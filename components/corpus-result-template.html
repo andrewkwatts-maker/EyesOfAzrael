@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <script defer src="../themes/theme-picker.js"></script>
+    <script defer src="../themes/theme-animations.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TERM}} - {{TRADITION_NAME}} Corpus Results</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="{{PATH_TO_THEMES}}/theme-base.css">
+    <script src="{{PATH_TO_THEMES}}/theme-picker.js" defer></script>
+
+    <style>
+        .matching-text {
+            background: var(--color-surface);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin: var(--space-4) 0;
+            line-height: 1.8;
+            font-size: var(--text-lg);
+        }
+
+        .matching-text mark {
+            background: rgba(var(--color-primary-rgb), 0.3);
+            padding: 2px 4px;
+            border-radius: var(--radius-sm);
+            font-weight: var(--font-semibold);
+        }
+
+        .full-chapter {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .full-chapter.expanded {
+            max-height: 5000px;
+        }
+
+        .full-chapter.collapsed {
+            max-height: 0;
+        }
+
+        .chapter-content {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            padding: var(--space-6);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-4);
+            border-left: 4px solid var(--color-primary);
+            line-height: 1.8;
+        }
+
+        .expand-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            border: none;
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: var(--text-base);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base, 0.3s ease);
+            margin-top: var(--space-4);
+        }
+
+        .expand-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .expand-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .result-item {
+            margin-bottom: var(--space-8);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-4);
+            flex-wrap: wrap;
+            gap: var(--space-2);
+        }
+
+        .text-name {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-bold);
+            color: var(--color-primary);
+        }
+
+        .translation-badge {
+            background: var(--color-secondary);
+            color: var(--color-text-primary);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-full);
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+        }
+
+        .citation {
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-bottom: var(--space-2);
+        }
+
+        .metadata {
+            display: flex;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+            margin-bottom: var(--space-4);
+        }
+
+        .metadata-item {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-md);
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .external-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-top: var(--space-4);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: var(--space-12);
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .no-results h2 {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-4);
+        }
+
+        .result-count {
+            font-size: var(--text-xl);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-2);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--space-4);
+            margin-top: var(--space-8);
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Picker -->
+    <div id="theme-picker-container"></div>
+
+    <header>
+    <div class="header-content"></div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{{PATH_TO_ROOT}}/mythos/index.html">Home</a> →
+            <a href="{{PATH_TO_ROOT}}/mythos/{{TRADITION}}/index.html">{{TRADITION_NAME}}</a> →
+            <a href="{{PATH_TO_ROOT}}/mythos/{{TRADITION}}/corpus-search.html">Corpus Search</a> →
+            <span aria-current="page">{{TERM}}</span>
+</nav>
+
+    <main class="container">
+        <div class="hero-section">
+            <h1>{{ICON}} Corpus Results: "{{TERM}}"</h1>
+            <p class="result-count">{{RESULT_COUNT_TEXT}}</p>
+        </div>
+
+        {{RESULTS_HTML}}
+
+        <!-- Back Navigation -->
+        <div class="nav-links">
+            <a href="{{PATH_TO_ROOT}}/mythos/{{TRADITION}}/index.html" class="btn btn-secondary">
+                ← Back to {{TRADITION_NAME}}
+            </a>
+            <a href="{{PATH_TO_ROOT}}/mythos/{{TRADITION}}/corpus-search.html" class="btn btn-primary">
+                🔍 New Search
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <strong>Corpus Results</strong> - {{TRADITION_NAME}}<br>
+            Pre-generated search results • Last updated: {{GENERATION_DATE}}<br>
+            <a href="{{PATH_TO_ROOT}}/mythos/index.html">World Mythos Home</a>
+        </p>
+    </footer>
+
+    <script>
+        function toggleChapter(chapterId) {
+            const chapter = document.getElementById(chapterId);
+            const btn = event.currentTarget;
+            const icon = btn.querySelector('.expand-icon');
+
+            if (chapter.classList.contains('collapsed')) {
+                chapter.classList.remove('collapsed');
+                chapter.classList.add('expanded');
+                icon.classList.add('rotated');
+                btn.setAttribute('aria-expanded', 'true');
+            } else {
+                chapter.classList.add('collapsed');
+                chapter.classList.remove('expanded');
+                icon.classList.remove('rotated');
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        }
+    </script>
+</body>
+</html>

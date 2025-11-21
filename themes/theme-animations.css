@@ -1,0 +1,579 @@
+/**
+ * Theme-Specific Animations
+ * Subtle, elegant animations that enhance each theme without being overbearing
+ */
+
+/* ===== FIRE THEME ===== */
+[data-theme="fire"] {
+    --flame-flicker-duration: 3s;
+}
+
+/* Flickering glow effect on cards */
+[data-theme="fire"] .glass-card,
+[data-theme="fire"] .nav-card,
+[data-theme="fire"] .mythos-card,
+[data-theme="fire"] .stat-card,
+[data-theme="fire"] .herb-card,
+[data-theme="fire"] .magic-card {
+    position: relative;
+    overflow: hidden;
+    animation: fireFlicker var(--flame-flicker-duration) ease-in-out infinite;
+}
+
+@keyframes fireFlicker {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(220, 38, 38, 0.3),
+                    0 0 20px rgba(234, 88, 12, 0.2),
+                    inset 0 0 15px rgba(220, 38, 38, 0.1);
+    }
+    25% {
+        box-shadow: 0 0 15px rgba(220, 38, 38, 0.4),
+                    0 0 25px rgba(234, 88, 12, 0.3),
+                    inset 0 0 20px rgba(220, 38, 38, 0.15);
+    }
+    50% {
+        box-shadow: 0 0 8px rgba(220, 38, 38, 0.25),
+                    0 0 18px rgba(234, 88, 12, 0.15),
+                    inset 0 0 12px rgba(220, 38, 38, 0.08);
+    }
+    75% {
+        box-shadow: 0 0 20px rgba(220, 38, 38, 0.5),
+                    0 0 30px rgba(234, 88, 12, 0.35),
+                    inset 0 0 25px rgba(220, 38, 38, 0.2);
+    }
+}
+
+/* Animated border ember effect */
+[data-theme="fire"] .glass-card::before,
+[data-theme="fire"] .nav-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg,
+        transparent 0%,
+        rgba(220, 38, 38, 0.4) 25%,
+        rgba(234, 88, 12, 0.6) 50%,
+        rgba(251, 191, 36, 0.4) 75%,
+        transparent 100%);
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    animation: flameBorder 4s linear infinite;
+}
+
+@keyframes flameBorder {
+    0%, 100% { opacity: 0; transform: rotate(0deg) scale(1); }
+    50% { opacity: 0.6; transform: rotate(180deg) scale(1.02); }
+}
+
+/* ===== WATER THEME ===== */
+[data-theme="water"] {
+    --wave-duration: 8s;
+    --bubble-duration: 6s;
+}
+
+/* Subtle wave effect at top of cards */
+[data-theme="water"] .glass-card::after,
+[data-theme="water"] .nav-card::after,
+[data-theme="water"] .mythos-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(8, 145, 178, 0.6),
+        rgba(2, 132, 199, 0.4),
+        rgba(34, 211, 238, 0.6),
+        transparent);
+    background-size: 200% 100%;
+    animation: waterWave var(--wave-duration) ease-in-out infinite;
+    border-radius: inherit;
+    opacity: 0.7;
+}
+
+@keyframes waterWave {
+    0%, 100% { background-position: 0% 0%; }
+    50% { background-position: 100% 0%; }
+}
+
+/* Bubble animation for water theme */
+[data-theme="water"] .glass-card,
+[data-theme="water"] .nav-card {
+    position: relative;
+    overflow: visible;
+}
+
+[data-theme="water"] .glass-card::before,
+[data-theme="water"] .nav-card::before {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.6), transparent);
+    border-radius: 50%;
+    bottom: 0;
+    left: 20%;
+    animation: bubbleRise var(--bubble-duration) ease-in infinite;
+    opacity: 0;
+}
+
+@keyframes bubbleRise {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.6;
+    }
+    50% {
+        transform: translateY(-30px) translateX(10px) scale(1.2);
+        opacity: 0.4;
+    }
+    100% {
+        transform: translateY(-60px) translateX(-5px) scale(0.8);
+        opacity: 0;
+    }
+}
+
+/* Ripple effect on hover */
+[data-theme="water"] .glass-card:hover,
+[data-theme="water"] .nav-card:hover {
+    animation: waterRipple 1s ease-out;
+}
+
+@keyframes waterRipple {
+    0% { box-shadow: 0 0 0 0 rgba(8, 145, 178, 0.4); }
+    100% { box-shadow: 0 0 0 20px rgba(8, 145, 178, 0); }
+}
+
+/* ===== CHAOS THEME ===== */
+[data-theme="chaos"] {
+    --chaos-shift-duration: 15s;
+    --artifact-duration: 10s;
+}
+
+/* Subtle background void effect */
+[data-theme="chaos"]::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(225, 29, 72, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.03) 0%, transparent 60%);
+    z-index: -1;
+    animation: chaosShift var(--chaos-shift-duration) ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes chaosShift {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 0.4;
+    }
+    33% {
+        transform: scale(1.1) rotate(5deg);
+        opacity: 0.6;
+    }
+    66% {
+        transform: scale(0.9) rotate(-5deg);
+        opacity: 0.3;
+    }
+}
+
+/* Chaotic border distortion */
+[data-theme="chaos"] .glass-card,
+[data-theme="chaos"] .nav-card,
+[data-theme="chaos"] .mythos-card {
+    position: relative;
+    animation: chaosEdge 5s ease-in-out infinite;
+}
+
+@keyframes chaosEdge {
+    0%, 100% {
+        border-color: rgba(225, 29, 72, 0.3);
+        filter: hue-rotate(0deg) brightness(1);
+    }
+    25% {
+        border-color: rgba(168, 85, 247, 0.4);
+        filter: hue-rotate(10deg) brightness(1.05);
+    }
+    50% {
+        border-color: rgba(245, 158, 11, 0.35);
+        filter: hue-rotate(-10deg) brightness(0.95);
+    }
+    75% {
+        border-color: rgba(168, 85, 247, 0.4);
+        filter: hue-rotate(5deg) brightness(1.02);
+    }
+}
+
+/* Void artifacts appearing randomly */
+[data-theme="chaos"] .glass-card::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.6), transparent 70%);
+    border-radius: 50%;
+    top: 20%;
+    right: 15%;
+    animation: voidArtifact var(--artifact-duration) ease-in-out infinite;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+}
+
+@keyframes voidArtifact {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0) rotate(0deg);
+    }
+    10% {
+        opacity: 0.3;
+        transform: scale(1) rotate(45deg);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2) rotate(180deg);
+    }
+    90% {
+        opacity: 0.3;
+        transform: scale(0.8) rotate(315deg);
+    }
+}
+
+/* ===== EARTH THEME ===== */
+[data-theme="earth"] {
+    --growth-duration: 12s;
+}
+
+/* Subtle growth pulse */
+[data-theme="earth"] .glass-card,
+[data-theme="earth"] .nav-card,
+[data-theme="earth"] .herb-card {
+    animation: earthPulse var(--growth-duration) ease-in-out infinite;
+}
+
+@keyframes earthPulse {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(21, 128, 61, 0.2),
+                    inset 0 0 10px rgba(101, 163, 13, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(21, 128, 61, 0.3),
+                    inset 0 0 15px rgba(101, 163, 13, 0.15);
+    }
+}
+
+/* Organic border growth */
+[data-theme="earth"] .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(21, 128, 61, 0.4),
+        rgba(101, 163, 13, 0.6),
+        rgba(163, 230, 53, 0.4),
+        transparent);
+    background-size: 200% 100%;
+    animation: vineGrowth 8s ease-in-out infinite;
+    border-radius: inherit;
+}
+
+@keyframes vineGrowth {
+    0%, 100% {
+        background-position: 0% 0%;
+        opacity: 0.5;
+    }
+    50% {
+        background-position: 100% 0%;
+        opacity: 0.8;
+    }
+}
+
+/* ===== AIR THEME ===== */
+[data-theme="air"] {
+    --breeze-duration: 10s;
+}
+
+/* Gentle breeze shimmer */
+[data-theme="air"] .glass-card,
+[data-theme="air"] .nav-card {
+    position: relative;
+    animation: airShimmer var(--breeze-duration) ease-in-out infinite;
+}
+
+@keyframes airShimmer {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(14, 165, 233, 0.15),
+                    0 0 40px rgba(56, 189, 248, 0.1);
+        transform: translateY(0);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(14, 165, 233, 0.25),
+                    0 0 60px rgba(56, 189, 248, 0.15);
+        transform: translateY(-2px);
+    }
+}
+
+/* Flowing border effect */
+[data-theme="air"] .glass-card::after,
+[data-theme="air"] .nav-card::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(120deg,
+        transparent 0%,
+        rgba(14, 165, 233, 0.2) 30%,
+        rgba(56, 189, 248, 0.3) 50%,
+        rgba(125, 211, 252, 0.2) 70%,
+        transparent 100%);
+    background-size: 300% 100%;
+    animation: airFlow 6s linear infinite;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0.6;
+}
+
+@keyframes airFlow {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 300% 0%; }
+}
+
+/* ===== ABYSSAL THEME ===== */
+[data-theme="abyssal"] {
+    --void-duration: 20s;
+}
+
+/* Deep void pulsation */
+[data-theme="abyssal"] .glass-card,
+[data-theme="abyssal"] .nav-card {
+    animation: voidPulse var(--void-duration) ease-in-out infinite;
+}
+
+@keyframes voidPulse {
+    0%, 100% {
+        box-shadow: 0 0 30px rgba(99, 102, 241, 0.2),
+                    0 0 60px rgba(139, 92, 246, 0.15),
+                    inset 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(99, 102, 241, 0.3),
+                    0 0 80px rgba(139, 92, 246, 0.25),
+                    inset 0 0 30px rgba(0, 0, 0, 0.7);
+    }
+}
+
+/* Singularity effect */
+[data-theme="abyssal"]::before {
+    content: '';
+    position: fixed;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle,
+        rgba(236, 72, 153, 0.15) 0%,
+        rgba(139, 92, 246, 0.1) 30%,
+        rgba(99, 102, 241, 0.05) 60%,
+        transparent 100%);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: singularity 15s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes singularity {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.3;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.6;
+    }
+}
+
+/* ===== CELESTIAL THEME ===== */
+[data-theme="celestial"] {
+    --star-duration: 3s;
+    --cosmic-duration: 20s;
+}
+
+/* Starlight twinkle */
+[data-theme="celestial"] .glass-card,
+[data-theme="celestial"] .nav-card {
+    animation: starTwinkle var(--star-duration) ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(124, 58, 237, 0.3),
+                    0 0 40px rgba(168, 85, 247, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(124, 58, 237, 0.5),
+                    0 0 60px rgba(168, 85, 247, 0.35);
+    }
+}
+
+/* Cosmic dust particles */
+[data-theme="celestial"]::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(2px 2px at 20% 30%, rgba(253, 224, 71, 0.3), transparent),
+        radial-gradient(2px 2px at 60% 70%, rgba(168, 85, 247, 0.3), transparent),
+        radial-gradient(1px 1px at 50% 50%, rgba(216, 180, 254, 0.3), transparent),
+        radial-gradient(1px 1px at 80% 10%, rgba(124, 58, 237, 0.3), transparent),
+        radial-gradient(2px 2px at 90% 60%, rgba(253, 224, 71, 0.3), transparent);
+    background-size: 200% 200%;
+    animation: cosmicDrift var(--cosmic-duration) linear infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes cosmicDrift {
+    0% {
+        background-position: 0% 0%;
+        opacity: 0.4;
+    }
+    100% {
+        background-position: 100% 100%;
+        opacity: 0.6;
+    }
+}
+
+/* ===== NIGHT THEME ===== */
+[data-theme="night"] {
+    --moonlight-duration: 8s;
+}
+
+/* Gentle moonlight glow */
+[data-theme="night"] .glass-card,
+[data-theme="night"] .nav-card {
+    animation: moonlightGlow var(--moonlight-duration) ease-in-out infinite;
+}
+
+@keyframes moonlightGlow {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(139, 127, 255, 0.2),
+                    0 0 30px rgba(255, 126, 182, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(139, 127, 255, 0.3),
+                    0 0 50px rgba(255, 126, 182, 0.15);
+    }
+}
+
+/* ===== DAY THEME ===== */
+[data-theme="day"] {
+    --sunlight-duration: 10s;
+}
+
+/* Warm sunlight pulse */
+[data-theme="day"] .glass-card,
+[data-theme="day"] .nav-card {
+    animation: sunlightPulse var(--sunlight-duration) ease-in-out infinite;
+}
+
+@keyframes sunlightPulse {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(245, 158, 11, 0.15),
+                    0 0 20px rgba(37, 99, 235, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.25),
+                    0 0 40px rgba(37, 99, 235, 0.15);
+    }
+}
+
+/* ===== ORDER THEME ===== */
+[data-theme="order"] {
+    --harmony-duration: 6s;
+}
+
+/* Structured harmony shimmer */
+[data-theme="order"] .glass-card,
+[data-theme="order"] .nav-card {
+    animation: harmonyShimmer var(--harmony-duration) ease-in-out infinite;
+}
+
+@keyframes harmonyShimmer {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(30, 64, 175, 0.15),
+                    inset 0 0 10px rgba(8, 145, 178, 0.05);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(30, 64, 175, 0.2),
+                    inset 0 0 15px rgba(8, 145, 178, 0.1);
+    }
+}
+
+/* Geometric pattern overlay */
+[data-theme="order"] .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        linear-gradient(90deg, transparent 49%, rgba(30, 64, 175, 0.03) 50%, transparent 51%),
+        linear-gradient(0deg, transparent 49%, rgba(30, 64, 175, 0.03) 50%, transparent 51%);
+    background-size: 20px 20px;
+    opacity: 0;
+    animation: orderGrid 4s ease-in-out infinite;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+@keyframes orderGrid {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 0.3; }
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* Reduce animations on low-performance devices */
+@media (prefers-reduced-motion: reduce) {
+    [data-theme] *,
+    [data-theme]::before,
+    [data-theme]::after,
+    [data-theme] *::before,
+    [data-theme] *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Pause animations when tab is not visible */
+@media (prefers-reduced-motion: no-preference) {
+    body:not(.tab-visible) [data-theme] .glass-card,
+    body:not(.tab-visible) [data-theme] .nav-card,
+    body:not(.tab-visible) [data-theme] .mythos-card {
+        animation-play-state: paused;
+    }
+}
