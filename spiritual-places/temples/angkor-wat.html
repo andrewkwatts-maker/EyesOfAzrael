@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angkor Wat - Sacred Places</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .location {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            color: var(--color-primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-icon {
+            font-size: 2.5rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all var(--transition-base);
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .feature-title {
+            color: var(--color-primary);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .tradition-tag {
+            padding: 0.5rem 1rem;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            color: var(--color-text-primary);
+        }
+
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .related-link {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            text-align: center;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .related-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .timeline-item {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '•';
+            position: absolute;
+            left: -2.5rem;
+            color: var(--color-primary);
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .timeline-date {
+            color: var(--color-primary);
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .quote-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        }
+
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .deity-card {
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+
+        .deity-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .list-styled {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .list-styled li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .list-styled li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+    <div class="header-content">
+        <h1>Angkor Wat</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Sacred Places</a> →
+                <a href="../index.html#temples">Temples</a> →
+                <span>Angkor Wat</span>
+</nav>
+
+    <main>
+        <div class="hero-section">
+            <div class="hero-icon">🕉️</div>
+            <h2>Angkor Wat - City of Temples</h2>
+            <p class="location">Siem Reap Province, Cambodia</p>
+            <div class="tradition-tags">
+                <span class="tradition-tag">Hindu</span>
+                <span class="tradition-tag">Buddhist</span>
+                <span class="tradition-tag">Khmer</span>
+            </div>
+        </div>
+
+        <!-- Historical Overview -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📜</span>
+                Historical Overview
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                Angkor Wat (Khmer: អង្គរវត្ត, meaning "City of Temples") is the largest religious monument in the world,
+                covering an area of approximately 162.6 hectares (402 acres). Built in the early 12th century (1113-1150 CE)
+                by Khmer King Suryavarman II, it was originally constructed as a Hindu temple dedicated to Vishnu, but
+                gradually transformed into a Buddhist temple by the end of the 12th century. The temple complex represents
+                the pinnacle of classical Khmer architecture and has become a symbol of Cambodia, appearing on the national
+                flag and serving as the country's prime tourist attraction.
+            </p>
+
+            <div class="quote-box">
+                "The temple is surrounded by a moat, and access is by a single bridge, protected by two stone tigers,
+                so grand is this temple that it is not possible to describe it with a pen, particularly since it is like
+                no other building in the world. It has towers and decoration and all the refinements which the human genius
+                can conceive of." - Diogo do Couto, Portuguese historian, 16th century
+            </div>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-top: 1.5rem;">
+                The construction of Angkor Wat took approximately 30 years and required the labor of thousands of workers
+                and craftsmen. Unlike most Khmer temples, Angkor Wat is oriented to the west, which is associated with
+                Vishnu and suggests it may have been intended as a funerary temple for Suryavarman II. The temple's
+                architecture is designed to represent Mount Meru, the home of the gods in Hindu mythology, with its five
+                towers symbolizing the five peaks of the mountain, surrounded by walls representing the mountains at the
+                edge of the world, and the moat representing the cosmic ocean.
+            </p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">802 CE</div>
+                    <p>Jayavarman II establishes Khmer Empire at Angkor</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1113-1150 CE</div>
+                    <p>King Suryavarman II builds Angkor Wat as state temple and capital</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Late 12th Century</div>
+                    <p>Gradual conversion from Hindu to Buddhist worship begins</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1177 CE</div>
+                    <p>Cham invasion and sacking of Angkor</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">14th-15th Century</div>
+                    <p>Theravada Buddhism fully established; Buddhist statuary added</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1431-1432 CE</div>
+                    <p>Thai invasion; Khmer court abandons Angkor for Phnom Penh</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">16th Century</div>
+                    <p>Buddhist monks maintain temple; visited by Portuguese and Spanish explorers</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1860</div>
+                    <p>Henri Mouhot's published accounts bring Western attention (though never truly "lost")</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1992</div>
+                    <p>UNESCO World Heritage Site designation; international restoration begins</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1992-1998</div>
+                    <p>Listed as endangered due to civil war; removed from danger list 2004</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Architectural Features -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🏛️</span>
+                Architectural Marvel
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                Angkor Wat represents the high classical style of Khmer architecture and is distinguished by its perfect
+                proportions, sophisticated bas-reliefs, and symbolic representation of Hindu cosmology. The temple's
+                design embodies religious, political, and cosmological significance in every dimension.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">📐 Layout & Dimensions</h3>
+                    <ul class="list-styled">
+                        <li>Total area: 162.6 hectares (1,626,000 m²)</li>
+                        <li>Moat dimensions: 190m wide, 5.5km circumference</li>
+                        <li>Outer wall: 1,025m x 800m</li>
+                        <li>Central temple: Three rectangular galleries</li>
+                        <li>Central tower height: 65m (213 ft) above ground</li>
+                        <li>Perfect east-west orientation (unusual western face)</li>
+                        <li>Built entirely of sandstone blocks</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🗻 Mount Meru Symbolism</h3>
+                    <ul class="list-styled">
+                        <li>Five towers represent Mount Meru's five peaks</li>
+                        <li>Central tower: Home of the gods</li>
+                        <li>Three enclosures: Three levels of heaven</li>
+                        <li>Moat: Cosmic ocean surrounding earth</li>
+                        <li>Walls: Mountain ranges at world's edge</li>
+                        <li>Causeway: Rainbow bridge to divine realm</li>
+                        <li>Entire complex is microcosm of universe</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎨 Bas-Relief Galleries</h3>
+                    <ul class="list-styled">
+                        <li>800 meters of narrative bas-reliefs</li>
+                        <li>Churning of the Ocean of Milk (south gallery)</li>
+                        <li>Battle of Kurukshetra from Mahabharata</li>
+                        <li>Procession of Suryavarman II</li>
+                        <li>Heaven and Hell scenes (32 hells, 37 heavens)</li>
+                        <li>Battle of Lanka from Ramayana</li>
+                        <li>Battle between gods and demons</li>
+                        <li>Over 1,500 apsaras (celestial dancers)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌺 Apsara Carvings</h3>
+                    <ul class="list-styled">
+                        <li>Nearly 2,000 apsara devata carvings</li>
+                        <li>Each figure unique in dress and expression</li>
+                        <li>37 different hairstyles identified</li>
+                        <li>Celestial dancers and divine attendants</li>
+                        <li>Emerged from Churning of Ocean</li>
+                        <li>Symbol of heavenly beauty and grace</li>
+                        <li>Worn by time but still magnificent</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔨 Construction Techniques</h3>
+                    <ul class="list-styled">
+                        <li>5-10 million sandstone blocks used</li>
+                        <li>Stone quarried 40km away at Phnom Kulen</li>
+                        <li>Transported via canals and elephants</li>
+                        <li>Blocks fitted without mortar</li>
+                        <li>Corbel arch vaulting technique</li>
+                        <li>Precision stone carving in situ</li>
+                        <li>Engineering marvel for its era</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💧 Water Management</h3>
+                    <ul class="list-styled">
+                        <li>Sophisticated hydraulic system</li>
+                        <li>Moat and reservoirs (barays)</li>
+                        <li>Irrigation for agriculture</li>
+                        <li>Symbolizes cosmic ocean</li>
+                        <li>Also served defensive purpose</li>
+                        <li>Sustained large urban population</li>
+                        <li>Climate change theories for Angkor's decline</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Religious Significance -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🕉️</span>
+                Religious & Mythological Significance
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                Angkor Wat uniquely bridges Hindu and Buddhist traditions, beginning as a Vaishnavite temple and
+                transforming into a Theravada Buddhist pilgrimage site. The temple's iconography reflects the
+                religious syncretism that characterized Khmer civilization.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🌊 Churning of the Ocean of Milk</h3>
+                    <p>The most famous bas-relief depicts this central Hindu creation myth:</p>
+                    <ul class="list-styled">
+                        <li>Gods (devas) and demons (asuras) cooperate</li>
+                        <li>Use serpent Vasuki as churning rope</li>
+                        <li>Mount Mandara as churning staff</li>
+                        <li>Vishnu as turtle Kurma supports mountain</li>
+                        <li>Churn ocean to produce amrita (immortality elixir)</li>
+                        <li>Apsaras, goddess Lakshmi emerge</li>
+                        <li>54 meters long, most photographed relief</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏹 Ramayana Scenes</h3>
+                    <ul class="list-styled">
+                        <li>Battle of Lanka on north gallery west wing</li>
+                        <li>Rama and Lakshmana vs. Ravana</li>
+                        <li>Monkey army of Hanuman aids Rama</li>
+                        <li>Rescue of Sita from demon king</li>
+                        <li>Triumph of dharma over adharma</li>
+                        <li>Particularly revered in Cambodian culture</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚔️ Mahabharata Depictions</h3>
+                    <ul class="list-styled">
+                        <li>Battle of Kurukshetra on south gallery west wing</li>
+                        <li>Pandavas vs. Kauravas</li>
+                        <li>Krishna as Arjuna's charioteer</li>
+                        <li>Bhishma on bed of arrows</li>
+                        <li>Epic struggle between good and evil</li>
+                        <li>Reflects Khmer royal ideology</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">☸️ Buddhist Transformation</h3>
+                    <ul class="list-styled">
+                        <li>Gradual conversion 12th-14th centuries</li>
+                        <li>Buddha images added to galleries</li>
+                        <li>Some Hindu deities defaced or replaced</li>
+                        <li>Theravada Buddhism became dominant</li>
+                        <li>Temple reinterpreted as Buddhist cosmology</li>
+                        <li>Continuous worship to present day</li>
+                        <li>Living temple with resident monks</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">👑 Devaraja Cult</h3>
+                    <ul class="list-styled">
+                        <li>King as divine incarnation on earth</li>
+                        <li>Suryavarman II as manifestation of Vishnu</li>
+                        <li>Temple as royal mausoleum</li>
+                        <li>King depicted in bas-reliefs</li>
+                        <li>Sacred geography legitimizes rule</li>
+                        <li>Temple = cosmic mountain = royal power</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌅 Cosmological Alignment</h3>
+                    <ul class="list-styled">
+                        <li>Western orientation unique among Angkor temples</li>
+                        <li>Associated with death and Vishnu</li>
+                        <li>Equinox sunrise aligns with central tower</li>
+                        <li>Solar and lunar astronomical observations</li>
+                        <li>Proportions based on Vedic mathematics</li>
+                        <li>Encodes religious and astronomical knowledge</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Associated Deities -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🕉️</span>
+                Associated Deities & Figures
+            </h2>
+
+            <div class="deity-grid">
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🌊</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Vishnu</h3>
+                    <p>Preserver deity to whom temple was originally dedicated. Appears as Kurma (turtle) and in many avatars</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🐍</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Vasuki</h3>
+                    <p>Serpent king used as rope in Churning of Ocean. Nagas feature prominently in Khmer architecture</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">💃</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Apsaras</h3>
+                    <p>Celestial dancers emerged from churning ocean. Nearly 2,000 unique carvings adorn the temple</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🏹</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Rama</h3>
+                    <p>Avatar of Vishnu, hero of Ramayana. His battle with Ravana depicted in extensive bas-reliefs</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🐒</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Hanuman</h3>
+                    <p>Monkey god, devoted servant of Rama. Leader of monkey army in Battle of Lanka</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">☸️</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Buddha</h3>
+                    <p>Later Buddhist images added throughout. Temple became major Theravada pilgrimage site</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">💰</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Lakshmi</h3>
+                    <p>Goddess of prosperity, emerged from churning ocean. Depicted in bas-reliefs</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🔱</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Shiva & Brahma</h3>
+                    <p>Other Trimurti deities also represented, showing Khmer religious synthesis</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rituals & Ceremonies -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🎭</span>
+                Historical Rituals & Modern Worship
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🕉️ Hindu Period Rituals (12th-13th c.)</h3>
+                    <ul class="list-styled">
+                        <li>Daily puja ceremonies to Vishnu</li>
+                        <li>Royal patronage and participation</li>
+                        <li>Offerings of flowers, incense, food</li>
+                        <li>Sacred dance performances by devadasis</li>
+                        <li>Festival celebrations throughout year</li>
+                        <li>Priestly Brahmin class maintained temple</li>
+                        <li>Funerary rites for Suryavarman II</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">☸️ Buddhist Practices (14th c.-Present)</h3>
+                    <ul class="list-styled">
+                        <li>Theravada Buddhist monastics resident</li>
+                        <li>Daily meditation and chanting</li>
+                        <li>Pilgrimage destination for Buddhists</li>
+                        <li>Water blessing ceremonies</li>
+                        <li>Merit-making offerings at Buddha images</li>
+                        <li>Traditional Cambodian Buddhism maintained</li>
+                        <li>Coexistence with Hindu iconography</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎊 Khmer New Year</h3>
+                    <ul class="list-styled">
+                        <li>Major celebration at Angkor Wat (April)</li>
+                        <li>Tens of thousands of pilgrims attend</li>
+                        <li>Traditional games and ceremonies</li>
+                        <li>Water blessings from monks</li>
+                        <li>Offerings at shrines throughout complex</li>
+                        <li>Cultural performances and festivities</li>
+                        <li>National and spiritual celebration combined</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌅 Sunrise Rituals</h3>
+                    <ul class="list-styled">
+                        <li>Equinox sunrise aligns with central tower</li>
+                        <li>Special significance during spring/fall equinoxes</li>
+                        <li>Modern spiritual tourism phenomenon</li>
+                        <li>Thousands gather for sunrise viewing</li>
+                        <li>Reflection in western moat creates iconic image</li>
+                        <li>Personal meditation and prayers</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🙏 Local Devotion</h3>
+                    <ul class="list-styled">
+                        <li>Cambodians visit for blessings and merit</li>
+                        <li>Prayers for health, prosperity, success</li>
+                        <li>Incense and flower offerings</li>
+                        <li>Consultation with resident monks</li>
+                        <li>Life event commemorations (weddings, etc.)</li>
+                        <li>Deep spiritual connection for Khmers</li>
+                        <li>Symbol of national identity and pride</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎭 Classical Dance</h3>
+                    <ul class="list-styled">
+                        <li>Apsara dance inspired by stone carvings</li>
+                        <li>Revived and preserved as cultural heritage</li>
+                        <li>Performances at temple and cultural venues</li>
+                        <li>Living connection to ancient traditions</li>
+                        <li>Royal ballet performed for ceremonies</li>
+                        <li>UNESCO Intangible Cultural Heritage</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modern Significance -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🌍</span>
+                Modern Significance & Preservation
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                Angkor Wat stands as a symbol of Cambodian national identity and cultural continuity through centuries
+                of upheaval. Its preservation represents one of the world's most significant archaeological and
+                conservation efforts.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🇰🇭 National Symbol</h3>
+                    <ul class="list-styled">
+                        <li>Featured on Cambodian flag since 1863</li>
+                        <li>Only building on any national flag</li>
+                        <li>Source of profound national pride</li>
+                        <li>Symbol of Khmer cultural achievement</li>
+                        <li>Unifying symbol through political turmoil</li>
+                        <li>Represents continuity of civilization</li>
+                        <li>Featured on currency, official seals</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ UNESCO World Heritage (1992)</h3>
+                    <ul class="list-styled">
+                        <li>Designated for outstanding universal value</li>
+                        <li>Initially listed as endangered (1992-2004)</li>
+                        <li>Civil war and looting threatened site</li>
+                        <li>International restoration efforts coordinated</li>
+                        <li>Removed from danger list 2004</li>
+                        <li>Model for heritage conservation</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔨 Conservation Challenges</h3>
+                    <ul class="list-styled">
+                        <li>Vegetation damage from tree roots</li>
+                        <li>Sandstone erosion and weathering</li>
+                        <li>Water damage and moisture</li>
+                        <li>Mass tourism impacts (2+ million visitors/year)</li>
+                        <li>Climate change threats</li>
+                        <li>Balancing preservation with access</li>
+                        <li>Ongoing stabilization required</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌐 International Cooperation</h3>
+                    <ul class="list-styled">
+                        <li>Teams from Japan, France, India, China</li>
+                        <li>APSARA Authority manages site</li>
+                        <li>Archaeological research ongoing</li>
+                        <li>Training Cambodian conservators</li>
+                        <li>Technological innovations in preservation</li>
+                        <li>3D scanning and documentation</li>
+                        <li>Sustainable tourism development</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💰 Economic Impact</h3>
+                    <ul class="list-styled">
+                        <li>Cambodia's largest tourist attraction</li>
+                        <li>2+ million international visitors annually</li>
+                        <li>Major source of foreign exchange</li>
+                        <li>Employment for thousands locally</li>
+                        <li>Tourism accounts for 12% of GDP</li>
+                        <li>Balancing economic needs with preservation</li>
+                        <li>Community development programs</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📚 Academic Research</h3>
+                    <ul class="list-styled">
+                        <li>Ongoing archaeological excavations</li>
+                        <li>LiDAR reveals massive urban complex</li>
+                        <li>Hydraulic system studies</li>
+                        <li>Astronomical alignment research</li>
+                        <li>Art historical analysis</li>
+                        <li>Climate change and decline theories</li>
+                        <li>Digital humanities documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visitor Information -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🗺️</span>
+                Visitor Information
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🎫 Access & Tickets</h3>
+                    <ul class="list-styled">
+                        <li><strong>Base:</strong> Siem Reap town (6km away)</li>
+                        <li><strong>Passes:</strong> 1-day ($37), 3-day ($62), 7-day ($72)</li>
+                        <li><strong>Hours:</strong> 5:00 AM - 5:30 PM daily</li>
+                        <li><strong>Sunrise entry:</strong> From 5:00 AM (arrive early)</li>
+                        <li><strong>Ticket includes:</strong> All Angkor Archaeological Park temples</li>
+                        <li><strong>Children under 12:</strong> Free</li>
+                        <li><strong>Photo required:</strong> Taken on-site for pass</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌡️ Best Time to Visit</h3>
+                    <ul class="list-styled">
+                        <li><strong>Season:</strong> November to February (cool & dry)</li>
+                        <li><strong>Avoid:</strong> March-May (extreme heat 35-40°C)</li>
+                        <li><strong>Monsoon:</strong> June-October (wet but less crowded)</li>
+                        <li><strong>Sunrise:</strong> Worth the early wake-up</li>
+                        <li><strong>Crowds:</strong> Arrive early or late afternoon</li>
+                        <li><strong>Photography:</strong> Morning light is best</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">👕 Dress Code & Etiquette</h3>
+                    <ul class="list-styled">
+                        <li>Shoulders and knees must be covered</li>
+                        <li>No revealing or tight clothing</li>
+                        <li>Scarves/wraps available for purchase</li>
+                        <li>Remove shoes at certain areas</li>
+                        <li>Respectful behavior at Buddhist shrines</li>
+                        <li>No touching bas-reliefs or carvings</li>
+                        <li>Active place of worship - be mindful</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🚶 Exploring the Temple</h3>
+                    <ul class="list-styled">
+                        <li>Allow 2-3 hours minimum</li>
+                        <li>Full day recommended for thorough visit</li>
+                        <li>Steep stairs to upper terraces</li>
+                        <li>Walk clockwise (traditional Buddhist practice)</li>
+                        <li>Bring flashlight for inner galleries</li>
+                        <li>Guided tours available (recommended)</li>
+                        <li>Audio guides can be rented</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Other Angkor Temples</h3>
+                    <ul class="list-styled">
+                        <li><strong>Angkor Thom:</strong> Last capital, Bayon temple</li>
+                        <li><strong>Ta Prohm:</strong> Trees growing through ruins</li>
+                        <li><strong>Banteay Srei:</strong> Pink sandstone, intricate carvings</li>
+                        <li><strong>Preah Khan:</strong> Sprawling monastic complex</li>
+                        <li><strong>Ta Som:</strong> Strangler fig in gopura</li>
+                        <li>100+ temples in archaeological park</li>
+                        <li>Multi-day pass worthwhile</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💡 Practical Tips</h3>
+                    <ul class="list-styled">
+                        <li>Bring plenty of water (hot and humid)</li>
+                        <li>Sun protection essential (hat, sunscreen)</li>
+                        <li>Comfortable walking shoes required</li>
+                        <li>Insect repellent recommended</li>
+                        <li>Sunrise spots fill early (arrive 5:00 AM)</li>
+                        <li>Tuk-tuks and bikes available for hire</li>
+                        <li>Cash only for most vendors</li>
+                        <li>Download offline map</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Links -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🔗</span>
+                Related Topics & Further Exploration
+            </h2>
+
+            <div class="related-links">
+                <a href="borobudur.html" class="related-link">
+                    ☸️ Borobudur Temple
+                </a>
+                <a href="../../mythos/hindu/vishnu.html" class="related-link">
+                    🌊 Vishnu - The Preserver
+                </a>
+                <a href="../../mythos/hindu/ramayana.html" class="related-link">
+                    🏹 The Ramayana
+                </a>
+                <a href="../../mythos/buddhist/index.html" class="related-link">
+                    ☸️ Buddhist Mythology
+                </a>
+                <a href="../index.html" class="related-link">
+                    🏛️ All Sacred Places
+                </a>
+                <a href="../../index.html" class="related-link">
+                    🏠 Home
+                </a>
+            </div>
+        </div>
+
+        <!-- Bibliography -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📚</span>
+                Sources & Further Reading
+            </h2>
+
+            <div style="line-height: 2; font-size: 1rem;">
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Historical Sources:</h3>
+                <ul class="list-styled">
+                    <li>Zhou Daguan: <em>A Record of Cambodia: The Land and Its People</em> (1296)</li>
+                    <li>Inscriptions of King Suryavarman II</li>
+                    <li>Henri Mouhot: <em>Travels in Siam, Cambodia, Laos, and Annam</em> (1864)</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Architecture & Art:</h3>
+                <ul class="list-styled">
+                    <li>Freeman, Michael & Jacques, Claude. <em>Ancient Angkor</em>. River Books, 2003.</li>
+                    <li>Dumarçay, Jacques & Royère, Pascal. <em>Cambodian Architecture</em>. Brill, 2001.</li>
+                    <li>Jessup, Helen & Zephir, Thierry (eds.). <em>Sculpture of Angkor and Ancient Cambodia</em>. Thames & Hudson, 1997.</li>
+                    <li>Mannikka, Eleanor. <em>Angkor Wat: Time, Space and Kingship</em>. University of Hawaii Press, 1996.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">History & Civilization:</h3>
+                <ul class="list-styled">
+                    <li>Chandler, David. <em>A History of Cambodia</em>. Westview Press, 2007.</li>
+                    <li>Coe, Michael D. <em>Angkor and the Khmer Civilization</em>. Thames & Hudson, 2003.</li>
+                    <li>Higham, Charles. <em>The Civilization of Angkor</em>. University of California Press, 2001.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Conservation & Research:</h3>
+                <ul class="list-styled">
+                    <li>Jacques, Claude & Freeman, Michael. <em>Angkor: Cities and Temples</em>. River Books, 2013.</li>
+                    <li>Evans, Damian et al. "Uncovering archaeological landscapes at Angkor using lidar." <em>PNAS</em>, 2013.</li>
+                    <li>APSARA Authority reports on conservation efforts</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
