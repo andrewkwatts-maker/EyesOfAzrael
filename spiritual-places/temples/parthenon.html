@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Parthenon - Sacred Places</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .location {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            color: var(--color-primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-icon {
+            font-size: 2.5rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all var(--transition-base);
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .feature-title {
+            color: var(--color-primary);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .tradition-tag {
+            padding: 0.5rem 1rem;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            color: var(--color-text-primary);
+        }
+
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .related-link {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            text-align: center;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .related-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .timeline-item {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '•';
+            position: absolute;
+            left: -2.5rem;
+            color: var(--color-primary);
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .timeline-date {
+            color: var(--color-primary);
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .quote-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        }
+
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .deity-card {
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+
+        .deity-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .list-styled {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .list-styled li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .list-styled li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+    <div class="header-content">
+        <h1>The Parthenon</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Sacred Places</a> →
+                <a href="../index.html#temples">Temples</a> →
+                <span>The Parthenon</span>
+</nav>
+
+    <main>
+        <div class="hero-section">
+            <div class="hero-icon">🏛️</div>
+            <h2>The Parthenon - Temple of Athena Parthenos</h2>
+            <p class="location">Acropolis, Athens, Greece</p>
+            <div class="tradition-tags">
+                <span class="tradition-tag">Greek</span>
+                <span class="tradition-tag">Classical Architecture</span>
+            </div>
+        </div>
+
+        <!-- Historical Overview -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📜</span>
+                Historical Overview
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                The Parthenon (Greek: Παρθενών) stands as the crown jewel of the Athenian Acropolis and one of the most
+                enduring symbols of ancient Greek civilization. Built between 447 and 432 BCE during the Golden Age of
+                Athens under the leadership of Pericles, this Doric temple was dedicated to Athena Parthenos ("Athena
+                the Virgin"), patron goddess of Athens. The Parthenon represents the pinnacle of Classical Greek
+                architecture and embodies the ideals of democracy, wisdom, and civic virtue that defined Athens at the
+                height of its power.
+            </p>
+
+            <div class="quote-box">
+                "We are lovers of beauty without extravagance, and lovers of wisdom without unmanliness."
+                - Pericles' Funeral Oration, as recorded by Thucydides
+            </div>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-top: 1.5rem;">
+                The Parthenon replaced an earlier temple destroyed by the Persians in 480 BCE. Its construction was
+                supervised by the sculptor Phidias, who also created the massive gold and ivory statue of Athena that
+                stood inside. The architects Iktinos and Kallikrates designed the building with sophisticated optical
+                refinements that make it appear perfectly straight to the human eye, despite the fact that almost no
+                element is truly straight or level. The temple served not only as a religious sanctuary but also as
+                the treasury of the Delian League, storing vast wealth that symbolized Athenian supremacy.
+            </p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">480 BCE</div>
+                    <p>Persians destroy the Old Parthenon (Older Parthenon) during invasion of Greece</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">447 BCE</div>
+                    <p>Construction begins under Pericles; Phidias appointed as artistic director</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">438 BCE</div>
+                    <p>Athena Parthenos statue completed and dedicated</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">432 BCE</div>
+                    <p>Sculptural decoration completed; temple officially finished</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">5th Century CE</div>
+                    <p>Converted to Christian church dedicated to Virgin Mary (Parthenos Maria)</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1460s CE</div>
+                    <p>Converted to mosque after Ottoman conquest of Athens</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1687 CE</div>
+                    <p>Venetian bombardment causes explosion of Ottoman ammunition stored inside, severely damaging structure</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1801-1812 CE</div>
+                    <p>Lord Elgin removes much of surviving sculpture (the "Elgin Marbles")</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1975-Present</div>
+                    <p>Ongoing restoration and conservation project</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Architectural Features -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🏛️</span>
+                Architectural Masterpiece
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                The Parthenon epitomizes the Doric order of Greek architecture while incorporating Ionic elements,
+                creating a harmonious synthesis that influenced Western architecture for millennia. Its designers
+                employed mathematical precision and optical illusions to create a building that appears perfect to
+                the human eye despite (or because of) its subtle curves and irregularities.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">📐 Dimensions & Proportions</h3>
+                    <ul class="list-styled">
+                        <li>Overall: 69.5 x 30.9 meters (228 x 101 feet)</li>
+                        <li>Height to peak: approximately 18 meters (59 feet)</li>
+                        <li>8 columns on short ends, 17 on long sides</li>
+                        <li>Column height: 10.43 meters (34.2 feet)</li>
+                        <li>Ratio approximates golden ratio (phi)</li>
+                        <li>Built entirely of Pentelic marble</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">👁️ Optical Refinements</h3>
+                    <ul class="list-styled">
+                        <li><strong>Entasis:</strong> Columns curve slightly outward to appear straight</li>
+                        <li><strong>Stylobate curvature:</strong> Floor curves upward 4 inches at center</li>
+                        <li><strong>Column tilts:</strong> All columns lean slightly inward</li>
+                        <li><strong>Corner columns:</strong> Thicker and closer together</li>
+                        <li><strong>No true verticals or horizontals</strong> in entire structure</li>
+                        <li>Compensates for human visual perception</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎨 Sculptural Program</h3>
+                    <ul class="list-styled">
+                        <li><strong>Pediments:</strong> Birth of Athena (east), Contest with Poseidon (west)</li>
+                        <li><strong>Metopes:</strong> 92 panels depicting mythological battles</li>
+                        <li><strong>Ionic Frieze:</strong> 160-meter Panathenaic procession</li>
+                        <li>Originally brightly painted in reds, blues, golds</li>
+                        <li>Phidias designed all sculpture</li>
+                        <li>Most advanced Greek sculpture of its era</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌟 Athena Parthenos Statue</h3>
+                    <ul class="list-styled">
+                        <li>Height: 12 meters (40 feet) including base</li>
+                        <li>Chryselephantine: gold and ivory over wooden core</li>
+                        <li>Required 40-44 talents of gold (1,140-1,250 kg)</li>
+                        <li>Removable gold plates served as state treasury</li>
+                        <li>Shield depicted Amazonomachy and Gigantomachy</li>
+                        <li>Disappeared in late antiquity; known from copies</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔨 Construction Techniques</h3>
+                    <ul class="list-styled">
+                        <li>Marble blocks fitted without mortar</li>
+                        <li>Iron clamps sealed with lead for stability</li>
+                        <li>Precision cutting allowed tight joins</li>
+                        <li>Blocks quarried 16 km away on Mount Pentelikon</li>
+                        <li>Advanced lifting and positioning technology</li>
+                        <li>Estimated 13,400 marble blocks used</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏺 Interior Spaces</h3>
+                    <ul class="list-styled">
+                        <li><strong>Naos (cella):</strong> Main chamber housing Athena statue</li>
+                        <li><strong>Opisthodomos:</strong> Back room, state treasury</li>
+                        <li><strong>Pronaos:</strong> Front porch with six columns</li>
+                        <li><strong>Peristyle:</strong> Surrounding colonnade</li>
+                        <li>Two-story interior colonnade in naos</li>
+                        <li>Sacred pool reflected statue</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Religious Significance -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">⚡</span>
+                Religious & Mythological Significance
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                The Parthenon served as the spiritual and civic heart of Athens, embodying the city's special
+                relationship with its patron goddess Athena. More than just a temple, it was a statement of Athenian
+                values, military might, democratic ideals, and cultural supremacy over the rest of the Greek world.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🏺 Foundation Myths</h3>
+                    <p>The Parthenon's location and decoration commemorated Athens's founding myths:</p>
+                    <ul class="list-styled">
+                        <li><strong>Contest of Athena & Poseidon:</strong> Depicted on west pediment</li>
+                        <li>Athena's gift of olive tree won patronage of city</li>
+                        <li>Poseidon's salt spring marked on nearby Erechtheion</li>
+                        <li>Site where Cecrops, first king, judged the contest</li>
+                        <li>Olive tree sacred to Athena grew nearby</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">👶 Birth of Athena</h3>
+                    <p>East pediment depicted Athena's miraculous birth:</p>
+                    <ul class="list-styled">
+                        <li>Athena emerged fully armed from Zeus's head</li>
+                        <li>Hephaestus split Zeus's skull with axe</li>
+                        <li>Showed Athena's divine wisdom and war prowess</li>
+                        <li>Gods assembled as witnesses to marvel</li>
+                        <li>Central divine moment for Athenian identity</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚔️ Mythological Battles</h3>
+                    <p>92 metope panels depicted four mythological conflicts:</p>
+                    <ul class="list-styled">
+                        <li><strong>Gigantomachy:</strong> Gods vs. Giants (east)</li>
+                        <li><strong>Amazonomachy:</strong> Greeks vs. Amazons (west)</li>
+                        <li><strong>Centauromachy:</strong> Lapiths vs. Centaurs (south)</li>
+                        <li><strong>Trojan War:</strong> Fall of Troy (north)</li>
+                        <li>All represented civilization vs. chaos</li>
+                        <li>Parallel to recent Persian Wars victory</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎭 Panathenaic Procession</h3>
+                    <p>The Ionic frieze depicted Athens's greatest festival:</p>
+                    <ul class="list-styled">
+                        <li>Annual Great Panathenaia honored Athena's birthday</li>
+                        <li>Procession brought new peplos (robe) to goddess</li>
+                        <li>All Athenian citizens, metics, and slaves participated</li>
+                        <li>Horsemen, musicians, sacrificial animals</li>
+                        <li>Culminated in presentation to Athena's statue</li>
+                        <li>United civic and religious identity</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🛡️ Athena's Attributes</h3>
+                    <ul class="list-styled">
+                        <li><strong>Wisdom:</strong> Strategic warfare, crafts, reason</li>
+                        <li><strong>Victory:</strong> Nike held in statue's hand</li>
+                        <li><strong>Protection:</strong> Aegis breastplate with Medusa</li>
+                        <li><strong>Civilization:</strong> Olive tree, weaving, pottery</li>
+                        <li><strong>Justice:</strong> Patron of law courts</li>
+                        <li><strong>Virginity:</strong> Parthenos (maiden) emphasized purity</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Political Symbolism</h3>
+                    <ul class="list-styled">
+                        <li>Monument to Athenian democracy</li>
+                        <li>Funded by Delian League treasury</li>
+                        <li>Statement of imperial power</li>
+                        <li>Victory monument for Persian Wars</li>
+                        <li>Cultural superiority over other Greeks</li>
+                        <li>Pericles's vision of Athenian greatness</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="quote-box" style="margin-top: 2rem;">
+                "Future ages will wonder at us, as the present age wonders at us now."
+                - Pericles on the Parthenon and Athens's cultural achievements
+            </div>
+        </div>
+
+        <!-- Associated Deities -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">⚡</span>
+                Associated Deities & Figures
+            </h2>
+
+            <div class="deity-grid">
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🦉</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Athena</h3>
+                    <p>Goddess of wisdom, warfare, and crafts. Patron deity of Athens, born from Zeus's head fully armed</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">⚡</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Zeus</h3>
+                    <p>King of the gods, father of Athena. Central figure in east pediment birth scene</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🔱</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Poseidon</h3>
+                    <p>God of the sea, rival to Athena for patronage of Athens. Depicted in west pediment contest</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🔨</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Hephaestus</h3>
+                    <p>God of smithing and fire, split Zeus's head to release Athena</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🏆</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Nike</h3>
+                    <p>Goddess of victory, held in hand of Athena Parthenos statue</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🐍</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Erichthonius</h3>
+                    <p>Mythical king of Athens, son of Hephaestus, raised by Athena. Snake-tailed form shown on shield</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">👑</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Cecrops</h3>
+                    <p>First king of Athens, judged the contest between Athena and Poseidon</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🌅</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Helios & Selene</h3>
+                    <p>Sun and moon deities, shown rising and setting in pediment corners</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rituals & Ceremonies -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🎭</span>
+                Rituals & Ceremonies
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🎊 Great Panathenaia</h3>
+                    <ul class="list-styled">
+                        <li>Held every four years in midsummer</li>
+                        <li>Week-long festival with athletic contests</li>
+                        <li>Musical and poetic competitions</li>
+                        <li>Torch race from Academy to Acropolis</li>
+                        <li>Grand procession depicted on frieze</li>
+                        <li>New peplos presented to Athena's statue</li>
+                        <li>Hecatomb: sacrifice of 100 oxen</li>
+                        <li>Meat distributed to all citizens</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📅 Annual Panathenaia</h3>
+                    <ul class="list-styled">
+                        <li>Celebrated every year on Athena's birthday</li>
+                        <li>Smaller scale than Great Panathenaia</li>
+                        <li>Procession and sacrifices maintained</li>
+                        <li>Reinforced civic identity annually</li>
+                        <li>Both citizens and metics participated</li>
+                        <li>Olive oil prizes from sacred groves</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🕯️ Daily Observances</h3>
+                    <ul class="list-styled">
+                        <li>Priestess of Athena Polias maintained sacred fire</li>
+                        <li>Daily libations and small offerings</li>
+                        <li>Perpetual lamp burned before statue</li>
+                        <li>Private devotions by citizens</li>
+                        <li>Votive offerings left at altar</li>
+                        <li>Prayer before important civic decisions</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏺 Peplos Weaving</h3>
+                    <ul class="list-styled">
+                        <li>New robe woven by selected maidens (arrhephoroi)</li>
+                        <li>Nine months of sacred work</li>
+                        <li>Depicted myths and victories</li>
+                        <li>Displayed on ship-shaped cart in procession</li>
+                        <li>Dressed Athena's ancient wooden statue (xoanon)</li>
+                        <li>Old peplos cut up as sacred relics</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚔️ Military Dedications</h3>
+                    <ul class="list-styled">
+                        <li>Generals dedicated spoils of war</li>
+                        <li>Shields hung on exterior walls</li>
+                        <li>Persian armor from Marathon displayed</li>
+                        <li>Prayers before military campaigns</li>
+                        <li>Victory celebrations at the temple</li>
+                        <li>Ephebic oath sworn by new soldiers</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎓 Civic Functions</h3>
+                    <ul class="list-styled">
+                        <li>Important state meetings held on Acropolis</li>
+                        <li>Treaties signed in Athena's presence</li>
+                        <li>Decrees inscribed and displayed</li>
+                        <li>Ambassadors received</li>
+                        <li>Oaths of office administered</li>
+                        <li>Symbol of democratic values</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Historical Figures -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">👥</span>
+                Key Historical Figures
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                The Parthenon's creation and legacy involved some of the most influential figures in ancient history,
+                from its visionary patron Pericles to the master sculptor Phidias, and from the architects who perfected
+                its proportions to the later figures who transformed, damaged, and attempted to preserve it.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Pericles (c. 495-429 BCE)</h3>
+                    <p style="margin-bottom: 1rem;">Athenian statesman and general who dominated Athens during its Golden Age</p>
+                    <ul class="list-styled">
+                        <li>Led Athens for nearly 30 years (461-429 BCE)</li>
+                        <li>Initiated the Periclean building program</li>
+                        <li>Strengthened Athenian democracy</li>
+                        <li>Built Athenian empire through Delian League</li>
+                        <li>Commissioned the Parthenon and Acropolis monuments</li>
+                        <li>Defended expenditures against political opponents</li>
+                        <li>Died of plague during Peloponnesian War</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎨 Phidias (c. 480-430 BCE)</h3>
+                    <p style="margin-bottom: 1rem;">Greatest sculptor of antiquity, artistic director of the Parthenon</p>
+                    <ul class="list-styled">
+                        <li>Overall supervisor (epistates) of Parthenon project</li>
+                        <li>Created the Athena Parthenos chryselephantine statue</li>
+                        <li>Also sculpted Zeus at Olympia (Wonder of Ancient World)</li>
+                        <li>Designed all sculptural programs for the Parthenon</li>
+                        <li>Accused of embezzlement and impiety by rivals</li>
+                        <li>Proved gold theft charges false by weighing plates</li>
+                        <li>Died in prison/exile, victim of political intrigue</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📐 Iktinos</h3>
+                    <p style="margin-bottom: 1rem;">Brilliant architect who designed the Parthenon's structure</p>
+                    <ul class="list-styled">
+                        <li>Master architect of the Parthenon</li>
+                        <li>Pioneered sophisticated optical refinements</li>
+                        <li>Also designed Temple of Apollo at Bassae</li>
+                        <li>Wrote treatise on Parthenon (now lost)</li>
+                        <li>Innovative use of Ionic elements in Doric temple</li>
+                        <li>Mathematical genius in proportions</li>
+                        <li>Influenced all subsequent Greek architecture</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏗️ Kallikrates</h3>
+                    <p style="margin-bottom: 1rem;">Co-architect of the Parthenon, specialist in detailed execution</p>
+                    <ul class="list-styled">
+                        <li>Worked alongside Iktinos on Parthenon design</li>
+                        <li>Handled construction oversight and implementation</li>
+                        <li>Previously built Long Walls connecting Athens to Piraeus</li>
+                        <li>Designed Temple of Athena Nike on Acropolis</li>
+                        <li>Expert in precision stonework</li>
+                        <li>Ensured accurate execution of optical refinements</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💣 Francesco Morosini (1619-1694)</h3>
+                    <p style="margin-bottom: 1rem;">Venetian commander whose bombardment caused catastrophic damage</p>
+                    <ul class="list-styled">
+                        <li>Led Venetian siege of Ottoman Athens in 1687</li>
+                        <li>Ordered artillery bombardment of Acropolis</li>
+                        <li>Shell hit Ottoman ammunition stored in Parthenon</li>
+                        <li>Massive explosion destroyed temple's interior</li>
+                        <li>Attempted to loot surviving sculptures (many fell)</li>
+                        <li>Worst single disaster in Parthenon's history</li>
+                        <li>Later served as Doge of Venice despite the destruction</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏺 Lord Elgin (Thomas Bruce, 1766-1841)</h3>
+                    <p style="margin-bottom: 1rem;">British ambassador who removed major portions of Parthenon sculptures</p>
+                    <ul class="list-styled">
+                        <li>British Ambassador to Ottoman Empire 1799-1803</li>
+                        <li>Obtained controversial permission (firman) to remove sculptures</li>
+                        <li>Removed about half of surviving frieze, metopes, pediments</li>
+                        <li>Claimed to be saving them from destruction</li>
+                        <li>Sold marbles to British Museum in 1816</li>
+                        <li>Actions remain deeply controversial</li>
+                        <li>Greece demands repatriation to this day</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔬 Manolis Korres (b. 1949)</h3>
+                    <p style="margin-bottom: 1rem;">Leading architect of modern Parthenon restoration</p>
+                    <ul class="list-styled">
+                        <li>Director of Acropolis Restoration Service</li>
+                        <li>Led restoration efforts since 1975</li>
+                        <li>Pioneered use of titanium clamps</li>
+                        <li>Developed innovative anastylosis techniques</li>
+                        <li>Identified thousands of displaced blocks</li>
+                        <li>Major scholarly work on Parthenon construction</li>
+                        <li>Continuing multi-decade conservation project</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📖 Other Key Figures</h3>
+                    <ul class="list-styled">
+                        <li><strong>Plutarch:</strong> Ancient biographer who preserved Pericles's history</li>
+                        <li><strong>Pausanias:</strong> 2nd century CE traveler who described the Parthenon</li>
+                        <li><strong>Cyriacus of Ancona:</strong> 15th c. antiquarian who drew intact sculptures</li>
+                        <li><strong>Jacques Carrey:</strong> Artist who sketched pediments before 1687 explosion</li>
+                        <li><strong>Stuart & Revett:</strong> 18th c. architects who measured and published drawings</li>
+                        <li><strong>Adolf Furtwängler:</strong> 19th c. scholar who reconstructed pediment compositions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- History & Transformations -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🔄</span>
+                Transformations Through History
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">✝️ Christian Church (5th-15th c.)</h3>
+                    <ul class="list-styled">
+                        <li>Converted to Church of the Parthenos Maria</li>
+                        <li>Later became Church of the Divine Wisdom</li>
+                        <li>Athena statue removed and destroyed</li>
+                        <li>Apse added to east end</li>
+                        <li>Metopes defaced or removed</li>
+                        <li>Christian mosaics and frescoes added</li>
+                        <li>Served as cathedral of Athens</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">☪️ Ottoman Mosque (1460s-1687)</h3>
+                    <ul class="list-styled">
+                        <li>Converted after Ottoman conquest</li>
+                        <li>Minaret added to southwest corner</li>
+                        <li>Relatively well preserved during this period</li>
+                        <li>Travelers' accounts describe good condition</li>
+                        <li>Used as ammunition depot</li>
+                        <li>Tragic consequences in 1687</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💣 1687 Explosion</h3>
+                    <ul class="list-styled">
+                        <li>Venetian siege of Ottoman-held Athens</li>
+                        <li>Artillery shell hit ammunition storage</li>
+                        <li>Massive explosion destroyed roof and cella</li>
+                        <li>14 of 46 columns collapsed</li>
+                        <li>Most sculpture on south side lost</li>
+                        <li>Building reduced to ruins</li>
+                        <li>Worst disaster in Parthenon's history</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏺 Elgin Marbles Controversy</h3>
+                    <ul class="list-styled">
+                        <li>Lord Elgin removed sculptures 1801-1812</li>
+                        <li>Claimed Ottoman permission</li>
+                        <li>About half of surviving sculpture taken</li>
+                        <li>Now in British Museum, London</li>
+                        <li>Greece demands repatriation</li>
+                        <li>Ongoing international controversy</li>
+                        <li>Other sculptures in Louvre, other museums</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔨 Modern Restoration</h3>
+                    <ul class="list-styled">
+                        <li>Major restoration began 1975</li>
+                        <li>Reversing damage from earlier repairs</li>
+                        <li>Replacing iron clamps with titanium</li>
+                        <li>Laser cleaning of marble</li>
+                        <li>Reassembling displaced blocks</li>
+                        <li>New Acropolis Museum (2009) for sculptures</li>
+                        <li>Ongoing work expected for decades</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌍 UNESCO World Heritage</h3>
+                    <ul class="list-styled">
+                        <li>Acropolis designated 1987</li>
+                        <li>Universal symbol of classical spirit</li>
+                        <li>Represents birth of Western civilization</li>
+                        <li>Attracts millions of visitors annually</li>
+                        <li>Symbol of democratic values</li>
+                        <li>Ongoing conservation challenges</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modern Significance -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🌍</span>
+                Modern Significance & Influence
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                The Parthenon transcends its original religious function to become a universal symbol of human
+                achievement, democratic values, and classical beauty. Its influence on Western architecture,
+                art, and political philosophy cannot be overstated.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Architectural Legacy</h3>
+                    <ul class="list-styled">
+                        <li>Template for neoclassical architecture worldwide</li>
+                        <li>U.S. Capitol, Supreme Court, Lincoln Memorial</li>
+                        <li>British Museum, Brandenburg Gate</li>
+                        <li>Countless banks, libraries, government buildings</li>
+                        <li>Academic institutions globally</li>
+                        <li>Doric order remains standard architectural element</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🗽 Democratic Symbol</h3>
+                    <ul class="list-styled">
+                        <li>Embodies Athenian democracy</li>
+                        <li>Symbol of Western political values</li>
+                        <li>Freedom, reason, civic participation</li>
+                        <li>Used in political imagery worldwide</li>
+                        <li>Greek 1 euro coin depicts Parthenon</li>
+                        <li>National symbol of Greece</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎨 Artistic Influence</h3>
+                    <ul class="list-styled">
+                        <li>Renaissance rediscovery shaped Western art</li>
+                        <li>Neoclassical movement in 18th-19th centuries</li>
+                        <li>Standard of beauty and proportion</li>
+                        <li>Inspiration for countless paintings, sculptures</li>
+                        <li>Photography and film icon</li>
+                        <li>Modern artists reinterpret and critique</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📚 Educational Symbol</h3>
+                    <ul class="list-styled">
+                        <li>Central to classical education</li>
+                        <li>Study of Greek civilization begins here</li>
+                        <li>Architecture and engineering marvel</li>
+                        <li>Archaeological training ground</li>
+                        <li>Philosophy and democracy connection</li>
+                        <li>Cultural heritage preservation case study</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌐 Tourism & Economy</h3>
+                    <ul class="list-styled">
+                        <li>Greece's most visited monument</li>
+                        <li>3+ million visitors annually</li>
+                        <li>Major economic driver for Athens</li>
+                        <li>New Acropolis Museum (2009)</li>
+                        <li>Night illumination spectacle</li>
+                        <li>Cultural events and celebrations</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚖️ Repatriation Debate</h3>
+                    <ul class="list-styled">
+                        <li>Greece campaigns for Elgin Marbles return</li>
+                        <li>Questions of cultural property ownership</li>
+                        <li>Colonial legacy and restitution</li>
+                        <li>British Museum refuses return</li>
+                        <li>UNESCO involved in mediation</li>
+                        <li>Broader implications for museum collections</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visitor Information -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🗺️</span>
+                Visitor Information
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🎫 Access & Tickets</h3>
+                    <ul class="list-styled">
+                        <li><strong>Hours:</strong> 8:00 AM - 8:00 PM (summer); 8:00 AM - 5:00 PM (winter)</li>
+                        <li><strong>Combined ticket:</strong> Includes all Acropolis sites</li>
+                        <li><strong>Free entry:</strong> First Sunday of month (Nov-March)</li>
+                        <li><strong>Special days:</strong> Free on March 25, October 28</li>
+                        <li><strong>Advance booking:</strong> Highly recommended</li>
+                        <li><strong>Early arrival:</strong> Best to beat crowds and heat</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">♿ Accessibility</h3>
+                    <ul class="list-styled">
+                        <li>Wheelchair lift available at entrance</li>
+                        <li>Paved path to summit (steep in places)</li>
+                        <li>Limited wheelchair access around Parthenon</li>
+                        <li>Companion assistance recommended</li>
+                        <li>Accessible restrooms at entrance</li>
+                        <li>Contact site in advance for arrangements</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌡️ Best Times to Visit</h3>
+                    <ul class="list-styled">
+                        <li><strong>Season:</strong> Spring (April-May) or Fall (Sept-Oct)</li>
+                        <li><strong>Time:</strong> Early morning (8 AM) or late afternoon</li>
+                        <li><strong>Weather:</strong> Avoid midday summer heat (35°C+)</li>
+                        <li><strong>Crowds:</strong> Lowest in winter, highest in summer</li>
+                        <li><strong>Special:</strong> Full moon nights (limited access)</li>
+                        <li><strong>Photography:</strong> Golden hour for best light</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">👟 Practical Tips</h3>
+                    <ul class="list-styled">
+                        <li>Wear comfortable, non-slip walking shoes</li>
+                        <li>Marble becomes slippery when wet</li>
+                        <li>Bring water, sun protection, hat</li>
+                        <li>No large bags allowed (storage available)</li>
+                        <li>Stay on marked paths</li>
+                        <li>Photography allowed (no tripods)</li>
+                        <li>Allow 2-3 hours for full Acropolis visit</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Nearby Sites (Included in Ticket)</h3>
+                    <ul class="list-styled">
+                        <li><strong>Propylaea:</strong> Monumental gateway</li>
+                        <li><strong>Erechtheion:</strong> Temple with Caryatid Porch</li>
+                        <li><strong>Temple of Athena Nike:</strong> Small Ionic temple</li>
+                        <li><strong>Theatre of Dionysus:</strong> Birthplace of drama</li>
+                        <li><strong>Odeon of Herodes Atticus:</strong> Roman theater</li>
+                        <li><strong>Ancient Agora:</strong> Marketplace and civic center</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Acropolis Museum</h3>
+                    <ul class="list-styled">
+                        <li>Modern museum at base of Acropolis (2009)</li>
+                        <li>Houses original Parthenon sculptures</li>
+                        <li>Top floor recreates frieze in situ</li>
+                        <li>Caryatids from Erechtheion</li>
+                        <li>Glass floor shows excavations below</li>
+                        <li>Restaurant with Acropolis view</li>
+                        <li>Separate ticket required</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Links -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🔗</span>
+                Related Topics & Further Exploration
+            </h2>
+
+            <div class="related-links">
+                <a href="../groves/delphi.html" class="related-link">
+                    🔮 Delphi Oracle
+                </a>
+                <a href="../../mythos/greek/athena.html" class="related-link">
+                    🦉 Athena - Goddess of Wisdom
+                </a>
+                <a href="../mountains/mount-olympus.html" class="related-link">
+                    ⚡ Mount Olympus
+                </a>
+                <a href="../../mythos/greek/index.html" class="related-link">
+                    🏛️ Greek Mythology
+                </a>
+                <a href="../index.html" class="related-link">
+                    🏛️ All Sacred Places
+                </a>
+                <a href="../../index.html" class="related-link">
+                    🏠 Home
+                </a>
+            </div>
+        </div>
+
+        <!-- Bibliography -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📚</span>
+                Sources & Further Reading
+            </h2>
+
+            <div style="line-height: 2; font-size: 1rem;">
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Ancient Sources:</h3>
+                <ul class="list-styled">
+                    <li>Pausanias: <em>Description of Greece</em> (Book 1 - Athens and Attica)</li>
+                    <li>Plutarch: <em>Life of Pericles</em></li>
+                    <li>Thucydides: <em>History of the Peloponnesian War</em></li>
+                    <li>Vitruvius: <em>De Architectura</em></li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Modern Scholarship:</h3>
+                <ul class="list-styled">
+                    <li>Beard, Mary. <em>The Parthenon</em>. Profile Books, 2002.</li>
+                    <li>Connelly, Joan Breton. <em>The Parthenon Enigma</em>. Knopf, 2014.</li>
+                    <li>Hurwit, Jeffrey M. <em>The Athenian Acropolis</em>. Cambridge, 1999.</li>
+                    <li>Jenkins, Ian. <em>The Parthenon Sculptures</em>. British Museum Press, 2007.</li>
+                    <li>Neils, Jenifer (ed.). <em>The Parthenon: From Antiquity to the Present</em>. Cambridge, 2005.</li>
+                    <li>Pollitt, J.J. <em>Art and Experience in Classical Greece</em>. Cambridge, 1972.</li>
+                    <li>Rhodes, Robin Francis. <em>Architecture and Meaning on the Athenian Acropolis</em>. Cambridge, 1995.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Archaeological & Conservation:</h3>
+                <ul class="list-styled">
+                    <li>Korres, Manolis. <em>The Stones of the Parthenon</em>. Getty, 2000.</li>
+                    <li>Acropolis Restoration Service. <em>The Acropolis Restoration: The CCAM Interventions</em>.</li>
+                    <li>Hellenic Ministry of Culture reports on ongoing restoration</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Cultural & Political Context:</h3>
+                <ul class="list-styled">
+                    <li>Cuno, James. <em>Who Owns Antiquity?</em> Princeton, 2008.</li>
+                    <li>St Clair, William. <em>Lord Elgin and the Marbles</em>. Oxford, 1998.</li>
+                    <li>Hamilakis, Yannis. <em>The Nation and its Ruins: Antiquity, Archaeology, and National Imagination in Greece</em>. Oxford, 2007.</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

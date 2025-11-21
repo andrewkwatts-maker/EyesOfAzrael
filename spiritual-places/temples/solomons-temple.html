@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solomon's Temple - Sacred Places</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .location {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            color: var(--color-primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-icon {
+            font-size: 2.5rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all var(--transition-base);
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .feature-title {
+            color: var(--color-primary);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .tradition-tag {
+            padding: 0.5rem 1rem;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            color: var(--color-text-primary);
+        }
+
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .related-link {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            text-align: center;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .related-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .timeline-item {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '•';
+            position: absolute;
+            left: -2.5rem;
+            color: var(--color-primary);
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .timeline-date {
+            color: var(--color-primary);
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .quote-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        }
+
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .deity-card {
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+
+        .deity-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .list-styled {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .list-styled li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .list-styled li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+    <div class="header-content">
+        <h1>Solomon's Temple</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Sacred Places</a> →
+                <a href="./index.html">Temples</a> →
+                <span>Solomon's Temple</span>
+</nav>
+
+    <main>
+        <div class="hero-section">
+            <div class="hero-icon">✡️</div>
+            <h2>Solomon's Temple (First Temple)</h2>
+            <p class="location">Jerusalem, Israel</p>
+            <div class="tradition-tags">
+                <span class="tradition-tag">Jewish</span>
+                <span class="tradition-tag">Christian</span>
+                <span class="tradition-tag">Islamic</span>
+            </div>
+        </div>
+
+        <!-- Historical Overview -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📜</span>
+                Historical Overview
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                Solomon's Temple, also known as the First Temple (Hebrew: בֵּית־הַמִּקְדָּשׁ הָרִאשׁוֹן, Beit HaMikdash HaRishon),
+                was the first holy temple of the ancient Israelites, built in Jerusalem during the reign of King Solomon around
+                957 BCE. It served as the primary center of Israelite worship and housed the Ark of the Covenant in its innermost
+                sanctuary, the Holy of Holies. The Temple stood for approximately 370 years until its destruction by the
+                Babylonians under Nebuchadnezzar II in 586 BCE.
+            </p>
+
+            <div class="quote-box">
+                "So Solomon built the temple and finished it. He lined its interior walls with cedar boards, paneling them
+                from the floor of the temple to the ceiling, and covered the floor of the temple with planks of cypress."
+                - 1 Kings 6:14-15
+            </div>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-top: 1.5rem;">
+                The Temple was built on Mount Moriah (the threshing floor of Araunah the Jebusite, purchased by David for 50 shekels
+                of silver), believed to be the site where Abraham prepared to sacrifice Isaac (the Akedah) and where Jacob dreamed
+                of a ladder reaching to heaven. According to Jewish tradition, this was also the Foundation Stone (Even Shetiyah)
+                from which the world was created. King David had originally planned to build the Temple after bringing the Ark to
+                Jerusalem, but God, through the prophet Nathan, decreed that his son Solomon would be the one to construct it, as
+                David had "shed much blood" and been "a man of war" (1 Chronicles 22:8). Nevertheless, David amassed enormous wealth
+                for the project—100,000 talents of gold and 1 million talents of silver according to 1 Chronicles 22:14—and
+                organized the priestly and Levitical divisions that would serve in the Temple.
+            </p>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-top: 1.5rem;">
+                King Solomon, son of David and Bathsheba, ascended to the throne around 970 BCE after a succession crisis involving
+                his half-brother Adonijah. According to biblical accounts, Solomon prayed at the ancient sanctuary of Gibeon, where
+                God appeared to him in a dream offering to grant any request. Solomon asked for "a discerning heart to govern your
+                people," which pleased God so much that He also granted Solomon wealth, honor, and long life (1 Kings 3:9-14). The
+                young king's legendary wisdom became proverbial—he authored 3,000 proverbs and 1,005 songs, and "spoke about plant
+                life, from the cedar of Lebanon to the hyssop" (1 Kings 4:32-33). Rulers from distant lands, including the Queen of
+                Sheba, came to Jerusalem to hear his judgments and marvel at his court's splendor.
+            </p>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-top: 1.5rem;">
+                The construction took seven years (c. 967-960 BCE, in the 4th through 11th years of Solomon's reign) and employed
+                a massive workforce described in meticulous detail in 1 Kings 5-6 and 2 Chronicles 2-4. Solomon conscripted 30,000
+                men from Israel who worked in monthly shifts in Lebanon (10,000 per month, allowing two months at home between
+                shifts), along with 70,000 carriers, 80,000 stonecutters in the mountains, and 3,300 (or 3,600 according to
+                2 Chronicles) foremen overseeing the work. The project required unprecedented international cooperation: King Hiram
+                of Tyre, an ally of David and friend to Solomon, provided cedar and cypress timber from the forests of Lebanon,
+                along with skilled Phoenician craftsmen renowned throughout the ancient world. In exchange, Solomon supplied Hiram
+                with 20,000 cors (approximately 125,000 bushels) of wheat and 20 cors of pressed olive oil annually throughout the
+                construction period.
+            </p>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-top: 1.5rem;">
+                The master craftsman Hiram-Abi (also called Huram-Abi), son of a Tyrian bronze worker and an Israelite mother from
+                the tribe of Naphtali (or Dan according to 2 Chronicles), was brought from Tyre to oversee the intricate metalwork.
+                He was "filled with wisdom, understanding, and skill for making any work in bronze" (1 Kings 7:14) and created the
+                two great pillars Jachin and Boaz, the enormous Bronze Sea, the ten bronze lavers, and countless vessels and
+                furnishings. Materials were imported from throughout the ancient world: cedar and cypress from Lebanon (floated as
+                rafts down the Mediterranean coast to Joppa, then transported overland 35 miles to Jerusalem), gold from Ophir
+                (possibly in Arabia, East Africa, or India—420 talents for the Temple), precious stones, algum wood (possibly red
+                sandalwood), and massive dressed stones quarried locally from the limestone hills around Jerusalem.
+            </p>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-top: 1.5rem;">
+                The foundation stones were enormous—some measuring 15 cubits (about 22.5 feet) long. The stones were so precisely
+                cut and dressed at the quarry that "neither hammer nor axe nor any tool of iron was heard in the temple while it was
+                being built" (1 Kings 6:7). This remarkable construction technique maintained the sanctity of the site, as iron was
+                associated with warfare, bloodshed, and the curse upon the earth after the Fall. The Talmud records that Solomon
+                possessed the miraculous shamir worm (or stone), a creature "no bigger than a barleycorn" that could cut through
+                stone with its gaze, bequeathed to Solomon by Asmodeus, king of demons. Modern scholars suggest the silent
+                construction may indicate pre-fabrication of all components at external sites.
+            </p>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-top: 1.5rem;">
+                The Temple's completion in 960 BCE (the 11th year of Solomon's reign, in the month of Bul, the 8th month) was
+                followed by an elaborate dedication ceremony that lasted fourteen days, coinciding with and extending beyond the
+                Feast of Tabernacles (Sukkot). Solomon offered 22,000 cattle and 120,000 sheep and goats in sacrifice—a staggering
+                number that required the consecration of the middle of the courtyard as additional altar space, since the bronze
+                altar was insufficient for all the offerings (1 Kings 8:64). When the Ark of the Covenant was brought into the Holy
+                of Holies beneath the wings of the golden cherubim, the glory of the Lord (Shekhinah) filled the Temple in a cloud
+                so dense that the priests could not stand to minister (1 Kings 8:10-11). Fire descended from heaven to consume the
+                offerings, and all the people fell prostrate, worshiping and praising: "He is good; his love endures forever"
+                (2 Chronicles 7:3). Solomon delivered his famous prayer of dedication from a bronze platform in the courtyard,
+                acknowledging that even the highest heaven cannot contain God, yet asking Him to hear prayers offered toward this
+                place.
+            </p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 1000 BCE</div>
+                    <p>King David conquers Jerusalem and plans to build a temple; purchases threshing floor of Araunah the Jebusite on Mount Moriah</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 970 BCE</div>
+                    <p>Solomon ascends to throne after succession crisis; God grants him wisdom at Gibeon</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 967 BCE (4th year)</div>
+                    <p>Construction begins; treaty with King Hiram of Tyre for cedars of Lebanon and skilled craftsmen</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 960 BCE (11th year)</div>
+                    <p>Temple completed after seven years; Ark installed in Holy of Holies; fourteen-day dedication with 22,000 cattle and 120,000 sheep sacrificed</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 925 BCE</div>
+                    <p>Egyptian Pharaoh Shishak (Shoshenq I) plunders temple treasures during reign of Solomon's son Rehoboam after kingdom divides</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">835 BCE</div>
+                    <p>King Joash repairs Temple using chest for collection of funds; priest Jehoiada oversees restoration</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 750 BCE</div>
+                    <p>Prophets Isaiah, Amos, and Hosea warn of coming judgment; call for justice over empty rituals</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">701 BCE</div>
+                    <p>King Hezekiah strips gold from temple doors to pay tribute to Assyrian King Sennacherib; Jerusalem miraculously saved from siege</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">640-609 BCE</div>
+                    <p>King Josiah's reforms; Torah scroll discovered in Temple during repairs; major restoration and return to covenant faithfulness</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">605 BCE</div>
+                    <p>Babylonians defeat Egypt at Carchemish; Judah becomes Babylonian vassal; Daniel taken to Babylon</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">597 BCE</div>
+                    <p>First Babylonian siege; King Jehoiachin surrenders; temple treasures and nobles (including Ezekiel) taken to Babylon</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">588-586 BCE</div>
+                    <p>Final Babylonian siege lasts 18 months; city walls breached on 9th of Tammuz; Temple burned on 9th of Av (Tisha B'Av), 586 BCE</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">586 BCE</div>
+                    <p>Temple systematically demolished; bronze pillars, sea, and vessels broken up and carried to Babylon; Ark of the Covenant disappears; Jerusalem destroyed</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Architectural Features -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🏛️</span>
+                Architectural Features
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                The Temple complex was a magnificent architectural achievement that incorporated the finest materials and
+                craftsmanship of the ancient world. Its design reflected both practical religious needs and profound symbolic
+                meanings, with each element carefully prescribed in biblical texts.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">📐 Dimensions & Layout</h3>
+                    <ul class="list-styled">
+                        <li>Main building: 60 cubits long, 20 cubits wide, 30 cubits high (approximately 90 x 30 x 45 feet)</li>
+                        <li>Three main sections: Ulam (porch), Heikhal (main hall), and Devir (Holy of Holies)</li>
+                        <li>Holy of Holies: Perfect cube of 20 x 20 x 20 cubits</li>
+                        <li>Surrounded by three-story side chambers for storage</li>
+                        <li>Large courtyard with various auxiliary structures</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌟 Materials & Decoration</h3>
+                    <ul class="list-styled">
+                        <li>Walls lined with cedar from Lebanon</li>
+                        <li>Floors covered with cypress wood</li>
+                        <li>Interior overlaid with pure gold</li>
+                        <li>Carved cherubim, palm trees, and flowers throughout</li>
+                        <li>Precious stones and bronze work adorning fixtures</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🕯️ Holy of Holies</h3>
+                    <ul class="list-styled">
+                        <li>Housed the Ark of the Covenant</li>
+                        <li>Two massive cherubim of olive wood overlaid with gold</li>
+                        <li>Wings of cherubim spanned 20 cubits wall to wall</li>
+                        <li>Separated from main hall by veil and doors</li>
+                        <li>Entered only once per year by High Priest on Yom Kippur</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔱 Temple Furnishings</h3>
+                    <ul class="list-styled">
+                        <li>Bronze Sea: Massive basin held by twelve bronze oxen</li>
+                        <li>Ten bronze lavers for ritual washing</li>
+                        <li>Golden altar of incense</li>
+                        <li>Ten golden lampstands (menorahs)</li>
+                        <li>Table of showbread with twelve loaves</li>
+                        <li>Bronze altar for burnt offerings in courtyard</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Pillars of Jachin & Boaz</h3>
+                    <ul class="list-styled">
+                        <li>Two bronze pillars flanking temple entrance</li>
+                        <li>Each 18 cubits high with capitals of 5 cubits</li>
+                        <li>Jachin (right): "He establishes"</li>
+                        <li>Boaz (left): "In Him is strength"</li>
+                        <li>Decorated with pomegranates and lily work</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌳 Courtyard Complex</h3>
+                    <ul class="list-styled">
+                        <li>Inner court for priests (Court of Priests)</li>
+                        <li>Outer court for worshippers (Court of Israel)</li>
+                        <li>Separate women's court</li>
+                        <li>Storage chambers along walls</li>
+                        <li>Gates oriented to cardinal directions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Religious Significance -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">✡️</span>
+                Religious & Mythological Significance
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                Solomon's Temple represented the physical dwelling place of God on Earth (Hebrew: שכינה, Shekhinah - Divine Presence).
+                It served as the central point of contact between the divine and human realms, where sacrifices were offered,
+                prayers were heard, and festivals were celebrated. The Temple embodied the covenant between God and the people
+                of Israel, manifesting divine order in physical form.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🕊️ The Ark of the Covenant</h3>
+                    <p>The Temple's most sacred element was the Ark of the Covenant, containing:</p>
+                    <ul class="list-styled">
+                        <li>Two tablets inscribed with the Ten Commandments</li>
+                        <li>Aaron's rod that budded</li>
+                        <li>A pot of manna from the wilderness</li>
+                        <li>The mercy seat (kapporet) where God's presence dwelt</li>
+                        <li>Two golden cherubim facing each other above the Ark</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">
+                        The Ark disappeared after the Temple's destruction, becoming one of history's greatest mysteries and
+                        the subject of countless legends and searches.
+                    </p>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔥 Sacrificial System</h3>
+                    <ul class="list-styled">
+                        <li>Daily burnt offerings (tamid) morning and evening</li>
+                        <li>Sin offerings for atonement (chatat)</li>
+                        <li>Peace offerings (shelamim)</li>
+                        <li>Grain offerings (mincha)</li>
+                        <li>Special sacrifices for festivals and holy days</li>
+                        <li>Only Aaronic priests could perform sacrifices</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📅 Major Festivals</h3>
+                    <ul class="list-styled">
+                        <li><strong>Passover (Pesach):</strong> Spring pilgrimage festival</li>
+                        <li><strong>Shavuot:</strong> Feast of Weeks, wheat harvest</li>
+                        <li><strong>Sukkot:</strong> Feast of Tabernacles, fall harvest</li>
+                        <li><strong>Yom Kippur:</strong> Day of Atonement, High Priest enters Holy of Holies</li>
+                        <li><strong>Rosh Hashanah:</strong> New Year, blowing of shofar</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">👑 Priestly Service</h3>
+                    <ul class="list-styled">
+                        <li>Descendants of Aaron served as priests (kohanim)</li>
+                        <li>Levites assisted in temple service</li>
+                        <li>High Priest wore special garments including ephod and breastplate</li>
+                        <li>Twenty-four priestly divisions rotated weekly service</li>
+                        <li>Strict purity laws governed temple service</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="quote-box" style="margin-top: 2rem;">
+                "But will God really dwell on earth? The heavens, even the highest heaven, cannot contain you.
+                How much less this temple I have built! Yet give attention to your servant's prayer and his plea for mercy,
+                LORD my God. Hear the cry and the prayer that your servant is praying in your presence this day."
+                - Solomon's prayer at the temple dedication, 1 Kings 8:27-28
+            </div>
+        </div>
+
+        <!-- Associated Deities & Figures -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">👑</span>
+                Associated Figures & Deities
+            </h2>
+
+            <div class="deity-grid">
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🌟</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">YHWH (Yahweh)</h3>
+                    <p>The God of Israel, whose divine presence (Shekhinah) dwelt in the Holy of Holies above the Ark of the Covenant</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">👑</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">King Solomon</h3>
+                    <p>Builder of the Temple, renowned for wisdom. Son of David and Bathsheba, third king of Israel</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">⚔️</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">King David</h3>
+                    <p>Planned the Temple and gathered materials, though forbidden to build it due to being a warrior</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🕊️</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Angels & Cherubim</h3>
+                    <p>Celestial beings depicted throughout the Temple, guardians of the divine throne</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">📜</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Moses</h3>
+                    <p>Received the Torah and Ark of the Covenant, which found its permanent home in Solomon's Temple</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">⚡</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Aaron</h3>
+                    <p>First High Priest, ancestor of all priests who served in the Temple</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rituals & Ceremonies -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🕯️</span>
+                Rituals & Ceremonies
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🌅 Daily Temple Service</h3>
+                    <ul class="list-styled">
+                        <li><strong>Morning Tamid:</strong> First sacrifice at dawn with accompanying prayers</li>
+                        <li><strong>Incense Offering:</strong> Twice daily burning of sacred incense blend</li>
+                        <li><strong>Menorah Lighting:</strong> Lamps trimmed and lit daily</li>
+                        <li><strong>Showbread Renewal:</strong> Fresh loaves placed every Sabbath</li>
+                        <li><strong>Evening Tamid:</strong> Final sacrifice before sunset</li>
+                        <li><strong>Levitical Choir:</strong> Psalms sung during offerings</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📿 Yom Kippur Ritual</h3>
+                    <ul class="list-styled">
+                        <li>High Priest performs five ritual immersions</li>
+                        <li>Confession of sins over two goats</li>
+                        <li>One goat sacrificed, blood sprinkled in Holy of Holies</li>
+                        <li>Scapegoat (Azazel) sent into wilderness bearing sins</li>
+                        <li>High Priest speaks the sacred name of God (YHWH)</li>
+                        <li>People prostrate when Name is pronounced</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌾 Harvest Festivals</h3>
+                    <ul class="list-styled">
+                        <li><strong>Firstfruits:</strong> Barley offering at Passover</li>
+                        <li><strong>Shavuot:</strong> Two wheat loaves brought to Temple</li>
+                        <li><strong>Sukkot Libations:</strong> Water drawing ceremony</li>
+                        <li><strong>Four Species:</strong> Procession with lulav and etrog</li>
+                        <li><strong>Simchat Beit HaShoevah:</strong> Celebration of water drawing</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎺 Musical Worship</h3>
+                    <ul class="list-styled">
+                        <li>Levitical choirs sang psalms during sacrifices</li>
+                        <li>Instruments: lyres, harps, cymbals, trumpets</li>
+                        <li>Specific psalms assigned to each day of week</li>
+                        <li>Special music for festivals and new moons</li>
+                        <li>Priestly trumpets signaled ritual moments</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🧼 Purification Rites</h3>
+                    <ul class="list-styled">
+                        <li>Ritual bathing in mikvaot before entering</li>
+                        <li>Washing hands and feet at bronze lavers</li>
+                        <li>Ashes of red heifer for purification from death</li>
+                        <li>Offerings for various states of impurity</li>
+                        <li>Nazarite purification ceremonies</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">👶 Life Cycle Events</h3>
+                    <ul class="list-styled">
+                        <li>Pidyon haben (redemption of firstborn)</li>
+                        <li>Purification offerings after childbirth</li>
+                        <li>Nazirite vow completion ceremonies</li>
+                        <li>Thank offerings for recovery from illness</li>
+                        <li>Personal votive offerings</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Destruction & Legacy -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">💔</span>
+                Destruction & Legacy
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                The destruction of Solomon's Temple in 586 BCE by the Babylonian army under Nebuchadnezzar II was one of the
+                most traumatic events in Jewish history. The prophets had warned that Israel's idolatry and injustice would
+                lead to catastrophe, but the loss of the Temple—the physical manifestation of God's presence—devastated the
+                nation. The Temple treasures were looted, the building was burned, and the walls were torn down. The Ark of
+                the Covenant disappeared and has never been recovered.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🔥 The Destruction</h3>
+                    <ul class="list-styled">
+                        <li>Babylonian siege lasted 18 months</li>
+                        <li>Temple burned on the 9th of Av, 586 BCE</li>
+                        <li>All gold, silver, and bronze taken as plunder</li>
+                        <li>Building systematically demolished</li>
+                        <li>Priests and nobles executed or exiled</li>
+                        <li>Fate of Ark of the Covenant unknown</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📖 Literary Legacy</h3>
+                    <ul class="list-styled">
+                        <li>Book of Lamentations mourns the destruction</li>
+                        <li>Psalms reflect Temple worship traditions</li>
+                        <li>Prophets interpret meaning of catastrophe</li>
+                        <li>Ezekiel's vision of restored Temple</li>
+                        <li>Detailed architectural descriptions preserved</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Second Temple Period</h3>
+                    <ul class="list-styled">
+                        <li>Second Temple built 516 BCE after exile</li>
+                        <li>Expanded by Herod the Great (20 BCE)</li>
+                        <li>Lacked Ark, sacred fire, Urim & Thummim</li>
+                        <li>Destroyed by Romans in 70 CE</li>
+                        <li>Western Wall survives as remnant</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">✡️ Jewish Mourning Traditions</h3>
+                    <ul class="list-styled">
+                        <li>Tisha B'Av fast commemorates destruction</li>
+                        <li>Glass broken at weddings in remembrance</li>
+                        <li>Prayers face Jerusalem and Temple Mount</li>
+                        <li>Messianic hope for Third Temple</li>
+                        <li>Liturgy preserves Temple service memory</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">✝️ Christian Significance</h3>
+                    <ul class="list-styled">
+                        <li>Jesus taught and worshipped in Second Temple</li>
+                        <li>Temple veil torn at Jesus's crucifixion</li>
+                        <li>Jesus's body called "temple" (John 2:19-21)</li>
+                        <li>Early church met in Temple courts</li>
+                        <li>Believers seen as spiritual temple (1 Peter 2:5)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">☪️ Islamic Tradition</h3>
+                    <ul class="list-styled">
+                        <li>Solomon (Sulayman) honored as prophet</li>
+                        <li>Dome of the Rock built on Temple Mount</li>
+                        <li>Al-Aqsa Mosque third holiest site in Islam</li>
+                        <li>Temple Mount (Haram al-Sharif) revered</li>
+                        <li>Legends of Solomon's wisdom and power</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Temple Period -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🏛️</span>
+                The Second Temple Period (516 BCE - 70 CE)
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                After seventy years of Babylonian exile, the Jewish people returned to Jerusalem and rebuilt the Temple, inaugurating
+                the Second Temple period that would last nearly 600 years. This era witnessed dramatic transformations in Jewish thought,
+                the emergence of various sects, Greek and Roman occupation, the ministry of Jesus, and ultimately another catastrophic
+                destruction—this time by the Romans in 70 CE. The Second Temple, especially after Herod's massive expansion, became one
+                of the ancient world's architectural marvels, yet it lacked several sacred elements present in Solomon's Temple.
+            </p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">539 BCE</div>
+                    <p>Cyrus the Great conquers Babylon; issues decree allowing Jews to return and rebuild Temple; returns temple vessels</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">538 BCE</div>
+                    <p>First wave of exiles returns under Zerubbabel (governor) and Joshua (high priest); altar re-established</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">536 BCE</div>
+                    <p>Temple foundation laid amid mixed emotions—older priests weep remembering Solomon's Temple</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">530-520 BCE</div>
+                    <p>Construction halted due to opposition from Samaritans and local adversaries</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">520 BCE</div>
+                    <p>Prophets Haggai and Zechariah urge renewal of building; work resumes</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">516 BCE</div>
+                    <p>Second Temple completed and dedicated; modest compared to First Temple but functional</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">458 BCE</div>
+                    <p>Ezra the scribe arrives with second wave; brings Torah scroll; institutes reforms</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">445 BCE</div>
+                    <p>Nehemiah rebuilds Jerusalem walls; Temple service formalized</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">332 BCE</div>
+                    <p>Alexander the Great conquers region; Hellenistic period begins</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">167 BCE</div>
+                    <p>Antiochus IV Epiphanes desecrates Temple; sacrifices pig on altar; triggers Maccabean Revolt</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">164 BCE</div>
+                    <p>Judah Maccabee recaptures Temple; cleansed and rededicated (origin of Hanukkah)</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">63 BCE</div>
+                    <p>Roman General Pompey conquers Jerusalem; enters Holy of Holies (shocked to find it empty)</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">37 BCE</div>
+                    <p>Herod the Great becomes king of Judea under Roman authority</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">20 BCE</div>
+                    <p>Herod begins massive Temple expansion and renovation project</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 27-30 CE</div>
+                    <p>Jesus ministers in Temple; drives out money changers; teaches in courts</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">63 CE</div>
+                    <p>Temple construction finally completed—just seven years before destruction</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">66-70 CE</div>
+                    <p>First Jewish-Roman War; Zealots occupy Temple; Roman siege under Titus</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">70 CE (9th of Av)</div>
+                    <p>Romans breach walls; Temple set ablaze; systematic destruction; only Western Wall retaining wall survives</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">132-135 CE</div>
+                    <p>Bar Kokhba Revolt; brief Jewish independence; Romans ban Jews from Jerusalem; build pagan temple on site</p>
+                </div>
+            </div>
+
+            <div class="content-grid" style="margin-top: 2rem;">
+                <div class="feature-box">
+                    <h3 class="feature-title">🏗️ Zerubbabel's Temple</h3>
+                    <ul class="list-styled">
+                        <li>Built 520-516 BCE by returning exiles</li>
+                        <li>More modest than Solomon's Temple</li>
+                        <li>Used Cyrus's financial support</li>
+                        <li>Older priests wept, remembering former glory</li>
+                        <li>Served for nearly 500 years</li>
+                        <li>Lacked the Ark, Urim & Thummim, sacred fire</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">✨ What Was Missing</h3>
+                    <ul class="list-styled">
+                        <li>Ark of the Covenant (lost in 586 BCE)</li>
+                        <li>Sacred fire from heaven</li>
+                        <li>Urim and Thummim (priestly oracles)</li>
+                        <li>Anointing oil (formula lost)</li>
+                        <li>Spirit of prophecy (according to Talmud)</li>
+                        <li>Divine cloud/Shekhinah glory visible presence</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">👑 Herod's Expansion</h3>
+                    <ul class="list-styled">
+                        <li>Began 20 BCE; completed 63 CE</li>
+                        <li>Doubled the Temple Mount platform</li>
+                        <li>Massive retaining walls with huge stones</li>
+                        <li>Some stones weigh over 400 tons</li>
+                        <li>Created largest religious structure of ancient world</li>
+                        <li>Workers trained as priests to enter holy areas</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Herodian Architecture</h3>
+                    <ul class="list-styled">
+                        <li>Temple proper similar dimensions to Solomon's</li>
+                        <li>Surrounded by vast courts and porticoes</li>
+                        <li>Court of Gentiles (outermost)</li>
+                        <li>Women's Court</li>
+                        <li>Court of Israel (Jewish men)</li>
+                        <li>Court of Priests with altar</li>
+                        <li>Royal Stoa—magnificent covered colonnade</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📚 New Developments</h3>
+                    <ul class="list-styled">
+                        <li>Rise of synagogues throughout diaspora</li>
+                        <li>Pharisees, Sadducees, Essenes emerge</li>
+                        <li>Oral Torah develops alongside written</li>
+                        <li>Sanhedrin as ruling council</li>
+                        <li>Apocalyptic literature flourishes</li>
+                        <li>Greek translation (Septuagint)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔥 Roman Destruction</h3>
+                    <ul class="list-styled">
+                        <li>70 CE during First Jewish-Roman War</li>
+                        <li>Titus besieged Jerusalem for months</li>
+                        <li>Soldiers set Temple ablaze</li>
+                        <li>Gold melted between stones; soldiers pried apart</li>
+                        <li>Literally "not one stone upon another" (Luke 21:6)</li>
+                        <li>Treasures paraded in Roman Triumph; depicted on Arch of Titus</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="quote-box" style="margin-top: 2rem;">
+                "As Jesus was leaving the temple, one of his disciples said to him, 'Look, Teacher! What massive stones! What
+                magnificent buildings!' 'Do you see all these great buildings?' replied Jesus. 'Not one stone here will be left
+                on another; every one will be thrown down.'" - Mark 13:1-2
+            </div>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-top: 2rem;">
+                The destruction of the Second Temple in 70 CE was as traumatic as the first destruction 656 years earlier. This time,
+                however, the Jewish people would not return to rebuild. The Temple Mount remained in ruins until the 7th century, when
+                Muslims built the Dome of the Rock and Al-Aqsa Mosque on the site. The loss of the Temple forced a radical
+                transformation of Judaism from a temple-centered religion of sacrifice to a synagogue-centered religion of prayer and
+                study—a transformation that shapes Judaism to this day.
+            </p>
+        </div>
+
+        <!-- Modern Significance -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🌍</span>
+                Modern Significance & Research
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                The Temple Mount (Hebrew: Har HaBayit; Arabic: al-Haram al-Sharif) remains one of the most contested and
+                sacred sites in the world. Archaeological investigation is extremely limited due to religious and political
+                sensitivities. The site is managed by the Islamic Waqf, while the Western Wall plaza serves as a Jewish
+                prayer site. The Temple continues to play a central role in Jewish liturgy, eschatology, and identity.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🔍 Archaeological Evidence</h3>
+                    <ul class="list-styled">
+                        <li>Western Wall: retaining wall from Herodian expansion</li>
+                        <li>Warren's Gate: underground passage to Temple Mount</li>
+                        <li>Temple Mount Sifting Project: analyzing rubble</li>
+                        <li>First Temple period artifacts found in City of David</li>
+                        <li>Hezekiah's tunnel and Siloam Pool discoveries</li>
+                        <li>Inscriptions mentioning Temple and priesthood</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🕊️ Modern Jewish Observance</h3>
+                    <ul class="list-styled">
+                        <li>Daily prayers face toward Temple Mount</li>
+                        <li>Amidah includes prayers for Temple restoration</li>
+                        <li>Western Wall serves as prayer site</li>
+                        <li>Bar/Bat Mitzvah ceremonies at Western Wall</li>
+                        <li>Temple Institute recreating sacred vessels</li>
+                        <li>Red heifer breeding program for purification</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Third Temple Movement</h3>
+                    <ul class="list-styled">
+                        <li>Some Jews believe in rebuilding the Temple</li>
+                        <li>Temple Institute training potential priests</li>
+                        <li>Architectural plans developed</li>
+                        <li>Ritual objects reconstructed</li>
+                        <li>Others see Temple as metaphor or future miracle</li>
+                        <li>Controversial due to political implications</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📚 Scholarly Debates</h3>
+                    <ul class="list-styled">
+                        <li>Exact location of Holy of Holies disputed</li>
+                        <li>Historical accuracy of biblical descriptions</li>
+                        <li>Dating of construction and destruction</li>
+                        <li>Relationship to other ancient temples</li>
+                        <li>Phoenician architectural influences</li>
+                        <li>Fate of Temple treasures and Ark</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌐 Interfaith Significance</h3>
+                    <ul class="list-styled">
+                        <li>Sacred to Judaism, Christianity, and Islam</li>
+                        <li>Source of interfaith dialogue and tension</li>
+                        <li>UNESCO World Heritage Site debates</li>
+                        <li>International peace process implications</li>
+                        <li>Shared Abrahamic heritage</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎨 Cultural Influence</h3>
+                    <ul class="list-styled">
+                        <li>Freemasonry symbolism and architecture</li>
+                        <li>Medieval cathedral designs inspired by Temple</li>
+                        <li>Literature: Milton, Blake, countless others</li>
+                        <li>Film: Indiana Jones, National Treasure</li>
+                        <li>Music: Handel's "Solomon", countless settings</li>
+                        <li>Art: countless depictions and reconstructions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visitor Information -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🗺️</span>
+                Visitor Information
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">📍 Temple Mount</h3>
+                    <ul class="list-styled">
+                        <li><strong>Access:</strong> Limited non-Muslim access via Mughrabi Gate</li>
+                        <li><strong>Hours:</strong> Very limited visiting hours (check current)</li>
+                        <li><strong>Rules:</strong> Modest dress required, no prayer by non-Muslims</li>
+                        <li><strong>Note:</strong> Site of Dome of the Rock and Al-Aqsa Mosque</li>
+                        <li><strong>Restrictions:</strong> Subject to sudden closures</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🙏 Western Wall (Kotel)</h3>
+                    <ul class="list-styled">
+                        <li><strong>Access:</strong> Open 24/7 for prayer</li>
+                        <li><strong>Sections:</strong> Separate men's and women's areas</li>
+                        <li><strong>Customs:</strong> Head covering (kippah) for men</li>
+                        <li><strong>Activities:</strong> Prayer, Bar/Bat Mitzvahs, written prayers</li>
+                        <li><strong>Tours:</strong> Western Wall tunnels by reservation</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Related Sites</h3>
+                    <ul class="list-styled">
+                        <li><strong>City of David:</strong> Archaeological park south of Temple Mount</li>
+                        <li><strong>Temple Institute Museum:</strong> Recreated Temple vessels</li>
+                        <li><strong>Tower of David Museum:</strong> Jerusalem history</li>
+                        <li><strong>Davidson Center:</strong> Archaeological finds</li>
+                        <li><strong>Church of Holy Sepulchre:</strong> Christian holy site</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">ℹ️ Practical Tips</h3>
+                    <ul class="list-styled">
+                        <li>Dress modestly (covered shoulders, knees)</li>
+                        <li>Expect security checks at all sites</li>
+                        <li>Photography restrictions at some locations</li>
+                        <li>Consider guided tours for historical context</li>
+                        <li>Be respectful of active worship</li>
+                        <li>Check current political situation before visiting</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Links -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🔗</span>
+                Related Topics & Further Exploration
+            </h2>
+
+            <div class="related-links">
+                <a href="../pilgrimage/jerusalem.html" class="related-link">
+                    ✨ Jerusalem - Holy City
+                </a>
+                <a href="../../spiritual-items/ark-covenant.html" class="related-link">
+                    📦 Ark of the Covenant
+                </a>
+                <a href="../../mythos/jewish/index.html" class="related-link">
+                    ✡️ Jewish Mythology
+                </a>
+                <a href="../../spiritual-items/menorah.html" class="related-link">
+                    🕎 The Menorah
+                </a>
+                <a href="../index.html" class="related-link">
+                    🏛️ All Sacred Places
+                </a>
+                <a href="../../index.html" class="related-link">
+                    🏠 Home
+                </a>
+            </div>
+        </div>
+
+        <!-- Bibliography -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📚</span>
+                Sources & Further Reading
+            </h2>
+
+            <div style="line-height: 2; font-size: 1rem;">
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Primary Sources:</h3>
+                <ul class="list-styled">
+                    <li>The Hebrew Bible (Tanakh): 1 Kings 5-8, 2 Chronicles 2-7, Ezekiel 40-48</li>
+                    <li>Flavius Josephus: <em>Antiquities of the Jews</em>, <em>The Jewish War</em></li>
+                    <li>Mishnah: Tractate Middot (Temple measurements)</li>
+                    <li>Talmud: Various tractates on Temple service</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Modern Scholarship:</h3>
+                <ul class="list-styled">
+                    <li>Busink, Th. A. <em>Der Tempel von Jerusalem von Salomo bis Herodes</em>. Brill, 1970-1980.</li>
+                    <li>Hurowitz, Victor. <em>I Have Built You an Exalted House: Temple Building in the Bible in Light of Mesopotamian and Northwest Semitic Writings</em>. Sheffield Academic Press, 1992.</li>
+                    <li>Lundquist, John M. <em>The Temple of Jerusalem: Past, Present, and Future</em>. Praeger, 2008.</li>
+                    <li>Mazar, Benjamin. <em>The Mountain of the Lord</em>. Doubleday, 1975.</li>
+                    <li>Patai, Raphael. <em>Man and Temple in Ancient Jewish Myth and Ritual</em>. Ktav Publishing, 1967.</li>
+                    <li>Ritmeyer, Leen & Kathleen. <em>The Quest: Revealing the Temple Mount in Jerusalem</em>. Carta, 2006.</li>
+                    <li>Ritmeyer, Leen. <em>The Temples that Jerusalem Forgot</em>. Institute for Biblical and Scientific Studies, 2016.</li>
+                    <li>Yadin, Yigael. <em>The Temple Scroll</em>. Random House, 1985.</li>
+                    <li>Levine, Lee I. <em>Jerusalem: Portrait of the City in the Second Temple Period (538 B.C.E.-70 C.E.)</em>. Jewish Publication Society, 2002.</li>
+                    <li>Hayward, C.T.R. <em>The Jewish Temple: A Non-Biblical Sourcebook</em>. Routledge, 1996.</li>
+                    <li>Finkelstein, Israel & Silberman, Neil Asher. <em>David and Solomon: In Search of the Bible's Sacred Kings and the Roots of the Western Tradition</em>. Free Press, 2006.</li>
+                    <li>Edersheim, Alfred. <em>The Temple: Its Ministry and Services</em>. Hendrickson Publishers, 1994 (orig. 1874).</li>
+                    <li>Cornuke, Robert. <em>Temple: Amazing New Discoveries that Change Everything About the Location of Solomon's Temple</em>. Bible Archaeology Search and Exploration Institute, 2014.</li>
+                    <li>Grabbe, Lester L. <em>A History of the Jews and Judaism in the Second Temple Period</em> (2 vols). T&T Clark, 2004-2008.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Second Temple Period Studies:</h3>
+                <ul class="list-styled">
+                    <li>Goodman, Martin. <em>The Ruling Class of Judaea: The Origins of the Jewish Revolt Against Rome, A.D. 66-70</em>. Cambridge, 1987.</li>
+                    <li>Sanders, E.P. <em>Judaism: Practice and Belief, 63 BCE - 66 CE</em>. Trinity Press, 1992.</li>
+                    <li>Schiffman, Lawrence H. <em>From Text to Tradition: A History of Second Temple and Rabbinic Judaism</em>. Ktav, 1991.</li>
+                    <li>VanderKam, James C. <em>An Introduction to Early Judaism</em>. Eerdmans, 2001.</li>
+                    <li>Richardson, Peter. <em>Herod: King of the Jews and Friend of the Romans</em>. University of South Carolina Press, 1996.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Archaeological Reports:</h3>
+                <ul class="list-styled">
+                    <li>Reich, Ronny. <em>Excavating the City of David</em></li>
+                    <li>Shanks, Hershel & Cole, Dan. <em>Archaeology and the Bible</em></li>
+                    <li>Temple Mount Sifting Project Reports</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Online Resources:</h3>
+                <ul class="list-styled">
+                    <li>The Temple Institute (templeinstitute.org)</li>
+                    <li>Biblical Archaeology Society</li>
+                    <li>Israel Antiquities Authority</li>
+                    <li>Jewish Virtual Library - Temple Section</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

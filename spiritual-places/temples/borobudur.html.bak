@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borobudur - Sacred Places</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.8), rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+        .hero-icon { font-size: 5rem; margin-bottom: 1rem; }
+        .location { font-size: 1.2rem; color: var(--color-text-secondary); font-style: italic; margin-top: 0.5rem; }
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+        .section-title {
+            color: var(--color-primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .section-icon { font-size: 2.5rem; }
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .feature-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all var(--transition-base);
+        }
+        .feature-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.3);
+        }
+        .feature-title {
+            color: var(--color-primary);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .tradition-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        .tradition-tag {
+            padding: 0.5rem 1rem;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            color: var(--color-text-primary);
+        }
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .related-link {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            text-align: center;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .related-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 3px solid var(--color-primary);
+        }
+        .timeline-item {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .timeline-item::before {
+            content: '•';
+            position: absolute;
+            left: -2.5rem;
+            color: var(--color-primary);
+            font-size: 2rem;
+            line-height: 1;
+        }
+        .timeline-date {
+            color: var(--color-primary);
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .quote-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        }
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .deity-card {
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+        .deity-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+        .list-styled {
+            list-style: none;
+            padding-left: 0;
+        }
+        .list-styled li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+        .list-styled li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+        <div class="header-content">
+            <h1>Borobudur</h1>
+            <nav class="breadcrumb">
+                <a href="../../index.html">Home</a> →
+                <a href="../index.html">Sacred Places</a> →
+                <a href="../index.html#temples">Temples</a> →
+                <span>Borobudur</span>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="hero-section">
+            <div class="hero-icon">☸️</div>
+            <h2>Borobudur - Mountain of Buddhas</h2>
+            <p class="location">Central Java, Indonesia</p>
+            <div class="tradition-tags">
+                <span class="tradition-tag">Buddhist</span>
+                <span class="tradition-tag">Mahayana</span>
+                <span class="tradition-tag">Javanese</span>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📜</span>
+                Historical Overview
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem;">
+                Borobudur is the world's largest Buddhist monument and one of the greatest architectural achievements in human history.
+                Built in the 9th century (c. 750-850 CE) during the reign of the Sailendra Dynasty, this massive stone structure consists
+                of nine stacked platforms—six square and three circular—topped by a central dome. The temple is decorated with 2,672
+                relief panels and 504 Buddha statues, creating a three-dimensional mandala that represents the Buddhist path to enlightenment.
+                The name "Borobudur" possibly derives from Sanskrit "Vihara Buddha Uhr" meaning "Buddhist monastery on the hill."
+            </p>
+
+            <div class="quote-box">
+                "This is the most magnificent and sublime work that human hands have ever created, and at the same time one of the most
+                mysterious monuments of the world." - Auguste Jean Adalbert Roguet, 19th century French engineer
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 750-850 CE</div>
+                    <p>Construction during Sailendra Dynasty rule; approximately 75 years of building</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 10th-11th Century</div>
+                    <p>Shift to Hinduism in Java; Borobudur gradually abandoned</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1006 CE</div>
+                    <p>Merapi volcanic eruption may have contributed to abandonment</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1814</div>
+                    <p>Sir Thomas Stamford Raffles (British Java ruler) alerted to temple by local Javanese</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1907-1911</div>
+                    <p>Theodoor van Erp leads first major restoration under Dutch colonial rule</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1973-1983</div>
+                    <p>UNESCO-led major restoration; 1 million stones dismantled and cleaned</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1991</div>
+                    <p>Designated UNESCO World Heritage Site</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">2006, 2010</div>
+                    <p>Damaged by earthquakes and Merapi eruptions; subsequently restored</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🏛️</span>
+                Architectural Mandala
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                Borobudur's design is a three-dimensional mandala representing the Buddhist cosmology and path to enlightenment.
+                Pilgrims walk a 5-kilometer path ascending through three levels of Buddhist cosmology: Kamadhatu (world of desire),
+                Rupadhatu (world of forms), and Arupadhatu (formless world). The entire structure embodies the journey from
+                ignorance to nirvana.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">📐 Structure & Dimensions</h3>
+                    <ul class="list-styled">
+                        <li>Base: 123m x 123m (404 ft x 404 ft)</li>
+                        <li>Height: 35 meters (115 feet) above ground</li>
+                        <li>Built from 2 million stone blocks</li>
+                        <li>Estimated 55,000 cubic meters of stone</li>
+                        <li>No mortar used - interlocking stones</li>
+                        <li>Nine stacked platforms total</li>
+                        <li>Built on small hill for elevation</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌍 Three Realms of Existence</h3>
+                    <ul class="list-styled">
+                        <li><strong>Kamadhatu (Base):</strong> World of desires, hidden by later foot</li>
+                        <li><strong>Rupadhatu (Middle):</strong> Five square terraces, world of forms</li>
+                        <li><strong>Arupadhatu (Top):</strong> Three circular platforms, formless realm</li>
+                        <li>Represents journey from earthly to enlightened</li>
+                        <li>Pilgrim ascends counterclockwise</li>
+                        <li>Each level progressively more refined</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎨 Relief Panels (2,672 total)</h3>
+                    <ul class="list-styled">
+                        <li><strong>Hidden base:</strong> Karmavibhangga (law of karma) - 160 panels</li>
+                        <li><strong>Main wall:</strong> Lalitavistara (life of Buddha) - 120 panels</li>
+                        <li><strong>Jataka tales:</strong> Buddha's previous lives - 500+ panels</li>
+                        <li><strong>Avadana:</strong> Buddhist legends - 500+ panels</li>
+                        <li><strong>Gandavyuha:</strong> Sudhana's quest for enlightenment - 460 panels</li>
+                        <li>Total 1,300+ narrative panels depicting Buddhist teachings</li>
+                        <li>Additional decorative panels with flora, fauna, celestial beings</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🧘 Buddha Statues (504 total)</h3>
+                    <ul class="list-styled">
+                        <li>432 Buddha statues on balustrades</li>
+                        <li>72 openwork stupas with seated Buddhas</li>
+                        <li>Each exhibits one of five mudras (hand positions)</li>
+                        <li><strong>East:</strong> Bhumisparsa mudra (calling earth to witness)</li>
+                        <li><strong>South:</strong> Vara mudra (giving/offering)</li>
+                        <li><strong>West:</strong> Dhyana mudra (meditation)</li>
+                        <li><strong>North:</strong> Abhaya mudra (fearlessness)</li>
+                        <li><strong>Zenith:</strong> Dharmachakra mudra (teaching/turning wheel)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔔 Perforated Stupas</h3>
+                    <ul class="list-styled">
+                        <li>72 bell-shaped stupas on circular terraces</li>
+                        <li>Diamond-pattern perforations allow viewing inside</li>
+                        <li>Each contains seated Buddha statue</li>
+                        <li>Symbolize transition from form to formlessness</li>
+                        <li>Visitors touch statues for good fortune</li>
+                        <li>Local belief: touching through hole brings luck</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏔️ Central Stupa</h3>
+                    <ul class="list-styled">
+                        <li>Main stupa crowns entire monument</li>
+                        <li>Height: 35 meters from base</li>
+                        <li>Originally may have held relic or Buddha statue</li>
+                        <li>Now empty (debated whether intentional)</li>
+                        <li>Represents ultimate nirvana/emptiness</li>
+                        <li>Sealed without opening</li>
+                        <li>Goal of pilgrim's circumambulation journey</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">☸️</span>
+                Buddhist Philosophy & Symbolism
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">📖 Visual Dharma</h3>
+                    <p>Borobudur functions as a massive stone sutra, teaching Buddhism through visual narrative:</p>
+                    <ul class="list-styled">
+                        <li>Relief panels tell stories from Buddhist texts</li>
+                        <li>Illiterate pilgrims could "read" spiritual lessons</li>
+                        <li>Circumambulation (pradakshina) is meditative practice</li>
+                        <li>3-mile journey through 1,300 narrative panels</li>
+                        <li>Each circuit reveals deeper teachings</li>
+                        <li>Architecture itself is sermon in stone</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌸 Mandala in Three Dimensions</h3>
+                    <ul class="list-styled">
+                        <li>Viewed from above, forms perfect mandala</li>
+                        <li>Square within circle, cosmic diagram</li>
+                        <li>Four cardinal directions aligned precisely</li>
+                        <li>Represents Buddhist universe</li>
+                        <li>Pilgrimage recreates spiritual journey</li>
+                        <li>Physical movement mirrors internal transformation</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎭 Jataka Tales</h3>
+                    <ul class="list-styled">
+                        <li>Previous lives of Buddha depicted</li>
+                        <li>Stories of compassion, wisdom, sacrifice</li>
+                        <li>Bodhisattva path illustrated</li>
+                        <li>Over 500 panels devoted to jatakas</li>
+                        <li>Moral lessons in visual form</li>
+                        <li>Popular stories: Vessantara Jataka, Mahakapi Jataka</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌟 Sudhana's Quest</h3>
+                    <ul class="list-styled">
+                        <li>Gandavyuha Sutra depicted on highest galleries</li>
+                        <li>Youth Sudhana seeks enlightenment</li>
+                        <li>Visits 53 spiritual teachers</li>
+                        <li>Culminates in vision of Bodhisattva Samantabhadra</li>
+                        <li>Mirrors pilgrim's own journey at Borobudur</li>
+                        <li>Represents Mahayana ideal of universal enlightenment</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🧘 Hidden Base & Karma</h3>
+                    <ul class="list-styled">
+                        <li>Original base covered by later addition</li>
+                        <li>Karmavibhangga panels depict law of cause and effect</li>
+                        <li>Shows consequences of good and evil actions</li>
+                        <li>Possibly hidden to strengthen structure</li>
+                        <li>One corner left exposed for viewing</li>
+                        <li>Teaches karma's role in rebirth</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">☯️ Symbolism of Emptiness</h3>
+                    <ul class="list-styled">
+                        <li>Upper levels progressively less ornate</li>
+                        <li>Transition from form to formlessness</li>
+                        <li>Central stupa's emptiness = ultimate truth</li>
+                        <li>Represents sunyata (emptiness) doctrine</li>
+                        <li>Release from attachment to material world</li>
+                        <li>Final step before nirvana</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🌍</span>
+                Modern Significance
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🇮🇩 National Symbol</h3>
+                    <ul class="list-styled">
+                        <li>Indonesia's most visited tourist attraction</li>
+                        <li>Symbol of national pride and identity</li>
+                        <li>Featured on currency and official emblems</li>
+                        <li>Represents Indonesia's Buddhist heritage</li>
+                        <li>3-4 million visitors annually</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">☸️ Buddhist Pilgrimage</h3>
+                    <ul class="list-styled">
+                        <li>Active pilgrimage site for Buddhists worldwide</li>
+                        <li>Waisak (Vesak) celebration held annually</li>
+                        <li>Thousands gather for Buddha's birthday</li>
+                        <li>Monks lead procession with candles</li>
+                        <li>Spiritual rather than touristic experience</li>
+                        <li>Indonesia's Buddhist minority maintains traditions</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ UNESCO World Heritage (1991)</h3>
+                    <ul class="list-styled">
+                        <li>Outstanding universal value recognized</li>
+                        <li>Largest Buddhist monument globally</li>
+                        <li>Masterpiece of human creative genius</li>
+                        <li>Testimony to Javanese civilization</li>
+                        <li>Model for conservation efforts</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔨 Conservation Challenges</h3>
+                    <ul class="list-styled">
+                        <li>Volcanic activity threatens structure</li>
+                        <li>2010 Merapi eruption deposited ash</li>
+                        <li>Earthquakes cause stone damage</li>
+                        <li>Mass tourism impact management</li>
+                        <li>Weathering and erosion ongoing</li>
+                        <li>Climate change considerations</li>
+                        <li>Continuous monitoring and maintenance</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📚 Archaeological Research</h3>
+                    <ul class="list-styled">
+                        <li>Ongoing studies of construction techniques</li>
+                        <li>Iconographic analysis of reliefs</li>
+                        <li>3D scanning for digital preservation</li>
+                        <li>Investigation of hidden chambers</li>
+                        <li>Dating refinement through new methods</li>
+                        <li>Understanding Sailendra civilization</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎓 Cultural Education</h3>
+                    <ul class="list-styled">
+                        <li>Teaching Buddhist philosophy globally</li>
+                        <li>School groups visit for education</li>
+                        <li>Interfaith dialogue promotion</li>
+                        <li>Art and architecture studies</li>
+                        <li>Symbol of religious tolerance</li>
+                        <li>Living connection to ancient wisdom</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🗺️</span>
+                Visitor Information
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🎫 Access & Tickets</h3>
+                    <ul class="list-styled">
+                        <li><strong>Location:</strong> 40 km NW of Yogyakarta, Central Java</li>
+                        <li><strong>Hours:</strong> 6:00 AM - 5:00 PM daily</li>
+                        <li><strong>Sunrise entry:</strong> 4:30 AM (special ticket required)</li>
+                        <li><strong>Time needed:</strong> 2-3 hours minimum</li>
+                        <li><strong>Best time:</strong> Early morning or late afternoon</li>
+                        <li><strong>Tickets:</strong> Online booking recommended</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌅 Sunrise Experience</h3>
+                    <ul class="list-styled">
+                        <li>Spectacular views from monument</li>
+                        <li>Watch sunrise over volcanoes and jungle</li>
+                        <li>Merapi, Merbabu, Sumbing visible</li>
+                        <li>Mystical atmosphere with morning mist</li>
+                        <li>Limited tickets (book weeks in advance)</li>
+                        <li>Unforgettable spiritual experience</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">👕 Dress Code & Etiquette</h3>
+                    <ul class="list-styled">
+                        <li>Modest dress required (sarongs provided)</li>
+                        <li>Shoulders and knees covered</li>
+                        <li>Respectful behavior at active religious site</li>
+                        <li>Walk counterclockwise (traditional)</li>
+                        <li>No climbing on stupas or statues</li>
+                        <li>Silent contemplation encouraged</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💡 Practical Tips</h3>
+                    <ul class="list-styled">
+                        <li>Wear comfortable walking shoes</li>
+                        <li>Bring water, sun protection, hat</li>
+                        <li>Can be very hot and humid</li>
+                        <li>Rainy season: Nov-March</li>
+                        <li>Dry season: April-Oct (best time)</li>
+                        <li>Hire guide for deeper understanding</li>
+                        <li>Photography allowed (no flash)</li>
+                        <li>Allow full morning or afternoon</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Nearby Attractions</h3>
+                    <ul class="list-styled">
+                        <li><strong>Mendut Temple:</strong> Buddhist temple 3 km away</li>
+                        <li><strong>Pawon Temple:</strong> Small temple on axis with Borobudur</li>
+                        <li><strong>Prambanan:</strong> Hindu temple complex (47 km)</li>
+                        <li><strong>Yogyakarta:</strong> Cultural capital of Java</li>
+                        <li><strong>Merapi Volcano:</strong> Active volcano tours</li>
+                        <li>Rice paddies and traditional villages nearby</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎊 Special Events</h3>
+                    <ul class="list-styled">
+                        <li><strong>Waisak (Vesak):</strong> Buddha's birthday (May full moon)</li>
+                        <li>Massive candlelit procession</li>
+                        <li>Buddhist monks from around world</li>
+                        <li>Meditation and prayers</li>
+                        <li>Cultural performances</li>
+                        <li>Unforgettable spiritual gathering</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🔗</span>
+                Related Topics
+            </h2>
+
+            <div class="related-links">
+                <a href="angkor-wat.html" class="related-link">
+                    🕉️ Angkor Wat
+                </a>
+                <a href="mahabodhi.html" class="related-link">
+                    🌳 Mahabodhi Temple
+                </a>
+                <a href="../../mythos/buddhist/index.html" class="related-link">
+                    ☸️ Buddhist Mythology
+                </a>
+                <a href="../index.html" class="related-link">
+                    🏛️ All Sacred Places
+                </a>
+                <a href="../../index.html" class="related-link">
+                    🏠 Home
+                </a>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📚</span>
+                Sources & Further Reading
+            </h2>
+
+            <div style="line-height: 2; font-size: 1rem;">
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Key Works:</h3>
+                <ul class="list-styled">
+                    <li>Miksic, John. <em>Borobudur: Golden Tales of the Buddhas</em>. Periplus, 1990.</li>
+                    <li>Soekmono, R. <em>The Javanese Candi: Function and Meaning</em>. Brill, 1995.</li>
+                    <li>Gomez, Luis O. & Woodward, Hiram W. <em>Barabudur: History and Significance of a Buddhist Monument</em>. Berkeley, 1981.</li>
+                    <li>Fontein, Jan. <em>The Pilgrimage of Sudhana</em>. Mouton, 1967.</li>
+                    <li>Krom, N.J. <em>The Life of the Buddha on the Stupa of Barabudur according to the Lalitavistara Text</em>. 1926.</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

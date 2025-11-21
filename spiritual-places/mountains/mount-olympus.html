@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mount Olympus - Sacred Mountains</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .location {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        .altitude {
+            font-size: 1.4rem;
+            color: var(--color-primary);
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            color: var(--color-primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-icon {
+            font-size: 2.5rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all var(--transition-base);
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .feature-title {
+            color: var(--color-primary);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .tradition-tag {
+            padding: 0.5rem 1rem;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            color: var(--color-text-primary);
+        }
+
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .related-link {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            text-align: center;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .related-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .quote-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        }
+
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .deity-card {
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+
+        .deity-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .list-styled {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .list-styled li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .list-styled li::before {
+            content: '⚡';
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+    <div class="header-content">
+        <h1>Mount Olympus</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Sacred Places</a> →
+                <a href="./index.html">Mountains</a> →
+                <span>Mount Olympus</span>
+</nav>
+
+    <main>
+        <div class="hero-section">
+            <div class="hero-icon">⚡</div>
+            <h2>Mount Olympus (Όλυμπος)</h2>
+            <p class="location">Thessaly & Macedonia, Greece</p>
+            <p class="altitude">Elevation: 2,917 meters (9,570 feet) - Mytikas Peak</p>
+            <div class="tradition-tags">
+                <span class="tradition-tag">Greek</span>
+                <span class="tradition-tag">Hellenistic</span>
+                <span class="tradition-tag">Roman</span>
+                <span class="tradition-tag">Classical Mythology</span>
+            </div>
+        </div>
+
+        <!-- Geological Overview -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🏔️</span>
+                Geological Features & Formation
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                Mount Olympus is the highest mountain in Greece, rising majestically near the Aegean coast at the border between
+                Thessaly and Macedonia. The mountain is a massive limestone massif formed approximately 200 million years ago
+                during the Triassic period, shaped by tectonic uplift and extensive erosion. Its dramatic peaks, deep gorges,
+                and near-vertical cliffs create an imposing presence that has inspired awe throughout human history.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🪨 Geological Structure</h3>
+                    <ul class="list-styled">
+                        <li>Primarily limestone with some metamorphic rocks</li>
+                        <li>Formed during Triassic period (200+ million years ago)</li>
+                        <li>Alpine-type orogenic formation</li>
+                        <li>Karst topography with caves and sinkholes</li>
+                        <li>Multiple distinct peaks forming crown-like summit</li>
+                        <li>Steep cliffs rising 2,000+ meters from base</li>
+                        <li>Evidence of past glaciation in higher elevations</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⛰️ Major Peaks</h3>
+                    <ul class="list-styled">
+                        <li><strong>Mytikas:</strong> Highest peak at 2,917m</li>
+                        <li><strong>Stefani (Throne of Zeus):</strong> 2,909m, distinctive shape</li>
+                        <li><strong>Skala:</strong> 2,866m, technical climbing</li>
+                        <li><strong>Skolio:</strong> 2,911m, accessible summit</li>
+                        <li><strong>Toumba:</strong> 2,801m</li>
+                        <li><strong>Profitis Ilias:</strong> 2,803m with chapel</li>
+                        <li>Over 50 peaks above 2,000 meters</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌊 Gorges & Valleys</h3>
+                    <ul class="list-styled">
+                        <li>Enipeas Gorge: Sacred valley with legendary associations</li>
+                        <li>Mavrolongos Gorge: Deep ravine system</li>
+                        <li>Spectacular vertical rock walls</li>
+                        <li>Numerous streams and waterfalls</li>
+                        <li>Alpine meadows at higher elevations</li>
+                        <li>Dense forests at lower slopes</li>
+                        <li>Unique microclimate zones</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌡️ Climate & Weather</h3>
+                    <ul class="list-styled">
+                        <li>Mediterranean climate at base, alpine at summit</li>
+                        <li>Summit often shrouded in clouds (home of gods)</li>
+                        <li>Heavy snowfall in winter (snow cap year-round historically)</li>
+                        <li>Summer temperatures: 20-30°C at base, near freezing at summit</li>
+                        <li>Sudden weather changes, fog, and storms</li>
+                        <li>Annual precipitation: 1,000-1,700mm</li>
+                        <li>Best climbing season: June to September</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌿 Biodiversity</h3>
+                    <ul class="list-styled">
+                        <li>UNESCO Biosphere Reserve (1981)</li>
+                        <li>Over 1,700 plant species (25% endemic to Greece)</li>
+                        <li>Jankaea heldreichii: rare endemic plant</li>
+                        <li>Habitat for wolves, wild boar, deer, chamois</li>
+                        <li>Over 100 bird species including golden eagles</li>
+                        <li>Black pine and beech forests</li>
+                        <li>Alpine flora above treeline (2,500m)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏞️ National Park Status</h3>
+                    <ul class="list-styled">
+                        <li>Established as National Park in 1938</li>
+                        <li>First National Park in Greece</li>
+                        <li>Core zone: 4,000 hectares</li>
+                        <li>Buffer zone: 7,500 hectares</li>
+                        <li>Protected archaeological sites</li>
+                        <li>Strictly regulated activities</li>
+                        <li>Part of Natura 2000 network</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Greek Mythology -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🏛️</span>
+                Greek Mythology & The Home of the Gods
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                In ancient Greek religion and mythology, Mount Olympus was the dwelling place of the Twelve Olympian gods,
+                the principal deities of the Greek pantheon. Conceived as a paradise above the clouds, the summit was thought
+                to house magnificent palaces of gold and crystal where the immortals feasted on ambrosia and nectar,
+                deliberated the fates of mortals, and intervened in human affairs. The mountain represented the axis mundi—the
+                cosmic pillar connecting earth to heaven.
+            </p>
+
+            <div class="quote-box">
+                "There dwell the gods for ever, the Olympians,
+                And with them Zeus, who gathers the clouds and thunders,
+                Where there is no shaking, and where no rain falls,
+                Nor any snow, but the air is outspread clear and cloudless,
+                And over it hovers a radiant whiteness."
+                - Homer, Odyssey 6.42-46
+            </div>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🏰 The Celestial Palace</h3>
+                    <ul class="list-styled">
+                        <li>Summit concealed by eternal clouds</li>
+                        <li>Golden palaces for each Olympian god</li>
+                        <li>Zeus's throne room at the highest point</li>
+                        <li>Hephaestus crafted the divine palaces</li>
+                        <li>Gates guarded by the Horae (Hours/Seasons)</li>
+                        <li>Eternal spring weather on the summit</li>
+                        <li>No mortals could reach the divine realm</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚔️ The Titanomachy</h3>
+                    <p style="margin-bottom: 1rem;">
+                        The Olympians established their rule on Mount Olympus after defeating the older Titans in a
+                        ten-year cosmic war called the Titanomachy.
+                    </p>
+                    <ul class="list-styled">
+                        <li>Zeus led younger gods against Titans</li>
+                        <li>Battle shook the foundations of cosmos</li>
+                        <li>Cyclopes forged Zeus's thunderbolts</li>
+                        <li>Hundred-Handed Ones aided Olympians</li>
+                        <li>Titans imprisoned in Tartarus below earth</li>
+                        <li>Olympus became seat of new divine order</li>
+                        <li>Zeus claimed sky, Poseidon seas, Hades underworld</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌩️ Zeus's Throne</h3>
+                    <ul class="list-styled">
+                        <li>Stefani peak called "Throne of Zeus"</li>
+                        <li>Zeus wielded thunderbolts from summit</li>
+                        <li>Controlled weather and cosmic justice</li>
+                        <li>Held councils of gods at his palace</li>
+                        <li>Observed mortal world from mountain heights</li>
+                        <li>Hurled lightning at those who offended gods</li>
+                        <li>Supreme authority among Olympians</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🍷 Divine Gatherings</h3>
+                    <ul class="list-styled">
+                        <li>Gods feasted on ambrosia and nectar</li>
+                        <li>Hebe served as cupbearer (later Ganymede)</li>
+                        <li>Apollo played lyre while Muses sang</li>
+                        <li>Deliberations on mortal fates</li>
+                        <li>Divine councils resolved disputes</li>
+                        <li>Celebrations of victories and festivals</li>
+                        <li>Olympic Games honored Zeus of Olympus</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🛡️ Mortal Heroes & Olympus</h3>
+                    <ul class="list-styled">
+                        <li>Heracles gained immortality, joined Olympians</li>
+                        <li>Ganymede abducted by Zeus to serve as cupbearer</li>
+                        <li>Psyche brought to Olympus after trials</li>
+                        <li>Bellerophon attempted to reach summit on Pegasus</li>
+                        <li>Zeus struck him down for hubris</li>
+                        <li>Only by divine will could mortals ascend</li>
+                        <li>Deification rare and reserved for greatest heroes</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📚 Literary References</h3>
+                    <ul class="list-styled">
+                        <li>Homer's Iliad and Odyssey: frequent mentions</li>
+                        <li>Hesiod's Theogony: establishment of Olympian order</li>
+                        <li>Pindar's Odes: celebrated Olympic victors</li>
+                        <li>Euripides' tragedies: gods intervene from Olympus</li>
+                        <li>Lucian's Dialogues of the Gods: satirical</li>
+                        <li>Ovid's Metamorphoses: Roman perspective</li>
+                        <li>Foundation myth for Greek religion and culture</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- The Twelve Olympians -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">👑</span>
+                The Twelve Olympian Gods
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                The Twelve Olympians were the principal deities of the Greek pantheon who dwelt atop Mount Olympus.
+                While the composition varied slightly across regions and time periods, the canonical twelve established
+                during the Classical period represented the cosmic order and human experience.
+            </p>
+
+            <div class="deity-grid">
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">⚡</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Zeus</h3>
+                    <p>King of the gods, ruler of sky and thunder, wielder of lightning bolt. Supreme authority,
+                    justice, hospitality, oaths. Husband of Hera.</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">👑</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Hera</h3>
+                    <p>Queen of the gods, goddess of marriage, women, childbirth, and family. Zeus's wife and sister,
+                    often portrayed opposing his affairs.</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🔱</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Poseidon</h3>
+                    <p>God of the sea, earthquakes, and horses. Brother of Zeus, wielded trident, lived primarily
+                    in underwater palace but maintained Olympian seat.</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🌾</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Demeter</h3>
+                    <p>Goddess of agriculture, harvest, grain, and fertility of the earth. Mother of Persephone,
+                    controlled the seasons through grief and joy.</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">⚔️</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Ares</h3>
+                    <p>God of war, violence, and bloodlust. Son of Zeus and Hera, lover of Aphrodite,
+                    represented brutal aspect of warfare.</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🦉</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Athena</h3>
+                    <p>Goddess of wisdom, warfare strategy, crafts, and justice. Born fully armed from Zeus's head,
+                    patron of Athens, virgin goddess.</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">☀️</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Apollo</h3>
+                    <p>God of sun, music, poetry, prophecy, healing, and archery. Son of Zeus and Leto,
+                    twin of Artemis, patron of Delphi.</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🏹</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Artemis</h3>
+                    <p>Goddess of hunt, wilderness, wild animals, moon, and chastity. Twin of Apollo,
+                    virgin goddess, protector of young girls.</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🔥</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Hephaestus</h3>
+                    <p>God of fire, metalworking, craftsmanship, and forges. Son of Hera, thrown from Olympus,
+                    crafted divine weapons and palaces.</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">💕</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Aphrodite</h3>
+                    <p>Goddess of love, beauty, pleasure, and procreation. Born from sea foam, married to Hephaestus,
+                    lover of Ares and mortals.</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🎭</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Hermes</h3>
+                    <p>God of trade, thieves, travelers, sports, athletes, and guide to Underworld. Messenger of gods,
+                    son of Zeus, wore winged sandals.</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🍇</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Dionysus</h3>
+                    <p>God of wine, vegetation, pleasure, festivity, madness, and theater. Son of Zeus and mortal Semele,
+                    youngest Olympian, replaced Hestia.</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-lg);">
+                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Note on the Twelve:</h3>
+                <p style="line-height: 1.8;">
+                    The canonical twelve varied across time and region. <strong>Hestia</strong> (goddess of hearth and home)
+                    was originally among the twelve but yielded her seat to Dionysus to avoid conflict. <strong>Hades</strong>
+                    (god of the underworld), though brother to Zeus and Poseidon, did not dwell on Olympus and typically
+                    wasn't counted among the Twelve. Some traditions replaced certain gods depending on local cult importance.
+                </p>
+            </div>
+        </div>
+
+        <!-- Worship & Rituals -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🕯️</span>
+                Ancient Worship & Rituals
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">⛰️ Mountain Sanctuaries</h3>
+                    <ul class="list-styled">
+                        <li>Ancient altars at foothills of mountain</li>
+                        <li>Sanctuary of Zeus at Dion (northern base)</li>
+                        <li>Temple ruins in ancient city of Dion</li>
+                        <li>Ritual processions from lowlands to mountain</li>
+                        <li>Sacrifices performed at designated altars</li>
+                        <li>Mountain itself too sacred to build temples on summit</li>
+                        <li>Natural features as divine presence</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Dion - City of Zeus</h3>
+                    <ul class="list-styled">
+                        <li>Major sanctuary city at base of Olympus</li>
+                        <li>Dedicated to Zeus and all Olympians</li>
+                        <li>Macedonian kings performed rituals here</li>
+                        <li>Alexander the Great sacrificed before campaigns</li>
+                        <li>Theater for religious dramas and festivals</li>
+                        <li>Olympic games held in honor of Zeus</li>
+                        <li>Archaeological site with extensive ruins</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎭 Olympian Festivals</h3>
+                    <ul class="list-styled">
+                        <li>Olympia celebrated with pan-Hellenic games</li>
+                        <li>Each god honored with specific festivals</li>
+                        <li>Dramatic performances of mythological tales</li>
+                        <li>Athletic competitions honoring Zeus</li>
+                        <li>Processions carrying cult statues</li>
+                        <li>Communal feasting after sacrifices</li>
+                        <li>Mystery initiations for certain cults</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔥 Sacrificial Practices</h3>
+                    <ul class="list-styled">
+                        <li>Animal sacrifices: bulls, goats, sheep</li>
+                        <li>Burnt offerings to send smoke to Olympus</li>
+                        <li>Libations of wine, oil, and honey</li>
+                        <li>Votive offerings at altars and shrines</li>
+                        <li>First fruits of harvest dedicated</li>
+                        <li>Victory spoils from battles offered</li>
+                        <li>Prayers accompanied all offerings</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">👁️ Oracle Consultation</h3>
+                    <ul class="list-styled">
+                        <li>Dodona: Zeus's oracle in oak grove</li>
+                        <li>Delphi: Apollo's prophetic sanctuary</li>
+                        <li>Pilgrims sought divine guidance</li>
+                        <li>Priests interpreted signs and omens</li>
+                        <li>Dreams incubated at sacred sites</li>
+                        <li>Thunder and lightning as Zeus's messages</li>
+                        <li>Bird flight patterns interpreted</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏺 Cult Practices</h3>
+                    <ul class="list-styled">
+                        <li>Each city-state had patron Olympian deity</li>
+                        <li>Mystery cults with secret initiations</li>
+                        <li>Household shrines to multiple gods</li>
+                        <li>Seasonal festivals marking agricultural cycles</li>
+                        <li>Birth, marriage, death rituals invoking gods</li>
+                        <li>Oaths sworn by Olympian deities</li>
+                        <li>Curses and blessings in gods' names</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Climbing & Modern Access -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🥾</span>
+                Climbing Routes & Modern Access
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🚶 Main Hiking Routes</h3>
+                    <ul class="list-styled">
+                        <li><strong>Route from Prionia:</strong> Most popular, 6-8 hours to summit</li>
+                        <li><strong>Route from Gortsia:</strong> Longer but scenic, 8-10 hours</li>
+                        <li><strong>Route from Dion:</strong> Historical route, very long</li>
+                        <li>Well-marked trails with E4 European path</li>
+                        <li>Maintained by Greek Alpine Club (EOS)</li>
+                        <li>Mountain refuges provide overnight accommodation</li>
+                        <li>No technical climbing needed for most routes</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏔️ Summit Routes</h3>
+                    <ul class="list-styled">
+                        <li><strong>Mytikas (highest):</strong> Class III scrambling required</li>
+                        <li><strong>Skolio:</strong> Non-technical, safe alternative</li>
+                        <li>Kakoskala couloir: technical but popular to Mytikas</li>
+                        <li>Louki couloir: more difficult alternative</li>
+                        <li>Weather crucial for safety</li>
+                        <li>Many turn back due to exposure</li>
+                        <li>Accidents occur from underestimation</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏠 Mountain Refuges</h3>
+                    <ul class="list-styled">
+                        <li><strong>Refuge A (Spilios Agapitos):</strong> 2,100m, 110 beds</li>
+                        <li><strong>Refuge C (Kakkalos):</strong> 2,650m, 18 beds</li>
+                        <li><strong>Refuge of Apostolidis:</strong> 2,697m, 80 beds</li>
+                        <li>Dormitory-style accommodation</li>
+                        <li>Meals provided, advance booking essential</li>
+                        <li>Spring water available</li>
+                        <li>Solar power and basic amenities</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🗓️ Best Climbing Season</h3>
+                    <ul class="list-styled">
+                        <li>June to September: optimal conditions</li>
+                        <li>July-August: warmest but most crowded</li>
+                        <li>May and October: possible but weather unpredictable</li>
+                        <li>Winter: technical mountaineering, heavy snow</li>
+                        <li>Spring: snowmelt and rockfall hazards</li>
+                        <li>Summer thunderstorms common in afternoons</li>
+                        <li>Early morning starts recommended</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚠️ Safety & Restrictions</h3>
+                    <ul class="list-styled">
+                        <li>Register at refuge before summit attempts</li>
+                        <li>Proper equipment essential (boots, layers, rain gear)</li>
+                        <li>Weather changes rapidly, turn back if unsafe</li>
+                        <li>No permanent snow/glacier anymore (climate change)</li>
+                        <li>Loose rock hazard on summit routes</li>
+                        <li>Mobile coverage limited above treeline</li>
+                        <li>Rescue operations by Hellenic Rescue Team</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🚫 Protected Area Rules</h3>
+                    <ul class="list-styled">
+                        <li>National Park regulations enforced</li>
+                        <li>Stay on marked trails</li>
+                        <li>No camping except at designated areas</li>
+                        <li>No fires outside refuges</li>
+                        <li>Carry out all trash (Leave No Trace)</li>
+                        <li>Respect flora and fauna</li>
+                        <li>Archaeological sites protected by law</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historical First Ascents -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📜</span>
+                Historical Ascents & Modern Tourism
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🏔️ First Recorded Ascent</h3>
+                    <ul class="list-styled">
+                        <li><strong>August 2, 1913:</strong> First documented summit of Mytikas</li>
+                        <li>Christos Kakkalos (local hunter/guide)</li>
+                        <li>Frederic Boissonnas (Swiss photographer)</li>
+                        <li>Daniel Baud-Bovy (Swiss writer)</li>
+                        <li>Reached summit after multi-day approach</li>
+                        <li>Previously believed impossible by locals</li>
+                        <li>Photograph documented achievement</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌟 Christos Kakkalos</h3>
+                    <ul class="list-styled">
+                        <li>Local shepherd from Litochoro</li>
+                        <li>Made over 10,000 ascents in lifetime</li>
+                        <li>Last ascent at age 80 (1972)</li>
+                        <li>Legendary guide and mountaineer</li>
+                        <li>Refuge C named in his honor</li>
+                        <li>Died 1976, buried with view of Olympus</li>
+                        <li>Inspiration for Greek mountaineering</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎿 Winter & Technical Climbing</h3>
+                    <ul class="list-styled">
+                        <li>Winter ascents require ice climbing skills</li>
+                        <li>Multiple technical routes established</li>
+                        <li>Rock climbing routes on various faces</li>
+                        <li>Ice climbing in couloirs</li>
+                        <li>Alpine Club maintains route information</li>
+                        <li>Tragedy and rescue history</li>
+                        <li>Respect for mountain's dangers</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏃 Trail Running & Records</h3>
+                    <ul class="list-styled">
+                        <li>Annual Olympus Marathon (mountain race)</li>
+                        <li>Speed ascent records continuously challenged</li>
+                        <li>Vertical kilometer races from Litochoro</li>
+                        <li>Growing ultra-running community</li>
+                        <li>Balance with conservation concerns</li>
+                        <li>Organized races follow strict environmental rules</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏘️ Tourism Infrastructure</h3>
+                    <ul class="list-styled">
+                        <li>Litochoro: main base town</li>
+                        <li>Hotels, restaurants, guide services</li>
+                        <li>Visitor center with information</li>
+                        <li>Museum of Natural History</li>
+                        <li>Access roads to trailheads</li>
+                        <li>Parking areas at Prionia (1,100m)</li>
+                        <li>Annual visitors: 10,000+ summit attempts</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📸 Cultural Impact</h3>
+                    <ul class="list-styled">
+                        <li>National symbol of Greece</li>
+                        <li>Featured on Greek currency and stamps</li>
+                        <li>Inspiration for literature and art</li>
+                        <li>Popular photography destination</li>
+                        <li>Symbol of Greek heritage and mythology</li>
+                        <li>Pride of local communities</li>
+                        <li>Educational destination for Greek students</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conservation & Research -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🔬</span>
+                Modern Research & Conservation
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🌍 Climate Change Impact</h3>
+                    <ul class="list-styled">
+                        <li>Permanent snow cap disappeared (2014)</li>
+                        <li>Historical glaciers completely melted</li>
+                        <li>Changes in vegetation zones</li>
+                        <li>Species migration to higher elevations</li>
+                        <li>Increased rockfall from freeze-thaw cycles</li>
+                        <li>Altered water flow patterns</li>
+                        <li>Research stations monitor changes</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌿 Biodiversity Research</h3>
+                    <ul class="list-styled">
+                        <li>Ongoing botanical surveys</li>
+                        <li>Endemic species protection programs</li>
+                        <li>Wildlife population monitoring</li>
+                        <li>Rare species: Balkan chamois, golden eagles</li>
+                        <li>Reintroduction programs for extinct species</li>
+                        <li>Impact of tourism on ecosystems</li>
+                        <li>Collaboration with international researchers</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Archaeological Work</h3>
+                    <ul class="list-styled">
+                        <li>Excavations at ancient Dion continue</li>
+                        <li>Survey of mountain sanctuaries</li>
+                        <li>Ancient trail identification</li>
+                        <li>Protection of archaeological sites</li>
+                        <li>Study of ancient worship practices</li>
+                        <li>Documentation of inscriptions</li>
+                        <li>Museum displays of findings</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💧 Hydrological Studies</h3>
+                    <ul class="list-styled">
+                        <li>Water source for surrounding regions</li>
+                        <li>Spring and stream monitoring</li>
+                        <li>Impact of reduced snowfall</li>
+                        <li>Quality testing for drinking water</li>
+                        <li>Karst system exploration</li>
+                        <li>Sustainable water use planning</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🛡️ Conservation Challenges</h3>
+                    <ul class="list-styled">
+                        <li>Balancing tourism with protection</li>
+                        <li>Trail erosion from heavy use</li>
+                        <li>Waste management issues</li>
+                        <li>Illegal construction near park</li>
+                        <li>Wildfire risk management</li>
+                        <li>Grazing conflicts with biodiversity</li>
+                        <li>Funding limitations for management</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📋 Management Strategies</h3>
+                    <ul class="list-styled">
+                        <li>Capacity limits for refuges</li>
+                        <li>Ranger patrols and enforcement</li>
+                        <li>Education programs for visitors</li>
+                        <li>Trail maintenance schedules</li>
+                        <li>Collaboration with Alpine Clubs</li>
+                        <li>Scientific research permits</li>
+                        <li>EU funding for conservation projects</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Links -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🔗</span>
+                Related Topics & Further Exploration
+            </h2>
+
+            <div class="related-links">
+                <a href="./mount-sinai.html" class="related-link">
+                    ⛰️ Mount Sinai - Egypt
+                </a>
+                <a href="./mount-kailash.html" class="related-link">
+                    🏔️ Mount Kailash - Tibet
+                </a>
+                <a href="../../mythos/greek/index.html" class="related-link">
+                    🏛️ Greek Mythology
+                </a>
+                <a href="../temples/parthenon.html" class="related-link">
+                    🏛️ The Parthenon
+                </a>
+                <a href="../index.html" class="related-link">
+                    🗺️ All Sacred Places
+                </a>
+                <a href="../../index.html" class="related-link">
+                    🏠 Home
+                </a>
+            </div>
+        </div>
+
+        <!-- Bibliography -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📚</span>
+                Sources & Further Reading
+            </h2>
+
+            <div style="line-height: 2; font-size: 1rem;">
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Classical Sources:</h3>
+                <ul class="list-styled">
+                    <li>Homer. <em>The Iliad</em> and <em>The Odyssey</em></li>
+                    <li>Hesiod. <em>Theogony</em> and <em>Works and Days</em></li>
+                    <li>Pindar. <em>Olympian Odes</em></li>
+                    <li>Apollodorus. <em>Bibliotheca</em> (Library of Greek Mythology)</li>
+                    <li>Pausanias. <em>Description of Greece</em></li>
+                    <li>Ovid. <em>Metamorphoses</em></li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Mythology & Religion:</h3>
+                <ul class="list-styled">
+                    <li>Burkert, Walter. <em>Greek Religion</em></li>
+                    <li>Graves, Robert. <em>The Greek Myths</em></li>
+                    <li>Hamilton, Edith. <em>Mythology</em></li>
+                    <li>Kerényi, Carl. <em>The Gods of the Greeks</em></li>
+                    <li>Otto, Walter F. <em>The Homeric Gods</em></li>
+                    <li>Price, Simon. <em>Religions of the Ancient Greeks</em></li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Mountain & Geography:</h3>
+                <ul class="list-styled">
+                    <li>Adshead, S. A. M. <em>Mount Olympus: A Cultural History</em></li>
+                    <li>Karakatsanis, A. <em>Olympus: The Mountain of the Gods</em></li>
+                    <li>Pyrgiotis, Y. <em>The Geology of Mount Olympus</em></li>
+                    <li>Strid, Arne, ed. <em>Mountain Flora of Greece</em> (Volume on Olympus)</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Mountaineering & Tourism:</h3>
+                <ul class="list-styled">
+                    <li>Cicerone Press. <em>The Mountains of Greece</em></li>
+                    <li>Hellenic Alpine Club. <em>Guide to Mount Olympus</em></li>
+                    <li>Kakkalos, Christos. <em>Memories of Olympus</em> (in Greek)</li>
+                    <li>Malamud, Randy, ed. <em>A Cultural History of Mountains</em></li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Archaeology:</h3>
+                <ul class="list-styled">
+                    <li>Pandermalis, Dimitrios. <em>Dion: The Archaeological Site and the Museum</em></li>
+                    <li>Chrysostomou, P. <em>The Ancient Theatre of Dion</em></li>
+                    <li>Cole, Susan Guettel. <em>Landscapes, Gender, and Ritual Space</em></li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Conservation & Environment:</h3>
+                <ul class="list-styled">
+                    <li>Management Body of Olympus National Park. <em>Annual Reports</em></li>
+                    <li>UNESCO. <em>Biosphere Reserve Designation Documentation</em></li>
+                    <li>Greek Ministry of Environment. <em>Olympus National Park Management Plan</em></li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Online Resources:</h3>
+                <ul class="list-styled">
+                    <li>Mount Olympus National Park Official Website</li>
+                    <li>Hellenic Alpine Club (EOS) - Litochoro Section</li>
+                    <li>Theoi Project: Greek Mythology Database</li>
+                    <li>Ancient Dion Archaeological Site</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
