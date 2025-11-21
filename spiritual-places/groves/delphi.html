@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delphi Oracle - Sacred Groves</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .location {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            color: var(--color-primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-icon {
+            font-size: 2.5rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all var(--transition-base);
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .feature-title {
+            color: var(--color-primary);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .tradition-tag {
+            padding: 0.5rem 1rem;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            color: var(--color-text-primary);
+        }
+
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .related-link {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            text-align: center;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .related-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .timeline-item {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '•';
+            position: absolute;
+            left: -2.5rem;
+            color: var(--color-primary);
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .timeline-date {
+            color: var(--color-primary);
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .quote-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        }
+
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .deity-card {
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+
+        .deity-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .list-styled {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .list-styled li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .list-styled li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+    <div class="header-content">
+        <h1>The Oracle of Delphi</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Sacred Places</a> →
+                <a href="../index.html#groves">Sacred Groves</a> →
+                <span>Delphi</span>
+</nav>
+
+    <main>
+        <div class="hero-section">
+            <div class="hero-icon">🔮</div>
+            <h2>Delphi - The Navel of the World</h2>
+            <p class="location">Mount Parnassus, Central Greece</p>
+            <div class="tradition-tags">
+                <span class="tradition-tag">Greek</span>
+                <span class="tradition-tag">Oracle</span>
+                <span class="tradition-tag">Pythia</span>
+            </div>
+        </div>
+
+        <!-- Historical Overview -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📜</span>
+                Historical Overview
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                Delphi was the most important oracle in the ancient Greek world, consulted on matters of state,
+                war, colonization, and personal destiny for over a thousand years. Perched on the slopes of
+                Mount Parnassus, overlooking the Gulf of Corinth, this sacred site was considered the "omphalos"
+                or navel of the world. According to myth, Zeus released two eagles from opposite ends of the
+                earth, and they met at Delphi, marking it as the world's center. The oracle's pronouncements,
+                delivered through the Pythia priestess, shaped the course of Greek history and influenced
+                decisions from Athens to Asia Minor.
+            </p>
+
+            <div class="quote-box">
+                "Know thyself" (Γνῶθι σεαυτόν) and "Nothing in excess" (Μηδὲν ἄγαν)
+                - Inscriptions on the Temple of Apollo at Delphi
+            </div>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-top: 1.5rem;">
+                The sanctuary developed from pre-Greek origins, initially dedicated to Gaia (Earth) and her
+                serpent-son Python, before being claimed by Apollo after he slew the serpent. This mythological
+                transition reflects historical shifts in religious power from chthonic earth goddess worship to
+                the Olympian sky gods. By the 8th century BCE, Delphi had become a pan-Hellenic sanctuary,
+                transcending local politics and serving as a unifying religious center for all Greeks. The site
+                accumulated immense wealth through dedications and treasuries built by city-states, becoming not
+                just a religious center but also a political, artistic, and economic powerhouse of the ancient world.
+            </p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 1600-1100 BCE</div>
+                    <p>Mycenaean presence; possible early cult activity to Gaia</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 800 BCE</div>
+                    <p>Apollo cult established; oracle begins operating; First Pythian Games</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 582 BCE</div>
+                    <p>Pythian Games reorganized; become one of four pan-Hellenic festivals</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">548 BCE</div>
+                    <p>Temple of Apollo destroyed by fire; rebuilt by Alcmaeonidae</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">480 BCE</div>
+                    <p>Oracle consulted during Persian Wars; controversial prophecies</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">373 BCE</div>
+                    <p>Temple destroyed by earthquake and rock fall</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">356 BCE</div>
+                    <p>Third Sacred War; Philip II of Macedon gains control</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">279 BCE</div>
+                    <p>Celtic invasion repelled; legendary defense by Apollo</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">191 BCE</div>
+                    <p>Romans take control of Greece; oracle continues under Rome</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">66 CE</div>
+                    <p>Nero plunders 500 bronze statues from sanctuary</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 362 CE</div>
+                    <p>Emperor Julian attempts to revive oracle; receives final prophecy</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">393-394 CE</div>
+                    <p>Theodosius I closes oracle; Christianity triumphs</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1892-Present</div>
+                    <p>French Archaeological School excavates; ongoing research</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Archaeological Evidence -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🏺</span>
+                Archaeological Evidence & Dating
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                Delphi is one of the most extensively excavated archaeological sites in Greece, revealing layers
+                of history from the Mycenaean period through the Roman era. The French Archaeological School has
+                conducted systematic excavations since 1892, uncovering a wealth of architecture, sculpture,
+                inscriptions, and votive offerings that illuminate the oracle's operations and cultural significance.
+                The site's remarkable preservation allows modern visitors to walk the same Sacred Way that ancient
+                pilgrims traversed, experience the acoustic perfection of the ancient theater, and contemplate the
+                spot where the Pythia delivered prophecies that shaped the course of Western civilization.
+            </p>
+
+            <div class="quote-box">
+                "Delphi is the most important oracle in all of Greece... here is the omphalos stone, which marks
+                the center of the earth."
+                - Pausanias, Description of Greece (10.5.3-6)
+            </div>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Temple of Apollo</h3>
+                    <ul class="list-styled">
+                        <li>Current ruins date to 4th century BCE (4th temple)</li>
+                        <li>Built after 373 BCE earthquake destroyed 3rd temple</li>
+                        <li>Doric peripteral temple: 6 x 15 columns</li>
+                        <li>Limestone with Parian marble sculptures</li>
+                        <li>Adyton (inner sanctum) where Pythia prophesied</li>
+                        <li>Chasm or pneuma source debated by scholars</li>
+                        <li>Underground springs and geological faults present</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚱️ The Omphalos</h3>
+                    <ul class="list-styled">
+                        <li>Stone marking "navel of the world"</li>
+                        <li>Egg-shaped carved marble in museum</li>
+                        <li>Covered with agrenon (wool net pattern)</li>
+                        <li>Two golden eagles perched on top (now lost)</li>
+                        <li>Stood in adyton near Pythia's tripod</li>
+                        <li>Symbol of Delphi's cosmic centrality</li>
+                        <li>Multiple copies made in antiquity</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏺 Treasury Houses</h3>
+                    <ul class="list-styled">
+                        <li>Over 20 city-state treasuries lined Sacred Way</li>
+                        <li>Treasury of Athens (490 BCE) best preserved</li>
+                        <li>Housed valuable dedications and war spoils</li>
+                        <li>Architectural propaganda for donor cities</li>
+                        <li>Siphnian Treasury had elaborate sculptural friezes</li>
+                        <li>Competition in display of wealth and piety</li>
+                        <li>Many dismantled and stones reused</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎭 Theater & Stadium</h3>
+                    <ul class="list-styled">
+                        <li>Theater built 4th century BCE (5,000 seats)</li>
+                        <li>Used for musical competitions and plays</li>
+                        <li>Spectacular views of valley below</li>
+                        <li>Stadium 178 meters long with 6,500 seats</li>
+                        <li>Pythian Games held every four years</li>
+                        <li>Athletic, musical, and dramatic competitions</li>
+                        <li>Both structures well preserved and restored</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🗿 Sculptural Masterpieces</h3>
+                    <ul class="list-styled">
+                        <li>Charioteer of Delphi (478 BCE bronze)</li>
+                        <li>Sphinx of Naxos (560 BCE) atop Ionic column</li>
+                        <li>Metopes from treasury friezes</li>
+                        <li>Pediment sculptures from Temple of Apollo</li>
+                        <li>Caryatids from Siphnian Treasury</li>
+                        <li>Over 3,000 inscriptions catalogued</li>
+                        <li>World-class sculpture collection in museum</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💰 Votive Offerings</h3>
+                    <ul class="list-styled">
+                        <li>Thousands of bronze and terracotta figurines</li>
+                        <li>Tripods, cauldrons, and vessels</li>
+                        <li>Gold and silver jewelry</li>
+                        <li>Weapons from military victories</li>
+                        <li>Lysander's bronze monument (405 BCE)</li>
+                        <li>Alexander the Great's dedications</li>
+                        <li>Accumulated wealth attracted plunderers</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌊 Castalian Spring</h3>
+                    <ul class="list-styled">
+                        <li>Sacred spring at entrance to sanctuary</li>
+                        <li>Pilgrims purified themselves before consulting</li>
+                        <li>Pythia bathed in spring before prophecy</li>
+                        <li>Natural spring flowing from cliff</li>
+                        <li>Rock-cut basins and fountain houses</li>
+                        <li>Still flowing today; water considered pure</li>
+                        <li>Associated with nymphs and Apollo</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔬 Geological Studies</h3>
+                    <ul class="list-styled">
+                        <li>Intersection of two fault lines beneath temple</li>
+                        <li>Geological activity produces hydrocarbon gases</li>
+                        <li>Ethylene detected in groundwater</li>
+                        <li>May explain Pythia's altered state</li>
+                        <li>Seismic activity caused temple destructions</li>
+                        <li>Modern analysis confirms ancient accounts</li>
+                        <li>Pneuma ("breath") had physical basis</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- The Pythia & Oracle Process -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">👩</span>
+                The Pythia & Oracle Process
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                The heart of Delphi's oracle was the Pythia, a woman chosen from among the local population to
+                serve as Apollo's prophetess. Unlike priests in many cultures, the Pythia was not born into the
+                role but selected for her virtue and character. The process of consultation involved elaborate
+                rituals, precise timing, and interpretation by male priests.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">👩 The Pythia</h3>
+                    <ul class="list-styled">
+                        <li>Local woman of good character, initially young maiden</li>
+                        <li>Later, women over 50 chosen, dressed as maidens</li>
+                        <li>Served for life once appointed</li>
+                        <li>Named "Pythia" after Python serpent</li>
+                        <li>Originally one Pythia, later two with backup</li>
+                        <li>Required to be virgin or post-menopausal</li>
+                        <li>Lived in sanctuary, maintained ritual purity</li>
+                        <li>Most famous: Themistoclea (taught Pythagoras)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📅 Consultation Schedule</h3>
+                    <ul class="list-styled">
+                        <li>Oracle operated one day per month</li>
+                        <li>Seventh day of Bysios (early spring)</li>
+                        <li>Apollo absent in winter (at Hyperborea)</li>
+                        <li>Closed three winter months</li>
+                        <li>Dionysus ruled Delphi during Apollo's absence</li>
+                        <li>Special consultations for emergencies</li>
+                        <li>Theoria (sacred embassies) scheduled in advance</li>
+                        <li>Long waiting lists for consultation</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔮 Consultation Process</h3>
+                    <ul class="list-styled">
+                        <li><strong>1. Purification:</strong> Bathe in Castalian Spring</li>
+                        <li><strong>2. Fee payment:</strong> Pelanos (consultation fee)</li>
+                        <li><strong>3. Sacrifice:</strong> Animal offered (goat tested)</li>
+                        <li><strong>4. Omens:</strong> If unfavorable, consultation cancelled</li>
+                        <li><strong>5. Question submitted:</strong> Written or oral</li>
+                        <li><strong>6. Drawing lots:</strong> Determined order (or bribery)</li>
+                        <li><strong>7. Pythia enters adyton:</strong> Sacred inner chamber</li>
+                        <li><strong>8. Prophecy delivered:</strong> Often cryptic utterances</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌿 The Pythia's Trance</h3>
+                    <ul class="list-styled">
+                        <li>Sat on bronze tripod over chasm</li>
+                        <li>Chewed laurel leaves (sacred to Apollo)</li>
+                        <li>Inhaled pneuma (vapors) from earth</li>
+                        <li>Entered ecstatic, altered state</li>
+                        <li>Spoke Apollo's words in first person</li>
+                        <li>Utterances sometimes incoherent</li>
+                        <li>Male prophetes (priests) interpreted</li>
+                        <li>Modern theory: ethylene gas intoxication</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📜 Oracle Responses</h3>
+                    <ul class="list-styled">
+                        <li>Simple yes/no through divination beans</li>
+                        <li>Cryptic verse in hexameter poetry</li>
+                        <li>Ambiguous responses allowing interpretation</li>
+                        <li>Sometimes clear, practical advice</li>
+                        <li>Priests shaped final form of prophecy</li>
+                        <li>Written record given to inquirer</li>
+                        <li>Famous for fulfilled and misinterpreted prophecies</li>
+                        <li>Consultations ranged from personal to political</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚖️ Oracle's Power</h3>
+                    <ul class="list-styled">
+                        <li>Authority derived from Apollo's divine knowledge</li>
+                        <li>Consulted before wars, colonization, legislation</li>
+                        <li>Could legitimize or delegitimize rulers</li>
+                        <li>Mediated conflicts between city-states</li>
+                        <li>Influence exceeded any single political power</li>
+                        <li>Pan-Hellenic neutrality (in theory)</li>
+                        <li>Accused of accepting bribes (Persian Wars)</li>
+                        <li>Political pragmatism mixed with divine authority</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="quote-box" style="margin-top: 2rem;">
+                "You ask what you should say or do to please the god. My answer is this: do as the city's nomos
+                requires in religious matters; thus you will act piously."
+                - Typical Delphic response (Xenophon, Memorabilia IV.3.16)
+            </div>
+        </div>
+
+        <!-- Associated Deities -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">⚡</span>
+                Associated Deities & Mythology
+            </h2>
+
+            <div class="deity-grid">
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">☀️</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Apollo</h3>
+                    <p>God of prophecy, music, healing, and light. Primary deity of Delphi after slaying Python.
+                    Gave oracles through his priestess</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🌍</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Gaia</h3>
+                    <p>Primordial earth goddess. First owner of the oracle before Apollo's arrival. Mother of Python</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🐍</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Python</h3>
+                    <p>Serpent-dragon son of Gaia, guardian of original oracle. Slain by Apollo in contest for site</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">⚖️</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Themis</h3>
+                    <p>Titaness of divine law and order. Second owner of oracle after Gaia, before Apollo</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🌙</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Phoebe</h3>
+                    <p>Titaness grandmother of Apollo. Third owner of oracle, gave it to Apollo as birth-gift</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🍷</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Dionysus</h3>
+                    <p>God of wine and ecstasy. Ruled Delphi three winter months while Apollo visited Hyperborea</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">⚡</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Zeus</h3>
+                    <p>King of gods. Sent two eagles to find world's center; they met at Delphi. Father of Apollo</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🌸</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Leto</h3>
+                    <p>Mother of Apollo and Artemis. Honored at Delphi for giving birth to Apollo on Delos</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🏹</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Artemis</h3>
+                    <p>Apollo's twin sister, goddess of hunting. Had shrine at Delphi; supported Apollo's claim</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">💧</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Castalian Nymphs</h3>
+                    <p>Nymphs of sacred spring. Provided purifying water for pilgrims and Pythia</p>
+                </div>
+            </div>
+
+            <div class="quote-box" style="margin-top: 2rem;">
+                "Phoebus Apollo came down from Olympus, and in anger slew the she-dragon, a fierce monster wont
+                to do great mischief to men upon earth... There she lay, breathing out her last breath, panting
+                and wallowing in blood."
+                - Homeric Hymn to Apollo (lines 300-374) - Apollo's conquest of Delphi
+            </div>
+        </div>
+
+        <!-- Famous Prophecies -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📖</span>
+                Famous Prophecies & Historical Impact
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">👑 Croesus of Lydia</h3>
+                    <ul class="list-styled">
+                        <li>Croesus tested oracle's accuracy (6th c. BCE)</li>
+                        <li>Asked what he was doing on specific day</li>
+                        <li>Oracle correctly said "boiling lamb and tortoise"</li>
+                        <li>Impressed, asked if should attack Persia</li>
+                        <li>Oracle: "Great empire will fall"</li>
+                        <li>Croesus attacked; his own empire fell</li>
+                        <li>Classic example of ambiguous prophecy</li>
+                        <li>Herodotus recorded full story</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚔️ Persian Wars Oracles</h3>
+                    <ul class="list-styled">
+                        <li>480 BCE: Athens consulted before Xerxes invasion</li>
+                        <li>First oracle terrifying: total destruction</li>
+                        <li>Second oracle: "wooden walls will save you"</li>
+                        <li>Themistocles interpreted as ships (trireme fleet)</li>
+                        <li>Led to naval victory at Salamis</li>
+                        <li>Oracle accused of being pro-Persian (Medism)</li>
+                        <li>Some prophecies urged submission</li>
+                        <li>Ambiguity allowed political maneuvering</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Socrates's Wisdom</h3>
+                    <ul class="list-styled">
+                        <li>Chaerephon asked if anyone wiser than Socrates</li>
+                        <li>Oracle replied "No one is wiser"</li>
+                        <li>Socrates puzzled; knew he knew nothing</li>
+                        <li>Investigated by questioning supposed wise men</li>
+                        <li>Discovered they knew less than they claimed</li>
+                        <li>Concluded: wisdom is knowing you know nothing</li>
+                        <li>Oracle validated Socrates's philosophical mission</li>
+                        <li>Plato records in Apology</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏺 Colonization Oracles</h3>
+                    <ul class="list-styled">
+                        <li>Oracle consulted before founding colonies</li>
+                        <li>Provided divine sanction for expeditions</li>
+                        <li>Suggested locations for new settlements</li>
+                        <li>Sicily, Italy, Black Sea colonized with approval</li>
+                        <li>Spread Greek culture across Mediterranean</li>
+                        <li>Oracle's role in Greek expansion crucial</li>
+                        <li>Combined religious and practical guidance</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">👶 Oedipus Prophecy</h3>
+                    <ul class="list-styled">
+                        <li>Laius warned son would kill him</li>
+                        <li>Oedipus later told he'd kill father, marry mother</li>
+                        <li>Attempts to avoid fate led to its fulfillment</li>
+                        <li>Central to Sophocles's tragic plays</li>
+                        <li>Explores fate vs. free will</li>
+                        <li>Literary, not historical, but reflects oracle's nature</li>
+                        <li>Delphi as source of terrible truths</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔱 Sparta's Constitution</h3>
+                    <ul class="list-styled">
+                        <li>Lycurgus consulted oracle on laws</li>
+                        <li>Oracle approved Spartan constitution (Rhetra)</li>
+                        <li>Divine sanction for military society</li>
+                        <li>Sparta remained conservative, citing oracle</li>
+                        <li>Delphi supported Spartan claims</li>
+                        <li>Political alliance with major power</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚱️ Final Prophecy</h3>
+                    <ul class="list-styled">
+                        <li>Emperor Julian consulted oracle (362 CE)</li>
+                        <li>Last pagan emperor trying to revive old religion</li>
+                        <li>Oracle's response: "Tell the king this:"</li>
+                        <li>"The carved stones are fallen, Apollo has no shrine,"</li>
+                        <li>"No prophetic bay, no speaking spring;"</li>
+                        <li>"The murmuring water is quenched"</li>
+                        <li>Acknowledged oracle's end; Christianity victorious</li>
+                        <li>Poignant end to 1400 years of prophecy</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎭 Literary Prophecies</h3>
+                    <ul class="list-styled">
+                        <li>Greek tragedy frequently featured Delphic oracles</li>
+                        <li>Dramatic device for fate and inevitability</li>
+                        <li>Aeschylus, Sophocles, Euripides used extensively</li>
+                        <li>Characters struggle against divine will</li>
+                        <li>Oracle represents cosmic order</li>
+                        <li>Blurred line between history and mythology</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ritual & Ceremonies -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🎭</span>
+                Rituals, Ceremonies & Festivals
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🏆 Pythian Games</h3>
+                    <ul class="list-styled">
+                        <li>One of four pan-Hellenic games (with Olympics)</li>
+                        <li>Held every four years in summer</li>
+                        <li>Originally musical competitions only</li>
+                        <li>582 BCE: athletic events added</li>
+                        <li>Chariot racing, running, wrestling, boxing</li>
+                        <li>Poetry, drama, and philosophy contests</li>
+                        <li>Victor's crown: laurel wreath</li>
+                        <li>Less prestigious than Olympics but highly valued</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎵 Musical Competitions</h3>
+                    <ul class="list-styled">
+                        <li>Kitharōidia: singing to lyre accompaniment</li>
+                        <li>Aulōidia: singing to aulos (double flute)</li>
+                        <li>Instrumental solo performances</li>
+                        <li>Most prestigious contest at Pythian Games</li>
+                        <li>Celebrated Apollo as god of music</li>
+                        <li>Winners gained pan-Hellenic fame</li>
+                        <li>Competitions held in theater</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎊 Theophania</h3>
+                    <ul class="list-styled">
+                        <li>Festival celebrating Apollo's epiphany</li>
+                        <li>Marked god's return from Hyperborea</li>
+                        <li>Spring renewal and oracle's reopening</li>
+                        <li>Processions, sacrifices, hymns</li>
+                        <li>Paean singing by choruses</li>
+                        <li>Ritual cleansing of sanctuary</li>
+                        <li>Renewal of sacred fire</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🍷 Dionysian Winter</h3>
+                    <ul class="list-styled">
+                        <li>Three winter months: Apollo absent</li>
+                        <li>Dionysus ruled sanctuary</li>
+                        <li>Tomb of Dionysus in Apollo's temple</li>
+                        <li>Thyiades: female worshippers of Dionysus</li>
+                        <li>Nocturnal rites on Mount Parnassus</li>
+                        <li>Ecstatic dances and wine rituals</li>
+                        <li>Balance between Apollonian order and Dionysian chaos</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔥 Theoxenia</h3>
+                    <ul class="list-styled">
+                        <li>"Reception of gods" festival</li>
+                        <li>Banquet prepared for Apollo and other deities</li>
+                        <li>Statues brought to dining couches</li>
+                        <li>Food offerings displayed and later consumed</li>
+                        <li>Diplomatic receptions for city-state delegates</li>
+                        <li>Reinforced Delphi's pan-Hellenic role</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎖️ Victory Celebrations</h3>
+                    <ul class="list-styled">
+                        <li>Military victors dedicated spoils at Delphi</li>
+                        <li>Monuments erected along Sacred Way</li>
+                        <li>Thanksgiving sacrifices to Apollo</li>
+                        <li>Processional hymns (paeans) sung</li>
+                        <li>Cities competed in grandeur of dedications</li>
+                        <li>Athenian treasury built from Marathon spoils</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌿 Septerion Ritual</h3>
+                    <ul class="list-styled">
+                        <li>Reenactment of Apollo slaying Python</li>
+                        <li>Held every eight years</li>
+                        <li>Boy representing Apollo attacked hut (Python's lair)</li>
+                        <li>Ritual death and exile, then purification</li>
+                        <li>Journey to Vale of Tempe for cleansing</li>
+                        <li>Return in triumph with laurel</li>
+                        <li>Mythological drama made ritual reality</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💧 Purification Rites</h3>
+                    <ul class="list-styled">
+                        <li>All visitors bathed in Castalian Spring</li>
+                        <li>Pythia's elaborate purification before prophecy</li>
+                        <li>Bathing, fumigation with sulfur</li>
+                        <li>Chewing laurel leaves</li>
+                        <li>Wearing special garments</li>
+                        <li>Maintained ritual purity essential to function</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cultural Significance -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🌍</span>
+                Cultural & Religious Significance
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                Delphi's influence extended far beyond religious prophecy to shape Greek politics, philosophy,
+                art, and collective identity. As a pan-Hellenic sanctuary, it served as one of the few
+                institutions that transcended fierce city-state rivalries.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Pan-Hellenic Unity</h3>
+                    <ul class="list-styled">
+                        <li>Neutral ground for all Greeks</li>
+                        <li>Sacred truces during festivals</li>
+                        <li>Meeting place for diplomatic negotiations</li>
+                        <li>Amphictyonic League governed sanctuary</li>
+                        <li>Collective Greek identity reinforced</li>
+                        <li>Contrasted Greeks with "barbarians"</li>
+                        <li>Symbol of shared religion and culture</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎨 Artistic Treasury</h3>
+                    <ul class="list-styled">
+                        <li>Accumulated finest Greek art and sculpture</li>
+                        <li>Competition drove artistic innovation</li>
+                        <li>Architectural experimentation in treasuries</li>
+                        <li>Bronze and marble masterpieces</li>
+                        <li>Inspiration for later artists for millennia</li>
+                        <li>Museum showcases Classical Greek aesthetics</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💭 Philosophical Influence</h3>
+                    <ul class="list-styled">
+                        <li>"Know thyself" inspired Greek philosophy</li>
+                        <li>Socrates's mission began with oracle</li>
+                        <li>Plato referenced Delphi extensively</li>
+                        <li>Debate on fate vs. free will</li>
+                        <li>Nature of knowledge and wisdom</li>
+                        <li>Rational inquiry vs. divine revelation</li>
+                        <li>Temple maxims influenced ethical thought</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚖️ Political Power</h3>
+                    <ul class="list-styled">
+                        <li>Oracle could legitimize or undermine rulers</li>
+                        <li>Consulted on war, peace, colonization</li>
+                        <li>Accusations of bribery and manipulation</li>
+                        <li>Generally favored stability and conservatism</li>
+                        <li>Supported Sparta in Peloponnesian War</li>
+                        <li>Pragmatic advice often disguised as prophecy</li>
+                        <li>Influence waned as Greek city-states weakened</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📖 Literary Inspiration</h3>
+                    <ul class="list-styled">
+                        <li>Central to Greek tragedy and epic</li>
+                        <li>Archetypal wise oracle in Western literature</li>
+                        <li>Themes of fate, hubris, self-knowledge</li>
+                        <li>Ambiguous prophecy as plot device</li>
+                        <li>Influenced later works: Shakespeare, modern fiction</li>
+                        <li>Oracle as literary archetype persists</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌍 Economic Impact</h3>
+                    <ul class="list-styled">
+                        <li>Massive wealth accumulated from dedications</li>
+                        <li>Employment for locals: priests, guides, innkeepers</li>
+                        <li>Pilgrimage economy supported region</li>
+                        <li>Target for plunderers (Phocians, Nero, Sulla)</li>
+                        <li>Banking and money-lending services</li>
+                        <li>International significance attracted resources</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modern Research -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🔬</span>
+                Modern Research & Preservation
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                Modern scholarship on Delphi combines traditional archaeology with cutting-edge scientific methods,
+                revealing new insights into how the oracle functioned and why it wielded such extraordinary influence
+                for over a millennium. The site continues to fascinate researchers from multiple disciplines,
+                from geologists studying the fault lines beneath the temple to psychologists analyzing ancient
+                trance states and cognitive scientists exploring the nature of prophetic consciousness.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🏺 Excavation History</h3>
+                    <ul class="list-styled">
+                        <li>French Archaeological School (1892-present)</li>
+                        <li>Village of Kastri relocated for excavations</li>
+                        <li>Systematic uncovering of entire sanctuary</li>
+                        <li>Thousands of artifacts recovered</li>
+                        <li>Inscriptions published in massive volumes</li>
+                        <li>Ongoing work reveals new details annually</li>
+                        <li>Model of archaeological methodology</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌋 Geological Studies</h3>
+                    <ul class="list-styled">
+                        <li>2001: De Boer et al. identified ethylene gas</li>
+                        <li>Fault lines intersect beneath temple</li>
+                        <li>Hydrocarbon gases produced by geological activity</li>
+                        <li>Ethylene causes euphoria, altered consciousness</li>
+                        <li>Explains ancient accounts of pneuma</li>
+                        <li>Modern analysis confirms Pythia's trance had physical basis</li>
+                        <li>Seismic events caused temple destructions</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📜 Epigraphic Research</h3>
+                    <ul class="list-styled">
+                        <li>Over 4,000 inscriptions catalogued</li>
+                        <li>Manumission records (slave freedoms)</li>
+                        <li>Honorary decrees for benefactors</li>
+                        <li>Athletic victor lists</li>
+                        <li>Treaty texts and diplomatic documents</li>
+                        <li>Reveals social, economic, political history</li>
+                        <li>Ongoing publication and interpretation</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎭 Performance Studies</h3>
+                    <ul class="list-styled">
+                        <li>Theater still used for modern performances</li>
+                        <li>Acoustics studied and admired</li>
+                        <li>Pythian Games revival attempted</li>
+                        <li>Cultural events celebrate ancient traditions</li>
+                        <li>Living connection to ancient practices</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Conservation</h3>
+                    <ul class="list-styled">
+                        <li>UNESCO World Heritage Site (1987)</li>
+                        <li>Ongoing restoration of monuments</li>
+                        <li>New museum opened (1938, renovated 1970s)</li>
+                        <li>Climate control for sensitive artifacts</li>
+                        <li>Visitor management to reduce impact</li>
+                        <li>Digital documentation and 3D modeling</li>
+                        <li>Balancing preservation with public access</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔬 Interdisciplinary Approaches</h3>
+                    <ul class="list-styled">
+                        <li>Combination of archaeology, geology, chemistry</li>
+                        <li>Botanical studies of laurel and plants</li>
+                        <li>Psychological analysis of trance states</li>
+                        <li>Anthropological comparisons with other oracles</li>
+                        <li>Digital humanities and database projects</li>
+                        <li>Holistic understanding of oracle phenomenon</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visitor Information -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🗺️</span>
+                Visitor Information
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🎫 Access & Hours</h3>
+                    <ul class="list-styled">
+                        <li><strong>Location:</strong> Delphi village, Central Greece (180 km northwest of Athens)</li>
+                        <li><strong>Hours:</strong> 8:00 AM - 8:00 PM (summer); 8:00 AM - 3:00 PM (winter)</li>
+                        <li><strong>Time needed:</strong> 3-4 hours minimum for sanctuary and museum</li>
+                        <li><strong>Best time:</strong> Early morning or late afternoon (avoid midday heat and crowds)</li>
+                        <li><strong>Closed:</strong> January 1, March 25, May 1, Easter Sunday, December 25-26</li>
+                        <li><strong>Tickets:</strong> Combined admission for archaeological site and museum</li>
+                        <li><strong>Accessibility:</strong> Steep terrain; limited wheelchair access</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💡 Practical Tips</h3>
+                    <ul class="list-styled">
+                        <li>Wear sturdy walking shoes (steep, uneven paths)</li>
+                        <li>Bring water, sunscreen, and hat in summer</li>
+                        <li>Sacred Way has 200+ meters elevation gain</li>
+                        <li>Stadium requires additional steep climb (worth it!)</li>
+                        <li>Hire licensed guide for deeper understanding</li>
+                        <li>Photography allowed without flash</li>
+                        <li>Museum has excellent climate control and artifacts</li>
+                        <li>Nearby village has restaurants and accommodations</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🚗 Getting There</h3>
+                    <ul class="list-styled">
+                        <li>By car: 2.5 hours from Athens via National Road</li>
+                        <li>By bus: KTEL buses from Athens (3 hours)</li>
+                        <li>Scenic mountain drive through Arachova</li>
+                        <li>Parking available near site entrance</li>
+                        <li>Organized tours from Athens available</li>
+                        <li>Combine with Meteora or Hosios Loukas monastery</li>
+                        <li>Consider staying overnight for full experience</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📸 Must-See Highlights</h3>
+                    <ul class="list-styled">
+                        <li>Treasury of Athens (beautifully reconstructed)</li>
+                        <li>Temple of Apollo foundations and columns</li>
+                        <li>Theater with panoramic mountain views</li>
+                        <li>Stadium at top of site (breathtaking)</li>
+                        <li>Charioteer of Delphi in museum (world-famous)</li>
+                        <li>Sphinx of Naxos (museum highlight)</li>
+                        <li>Omphalos stone replica (museum)</li>
+                        <li>Tholos at Sanctuary of Athena Pronaia</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌟 Special Experiences</h3>
+                    <ul class="list-styled">
+                        <li>European Cultural Centre of Delphi (conferences)</li>
+                        <li>Summer cultural festivals and performances</li>
+                        <li>Ancient theater occasionally hosts events</li>
+                        <li>Spring wildflowers on Mount Parnassus</li>
+                        <li>Winter views with snow-capped peaks</li>
+                        <li>Sunrise/sunset photography opportunities</li>
+                        <li>Local olive oil and honey tasting</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📍 Nearby Attractions</h3>
+                    <ul class="list-styled">
+                        <li>Sanctuary of Athena Pronaia (Tholos)</li>
+                        <li>Castalian Spring (visible from road)</li>
+                        <li>Delphi Archaeological Museum (world-class)</li>
+                        <li>Corycian Cave on Mt. Parnassus</li>
+                        <li>Arachova mountain village (winter sports)</li>
+                        <li>Hosios Loukas Byzantine monastery (UNESCO)</li>
+                        <li>Gulf of Corinth views and beaches</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Links -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🔗</span>
+                Related Topics & Further Exploration
+            </h2>
+
+            <div class="related-links">
+                <a href="dodona.html" class="related-link">
+                    🌳 Dodona Oracle
+                </a>
+                <a href="../../mythos/greek/apollo.html" class="related-link">
+                    ☀️ Apollo - God of Prophecy
+                </a>
+                <a href="../mountains/mount-parnassus.html" class="related-link">
+                    ⛰️ Mount Parnassus
+                </a>
+                <a href="../temples/parthenon.html" class="related-link">
+                    🏛️ The Parthenon
+                </a>
+                <a href="../../mythos/greek/index.html" class="related-link">
+                    🏺 Greek Mythology
+                </a>
+                <a href="../index.html" class="related-link">
+                    🌍 All Sacred Places
+                </a>
+            </div>
+        </div>
+
+        <!-- Bibliography -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📚</span>
+                Sources & Further Reading
+            </h2>
+
+            <div style="line-height: 2; font-size: 1rem;">
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Ancient Sources:</h3>
+                <ul class="list-styled">
+                    <li>Homeric Hymn to Apollo</li>
+                    <li>Herodotus: <em>Histories</em> (Books I, VI, VII, VIII)</li>
+                    <li>Plutarch: <em>The Oracles at Delphi No Longer Given in Verse</em> and <em>The Obsolescence of Oracles</em></li>
+                    <li>Pausanias: <em>Description of Greece</em> (Book X - Phocis)</li>
+                    <li>Plato: <em>Apology</em>, <em>Republic</em></li>
+                    <li>Diodorus Siculus: <em>Library of History</em> (Book XVI)</li>
+                    <li>Strabo: <em>Geography</em> (Book IX)</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Modern Scholarship:</h3>
+                <ul class="list-styled">
+                    <li>Parke, H.W. and D.E.W. Wormell. <em>The Delphic Oracle</em>. 2 vols. Oxford, 1956.</li>
+                    <li>Fontenrose, Joseph. <em>The Delphic Oracle</em>. California, 1978.</li>
+                    <li>Bowden, Hugh. <em>Classical Athens and the Delphic Oracle</em>. Cambridge, 2005.</li>
+                    <li>Scott, Michael. <em>Delphi: A History of the Center of the Ancient World</em>. Princeton, 2014.</li>
+                    <li>Maurizio, Lisa. "Anthropology and Spirit Possession." <em>Journal of Hellenic Studies</em> 115 (1995).</li>
+                    <li>Price, Simon. <em>Religions of the Ancient Greeks</em>. Cambridge, 1999.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Geological & Scientific:</h3>
+                <ul class="list-styled">
+                    <li>De Boer, Jelle Z., et al. "Geological and Geochemical Evidence for a Gaseous Oracle at Delphi." <em>Geology</em> 29 (2001): 707-710.</li>
+                    <li>Spiller, Henry A., et al. "The Delphic Oracle: A Neurotoxicological View." <em>Journal of Toxicology</em> 40 (2002): 189-196.</li>
+                    <li>Piccardi, Luigi. "Active Faulting at Delphi: Seismotectonic Remarks." <em>Annals of Geophysics</em> 43 (2000).</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Archaeological Reports:</h3>
+                <ul class="list-styled">
+                    <li>Bommelaer, Jean-François. <em>Guide de Delphes: Le site</em>. École française d'Athènes, 1991.</li>
+                    <li>Jacquemin, Anne. <em>Offrandes monumentales à Delphes</em>. Athens, 1999.</li>
+                    <li>Amandry, Pierre. <em>La mantique apollinienne à Delphes</em>. Paris, 1950.</li>
+                    <li>Roux, Georges. <em>Delphes: son oracle et ses dieux</em>. Paris, 1976.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Cultural & Interpretive:</h3>
+                <ul class="list-styled">
+                    <li>Eidinow, Esther. <em>Oracles, Curses, and Risk Among the Ancient Greeks</em>. Oxford, 2007.</li>
+                    <li>Johnston, Sarah Iles. <em>Ancient Greek Divination</em>. Wiley-Blackwell, 2008.</li>
+                    <li>Flower, Michael Attyah. <em>The Seer in Ancient Greece</em>. California, 2008.</li>
+                    <li>Morgan, Catherine. <em>Athletes and Oracles</em>. Cambridge, 1990.</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
