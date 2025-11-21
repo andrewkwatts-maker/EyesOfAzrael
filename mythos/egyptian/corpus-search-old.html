@@ -1,0 +1,492 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Egyptian Corpus Search</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../../themes/theme-base.css">
+    
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../../themes/theme-picker.js" defer></script>
+
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        :root {
+            --egyptian-primary: #CD853F;
+            --egyptian-secondary: #DAA520;
+            --egyptian-dark: #8B6914;
+        }
+
+        .search-header {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            border-radius: var(--radius-2xl);
+            margin-bottom: 2rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-term {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 1rem 0;
+            text-transform: capitalize;
+        }
+
+        .results-count {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+
+        .corpus-info {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-left: 4px solid var(--egyptian-primary);
+            border: 2px solid var(--color-border);
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+        }
+
+        .corpus-info h3 {
+            color: var(--egyptian-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .no-results {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            padding: 3rem 2rem;
+            border-radius: var(--radius-2xl);
+            text-align: center;
+            border: 2px solid var(--color-border);
+        }
+
+        .no-results h3 {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-4);
+        }
+
+        .result-item {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-left: 4px solid var(--egyptian-primary);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            border-radius: var(--radius-xl);
+            transition: all var(--transition-base, 0.3s ease);
+            box-shadow: var(--shadow-md);
+        }
+
+        .result-item:hover {
+            background: var(--color-surface-hover);
+            transform: translateX(5px);
+            box-shadow: var(--shadow-lg), 0 4px 12px rgba(205, 133, 63, 0.2);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .text-name {
+            font-weight: 700;
+            color: var(--egyptian-primary);
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .citation {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .metadata {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .metadata-item {
+            background: rgba(205, 133, 63, 0.15);
+            padding: 0.3rem 0.7rem;
+            border-radius: 5px;
+        }
+
+        .context {
+            color: var(--text-primary);
+            line-height: 1.8;
+            font-size: 1.05rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(205, 133, 63, 0.05);
+            border-radius: var(--radius-sm, 8px);
+        }
+
+        .translation {
+            color: var(--text-secondary);
+            font-style: italic;
+            line-height: 1.7;
+            margin: 1rem 0;
+            padding: 0.8rem;
+            background: rgba(218, 165, 32, 0.05);
+            border-left: 3px solid var(--egyptian-secondary);
+            border-radius: 0 5px 5px 0;
+        }
+
+        .translation::before {
+            content: "🇩🇪 German Translation: ";
+            font-weight: 600;
+            color: var(--egyptian-dark);
+            font-style: normal;
+        }
+
+        mark {
+            background: rgba(205, 133, 63, 0.4);
+            color: var(--text-primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .tla-link {
+            display: inline-block;
+            background: var(--egyptian-primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm, 8px);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all var(--transition-base, 0.3s ease);
+            margin-top: 0.5rem;
+        }
+
+        .tla-link:hover {
+            background: var(--egyptian-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(139, 105, 20, 0.3);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(205, 133, 63, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--egyptian-primary);
+            animation: spin 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            display: inline-block;
+            background: rgba(205, 133, 63, 0.15);
+            color: var(--egyptian-primary);
+            padding: 0.85rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            border: 1px solid rgba(205, 133, 63, 0.3);
+            transition: all var(--transition-base, 0.3s ease);
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
+
+        .back-link:hover {
+            background: rgba(205, 133, 63, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(205, 133, 63, 0.2);
+        }
+
+        .search-box {
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: var(--space-4) var(--space-6);
+            font-size: var(--text-base);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            color: var(--color-text-primary);
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--egyptian-primary);
+            box-shadow: var(--shadow-lg), 0 4px 20px rgba(205, 133, 63, 0.3);
+        }
+
+        .suggested-searches {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .suggested-searches a {
+            display: inline-block;
+            background: rgba(205, 133, 63, 0.1);
+            color: var(--egyptian-primary);
+            padding: 0.4rem 0.8rem;
+            margin: 0.3rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .suggested-searches a:hover {
+            background: rgba(205, 133, 63, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+    <header>
+    <div class="header-content">
+        <h1>📜 Egyptian Corpus Search</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../mythos/index.html">Home</a> →
+                <a href="index.html">Egyptian</a> →
+                <span>Corpus Search</span>
+</nav>
+
+    <main>
+        <a href="javascript:history.back()" class="back-link">← Back to Previous Page</a>
+
+        <section class="search-header">
+            <h1 style="margin: 0; font-size: 1.5rem; opacity: 0.9;">Ancient Egyptian Texts Mentioning:</h1>
+            <div class="search-term" id="searchTerm">Loading...</div>
+            <div class="results-count" id="resultsCount"></div>
+        </section>
+
+        <div class="corpus-info">
+            <h3>📚 About the Corpus</h3>
+            <p>This search explores the <strong>Ancient Egyptian Dictionary (AED-TEI)</strong> corpus containing 11,000+ hieroglyphic texts from all periods of Egyptian history (Old Kingdom through Greco-Roman period). Texts include pyramid texts, coffin texts, temple inscriptions, offering formulas, hymns, wisdom literature, and mythological narratives.</p>
+            <p><strong>Note:</strong> Translations are provided in German. Text IDs link to the <a href="https://aaew.bbaw.de/tla/" target="_blank" style="color: var(--egyptian-primary); font-weight: 600;">Thesaurus Linguae Aegyptiae</a> online database.</p>
+        </div>
+
+        <div class="search-box">
+            <input type="text" class="search-input" id="newSearchInput" placeholder="Search for another deity or term...">
+            <div class="suggested-searches">
+                <strong>Suggested:</strong>
+                <a href="?term=ra">Ra</a>
+                <a href="?term=osiris">Osiris</a>
+                <a href="?term=isis">Isis</a>
+                <a href="?term=horus">Horus</a>
+                <a href="?term=anubis">Anubis</a>
+                <a href="?term=thoth">Thoth</a>
+                <a href="?term=maat">Ma'at</a>
+                <a href="?term=duat">Duat</a>
+                <a href="?term=ankh">Ankh</a>
+                <a href="?term=neith">Neith</a>
+            </div>
+        </div>
+
+        <div id="loadingIndicator" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Searching ancient texts...</p>
+        </div>
+
+        <div id="resultsContainer" style="display: none;">
+            <!-- Results will be inserted here by JavaScript -->
+        </div>
+
+        <div id="noResults" class="no-results" style="display: none;">
+            <h3>No Results Found</h3>
+            <p>We couldn't find any references to "<span id="noResultsTerm"></span>" in the corpus.</p>
+            <p style="margin-top: 1rem; color: var(--text-muted);">Try searching for deity names like Ra, Osiris, Isis, Horus, Thoth, or concepts like duat, ankh, or maat.</p>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <strong>Egyptian Corpus Search</strong> - Ancient Egyptian Dictionary (AED-TEI)<br>
+            Data from the <a href="https://aaew.bbaw.de/tla/" target="_blank">Thesaurus Linguae Aegyptiae</a> project<br>
+            <a href="../../mythos/index.html">World Mythos Home</a> |
+            <a href="index.html">Egyptian Mythology</a>
+        </p>
+    </footer>
+
+    <script>
+        // Load corpus data
+        let corpusData = null;
+
+        async function loadCorpusData() {
+            try {
+                const response = await fetch('corpus-index.json');
+                corpusData = await response.json();
+                return corpusData;
+            } catch (error) {
+                console.error('Error loading corpus data:', error);
+                return null;
+            }
+        }
+
+        // Get search term from URL
+        function getSearchTerm() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('term') || '';
+        }
+
+        // Highlight search term in text
+        function highlightTerm(text, term) {
+            if (!term || !text) return text;
+            const regex = new RegExp(`(${term})`, 'gi');
+            return text.replace(regex, '<mark>$1</mark>');
+        }
+
+        // Format date range
+        function formatDateRange(earliest, latest) {
+            if (!earliest && !latest) return 'Unknown Date';
+
+            const formatBCE = (year) => {
+                if (!year) return '';
+                const absYear = Math.abs(parseInt(year));
+                return `${absYear} BCE`;
+            };
+
+            if (earliest && latest) {
+                return `${formatBCE(earliest)} - ${formatBCE(latest)}`;
+            }
+            return formatBCE(earliest || latest);
+        }
+
+        // Perform search
+        async function performSearch(searchTerm) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const noResults = document.getElementById('noResults');
+            const searchTermDisplay = document.getElementById('searchTerm');
+            const resultsCount = document.getElementById('resultsCount');
+            const noResultsTerm = document.getElementById('noResultsTerm');
+
+            // Update display
+            searchTermDisplay.textContent = searchTerm;
+            noResultsTerm.textContent = searchTerm;
+
+            // Show loading
+            loadingIndicator.style.display = 'block';
+            resultsContainer.style.display = 'none';
+            noResults.style.display = 'none';
+
+            // Load corpus data if not already loaded
+            if (!corpusData) {
+                corpusData = await loadCorpusData();
+            }
+
+            if (!corpusData) {
+                loadingIndicator.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            // Search for term (case-insensitive)
+            const termLower = searchTerm.toLowerCase();
+            const results = corpusData[termLower] || [];
+
+            // Hide loading
+            loadingIndicator.style.display = 'none';
+
+            if (results.length === 0) {
+                noResults.style.display = 'block';
+                return;
+            }
+
+            // Display results count
+            resultsCount.textContent = `Found ${results.length} reference${results.length === 1 ? '' : 's'} in ancient Egyptian texts`;
+
+            // Build results HTML
+            let html = '';
+
+            results.forEach(result => {
+                const highlightedContext = highlightTerm(result.context, searchTerm);
+                const dateRange = formatDateRange(
+                    result.metadata.date_earliest,
+                    result.metadata.date_latest
+                );
+
+                html += `
+                    <div class="result-item">
+                        <div class="result-header">
+                            <div>
+                                <div class="text-name">${result.text_name}</div>
+                                <div class="citation">${result.citation}</div>
+                            </div>
+                        </div>
+
+                        <div class="metadata">
+                            <span class="metadata-item">📅 ${dateRange}</span>
+                            <span class="metadata-item">📖 ${result.metadata.text_type || 'Unknown Type'}</span>
+                            ${result.metadata.book ? `<span class="metadata-item">📚 ${result.metadata.book}</span>` : ''}
+                        </div>
+
+                        <div class="context">${highlightedContext}</div>
+
+                        ${result.translation ? `<div class="translation">${result.translation}</div>` : ''}
+
+                        <a href="${result.url}" target="_blank" class="tla-link">
+                            View in TLA Database →
+                        </a>
+                    </div>
+                `;
+            });
+
+            resultsContainer.innerHTML = html;
+            resultsContainer.style.display = 'block';
+        }
+
+        // Handle new search
+        document.getElementById('newSearchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const newTerm = this.value.trim();
+                if (newTerm) {
+                    window.location.href = `?term=${encodeURIComponent(newTerm)}`;
+                }
+            }
+        });
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const searchTerm = getSearchTerm();
+            const searchInput = document.getElementById('newSearchInput');
+
+            if (searchTerm) {
+                // Auto-populate the search input field
+                searchInput.value = searchTerm;
+                performSearch(searchTerm);
+            } else {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('noResults').style.display = 'block';
+                document.getElementById('searchTerm').textContent = '(No search term provided)';
+            }
+        });
+    </script>
+</body>
+</html>

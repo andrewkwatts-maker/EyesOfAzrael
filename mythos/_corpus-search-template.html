@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}} - {{MYTHOS}} Mythology Corpus Search</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-github.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script defer src="../../corpus-search-core.js"></script>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+        <header>
+    <div class="header-content">
+        <h1 style="font-size: 2.5rem; color: var(--color-primary); margin-bottom: 1rem;">
+                {{ICON}} {{HEADER}}
+            </h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../mythos/index.html">Home</a> →
+                <a href="index.html">{{MYTHOS_TITLE}}</a> →
+                <span>Corpus Search</span>
+</nav>
+
+        <div id="error-container"></div>
+
+        <div class="corpus-repo-selector">
+            <h3>📚 Step 1: Select Texts</h3>
+            <p style="color: var(--color-text-secondary); text-align: center; margin-bottom: 1rem;">
+                Choose which texts to load from GitHub
+            </p>
+
+            <div class="repo-list" id="repo-list"></div>
+
+            <div class="repo-actions">
+                <button class="select-all-btn" id="select-all-btn">Select All</button>
+                <button class="clear-selection-btn" id="clear-selection-btn">Clear Selection</button>
+                <button class="load-repos-btn" id="load-repos-btn" disabled>Load Selected Texts</button>
+            </div>
+
+            <div id="loading-status" class="hidden">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">0%</div>
+                </div>
+                <div class="status-text" id="status-text">Preparing to load...</div>
+            </div>
+        </div>
+
+        <div id="search-interface" class="hidden">
+            <h3>🔍 Step 2: Search Loaded Texts</h3>
+
+            <div class="search-controls">
+                <input type="text" id="search-term" placeholder="Enter search term..." autocomplete="off">
+                <button id="search-btn">Search</button>
+            </div>
+
+            <div class="search-options">
+                <label class="search-option">
+                    <input type="checkbox" id="case-sensitive">
+                    Case Sensitive
+                </label>
+                <label class="search-option">
+                    <input type="number" id="max-results" value="100" min="1" max="500" style="width: 80px; padding: 0.25rem; background: var(--color-bg-secondary); border: 1px solid var(--color-border-primary); border-radius: 4px; color: var(--color-text-primary);">
+                    Max Results
+                </label>
+            </div>
+
+            <div class="results-summary hidden" id="results-summary"></div>
+            <div id="search-results"></div>
+
+            <div class="corpus-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-loaded-texts">0</span>
+                    <span class="stat-label">Loaded Texts</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-cache-size">0 KB</span>
+                    <span class="stat-label">Cache Size</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-last-search">—</span>
+                    <span class="stat-label">Results Found</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../corpus-search-ui.js"></script>
+</body>
+</html>

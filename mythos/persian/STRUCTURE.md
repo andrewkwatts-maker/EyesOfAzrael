@@ -1,0 +1,113 @@
+# Persian/Zoroastrian Mythology - Structure & Data Guidelines
+
+**Tradition Color:** #9400D3
+**Icon:** 🔥
+**Status:** In Development - Ready for Parallel Work
+
+## Quick Reference
+
+### Priority Deities (Create First):
+1. **Ahura Mazda**
+2. **Mithra**
+3. **Anahita**
+
+### Priority Herbs:
+1. **Haoma**
+2. **Rose**
+3. **Pomegranate**
+
+### Color Scheme:
+```css
+--mythos-primary: #9400D3;
+--mythos-secondary: #BA55D3;
+```
+
+## 📁 Standard Folder Structure
+
+Follow universal structure documented in `_documentation/TEMPLATE_GUIDE.md`:
+- deities/ (gods, goddesses, divine figures)
+- cosmology/ (creation.html, afterlife.html, realms)
+- heroes/ (legendary mortals, culture heroes)
+- creatures/ (mythical beings, monsters)
+- herbs/ (sacred plants, preparations.html)
+- rituals/ (ceremonies, calendar.html, offerings.html)
+- magic/ (magical systems, practices)
+- path/ (6 stages: Lay Faithful, Herbad, Mobed, Dastur, Dastur-e Dasturan, Ratheeshtar)
+- texts/ (sacred writings)
+- symbols/ (sacred symbols, sigils)
+
+## Cross-Tradition Deity Mappings
+
+Link Persian/Zoroastrian deities to similar figures in other traditions.
+See `_documentation/TEMPLATE_GUIDE.md` for deity equivalence table.
+
+## Persian/Zoroastrian-Specific Features
+
+### Spiritual Path (6 Stages)
+1. **Lay Faithful** (Stage 1) - 0-1 years
+2. **Herbad** (Stage 2) - 1-5 years
+3. **Mobed** (Stage 3) - 5-10 years
+4. **Dastur** (Stage 4) - 10-15 years
+5. **Dastur-e Dasturan** (Stage 5) - 15-20 years
+6. **Ratheeshtar** (Stage 6) - 20+ years
+
+## 📚 Source Material
+
+**Primary Sources:**
+- Avesta
+- Gathas
+- Yasna
+- Bundahishn
+
+**Modern Scholarship:**
+See tradition-specific academic sources.
+
+## Priority Tasks
+
+**Week 1:**
+- [ ] Update index.html with modular navigation
+- [ ] Create deities/index.html (pantheon overview)
+- [ ] Create 3 priority deity pages: Ahura Mazda, Mithra, Anahita
+- [ ] Create cosmology/creation.html (STANDARDIZED)
+- [ ] Create cosmology/afterlife.html (STANDARDIZED)
+
+**Week 2:**
+- [ ] Create herbs/index.html
+- [ ] Create 3 priority herb pages: Haoma, Rose, Pomegranate
+- [ ] Create herbs/preparations.html (STANDARDIZED)
+- [ ] Create rituals/calendar.html (STANDARDIZED)
+- [ ] Create rituals/offerings.html (STANDARDIZED)
+
+**Week 3:**
+- [ ] Create path/index.html and all 6 stages (STANDARDIZED)
+- [ ] Complete remaining deity pages (aim for 10-15 total)
+
+**Week 4+:**
+- [ ] Expand heroes, creatures, magic systems
+- [ ] Add texts and symbols sections
+- [ ] Cross-link to all other traditions
+
+## 🔗 Required Cross-Links
+
+Every Persian/Zoroastrian page should link to similar concepts in:
+- Jewish/Kabbalah (reference implementation)
+- Greek, Norse, Egyptian (major traditions)
+- Other traditions as relevant
+
+## ✅ Quality Checklist
+
+Before marking any page complete:
+- [ ] Uses correct color scheme (#9400D3, #BA55D3)
+- [ ] Has breadcrumb navigation
+- [ ] Includes "Related Concepts" with cross-tradition links
+- [ ] Cites primary sources
+- [ ] Has practical applications section
+- [ ] Uses templates from `_scripts/TEMPLATE_*.html`
+- [ ] All links work and point to correct locations
+
+---
+
+**Status:** Structure Defined - Ready for Development
+**Template:** Use `_scripts/TEMPLATE_deity.html` and `TEMPLATE_herb.html`
+**Documentation:** See `_documentation/TEMPLATE_GUIDE.md` for complete details
+**Estimated Completion:** 4-6 weeks for core, 3-4 months for full completion

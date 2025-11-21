@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enoch's Journey - Interactive Visualizations</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script defer src="../../themes/theme-picker.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Seven Heavens Journey Map Styles */
+        .heavens-container {
+            position: relative;
+            margin: 2rem auto;
+            max-width: 1200px;
+            padding: 2rem;
+        }
+
+        .heaven-level {
+            position: relative;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.15),
+                rgba(var(--color-secondary-rgb), 0.15));
+            border: 2px solid rgba(var(--color-primary-rgb), 0.3);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            min-height: 100px;
+        }
+
+        .heaven-level:hover {
+            transform: translateX(10px) scale(1.02);
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.3),
+                rgba(var(--color-secondary-rgb), 0.3));
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .heaven-level.active {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.4),
+                rgba(var(--color-secondary-rgb), 0.4));
+            border-color: var(--color-accent);
+            box-shadow: 0 10px 40px rgba(var(--color-accent-rgb), 0.6);
+        }
+
+        .heaven-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .heaven-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--color-accent);
+            min-width: 80px;
+            text-shadow: 0 2px 8px rgba(var(--color-accent-rgb), 0.5);
+        }
+
+        .heaven-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--color-text-primary);
+        }
+
+        .heaven-subtitle {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-left: 80px;
+        }
+
+        .heaven-icons {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0.5rem 0 0.5rem 80px;
+            flex-wrap: wrap;
+        }
+
+        .heaven-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .heaven-level:hover .heaven-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .heaven-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            margin-top: 1rem;
+            padding-left: 80px;
+        }
+
+        .heaven-level.active .heaven-details {
+            max-height: 1000px;
+        }
+
+        .heaven-description {
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+
+        .heaven-inhabitants {
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        /* Journey Path SVG */
+        .journey-path {
+            position: absolute;
+            left: 40px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom,
+                rgba(var(--color-accent-rgb), 0.2),
+                rgba(var(--color-accent-rgb), 0.8));
+            z-index: -1;
+        }
+
+        /* Watchers Fall Diagram */
+        .fall-diagram {
+            margin: 2rem auto;
+            max-width: 900px;
+            padding: 2rem;
+            background: linear-gradient(180deg,
+                rgba(var(--color-primary-rgb), 0.15),
+                rgba(var(--color-secondary-rgb), 0.15));
+            border-radius: var(--radius-lg);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .fall-svg {
+            width: 100%;
+            height: 600px;
+        }
+
+        /* Timeline Styles */
+        .timeline-container {
+            position: relative;
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 1000px;
+        }
+
+        .timeline-event {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.15),
+                rgba(var(--color-secondary-rgb), 0.15));
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-event:hover {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.25),
+                rgba(var(--color-secondary-rgb), 0.25));
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .timeline-icon {
+            font-size: 2.5rem;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .timeline-content h3 {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-content p {
+            color: var(--color-text-primary);
+            line-height: 1.6;
+        }
+
+        /* Nephilim Family Tree */
+        .family-tree {
+            margin: 2rem auto;
+            padding: 2rem;
+            max-width: 1100px;
+        }
+
+        .tree-level {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .tree-node {
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.2),
+                rgba(var(--color-secondary-rgb), 0.2));
+            border: 2px solid rgba(var(--color-accent-rgb), 0.5);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            min-width: 150px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tree-node:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.4),
+                rgba(var(--color-secondary-rgb), 0.4));
+            border-color: var(--color-accent);
+            box-shadow: 0 8px 25px rgba(var(--color-accent-rgb), 0.4);
+        }
+
+        .tree-node-title {
+            font-weight: bold;
+            color: var(--color-accent);
+            margin-bottom: 0.25rem;
+            font-size: 1.1rem;
+        }
+
+        .tree-node-subtitle {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        .tree-connector {
+            width: 2px;
+            height: 30px;
+            background: linear-gradient(to bottom,
+                rgba(var(--color-accent-rgb), 0.5),
+                rgba(var(--color-accent-rgb), 0.2));
+            margin: 0 auto;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            position: fixed;
+            right: -400px;
+            top: 80px;
+            width: 380px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: linear-gradient(135deg,
+                rgba(var(--color-bg-secondary-rgb), 0.95),
+                rgba(var(--color-bg-primary-rgb), 0.95));
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: -5px 5px 30px rgba(0, 0, 0, 0.3);
+            transition: right 0.4s ease;
+            z-index: 1000;
+        }
+
+        .info-panel.visible {
+            right: 20px;
+        }
+
+        .info-panel h3 {
+            color: var(--color-accent);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--color-accent);
+            padding-bottom: 0.5rem;
+        }
+
+        .info-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--color-accent);
+            color: var(--color-bg-primary);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            transition: all 0.3s ease;
+        }
+
+        .info-close:hover {
+            transform: rotate(90deg);
+            background: var(--color-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .heaven-number {
+                font-size: 2rem;
+                min-width: 60px;
+            }
+
+            .heaven-name {
+                font-size: 1.2rem;
+            }
+
+            .heaven-subtitle,
+            .heaven-icons,
+            .heaven-details {
+                margin-left: 60px;
+            }
+
+            .info-panel {
+                width: 90%;
+                right: -100%;
+            }
+
+            .info-panel.visible {
+                right: 5%;
+            }
+
+            .tree-level {
+                gap: 1rem;
+            }
+
+            .tree-node {
+                min-width: 120px;
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        /* Loading Animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Scrollbar Styling */
+        .info-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .info-panel::-webkit-scrollbar-track {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-radius: 4px;
+        }
+
+        .info-panel::-webkit-scrollbar-thumb {
+            background: var(--color-accent);
+            border-radius: 4px;
+        }
+
+        .info-panel::-webkit-scrollbar-thumb:hover {
+            background: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+    <header>
+    <div class="header-content"></div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../mythos/index.html">Home</a> →
+            <a href="index.html">Apocryphal Mythology</a> →
+            <span aria-current="page">Enoch's Journey Visualizations</span>
+</nav>
+
+    <main>
+        <div class="hero-section">
+            <div class="hero-icon-display">🌌</div>
+            <h1>Enoch's Journey Through the Seven Heavens</h1>
+            <p class="hero-description">
+                Interactive visualizations of Enoch's mystical ascent through the celestial realms, the fall of the
+                Watchers, and the corruption that brought the Flood. Click on each heaven to explore its mysteries,
+                or scroll down for additional diagrams of the Nephilim lineage and timeline of events.
+            </p>
+        </div>
+
+        <!-- Seven Heavens Interactive Journey -->
+        <section style="margin-top: var(--spacing-xl);">
+            <h2 class="section-header">🪜 The Seven Heavens - Enoch's Ascent</h2>
+            <div class="glass-card" style="margin-bottom: var(--spacing-lg);">
+                <h3>Interactive Journey Map</h3>
+                <p>
+                    Click on each heaven to reveal detailed information about its inhabitants, purposes, and mysteries.
+                    Enoch's journey begins from Earth and ascends through increasingly sacred and terrible realms,
+                    culminating at the throne of God himself in the Seventh Heaven.
+                </p>
+            </div>
+
+            <div class="heavens-container">
+                <div class="journey-path"></div>
+
+                <!-- Seventh Heaven -->
+                <div class="heaven-level" data-heaven="7">
+                    <div class="heaven-header">
+                        <div class="heaven-number">VII</div>
+                        <div>
+                            <div class="heaven-name">Araboth - The Highest Heaven</div>
+                        </div>
+                    </div>
+                    <div class="heaven-subtitle">The Dwelling Place of God</div>
+                    <div class="heaven-icons">
+                        <span class="heaven-icon" title="God's Throne">👑</span>
+                        <span class="heaven-icon" title="Seraphim">🔥</span>
+                        <span class="heaven-icon" title="Metatron">✨</span>
+                        <span class="heaven-icon" title="Archangels">🗡️</span>
+                        <span class="heaven-icon" title="Merkabah">⚡</span>
+                    </div>
+                    <div class="heaven-details">
+                        <p class="heaven-description">
+                            The dwelling place of God, where the divine throne sits upon the Merkabah (divine chariot).
+                            Here are righteousness, justice, mercy, the souls of the unborn, the dew that will resurrect
+                            the dead, and the Seraphim who cry "Holy, Holy, Holy!" The archangels stand before the throne.
+                            Metatron, the transformed Enoch, rules here as Vice-Regent.
+                        </p>
+                        <p class="heaven-inhabitants">
+                            <strong>Inhabitants:</strong> God Himself, Seraphim, Ophanim, Archangels, Metatron, Souls of the Unborn
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Sixth Heaven -->
+                <div class="heaven-level" data-heaven="6">
+                    <div class="heaven-header">
+                        <div class="heaven-number">VI</div>
+                        <div>
+                            <div class="heaven-name">Machon - The Foundation</div>
+                        </div>
+                    </div>
+                    <div class="heaven-subtitle">Heavenly Archives & Scholar Angels</div>
+                    <div class="heaven-icons">
+                        <span class="heaven-icon" title="Scholar Angels">📚</span>
+                        <span class="heaven-icon" title="Cherubim">👁️</span>
+                        <span class="heaven-icon" title="Archives">📜</span>
+                        <span class="heaven-icon" title="Phoenix">🦅</span>
+                    </div>
+                    <div class="heaven-details">
+                        <p class="heaven-description">
+                            Dominated by scholar angels who study Torah, astronomy, and the sciences of creation. Here
+                            are stored the records of all that occurs on earth - the heavenly archives. Seven phoenixes,
+                            seven cherubim, and seven six-winged beings continually chant and observe the cosmos.
+                        </p>
+                        <p class="heaven-inhabitants">
+                            <strong>Inhabitants:</strong> Scholar Angels, Cherubim, Phoenixes, Keepers of Records
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Fifth Heaven -->
+                <div class="heaven-level" data-heaven="5">
+                    <div class="heaven-header">
+                        <div class="heaven-number">V</div>
+                        <div>
+                            <div class="heaven-name">Maon - The Residence</div>
+                        </div>
+                    </div>
+                    <div class="heaven-subtitle">Fiery Angels & Imprisoned Watcher Chiefs</div>
+                    <div class="heaven-icons">
+                        <span class="heaven-icon" title="Ishim">🔥</span>
+                        <span class="heaven-icon" title="Angels of Destruction">⚡</span>
+                        <span class="heaven-icon" title="Azazel Imprisoned">⛓️</span>
+                        <span class="heaven-icon" title="Angelic Armies">⚔️</span>
+                    </div>
+                    <div class="heaven-details">
+                        <p class="heaven-description">
+                            Home of the Ishim, angels of fire who eternally sing praises. Here Enoch witnessed angels of
+                            destruction and heard divine mysteries. The Watchers' leaders (including Azazel) are imprisoned
+                            here. Massive angelic armies stand in formation, awaiting divine commands.
+                        </p>
+                        <p class="heaven-inhabitants">
+                            <strong>Inhabitants:</strong> Ishim (fiery angels), Angels of Destruction, Imprisoned Watcher Chiefs
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Fourth Heaven -->
+                <div class="heaven-level" data-heaven="4">
+                    <div class="heaven-header">
+                        <div class="heaven-number">IV</div>
+                        <div>
+                            <div class="heaven-name">Zebul - The Dwelling</div>
+                        </div>
+                    </div>
+                    <div class="heaven-subtitle">Heavenly Jerusalem & Holy Temple</div>
+                    <div class="heaven-icons">
+                        <span class="heaven-icon" title="Heavenly Temple">🏛️</span>
+                        <span class="heaven-icon" title="Sun">☀️</span>
+                        <span class="heaven-icon" title="Moon">🌙</span>
+                        <span class="heaven-icon" title="Michael">🗡️</span>
+                    </div>
+                    <div class="heaven-details">
+                        <p class="heaven-description">
+                            Contains the heavenly Jerusalem and the Holy Temple where Michael serves as High Priest,
+                            offering the souls of the righteous as sacrifices. The Sun and Moon have thrones here, and their
+                            courses are directed by the angels Uriel and Gabriel.
+                        </p>
+                        <p class="heaven-inhabitants">
+                            <strong>Inhabitants:</strong> Michael the High Priest, Temple Angels, Sun and Moon, Wheels of the Chariot
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Third Heaven -->
+                <div class="heaven-level" data-heaven="3">
+                    <div class="heaven-header">
+                        <div class="heaven-number">III</div>
+                        <div>
+                            <div class="heaven-name">Shehaqim - The Clouds</div>
+                        </div>
+                    </div>
+                    <div class="heaven-subtitle">Paradise & Gehenna - Reward & Punishment</div>
+                    <div class="heaven-icons">
+                        <span class="heaven-icon" title="Tree of Life">🌳</span>
+                        <span class="heaven-icon" title="Paradise">🌺</span>
+                        <span class="heaven-icon" title="Gehenna Fire">🔥</span>
+                        <span class="heaven-icon" title="Phoenix">🦅</span>
+                    </div>
+                    <div class="heaven-details">
+                        <p class="heaven-description">
+                            Paradise (Eden) and Gehenna (Hell) coexist here - the Tree of Life grows in the north where
+                            the righteous dwell in bliss, while fire and ice torture the wicked in the south. Angels
+                            constantly manufacture manna to feed the blessed. The great phoenix bird lives here.
+                        </p>
+                        <p class="heaven-inhabitants">
+                            <strong>Inhabitants:</strong> Souls of the Righteous, Tormented Wicked, Angels of Paradise, Phoenix
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Second Heaven -->
+                <div class="heaven-level" data-heaven="2">
+                    <div class="heaven-header">
+                        <div class="heaven-number">II</div>
+                        <div>
+                            <div class="heaven-name">Raquia - The Firmament</div>
+                        </div>
+                    </div>
+                    <div class="heaven-subtitle">Prison of the Fallen Watchers</div>
+                    <div class="heaven-icons">
+                        <span class="heaven-icon" title="Imprisoned Watchers">⛓️</span>
+                        <span class="heaven-icon" title="Darkness">🌑</span>
+                        <span class="heaven-icon" title="Celestial Fire">🔥</span>
+                        <span class="heaven-icon" title="Stars">⭐</span>
+                    </div>
+                    <div class="heaven-details">
+                        <p class="heaven-description">
+                            Prison of the fallen Watchers who await final judgment. Here in darkness and chains, 200
+                            rebellious angels suffer, suspended between heaven and earth. Also contains the treasury of
+                            celestial fire and the sources of light for sun, moon, and stars.
+                        </p>
+                        <p class="heaven-inhabitants">
+                            <strong>Inhabitants:</strong> Imprisoned Watchers, Angels of Luminaries, Spirits of Darkness
+                        </p>
+                    </div>
+                </div>
+
+                <!-- First Heaven -->
+                <div class="heaven-level" data-heaven="1">
+                    <div class="heaven-header">
+                        <div class="heaven-number">I</div>
+                        <div>
+                            <div class="heaven-name">Vilon - The Veil</div>
+                        </div>
+                    </div>
+                    <div class="heaven-subtitle">Atmospheric Realm & Weather Angels</div>
+                    <div class="heaven-icons">
+                        <span class="heaven-icon" title="Clouds">☁️</span>
+                        <span class="heaven-icon" title="Snow & Hail">❄️</span>
+                        <span class="heaven-icon" title="Rain">🌧️</span>
+                        <span class="heaven-icon" title="Star-Elders">⭐</span>
+                    </div>
+                    <div class="heaven-details">
+                        <p class="heaven-description">
+                            The lowest heaven, a vast atmospheric realm containing the storehouses of snow, hail, dew,
+                            and rain. Here dwell the angels who govern weather and seasons. The Elders who command the stars
+                            reside here, ensuring celestial order.
+                        </p>
+                        <p class="heaven-inhabitants">
+                            <strong>Inhabitants:</strong> Angels of Weather, Star-Elders, Clouds of Glory
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Earth -->
+                <div class="heaven-level" data-heaven="0" style="opacity: 0.7;">
+                    <div class="heaven-header">
+                        <div class="heaven-number">🌍</div>
+                        <div>
+                            <div class="heaven-name">Earth - Mortal Realm</div>
+                        </div>
+                    </div>
+                    <div class="heaven-subtitle">Where Enoch's Journey Begins</div>
+                    <div class="heaven-icons">
+                        <span class="heaven-icon">🏔️</span>
+                        <span class="heaven-icon">🌊</span>
+                        <span class="heaven-icon">🌲</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Watchers' Fall Diagram -->
+        <section style="margin-top: var(--spacing-xl);">
+            <h2 class="section-header">⚡ The Watchers' Descent - From Heaven to Mount Hermon</h2>
+            <div class="glass-card" style="margin-bottom: var(--spacing-lg);">
+                <h3>The Great Transgression</h3>
+                <p>
+                    200 angels descended from heaven to Mount Hermon, where they swore a binding oath to take human
+                    wives and teach forbidden knowledge. This diagram traces their catastrophic fall from the celestial
+                    realms to earthly corruption.
+                </p>
+            </div>
+
+            <div class="fall-diagram">
+                <svg class="fall-svg" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Sky gradient -->
+                    <defs>
+                        <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:rgb(135,206,250);stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:rgb(70,130,180);stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:rgb(25,25,112);stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="fireGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:rgb(255,215,0);stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:rgb(255,69,0);stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Background -->
+                    <rect width="800" height="600" fill="url(#skyGrad)"/>
+
+                    <!-- Heaven (top) -->
+                    <g id="heaven">
+                        <ellipse cx="400" cy="80" rx="150" ry="50" fill="rgba(255,255,255,0.3)" stroke="gold" stroke-width="2"/>
+                        <text x="400" y="70" text-anchor="middle" fill="gold" font-size="16" font-weight="bold">HEAVEN</text>
+                        <text x="400" y="90" text-anchor="middle" fill="gold" font-size="12">The Celestial Realm</text>
+                    </g>
+
+                    <!-- Falling angels (diagonal paths) -->
+                    <g id="falling-angels">
+                        <!-- Left side angels -->
+                        <path d="M 300 130 Q 250 300 200 450" stroke="rgba(255,215,0,0.5)" stroke-width="3" fill="none" stroke-dasharray="5,5"/>
+                        <circle cx="200" cy="450" r="8" fill="url(#fireGrad)">
+                            <animate attributeName="cy" values="130;450;130" dur="4s" repeatCount="indefinite"/>
+                        </circle>
+
+                        <!-- Center angels -->
+                        <path d="M 400 130 L 400 450" stroke="rgba(255,215,0,0.7)" stroke-width="4" fill="none" stroke-dasharray="5,5"/>
+                        <circle cx="400" cy="450" r="10" fill="url(#fireGrad)">
+                            <animate attributeName="cy" values="130;450;130" dur="3.5s" repeatCount="indefinite"/>
+                        </circle>
+
+                        <!-- Right side angels -->
+                        <path d="M 500 130 Q 550 300 600 450" stroke="rgba(255,215,0,0.5)" stroke-width="3" fill="none" stroke-dasharray="5,5"/>
+                        <circle cx="600" cy="450" r="8" fill="url(#fireGrad)">
+                            <animate attributeName="cy" values="130;450;130" dur="4.5s" repeatCount="indefinite"/>
+                        </circle>
+                    </g>
+
+                    <!-- Mount Hermon -->
+                    <g id="mountain">
+                        <polygon points="400,480 300,550 500,550" fill="rgb(139,137,137)" stroke="rgb(90,90,90)" stroke-width="2"/>
+                        <polygon points="400,480 350,515 450,515" fill="rgb(169,169,169)"/>
+                        <text x="400" y="540" text-anchor="middle" fill="white" font-size="14" font-weight="bold">MOUNT HERMON</text>
+                    </g>
+
+                    <!-- Earth ground -->
+                    <rect x="0" y="550" width="800" height="50" fill="rgb(34,139,34)"/>
+
+                    <!-- Labels and arrows -->
+                    <g id="labels">
+                        <!-- The Descent -->
+                        <text x="650" y="150" fill="gold" font-size="14" font-weight="bold">200 Watchers</text>
+                        <text x="650" y="170" fill="gold" font-size="12">Descend from</text>
+                        <text x="650" y="185" fill="gold" font-size="12">Heaven</text>
+
+                        <!-- The Oath -->
+                        <text x="520" y="490" fill="white" font-size="12" font-weight="bold">The Binding Oath</text>
+                        <text x="520" y="505" fill="white" font-size="10">Leaders: Samyaza</text>
+                        <text x="520" y="520" fill="white" font-size="10">& Azazel</text>
+
+                        <!-- The Corruption -->
+                        <text x="50" y="480" fill="white" font-size="12" font-weight="bold">They Taught:</text>
+                        <text x="50" y="495" fill="white" font-size="10">• Warfare</text>
+                        <text x="50" y="510" fill="white" font-size="10">• Sorcery</text>
+                        <text x="50" y="525" fill="white" font-size="10">• Forbidden Arts</text>
+                        <text x="50" y="540" fill="white" font-size="10">• Cosmetics</text>
+                    </g>
+
+                    <!-- Stars in heaven -->
+                    <circle cx="150" cy="50" r="2" fill="white" opacity="0.8">
+                        <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="650" cy="40" r="2" fill="white" opacity="0.8">
+                        <animate attributeName="opacity" values="0.8;0.3;0.8" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="250" cy="70" r="1.5" fill="white" opacity="0.8">
+                        <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="550" cy="60" r="1.5" fill="white" opacity="0.8">
+                        <animate attributeName="opacity" values="0.8;0.3;0.8" dur="1.8s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Nephilim Family Tree -->
+        <section style="margin-top: var(--spacing-xl);">
+            <h2 class="section-header">🧬 The Nephilim Lineage - Sons of the Watchers</h2>
+            <div class="glass-card" style="margin-bottom: var(--spacing-lg);">
+                <h3>Hybrid Offspring of Angels and Humans</h3>
+                <p>
+                    When the Watchers took human wives, their offspring were neither fully angelic nor fully human.
+                    The Nephilim giants grew to enormous size and possessed supernatural power, but their existence
+                    was an abomination that corrupted the earth and brought divine judgment.
+                </p>
+            </div>
+
+            <div class="family-tree">
+                <!-- Level 1: Heaven -->
+                <div class="tree-level">
+                    <div class="tree-node" style="background: linear-gradient(135deg, rgba(255,215,0,0.3), rgba(255,140,0,0.3)); border-color: gold;">
+                        <div class="tree-node-title">HEAVEN</div>
+                        <div class="tree-node-subtitle">Celestial Realm</div>
+                    </div>
+                </div>
+
+                <div class="tree-connector"></div>
+
+                <!-- Level 2: Watchers -->
+                <div class="tree-level">
+                    <div class="tree-node">
+                        <div class="tree-node-title">Samyaza</div>
+                        <div class="tree-node-subtitle">Chief of Watchers</div>
+                    </div>
+                    <div class="tree-node">
+                        <div class="tree-node-title">Azazel</div>
+                        <div class="tree-node-subtitle">Teacher of Warfare</div>
+                    </div>
+                    <div class="tree-node">
+                        <div class="tree-node-title">Araqiel</div>
+                        <div class="tree-node-subtitle">Teacher of Earth Signs</div>
+                    </div>
+                    <div class="tree-node">
+                        <div class="tree-node-title">Penemue</div>
+                        <div class="tree-node-subtitle">Teacher of Writing</div>
+                    </div>
+                    <div class="tree-node">
+                        <div class="tree-node-title">196 Others</div>
+                        <div class="tree-node-subtitle">Fallen Angels</div>
+                    </div>
+                </div>
+
+                <div class="tree-connector"></div>
+
+                <!-- Level 3: Union Symbol -->
+                <div class="tree-level">
+                    <div class="tree-node" style="background: linear-gradient(135deg, rgba(255,0,0,0.2), rgba(255,69,0,0.2)); border-color: rgba(255,0,0,0.5);">
+                        <div class="tree-node-title">FORBIDDEN UNION</div>
+                        <div class="tree-node-subtitle">Daughters of Men</div>
+                    </div>
+                </div>
+
+                <div class="tree-connector"></div>
+
+                <!-- Level 4: Nephilim -->
+                <div class="tree-level">
+                    <div class="tree-node" style="background: linear-gradient(135deg, rgba(139,0,0,0.3), rgba(178,34,34,0.3)); border-color: rgba(139,0,0,0.7);">
+                        <div class="tree-node-title">Ohya</div>
+                        <div class="tree-node-subtitle">Son of Samyaza</div>
+                    </div>
+                    <div class="tree-node" style="background: linear-gradient(135deg, rgba(139,0,0,0.3), rgba(178,34,34,0.3)); border-color: rgba(139,0,0,0.7);">
+                        <div class="tree-node-title">Hahya</div>
+                        <div class="tree-node-subtitle">Son of Samyaza</div>
+                    </div>
+                    <div class="tree-node" style="background: linear-gradient(135deg, rgba(139,0,0,0.3), rgba(178,34,34,0.3)); border-color: rgba(139,0,0,0.7);">
+                        <div class="tree-node-title">Mahway</div>
+                        <div class="tree-node-subtitle">Giant Messenger</div>
+                    </div>
+                    <div class="tree-node" style="background: linear-gradient(135deg, rgba(139,0,0,0.3), rgba(178,34,34,0.3)); border-color: rgba(139,0,0,0.7);">
+                        <div class="tree-node-title">The Nephilim</div>
+                        <div class="tree-node-subtitle">Giants of Old</div>
+                    </div>
+                </div>
+
+                <div class="tree-connector"></div>
+
+                <!-- Level 5: Fate -->
+                <div class="tree-level">
+                    <div class="tree-node" style="background: linear-gradient(135deg, rgba(0,0,139,0.3), rgba(70,130,180,0.3)); border-color: rgba(0,0,139,0.7);">
+                        <div class="tree-node-title">THE GREAT FLOOD</div>
+                        <div class="tree-node-subtitle">Divine Judgment</div>
+                    </div>
+                </div>
+
+                <div class="tree-connector"></div>
+
+                <!-- Level 6: Aftermath -->
+                <div class="tree-level">
+                    <div class="tree-node" style="background: linear-gradient(135deg, rgba(75,0,130,0.3), rgba(138,43,226,0.3)); border-color: rgba(75,0,130,0.7);">
+                        <div class="tree-node-title">Evil Spirits</div>
+                        <div class="tree-node-subtitle">Demons on Earth</div>
+                    </div>
+                    <div class="tree-node" style="background: linear-gradient(135deg, rgba(75,0,130,0.3), rgba(138,43,226,0.3)); border-color: rgba(75,0,130,0.7);">
+                        <div class="tree-node-title">Watchers Bound</div>
+                        <div class="tree-node-subtitle">Imprisoned Until Judgment</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Timeline of Key Events -->
+        <section style="margin-top: var(--spacing-xl);">
+            <h2 class="section-header">📜 Timeline of the Watchers' Fall</h2>
+            <div class="glass-card" style="margin-bottom: var(--spacing-lg);">
+                <h3>From Rebellion to Judgment</h3>
+                <p>
+                    The chronology of events from the Watchers' descent through the Flood and beyond, tracing the
+                    catastrophic consequences of angelic rebellion and the divine response.
+                </p>
+            </div>
+
+            <div class="timeline-container">
+                <div class="timeline-event">
+                    <div class="timeline-icon">🌅</div>
+                    <div class="timeline-content">
+                        <h3>The Beginning - Before the Fall</h3>
+                        <p>
+                            In the days of Jared (father of Enoch), humanity multiplies upon the earth. The Watchers
+                            observe from heaven, assigned to watch over mankind. The daughters of men grow beautiful,
+                            and the angels begin to lust after them.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-event">
+                    <div class="timeline-icon">⛰️</div>
+                    <div class="timeline-content">
+                        <h3>The Descent to Mount Hermon</h3>
+                        <p>
+                            200 Watchers, led by Samyaza, descend from heaven to Mount Hermon (meaning "forbidden" or
+                            "devoted to destruction"). They swear a binding oath to share the guilt equally, knowing
+                            they commit a great transgression. Each chooses a human woman as a wife.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-event">
+                    <div class="timeline-icon">👹</div>
+                    <div class="timeline-content">
+                        <h3>Birth of the Nephilim</h3>
+                        <p>
+                            The human women bear children to the Watchers - the Nephilim. These hybrid offspring grow
+                            to enormous size (some traditions say 300-450 feet tall, others 15-30 feet). They possess
+                            supernatural strength and insatiable appetites, consuming all the resources of humanity.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-event">
+                    <div class="timeline-icon">📚</div>
+                    <div class="timeline-content">
+                        <h3>Teaching Forbidden Knowledge</h3>
+                        <p>
+                            The Watchers teach forbidden arts to humanity: Azazel reveals warfare and weapon-making;
+                            Penemue teaches writing; Kasdeja reveals abortion and poisoning; others teach astrology,
+                            sorcery, cosmetics, and dark magic. This knowledge corrupts humanity and spreads violence
+                            across the earth.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-event">
+                    <div class="timeline-icon">💀</div>
+                    <div class="timeline-content">
+                        <h3>The Nephilim's Rampage</h3>
+                        <p>
+                            The giants devour all that humanity produces, then begin eating humans themselves, and
+                            finally turn to cannibalism. They sin against animals, birds, reptiles, and fish. Their
+                            bloodshed fills the earth, and the cries of dying humanity reach heaven.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-event">
+                    <div class="timeline-icon">🌌</div>
+                    <div class="timeline-content">
+                        <h3>Enoch's First Ascension</h3>
+                        <p>
+                            Enoch walks with God and is taken up to heaven. He witnesses the seven heavens, learns
+                            the secrets of creation, and sees the imprisoned Watchers already suffering in the Second
+                            Heaven. The Nephilim beg him to intercede with God on their behalf.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-event">
+                    <div class="timeline-icon">📜</div>
+                    <div class="timeline-content">
+                        <h3>Prophecy of Doom</h3>
+                        <p>
+                            Enoch delivers God's message: no forgiveness will be granted. The Nephilim have prophetic
+                            dreams of their destruction - visions of gardens uprooted and fire consuming the earth.
+                            They understand their fate but can do nothing to prevent it.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-event">
+                    <div class="timeline-icon">⚔️</div>
+                    <div class="timeline-content">
+                        <h3>The Archangels' Mission</h3>
+                        <p>
+                            God commands the archangels to act: Uriel warns Noah of the coming flood; Gabriel turns
+                            the Nephilim against each other, causing civil war among the giants; Raphael binds Azazel
+                            in the desert of Dudael; Michael imprisons the Watchers in darkness until judgment day.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-event">
+                    <div class="timeline-icon">🌊</div>
+                    <div class="timeline-content">
+                        <h3>The Great Flood</h3>
+                        <p>
+                            God sends the Flood to cleanse the earth of the Nephilim and their corruption. Only Noah,
+                            his family, and the animals in the ark survive. The Nephilim perish, but their spirits
+                            become demons - disembodied evil spirits that wander the earth, possessing and tormenting
+                            humanity.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-event">
+                    <div class="timeline-icon">👻</div>
+                    <div class="timeline-content">
+                        <h3>The Age of Demons</h3>
+                        <p>
+                            One-tenth of the Nephilim's spirits are permitted to remain active on earth to test
+                            humanity. Nine-tenths are bound in darkness. The Watchers remain imprisoned in chains,
+                            awaiting the final judgment. These demons continue to lead humanity astray through
+                            possession, disease, and temptation.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-event">
+                    <div class="timeline-icon">👑</div>
+                    <div class="timeline-content">
+                        <h3>Enoch's Transformation</h3>
+                        <p>
+                            Enoch is taken up permanently to heaven and transformed into Metatron, the "Lesser YHVH,"
+                            greatest of all angels. He receives 365,000 eyes, 72 wings, and a throne beside God's own.
+                            As celestial scribe, he records all deeds in the heavenly books and serves as God's
+                            chancellor.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-event">
+                    <div class="timeline-icon">⚖️</div>
+                    <div class="timeline-content">
+                        <h3>Awaiting Final Judgment</h3>
+                        <p>
+                            The Watchers remain bound in darkness, the Nephilim spirits wander as demons, and the
+                            righteous await vindication. On the Day of Judgment, Azazel will be thrown into eternal
+                            fire, all evil spirits will be destroyed, and the earth will be restored to its original
+                            purity. The wicked will face gehenna, the righteous will enter paradise.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related Links -->
+        <section style="margin-top: var(--spacing-xl);">
+            <h2 class="section-header">🔗 Explore More</h2>
+            <div class="deity-grid">
+                <a class="deity-card" href="cosmology/index.html" style="text-decoration: none;">
+                    <div class="deity-icon">🌌</div>
+                    <h3>Cosmology</h3>
+                    <p>Detailed text about the Seven Heavens</p>
+                </a>
+                <a class="deity-card" href="angels/index.html" style="text-decoration: none;">
+                    <div class="deity-icon">👼</div>
+                    <h3>Angels & Watchers</h3>
+                    <p>The celestial beings and their fall</p>
+                </a>
+                <a class="deity-card" href="creatures/index.html" style="text-decoration: none;">
+                    <div class="deity-icon">⚔️</div>
+                    <h3>Nephilim & Giants</h3>
+                    <p>Hybrid offspring and their fate</p>
+                </a>
+                <a class="deity-card" href="index.html" style="text-decoration: none;">
+                    <div class="deity-icon">📖</div>
+                    <h3>Apocryphal Home</h3>
+                    <p>Return to main index</p>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Info Panel -->
+    <div class="info-panel" id="infoPanel">
+        <button class="info-close" onclick="closeInfoPanel()">×</button>
+        <div id="infoPanelContent"></div>
+    </div>
+
+    <footer>
+        <p>
+            <strong>Apocryphal & Enochian Mythology</strong> - World Mythos Explorer<br>
+            <a href="index.html">Back to Apocryphal Home</a> |
+            <a href="../../mythos/index.html">All Mythologies</a> |
+            <a href="../../index.html">Main Site</a>
+        </p>
+    </footer>
+
+    <script>
+        // Interactive Seven Heavens functionality
+        const heavenLevels = document.querySelectorAll('.heaven-level');
+        const infoPanel = document.getElementById('infoPanel');
+        const infoPanelContent = document.getElementById('infoPanelContent');
+
+        // Heaven data for info panel
+        const heavenData = {
+            '7': {
+                name: 'Seventh Heaven - Araboth',
+                subtitle: 'The Highest Heaven',
+                description: 'The ultimate dwelling place of God, where the divine throne sits upon the Merkabah (divine chariot). This is the realm of pure divinity, where righteousness, justice, and mercy emanate from the throne itself.',
+                features: [
+                    'The Divine Throne of Glory',
+                    'The Merkabah - Living Chariot with four faces',
+                    'Seraphim crying "Holy, Holy, Holy!" eternally',
+                    'Ophanim - wheel beings covered with eyes',
+                    'The Seven Archangels in attendance',
+                    'Metatron\'s throne beside God',
+                    'Souls of the unborn awaiting incarnation',
+                    'The dew of resurrection',
+                    'The treasuries of blessing'
+                ],
+                inhabitants: 'God Himself, Seraphim, Ophanim, Archangels (Michael, Gabriel, Raphael, Uriel), Metatron (transformed Enoch), Souls of the Unborn, Angels of the Presence'
+            },
+            '6': {
+                name: 'Sixth Heaven - Machon',
+                subtitle: 'The Foundation',
+                description: 'The heaven of wisdom and knowledge, where scholar angels study the mysteries of creation. Here are kept the heavenly archives - records of every deed performed on earth.',
+                features: [
+                    'The Heavenly Archives',
+                    'Seven phoenixes in eternal song',
+                    'Seven cherubim observing creation',
+                    'Scholar angels studying Torah',
+                    'Records of all earthly deeds',
+                    'Books of astronomy and sciences',
+                    'The Hall of Wisdom',
+                    'Celestial libraries'
+                ],
+                inhabitants: 'Scholar Angels, Cherubim, Phoenixes, Keepers of Records, Angels of Learning, Archivists of Creation'
+            },
+            '5': {
+                name: 'Fifth Heaven - Maon',
+                subtitle: 'The Residence',
+                description: 'A heaven of divine power and judgment, where fiery angels eternally sing praises and massive armies stand ready. Here the leaders of the fallen Watchers are imprisoned.',
+                features: [
+                    'The Ishim - angels of living fire',
+                    'Angels of destruction awaiting commands',
+                    'Prison chambers for Watcher chiefs',
+                    'Azazel bound in darkness',
+                    'Massive angelic armies in formation',
+                    'Chambers of divine mysteries',
+                    'The throne-rooms of punishment',
+                    'Songs of eternal praise'
+                ],
+                inhabitants: 'Ishim (fiery angels), Angels of Destruction, Imprisoned Watcher Chiefs (including Azazel), Angelic Armies, Angels of Divine Wrath'
+            },
+            '4': {
+                name: 'Fourth Heaven - Zebul',
+                subtitle: 'The Dwelling',
+                description: 'The heaven of worship and celestial order, containing the heavenly Jerusalem and the Holy Temple where Michael serves as High Priest.',
+                features: [
+                    'The Heavenly Jerusalem',
+                    'The Holy Temple (model for earthly temple)',
+                    'Michael\'s altar of sacrifice',
+                    'The Sun\'s throne and chariot',
+                    'The Moon\'s throne and course',
+                    'Wheels of the divine chariot',
+                    'Gates of prayer and praise',
+                    'Angelic worship services'
+                ],
+                inhabitants: 'Michael the High Priest, Temple Angels, Uriel (governing the Sun), Gabriel (governing the Moon), Wheels of the Chariot, Angelic Choirs'
+            },
+            '3': {
+                name: 'Third Heaven - Shehaqim',
+                subtitle: 'The Clouds',
+                description: 'The heaven of ultimate contrasts - Paradise and Gehenna exist here side by side. The Tree of Life grows in eternal paradise while the wicked suffer purification in gehenna\'s fires.',
+                features: [
+                    'The Garden of Eden (Paradise)',
+                    'The Tree of Life bearing eternal fruit',
+                    'Gehenna - seven chambers of purification',
+                    'Rivers of honey and balsam',
+                    'Angels manufacturing manna',
+                    'The Phoenix in eternal rebirth',
+                    'Souls of the righteous in bliss',
+                    'The tormented wicked in ice and fire'
+                ],
+                inhabitants: 'Souls of the Righteous, Tormented Wicked, Angels of Paradise, Angels of Punishment, The Phoenix, Guardians of the Tree of Life'
+            },
+            '2': {
+                name: 'Second Heaven - Raquia',
+                subtitle: 'The Firmament',
+                description: 'A dark and terrible heaven serving as prison for the fallen Watchers. Here 200 rebellious angels await final judgment in chains and darkness.',
+                features: [
+                    'Prison chambers for the Watchers',
+                    'Chains of darkness holding the fallen',
+                    'The treasury of celestial fire',
+                    'Sources of light for sun, moon, stars',
+                    'Spirits of darkness',
+                    'Angels of luminaries',
+                    'Storehouses of cosmic phenomena',
+                    'The abyss of judgment'
+                ],
+                inhabitants: 'The 200 Imprisoned Watchers, Angels of Luminaries, Spirits of Darkness, Guards of the Prison, Angels Awaiting Judgment'
+            },
+            '1': {
+                name: 'First Heaven - Vilon',
+                subtitle: 'The Veil',
+                description: 'The lowest heaven, an atmospheric realm where weather is governed and celestial order maintained. This heaven is closest to earth and serves as the boundary between mortal and divine realms.',
+                features: [
+                    'Storehouses of snow and hail',
+                    'Reservoirs of rain and dew',
+                    'Winds of the four directions',
+                    'Star-Elders commanding celestial bodies',
+                    'Angels of weather and seasons',
+                    'The Clouds of Glory',
+                    'Astronomical mechanisms',
+                    'Gateways between earth and heaven'
+                ],
+                inhabitants: 'Angels of Weather, Star-Elders, Angels of the Seasons, Clouds of Glory, Celestial Guardians, Atmospheric Spirits'
+            }
+        };
+
+        // Add click handlers to heaven levels
+        heavenLevels.forEach(level => {
+            level.addEventListener('click', function() {
+                const heavenNum = this.getAttribute('data-heaven');
+
+                // Skip Earth level
+                if (heavenNum === '0') return;
+
+                // Toggle active state
+                const wasActive = this.classList.contains('active');
+
+                // Remove active from all
+                heavenLevels.forEach(l => l.classList.remove('active'));
+
+                // Add active to this one if it wasn't active
+                if (!wasActive) {
+                    this.classList.add('active');
+
+                    // Show info panel with data
+                    if (heavenData[heavenNum]) {
+                        showInfoPanel(heavenData[heavenNum]);
+                    }
+                } else {
+                    // Close info panel
+                    closeInfoPanel();
+                }
+            });
+        });
+
+        function showInfoPanel(data) {
+            const featuresHTML = data.features.map(f => `<li>${f}</li>`).join('');
+
+            infoPanelContent.innerHTML = `
+                <h3>${data.name}</h3>
+                <p style="color: var(--color-text-secondary); font-style: italic; margin-bottom: 1rem;">
+                    ${data.subtitle}
+                </p>
+                <p style="margin-bottom: 1rem; line-height: 1.6;">
+                    ${data.description}
+                </p>
+                <h4 style="color: var(--color-primary); margin-bottom: 0.5rem;">Key Features:</h4>
+                <ul style="line-height: 1.8; margin-bottom: 1rem;">
+                    ${featuresHTML}
+                </ul>
+                <h4 style="color: var(--color-primary); margin-bottom: 0.5rem;">Inhabitants:</h4>
+                <p style="color: var(--color-text-secondary); font-style: italic; line-height: 1.6;">
+                    ${data.inhabitants}
+                </p>
+            `;
+
+            infoPanel.classList.add('visible');
+        }
+
+        function closeInfoPanel() {
+            infoPanel.classList.remove('visible');
+            heavenLevels.forEach(l => l.classList.remove('active'));
+        }
+
+        // Close info panel when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.heaven-level') &&
+                !event.target.closest('.info-panel') &&
+                infoPanel.classList.contains('visible')) {
+                closeInfoPanel();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && infoPanel.classList.contains('visible')) {
+                closeInfoPanel();
+            }
+        });
+
+        // Add scroll animation to reveal elements
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        // Observe timeline events
+        document.querySelectorAll('.timeline-event').forEach(event => {
+            event.style.opacity = '0';
+            event.style.transform = 'translateY(20px)';
+            event.style.transition = 'all 0.6s ease';
+            observer.observe(event);
+        });
+
+        // Observe tree nodes
+        document.querySelectorAll('.tree-node').forEach(node => {
+            node.style.opacity = '0';
+            node.style.transform = 'scale(0.9)';
+            node.style.transition = 'all 0.5s ease';
+            observer.observe(node);
+        });
+
+        // Log welcome message
+        console.log('%c🌌 Enoch\'s Journey Visualizations Loaded', 'color: gold; font-size: 16px; font-weight: bold;');
+        console.log('%cExplore the Seven Heavens by clicking on each level!', 'color: lightblue; font-size: 12px;');
+    </script>
+</body>
+</html>
