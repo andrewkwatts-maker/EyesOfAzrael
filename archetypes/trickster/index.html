@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trickster - Universal Archetype</title>
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    
+        <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+<script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        /* Trickster Archetype Custom Theme Colors */
+        :root {
+            --archetype-primary: #f59e0b;
+            --archetype-primary-light: #fbbf24;
+            --archetype-primary-dark: #d97706;
+            --archetype-primary-darker: #92400e;
+            --archetype-accent: #fb923c;
+            --archetype-surface: rgba(245, 158, 11, 0.05);
+            --archetype-border: rgba(245, 158, 11, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Breadcrumb Navigation */
+        .nav-breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-md);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-md);
+            flex-wrap: wrap;
+            font-size: var(--font-size-sm);
+        }
+
+        .nav-breadcrumb a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-breadcrumb a:hover {
+            color: var(--archetype-primary-light);
+        }
+
+        /* Hero Section */
+        header {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            background: var(--archetype-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-2xl);
+            border: 2px solid var(--archetype-border);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            font-family: var(--font-heading);
+            margin-bottom: var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary), var(--archetype-primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .archetype-definition {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            margin: var(--spacing-lg) 0;
+            padding: var(--spacing-lg);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--archetype-primary);
+        }
+
+        /* Glass Card Sections */
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 2px solid var(--color-border);
+            transition: all var(--transition-base);
+        }
+
+        section:hover {
+            background: var(--color-surface-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        h2 {
+            color: var(--archetype-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-3xl);
+            font-family: var(--font-heading);
+            border-bottom: 2px solid var(--archetype-border);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        h3 {
+            color: var(--archetype-accent);
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-xl);
+            font-family: var(--font-heading);
+        }
+
+        /* Styled Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-lg) 0;
+        }
+
+        th, td {
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--archetype-border);
+        }
+
+        th {
+            background: var(--archetype-surface);
+            color: var(--archetype-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        tr {
+            transition: background var(--transition-fast);
+        }
+
+        tr:hover {
+            background: var(--archetype-surface);
+        }
+
+        td a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        td a:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        /* Icon List */
+        .characteristics ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .characteristics li {
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin: var(--spacing-sm) 0;
+            background: var(--archetype-surface);
+            border-left: 3px solid var(--archetype-primary);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .characteristics li:hover {
+            background: rgba(245, 158, 11, 0.1);
+            transform: translateX(4px);
+        }
+
+        .characteristics li:before {
+            content: "🎭 ";
+            color: var(--archetype-primary);
+            font-weight: var(--font-bold);
+            margin-right: var(--spacing-sm);
+        }
+
+        /* Expandable Sections */
+        .codex-search-section {
+            margin: var(--spacing-lg) 0;
+            border: 2px solid var(--archetype-border);
+            border-radius: var(--radius-md);
+            background: var(--archetype-surface);
+            overflow: hidden;
+        }
+
+        .codex-search-header {
+            padding: var(--spacing-md) var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary-dark) 0%, var(--archetype-primary-darker) 100%);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background var(--transition-base);
+        }
+
+        .codex-search-header:hover {
+            background: linear-gradient(135deg, var(--archetype-primary) 0%, var(--archetype-primary-dark) 100%);
+        }
+
+        .codex-search-header h3 {
+            margin: 0;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-semibold);
+            color: white;
+        }
+
+        .expand-icon {
+            font-size: var(--font-size-xl);
+            transition: transform var(--transition-base);
+        }
+
+        .expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .codex-search-content {
+            display: none;
+            padding: var(--spacing-md);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .codex-search-content.show {
+            display: block;
+        }
+
+        .search-result-item {
+            margin: var(--spacing-sm) 0;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-left: 3px solid var(--archetype-primary);
+            background: rgba(245, 158, 11, 0.08);
+            border-radius: var(--radius-sm);
+        }
+
+        .citation {
+            font-weight: var(--font-semibold);
+            color: var(--archetype-primary);
+            cursor: pointer;
+            margin-bottom: var(--spacing-xs);
+            transition: color var(--transition-fast);
+        }
+
+        .citation:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        .verse-text {
+            display: none;
+            margin-top: var(--spacing-xs);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 2px solid var(--archetype-accent);
+            font-style: italic;
+            color: var(--color-text-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        .verse-text.show {
+            display: block;
+        }
+
+        .book-reference {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-breadcrumb">
+            <a href="../../index.html">🏠 Home</a> <span>→</span>
+            <a href="../index.html">Universal Archetypes</a> <span>→</span>
+            <span>Trickster</span>
+        </div>
+
+        <header>
+    <div class="header-content">
+        <h1>🎭 The Trickster Archetype</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> → <a href="../index.html">Archetypes</a> → <a href="index.html">Trickster</a>
+</nav>
+
+        <section class="characteristics">
+            <h2>Universal Characteristics</h2>
+            <ul>
+                <li><strong>Boundary Transgression:</strong> Crosses borders between worlds, genders, species, and moral categories</li>
+                <li><strong>Shape-Shifting:</strong> Transforms appearance, gender, and form at will</li>
+                <li><strong>Cunning Intelligence:</strong> Solves problems through wit, deception, and clever schemes rather than force</li>
+                <li><strong>Cultural Hero:</strong> Often brings fire, agriculture, or crucial knowledge to humanity through theft or trickery</li>
+                <li><strong>Sacred Fool:</strong> Appears foolish but possesses profound wisdom hidden in comedy</li>
+                <li><strong>Amoral Actions:</strong> Neither good nor evil—operates beyond conventional morality</li>
+                <li><strong>Creator Through Chaos:</strong> Destruction and disruption lead to new creation and transformation</li>
+                <li><strong>Sexual Transgression:</strong> Often violates sexual norms, changing gender or engaging in forbidden acts</li>
+                <li><strong>Messenger Role:</strong> Travels between divine and mortal realms, carrying messages and secrets</li>
+                <li><strong>Comic Relief:</strong> Provides humor even in tragic contexts, puncturing pomposity and pretension</li>
+        </section>
+
+        <section class="cross-tradition-table">
+            <h2>Deities Embodying This Archetype</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tradition</th>
+                        <th>Deity/Figure</th>
+                        <th>Key Attributes</th>
+                        <th>Primary Trickery</th>
+                        <th>Cultural Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Norse</td>
+                        <td><a href="../../mythos/norse/deities/loki.html">Loki</a></td>
+                        <td>Shape-shifter, father of monsters, chaos bringer</td>
+                        <td>Gender-shifting, betrayal of gods</td>
+                        <td>Agent of Ragnarok, necessary evil</td>
+                    </tr>
+                    <tr>
+                        <td>Greek</td>
+                        <td><a href="../../mythos/greek/deities/hermes.html">Hermes</a></td>
+                        <td>Messenger god, thief, psychopomp, inventor</td>
+                        <td>Stole Apollo's cattle as infant, guide of souls</td>
+                        <td>Commerce, communication, boundaries</td>
+                    </tr>
+                    <tr>
+                        <td>West African</td>
+                        <td><a href="../../mythos/african/deities/anansi.html">Anansi</a></td>
+                        <td>Spider trickster, storyteller, clever schemer</td>
+                        <td>Obtained all stories from sky god through cunning</td>
+                        <td>Wisdom through cleverness, storytelling tradition</td>
+                    </tr>
+                    <tr>
+                        <td>Native American</td>
+                        <td><a href="../../mythos/native-american/deities/coyote.html">Coyote</a></td>
+                        <td>Sacred clown, culture hero, fool</td>
+                        <td>Stole fire for humanity, sexual mischief</td>
+                        <td>Teacher through negative example</td>
+                    </tr>
+                    <tr>
+                        <td>Chinese</td>
+                        <td><a href="../../mythos/chinese/deities/sun-wukong.html">Sun Wukong</a></td>
+                        <td>Monkey King, immortal rebel, shape-shifter</td>
+                        <td>Rebelled against Heaven, ate immortality peaches</td>
+                        <td>Enlightenment through transgression</td>
+                    </tr>
+                    <tr>
+                        <td>Japanese</td>
+                        <td><a href="../../mythos/japanese/deities/kitsune.html">Kitsune</a> / <a href="../../mythos/japanese/deities/tanuki.html">Tanuki</a></td>
+                        <td>Fox/raccoon dog spirits, shape-shifters</td>
+                        <td>Deceive humans, change into human form</td>
+                        <td>Guardians and tricksters, messengers</td>
+                    </tr>
+                    <tr>
+                        <td>Hindu</td>
+                        <td><a href="../../mythos/hindu/deities/krishna.html">Krishna</a></td>
+                        <td>Divine child, playful lover, cosmic deceiver</td>
+                        <td>Steals butter, seduces gopis, cosmic play (lila)</td>
+                        <td>Divine love through transgression</td>
+                    </tr>
+                    <tr>
+                        <td>Egyptian</td>
+                        <td><a href="../../mythos/egyptian/deities/set.html">Set</a></td>
+                        <td>Chaos god, storm bringer, necessary disorder</td>
+                        <td>Murdered Osiris, battles Horus</td>
+                        <td>Protector against Apophis, chaos as balance</td>
+                    </tr>
+                    <tr>
+                        <td>Polynesian</td>
+                        <td><a href="../../mythos/polynesian/deities/maui.html">Maui</a></td>
+                        <td>Demi-god hero, shapeshifter, culture bringer</td>
+                        <td>Stole fire, fished up islands, slowed the sun</td>
+                        <td>Cultural hero through trickery</td>
+                    </tr>
+                    <tr>
+                        <td>Yoruba</td>
+                        <td><a href="../../mythos/yoruba/deities/eshu.html">Eshu</a>/<a href="../../mythos/yoruba/deities/elegba.html">Elegba</a></td>
+                        <td>Divine messenger, trickster, crossroads deity</td>
+                        <td>Causes mischief, interprets fate, tests mortals</td>
+                        <td>Mediator between orishas and humans</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/norse/deities/loki.html" style="color: var(--color-primary); text-decoration: none;">Loki</a> (Norse Tradition)</h2>
+            <p>
+                <a href="../../mythos/norse/deities/loki.html" style="color: var(--color-primary); text-decoration: none;">Loki</a> epitomizes the dangerous, necessary trickster—beautiful and chaotic, creative and destructive,
+                ultimately bringing about the end of the world (<a href="../../mythos/norse/concepts/ragnarok.html" style="color: var(--color-primary); text-decoration: none;">Ragnarok</a>) yet also enabling its renewal.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>📚 Loki's Gender-Shifting and Birth of Sleipnir</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Prose Edda, Gylfaginning:42
+                        </div>
+                        <div class="verse-text">
+                            "A certain builder came and offered to build them a fortress so good that it would be secure
+                            against mountain-giants and frost-giants... But he demanded as payment the goddess <a href="../../mythos/norse/deities/freyja.html" style="color: var(--color-secondary); text-decoration: none;">Freyja</a>,
+                            and he wanted the sun and moon as well... At <a href="../../mythos/norse/deities/loki.html" style="color: var(--color-secondary); text-decoration: none;">Loki's</a> suggestion, it was agreed that the builder
+                            should get what he asked for if he could finish the fortress in one winter... The builder had a
+                            stallion called <a href="../../mythos/norse/creatures/svadilfari.html" style="color: var(--color-secondary); text-decoration: none;">Svadilfari</a>... On the advice of <a href="../../mythos/norse/deities/loki.html" style="color: var(--color-secondary); text-decoration: none;">Loki</a>, who was to blame for the bad bargain,
+                            <a href="../../mythos/norse/deities/loki.html" style="color: var(--color-secondary); text-decoration: none;">Loki</a> changed himself into a mare and ran out from the forest to the stallion... Later <a href="../../mythos/norse/deities/loki.html" style="color: var(--color-secondary); text-decoration: none;">Loki</a> gave
+                            birth to a foal. It was grey and had eight legs. This is the best horse among gods and men."
+                        </div>
+                        <div class="book-reference">
+                            Source: Snorri Sturluson, Prose Edda, Gylfaginning (c. 1220 CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>🎭 Loki's Theft and the Death of Baldr</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Prose Edda, Gylfaginning:49
+                        </div>
+                        <div class="verse-text">
+                            "Then <a href="../../mythos/norse/deities/loki.html" style="color: var(--color-secondary); text-decoration: none;">Loki</a>, son of <a href="../../mythos/norse/deities/laufey.html" style="color: var(--color-secondary); text-decoration: none;">Laufey</a>, did something much worse. He went to where <a href="../../mythos/norse/deities/hod.html" style="color: var(--color-secondary); text-decoration: none;">Hod</a> was standing...
+                            and asked him, 'Why are you not shooting at <a href="../../mythos/norse/deities/baldr.html" style="color: var(--color-secondary); text-decoration: none;">Baldr</a>?' <a href="../../mythos/norse/deities/hod.html" style="color: var(--color-secondary); text-decoration: none;">Hod</a> answered, 'Because I cannot see where
+                            <a href="../../mythos/norse/deities/baldr.html" style="color: var(--color-secondary); text-decoration: none;">Baldr</a> is and, furthermore, I have no weapon.' Then <a href="../../mythos/norse/deities/loki.html" style="color: var(--color-secondary); text-decoration: none;">Loki</a> said, 'Do like the others and show <a href="../../mythos/norse/deities/baldr.html" style="color: var(--color-secondary); text-decoration: none;">Baldr</a>
+                            honour like other men. I will direct you to where he is standing. Shoot at him with this twig.'
+                            <a href="../../mythos/norse/deities/hod.html" style="color: var(--color-secondary); text-decoration: none;">Hod</a> took the mistletoe and shot at <a href="../../mythos/norse/deities/baldr.html" style="color: var(--color-secondary); text-decoration: none;">Baldr</a> at <a href="../../mythos/norse/deities/loki.html" style="color: var(--color-secondary); text-decoration: none;">Loki's</a> direction. The missile flew through him and
+                            he fell dead to the ground. This was the greatest misfortune ever to befall gods and men."
+                        </div>
+                        <div class="book-reference">
+                            Source: Snorri Sturluson, Prose Edda, Gylfaginning (c. 1220 CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>⛓️ Loki's Punishment and Bound Fate</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Prose Edda, Gylfaginning:50
+                        </div>
+                        <div class="verse-text">
+                            "Then the <a href="../../mythos/norse/concepts/aesir.html" style="color: var(--color-secondary); text-decoration: none;">Æsir</a> took three flat stones and set them on edge and bored a hole in each stone.
+                            They took <a href="../../mythos/norse/deities/loki.html" style="color: var(--color-secondary); text-decoration: none;">Loki's</a> sons <a href="../../mythos/norse/deities/vali.html" style="color: var(--color-secondary); text-decoration: none;">Vali</a> and <a href="../../mythos/norse/deities/nari.html" style="color: var(--color-secondary); text-decoration: none;">Nari</a>... They changed <a href="../../mythos/norse/deities/vali.html" style="color: var(--color-secondary); text-decoration: none;">Vali</a> into the form of a wolf and he tore apart
+                            his brother <a href="../../mythos/norse/deities/nari.html" style="color: var(--color-secondary); text-decoration: none;">Nari</a>. Then the <a href="../../mythos/norse/concepts/aesir.html" style="color: var(--color-secondary); text-decoration: none;">Æsir</a> took his entrails and bound <a href="../../mythos/norse/deities/loki.html" style="color: var(--color-secondary); text-decoration: none;">Loki</a> with them over the three stones...
+                            <a href="../../mythos/norse/deities/skadi.html" style="color: var(--color-secondary); text-decoration: none;">Skadi</a> then took a venomous snake and fastened it up over <a href="../../mythos/norse/deities/loki.html" style="color: var(--color-secondary); text-decoration: none;">Loki</a> so that the poison would drip from the
+                            snake onto his face... And there he lies until <a href="../../mythos/norse/concepts/ragnarok.html" style="color: var(--color-secondary); text-decoration: none;">Ragnarok</a>."
+                        </div>
+                        <div class="book-reference">
+                            Source: Snorri Sturluson, Prose Edda, Gylfaginning (c. 1220 CE)
+                        </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/greek/deities/hermes.html" style="color: var(--color-primary); text-decoration: none;">Hermes</a> (Greek Tradition)</h2>
+            <p>
+                <a href="../../mythos/greek/deities/hermes.html" style="color: var(--color-primary); text-decoration: none;">Hermes</a> represents the "civilized" trickster—a thief and deceiver, yes, but also inventor, messenger,
+                guide of souls, and patron of commerce. His tricks benefit civilization rather than destroy it.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>📚 The Infant Hermes Steals Apollo's Cattle</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Homeric Hymn to Hermes:17-23, 68-86
+                        </div>
+                        <div class="verse-text">
+                            "Born in the dawning, by midday he was playing the lyre, and in the evening he stole the cattle
+                            of far-shooting <a href="../../mythos/greek/deities/apollo.html" style="color: var(--color-secondary); text-decoration: none;">Apollo</a>—on the fourth day of the month when lady <a href="../../mythos/greek/deities/maia.html" style="color: var(--color-secondary); text-decoration: none;">Maia</a> bore him... The child sprang
+                            from the immortal limbs of his mother and did not remain in his sacred cradle, but he leaped up to
+                            seek the cattle of <a href="../../mythos/greek/deities/apollo.html" style="color: var(--color-secondary); text-decoration: none;">Apollo</a>, crossing the threshold of the high-roofed cave... He found the cattle of
+                            blessed <a href="../../mythos/greek/deities/apollo.html" style="color: var(--color-secondary); text-decoration: none;">Apollo</a> grazing in a meadow... The powerful son of <a href="../../mythos/greek/deities/maia.html" style="color: var(--color-secondary); text-decoration: none;">Maia</a> drove fifty loud-lowing cattle away...
+                            He made them walk backwards, reversing their hoofprints... while he himself walked forwards."
+                        </div>
+                        <div class="book-reference">
+                            Source: Homeric Hymn to Hermes (c. 7th-6th century BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Homeric Hymn to Hermes:368-396
+                        </div>
+                        <div class="verse-text">
+                            "So these two, <a href="../../mythos/greek/deities/zeus.html" style="color: var(--color-secondary); text-decoration: none;">Zeus's</a> glorious children, made their covenant with sacrifice. <a href="../../mythos/greek/deities/hermes.html" style="color: var(--color-secondary); text-decoration: none;">Hermes</a> could never
+                            deceive <a href="../../mythos/greek/deities/apollo.html" style="color: var(--color-secondary); text-decoration: none;">Apollo</a> completely, but would be the companion of <a href="../../mythos/greek/deities/apollo.html" style="color: var(--color-secondary); text-decoration: none;">Apollo</a>, harming neither gods nor men with
+                            word or deed... And the son of <a href="../../mythos/greek/deities/kronos.html" style="color: var(--color-secondary); text-decoration: none;">Kronos</a> [<a href="../../mythos/greek/deities/zeus.html" style="color: var(--color-secondary); text-decoration: none;">Zeus</a>] loved them both. For <a href="../../mythos/greek/deities/hermes.html" style="color: var(--color-secondary); text-decoration: none;">Hermes</a> moves among both mortals and
+                            immortals. He benefits few but continually deceives the tribes of mortal men throughout the night."
+                        </div>
+                        <div class="book-reference">
+                            Source: Homeric Hymn to Hermes (c. 7th-6th century BCE)
+                        </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/chinese/deities/sun-wukong.html" style="color: var(--color-primary); text-decoration: none;">Sun Wukong</a> (Chinese Tradition)</h2>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>🐒 The Monkey King Rebels Against Heaven</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Journey to the West:Chapter 5
+                        </div>
+                        <div class="verse-text">
+                            "The <a href="../../mythos/chinese/deities/sun-wukong.html" style="color: var(--color-secondary); text-decoration: none;">Monkey King</a>... crashed the Peach Banquet, drinking all the fine wine and eating all the immortality
+                            peaches meant for the gods. Drunk and reckless, he stumbled into <a href="../../mythos/chinese/deities/laozi.html" style="color: var(--color-secondary); text-decoration: none;">Laozi's</a> palace and consumed all the pills
+                            of immortality. When he sobered up and realized what he had done, he declared: 'This is bad! This is bad!
+                            When they discover what I've done in the morning, I'll surely be executed! I'd better leave! I'd better leave!
+                            It's better to be king down below than a slave up here in Heaven!' So the Great Sage somersaulted out of the
+                            Celestial Palace, broke through the Southern Gate of Heaven, and descended to his <a href="../../mythos/chinese/locations/flower-fruit-mountain.html" style="color: var(--color-secondary); text-decoration: none;">Flower-Fruit Mountain</a>."
+                        </div>
+                        <div class="book-reference">
+                            Source: Wu Cheng'en, Journey to the West (c. 16th century CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Cross-Cultural Analysis</h2>
+
+            <h3>Why Do Cultures Need Tricksters?</h3>
+            <p>The Trickster appears in every major mythology because human consciousness requires:</p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Creative Destruction:</strong> Old orders must be disrupted for new creation to emerge</li>
+                <li><strong>Moral Flexibility:</strong> Absolute law creates rigidity; the Trickster shows when rules must be broken</li>
+                <li><strong>Shadow Integration:</strong> The Trickster embodies rejected aspects of the psyche—sexuality, deception, chaos</li>
+                <li><strong>Cultural Critique:</strong> Sacred clowns mock authority, revealing pomposity and hypocrisy</li>
+                <li><strong>Liminal Wisdom:</strong> Truth often lies at boundaries and thresholds, the Trickster's domain</li>
+            </ul>
+
+            <h3>Trickster as Cultural Hero</h3>
+            <p>
+                Paradoxically, many tricksters are also culture heroes who bring crucial gifts to humanity:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Fire:</strong> <a href="../../mythos/greek/deities/prometheus.html" style="color: var(--color-primary); text-decoration: none;">Prometheus</a> (Greek), <a href="../../mythos/native-american/deities/coyote.html" style="color: var(--color-primary); text-decoration: none;">Coyote</a> (Native American), <a href="../../mythos/polynesian/deities/maui.html" style="color: var(--color-primary); text-decoration: none;">Maui</a> (Polynesian) all steal fire from gods</li>
+                <li><strong>Knowledge:</strong> <a href="../../mythos/norse/deities/loki.html" style="color: var(--color-primary); text-decoration: none;">Loki</a> helps gods acquire treasures; <a href="../../mythos/african/deities/anansi.html" style="color: var(--color-primary); text-decoration: none;">Anansi</a> obtains all stories</li>
+                <li><strong>Agriculture:</strong> Various tricksters teach farming, though often through failures</li>
+                <li><strong>Language/Writing:</strong> <a href="../../mythos/greek/deities/hermes.html" style="color: var(--color-primary); text-decoration: none;">Hermes</a> invents the lyre and alphabet; <a href="../../mythos/egyptian/deities/thoth.html" style="color: var(--color-primary); text-decoration: none;">Thoth</a> invents writing</li>
+            </ul>
+
+            <h3>The Dark Side: Necessary Chaos</h3>
+            <p>
+                Unlike purely benevolent heroes, Tricksters cause real harm:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong><a href="../../mythos/norse/deities/loki.html" style="color: var(--color-primary); text-decoration: none;">Loki</a>:</strong> Causes death of <a href="../../mythos/norse/deities/baldr.html" style="color: var(--color-primary); text-decoration: none;">Baldr</a>, brings about <a href="../../mythos/norse/concepts/ragnarok.html" style="color: var(--color-primary); text-decoration: none;">Ragnarok</a></li>
+                <li><strong><a href="../../mythos/egyptian/deities/set.html" style="color: var(--color-primary); text-decoration: none;">Set</a>:</strong> Murders <a href="../../mythos/egyptian/deities/osiris.html" style="color: var(--color-primary); text-decoration: none;">Osiris</a>, dismembers his brother</li>
+                <li><strong><a href="../../mythos/native-american/deities/coyote.html" style="color: var(--color-primary); text-decoration: none;">Coyote</a>:</strong> Brings death into the world through foolishness</li>
+                <li><strong><a href="../../mythos/yoruba/deities/eshu.html" style="color: var(--color-primary); text-decoration: none;">Eshu</a>:</strong> Creates conflict between friends through mischief</li>
+            </ul>
+            <p>
+                Yet this chaos is <em>necessary</em>—stagnation is death. The Trickster's disruption enables transformation.
+        </section>
+
+        <div style="margin-top: 50px; text-align: center; padding: 30px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+            <h3>Explore Related Archetypes</h3>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <a href="../wisdom/wisdom-goddess.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">📚 Wisdom Goddess</a>
+                <a href="../sky-father/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">⚡ Sky Father</a>
+                <a href="../death/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">💀 Death God</a>
+                <a href="../index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">🎭 All Archetypes</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCodexSearch(header) {
+            const section = header.parentElement;
+            const content = section.querySelector('.codex-search-content');
+            section.classList.toggle('expanded');
+            content.classList.toggle('show');
+        }
+        function toggleVerse(citation) {
+            const verseText = citation.nextElementSibling;
+            verseText.classList.toggle('show');
+        }
+    </script>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>
