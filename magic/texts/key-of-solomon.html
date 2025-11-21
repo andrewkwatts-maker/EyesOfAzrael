@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Key of Solomon - Clavicula Salomonis</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-relaxed);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--spacing-4xl) var(--spacing-xl);
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .text-icon {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            margin-bottom: var(--spacing-md);
+            color: white;
+        }
+
+        .subtitle {
+            font-size: var(--font-size-2xl);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: var(--spacing-lg);
+            font-weight: var(--font-light);
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-lg);
+        }
+
+        .tradition-tag {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+        }
+
+        .breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-lg);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .breadcrumb a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: white;
+        }
+
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        h2 {
+            color: var(--color-primary);
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-lg);
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: var(--spacing-md);
+        }
+
+        h3 {
+            color: var(--color-secondary);
+            font-size: var(--font-size-2xl);
+            margin: var(--spacing-xl) 0 var(--spacing-md);
+        }
+
+        h4 {
+            color: var(--color-accent);
+            font-size: var(--font-size-xl);
+            margin: var(--spacing-lg) 0 var(--spacing-sm);
+        }
+
+        p {
+            margin-bottom: var(--spacing-md);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin: var(--spacing-md) 0 var(--spacing-md) var(--spacing-2xl);
+            line-height: var(--leading-relaxed);
+        }
+
+        li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .quote-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-md);
+            font-style: italic;
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-secondary-rgb), 0.15);
+            border: 2px solid var(--color-secondary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .warning-box {
+            background: rgba(255, 140, 0, 0.15);
+            border: 2px solid rgba(255, 140, 0, 0.5);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .source-card {
+            background: rgba(var(--color-accent-rgb, 139, 127, 255), 0.1);
+            border: 1px solid var(--color-border);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-md) 0;
+            border-radius: var(--radius-md);
+        }
+
+        .source-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .cross-ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .cross-ref-card {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 2px solid var(--color-border);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .cross-ref-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--color-primary);
+            box-shadow: 0 5px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .cross-ref-icon {
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .cross-ref-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-3xl);
+        }
+
+        .nav-button {
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+            display: inline-block;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .tool-card {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.2),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border: 2px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+
+        .tool-icon {
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .tool-name {
+            font-weight: var(--font-bold);
+            color: var(--color-primary);
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .pentacle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .pentacle-card {
+            background: rgba(var(--color-accent-rgb, 139, 127, 255), 0.15);
+            border: 2px solid var(--color-accent);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+        }
+
+        .pentacle-title {
+            font-weight: var(--font-bold);
+            color: var(--color-secondary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        strong {
+            color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+    <div class="header-content">
+        <h1>The Key of Solomon</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Magical Systems</a> →
+                <a href="../index.html#texts">Sacred Texts</a> →
+                <span>Key of Solomon</span>
+</nav>
+
+        <section>
+            <h2>Overview</h2>
+            <p>
+                The <strong>Clavicula Salomonis</strong> (Key of Solomon the King) stands as the most influential grimoire
+                in the Western magical tradition. This comprehensive manual of ceremonial magic provides detailed instructions
+                for conjuring and commanding spirits, creating magical tools and pentacles, performing ritual operations,
+                and achieving various worldly and spiritual goals through the invocation of divine and angelic names.
+            </p>
+
+            <p>
+                Unlike grimoires focused on demonic evocation (such as the <em>Lemegeton</em> or <em>Grand Grimoire</em>),
+                the Key of Solomon emphasizes working with angelic forces and divine names, positioning the magician as a
+                holy operator petitioning God and angels rather than commanding demons. This gave it greater acceptability
+                among educated practitioners and helped it survive and proliferate despite ecclesiastical condemnation.
+            </p>
+
+            <h3>Historical Context & Authorship</h3>
+            <p>
+                The attribution to <strong>King Solomon</strong> is pseudepigraphical - a common medieval practice of
+                ascribing magical texts to biblical figures to grant them authority. The legend claims Solomon received
+                divine wisdom to command spirits and wrote grimoires to preserve this knowledge. The actual composition
+                history is more complex:
+            </p>
+
+            <ul>
+                <li><strong>Date of Composition:</strong> The earliest extant manuscripts date to the 14th-15th centuries,
+                    though the text likely draws on earlier material from the 12th-13th centuries</li>
+                <li><strong>Geographic Origin:</strong> Probably compiled in Italy or France, synthesizing Jewish
+                    Kabbalistic, Christian liturgical, and Greco-Roman magical elements</li>
+                <li><strong>Manuscript Tradition:</strong> Exists in numerous versions with significant variations,
+                    indicating a fluid textual tradition that evolved through copying and adaptation</li>
+                <li><strong>Languages:</strong> Original versions in Latin and Hebrew, later translated into Italian,
+                    French, English, and other vernaculars</li>
+            </ul>
+
+            <div class="quote-box">
+                "Solomon, the son of David, King of Israel, hath said that the beginning of our Key is to fear God,
+                to adore Him, to honor Him with contrition of heart, to invoke Him in all matters which we wish to
+                undertake, and to operate with very great devotion, for thus God will lead us in the right way."
+                <br><br><em>- Clavicula Salomonis, Opening Invocation</em>
+            </div>
+
+            <h3>Relationship to Other Solomonic Texts</h3>
+            <p>
+                The Key of Solomon belongs to a family of Solomonic grimoires, each with different emphasis:
+            </p>
+
+            <ul>
+                <li><strong>Clavicula Salomonis (Key of Solomon):</strong> Focuses on angelic magic, pentacles, and
+                    ritual purification</li>
+                <li><strong>Lemegeton/Lesser Key of Solomon:</strong> Five books including the <em>Ars Goetia</em>
+                    (72 demons), <em>Ars Theurgia Goetia</em>, <em>Ars Paulina</em>, <em>Ars Almadel</em>, and
+                    <em>Ars Notoria</em></li>
+                <li><strong>Testament of Solomon:</strong> Ancient Greek text (1st-5th century CE) describing Solomon's
+                    building of the Temple with demonic labor</li>
+                <li><strong>Hygromanteia:</strong> Byzantine Greek grimoire with Solomonic elements</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Key Teachings</h2>
+
+            <h3>The Holy Magician</h3>
+            <p>
+                The Key of Solomon presents a model of <strong>theurgic magic</strong> - the operator as a priest-magician
+                working through divine authority rather than personal power:
+            </p>
+
+            <div class="highlight-box">
+                <h4>Requirements for the Magician</h4>
+                <ul>
+                    <li><strong>Purity:</strong> Ritual purification through fasting, bathing, and sexual abstinence</li>
+                    <li><strong>Faith:</strong> Firm belief in God and the reality of spiritual forces</li>
+                    <li><strong>Knowledge:</strong> Understanding of divine names, angelic hierarchies, and correspondences</li>
+                    <li><strong>Timing:</strong> Operations performed at astrologically auspicious moments</li>
+                    <li><strong>Preparation:</strong> Proper construction of tools, vestments, and magical circle</li>
+                    <li><strong>Intention:</strong> Pure motive - seeking wisdom and divine assistance, not worldly gain alone</li>
+                </ul>
+            </div>
+
+            <h3>Divine Names & Power Words</h3>
+            <p>
+                Central to the grimoire's operations are <strong>divine names</strong> in Hebrew, Greek, and invented
+                "angelic" languages. These names constitute the actual power compelling spirits to appear:
+            </p>
+
+            <ul>
+                <li><strong>Tetragrammaton (YHVH):</strong> The ineffable name of God, most powerful invocation</li>
+                <li><strong>Adonai, Elohim, El, Shaddai:</strong> Hebrew divine names with specific attributes</li>
+                <li><strong>Agla:</strong> Notariqon (acronym) of "Atah Gibor Le-olam Adonai" (Thou art mighty forever, O Lord)</li>
+                <li><strong>Alpha and Omega:</strong> Greek Christian symbolism of divine totality</li>
+                <li><strong>Barbarous Names:</strong> Presumably corrupted ancient names or invented "angelic" words</li>
+            </ul>
+
+            <h3>The Magical Circle</h3>
+            <p>
+                Every operation begins with the construction of a <strong>circle of protection</strong>:
+            </p>
+
+            <div class="highlight-box">
+                <p>
+                    The circle serves multiple functions:
+                </p>
+                <ul>
+                    <li><strong>Protection:</strong> Shields the magician from hostile spirits</li>
+                    <li><strong>Sacred Space:</strong> Creates a temple consecrated to divine forces</li>
+                    <li><strong>Cosmogram:</strong> Represents the universe in miniature with operator at center</li>
+                    <li><strong>Boundary:</strong> Defines the limit of human and beginning of spiritual space</li>
+                </ul>
+                <p>
+                    The circle is typically nine feet in diameter, inscribed with divine names, planetary symbols, and
+                    often accompanied by a triangle of manifestation outside it where spirits appear.
+                </p>
+            </div>
+
+            <h3>The Magical Tools</h3>
+            <p>
+                The grimoire provides detailed instructions for creating ritual implements, each with specific purposes:
+            </p>
+
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-icon">🗡️</div>
+                    <div class="tool-name">The Sword</div>
+                    <p>Commands and threatens spirits; consecrated on day and hour of Mars</p>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">🔪</div>
+                    <div class="tool-name">The Knife (Arthame)</div>
+                    <p>Black-handled knife for inscribing circles and characters; Jupiter day</p>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">🪄</div>
+                    <div class="tool-name">The Wand</div>
+                    <p>Directs spiritual force; hazel or almond wood cut at sunrise</p>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">🪶</div>
+                    <div class="tool-name">The Pen & Ink</div>
+                    <p>For writing characters and pentacles; special inks and new quills</p>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">🧿</div>
+                    <div class="tool-name">The Pentacles</div>
+                    <p>Talismanic seals for various purposes; inscribed on virgin parchment or metal</p>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">👕</div>
+                    <div class="tool-name">The Vestments</div>
+                    <p>White robe of linen; priestly garments for purity</p>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">🕯️</div>
+                    <div class="tool-name">The Candles/Lamp</div>
+                    <p>Illumination representing divine light; virgin wax or olive oil</p>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-icon">💨</div>
+                    <div class="tool-name">The Incense</div>
+                    <p>Fumigation to attract spirits; specific recipes for each operation</p>
+                </div>
+            </div>
+
+            <p>
+                Each tool must be constructed according to precise specifications, blessed with prayers and fumigations,
+                and consecrated on astrologically appropriate days and hours. The grimoire insists that tools made
+                with improper procedure will fail.
+            </p>
+
+            <h3>The Pentacles of Solomon</h3>
+            <p>
+                The text includes numerous <strong>pentacles</strong> (also called seals or talismans) - circular or
+                polygonal designs combining Hebrew letters, divine names, planetary symbols, and geometric patterns.
+                Each pentacle has specific applications:
+            </p>
+
+            <div class="pentacle-grid">
+                <div class="pentacle-card">
+                    <div class="pentacle-title">Pentacles of Saturn (7)</div>
+                    <p><strong>Purpose:</strong> Compelling spirits, revealing hidden treasures, protection from harm,
+                    striking terror in enemies, commanding demons of Saturday</p>
+                </div>
+
+                <div class="pentacle-card">
+                    <div class="pentacle-title">Pentacles of Jupiter (7)</div>
+                    <p><strong>Purpose:</strong> Acquiring wealth and honor, discovering hidden treasures, protection
+                    during travel, commanding spirits of air, gaining favor</p>
+                </div>
+
+                <div class="pentacle-card">
+                    <div class="pentacle-title">Pentacles of Mars (7)</div>
+                    <p><strong>Purpose:</strong> Protection in battle, overcoming enemies, causing tempests, resisting
+                    attack, victory in combat, commanding martial spirits</p>
+                </div>
+
+                <div class="pentacle-card">
+                    <div class="pentacle-title">Pentacles of the Sun (7)</div>
+                    <p><strong>Purpose:</strong> Rendering invisible, commanding spirits to appear, obtaining gold,
+                    protection from evil, forcing spirits to grant wishes</p>
+                </div>
+
+                <div class="pentacle-card">
+                    <div class="pentacle-title">Pentacles of Venus (5)</div>
+                    <p><strong>Purpose:</strong> Obtaining love and grace, compelling affection, attracting friendships,
+                    commanding spirits of Venus, harmonizing relationships</p>
+                </div>
+
+                <div class="pentacle-card">
+                    <div class="pentacle-title">Pentacles of Mercury (5)</div>
+                    <p><strong>Purpose:</strong> Acquiring knowledge, understanding languages, revealing secrets,
+                    commanding Mercurial spirits, success in business</p>
+                </div>
+
+                <div class="pentacle-card">
+                    <div class="pentacle-title">Pentacles of the Moon (6)</div>
+                    <p><strong>Purpose:</strong> Opening locked doors, compelling truth from spirits, protection during
+                    water travel, revealing hidden things, night operations</p>
+                </div>
+            </div>
+
+            <h3>Categories of Operations</h3>
+            <p>
+                The grimoire provides procedures for diverse magical goals:
+            </p>
+
+            <ul>
+                <li><strong>Conjurations:</strong> Summoning and commanding spirits to visible appearance</li>
+                <li><strong>Divination:</strong> Obtaining knowledge of hidden or future things</li>
+                <li><strong>Love Magic:</strong> Attracting affection and favor (though with warnings about free will)</li>
+                <li><strong>Protection:</strong> Defending against physical and spiritual dangers</li>
+                <li><strong>Treasure:</strong> Discovering hidden wealth and material resources</li>
+                <li><strong>Invisibility:</strong> Concealing oneself from human sight</li>
+                <li><strong>Knowledge:</strong> Acquiring wisdom and understanding of sciences</li>
+            </ul>
+
+            <div class="warning-box">
+                <h4>⚠️ Ethical Considerations</h4>
+                <p>
+                    While the Key of Solomon presents itself as "white magic" working with divine forces, it includes
+                    operations that modern ethics would question - compelling love, harming enemies, dominating wills.
+                    The text itself includes warnings that operations performed for evil purposes will rebound upon the
+                    operator. Medieval magicians debated extensively whether such practices could ever be justified,
+                    and many manuscripts omit the most problematic sections.
+                </p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Structure & Contents</h2>
+
+            <h3>Book I: Preparation & Theory</h3>
+            <p>
+                The first book establishes the foundation for magical practice:
+            </p>
+
+            <ul>
+                <li><strong>Chapters 1-3:</strong> General precepts - the necessity of faith, fear of God, and purity of intention</li>
+                <li><strong>Chapters 4-6:</strong> Days and hours of the planets - astrological timing for operations</li>
+                <li><strong>Chapters 7-9:</strong> Preparation of the operator - fasting, bathing, abstinence</li>
+                <li><strong>Chapters 10-12:</strong> Construction of the magical circle and its variations</li>
+                <li><strong>Chapters 13-15:</strong> Conjurations and invocations for compelling spirits</li>
+                <li><strong>Chapters 16-18:</strong> Dismissal of spirits and closing procedures</li>
+                <li><strong>Chapters 19-22:</strong> The pentacles and their applications</li>
+            </ul>
+
+            <h3>Book II: Tools & Operations</h3>
+            <p>
+                The second book provides practical instructions for specific operations:
+            </p>
+
+            <ul>
+                <li><strong>Chapters 1-8:</strong> Construction and consecration of magical tools (sword, knife, wand,
+                    vestments, pen, ink, parchment, candles)</li>
+                <li><strong>Chapters 9-12:</strong> Fumigations and perfumes for different operations</li>
+                <li><strong>Chapters 13-16:</strong> The experiment of love and favor</li>
+                <li><strong>Chapters 17-20:</strong> Operations for invisibility and various transformations</li>
+                <li><strong>Chapters 21-24:</strong> Experiments for discovering theft and hidden treasure</li>
+                <li><strong>Chapters 25-27:</strong> Various other operations (opening locks, causing visions, etc.)</li>
+            </ul>
+
+            <h3>The Pentacles</h3>
+            <p>
+                Many manuscripts include a separate section or appendix containing the 44 pentacles organized by planet,
+                with instructions for their inscription, consecration, and use. Each pentacle includes:
+            </p>
+
+            <ul>
+                <li>The geometric design with Hebrew characters and divine names</li>
+                <li>Planetary association and timing for creation</li>
+                <li>Specific powers and applications</li>
+                <li>Verses from biblical sources (particularly Psalms) connected to its virtue</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Influence & Legacy</h2>
+
+            <h3>Medieval & Renaissance Magic</h3>
+            <p>
+                The Key of Solomon became the template for ceremonial magic practice:
+            </p>
+
+            <ul>
+                <li><strong>Grimoire Tradition:</strong> Established the standard structure for later grimoires (preparation,
+                    tools, circles, conjurations)</li>
+                <li><strong>Ritual Magic:</strong> Its procedures became the foundation of ceremonial magic as practiced
+                    by educated elites</li>
+                <li><strong>Angelic Magic:</strong> Provided a "safe" alternative to demonic grimoires by emphasizing
+                    divine authority</li>
+                <li><strong>Practical Kabbalah:</strong> Synthesized Jewish mystical elements into Christian magical practice</li>
+            </ul>
+
+            <h3>Modern Occultism</h3>
+            <p>
+                The grimoire profoundly shaped 19th-20th century occult revival:
+            </p>
+
+            <ul>
+                <li><strong>S.L. MacGregor Mathers (1854-1918):</strong> His 1889 English translation from French manuscripts
+                    made the text widely accessible and became the standard version</li>
+                <li><strong>Hermetic Order of the Golden Dawn:</strong> Incorporated Solomonic pentacles, divine names,
+                    and ritual structure into their ceremonial system</li>
+                <li><strong>Aleister Crowley:</strong> Drew on Key of Solomon for ritual elements while adapting them
+                    to Thelemic framework</li>
+                <li><strong>Wicca:</strong> The athame (ritual knife) and other tools derive from Solomonic tradition
+                    via the Golden Dawn</li>
+                <li><strong>Chaos Magic:</strong> Modern practitioners have experimented with simplified Solomonic evocation</li>
+            </ul>
+
+            <h3>Academic & Cultural Impact</h3>
+            <p>
+                Beyond operative magic, the Key of Solomon influenced:
+            </p>
+
+            <ul>
+                <li><strong>History of Magic:</strong> Lynn Thorndike, Richard Kieckhefer, and other scholars used it
+                    as primary source for understanding medieval magical practice</li>
+                <li><strong>Literary Influence:</strong> References appear in works by Marlowe, Goethe, and others
+                    depicting magical practices</li>
+                <li><strong>Popular Culture:</strong> Contributed to popular conception of magical circles, grimoires,
+                    and ceremonial magic</li>
+                <li><strong>Comparative Religion:</strong> Demonstrates synthesis of Jewish, Christian, and pagan
+                    elements in medieval syncretism</li>
+            </ul>
+
+            <h3>Manuscript Tradition & Variations</h3>
+            <p>
+                The Key of Solomon exists in hundreds of manuscript copies across multiple languages, each with variations:
+            </p>
+
+            <ul>
+                <li><strong>British Library Manuscripts:</strong> Including Sloane, Harley, and Additional collections
+                    with Latin, French, and English versions</li>
+                <li><strong>Bibliothèque de l'Arsenal (Paris):</strong> Important French manuscripts used by Mathers</li>
+                <li><strong>Vatican Library:</strong> Latin versions showing Christian theological influence</li>
+                <li><strong>Italian Manuscripts:</strong> Often include additional pentacles and experiments</li>
+            </ul>
+
+            <p>
+                This manuscript diversity indicates a living tradition continually adapted by practitioners rather than
+                a fixed canonical text, reflecting the experimental nature of magical practice.
+            </p>
+        </section>
+
+        <section>
+            <h2>Primary Sources & Editions</h2>
+
+            <div class="source-card">
+                <div class="source-title">The Key of Solomon the King (Clavicula Salomonis) - S.L. MacGregor Mathers (trans.) (1889/1972)</div>
+                <p>
+                    The classic English translation from French manuscripts, still the most widely read version. Mathers
+                    provides introduction on Solomonic tradition and includes illustrations of pentacles and magical
+                    implements. Despite some inaccuracies, it remains influential and accessible.
+                </p>
+                <p><strong>Publisher:</strong> Samuel Weiser | <strong>ISBN:</strong> 978-0877289142</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Clavicle of Solomon Revealed by Ptolomy - Ceisiwr Serith (trans.) (2015)</div>
+                <p>
+                    Translation of Italian manuscript (British Library MS Sloane 3825) titled "Clavicula di Salomone
+                    ridotta in pratie di Ptolomeo Greco." Represents a different manuscript family with unique content
+                    and interesting variations from Mathers' version.
+                </p>
+                <p><strong>Publisher:</strong> CreateSpace | <strong>ISBN:</strong> 978-1511902656</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">Forbidden Rites: A Necromancer's Manual of the Fifteenth Century - Richard Kieckhefer (1997)</div>
+                <p>
+                    Scholarly edition and analysis of MS Clm 849 (Munich), containing Solomonic material along with
+                    necromantic experiments. Kieckhefer's introduction provides essential context for understanding
+                    medieval magical practice and manuscript culture.
+                </p>
+                <p><strong>Publisher:</strong> Penn State University Press | <strong>ISBN:</strong> 978-0271019857</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Sworn Book of Honorius - Daniel Driscoll (trans.) (2016)</div>
+                <p>
+                    Though not the Key of Solomon, this related grimoire (<em>Liber Juratus</em>) shares similar theurgy
+                    and provides context for the Solomonic tradition. One of the oldest surviving grimoires (13th century),
+                    showing earlier development of ceremonial magic.
+                </p>
+                <p><strong>Publisher:</strong> Sourceworks of Ceremonial Magic | <strong>ISBN:</strong> 978-0996990820</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Veritable Key of Solomon - Stephen Skinner & David Rankine (trans.) (2008)</div>
+                <p>
+                    Translation of Italian Clavicula manuscripts presenting different material from Mathers' version.
+                    Includes extensive scholarly apparatus, manuscript comparisons, and historical analysis. Essential
+                    for serious study of the textual tradition.
+                </p>
+                <p><strong>Publisher:</strong> Golden Hoard Press | <strong>ISBN:</strong> 978-0954763954</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Grimoire of Arthur Gauntlet - David Rankine (ed.) (2011)</div>
+                <p>
+                    17th-century English grimoire heavily based on Key of Solomon, showing how the text was adapted
+                    and used by an actual practitioner. Provides insight into how grimoires functioned as working
+                    manuals rather than merely theoretical texts.
+                </p>
+                <p><strong>Publisher:</strong> Avalonia | <strong>ISBN:</strong> 978-1905297474</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Cross-References & Related Texts</h2>
+
+            <div class="cross-ref-grid">
+                <div class="cross-ref-card" onclick="location.href='sefer-yetzirah.html'">
+                    <div class="cross-ref-icon">✡️</div>
+                    <div class="cross-ref-title">Sefer Yetzirah</div>
+                    <p>Kabbalistic foundation for Hebrew names and letter mysticism in the Key</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='picatrix.html'">
+                    <div class="cross-ref-icon">🌟</div>
+                    <div class="cross-ref-title">Picatrix</div>
+                    <p>Astrological timing and planetary correspondences used in Solomonic magic</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='corpus-hermeticum.html'">
+                    <div class="cross-ref-icon">☿</div>
+                    <div class="cross-ref-title">Corpus Hermeticum</div>
+                    <p>Hermetic philosophy underlying the magician as divine intermediary</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../ritual/ceremonial-magic.html'">
+                    <div class="cross-ref-icon">🔯</div>
+                    <div class="cross-ref-title">Ceremonial Magic</div>
+                    <p>Practical tradition descended from Solomonic grimoires</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../practical/talismans.html'">
+                    <div class="cross-ref-icon">🧿</div>
+                    <div class="cross-ref-title">Talismans & Pentacles</div>
+                    <p>The Solomonic pentacles as archetypal talismans</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../practical/spirit-work.html'">
+                    <div class="cross-ref-icon">👻</div>
+                    <div class="cross-ref-title">Spirit Work</div>
+                    <p>Techniques of angelic and spiritual evocation</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../divination/astrology.html'">
+                    <div class="cross-ref-icon">♈</div>
+                    <div class="cross-ref-title">Astrology</div>
+                    <p>Planetary hours and astrological elections for magical timing</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../../mythos/jewish/texts/index.html'">
+                    <div class="cross-ref-icon">📜</div>
+                    <div class="cross-ref-title">Jewish Mystical Texts</div>
+                    <p>Sources for Hebrew names and Kabbalistic elements</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="nav-buttons">
+            <a href="picatrix.html" class="nav-button">⬅ Previous: Picatrix</a>
+            <a href="corpus-hermeticum.html" class="nav-button">Next: Corpus Hermeticum ➡</a>
+            <a href="../index.html" class="nav-button">📚 Sacred Texts</a>
+            <a href="../../index.html" class="nav-button">🏠 Home</a>
+        </div>
+    </div>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>

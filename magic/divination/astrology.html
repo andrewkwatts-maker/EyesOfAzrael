@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astrology - Divination Systems</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--space-5);
+        }
+
+        .container {
+            max-width: var(--container-lg);
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--space-16) var(--space-5);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-10);
+            border: 2px solid var(--color-border);
+        }
+
+        .header-icon {
+            font-size: 5rem;
+            margin-bottom: var(--space-4);
+        }
+
+        h1 {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-5);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: var(--text-xl);
+            color: var(--color-text-secondary);
+            margin: var(--space-3) 0;
+            font-style: italic;
+        }
+
+        .section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+        }
+
+        h2 {
+            font-size: var(--text-3xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-3);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        h3 {
+            font-size: var(--text-2xl);
+            color: var(--color-secondary);
+            margin-top: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+
+        h4 {
+            font-size: var(--text-xl);
+            color: var(--color-primary);
+            margin-top: var(--space-4);
+            margin-bottom: var(--space-3);
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-4);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin-left: var(--space-6);
+            margin-bottom: var(--space-4);
+            color: var(--color-text-secondary);
+        }
+
+        li {
+            margin-bottom: var(--space-2);
+            line-height: var(--leading-relaxed);
+        }
+
+        .zodiac-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-6) 0;
+        }
+
+        .zodiac-item {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+        }
+
+        .zodiac-symbol {
+            font-size: var(--text-4xl);
+            text-align: center;
+            margin-bottom: var(--space-2);
+        }
+
+        .zodiac-name {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+            text-align: center;
+        }
+
+        .zodiac-dates {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+            text-align: center;
+            font-style: italic;
+            margin-bottom: var(--space-3);
+        }
+
+        .zodiac-details {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .planet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-6) 0;
+        }
+
+        .planet-item {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            text-align: center;
+        }
+
+        .planet-symbol {
+            font-size: var(--text-3xl);
+            margin-bottom: var(--space-2);
+        }
+
+        .planet-name {
+            font-weight: var(--font-semibold);
+            color: var(--color-secondary);
+            margin-bottom: var(--space-2);
+        }
+
+        .source-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .source-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 3px solid var(--color-primary);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+            border-radius: var(--radius-md);
+        }
+
+        .cross-ref {
+            display: inline-block;
+            padding: var(--space-2) var(--space-4);
+            background: rgba(var(--color-secondary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            margin: var(--space-2);
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+        }
+
+        .cross-ref:hover {
+            background: rgba(var(--color-secondary-rgb), 0.4);
+            transform: translateY(-2px);
+        }
+
+        .nav-section {
+            text-align: center;
+            margin-top: var(--space-10);
+            padding: var(--space-6);
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: var(--space-4) var(--space-8);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+            margin: var(--space-2);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-accent-rgb), 0.1);
+            border-left: 4px solid var(--color-accent);
+            padding: var(--space-4);
+            margin: var(--space-4) 0;
+            border-radius: var(--radius-md);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-4) 0;
+        }
+
+        th, td {
+            padding: var(--space-3);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            color: var(--color-primary);
+            font-weight: var(--font-semibold);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Astrology</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../mythos/index.html">Home</a> → <a href="../magic/index.html">Magic</a> → <a href="../divination/index.html">Divination</a> → <span>Astrology</span>
+</nav>
+
+        <!-- OVERVIEW -->
+        <section class="section">
+            <h2>Overview & Historical Origins</h2>
+
+            <p>
+                Astrology is the study of the relationship between celestial phenomena and terrestrial events,
+                based on the principle that the positions and movements of celestial bodies at specific moments
+                correlate with character traits, life events, and worldly affairs. Emerging independently in
+                multiple ancient civilizations, astrology represents humanity's earliest attempt to systematize
+                observations of cosmic patterns and their apparent influence on earthly existence.
+            </p>
+
+            <p>
+                The term "astrology" derives from Greek "astrologia" (from "astron" meaning star and "logia"
+                meaning study). While modern science distinguishes astronomy (empirical study of celestial
+                objects) from astrology (interpretive correlation), the two were historically unified as a single
+                discipline seeking to understand both the mechanics and meaning of celestial movements.
+            </p>
+
+            <div class="highlight-box">
+                <h4>The Hermetic Principle</h4>
+                <p>
+                    The philosophical foundation of astrology rests on the Hermetic axiom "As above, so below;
+                    as below, so above"—the principle of correspondence stating that patterns in the macrocosm
+                    (universe) reflect in the microcosm (individual). This worldview sees the cosmos as an
+                    interconnected whole where celestial and terrestrial realms mirror each other, making the
+                    heavens a symbolic map of earthly possibilities.
+                </p>
+            </div>
+
+            <h3>Historical Development</h3>
+
+            <h4>Mesopotamian Origins (c. 3000-1000 BCE)</h4>
+            <p>
+                The Babylonians and Sumerians developed the earliest systematic astrology, observing Venus,
+                Jupiter, and other planets, correlating celestial phenomena with agricultural cycles, weather
+                patterns, and political events. The <em>Enūma Anu Enlil</em> (c. 1600 BCE) compiled omens
+                derived from celestial observations, representing predictive astrology focused on kingdoms
+                rather than individuals.
+            </p>
+
+            <h4>Hellenistic Synthesis (c. 300 BCE - 300 CE)</h4>
+            <p>
+                Following Alexander the Great's conquests, Babylonian astronomical knowledge merged with
+                Greek philosophy, Egyptian mysticism, and Persian cosmology. This synthesis produced horoscopic
+                astrology—birth chart interpretation for individuals—including the zodiac signs, planetary
+                rulers, houses, and aspects still used today. Key figures include Ptolemy, whose <em>Tetrabiblos</em>
+                (2nd century CE) systematized astrological doctrine.
+            </p>
+
+            <h4>Islamic Golden Age (c. 800-1400 CE)</h4>
+            <p>
+                Arab and Persian scholars preserved and advanced Hellenistic astrology, contributing mathematical
+                precision, detailed planetary tables, and philosophical refinements. Works by Al-Kindi, Abu Ma'shar,
+                and others translated into Latin sparked the medieval European astrological revival.
+            </p>
+
+            <h4>Renaissance and Early Modern Period (c. 1400-1700 CE)</h4>
+            <p>
+                Astrology flourished in Renaissance Europe as part of a unified cosmological worldview. Figures
+                like Marsilio Ficino integrated astrology with Platonic philosophy and Hermetic magic. The
+                development of telescopic astronomy and mechanistic physics gradually separated astronomy from
+                astrology, though notable figures like Johannes Kepler practiced both.
+            </p>
+
+            <h4>Modern Revival (20th Century - Present)</h4>
+            <p>
+                After declining in the Enlightenment, astrology revived in the late 19th and early 20th centuries,
+                influenced by Theosophy, psychology (particularly Jungian archetypes), and New Age spirituality.
+                Contemporary astrology emphasizes psychological insight and personal growth over fatalistic prediction.
+            </p>
+
+            <h3>Purpose and Applications</h3>
+            <ul>
+                <li><strong>Natal Astrology:</strong> Analyzing birth charts to understand personality, potential, and life path</li>
+                <li><strong>Predictive Astrology:</strong> Forecasting trends through transits, progressions, and returns</li>
+                <li><strong>Electional Astrology:</strong> Choosing optimal timing for important actions</li>
+                <li><strong>Horary Astrology:</strong> Answering specific questions through charts cast for the moment of inquiry</li>
+                <li><strong>Mundane Astrology:</strong> Analyzing collective events, nations, and world affairs</li>
+                <li><strong>Relationship Astrology (Synastry):</strong> Comparing charts to assess compatibility</li>
+                <li><strong>Medical Astrology:</strong> Correlating planetary positions with health conditions</li>
+            </ul>
+        </section>
+
+        <!-- KEY COMPONENTS -->
+        <section class="section">
+            <h2>Key Components & Structure</h2>
+
+            <h3>The Twelve Zodiac Signs</h3>
+            <p>
+                The zodiac (from Greek "zōidiakos kyklos," meaning "circle of animals") divides the ecliptic—the
+                Sun's apparent annual path through the sky—into twelve 30-degree segments, each associated with
+                a constellation and archetypal qualities.
+            </p>
+
+            <div class="zodiac-grid">
+                <div class="zodiac-item">
+                    <div class="zodiac-symbol">♈</div>
+                    <div class="zodiac-name">Aries</div>
+                    <div class="zodiac-dates">March 21 - April 19</div>
+                    <div class="zodiac-details">
+                        <strong>Element:</strong> Fire<br>
+                        <strong>Quality:</strong> Cardinal<br>
+                        <strong>Ruler:</strong> Mars<br>
+                        <strong>Themes:</strong> Initiative, courage, pioneering spirit, independence, impulsiveness
+                    </div>
+                </div>
+                <div class="zodiac-item">
+                    <div class="zodiac-symbol">♉</div>
+                    <div class="zodiac-name">Taurus</div>
+                    <div class="zodiac-dates">April 20 - May 20</div>
+                    <div class="zodiac-details">
+                        <strong>Element:</strong> Earth<br>
+                        <strong>Quality:</strong> Fixed<br>
+                        <strong>Ruler:</strong> Venus<br>
+                        <strong>Themes:</strong> Stability, sensuality, persistence, material security, stubbornness
+                    </div>
+                </div>
+                <div class="zodiac-item">
+                    <div class="zodiac-symbol">♊</div>
+                    <div class="zodiac-name">Gemini</div>
+                    <div class="zodiac-dates">May 21 - June 20</div>
+                    <div class="zodiac-details">
+                        <strong>Element:</strong> Air<br>
+                        <strong>Quality:</strong> Mutable<br>
+                        <strong>Ruler:</strong> Mercury<br>
+                        <strong>Themes:</strong> Communication, curiosity, adaptability, duality, information exchange
+                    </div>
+                </div>
+                <div class="zodiac-item">
+                    <div class="zodiac-symbol">♋</div>
+                    <div class="zodiac-name">Cancer</div>
+                    <div class="zodiac-dates">June 21 - July 22</div>
+                    <div class="zodiac-details">
+                        <strong>Element:</strong> Water<br>
+                        <strong>Quality:</strong> Cardinal<br>
+                        <strong>Ruler:</strong> Moon<br>
+                        <strong>Themes:</strong> Nurturing, emotions, home, family, sensitivity, protection
+                    </div>
+                </div>
+                <div class="zodiac-item">
+                    <div class="zodiac-symbol">♌</div>
+                    <div class="zodiac-name">Leo</div>
+                    <div class="zodiac-dates">July 23 - August 22</div>
+                    <div class="zodiac-details">
+                        <strong>Element:</strong> Fire<br>
+                        <strong>Quality:</strong> Fixed<br>
+                        <strong>Ruler:</strong> Sun<br>
+                        <strong>Themes:</strong> Creativity, self-expression, leadership, pride, generosity, drama
+                    </div>
+                </div>
+                <div class="zodiac-item">
+                    <div class="zodiac-symbol">♍</div>
+                    <div class="zodiac-name">Virgo</div>
+                    <div class="zodiac-dates">August 23 - September 22</div>
+                    <div class="zodiac-details">
+                        <strong>Element:</strong> Earth<br>
+                        <strong>Quality:</strong> Mutable<br>
+                        <strong>Ruler:</strong> Mercury<br>
+                        <strong>Themes:</strong> Service, analysis, perfectionism, health, practical skills, discernment
+                    </div>
+                </div>
+                <div class="zodiac-item">
+                    <div class="zodiac-symbol">♎</div>
+                    <div class="zodiac-name">Libra</div>
+                    <div class="zodiac-dates">September 23 - October 22</div>
+                    <div class="zodiac-details">
+                        <strong>Element:</strong> Air<br>
+                        <strong>Quality:</strong> Cardinal<br>
+                        <strong>Ruler:</strong> Venus<br>
+                        <strong>Themes:</strong> Balance, relationships, diplomacy, aesthetics, justice, harmony
+                    </div>
+                </div>
+                <div class="zodiac-item">
+                    <div class="zodiac-symbol">♏</div>
+                    <div class="zodiac-name">Scorpio</div>
+                    <div class="zodiac-dates">October 23 - November 21</div>
+                    <div class="zodiac-details">
+                        <strong>Element:</strong> Water<br>
+                        <strong>Quality:</strong> Fixed<br>
+                        <strong>Ruler:</strong> Mars/Pluto<br>
+                        <strong>Themes:</strong> Transformation, intensity, power, mystery, regeneration, depth
+                    </div>
+                </div>
+                <div class="zodiac-item">
+                    <div class="zodiac-symbol">♐</div>
+                    <div class="zodiac-name">Sagittarius</div>
+                    <div class="zodiac-dates">November 22 - December 21</div>
+                    <div class="zodiac-details">
+                        <strong>Element:</strong> Fire<br>
+                        <strong>Quality:</strong> Mutable<br>
+                        <strong>Ruler:</strong> Jupiter<br>
+                        <strong>Themes:</strong> Philosophy, adventure, optimism, expansion, higher learning, freedom
+                    </div>
+                </div>
+                <div class="zodiac-item">
+                    <div class="zodiac-symbol">♑</div>
+                    <div class="zodiac-name">Capricorn</div>
+                    <div class="zodiac-dates">December 22 - January 19</div>
+                    <div class="zodiac-details">
+                        <strong>Element:</strong> Earth<br>
+                        <strong>Quality:</strong> Cardinal<br>
+                        <strong>Ruler:</strong> Saturn<br>
+                        <strong>Themes:</strong> Ambition, structure, discipline, authority, achievement, responsibility
+                    </div>
+                </div>
+                <div class="zodiac-item">
+                    <div class="zodiac-symbol">♒</div>
+                    <div class="zodiac-name">Aquarius</div>
+                    <div class="zodiac-dates">January 20 - February 18</div>
+                    <div class="zodiac-details">
+                        <strong>Element:</strong> Air<br>
+                        <strong>Quality:</strong> Fixed<br>
+                        <strong>Ruler:</strong> Saturn/Uranus<br>
+                        <strong>Themes:</strong> Innovation, humanitarianism, independence, eccentricity, progress
+                    </div>
+                </div>
+                <div class="zodiac-item">
+                    <div class="zodiac-symbol">♓</div>
+                    <div class="zodiac-name">Pisces</div>
+                    <div class="zodiac-dates">February 19 - March 20</div>
+                    <div class="zodiac-details">
+                        <strong>Element:</strong> Water<br>
+                        <strong>Quality:</strong> Mutable<br>
+                        <strong>Ruler:</strong> Jupiter/Neptune<br>
+                        <strong>Themes:</strong> Compassion, imagination, spirituality, dissolution, transcendence
+                    </div>
+                </div>
+            </div>
+
+            <h3>The Planets and Luminaries</h3>
+            <p>
+                Planets represent different psychological functions, life principles, and types of experience.
+                Traditional astrology used seven visible bodies; modern astrology adds the outer planets discovered
+                through telescopes.
+            </p>
+
+            <div class="planet-grid">
+                <div class="planet-item">
+                    <div class="planet-symbol">☉</div>
+                    <div class="planet-name">Sun</div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">
+                        Core identity, ego, vitality, consciousness, purpose, creative expression
+                    </div>
+                </div>
+                <div class="planet-item">
+                    <div class="planet-symbol">☽</div>
+                    <div class="planet-name">Moon</div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">
+                        Emotions, instincts, subconscious, nurturing, habits, inner needs
+                    </div>
+                </div>
+                <div class="planet-item">
+                    <div class="planet-symbol">☿</div>
+                    <div class="planet-name">Mercury</div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">
+                        Communication, intellect, reasoning, learning, connections, perception
+                    </div>
+                </div>
+                <div class="planet-item">
+                    <div class="planet-symbol">♀</div>
+                    <div class="planet-name">Venus</div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">
+                        Love, beauty, values, relationships, pleasure, harmony, attraction
+                    </div>
+                </div>
+                <div class="planet-item">
+                    <div class="planet-symbol">♂</div>
+                    <div class="planet-name">Mars</div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">
+                        Action, desire, aggression, courage, sexuality, drive, assertion
+                    </div>
+                </div>
+                <div class="planet-item">
+                    <div class="planet-symbol">♃</div>
+                    <div class="planet-name">Jupiter</div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">
+                        Expansion, growth, optimism, philosophy, luck, abundance, wisdom
+                    </div>
+                </div>
+                <div class="planet-item">
+                    <div class="planet-symbol">♄</div>
+                    <div class="planet-name">Saturn</div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">
+                        Structure, limitation, discipline, responsibility, time, maturity, karma
+                    </div>
+                </div>
+                <div class="planet-item">
+                    <div class="planet-symbol">♅</div>
+                    <div class="planet-name">Uranus</div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">
+                        Revolution, innovation, independence, sudden change, awakening, rebellion
+                    </div>
+                </div>
+                <div class="planet-item">
+                    <div class="planet-symbol">♆</div>
+                    <div class="planet-name">Neptune</div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">
+                        Spirituality, illusion, dreams, compassion, dissolution, imagination
+                    </div>
+                </div>
+                <div class="planet-item">
+                    <div class="planet-symbol">♇</div>
+                    <div class="planet-name">Pluto</div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">
+                        Transformation, power, death/rebirth, intensity, hidden forces, evolution
+                    </div>
+                </div>
+            </div>
+
+            <h3>The Twelve Houses</h3>
+            <p>
+                Houses represent life areas and experiential domains. Calculated based on Earth's daily rotation,
+                the house system requires precise birth time and location. The Ascendant (rising sign) marks the
+                cusp of the first house.
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>House</th>
+                        <th>Domain</th>
+                        <th>Key Themes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1st</td>
+                        <td>Self & Identity</td>
+                        <td>Physical appearance, personality, first impressions, beginnings</td>
+                    </tr>
+                    <tr>
+                        <td>2nd</td>
+                        <td>Resources & Values</td>
+                        <td>Money, possessions, self-worth, material security, talents</td>
+                    </tr>
+                    <tr>
+                        <td>3rd</td>
+                        <td>Communication</td>
+                        <td>Learning, siblings, neighbors, short trips, everyday interactions</td>
+                    </tr>
+                    <tr>
+                        <td>4th</td>
+                        <td>Home & Roots</td>
+                        <td>Family, ancestry, emotional foundation, private life, endings</td>
+                    </tr>
+                    <tr>
+                        <td>5th</td>
+                        <td>Creativity & Pleasure</td>
+                        <td>Romance, children, self-expression, hobbies, joy, speculation</td>
+                    </tr>
+                    <tr>
+                        <td>6th</td>
+                        <td>Work & Health</td>
+                        <td>Daily routines, service, employment, wellness, pets, duties</td>
+                    </tr>
+                    <tr>
+                        <td>7th</td>
+                        <td>Partnerships</td>
+                        <td>Marriage, business partners, contracts, open enemies, balance</td>
+                    </tr>
+                    <tr>
+                        <td>8th</td>
+                        <td>Transformation</td>
+                        <td>Shared resources, death, rebirth, sexuality, occult, psychology</td>
+                    </tr>
+                    <tr>
+                        <td>9th</td>
+                        <td>Philosophy & Travel</td>
+                        <td>Higher education, religion, long journeys, expansion, law</td>
+                    </tr>
+                    <tr>
+                        <td>10th</td>
+                        <td>Career & Status</td>
+                        <td>Profession, public image, reputation, authority, achievement</td>
+                    </tr>
+                    <tr>
+                        <td>11th</td>
+                        <td>Community</td>
+                        <td>Friends, groups, hopes, humanitarian causes, future vision</td>
+                    </tr>
+                    <tr>
+                        <td>12th</td>
+                        <td>Transcendence</td>
+                        <td>Spirituality, hidden matters, unconscious, karma, isolation</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Essential Dignities</h3>
+            <p>
+                Planets express differently depending on their zodiacal position:
+            </p>
+            <ul>
+                <li><strong>Domicile (Rulership):</strong> The sign a planet rules; strongest expression</li>
+                <li><strong>Exaltation:</strong> Sign of enhanced expression and honor</li>
+                <li><strong>Detriment:</strong> Sign opposite rulership; challenged expression</li>
+                <li><strong>Fall:</strong> Sign opposite exaltation; weakened expression</li>
+            </ul>
+
+            <h3>Aspects</h3>
+            <p>
+                Angular relationships between planets, indicating how their energies interact:
+            </p>
+            <ul>
+                <li><strong>Conjunction (0°):</strong> Fusion and intensification</li>
+                <li><strong>Sextile (60°):</strong> Opportunity and cooperation</li>
+                <li><strong>Square (90°):</strong> Tension and dynamic challenge</li>
+                <li><strong>Trine (120°):</strong> Harmony and ease</li>
+                <li><strong>Opposition (180°):</strong> Polarity and awareness</li>
+            </ul>
+        </section>
+
+        <!-- PRACTICE & METHODS -->
+        <section class="section">
+            <h2>Practice & Methods</h2>
+
+            <h3>Natal Chart Interpretation</h3>
+
+            <h4>Calculating a Birth Chart</h4>
+            <p>
+                A natal chart requires three pieces of information:
+            </p>
+            <ul>
+                <li><strong>Date of Birth:</strong> Determines planetary positions along the zodiac</li>
+                <li><strong>Time of Birth:</strong> Determines house cusps and Ascendant (essential for precision)</li>
+                <li><strong>Place of Birth:</strong> Establishes geographical coordinates for house calculation</li>
+            </ul>
+
+            <p>
+                Modern software and online calculators handle complex astronomical calculations, but traditional
+                astrologers used ephemerides (tables of planetary positions) and house tables. Without accurate
+                birth time, astrologers can still interpret planetary positions and aspects but cannot determine
+                houses or Ascendant.
+            </p>
+
+            <h4>Reading Methodology</h4>
+            <ol>
+                <li><strong>Assess the Chart as a Whole:</strong> Note element/quality balance, hemisphere emphasis, patterns</li>
+                <li><strong>The Ascendant:</strong> Rising sign describes persona and approach to life</li>
+                <li><strong>Sun Sign:</strong> Core identity, conscious will, and life purpose</li>
+                <li><strong>Moon Sign:</strong> Emotional nature, needs, and subconscious patterns</li>
+                <li><strong>Mercury, Venus, Mars:</strong> Personal planets showing communication, love, and action styles</li>
+                <li><strong>Jupiter and Saturn:</strong> Social planets indicating growth and structure</li>
+                <li><strong>Outer Planets:</strong> Generational influences and deep transformation</li>
+                <li><strong>House Placements:</strong> Life areas where planetary energies manifest</li>
+                <li><strong>Aspects:</strong> How different parts of the psyche interact</li>
+                <li><strong>Synthesis:</strong> Integrate all factors into coherent interpretation</li>
+            </ol>
+
+            <h3>Predictive Techniques</h3>
+
+            <h4>Transits</h4>
+            <p>
+                Current planetary positions aspecting natal chart placements, indicating timing of events and
+                psychological themes. Slow-moving outer planet transits (Uranus, Neptune, Pluto) mark major
+                life passages lasting months to years; faster planets trigger shorter-term events.
+            </p>
+
+            <h4>Progressions</h4>
+            <p>
+                Symbolic time technique where each day after birth represents one year of life. The progressed
+                Moon changes signs every 2-2.5 years, marking emotional shifts. Progressed Sun changing signs
+                (roughly every 30 years) indicates major life chapter transitions.
+            </p>
+
+            <h4>Solar and Lunar Returns</h4>
+            <p>
+                Charts cast for the moment the Sun (annually) or Moon (monthly) returns to its exact natal
+                position, providing themes for the coming year or month.
+            </p>
+
+            <h3>Specialized Applications</h3>
+
+            <h4>Horary Astrology</h4>
+            <p>
+                Answering specific questions through charts cast for the moment the question is asked. Strict
+                traditional rules determine whether the chart is "radical" (fit to judge) and how to extract
+                yes/no answers or timing information.
+            </p>
+
+            <h4>Electional Astrology</h4>
+            <p>
+                Selecting optimal timing for important actions—weddings, business launches, surgeries, etc.—by
+                choosing moments when celestial configurations support the intended outcome.
+            </p>
+
+            <h4>Synastry and Composite Charts</h4>
+            <p>
+                Relationship astrology comparing two charts (synastry) or creating a single chart from the
+                midpoints of two charts (composite), revealing compatibility, challenges, and relationship dynamics.
+            </p>
+        </section>
+
+        <!-- TRADITIONS & VARIATIONS -->
+        <section class="section">
+            <h2>Traditions & Variations</h2>
+
+            <h3>Western (Tropical) Astrology</h3>
+            <p>
+                The dominant system in Europe and the Americas, using the tropical zodiac aligned to Earth's
+                seasons rather than constellations. Aries begins at the Spring Equinox (0° Aries = Sun's position
+                on March 21), regardless of the background constellation. Emphasizes psychological interpretation
+                and personal growth.
+            </p>
+
+            <h3>Vedic Astrology (Jyotisha)</h3>
+            <p>
+                Hindu astrological system using the sidereal zodiac aligned to actual constellations, accounting
+                for precession of the equinoxes. This results in most planets being roughly 24° earlier than in
+                tropical astrology. Key differences include:
+            </p>
+            <ul>
+                <li>Emphasis on the Moon and Ascendant over the Sun</li>
+                <li>Use of 27-28 lunar mansions (Nakshatras)</li>
+                <li>Dasha system: planetary periods indicating life phases</li>
+                <li>Traditional seven-planet system (not using Uranus, Neptune, Pluto)</li>
+                <li>Integration with karma and spiritual evolution concepts</li>
+                <li>Emphasis on predictive astrology and timing (muhurta)</li>
+            </ul>
+
+            <h3>Chinese Astrology</h3>
+            <p>
+                Fundamentally different from Western astrology, based on lunar calendar cycles rather than solar
+                zodiac. Key elements include:
+            </p>
+            <ul>
+                <li><strong>Twelve Animal Signs:</strong> Rat, Ox, Tiger, Rabbit, Dragon, Snake, Horse, Goat, Monkey,
+                    Rooster, Dog, Pig—rotating in 12-year cycles</li>
+                <li><strong>Five Elements:</strong> Wood, Fire, Earth, Metal, Water—creating 60-year cycles</li>
+                <li><strong>Four Pillars (BaZi):</strong> Year, month, day, and hour pillars for detailed analysis</li>
+                <li><strong>Integration with Feng Shui and I Ching</strong></li>
+            </ul>
+
+            <h3>Hellenistic Astrology</h3>
+            <p>
+                Revival of ancient Greek and Roman astrological techniques (c. 100 BCE - 600 CE), recovered from
+                texts translated from Greek and Latin. Emphasizes:
+            </p>
+            <ul>
+                <li>Sect (day versus night charts)</li>
+                <li>Traditional rulerships (Saturn rules Aquarius, not Uranus, etc.)</li>
+                <li>Whole sign houses rather than later quadrant systems</li>
+                <li>Time-lord techniques like annual profections</li>
+                <li>Focus on prediction and fate rather than psychological growth</li>
+            </ul>
+
+            <h3>Evolutionary Astrology</h3>
+            <p>
+                Modern psychological approach pioneered by Jeffrey Wolf Green, viewing the chart through the lens
+                of soul evolution across lifetimes. Pluto and the lunar nodes indicate karmic patterns, soul
+                purpose, and evolutionary intentions.
+            </p>
+
+            <h3>Psychological Astrology</h3>
+            <p>
+                Integration of depth psychology (especially Jungian) with astrology, viewing planets as archetypal
+                forces and the chart as a map of the psyche. Emphasizes free will, conscious development, and
+                integration of shadow material over prediction.
+            </p>
+        </section>
+
+        <!-- PRIMARY SOURCES -->
+        <section class="section">
+            <h2>Primary Sources & Further Reading</h2>
+
+            <h3>Classical and Historical Texts</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Ptolemy, Claudius. <em>Tetrabiblos</em> (c. 160 CE)</strong><br>
+                    Foundational Greco-Roman astrological text systematizing planetary meanings, aspects, houses,
+                    and predictive techniques. Influenced all subsequent Western astrology. Multiple modern
+                    translations available; Robbins (1940) and Schmidt (1994) are standard.
+                </li>
+                <li class="source-item">
+                    <strong>Manilius, Marcus. <em>Astronomica</em> (c. 10-20 CE)</strong><br>
+                    Latin didactic poem presenting astrological doctrine in the Augustan age. Provides insight
+                    into Roman astrological thought and poetic cosmology.
+                </li>
+                <li class="source-item">
+                    <strong>Firmicus Maternus, Julius. <em>Mathesis</em> (c. 334-337 CE)</strong><br>
+                    Comprehensive late Roman astrological compendium covering natal astrology, mundane astrology,
+                    and predictive techniques. Rich source for Hellenistic practices.
+                </li>
+                <li class="source-item">
+                    <strong>Vettius Valens. <em>Anthology</em> (c. 150-175 CE)</strong><br>
+                    Extensive collection of chart examples and techniques from a practicing Hellenistic astrologer.
+                    Invaluable for understanding how ancient astrologers actually worked with charts.
+                </li>
+                <li class="source-item">
+                    <strong>Abu Ma'shar (Albumasar). <em>The Great Introduction to Astrology</em> (848 CE)</strong><br>
+                    Influential Arabic synthesis of Greek, Persian, and Indian astrology. Transmitted Hellenistic
+                    knowledge to medieval Europe through Latin translations.
+                </li>
+            </ul>
+
+            <h3>Modern Foundational Works</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Rudhyar, Dane. <em>The Astrology of Personality</em> (1936)</strong><br>
+                    Revolutionary work introducing humanistic and psychological astrology, shifting focus from
+                    prediction to personal growth and self-actualization. Influenced all subsequent psychological
+                    approaches.
+                </li>
+                <li class="source-item">
+                    <strong>Greene, Liz. <em>Saturn: A New Look at an Old Devil</em> (1976)</strong><br>
+                    Jungian psychological approach to Saturn as principle of individuation. Part of Greene's
+                    extensive series integrating depth psychology with astrology.
+                </li>
+                <li class="source-item">
+                    <strong>Arroyo, Stephen. <em>Astrology, Psychology, and the Four Elements</em> (1975)</strong><br>
+                    Clear synthesis of humanistic psychology and astrology, emphasizing energy dynamics and
+                    practical counseling applications.
+                </li>
+                <li class="source-item">
+                    <strong>Hand, Robert. <em>Planets in Transit</em> (1976)</strong><br>
+                    Comprehensive guide to predictive astrology through transits. Standard reference for
+                    understanding timing techniques.
+                </li>
+                <li class="source-item">
+                    <strong>Frawley, John. <em>The Real Astrology</em> (2000)</strong><br>
+                    Modern exposition of traditional horary astrology with wit and clarity. Represents the
+                    revival of pre-modern techniques.
+                </li>
+            </ul>
+
+            <h3>Vedic Astrology</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Frawley, David. <em>Astrology of the Seers</em> (1990)</strong><br>
+                    Introduction to Vedic astrology for Western students, explaining philosophical foundations,
+                    techniques, and differences from tropical astrology.
+                </li>
+                <li class="source-item">
+                    <strong>Braha, James. <em>Ancient Hindu Astrology for the Modern Western Astrologer</em> (1986)</strong><br>
+                    Practical guide bridging Vedic and Western approaches, with detailed interpretations of
+                    planetary placements and dasha periods.
+                </li>
+            </ul>
+
+            <h3>Contemporary Scholarship</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Campion, Nicholas. <em>A History of Western Astrology</em> (2 volumes, 2008-2009)</strong><br>
+                    Comprehensive academic history from Mesopotamian origins through modern era. Essential for
+                    understanding astrology's cultural and intellectual development.
+                </li>
+                <li class="source-item">
+                    <strong>Holden, James Herschel. <em>A History of Horoscopic Astrology</em> (2006)</strong><br>
+                    Detailed scholarly examination of horoscopy's evolution from Babylonian beginnings through
+                    Renaissance, with emphasis on technical developments.
+                </li>
+            </ul>
+        </section>
+
+        <!-- CROSS-REFERENCES -->
+        <section class="section">
+            <h2>Cross-References & Related Practices</h2>
+
+            <h3>Related Divination Systems</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="tarot.html" class="cross-ref">Tarot - Archetypal Correspondences</a>
+                <a href="i-ching.html" class="cross-ref">I Ching - Cosmic Patterns</a>
+                <a href="geomancy.html" class="cross-ref">Geomancy - Earth Divination</a>
+            </div>
+
+            <h3>Associated Magical Traditions</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../ritual/ceremonial-magic.html" class="cross-ref">Ceremonial Magic - Planetary Hours</a>
+                <a href="../texts/picatrix.html" class="cross-ref">Picatrix - Astrological Magic</a>
+                <a href="../ritual/alchemy.html" class="cross-ref">Alchemy - Planetary Correspondences</a>
+                <a href="../practical/talismans.html" class="cross-ref">Talismans - Astrological Timing</a>
+            </div>
+
+            <h3>Mythological Correspondences</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../../mythologies/greek/zeus.html" class="cross-ref">Zeus/Jupiter</a>
+                <a href="../../mythologies/greek/aphrodite.html" class="cross-ref">Aphrodite/Venus</a>
+                <a href="../../mythologies/greek/hermes.html" class="cross-ref">Hermes/Mercury</a>
+                <a href="../../mythologies/roman/mars.html" class="cross-ref">Mars - God of War</a>
+            </div>
+
+            <h3>Archetypal Psychology</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../../archetypes/hero.html" class="cross-ref">The Hero (Sun)</a>
+                <a href="../../archetypes/mother.html" class="cross-ref">The Mother (Moon)</a>
+                <a href="../../archetypes/wise-old-man.html" class="cross-ref">The Wise Old Man (Saturn)</a>
+            </div>
+        </section>
+
+        <!-- NAVIGATION -->
+        <div class="nav-section">
+            <h3 style="color: var(--color-primary); margin-bottom: var(--space-5);">Continue Exploring</h3>
+            <a href="../index.html" class="nav-button">Magical Systems Index</a>
+            <a href="tarot.html" class="nav-button">Tarot</a>
+            <a href="oracle-bones.html" class="nav-button">Oracle Bones</a>
+            <a href="../../index.html" class="nav-button">Home</a>
+        </div>
+    </div>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>

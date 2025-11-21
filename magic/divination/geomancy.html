@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geomancy - Divination Systems</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--space-5);
+        }
+
+        .container {
+            max-width: var(--container-lg);
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--space-16) var(--space-5);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-10);
+            border: 2px solid var(--color-border);
+        }
+
+        .header-icon {
+            font-size: 5rem;
+            margin-bottom: var(--space-4);
+        }
+
+        h1 {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-5);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: var(--text-xl);
+            color: var(--color-text-secondary);
+            margin: var(--space-3) 0;
+            font-style: italic;
+        }
+
+        .section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+        }
+
+        h2 {
+            font-size: var(--text-3xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-3);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        h3 {
+            font-size: var(--text-2xl);
+            color: var(--color-secondary);
+            margin-top: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+
+        h4 {
+            font-size: var(--text-xl);
+            color: var(--color-primary);
+            margin-top: var(--space-4);
+            margin-bottom: var(--space-3);
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-4);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin-left: var(--space-6);
+            margin-bottom: var(--space-4);
+            color: var(--color-text-secondary);
+        }
+
+        li {
+            margin-bottom: var(--space-2);
+            line-height: var(--leading-relaxed);
+        }
+
+        .figure-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-6) 0;
+        }
+
+        .figure-item {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            text-align: center;
+        }
+
+        .figure-symbol {
+            font-family: monospace;
+            font-size: var(--text-3xl);
+            margin-bottom: var(--space-2);
+            line-height: 1.2;
+        }
+
+        .figure-name {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .figure-meaning {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-bottom: var(--space-2);
+        }
+
+        .figure-element {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .source-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .source-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 3px solid var(--color-primary);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+            border-radius: var(--radius-md);
+        }
+
+        .cross-ref {
+            display: inline-block;
+            padding: var(--space-2) var(--space-4);
+            background: rgba(var(--color-secondary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            margin: var(--space-2);
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+        }
+
+        .cross-ref:hover {
+            background: rgba(var(--color-secondary-rgb), 0.4);
+            transform: translateY(-2px);
+        }
+
+        .nav-section {
+            text-align: center;
+            margin-top: var(--space-10);
+            padding: var(--space-6);
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: var(--space-4) var(--space-8);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+            margin: var(--space-2);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-accent-rgb), 0.1);
+            border-left: 4px solid var(--color-accent);
+            padding: var(--space-4);
+            margin: var(--space-4) 0;
+            border-radius: var(--radius-md);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-4) 0;
+        }
+
+        th, td {
+            padding: var(--space-3);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            color: var(--color-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        .method-box {
+            background: rgba(var(--color-secondary-rgb), 0.05);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .tradition-section {
+            background: rgba(var(--color-primary-rgb), 0.03);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Geomancy</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../mythos/index.html">Home</a> → <a href="../magic/index.html">Magic</a> → <a href="../divination/index.html">Divination</a> → <span>Geomancy</span>
+</nav>
+
+        <!-- OVERVIEW -->
+        <section class="section">
+            <h2>Overview & Historical Origins</h2>
+
+            <p>
+                Geomancy (from Greek "geo" meaning earth and "manteia" meaning divination) encompasses multiple
+                distinct divinatory traditions unified by their use of earth, land features, or earth-derived
+                patterns. The term applies to at least three major systems: Arabic/European geomancy (sand
+                divination), Chinese Feng Shui (spatial energy analysis), and various African earth divination
+                practices. While sharing the name, these traditions developed independently with different
+                philosophical foundations and techniques.
+            </p>
+
+            <p>
+                The diversity of geomantic practices reflects humanity's universal recognition of earth as
+                sacred, powerful, and communicative—whether through patterns revealed in cast sand, energy
+                flows through landscape, or messages from earth spirits. Each tradition developed sophisticated
+                interpretive frameworks for reading earth's wisdom.
+            </p>
+
+            <div class="highlight-box">
+                <h4>Etymology and Scope</h4>
+                <p>
+                    The term "geomancy" in Western contexts typically refers to the medieval Arabic/European
+                    system of casting dots and interpreting sixteen figures. However, the word has been broadly
+                    applied to diverse earth-divination practices worldwide, sometimes creating confusion. Chinese
+                    Feng Shui, while sometimes called "Chinese geomancy" in English, represents a distinct
+                    tradition with different aims (harmonizing human dwellings with cosmic forces) rather than
+                    answering specific questions like Arabic geomancy.
+                </p>
+            </div>
+
+            <h3>Arabic/European Geomancy Origins</h3>
+
+            <p>
+                The geomantic system of sixteen figures appears to have originated in North Africa or the Middle
+                East, possibly deriving from earlier African divination practices. By the 9th-10th centuries CE,
+                Arabic scholars had systematized the practice into an elaborate divinatory science integrated
+                with astrology, numerology, and Islamic cosmology.
+            </p>
+
+            <p>
+                The system entered medieval Europe through translations of Arabic texts, particularly during the
+                12th-13th centuries. European scholars embraced geomancy as a "legitimate" form of divination,
+                ranking it alongside astrology. Unlike many magical practices condemned by the Church, geomancy
+                maintained semi-respectability due to its mathematical nature and astrological associations,
+                though it still faced periodic criticism.
+            </p>
+
+            <h3>Chinese Geomancy (Feng Shui) Origins</h3>
+
+            <p>
+                Feng Shui (風水, literally "wind-water") developed in ancient China as a system for harmonizing
+                buildings, graves, and cities with the natural environment and cosmic forces. Its origins trace
+                to the Han Dynasty (206 BCE - 220 CE) or earlier, evolving from shamanic practices, cosmology,
+                and observation of natural patterns.
+            </p>
+
+            <p>
+                Unlike Arabic geomancy's focus on answering specific questions, Feng Shui aims to optimize the
+                flow of qi (vital energy) through strategic placement and orientation, creating harmony between
+                human structures and natural forces. This practice influenced architecture, urban planning, and
+                burial customs throughout East Asia.
+            </p>
+
+            <h3>African Earth Divination</h3>
+
+            <p>
+                Various African cultures developed sophisticated earth divination systems, often involving
+                casting objects (seeds, bones, shells) and interpreting their patterns on the ground. Systems
+                like Ifa/Fa (Yoruba), sikidy (Madagascar), and others may have influenced the development of
+                Arabic geomancy, though the exact relationships remain debated among scholars.
+            </p>
+        </section>
+
+        <!-- ARABIC/EUROPEAN GEOMANCY -->
+        <section class="section">
+            <h2>Arabic/European Geomancy: The Sixteen Figures</h2>
+
+            <h3>The Geomantic Figures</h3>
+
+            <p>
+                The foundation of this geomantic system consists of sixteen figures (called "mothers" when
+                generated, "daughters" when derived), each composed of four rows of either one or two dots/marks.
+                Each figure has a name (often derived from Arabic), elemental association, planetary rulership,
+                and zodiacal correlation.
+            </p>
+
+            <h4>The Complete Sixteen Figures</h4>
+
+            <div class="figure-grid">
+                <div class="figure-item">
+                    <div class="figure-symbol">• •<br>•<br>•<br>•</div>
+                    <div class="figure-name">Puer (Boy)</div>
+                    <div class="figure-meaning">Rashness, impulsiveness</div>
+                    <div class="figure-element">Fire / Mars / Aries</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">• •<br>• •<br>•<br>•</div>
+                    <div class="figure-name">Amissio (Loss)</div>
+                    <div class="figure-meaning">Loss, letting go</div>
+                    <div class="figure-element">Fire / Venus / Taurus</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">• •<br>•<br>• •<br>•</div>
+                    <div class="figure-name">Albus (White)</div>
+                    <div class="figure-meaning">Wisdom, peace, clarity</div>
+                    <div class="figure-element">Water / Mercury / Cancer</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">• •<br>• •<br>• •<br>•</div>
+                    <div class="figure-name">Populus (People)</div>
+                    <div class="figure-meaning">Gathering, community</div>
+                    <div class="figure-element">Water / Moon / Cancer</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">•<br>• •<br>•<br>•</div>
+                    <div class="figure-name">Fortuna Major (Greater Fortune)</div>
+                    <div class="figure-meaning">Success, protection</div>
+                    <div class="figure-element">Earth / Sun / Leo</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">•<br>•<br>• •<br>•</div>
+                    <div class="figure-name">Fortuna Minor (Lesser Fortune)</div>
+                    <div class="figure-meaning">Fleeting success</div>
+                    <div class="figure-element">Fire / Sun / Leo</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">•<br>•<br>•<br>• •</div>
+                    <div class="figure-name">Conjunctio (Union)</div>
+                    <div class="figure-meaning">Joining, combination</div>
+                    <div class="figure-element">Air / Mercury / Virgo</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">•<br>• •<br>• •<br>•</div>
+                    <div class="figure-name">Carcer (Prison)</div>
+                    <div class="figure-meaning">Restriction, binding</div>
+                    <div class="figure-element">Earth / Saturn / Capricorn</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">•<br>•<br>•<br>•</div>
+                    <div class="figure-name">Via (Way)</div>
+                    <div class="figure-meaning">Change, journey</div>
+                    <div class="figure-element">Water / Moon / Cancer</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">•<br>• •<br>• •<br>• •</div>
+                    <div class="figure-name">Tristitia (Sorrow)</div>
+                    <div class="figure-meaning">Sadness, heaviness</div>
+                    <div class="figure-element">Earth / Saturn / Aquarius</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">• •<br>•<br>•<br>• •</div>
+                    <div class="figure-name">Laetitia (Joy)</div>
+                    <div class="figure-meaning">Happiness, elevation</div>
+                    <div class="figure-element">Air / Jupiter / Pisces</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">• •<br>• •<br>•<br>• •</div>
+                    <div class="figure-name">Rubeus (Red)</div>
+                    <div class="figure-meaning">Passion, violence</div>
+                    <div class="figure-element">Fire / Mars / Gemini</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">• •<br>• •<br>• •<br>• •</div>
+                    <div class="figure-name">Acquisitio (Gain)</div>
+                    <div class="figure-meaning">Acquisition, success</div>
+                    <div class="figure-element">Air / Jupiter / Sagittarius</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">•<br>•<br>• •<br>• •</div>
+                    <div class="figure-name">Cauda Draconis (Dragon's Tail)</div>
+                    <div class="figure-meaning">Endings, decrease</div>
+                    <div class="figure-element">Earth / South Node / Sagittarius</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">• •<br>• •<br>•<br>•</div>
+                    <div class="figure-name">Caput Draconis (Dragon's Head)</div>
+                    <div class="figure-meaning">Beginnings, increase</div>
+                    <div class="figure-element">Earth / North Node / Virgo</div>
+                </div>
+                <div class="figure-item">
+                    <div class="figure-symbol">•<br>• •<br>•<br>• •</div>
+                    <div class="figure-name">Puella (Girl)</div>
+                    <div class="figure-meaning">Beauty, harmony</div>
+                    <div class="figure-element">Water / Venus / Libra</div>
+                </div>
+            </div>
+
+            <h3>Practice and Methodology</h3>
+
+            <h4>Traditional Method: Sand or Earth</h4>
+            <div class="method-box">
+                <ol>
+                    <li><strong>Preparation:</strong> Clear the mind, focus on the question, prepare clean sand or earth surface</li>
+                    <li><strong>Casting Points:</strong> Make sixteen random marks (dots, lines, or strikes) in the sand/earth
+                        without counting, four rows of random marks</li>
+                    <li><strong>Counting:</strong> Count the marks in each row. If even, record two dots; if odd, record one dot</li>
+                    <li><strong>Generate Four Mothers:</strong> The four rows of counted marks create the first figure (First Mother).
+                        Repeat the entire process three more times to generate four Mother figures</li>
+                    <li><strong>Derive Four Daughters:</strong> Create Daughter figures by reading Mothers vertically (top row of
+                        all Mothers = First Daughter, etc.)</li>
+                    <li><strong>Generate Four Nieces:</strong> Add Mother-Daughter pairs to create Niece figures</li>
+                    <li><strong>Create Two Witnesses:</strong> Add Niece pairs to create Right and Left Witness</li>
+                    <li><strong>Form the Judge:</strong> Add the two Witnesses to create the Judge figure</li>
+                    <li><strong>Reconciler (sometimes):</strong> Add First Mother and Judge for final synthesis</li>
+                </ol>
+            </div>
+
+            <h4>Modern Adaptations</h4>
+            <p>
+                Contemporary practitioners often use alternative methods for generating randomness:
+            </p>
+            <ul>
+                <li><strong>Dice:</strong> Roll a die sixteen times; even = two dots, odd = one dot</li>
+                <li><strong>Coin Flips:</strong> Flip coins for binary results</li>
+                <li><strong>Random Number Generators:</strong> Digital tools for generating figures</li>
+                <li><strong>Pencil Strikes:</strong> Making random marks on paper without looking</li>
+            </ul>
+
+            <h3>The Geomantic Shield</h3>
+            <p>
+                The sixteen figures generated in a reading are arranged in a specific pattern called the
+                "geomantic shield" or "house chart," which assigns figures to astrological houses similar
+                to an astrological chart. The positions determine what aspect of the question each figure
+                addresses:
+            </p>
+            <ul>
+                <li><strong>House 1 (Querent):</strong> The questioner's state and involvement</li>
+                <li><strong>House 2 (Wealth):</strong> Financial matters and resources</li>
+                <li><strong>House 3 (Siblings):</strong> Communication, short journeys, neighbors</li>
+                <li><strong>House 4 (Home):</strong> Property, family, foundations</li>
+                <li><strong>House 5 (Children):</strong> Creativity, pleasure, offspring</li>
+                <li><strong>House 6 (Health):</strong> Illness, service, daily work</li>
+                <li><strong>House 7 (Partner):</strong> The other party, partnerships</li>
+                <li><strong>House 8 (Death):</strong> Transformation, shared resources, mysteries</li>
+                <li><strong>House 9 (Journey):</strong> Long travel, philosophy, foreign matters</li>
+                <li><strong>House 10 (Career):</strong> Status, authority, public life</li>
+                <li><strong>House 11 (Friends):</strong> Hopes, allies, groups</li>
+                <li><strong>House 12 (Sorrow):</strong> Hidden enemies, restrictions, secrets</li>
+            </ul>
+
+            <h3>Interpretation Principles</h3>
+            <ul>
+                <li><strong>Figure Meanings:</strong> Each of the sixteen figures carries inherent significance</li>
+                <li><strong>House Placement:</strong> The meaning modifies based on which house contains the figure</li>
+                <li><strong>Planetary Hours:</strong> Some practitioners consider the planetary hour of the reading</li>
+                <li><strong>The Judge:</strong> Final figure indicating the overall outcome or answer</li>
+                <li><strong>Reconciler:</strong> Additional synthesis when Judge seems ambiguous</li>
+                <li><strong>Triplicities:</strong> Grouping figures by element for deeper analysis</li>
+                <li><strong>Aspects:</strong> Relationships between figures in different houses</li>
+            </ul>
+        </section>
+
+        <!-- FENG SHUI -->
+        <section class="section">
+            <h2>Chinese Geomancy: Feng Shui</h2>
+
+            <h3>Philosophical Foundations</h3>
+
+            <p>
+                Feng Shui operates on fundamentally different principles than Arabic geomancy, focusing on the
+                arrangement of space to harmonize with natural energy flows rather than divining answers to
+                questions. The practice rests on several core concepts:
+            </p>
+
+            <h4>Qi (氣) - Vital Energy</h4>
+            <p>
+                The fundamental life force flowing through all things. Feng Shui aims to cultivate beneficial
+                qi flow while mitigating harmful or stagnant qi. Ideal sites allow qi to meander gently,
+                accumulating in auspicious areas without rushing too quickly or becoming trapped.
+            </p>
+
+            <h4>Yin and Yang (陰陽)</h4>
+            <p>
+                Complementary forces requiring balance. Excessive yin (passive, dark, cold) or yang (active,
+                bright, hot) creates disharmony. Feng Shui adjusts spatial characteristics to achieve dynamic
+                equilibrium appropriate to a location's function.
+            </p>
+
+            <h4>Five Elements (Wu Xing 五行)</h4>
+            <p>
+                Wood, Fire, Earth, Metal, and Water—phases that generate and control each other in productive
+                and destructive cycles. Buildings, rooms, and furnishings embody elemental qualities that should
+                be balanced and appropriately sequenced.
+            </p>
+
+            <h3>Classical Feng Shui Schools</h3>
+
+            <div class="tradition-section">
+                <h4>Form School (Luan Tou 巒頭)</h4>
+                <p>
+                    The oldest approach, emphasizing observation of landforms—mountains, water features, valleys,
+                    ridges. Practitioners assess how landscape shapes affect qi flow, identifying auspicious
+                    formations like the ideal "armchair" formation (protective mountains behind and to sides,
+                    water in front, open space ahead).
+                </p>
+                <p><strong>Key concepts:</strong></p>
+                <ul>
+                    <li><strong>Dragon veins:</strong> Mountain ridges channeling qi</li>
+                    <li><strong>Tiger and Dragon:</strong> Protective hills flanking ideal sites</li>
+                    <li><strong>Bright Hall:</strong> Open space gathering beneficial energy</li>
+                    <li><strong>Water features:</strong> Rivers, lakes affecting prosperity and flow</li>
+                </ul>
+            </div>
+
+            <div class="tradition-section">
+                <h4>Compass School (Li Qi 理氣)</h4>
+                <p>
+                    Developed later, using the Luo Pan (geomantic compass) to determine precise orientations
+                    and their temporal-energetic qualities. This approach incorporates complex calculations
+                    based on compass directions, trigrams, stars, and time periods.
+                </p>
+                <p><strong>Key concepts:</strong></p>
+                <ul>
+                    <li><strong>Luo Pan:</strong> Specialized compass with concentric rings of information</li>
+                    <li><strong>Eight Mansions (Ba Zhai):</strong> Eight directional energies affecting buildings</li>
+                    <li><strong>Flying Stars (Xuan Kong Fei Xing):</strong> Time-based energy patterns cycling
+                        through spaces</li>
+                    <li><strong>Purple White Scripts:</strong> Numerical-directional systems for timing</li>
+                </ul>
+            </div>
+
+            <h3>The Bagua (八卦)</h3>
+            <p>
+                The eight trigrams from the I Ching form the foundation of Feng Shui directional analysis:
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Trigram</th>
+                        <th>Direction</th>
+                        <th>Element</th>
+                        <th>Life Area</th>
+                        <th>Family Member</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Qián (☰)</td>
+                        <td>Northwest</td>
+                        <td>Metal</td>
+                        <td>Helpful People, Travel</td>
+                        <td>Father</td>
+                    </tr>
+                    <tr>
+                        <td>Kūn (☷)</td>
+                        <td>Southwest</td>
+                        <td>Earth</td>
+                        <td>Relationships, Partnership</td>
+                        <td>Mother</td>
+                    </tr>
+                    <tr>
+                        <td>Zhèn (☳)</td>
+                        <td>East</td>
+                        <td>Wood</td>
+                        <td>Family, Health</td>
+                        <td>Eldest Son</td>
+                    </tr>
+                    <tr>
+                        <td>Xùn (☴)</td>
+                        <td>Southeast</td>
+                        <td>Wood</td>
+                        <td>Wealth, Abundance</td>
+                        <td>Eldest Daughter</td>
+                    </tr>
+                    <tr>
+                        <td>Kǎn (☵)</td>
+                        <td>North</td>
+                        <td>Water</td>
+                        <td>Career, Life Path</td>
+                        <td>Middle Son</td>
+                    </tr>
+                    <tr>
+                        <td>Lí (☲)</td>
+                        <td>South</td>
+                        <td>Fire</td>
+                        <td>Fame, Recognition</td>
+                        <td>Middle Daughter</td>
+                    </tr>
+                    <tr>
+                        <td>Gèn (☶)</td>
+                        <td>Northeast</td>
+                        <td>Earth</td>
+                        <td>Knowledge, Cultivation</td>
+                        <td>Youngest Son</td>
+                    </tr>
+                    <tr>
+                        <td>Duì (☱)</td>
+                        <td>West</td>
+                        <td>Metal</td>
+                        <td>Children, Creativity</td>
+                        <td>Youngest Daughter</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Applications</h3>
+
+            <h4>Yang Feng Shui (Yang Zhai 陽宅)</h4>
+            <p>
+                Feng Shui for the living—homes, businesses, cities. Considerations include:
+            </p>
+            <ul>
+                <li>Building orientation and entrance direction</li>
+                <li>Room placement and function alignment</li>
+                <li>Furniture arrangement to optimize qi flow</li>
+                <li>Color, material, and elemental balance</li>
+                <li>Mitigation of "secret arrows" (sharp angles, straight lines directing harsh qi)</li>
+            </ul>
+
+            <h4>Yin Feng Shui (Yin Zhai 陰宅)</h4>
+            <p>
+                Feng Shui for burial sites, believed to affect descendants' fortune. Traditional Chinese culture
+                placed enormous importance on ancestral grave placement, consulting Feng Shui masters for optimal
+                burial locations in auspicious landscapes.
+            </p>
+
+            <h3>Contemporary Practice</h3>
+            <p>
+                Modern Feng Shui divides between traditional Chinese practitioners maintaining classical methods
+                and contemporary Western adaptations. Western "New Age Feng Shui" often simplifies traditional
+                complexity, sometimes adding concepts (like the Black Hat Sect method) not found in classical texts.
+                Traditional practitioners emphasize rigorous training in classical texts, accurate compass work,
+                and integration with Chinese cosmology.
+            </p>
+        </section>
+
+        <!-- PRIMARY SOURCES -->
+        <section class="section">
+            <h2>Primary Sources & Further Reading</h2>
+
+            <h3>Arabic/European Geomancy</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Skinner, Stephen (trans. and ed.). <em>The Oracle of Geomancy</em> (1977,
+                    revised 1986)</strong><br>
+                    Comprehensive introduction to Western geomancy with historical context, complete instructions
+                    for practice, and interpretation guidelines. Includes translations of medieval texts.
+                    Standard modern reference.
+                </li>
+                <li class="source-item">
+                    <strong>Greer, John Michael. <em>The Art and Practice of Geomancy</em> (2009)</strong><br>
+                    Detailed modern exposition of geomantic technique, combining historical scholarship with
+                    practical instruction. Includes advanced techniques, astrological correlations, and
+                    mathematical analysis of the system.
+                </li>
+                <li class="source-item">
+                    <strong>Cornelius Agrippa. <em>Fourth Book of Occult Philosophy</em> (attributed, c. 1565)</strong><br>
+                    Renaissance magical text including extensive geomancy section (though Agrippa's actual
+                    authorship is disputed). Influential on European occult geomancy practice. Available in
+                    various English translations.
+                </li>
+                <li class="source-item">
+                    <strong>Gerard of Cremona (trans.). <em>De Geomantia</em> (12th century)</strong><br>
+                    One of the earliest Latin translations of Arabic geomantic texts, foundational to medieval
+                    European practice. Critical for understanding how the system entered Western tradition.
+                </li>
+                <li class="source-item">
+                    <strong>Brenner, Jan. "Geomancy in Medieval Islam and Christian Europe" in <em>The
+                    Metamorphosis of Magic from Late Antiquity to the Early Modern Period</em> (2002)</strong><br>
+                    Scholarly article tracing geomancy's transmission from Islamic world to medieval Europe,
+                    examining cultural adaptations and theological controversies.
+                </li>
+            </ul>
+
+            <h3>Chinese Feng Shui - Classical Texts</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong><em>Qing Nang Jing</em> (青囊經, Canon of the Green Bag) (attributed to various
+                    authors, compiled c. 300 CE)</strong><br>
+                    One of the oldest Feng Shui texts, establishing foundational principles. Cryptic and
+                    philosophical, requiring extensive commentary for interpretation.
+                </li>
+                <li class="source-item">
+                    <strong><em>Zang Shu</em> (葬書, Book of Burial) attributed to Guo Pu (276-324 CE)</strong><br>
+                    Influential early text on grave site selection and yin Feng Shui, describing qi flow,
+                    landform analysis, and cosmological principles. Foundational for Form School approach.
+                </li>
+                <li class="source-item">
+                    <strong><em>Yang Zhai San Yao</em> (陽宅三要, Three Essentials of the Yang Dwelling)
+                    (Qing Dynasty)</strong><br>
+                    Classical manual for residential Feng Shui, emphasizing door, stove, and bed placement
+                    as critical factors. Widely referenced in traditional practice.
+                </li>
+            </ul>
+
+            <h3>Modern Feng Shui Studies</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Bruun, Ole. <em>An Introduction to Feng Shui</em> (2008)</strong><br>
+                    Academic anthropological examination of Feng Shui in contemporary Chinese society,
+                    distinguishing traditional practice from commercial adaptations. Scholarly and accessible.
+                </li>
+                <li class="source-item">
+                    <strong>Field, Stephen L. <em>Ancient Chinese Divination</em> (2008)</strong><br>
+                    Scholarly translation and analysis of the Qing Nang Jing and related texts, providing
+                    historical context and technical explanation of classical Feng Shui principles.
+                </li>
+                <li class="source-item">
+                    <strong>Lip, Evelyn. <em>Feng Shui for the Home</em> (1986) and other works</strong><br>
+                    Series by respected Singapore-based practitioner combining traditional knowledge with
+                    practical application. Balances accessibility with authentic classical principles.
+                </li>
+                <li class="source-item">
+                    <strong>Skinner, Stephen. <em>Guide to the Feng Shui Compass</em> (2008)</strong><br>
+                    Detailed explanation of the Luo Pan (geomantic compass), its rings, and their use in
+                    Compass School Feng Shui. Technical but essential for serious study.
+                </li>
+                <li class="source-item">
+                    <strong>Needham, Joseph. <em>Science and Civilisation in China, Volume 3: Mathematics
+                    and the Sciences of the Heavens and the Earth</em> (1959)</strong><br>
+                    Comprehensive scholarly examination of Chinese geomancy within broader scientific and
+                    mathematical traditions. Academic standard reference for historical understanding.
+                </li>
+            </ul>
+
+            <h3>African Earth Divination</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Bascom, William. <em>Ifa Divination: Communication Between Gods and Men in West
+                    Africa</em> (1969)</strong><br>
+                    Anthropological study of Yoruba Ifa divination system, which may share origins with Arabic
+                    geomancy. Detailed analysis of practice, cosmology, and social function.
+                </li>
+                <li class="source-item">
+                    <strong>Peek, Philip M. (ed.). <em>African Divination Systems: Ways of Knowing</em> (1991)</strong><br>
+                    Collection of scholarly essays examining diverse African divination practices, including
+                    several earth-based systems. Provides comparative context and cultural analysis.
+                </li>
+            </ul>
+        </section>
+
+        <!-- CROSS-REFERENCES -->
+        <section class="section">
+            <h2>Cross-References & Related Practices</h2>
+
+            <h3>Related Divination Systems</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="i-ching.html" class="cross-ref">I Ching - Chinese Divination</a>
+                <a href="astrology.html" class="cross-ref">Astrology - Celestial Patterns</a>
+                <a href="tarot.html" class="cross-ref">Tarot - Archetypal Reading</a>
+                <a href="oracle-bones.html" class="cross-ref">Oracle Bones - Ancient Chinese Practice</a>
+            </div>
+
+            <h3>Associated Traditions</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../ritual/ceremonial-magic.html" class="cross-ref">Ceremonial Magic - Planetary Hours</a>
+                <a href="../texts/picatrix.html" class="cross-ref">Picatrix - Medieval Magic</a>
+                <a href="../energy/qigong.html" class="cross-ref">Qigong - Qi Cultivation</a>
+            </div>
+
+            <h3>Chinese Cosmology</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../../philosophies/taoism.html" class="cross-ref">Taoism</a>
+                <a href="../../philosophies/confucianism.html" class="cross-ref">Confucianism</a>
+                <a href="../../mythologies/chinese/five-elements.html" class="cross-ref">Five Elements Theory</a>
+            </div>
+
+            <h3>Practical Applications</h3>
+            <p>
+                Geomancy intersects with:
+            </p>
+            <ul>
+                <li><strong>Architecture:</strong> Traditional Chinese and Islamic building design</li>
+                <li><strong>Urban Planning:</strong> City layout according to geomantic principles</li>
+                <li><strong>Agriculture:</strong> Site selection for farming and water management</li>
+                <li><strong>Interior Design:</strong> Contemporary Feng Shui consultations</li>
+                <li><strong>Timing:</strong> Electional astrology and geomancy for optimal timing</li>
+            </ul>
+        </section>
+
+        <!-- NAVIGATION -->
+        <div class="nav-section">
+            <h3 style="color: var(--color-primary); margin-bottom: var(--space-5);">Continue Exploring</h3>
+            <a href="../index.html" class="nav-button">Magical Systems Index</a>
+            <a href="i-ching.html" class="nav-button">I Ching</a>
+            <a href="oracle-bones.html" class="nav-button">Oracle Bones</a>
+            <a href="../../index.html" class="nav-button">Home</a>
+        </div>
+    </div>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>
