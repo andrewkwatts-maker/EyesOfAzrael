@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I Ching - Divination Systems</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--space-5);
+        }
+
+        .container {
+            max-width: var(--container-lg);
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--space-16) var(--space-5);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-10);
+            border: 2px solid var(--color-border);
+        }
+
+        .header-icon {
+            font-size: 5rem;
+            margin-bottom: var(--space-4);
+        }
+
+        h1 {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-5);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: var(--text-xl);
+            color: var(--color-text-secondary);
+            margin: var(--space-3) 0;
+            font-style: italic;
+        }
+
+        .section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+        }
+
+        h2 {
+            font-size: var(--text-3xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-3);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        h3 {
+            font-size: var(--text-2xl);
+            color: var(--color-secondary);
+            margin-top: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+
+        h4 {
+            font-size: var(--text-xl);
+            color: var(--color-primary);
+            margin-top: var(--space-4);
+            margin-bottom: var(--space-3);
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-4);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin-left: var(--space-6);
+            margin-bottom: var(--space-4);
+            color: var(--color-text-secondary);
+        }
+
+        li {
+            margin-bottom: var(--space-2);
+            line-height: var(--leading-relaxed);
+        }
+
+        .hexagram-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-6) 0;
+        }
+
+        .hexagram-item {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            text-align: center;
+        }
+
+        .hexagram-symbol {
+            font-size: var(--text-3xl);
+            margin-bottom: var(--space-2);
+            font-family: monospace;
+        }
+
+        .hexagram-name {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .hexagram-description {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .source-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .source-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 3px solid var(--color-primary);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+            border-radius: var(--radius-md);
+        }
+
+        .cross-ref {
+            display: inline-block;
+            padding: var(--space-2) var(--space-4);
+            background: rgba(var(--color-secondary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            margin: var(--space-2);
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+        }
+
+        .cross-ref:hover {
+            background: rgba(var(--color-secondary-rgb), 0.4);
+            transform: translateY(-2px);
+        }
+
+        .nav-section {
+            text-align: center;
+            margin-top: var(--space-10);
+            padding: var(--space-6);
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: var(--space-4) var(--space-8);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+            margin: var(--space-2);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-accent-rgb), 0.1);
+            border-left: 4px solid var(--color-accent);
+            padding: var(--space-4);
+            margin: var(--space-4) 0;
+            border-radius: var(--radius-md);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-4) 0;
+        }
+
+        th, td {
+            padding: var(--space-3);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            color: var(--color-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        .trigram-box {
+            display: inline-block;
+            font-family: monospace;
+            font-size: var(--text-xl);
+            margin: var(--space-2);
+            padding: var(--space-3);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-radius: var(--radius-md);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+    <div class="header-content">
+        <h1>I Ching (Yijing)</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../mythos/index.html">Home</a> → <a href="../magic/index.html">Magic</a> → <a href="../divination/index.html">Divination</a> → <span>I Ching</span>
+</nav>
+
+        <!-- OVERVIEW -->
+        <section class="section">
+            <h2>Overview & Historical Origins</h2>
+
+            <p>
+                The I Ching (Wade-Giles romanization) or Yijing (Pinyin), known as the Book of Changes, is one of
+                the oldest Chinese classical texts and divination systems, with origins dating back over 3,000 years
+                to the Western Zhou Dynasty (1000-750 BCE) and possibly earlier. It consists of 64 hexagrams, each
+                composed of six stacked lines that are either broken (yin) or unbroken (yang), representing the
+                fundamental binary forces underlying all existence.
+            </p>
+
+            <p>
+                The text evolved through several historical layers: the hexagrams themselves (believed to derive from
+                even older divination practices using oracle bones and turtle shells), the brief hexagram and line
+                statements attributed to King Wen and the Duke of Zhou, and later philosophical commentaries known
+                as the Ten Wings, traditionally attributed to Confucius but likely compiled by his followers during
+                the Warring States period (475-221 BCE).
+            </p>
+
+            <div class="highlight-box">
+                <h4>Cultural Significance</h4>
+                <p>
+                    The I Ching occupies a unique position in Chinese thought as both a divination manual and
+                    a philosophical text. It influenced both Confucianism (emphasizing moral development and
+                    proper social conduct) and Taoism (focusing on natural harmony and spontaneous action).
+                    Neo-Confucian scholars in the Song Dynasty (960-1279 CE) developed elaborate cosmological
+                    interpretations linking the hexagrams to metaphysical principles.
+                </p>
+            </div>
+
+            <h3>Core Philosophy: Change and Transformation</h3>
+            <p>
+                The central principle of the I Ching is that reality is not static but constantly transforming
+                according to natural patterns. Change occurs through the dynamic interplay of yin and yang:
+            </p>
+            <ul>
+                <li><strong>Yang (—):</strong> The creative, active, masculine, bright, firm, heaven principle</li>
+                <li><strong>Yin (- -):</strong> The receptive, passive, feminine, dark, yielding, earth principle</li>
+            </ul>
+
+            <p>
+                Unlike Western binary opposition, yin and yang are complementary forces that transform into each
+                other. The hexagrams capture moments in this continuous cycle of transformation, providing insight
+                into the present situation and indicating how change is likely to unfold.
+            </p>
+
+            <h3>Purpose and Applications</h3>
+            <ul>
+                <li><strong>Divination:</strong> Receiving guidance on specific questions or situations</li>
+                <li><strong>Philosophical Study:</strong> Understanding the principles of change and cosmic order</li>
+                <li><strong>Meditation:</strong> Contemplating the hexagram images and judgments</li>
+                <li><strong>Decision-Making:</strong> Gaining perspective on timing and proper action</li>
+                <li><strong>Self-Cultivation:</strong> Aligning oneself with natural processes and moral development</li>
+                <li><strong>Strategic Planning:</strong> Assessing situations in business, politics, and warfare</li>
+            </ul>
+        </section>
+
+        <!-- KEY COMPONENTS -->
+        <section class="section">
+            <h2>Key Components & Structure</h2>
+
+            <h3>The Eight Trigrams (Bagua)</h3>
+            <p>
+                The foundation of the I Ching consists of eight trigrams, three-line figures representing
+                fundamental forces of nature and aspects of reality:
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Trigram</th>
+                        <th>Name</th>
+                        <th>Image</th>
+                        <th>Attribute</th>
+                        <th>Family</th>
+                        <th>Direction</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="trigram-box">☰</span></td>
+                        <td>Qián (乾)</td>
+                        <td>Heaven</td>
+                        <td>Creative, Strong</td>
+                        <td>Father</td>
+                        <td>Northwest</td>
+                    </tr>
+                    <tr>
+                        <td><span class="trigram-box">☷</span></td>
+                        <td>Kūn (坤)</td>
+                        <td>Earth</td>
+                        <td>Receptive, Devoted</td>
+                        <td>Mother</td>
+                        <td>Southwest</td>
+                    </tr>
+                    <tr>
+                        <td><span class="trigram-box">☳</span></td>
+                        <td>Zhèn (震)</td>
+                        <td>Thunder</td>
+                        <td>Arousing, Moving</td>
+                        <td>Eldest Son</td>
+                        <td>East</td>
+                    </tr>
+                    <tr>
+                        <td><span class="trigram-box">☵</span></td>
+                        <td>Kǎn (坎)</td>
+                        <td>Water/Abyss</td>
+                        <td>Dangerous, Abysmal</td>
+                        <td>Middle Son</td>
+                        <td>North</td>
+                    </tr>
+                    <tr>
+                        <td><span class="trigram-box">☶</span></td>
+                        <td>Gèn (艮)</td>
+                        <td>Mountain</td>
+                        <td>Keeping Still</td>
+                        <td>Youngest Son</td>
+                        <td>Northeast</td>
+                    </tr>
+                    <tr>
+                        <td><span class="trigram-box">☴</span></td>
+                        <td>Xùn (巽)</td>
+                        <td>Wind/Wood</td>
+                        <td>Gentle, Penetrating</td>
+                        <td>Eldest Daughter</td>
+                        <td>Southeast</td>
+                    </tr>
+                    <tr>
+                        <td><span class="trigram-box">☲</span></td>
+                        <td>Lí (離)</td>
+                        <td>Fire</td>
+                        <td>Clinging, Luminous</td>
+                        <td>Middle Daughter</td>
+                        <td>South</td>
+                    </tr>
+                    <tr>
+                        <td><span class="trigram-box">☱</span></td>
+                        <td>Duì (兌)</td>
+                        <td>Lake/Marsh</td>
+                        <td>Joyous, Pleasing</td>
+                        <td>Youngest Daughter</td>
+                        <td>West</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>The 64 Hexagrams</h3>
+            <p>
+                Hexagrams are formed by stacking two trigrams (lower and upper), creating 64 possible combinations
+                (8 × 8). Each hexagram has a number, name, image, judgment, and commentary on each of its six lines.
+            </p>
+
+            <h4>Example Hexagrams (Select Notable Examples)</h4>
+
+            <div class="hexagram-grid">
+                <div class="hexagram-item">
+                    <div class="hexagram-symbol">☰<br>☰</div>
+                    <div class="hexagram-name">1. Qián (乾)<br>The Creative</div>
+                    <div class="hexagram-description">
+                        Pure yang energy. Heaven above and below. Represents creative power,
+                        strength, initiation, and perseverance.
+                    </div>
+                </div>
+                <div class="hexagram-item">
+                    <div class="hexagram-symbol">☷<br>☷</div>
+                    <div class="hexagram-name">2. Kūn (坤)<br>The Receptive</div>
+                    <div class="hexagram-description">
+                        Pure yin energy. Earth above and below. Represents receptivity,
+                        devotion, yielding, and nurturing support.
+                    </div>
+                </div>
+                <div class="hexagram-item">
+                    <div class="hexagram-symbol">☵<br>☳</div>
+                    <div class="hexagram-name">3. Zhūn (屯)<br>Difficulty at the Beginning</div>
+                    <div class="hexagram-description">
+                        Water above Thunder. Challenges in starting new ventures.
+                        Persevere through initial chaos to establish order.
+                    </div>
+                </div>
+                <div class="hexagram-item">
+                    <div class="hexagram-symbol">☶<br>☵</div>
+                    <div class="hexagram-name">4. Méng (蒙)<br>Youthful Folly</div>
+                    <div class="hexagram-description">
+                        Mountain above Water. Inexperience seeking knowledge.
+                        The student must seek the teacher with sincerity.
+                    </div>
+                </div>
+                <div class="hexagram-item">
+                    <div class="hexagram-symbol">☵<br>☰</div>
+                    <div class="hexagram-name">5. Xū (需)<br>Waiting</div>
+                    <div class="hexagram-description">
+                        Water above Heaven. Patient confidence. Wait for the right
+                        moment while maintaining inner strength.
+                    </div>
+                </div>
+                <div class="hexagram-item">
+                    <div class="hexagram-symbol">☰<br>☵</div>
+                    <div class="hexagram-name">6. Sòng (訟)<br>Conflict</div>
+                    <div class="hexagram-description">
+                        Heaven above Water. Opposition and dispute. Seek mediation
+                        rather than forcing resolution.
+                    </div>
+                </div>
+                <div class="hexagram-item">
+                    <div class="hexagram-symbol">☷<br>☵</div>
+                    <div class="hexagram-name">7. Shī (師)<br>The Army</div>
+                    <div class="hexagram-description">
+                        Earth above Water. Organized discipline. Leadership requires
+                        moral authority and strategic wisdom.
+                    </div>
+                </div>
+                <div class="hexagram-item">
+                    <div class="hexagram-symbol">☵<br>☷</div>
+                    <div class="hexagram-name">8. Bǐ (比)<br>Holding Together</div>
+                    <div class="hexagram-description">
+                        Water above Earth. Union and alliance. Seek complementary
+                        relationships built on mutual support.
+                    </div>
+                </div>
+                <div class="hexagram-item">
+                    <div class="hexagram-symbol">☴<br>☰</div>
+                    <div class="hexagram-name">9. Xiǎo Chù (小畜)<br>Small Taming</div>
+                    <div class="hexagram-description">
+                        Wind above Heaven. Gentle restraint. Minor obstacles can
+                        be overcome with patient persistence.
+                    </div>
+                </div>
+                <div class="hexagram-item">
+                    <div class="hexagram-symbol">☰<br>☱</div>
+                    <div class="hexagram-name">10. Lǚ (履)<br>Treading</div>
+                    <div class="hexagram-description">
+                        Heaven above Lake. Careful conduct. Move forward with
+                        respect and proper behavior.
+                    </div>
+                </div>
+                <div class="hexagram-item">
+                    <div class="hexagram-symbol">☷<br>☰</div>
+                    <div class="hexagram-name">11. Tài (泰)<br>Peace</div>
+                    <div class="hexagram-description">
+                        Earth above Heaven. Harmony and prosperity. Heaven and
+                        Earth in perfect communion.
+                    </div>
+                </div>
+                <div class="hexagram-item">
+                    <div class="hexagram-symbol">☰<br>☷</div>
+                    <div class="hexagram-name">12. Pǐ (否)<br>Standstill</div>
+                    <div class="hexagram-description">
+                        Heaven above Earth. Stagnation and obstruction. Heaven
+                        and Earth separate; withdraw and wait.
+                    </div>
+                </div>
+            </div>
+
+            <p style="text-align: center; font-style: italic; margin-top: var(--space-4);">
+                ...and 52 more hexagrams, each with unique meanings and line commentaries.
+            </p>
+
+            <h3>Structure of Each Hexagram</h3>
+            <p>
+                Every hexagram entry in the I Ching contains several components:
+            </p>
+            <ul>
+                <li><strong>Number and Name:</strong> Sequential position (1-64) and Chinese name with translation</li>
+                <li><strong>Symbol/Image:</strong> Natural imagery associated with the trigram combination</li>
+                <li><strong>Judgment (Tuàn):</strong> Overall assessment of the hexagram's meaning</li>
+                <li><strong>Image Commentary:</strong> Symbolic interpretation suggesting proper action</li>
+                <li><strong>Line Texts:</strong> Six individual statements for each line position</li>
+                <li><strong>Changing Lines:</strong> Indications of transformation to other hexagrams</li>
+            </ul>
+        </section>
+
+        <!-- PRACTICE & METHODS -->
+        <section class="section">
+            <h2>Practice & Methods</h2>
+
+            <h3>Traditional Methods of Consultation</h3>
+
+            <h4>Yarrow Stalk Method (Shì Fǎ)</h4>
+            <p>
+                The classical method using 50 yarrow stalks (one set aside, using 49):
+            </p>
+            <ol>
+                <li>Begin with 49 stalks, divide randomly into two piles</li>
+                <li>Set aside one stalk from the right pile</li>
+                <li>Count out the left pile in groups of four; remainder goes between fingers</li>
+                <li>Count out the right pile in groups of four; remainder goes between fingers</li>
+                <li>Combine remainders (will equal 5 or 9)</li>
+                <li>Repeat this process three times to determine one line (6, 7, 8, or 9)</li>
+                <li>Repeat entire process six times to build the hexagram from bottom to top</li>
+            </ol>
+
+            <p>
+                This elaborate process takes 15-20 minutes and creates a meditative state conducive to
+                receiving insight. The method produces probabilities that favor certain line values,
+                which traditional practitioners consider cosmologically significant.
+            </p>
+
+            <h4>Three Coin Method</h4>
+            <p>
+                A simplified method that became popular during the Han Dynasty:
+            </p>
+            <ol>
+                <li>Use three identical coins (traditionally Chinese coins with inscription)</li>
+                <li>Assign values: Heads = 3 (yang), Tails = 2 (yin)</li>
+                <li>Toss three coins simultaneously</li>
+                <li>Sum the values: 6 = changing yin, 7 = stable yang, 8 = stable yin, 9 = changing yang</li>
+                <li>Record the line (broken for yin, unbroken for yang)</li>
+                <li>Repeat six times, building from bottom to top</li>
+            </ol>
+
+            <p>
+                While faster than yarrow stalks, this method produces different probabilities for
+                changing versus stable lines.
+            </p>
+
+            <h3>Interpreting the Response</h3>
+
+            <div class="highlight-box">
+                <h4>Changing Lines</h4>
+                <p>
+                    Lines valued 6 or 9 are "changing" or "moving" lines—they represent unstable
+                    situations in transformation. A line 6 (old yin) transforms into yang; line 9
+                    (old yang) transforms into yin. These changing lines indicate which line texts
+                    to read for specific guidance, and they generate a second hexagram showing the
+                    situation's likely development.
+                </p>
+            </div>
+
+            <h4>Reading Strategy</h4>
+            <p>
+                The traditional approach to interpretation involves multiple layers:
+            </p>
+            <ol>
+                <li><strong>Primary Hexagram:</strong> Read the Judgment and Image for overall situation</li>
+                <li><strong>Changing Lines:</strong> Read the line texts for any moving lines (bottom to top)</li>
+                <li><strong>Relating Hexagrams:</strong> If multiple lines change, sometimes read only top and bottom</li>
+                <li><strong>Future Hexagram:</strong> Transform changing lines to create the resultant hexagram</li>
+                <li><strong>Synthesis:</strong> Integrate all readings into coherent guidance</li>
+            </ol>
+
+            <h3>Formulating Questions</h3>
+            <p>
+                The quality of the question significantly affects the usefulness of the response:
+            </p>
+            <ul>
+                <li><strong>Be Specific:</strong> "How should I approach this job opportunity?" rather than "What about work?"</li>
+                <li><strong>Focus on Understanding:</strong> "What do I need to know about..." rather than "Will I..."</li>
+                <li><strong>Request Guidance:</strong> "What is the best approach to..." rather than yes/no questions</li>
+                <li><strong>Timing Questions:</strong> "Is now the right time to..." acknowledges the I Ching's emphasis on timing</li>
+                <li><strong>Single Focus:</strong> One clear question per consultation rather than multiple topics</li>
+            </ul>
+
+            <h3>Ethical Considerations</h3>
+            <p>
+                Traditional practice emphasizes approaching the I Ching with sincerity and respect:
+            </p>
+            <ul>
+                <li>Don't consult frivolously or repeatedly on the same question</li>
+                <li>Maintain a receptive, contemplative state rather than demanding answers</li>
+                <li>Accept challenging or unexpected responses</li>
+                <li>Use insights to inform decisions rather than abdicate responsibility</li>
+                <li>Consider the oracle a teacher, not a fortune-telling device</li>
+            </ul>
+        </section>
+
+        <!-- TRADITIONS & VARIATIONS -->
+        <section class="section">
+            <h2>Traditions & Variations</h2>
+
+            <h3>Philosophical Schools</h3>
+
+            <h4>Confucian Interpretation</h4>
+            <p>
+                The Confucian approach emphasizes moral development, social harmony, and proper conduct.
+                The Ten Wings commentaries interpret hexagrams as guidance for ethical behavior, self-cultivation,
+                and fulfilling one's role in society. Key concepts include:
+            </p>
+            <ul>
+                <li>Alignment with the "Mandate of Heaven" (Tianming)</li>
+                <li>Development of virtue (de) through proper action</li>
+                <li>Recognition of one's position in the social and cosmic order</li>
+                <li>Timing actions according to natural cycles</li>
+            </ul>
+
+            <h4>Taoist Interpretation</h4>
+            <p>
+                Taoist readings emphasize spontaneity, naturalness, and wu wei (effortless action).
+                Rather than moral prescriptions, Taoist interpretation focuses on:
+            </p>
+            <ul>
+                <li>Flowing with circumstances rather than forcing outcomes</li>
+                <li>Recognizing the natural tendency of situations to transform</li>
+                <li>Understanding when to act and when to refrain</li>
+                <li>Maintaining balance and avoiding extremes</li>
+            </ul>
+
+            <h4>Neo-Confucian Cosmology</h4>
+            <p>
+                Song Dynasty scholars like Shao Yong developed elaborate metaphysical systems based
+                on the I Ching, connecting hexagrams to the generation of reality itself through
+                the Supreme Ultimate (Taiji) differentiating into yin and yang, then into four
+                symbols, then eight trigrams, then 64 hexagrams—a cosmogonic sequence.
+            </p>
+
+            <h3>Western Adaptations</h3>
+
+            <h4>Jungian Psychology</h4>
+            <p>
+                Carl Jung introduced the I Ching to Western psychology, interpreting it through his
+                concept of synchronicity—meaningful coincidences that reflect the archetypal structure
+                of the collective unconscious. Jung saw hexagrams as representing universal psychic
+                patterns, making consultation a method of accessing unconscious knowledge.
+            </p>
+
+            <h4>Wilhelm-Baynes Translation</h4>
+            <p>
+                Richard Wilhelm's German translation (1923), later rendered into English by Cary Baynes
+                (1950) with Jung's foreword, became the standard Western version. Wilhelm studied with
+                Chinese scholars and incorporated both Confucian and Taoist perspectives, making the
+                text philosophically rich though sometimes departing from literal translation.
+            </p>
+
+            <h4>Contemporary Interpretations</h4>
+            <p>
+                Modern Western practitioners have developed various approaches:
+            </p>
+            <ul>
+                <li><strong>Psychological Tool:</strong> Using hexagrams for self-reflection and decision-making</li>
+                <li><strong>Creative Inspiration:</strong> Artists and writers consulting for creative direction</li>
+                <li><strong>Business Strategy:</strong> Corporate consultants applying I Ching principles to management</li>
+                <li><strong>Simplified Systems:</strong> Apps and online consultations using random number generation</li>
+            </ul>
+
+            <h3>Related Chinese Divinatory Practices</h3>
+
+            <h4>Feng Shui and the Bagua</h4>
+            <p>
+                The eight trigrams form the foundation of Feng Shui's Later Heaven arrangement,
+                used to analyze spatial energy and orient buildings. Each trigram corresponds to
+                life areas: career, relationships, wealth, health, etc.
+            </p>
+
+            <h4>Plum Blossom Numerology (Mei Hua Yi Shu)</h4>
+            <p>
+                Divination method using numbers derived from natural phenomena (time, observations,
+                sounds) to generate hexagrams spontaneously without coins or yarrow stalks.
+            </p>
+
+            <h4>Qi Men Dun Jia</h4>
+            <p>
+                Complex divinatory system combining the I Ching with Chinese astrology, used
+                historically for military strategy and currently for business timing and feng shui.
+            </p>
+        </section>
+
+        <!-- PRIMARY SOURCES -->
+        <section class="section">
+            <h2>Primary Sources & Further Reading</h2>
+
+            <h3>Classical Texts and Translations</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Wilhelm, Richard (trans.), Baynes, Cary F. (English trans.). <em>The I Ching or Book
+                    of Changes</em> (1950)</strong><br>
+                    The most influential Western translation, based on Wilhelm's study with Chinese scholars.
+                    Includes Jung's foreword on synchronicity. Combines Confucian moral interpretation with
+                    accessible language, though sometimes interpretive rather than literal.
+                </li>
+                <li class="source-item">
+                    <strong>Lynn, Richard John (trans.). <em>The Classic of Changes: A New Translation of the
+                    I Ching as Interpreted by Wang Bi</em> (1994)</strong><br>
+                    Scholarly translation of Wang Bi's (226-249 CE) influential commentary, representing the
+                    Neo-Taoist philosophical approach. More literal than Wilhelm, focusing on the Chinese
+                    intellectual tradition.
+                </li>
+                <li class="source-item">
+                    <strong>Rutt, Richard (trans.). <em>The Book of Changes (Zhouyi): A Bronze Age Document</em>
+                    (1996)</strong><br>
+                    Academic translation emphasizing the text's original Bronze Age context, stripping away
+                    later philosophical elaborations to reveal the oracle's earliest form. Controversial but
+                    historically rigorous.
+                </li>
+                <li class="source-item">
+                    <strong>Huang, Alfred (trans.). <em>The Complete I Ching: The Definitive Translation</em>
+                    (1998)</strong><br>
+                    Translation by a native Chinese speaker who studied the text during imprisonment in the
+                    Cultural Revolution. Includes detailed explanations of Chinese characters and decision-making
+                    processes, emphasizing practical application.
+                </li>
+                <li class="source-item">
+                    <strong>Shaughnessy, Edward L. (trans.). <em>I Ching: The Classic of Changes</em> (1996)</strong><br>
+                    Translation of the Mawangdui silk manuscript version (168 BCE), discovered in 1973. Shows
+                    the text's form before standardization, with different hexagram sequences and variant readings.
+                </li>
+            </ul>
+
+            <h3>Historical and Scholarly Studies</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Smith, Richard J. <em>Fathoming the Cosmos and Ordering the World: The Yijing
+                    (I Ching, or Classic of Changes) and Its Evolution in China</em> (2008)</strong><br>
+                    Comprehensive intellectual history examining how the I Ching was interpreted across
+                    different periods and philosophical schools in China, from ancient divination to
+                    Neo-Confucian cosmology.
+                </li>
+                <li class="source-item">
+                    <strong>Redmond, Geoffrey and Hon, Tze-ki. <em>Teaching the I Ching (Book of Changes)</em>
+                    (2014)</strong><br>
+                    Detailed scholarly introduction covering historical development, philosophical interpretations,
+                    textual structure, and pedagogical approaches. Excellent resource for serious study.
+                </li>
+                <li class="source-item">
+                    <strong>Kunst, Richard Alan. <em>The Original Yijing: A Text, Phonetic Transcription,
+                    Translation, and Indexes, with Sample Glosses</em> (1985)</strong><br>
+                    Philological study reconstructing the text's original meanings through linguistic analysis,
+                    separate from later interpretive traditions. Highly technical but foundational for
+                    understanding textual evolution.
+                </li>
+            </ul>
+
+            <h3>Practical and Interpretive Guides</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Wing, R.L. <em>The I Ching Workbook</em> (1979)</strong><br>
+                    Accessible introduction with modernized interpretations, practical exercises, and
+                    visual diagrams. Particularly useful for beginners and contemporary applications.
+                </li>
+                <li class="source-item">
+                    <strong>Karcher, Stephen. <em>Total I Ching: Myths for Change</em> (2003)</strong><br>
+                    Comprehensive guide integrating scholarly research with practical divination techniques.
+                    Includes historical context, detailed hexagram analysis, and methods for consultation.
+                </li>
+                <li class="source-item">
+                    <strong>Blofeld, John. <em>I Ching: The Book of Change</em> (1965)</strong><br>
+                    Translation and commentary by a Western scholar who lived in China and studied with
+                    traditional teachers. Emphasizes Taoist interpretation and meditative approaches.
+                </li>
+            </ul>
+
+            <h3>Contemporary Applications</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Minford, John (trans.). <em>I Ching (Yijing): The Book of Change</em> (2014)</strong><br>
+                    Modern translation incorporating recent scholarship with extensive commentary drawing
+                    on Taoist, Buddhist, and Confucian sources. Emphasizes spiritual and philosophical
+                    dimensions.
+                </li>
+            </ul>
+        </section>
+
+        <!-- CROSS-REFERENCES -->
+        <section class="section">
+            <h2>Cross-References & Related Practices</h2>
+
+            <h3>Related Divination Systems</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="oracle-bones.html" class="cross-ref">Oracle Bones - Ancient Chinese Divination</a>
+                <a href="geomancy.html" class="cross-ref">Geomancy & Feng Shui</a>
+                <a href="astrology.html" class="cross-ref">Astrology - Celestial Divination</a>
+                <a href="tarot.html" class="cross-ref">Tarot - Western Symbolic System</a>
+            </div>
+
+            <h3>Chinese Philosophical Traditions</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../energy/qigong.html" class="cross-ref">Qigong - Energy Cultivation</a>
+                <a href="../ritual/alchemy.html" class="cross-ref">Chinese Alchemy</a>
+                <a href="../../philosophies/taoism.html" class="cross-ref">Taoism</a>
+                <a href="../../philosophies/confucianism.html" class="cross-ref">Confucianism</a>
+            </div>
+
+            <h3>Archetypal Patterns</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../../archetypes/sage.html" class="cross-ref">The Sage/Wise One</a>
+                <a href="../../archetypes/hero.html" class="cross-ref">The Hero's Journey</a>
+                <a href="../../archetypes/trickster.html" class="cross-ref">The Trickster</a>
+            </div>
+
+            <h3>Symbolic Correspondences</h3>
+            <p>
+                The I Ching connects to numerous symbolic systems:
+            </p>
+            <ul>
+                <li><strong>Five Elements:</strong> Wood, Fire, Earth, Metal, Water phases in Chinese cosmology</li>
+                <li><strong>Celestial Stems and Earthly Branches:</strong> Chinese calendrical system</li>
+                <li><strong>Animal Symbolism:</strong> Dragon, Phoenix, Tiger, Tortoise representing cosmic forces</li>
+                <li><strong>Seasonal Cycles:</strong> Hexagrams corresponding to times of year</li>
+                <li><strong>Body Systems:</strong> Correspondences with organs and meridians in Chinese medicine</li>
+            </ul>
+        </section>
+
+        <!-- NAVIGATION -->
+        <div class="nav-section">
+            <h3 style="color: var(--color-primary); margin-bottom: var(--space-5);">Continue Exploring</h3>
+            <a href="../index.html" class="nav-button">Magical Systems Index</a>
+            <a href="tarot.html" class="nav-button">Tarot</a>
+            <a href="runes.html" class="nav-button">Runes</a>
+            <a href="../../index.html" class="nav-button">Home</a>
+        </div>
+    </div>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>
