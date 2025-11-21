@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gandiva - Divine Weapons - World Mythos Explorer</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-text-primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            color: var(--color-primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .subsection-title {
+            color: var(--color-primary);
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .info-item {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-value {
+            color: var(--color-text-primary);
+            font-size: 1.1rem;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+            justify-content: center;
+        }
+
+        .tradition-tag {
+            background: var(--color-primary);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .related-link {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .related-link:hover {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border-color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .quote-box {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border-left: 4px solid var(--color-secondary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        }
+
+        .content-text {
+            line-height: 1.8;
+            color: var(--color-text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .content-text p {
+            margin-bottom: 1rem;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.2),
+                rgba(var(--color-secondary-rgb), 0.2));
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+            color: var(--color-text-secondary);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .bibliography {
+            background: rgba(var(--color-surface-rgb), 0.4);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            margin-top: 3rem;
+        }
+
+        .bibliography ol {
+            list-style-type: decimal;
+        }
+
+        .bibliography li {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+        }
+
+        .power-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .power-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .power-item strong {
+            color: var(--color-primary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+    <div class="header-content">
+        <h1>🏹 Gandiva</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Sacred Items</a> →
+                <a href="index.html">Weapons</a> →
+                <span>Gandiva</span>
+</nav>
+
+    <main>
+        <!-- HERO SECTION -->
+        <div class="hero-section" data-item="gandiva" data-tradition="Hindu,Vedic,Indian" data-type="weapon">
+            <div class="hero-icon">🏹</div>
+            <h2 class="hero-title">Gandiva</h2>
+            <p class="hero-subtitle">Arjuna's Celestial Bow of Infallible Victory</p>
+            <div class="tradition-tags">
+                <span class="tradition-tag">Hindu</span>
+                <span class="tradition-tag">Vedic</span>
+                <span class="tradition-tag">Mahabharata</span>
+                <span class="tradition-tag">Epic</span>
+            </div>
+        </div>
+
+        <!-- QUICK INFO -->
+        <div class="glass-card">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Weapon Type</div>
+                    <div class="info-value">Celestial Bow (Dhanush)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Wielder</div>
+                    <div class="info-value">Arjuna (also Soma, Varuna, Agni previously)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Gifted By</div>
+                    <div class="info-value">Agni (Fire God), crafted by Brahma</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Primary Power</div>
+                    <div class="info-value">Inexhaustible arrows, unfailing accuracy, invincibility in battle</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="glass-card">
+            <h3 class="section-title">Description and Appearance</h3>
+            <div class="content-text">
+                <p>
+                    Gandiva (Sanskrit: गाण्डीव, Gāṇḍīva) stands as the most celebrated bow in Hindu epic literature,
+                    a celestial weapon of such power and prestige that its very name became synonymous with martial
+                    excellence and divine favor. As the primary weapon of Arjuna—third Pandava brother and greatest
+                    archer of the Mahabharata—Gandiva represents not merely a tool of warfare but the manifestation
+                    of dharma (righteousness) enacted through martial prowess.
+                </p>
+                <p>
+                    Unlike mortal-crafted bows that require constant maintenance and eventually wear out, Gandiva is
+                    eternal and indestructible, crafted by Lord Brahma himself at the dawn of creation. The bow
+                    possesses its own consciousness and will, choosing its wielders carefully and granting victory
+                    only to those who fight for righteous causes. It is said that the bow contains within it the
+                    combined power of one hundred thousand ordinary bows, making its wielder effectively invincible
+                    against conventional forces.
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <h4 class="subsection-title">Physical Characteristics:</h4>
+                <ul>
+                    <li><strong>Construction:</strong> Fashioned from celestial wood that never decays or breaks,
+                    with a bowstring (jyā) made from cosmic energy that never requires replacement and cannot be cut
+                    by any earthly weapon</li>
+                    <li><strong>Appearance:</strong> Radiant golden-yellow hue that glows with divine light, adorned
+                    with intricate carvings of celestial beings and cosmic symbols representing the elements and
+                    divine forces</li>
+                    <li><strong>Size and Proportions:</strong> Perfectly balanced for Arjuna's use, appearing as a
+                    tall bow (approximately six feet) that adapts to its wielder, though descriptions vary from text
+                    to text regarding exact dimensions</li>
+                    <li><strong>Sound:</strong> When drawn, Gandiva produces a distinctive thunderous twang
+                    (Gāṇḍīva-dhvani) that reverberates across the battlefield, striking terror into enemies and
+                    rallying allies—the sound alone could frighten opposing armies</li>
+                    <li><strong>Weight:</strong> Seemingly light as a feather to Arjuna but impossibly heavy to
+                    unworthy wielders; only those blessed with divine strength and proper authorization could even
+                    lift it, much less draw it</li>
+                    <li><strong>Mystical Properties:</strong> The bow emanates divine energy (tejas) visible as an
+                    aura of golden light surrounding both weapon and wielder, marking them as divinely favored</li>
+                    <li><strong>Self-Sustaining Nature:</strong> Never requires repair, restringing, or maintenance;
+                    the bowstring remains perpetually taut and ready, the wood never warps or cracks despite endless
+                    use in the most extreme conditions</li>
+                    <li><strong>Quiver Association:</strong> Accompanied by two inexhaustible quivers (akṣayya
+                    tūṇīra) gifted alongside the bow, ensuring the archer never runs out of arrows regardless of how
+                    many are fired—each arrow is perfectly crafted and flies true</li>
+                </ul>
+            </div>
+
+            <div class="content-text">
+                <p>
+                    The visual representation of Gandiva in temple art, manuscript illustrations, and folk
+                    traditions shows remarkable consistency: always depicted as luminous and larger than ordinary
+                    bows, often shown with Arjuna in his iconic pose with the bow drawn, Krishna by his side as
+                    charioteer. The bow's curvature follows the classical Indian bow design (dhanu), with pronounced
+                    recurve at the tips, though its supernatural nature transcends normal functional requirements.
+                </p>
+                <p>
+                    Ancient texts describe how the battlefield itself seemed to transform when Arjuna wielded
+                    Gandiva. The sky would darken with the density of his arrows, each shaft flying with such
+                    precision that they could weave patterns in the air, create defensive walls, or pierce through
+                    multiple enemies in succession. The bow enabled Arjuna to engage in incredible feats such as
+                    the "Bhāradvāja Astra"—a technique where arrows would split mid-flight and multiply, creating
+                    an impenetrable storm of projectiles.
+                </p>
+                <p>
+                    The symbolic meaning embedded in Gandiva's physical form reflects Hindu cosmological concepts.
+                    The bow's arc represents the vault of heaven, the string symbolizes cosmic order (ṛta), and the
+                    arrow stands for individual action aligned with universal dharma. When Arjuna draws Gandiva, he
+                    metaphorically draws together all these cosmic elements, becoming an instrument through which
+                    divine will manifests in the material world.
+                </p>
+            </div>
+        </div>
+
+        <!-- CREATION MYTH -->
+        <div class="glass-card">
+            <h3 class="section-title">Creation Myth and Crafting</h3>
+            <div class="content-text">
+                <p>
+                    The origin of Gandiva reaches back to the earliest moments of cosmic creation, making it one of
+                    the primordial weapons forged when the universe itself was young. According to the Mahabharata
+                    and various Puranic sources, Lord Brahma—the creator deity responsible for manifesting the
+                    material universe—personally crafted this bow to serve as the ultimate weapon for maintaining
+                    dharma (cosmic order and righteousness) through the ages.
+                </p>
+
+                <h4 class="subsection-title">Brahma's Divine Craftsmanship</h4>
+                <p>
+                    Brahma created Gandiva during a period when the cosmic balance between dharma and adharma
+                    (unrighteousness) was being established. The gods (devas) required supremely powerful weapons to
+                    combat the asuras (demons/anti-gods) who threatened to overthrow cosmic order. While other
+                    divine weapons were created for specific purposes or deities, Gandiva was fashioned as an
+                    instrument of pure martial supremacy—a bow that would guarantee victory to any righteous warrior
+                    who wielded it.
+                </p>
+                <p>
+                    The materials used in Gandiva's construction came from the most sacred and powerful sources in
+                    the cosmos. Some traditions state that Brahma used wood from the celestial Kalpavriksha (the
+                    wish-fulfilling tree of Indra's paradise), while others suggest he gathered materials from the
+                    cosmic tree Ashvattha (the eternal fig that represents the universe itself). The bowstring was
+                    woven from threads of pure cosmic energy—the same primordial force that binds the universe
+                    together.
+                </p>
+                <p>
+                    Brahma infused Gandiva with several divine blessings during its creation. He chanted mantras
+                    from the Vedas as he worked, embedding sacred sound vibrations into the weapon's very structure.
+                    He invoked the power of all five elements—earth, water, fire, air, and ether—ensuring the bow
+                    could channel any elemental force. Most significantly, he granted it sentience and purpose:
+                    Gandiva would serve only righteousness and could never be used for unjust causes.
+                </p>
+
+                <h4 class="subsection-title">The Succession of Divine Wielders</h4>
+                <p>
+                    Upon its completion, Gandiva did not immediately pass to Arjuna but went through a succession of
+                    divine and semi-divine wielders across the ages, each using it to uphold cosmic order in their
+                    respective epochs:
+                </p>
+                <p>
+                    <strong>First Wielder - Soma (Chandra):</strong> The Moon God, Soma, was Gandiva's first
+                    bearer. During an ancient conflict between the devas and asuras, Soma used the bow to defend the
+                    celestial realms. The association with the Moon God is significant—Soma represents the mind
+                    (manas) in Vedic thought, suggesting that Gandiva requires not just physical strength but mental
+                    clarity, emotional control, and strategic wisdom to wield effectively.
+                </p>
+                <p>
+                    <strong>Second Wielder - Varuna:</strong> After Soma, the bow passed to Varuna, the ancient
+                    Vedic god of cosmic order, oceans, and truth. Varuna is the guardian of ṛta (cosmic law), making
+                    him an ideal custodian for a weapon that enforces righteousness. During Varuna's tenure, Gandiva
+                    was used to bind and punish oath-breakers and maintain the moral order of the universe. Varuna
+                    kept the bow for thousands of divine years, stored in his underwater palace.
+                </p>
+                <p>
+                    <strong>Transfer to Agni:</strong> Eventually, Varuna gifted Gandiva to Agni, the god of fire,
+                    who would become instrumental in passing it to Arjuna. The reason for this transfer is connected
+                    to a specific need: Agni required assistance in consuming the Khandava Forest (described below),
+                    and only with Gandiva's power could this task be accomplished against the opposition of Indra.
+                </p>
+
+                <h4 class="subsection-title">Arjuna Receives Gandiva - The Khandava-daha Parva</h4>
+                <p>
+                    The transfer of Gandiva to Arjuna is one of the most significant events in the Mahabharata,
+                    detailed in the Khandava-daha Parva (The Burning of Khandava Forest). This episode occurs during
+                    the Pandavas' prosperous period in Indraprastha, before the infamous dice game that would lead
+                    to their exile.
+                </p>
+                <p>
+                    Agni, the fire god, appeared to Arjuna and Krishna in the form of a Brahmin, seeking their help.
+                    Agni had been cursed to suffer from digestive ailments after consuming excessive amounts of
+                    sacrificial ghee at King Svetaki's prolonged yajna (ritual sacrifice). The only cure was to
+                    consume the Khandava Forest—a vast, ancient woodland teeming with life, including the Naga
+                    (serpent) king Takshaka and his kin.
+                </p>
+                <p>
+                    However, Indra (king of gods and Arjuna's divine father) protected Khandava Forest because his
+                    friend Takshaka lived there. Whenever Agni attempted to burn the forest, Indra would send rain
+                    to extinguish the flames. Agni needed warriors powerful enough to prevent Indra's intervention—
+                    and only Arjuna and Krishna possessed such capability.
+                </p>
+            </div>
+
+            <div class="quote-box">
+                "O Phalguna, take this celestial bow Gandiva, imperishable and foremost among all bows, and these
+                two inexhaustible quivers. With this bow, you will be invincible in battle, like unto a second
+                Mahadeva (Shiva) himself. This bow was created by Brahma, wielded by Soma, then by Varuna, and now
+                by me. I now give it to you, who are worthy of wielding it."
+                <br><br>— Agni to Arjuna, Mahabharata, Adi Parva
+            </div>
+
+            <div class="content-text">
+                <p>
+                    Agni invoked Varuna, who immediately appeared from the waters with Gandiva, the two
+                    inexhaustible quivers, and a divine chariot with celestial horses bearing the emblem of Hanuman.
+                    Agni also provided Krishna with the Sudarshana Chakra (though Krishna, being an avatar of
+                    Vishnu, already possessed it in his divine form) and the Kaumodaki mace.
+                </p>
+                <p>
+                    Thus armed, Arjuna and Krishna assisted Agni in consuming Khandava Forest over fifteen days.
+                    Arjuna created a canopy of arrows to prevent Indra's rain from reaching the flames, demonstrating
+                    Gandiva's power for the first time. He shot arrows with such speed that they formed an unbroken
+                    shield over the entire forest. Even when Indra himself appeared with the full host of heaven,
+                    Arjuna—wielding Gandiva—matched his divine father's might, neutralizing every celestial weapon
+                    Indra deployed.
+                </p>
+                <p>
+                    This event established several crucial facts: First, Gandiva could enable a mortal (albeit a
+                    divinely-born one) to contend with the king of gods. Second, Arjuna had been tested and proven
+                    worthy—the bow accepted him as its rightful wielder. Third, Krishna and Arjuna's partnership was
+                    divinely sanctioned, a preview of their roles in the Kurukshetra War where Krishna would serve
+                    as Arjuna's charioteer and guide.
+                </p>
+
+                <h4 class="subsection-title">The Sacred Bond</h4>
+                <p>
+                    From the moment Arjuna first drew Gandiva, a mystical bond formed between archer and bow. The
+                    weapon became an extension of Arjuna's will, responding to his thoughts as much as his physical
+                    actions. This connection was so profound that when Arjuna doubted or wavered in righteousness—
+                    as he did at the beginning of the Kurukshetra War—even Gandiva could not grant him its full
+                    power until Krishna's Bhagavad Gita discourse restored his clarity of purpose.
+                </p>
+                <p>
+                    The tradition holds that Gandiva chose Arjuna specifically because of his unique combination of
+                    qualities: unmatched martial skill, unwavering devotion to dharma, humility despite supreme
+                    prowess, and most importantly, his relationship with Krishna. Arjuna was not merely a warrior
+                    but an instrument of divine will, and Gandiva recognized in him the perfect vessel for its
+                    power.
+                </p>
+            </div>
+        </div>
+
+        <!-- POWERS AND ABILITIES -->
+        <div class="glass-card">
+            <h3 class="section-title">Powers and Abilities</h3>
+            <div class="content-text">
+                <p>
+                    Gandiva's powers extend far beyond those of any mortal-crafted weapon, placing it among the most
+                    formidable divine arms in Hindu mythology. The bow does not merely amplify the wielder's
+                    strength—it transforms them into a force of nature, capable of facing gods, demons, and entire
+                    armies with equal confidence. The Mahabharata and associated texts enumerate numerous specific
+                    abilities granted by this celestial bow.
+                </p>
+            </div>
+
+            <div class="power-list">
+                <div class="power-item">
+                    <strong>Inexhaustible Ammunition</strong>
+                    The two divine quivers provided with Gandiva contain an infinite supply of arrows. No matter
+                    how many arrows Arjuna fired—whether thousands in a single minute or millions over days of
+                    continuous battle—the quivers magically replenished themselves. Each arrow was perfectly crafted,
+                    perfectly balanced, and imbued with celestial energy.
+                </div>
+                <div class="power-item">
+                    <strong>Infallible Accuracy (Akṣaya Accuracy)</strong>
+                    Arrows fired from Gandiva never miss their intended target unless countered by equally powerful
+                    divine weapons. The bow grants perfect accuracy at any distance, in any conditions. Arjuna could
+                    strike specific points on an enemy's body, pierce through armor and shields, or thread arrows
+                    through impossibly small gaps with absolute certainty.
+                </div>
+                <div class="power-item">
+                    <strong>Supernatural Penetration</strong>
+                    Gandiva's arrows could pierce any material—armor, shields, even mystical defenses—unless
+                    specifically protected by divine blessings of equal or greater power. Multiple warriors could be
+                    pierced by a single shaft, which would continue traveling until Arjuna willed it to stop or
+                    until it encountered a supernatural barrier.
+                </div>
+                <div class="power-item">
+                    <strong>Rapid-Fire Capability</strong>
+                    Arjuna could draw and release arrows from Gandiva with supernatural speed, creating the
+                    illusion of continuous streams of projectiles filling the air. Texts describe him firing "a
+                    hundred thousand arrows" in rapid succession, creating arrow-storms that blotted out the sun and
+                    appeared as solid walls of shafts moving through the air.
+                </div>
+                <div class="power-item">
+                    <strong>Astra Channeling</strong>
+                    Gandiva served as the perfect vehicle for launching astras—divine weapons invoked through
+                    mantras. While other bows might shatter or burn when channeling such power, Gandiva could safely
+                    discharge any astra, from the Agneyastra (fire weapon) to the devastating Brahmastra. The bow
+                    amplified the power of these astras beyond their normal capacity.
+                </div>
+                <div class="power-item">
+                    <strong>Defensive Capabilities</strong>
+                    Beyond offense, Gandiva enabled Arjuna to create defensive barriers by firing arrows in
+                    patterns that would intercept incoming weapons, create walls of shafts, or even weave net-like
+                    structures in mid-air. He could shoot down other arrows, stop rain, or create protective canopies
+                    over allied forces.
+                </div>
+                <div class="power-item">
+                    <strong>Sound Weapon (Dhvani-astra)</strong>
+                    The distinctive thunderous sound (Gāṇḍīva-dhvani) produced when drawing Gandiva served as a
+                    weapon itself. This terrifying roar could cause enemy warriors to lose courage, horses to bolt,
+                    and elephants to panic. The sound announced Arjuna's presence on the battlefield and often caused
+                    opponents to flee before a single arrow was fired.
+                </div>
+                <div class="power-item">
+                    <strong>Invincibility in Battle</strong>
+                    The Mahabharata explicitly states that no warrior bearing Gandiva could be defeated in
+                    righteous combat. While this didn't make Arjuna literally immortal or immune to injury, it meant
+                    that as long as he fought for dharma and wielded the bow, ultimate victory was assured. The
+                    weapon's power guaranteed that justice would prevail.
+                </div>
+                <div class="power-item">
+                    <strong>Energy Manifestation</strong>
+                    Gandiva could fire arrows of pure energy that carried no physical substance yet dealt
+                    devastating damage. These energy projectiles were particularly effective against supernatural
+                    beings who might be immune to physical weapons. The bow could also channel elemental forces—
+                    creating arrows of fire, water, wind, or other elements as needed.
+                </div>
+                <div class="power-item">
+                    <strong>Illumination and Revelation</strong>
+                    The divine light emanating from Gandiva could dispel supernatural darkness, reveal illusions
+                    and shape-shifters, and illuminate the battlefield. This ability proved crucial when facing
+                    enemies who used maya (illusion) or fought under cover of magical darkness. The bow's radiance
+                    represented truth cutting through deception.
+                </div>
+                <div class="power-item">
+                    <strong>Psychological Dominance</strong>
+                    The mere sight of Arjuna wielding Gandiva had profound psychological effects on opponents.
+                    The bow's legendary reputation meant that warriors often lost hope before combat even began.
+                    Conversely, allied forces gained tremendous morale from seeing their champion armed with the
+                    invincible bow.
+                </div>
+                <div class="power-item">
+                    <strong>Divine Durability</strong>
+                    Gandiva could not be damaged, burned, broken, or worn out by any means. It remained pristine
+                    through years of constant warfare, exposure to divine weapons, and the channeling of incredible
+                    destructive forces. The bow was, in essence, indestructible—eternal and unchanging like the
+                    dharma it served.
+                </div>
+            </div>
+
+            <div class="content-text">
+                <h4 class="subsection-title">Limitations and Conditions</h4>
+                <p>
+                    Despite its overwhelming power, Gandiva was not without limitations—primarily moral and
+                    spiritual rather than physical. The bow's sentient nature meant it would not grant its full
+                    power to a wielder who acted unrighteously or fought for unjust causes. If Arjuna's purpose
+                    wavered or his actions strayed from dharma, Gandiva's effectiveness would diminish proportionally.
+                </p>
+                <p>
+                    This limitation manifested most dramatically at the beginning of the Kurukshetra War. When
+                    Arjuna experienced moral crisis and refused to fight his relatives, he found himself unable to
+                    even lift Gandiva. The bow became heavy, his hands trembled, and his famous skill abandoned him.
+                    Only after Krishna's teachings in the Bhagavad Gita restored Arjuna's understanding of his
+                    dharmic duty did Gandiva's power fully return to him.
+                </p>
+                <p>
+                    Additionally, while Gandiva made its wielder nearly invincible, it could not overturn fate or
+                    the will of the supreme divine. When the time came for Arjuna to relinquish the bow (after
+                    Krishna's departure from the world), Gandiva's power waned. The weapon had fulfilled its cosmic
+                    purpose, and no force—not even Arjuna's skill or devotion—could maintain its might beyond its
+                    destined span.
+                </p>
+                <p>
+                    Finally, Gandiva required proper respect and ritual maintenance. While it never physically
+                    degraded, the sacred relationship between bow and archer needed to be preserved through
+                    appropriate worship, mantras, and righteous conduct. Arjuna performed regular pujas (worship
+                    ceremonies) for Gandiva, treating it not merely as a weapon but as a divine presence deserving
+                    reverence.
+                </p>
+            </div>
+        </div>
+
+        <!-- ASSOCIATED DEITY AND MYTHS -->
+        <div class="glass-card">
+            <h3 class="section-title">Associated Deity and Myths</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Arjuna - The Third Pandava</h4>
+                <p>
+                    Arjuna (Sanskrit: अर्जुन, meaning "bright," "shining," or "white"), also known as Partha,
+                    Dhananjaya ("winner of wealth"), and Phalguna, stands as the central hero of the Mahabharata.
+                    Son of Pandu and Kunti, but divinely fathered by Indra (king of gods), Arjuna embodied the
+                    ideal Kshatriya (warrior)—combining martial excellence, devotion to dharma, humility, and
+                    spiritual wisdom.
+                </p>
+                <p>
+                    Arjuna's character represents the synthesis of action and knowledge, warrior prowess and
+                    philosophical depth. He was the only student of Drona to master all forms of warfare, including
+                    the use of divine weapons (astras). His devotion to Krishna, whom he recognized as the Supreme
+                    Being, made him the ideal recipient for the Bhagavad Gita's teachings—spiritual wisdom delivered
+                    in the midst of a battlefield crisis.
+                </p>
+                <p>
+                    The relationship between Arjuna and Gandiva symbolizes the proper alignment of power with
+                    purpose. Without Arjuna's righteousness, Gandiva would be merely a powerful weapon; without
+                    Gandiva's power, Arjuna could not fulfill his cosmic role as the instrument through which
+                    dharma was restored to the world. Together, archer and bow became a single unified force for
+                    cosmic justice.
+                </p>
+
+                <h4 class="subsection-title">Major Myths Involving Gandiva</h4>
+
+                <div class="highlight-box">
+                    <p><strong>The Burning of Khandava Forest (Khandava-daha)</strong></p>
+                    <p>
+                        As described in the creation section, Arjuna first demonstrated Gandiva's power during the
+                        burning of Khandava Forest. Facing Indra himself—his divine father and king of gods—Arjuna
+                        wielded Gandiva to create an impenetrable canopy of arrows that prevented rain from
+                        extinguishing Agni's flames. For fifteen days and nights, Arjuna maintained this defense,
+                        shooting down Indra's weapons and neutralizing the attacks of the entire celestial host.
+                    </p>
+                    <p>
+                        This event established several crucial precedents: Gandiva could enable a mortal to contend
+                        with gods, Arjuna had proven himself worthy of the bow's power, and the partnership between
+                        Krishna and Arjuna was divinely sanctioned. During this episode, Arjuna also saved Maya, the
+                        great asura architect, who out of gratitude built the magnificent Maya Sabha (assembly hall)
+                        for the Pandavas in Indraprastha.
+                    </p>
+
+                    <p><strong>The Defeat of the Nivatakavachas</strong></p>
+                    <p>
+                        During the Pandavas' exile, Arjuna undertook a journey to Indra's heaven (Svarga) where his
+                        divine father requested his help against the Nivatakavachas—a race of powerful demons who
+                        lived in the ocean and possessed impenetrable armor. These asuras had obtained boons making
+                        them immune to weapons of the gods, and even Indra could not defeat them.
+                    </p>
+                    <p>
+                        Arjuna, wielding Gandiva and channeling divine astras taught to him by Indra, descended to
+                        the undersea realm of the Nivatakavachas. In a fierce battle lasting several days, Arjuna
+                        systematically destroyed the demon armies. Gandiva's power proved superior to their
+                        supposedly impenetrable defenses, as the bow's arrows carried the force to bypass their
+                        magical protections. This victory further established Arjuna's reputation as the greatest
+                        warrior across all the three worlds (Earth, Heaven, and the Underworld).
+                    </p>
+
+                    <p><strong>The Battle at Virata (Revealing After Incognito)</strong></p>
+                    <p>
+                        At the end of the Pandavas' thirteenth year of exile, spent incognito at King Virata's
+                        court, Arjuna had hidden Gandiva and his other weapons in a Shami tree outside the city.
+                        When the Kauravas attacked Virata's kingdom, the Pandavas revealed themselves, and Arjuna
+                        retrieved Gandiva from its hiding place.
+                    </p>
+                    <p>
+                        Facing an entire Kaurava army single-handedly (with Prince Uttara as his charioteer), Arjuna
+                        wielded Gandiva to defeat all the Kaurava warriors including Bhishma, Drona, Karna, Kripa,
+                        and Ashvatthama—the most formidable fighters of their age. He used the Sammohana Astra
+                        (sleep-inducing weapon) to incapacitate the entire army without killing them, demonstrating
+                        both Gandiva's power and his own merciful discrimination. This battle confirmed that the
+                        Pandavas had completed their exile and showcased Gandiva's might to both armies before the
+                        great war.
+                    </p>
+
+                    <p><strong>The Kurukshetra War - Eighteen Days of Combat</strong></p>
+                    <p>
+                        Gandiva's most extensive use came during the eighteen-day Kurukshetra War, the climactic
+                        conflict of the Mahabharata. Throughout this cosmic battle, Arjuna wielded Gandiva to
+                        accomplish seemingly impossible feats:
+                    </p>
+                    <ul>
+                        <li><strong>Day One:</strong> After Krishna's Bhagavad Gita teachings restored his resolve,
+                        Arjuna used Gandiva to wreak havoc on the Kaurava forces, the bow's roar announcing his
+                        renewed commitment to battle</li>
+                        <li><strong>The Slaying of Bhishma:</strong> Though bound by a vow not to directly kill his
+                        grandsire, Arjuna used Gandiva to fire the arrows that brought down Bhishma—after placing
+                        Shikhandi (whom Bhishma would not fight) before him</li>
+                        <li><strong>Jayadratha's Death:</strong> When the sun was about to set on the fourteenth day,
+                        Arjuna had sworn to kill Jayadratha before sunset or immolate himself. Krishna created an
+                        illusion of sunset, and when Jayadratha emerged in celebration, Krishna removed the illusion.
+                        Arjuna then used Gandiva to fire an arrow that not only killed Jayadratha but carried his
+                        head to his father's lap, fulfilling the curse that whoever dropped Jayadratha's head would
+                        have their own head explode</li>
+                        <li><strong>The Destruction of Abhimanyu's Killers:</strong> After his son Abhimanyu was
+                        unjustly killed by multiple warriors attacking simultaneously, Arjuna went on a rampage of
+                        vengeance with Gandiva, destroying vast portions of the Kaurava army</li>
+                        <li><strong>The Final Duel with Karna:</strong> The climactic confrontation between Arjuna
+                        and Karna saw Gandiva matched against Karna's Vijaya bow (another celestial weapon). Through
+                        Krishna's guidance and Gandiva's supreme power, Arjuna ultimately prevailed, killing his
+                        half-brother in single combat</li>
+                    </ul>
+
+                    <p><strong>The Return of Gandiva</strong></p>
+                    <p>
+                        After Krishna's death and the end of the Dwapara Yuga, Arjuna found his powers waning. When
+                        bandits attacked a group of women he was protecting, Arjuna discovered he could barely draw
+                        Gandiva, and his arrows had lost their power. He realized that Gandiva's full might was
+                        connected to Krishna's presence and his own dharmic purpose, both of which had been fulfilled.
+                    </p>
+                    <p>
+                        Following Krishna's instruction and understanding that his time as a warrior was complete,
+                        Arjuna returned Gandiva to Varuna by casting it into the ocean. The bow returned to the god
+                        of waters, completing the cycle that had begun when Varuna first entrusted it to Agni for
+                        transfer to Arjuna. This poignant moment symbolized the end of an age—the Dwapara Yuga gave
+                        way to Kali Yuga, and the time of gods directly intervening through chosen heroes came to a
+                        close.
+                    </p>
+
+                    <p><strong>The Encounter with Hanuman</strong></p>
+                    <p>
+                        During the Pandavas' exile, Arjuna once encountered Hanuman, the great devotee of Rama and
+                        one of the Chiranjivi (immortals). Arjuna, proud of his archery and Gandiva's reputation,
+                        questioned why Rama needed to build a bridge of stones to cross to Lanka when he had
+                        powerful arrows and could have simply built a bridge of arrows.
+                    </p>
+                    <p>
+                        Hanuman, in humility but also to teach Arjuna a lesson, suggested that perhaps Rama's
+                        arrows weren't strong enough to bear weight. Arjuna, stung by this implied criticism of his
+                        ancestor, declared he would build a bridge of arrows strong enough to bear Hanuman's weight.
+                        Arjuna used Gandiva to create an elaborate bridge of arrows, and Hanuman, in his small form,
+                        began to walk across it. But with each step, Hanuman expanded his size and weight until the
+                        arrow-bridge collapsed despite Gandiva's power.
+                    </p>
+                    <p>
+                        Humbled and about to fulfill his vow of self-immolation for failing, Arjuna was stopped by
+                        Krishna (revealed as Rama himself). Krishna explained that Hanuman had been testing Arjuna's
+                        pride, and that Hanuman in his full form could not be supported by any mortal-created
+                        structure, even one made with Gandiva's arrows. This taught Arjuna humility and the
+                        understanding that even divine weapons have their place within the cosmic order. Hanuman
+                        blessed Arjuna and agreed to reside on Arjuna's chariot banner throughout the Kurukshetra
+                        War, providing protection and auspicious presence.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SYMBOLISM -->
+        <div class="glass-card">
+            <h3 class="section-title">Symbolism and Spiritual Meaning</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Dharma as Weapon and Purpose</h4>
+                <p>
+                    Gandiva represents the power of dharma (righteousness) made manifest. The bow's inability to
+                    serve unrighteous causes demonstrates the Hindu philosophical principle that true power can only
+                    exist in alignment with cosmic order. Arjuna's invincibility while wielding Gandiva is not
+                    merely physical superiority but the inevitable triumph of righteousness over unrighteousness.
+                    The weapon symbolizes that when action is properly aligned with duty and moral law, success is
+                    assured—not through might alone but through the universe's inherent tendency toward dharmic
+                    balance.
+                </p>
+                <p>
+                    This symbolic dimension explains why Gandiva's power failed when Arjuna's purpose was fulfilled.
+                    The bow was not simply a tool but an instrument of cosmic justice, relevant only when the cosmic
+                    need for such justice existed. Its return to the gods after the Mahabharata war signified that
+                    the particular dharmic crisis requiring such overwhelming power had been resolved.
+                </p>
+
+                <h4 class="subsection-title">The Mind as Bow, Intention as Arrow</h4>
+                <p>
+                    Hindu spiritual texts often use the metaphor of archery to describe spiritual practice, and
+                    Gandiva embodies this symbolism perfectly. The Mundaka Upanishad describes the pranava (Om) as
+                    the bow, the atman (self/soul) as the arrow, and Brahman (ultimate reality) as the target. In
+                    this metaphorical framework, Gandiva represents the disciplined mind—perfectly controlled,
+                    unfailing in its aim, and capable of piercing through the illusions of maya to reach the divine.
+                </p>
+                <p>
+                    Arjuna's mastery of Gandiva parallels the yogi's mastery of the mind. Just as Arjuna could fire
+                    arrows with perfect accuracy regardless of external conditions, the accomplished spiritual
+                    practitioner maintains focus on the divine despite worldly distractions. The bow's infallible
+                    nature reflects the efficacy of properly directed spiritual intent—when the mind is truly
+                    concentrated on the highest truth, realization becomes inevitable.
+                </p>
+
+                <h4 class="subsection-title">Divine Grace and Human Effort</h4>
+                <p>
+                    Gandiva symbolizes the interplay between divine grace (prasāda) and human effort (puruṣārtha).
+                    While the bow granted tremendous power, it still required Arjuna's skill, training, devotion,
+                    and unwavering commitment to righteousness. Neither element alone was sufficient—divine favor
+                    without human worthiness would have been wasted, while human effort without divine support could
+                    not have achieved such cosmic impact.
+                </p>
+                <p>
+                    This reflects a central Hindu theological concept: moksha (liberation) requires both grace and
+                    effort. The divine provides the means and the opportunity, but the individual must be prepared
+                    to receive and properly utilize these gifts. Arjuna's reception of Gandiva came only after years
+                    of disciplined training, demonstrated virtue, and proven commitment to duty—he had to be worthy
+                    before grace could fully manifest.
+                </p>
+
+                <h4 class="subsection-title">The Kshatriya Ideal</h4>
+                <p>
+                    Gandiva embodies the Kshatriya (warrior class) dharma in its highest form. The bow represents
+                    the power that protects society, maintains order, and defends righteousness through force when
+                    necessary. However, this power is tempered by strict moral limitations—Gandiva serves only
+                    righteous causes, just as the ideal Kshatriya uses violence only in service of justice, never
+                    for personal gain or unjust conquest.
+                </p>
+                <p>
+                    The tradition of Kshatriya dharma emphasized that martial power without moral guidance becomes
+                    tyranny, while moral principles without the power to defend them become mere idealism. Gandiva
+                    symbolizes power and principle united—strength in service of righteousness, violence constrained
+                    by ethics, and martial skill directed by wisdom.
+                </p>
+
+                <h4 class="subsection-title">The Guru-Disciple Relationship</h4>
+                <p>
+                    The transmission of Gandiva through successive divine beings—from Brahma to Soma to Varuna to
+                    Agni to Arjuna—reflects the guru-parampara (lineage of teachers) concept central to Hindu
+                    spiritual tradition. Sacred knowledge and power are not randomly distributed but carefully passed
+                    from worthy teacher to worthy disciple, each guardian maintaining and honoring what they receive
+                    before passing it to the next generation.
+                </p>
+                <p>
+                    Arjuna's reception of Gandiva was not merely a transaction but an initiation into a lineage of
+                    cosmic guardians. He received not just a weapon but a responsibility, a legacy, and a sacred
+                    trust. His eventual return of the bow to Varuna completed the cycle, demonstrating that even the
+                    greatest gifts are held in stewardship, not ownership—they must ultimately return to their
+                    source.
+                </p>
+
+                <h4 class="subsection-title">Sound and Creation</h4>
+                <p>
+                    The distinctive thunderous sound of Gandiva's bowstring (Gāṇḍīva-dhvani) connects to the Hindu
+                    concept of shabda (sacred sound) as a creative and destructive force. Just as the universe was
+                    created through the cosmic sound Om, and just as mantras possess power through their vibrations,
+                    Gandiva's sound carried tangible force—striking fear, inspiring courage, and announcing divine
+                    presence.
+                </p>
+                <p>
+                    This sonic aspect emphasizes that in Hindu cosmology, sound is not merely an effect but a cause—
+                    vibrations that can alter reality itself. The bow's roar was not just noise but a manifestation
+                    of cosmic power, a verbal command from the divine realm enforcing order upon the material world.
+                </p>
+
+                <h4 class="subsection-title">Modern Relevance</h4>
+                <p>
+                    In contemporary Hindu thought and Indian cultural consciousness, Gandiva remains a powerful
+                    symbol of several virtues:
+                </p>
+                <ul>
+                    <li><strong>Excellence and Mastery:</strong> "Like Arjuna with Gandiva" is a common idiom for
+                    supreme skill in any field</li>
+                    <li><strong>Righteous Power:</strong> The bow represents power that serves justice rather than
+                    self-interest, relevant in discussions of ethical leadership and governance</li>
+                    <li><strong>Divine Partnership:</strong> Arjuna-and-Gandiva symbolizes the perfect alignment of
+                    tool and user, relevant in discussing human relationship with technology and power</li>
+                    <li><strong>Focused Intent:</strong> In motivational and educational contexts, Gandiva's
+                    infallible accuracy represents the power of concentrated attention and clear purpose</li>
+                    <li><strong>National Identity:</strong> As part of India's epic heritage, Gandiva appears in
+                    national discourse about Indian military tradition, valor, and strategic capability</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- MODERN DEPICTIONS -->
+        <div class="glass-card">
+            <h3 class="section-title">Modern Depictions in Culture</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Literature</h4>
+                <ul>
+                    <li><strong>Modern Mahabharata Retellings:</strong> Virtually every contemporary retelling of
+                    the Mahabharata—from C. Rajagopalachari's condensed version to Chitra Banerjee Divakaruni's
+                    "The Palace of Illusions"—features Gandiva prominently as Arjuna's signature weapon</li>
+                    <li><strong>Devdutt Pattanaik's Works:</strong> The mythologist's books frequently discuss
+                    Gandiva's symbolic dimensions, interpreting it through psychological and philosophical lenses</li>
+                    <li><strong>Amish Tripathi's "Ram Chandra Series":</strong> While focused on Rama rather than
+                    the Mahabharata, these novels explore the tradition of divine weapons in Hindu mythology,
+                    contextualizing Gandiva within the broader history of celestial arms</li>
+                    <li><strong>"Jaya" by Devdutt Pattanaik:</strong> This comprehensive Mahabharata retelling
+                    emphasizes Gandiva's role in every major battle and explores its spiritual significance</li>
+                </ul>
+
+                <h4 class="subsection-title">Film and Television</h4>
+                <ul>
+                    <li><strong>B.R. Chopra's "Mahabharat" (1988-1990):</strong> This legendary Indian TV series,
+                    considered definitive by many, depicted Gandiva with glowing special effects and emphasized its
+                    distinctive sound, creating an iconic audio-visual representation</li>
+                    <li><strong>Star Plus "Mahabharat" (2013-2014):</strong> The modern remake featured enhanced CGI
+                    for Gandiva, showing more elaborate visual effects when arrows were fired and emphasizing the
+                    bow's golden radiance</li>
+                    <li><strong>"Arjun: The Warrior Prince" (2012):</strong> This animated film focused on Arjuna's
+                    youth and training, with Gandiva appearing in the climactic sequences</li>
+                    <li><strong>Sony's "Suryaputra Karn" (2015-2016):</strong> This series, told from Karna's
+                    perspective, depicted Gandiva as Karna's greatest challenge, representing the cosmic favor
+                    that Arjuna enjoyed</li>
+                </ul>
+
+                <h4 class="subsection-title">Video Games</h4>
+                <ul>
+                    <li><strong>"Smite":</strong> The popular MOBA includes Rama as a playable character wielding a
+                    celestial bow inspired by Gandiva-type weapons, with abilities emphasizing infallible accuracy
+                    and piercing arrows</li>
+                    <li><strong>"Age of Empires" and Strategy Games:</strong> Indian civilization units sometimes
+                    reference Gandiva in unique archer unit names or abilities</li>
+                    <li><strong>"Mobile Legends: Bang Bang":</strong> Features characters inspired by Mahabharata
+                    heroes, with archer types referencing Arjuna and Gandiva</li>
+                    <li><strong>"Asura" (Indian Game):</strong> This action game based on Hindu and Buddhist
+                    mythology includes Gandiva as one of the legendary weapons players can acquire</li>
+                    <li><strong>"Fate/Grand Order":</strong> The Japanese mobile game includes Arjuna as a summonable
+                    character, with Gandiva as his Noble Phantasm (special ability), depicted with elaborate
+                    anime-style visual effects</li>
+                </ul>
+
+                <h4 class="subsection-title">Comics and Graphic Novels</h4>
+                <ul>
+                    <li><strong>Amar Chitra Katha:</strong> This legendary Indian comic book series has published
+                    numerous volumes featuring the Mahabharata, with Gandiva appearing as Arjuna's distinctive
+                    weapon throughout. These comics have introduced generations of Indian children to the epic and
+                    its weapons</li>
+                    <li><strong>"18 Days" by Grant Morrison:</strong> This reimagining of the Kurukshetra War with
+                    superhero-style aesthetics depicts Gandiva with cosmic-level powers, showing Arjuna's arrows
+                    tearing through reality itself</li>
+                    <li><strong>Campfire Graphic Novels:</strong> Their Mahabharata adaptation presents Gandiva with
+                    detailed artwork showing the bow's ornate design and supernatural properties</li>
+                    <li><strong>Vimanika Comics:</strong> Modern Indian superhero comics sometimes include characters
+                    wielding weapons inspired by or directly referencing Gandiva</li>
+                </ul>
+
+                <h4 class="subsection-title">Cultural References and Symbolism</h4>
+                <ul>
+                    <li><strong>Indian Military:</strong> Various military units and operations have been named after
+                    Gandiva, symbolizing precision strike capability and invincible power</li>
+                    <li><strong>Sports Teams:</strong> Indian archery teams and sports clubs frequently adopt Gandiva
+                    as their name or symbol, representing mastery and infallible accuracy</li>
+                    <li><strong>Corporate Branding:</strong> Companies in sectors requiring precision—from tech firms
+                    to consultancies—have used Gandiva as a name or logo element</li>
+                    <li><strong>Educational Institutions:</strong> Schools and colleges in India sometimes name
+                    buildings, hostels, or programs after Gandiva to symbolize targeted excellence and focused effort</li>
+                    <li><strong>Hindu Temples:</strong> Many temples feature depictions of Arjuna wielding Gandiva,
+                    particularly in sculptural programs showing Mahabharata scenes</li>
+                </ul>
+
+                <h4 class="subsection-title">Music and Performing Arts</h4>
+                <ul>
+                    <li><strong>Classical Dance:</strong> Bharatanatyam, Kathakali, and Kuchipudi performances
+                    frequently depict episodes from the Mahabharata, with stylized representations of Arjuna drawing
+                    Gandiva</li>
+                    <li><strong>Folk Theater:</strong> Traditional performance forms like Yakshagana and Therukoothu
+                    include elaborate costumes and props representing Gandiva in Mahabharata-themed productions</li>
+                    <li><strong>Film Music:</strong> Soundtracks for Mahabharata adaptations often include specific
+                    musical themes associated with Gandiva—typically using deep, resonant instruments to evoke the
+                    bow's thunderous sound</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- RELATED WEAPONS -->
+        <div class="glass-card">
+            <h3 class="section-title">Related Weapons and Items</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Other Celestial Bows in Hindu Mythology</h4>
+                <ul>
+                    <li><strong>Sharanga:</strong> Lord Vishnu's divine bow, said to be more powerful than Gandiva,
+                    used during his various avatars</li>
+                    <li><strong>Pinaka:</strong> Lord Shiva's bow, the most powerful weapon in existence, which only
+                    Shiva could wield; Rama broke it to win Sita's hand</li>
+                    <li><strong>Vijaya:</strong> The bow wielded by Karna, created by Vishvakarma for Lord Shiva,
+                    passed down through various gods; considered equal or superior to Gandiva</li>
+                    <li><strong>Kodanda:</strong> Lord Rama's bow (different from Pinaka), with which he performed
+                    incredible feats in the Ramayana</li>
+                </ul>
+
+                <h4 class="subsection-title">Other Weapons of the Mahabharata</h4>
+                <ul>
+                    <li><strong>Sudarshana Chakra:</strong> Krishna's discuss weapon, a spinning disc with 108
+                    serrated edges that never missed</li>
+                    <li><strong>Kaumodaki:</strong> Krishna/Vishnu's mace that could never be stopped</li>
+                    <li><strong>Brahmastra:</strong> The ultimate celestial weapon that Arjuna could invoke through
+                    Gandiva, capable of mass destruction</li>
+                    <li><strong>Pashupatastra:</strong> Shiva's most destructive weapon, which Arjuna received but
+                    promised never to use except in the most dire circumstances</li>
+                </ul>
+
+                <h4 class="subsection-title">Associated Items</h4>
+                <ul>
+                    <li><strong>Akshaya Quivers:</strong> The two inexhaustible quivers that accompanied Gandiva</li>
+                    <li><strong>Arjuna's Chariot:</strong> The divine chariot with Hanuman on its banner, provided
+                    alongside Gandiva</li>
+                    <li><strong>Various Astras:</strong> Divine missiles that Arjuna could invoke through Gandiva,
+                    each with specific powers (fire, water, wind, etc.)</li>
+                </ul>
+
+                <h4 class="subsection-title">Comparable Weapons from Other Mythologies</h4>
+                <ul>
+                    <li><strong>Apollo's Silver Bow (Greek):</strong> Never-missing divine bow of the Greek god</li>
+                    <li><strong>Houyi's Bow (Chinese):</strong> The bow with which Houyi shot down nine suns</li>
+                    <li><strong>Failnaught (Celtic):</strong> The unfailing bow of Lugh in Irish mythology</li>
+                    <li><strong>Yumi of Hachiman (Japanese):</strong> Sacred bows associated with the Japanese war god</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- RELATED LINKS -->
+        <div class="glass-card">
+            <h3 class="section-title">Related Articles</h3>
+            <div class="related-links">
+                <a href="brahmastra.html" class="related-link">Brahmastra</a>
+                <a href="pashupatastra.html" class="related-link">Pashupatastra</a>
+                <a href="kaumodaki.html" class="related-link">Kaumodaki</a>
+                <a href="vajra-indra.html" class="related-link">Vajra of Indra</a>
+                <a href="../../mythology/hindu/arjuna.html" class="related-link">Arjuna</a>
+                <a href="../../mythology/hindu/krishna.html" class="related-link">Krishna</a>
+                <a href="../../mythology/hindu/mahabharata.html" class="related-link">The Mahabharata</a>
+                <a href="../../mythology/hindu/kurukshetra.html" class="related-link">Kurukshetra War</a>
+            </div>
+        </div>
+
+        <!-- BIBLIOGRAPHY -->
+        <div class="bibliography glass-card">
+            <h3 class="section-title">Bibliography and Further Reading</h3>
+            <ol>
+                <li>Vyasa. <em>The Mahabharata</em>. Trans. J.A.B. van Buitenen and James L. Fitzgerald. University of Chicago Press, 1973-2004.</li>
+                <li>Ganguli, Kisari Mohan (trans.). <em>The Mahabharata of Krishna-Dwaipayana Vyasa</em>. Munshiram Manoharlal Publishers, 1970.</li>
+                <li>Narayan, R.K. <em>The Mahabharata: A Shortened Modern Prose Version of the Indian Epic</em>. University of Chicago Press, 1978.</li>
+                <li>Pattanaik, Devdutt. <em>Jaya: An Illustrated Retelling of the Mahabharata</em>. Penguin Books India, 2010.</li>
+                <li>Rajagopalachari, C. <em>Mahabharata</em>. Bharatiya Vidya Bhavan, 1951.</li>
+                <li>Menon, Ramesh. <em>The Mahabharata: A Modern Rendering</em>. iUniverse, 2006.</li>
+                <li>Hiltebeitel, Alf. <em>Rethinking the Mahabharata: A Reader's Guide to the Education of the Dharma King</em>. University of Chicago Press, 2001.</li>
+                <li>Brodbeck, Simon and Brian Black (eds.). <em>Gender and Narrative in the Mahabharata</em>. Routledge, 2007.</li>
+                <li>Brockington, John. <em>The Sanskrit Epics</em>. Brill Academic Publishers, 1998.</li>
+                <li>Goldman, Robert P. <em>Gods, Priests, and Warriors: The Bhṛgus of the Mahābhārata</em>. Columbia University Press, 1977.</li>
+                <li>Sullivan, Bruce M. <em>The A to Z of Hinduism</em>. Scarecrow Press, 2001.</li>
+                <li>Sutton, Nicholas. <em>Religious Doctrines in the Mahabharata</em>. Motilal Banarsidass, 2000.</li>
+                <li>Hopkins, E. Washburn. <em>The Great Epic of India</em>. Yale University Press, 1902.</li>
+                <li>Katz, Ruth Cecily. <em>Arjuna in the Mahabharata: Where Krishna Is, There Is Victory</em>. University of South Carolina Press, 1989.</li>
+                <li>Fitzgerald, James L. <em>The Mahabharata: Volume 7, Book 11, The Book of the Women, Book 12, The Book of Peace, Part One</em>. University of Chicago Press, 2004.</li>
+            </ol>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draupnir - Divine Relics - World Mythos Explorer</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-text-primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            color: var(--color-primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .subsection-title {
+            color: var(--color-primary);
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .info-item {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-value {
+            color: var(--color-text-primary);
+            font-size: 1.1rem;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        .tradition-tag {
+            background: var(--color-primary);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .related-link {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .related-link:hover {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border-color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .quote-box {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border-left: 4px solid var(--color-secondary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        }
+
+        .content-text {
+            line-height: 1.8;
+            color: var(--color-text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .content-text p {
+            margin-bottom: 1rem;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.2),
+                rgba(var(--color-secondary-rgb), 0.2));
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+            color: var(--color-text-secondary);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .bibliography {
+            background: rgba(var(--color-surface-rgb), 0.4);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            margin-top: 3rem;
+        }
+
+        .bibliography ol {
+            list-style-type: decimal;
+        }
+
+        .bibliography li {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+        }
+
+        .power-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .power-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .power-item strong {
+            color: var(--color-primary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+    <div class="header-content">
+        <h1>💍 Draupnir</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Sacred Items</a> →
+                <a href="index.html">Relics</a> →
+                <span>Draupnir</span>
+</nav>
+
+    <main>
+        <!-- HERO SECTION -->
+        <div class="hero-section" data-item="draupnir" data-tradition="Norse,Germanic,Viking" data-type="relic">
+            <div class="hero-icon">💍</div>
+            <h2 class="hero-title">Draupnir</h2>
+            <p class="hero-subtitle">The Dripper, Odin's Self-Multiplying Golden Ring of Abundance</p>
+            <div class="tradition-tags">
+                <span class="tradition-tag">Norse</span>
+                <span class="tradition-tag">Germanic</span>
+                <span class="tradition-tag">Viking</span>
+                <span class="tradition-tag">Aesir</span>
+            </div>
+        </div>
+
+        <!-- QUICK INFO -->
+        <div class="glass-card">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Item Type</div>
+                    <div class="info-value">Magic Ring / Arm Ring</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Owner</div>
+                    <div class="info-value">Odin (All-Father of the Aesir)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Crafted By</div>
+                    <div class="info-value">Sindri and Brokkr (Dwarven Master-Smiths)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Primary Power</div>
+                    <div class="info-value">Self-replication, infinite wealth generation</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="glass-card">
+            <h3 class="section-title">Description and Appearance</h3>
+            <div class="content-text">
+                <p>
+                    Draupnir (Old Norse: "the dripper" or "the dropper") is one of the most remarkable treasures in Norse mythology and perhaps the most economically significant magical object in any pantheon. As Odin's prized arm ring, Draupnir possesses the extraordinary ability to replicate itself, producing eight new gold rings of equal weight and purity every ninth night. This perpetual self-multiplication makes it not merely a piece of jewelry but a source of infinite wealth and an emblem of the abundance that flows from the All-Father.
+                </p>
+                <p>
+                    Unlike weapons of war or tools of destruction, Draupnir represents divine generosity, the cyclic nature of time, and the mysteries of creation itself. The ring's power to generate wealth without end mirrors Odin's role as giver of gifts to gods and worthy mortals, while its rhythmic production of eight rings every nine nights echoes the sacred numbers and cycles that structured Norse cosmology and ritual practice.
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <h4 class="subsection-title">Physical Characteristics:</h4>
+                <ul>
+                    <li><strong>Form:</strong> A heavy arm ring (baugi) of pure gold, designed to be worn on the upper arm in the manner of Norse nobility and gods, though sometimes depicted as a finger ring in later sources</li>
+                    <li><strong>Appearance:</strong> Gleaming red-gold metal, masterfully crafted with intricate Norse designs, possibly featuring runes or geometric patterns characteristic of dwarven workmanship</li>
+                    <li><strong>Weight:</strong> Described as heavy and substantial, befitting a treasure of the gods; each of the replicated rings matches the original in weight, suggesting considerable mass</li>
+                    <li><strong>Purity:</strong> The finest gold, untainted and perfect, a product of dwarven smithcraft that surpasses any mortal metalworking</li>
+                    <li><strong>Replication Timing:</strong> Every ninth night (the number nine being sacred in Norse tradition), eight new rings "drip" or separate from the original, appearing around it like dew drops</li>
+                    <li><strong>Replicated Rings:</strong> Each daughter ring is identical in weight and purity to Draupnir itself, though they lack the self-replicating power—only the original produces more rings</li>
+                    <li><strong>Sacred Associations:</strong> The ring was so precious to Odin that he placed it on his son Baldr's funeral pyre, the ultimate act of honor and sacrifice in Norse culture</li>
+                </ul>
+            </div>
+
+            <div class="content-text">
+                <p>
+                    The name "Draupnir" derives from the Old Norse verb "drjúpa," meaning "to drip" or "to drop," referring to the manner in which the new rings appear to drip or fall from the original. This imagery evokes both the dripping of precious liquid gold and the falling of dew—a process of natural, organic generation rather than mechanical production. The ring thus embodies a living, generative power rather than a static treasure.
+                </p>
+                <p>
+                    The significance of the numbers involved—eight rings every ninth night—cannot be overstated in Norse cosmology. Nine is the most sacred number in Norse tradition: nine worlds on Yggdrasil, nine nights Odin hung on the World Tree to gain the runes, nine mothers of Heimdall, nine days to create Draupnir. Eight, meanwhile, represents completion and cosmic order, being one less than nine and suggesting the constant approach to but never quite reaching divine perfection.
+                </p>
+                <p>
+                    As an arm ring, Draupnir would have been worn high on the bicep, a position of honor and authority in Norse culture. Arm rings served as symbols of wealth, status, and the bond between lord and warrior. A chieftain or king would distribute rings to his warriors as rewards for service, creating social bonds and demonstrating generosity. Odin, as the ultimate ring-giver, possessed in Draupnir the source of infinite generosity—he could never exhaust his ability to reward his chosen warriors and followers.
+                </p>
+            </div>
+        </div>
+
+        <!-- CREATION MYTH -->
+        <div class="glass-card">
+            <h3 class="section-title">Creation Myth and Crafting</h3>
+            <div class="content-text">
+                <p>
+                    The creation of Draupnir is inseparable from one of the most entertaining and consequential tales in Norse mythology—the story of Loki's mischief, the wager with the dwarves, and the crafting of the gods' greatest treasures. This myth not only explains Draupnir's origin but also establishes the interconnected nature of the divine treasures that would shape the fate of Asgard.
+                </p>
+
+                <h4 class="subsection-title">Loki's Mischief and the Shorn Goddess</h4>
+                <p>
+                    The chain of events leading to Draupnir's creation began with one of Loki's characteristic acts of malicious mischief. While Sif, the beautiful wife of Thor, slept, Loki crept into her chamber and cut off her magnificent golden hair—hair so beautiful it was said to shimmer like fields of grain in sunlight. Some sources suggest this hair was literally golden, not merely blonde, and possessed magical properties of its own.
+                </p>
+                <p>
+                    When Thor discovered this outrage, his fury was terrible and immediate. He seized Loki and would have broken every bone in his body had Loki not sworn the most binding oaths to make amends. Loki promised he would journey to Svartalfheim, the realm of the dwarves, and commission new hair for Sif—hair made of actual gold that would grow naturally like real hair.
+                </p>
+
+                <h4 class="subsection-title">The Sons of Ivaldi</h4>
+                <p>
+                    Loki traveled to the underground realm and sought out the Sons of Ivaldi, dwarven craftsmen of legendary skill. These master smiths agreed to help Loki, and in their workshop deep beneath the mountains, they created three magnificent treasures:
+                </p>
+                <ul>
+                    <li><strong>Sif's Golden Hair:</strong> Hair of pure gold that would grow and behave like natural hair once attached to her head</li>
+                    <li><strong>Skíðblaðnir:</strong> A magical ship for Freyr that could sail across sea or sky, always had favorable wind, and could be folded up to fit in a pouch when not needed</li>
+                    <li><strong>Gungnir:</strong> Odin's great spear that never missed its target and always returned to the thrower's hand</li>
+                </ul>
+
+                <h4 class="subsection-title">The Wager with Brokkr and Sindri</h4>
+                <p>
+                    Loki, ever the schemer, saw an opportunity for additional mischief. He encountered the dwarf Brokkr and boasted that the Sons of Ivaldi were the greatest craftsmen in existence, and that Brokkr's brother Sindri (sometimes called Eitri) could never create treasures to match those three items. Brokkr, stung by this insult to his brother's skill, accepted a wager: Sindri would craft three items to match those of Ivaldi's sons, and if they proved superior, Loki would forfeit his head.
+                </p>
+                <p>
+                    Loki agreed, confident that no smith could surpass the work he had already commissioned. But he underestimated both Sindri's skill and his own capacity for causing problems even when trying to prevent them.
+                </p>
+
+                <h4 class="subsection-title">The Forging of Draupnir</h4>
+                <p>
+                    Sindri set to work in his forge, instructing Brokkr to work the bellows continuously without pause, no matter what happened. Loki, desperate to win the wager and keep his head, transformed into a biting fly and began to torment Brokkr as he worked the bellows.
+                </p>
+                <p>
+                    For the first item, Sindri placed a pig's hide in the forge. Despite Loki-as-fly biting Brokkr's hands, the dwarf maintained his work, and from the flames emerged Gullinbursti, the golden boar that would become Freyr's mount—a beast that could run through air and water, whose golden bristles lit up the darkest night.
+                </p>
+                <p>
+                    For the second item, Sindri placed gold in the forge. This time Loki bit Brokkr's neck, drawing blood, but still the dwarf worked the bellows without ceasing. From the fire came Draupnir, the golden arm ring with its miraculous power of self-replication. The ring emerged perfect and gleaming, its enchantment woven into the very metal through Sindri's combination of supreme craftsmanship and magical knowledge.
+                </p>
+                <p>
+                    The creation of Draupnir required not just technical skill but deep understanding of the principles of generation, multiplication, and the cycles of time. Sindri had to bind into the physical gold the abstract concepts of increase and abundance, creating an object that embodied perpetual creation. This was magic of the highest order, combining the dwarves' mastery of metalwork with their knowledge of runic power and cosmic principles.
+                </p>
+
+                <h4 class="subsection-title">The Judgment of the Gods</h4>
+                <p>
+                    When Sindri completed his third item (Mjolnir, Thor's hammer, which emerged slightly flawed due to Loki's final, most desperate interference), Brokkr brought all six treasures to Asgard. The gods assembled to judge which set was superior.
+                </p>
+                <p>
+                    Loki presented first: Sif's golden hair, which immediately attached itself to her head and grew naturally; Skíðblaðnir, which Freyr could sail across any realm and then fold into his pocket; and Gungnir, which Odin tested and found absolutely accurate in flight.
+                </p>
+                <p>
+                    Brokkr then presented his brother's work: Gullinbursti, whose speed and light made him the perfect mount; Draupnir, which Brokkr demonstrated would drip eight rings of equal weight every ninth night; and Mjolnir, the hammer that would never fail to hit its target and always return to Thor's hand, though its handle was slightly short due to Loki's interference during forging.
+                </p>
+                <p>
+                    The gods debated, examining each treasure. Ultimately, they judged that Mjolnir was the most valuable treasure, as it alone could defend Asgard against the giants when Ragnarok came. Therefore, Sindri and Brokkr won the wager. However, when Brokkr came to claim Loki's head, Loki argued that he had wagered his head but not his neck, and taking the head required cutting the neck. The gods, amused by this sophistry and unwilling to lose Loki despite his faults, allowed this logic. Brokkr instead sewed Loki's lips shut temporarily as punishment.
+                </p>
+
+                <h4 class="subsection-title">Draupnir Comes to Odin</h4>
+                <p>
+                    Draupnir was awarded to Odin, and it became one of his most prized possessions. For the All-Father, the ring represented more than mere wealth. It symbolized abundance, the ability to reward loyalty, and the cyclical nature of gift-giving that bound society together. Through Draupnir, Odin could maintain his role as the ultimate ring-giver, the generous lord who never exhausted his capacity to honor and reward.
+                </p>
+                <p>
+                    The ring also connected to Odin's role as a god of wisdom and magic. The number symbolism embedded in Draupnir's function—eight and nine, sacred numbers in Norse tradition—linked it to the cosmic cycles and mystical knowledge that Odin perpetually sought. Some scholars suggest that the ring's generative power paralleled Odin's acquisition and distribution of wisdom, knowledge multiplying as it was shared.
+                </p>
+            </div>
+
+            <div class="quote-box">
+                "Síðan gaf hann [Brokkr] Óðni hringinn ok sagði, at átta jafnhöfga hringa myndi drjúpa af honum ina níundu hverja nótt."
+                <br><br>
+                "Then he [Brokkr] gave Odin the ring and said that eight rings of equal weight would drip from it every ninth night."
+                <br><br>— Prose Edda, Skáldskaparmál
+            </div>
+        </div>
+
+        <!-- POWERS AND ABILITIES -->
+        <div class="glass-card">
+            <h3 class="section-title">Powers and Abilities</h3>
+            <div class="content-text">
+                <p>
+                    Draupnir's powers center on generation, abundance, and the sacred mathematics of Norse cosmology. While less overtly martial than weapons like Mjolnir or Gungnir, the ring's abilities have profound implications for divine economy, social bonds, and the maintenance of cosmic order through reciprocal gift-giving.
+                </p>
+            </div>
+
+            <div class="power-list">
+                <div class="power-item">
+                    <strong>Self-Multiplication</strong>
+                    The ring's primary and most extraordinary power is its ability to produce eight new gold rings of equal weight and purity every ninth night. This replication occurs automatically and perpetually, requiring no action from the wearer—the rings simply appear around the original, as if dripping from it like golden dew.
+                </div>
+                <div class="power-item">
+                    <strong>Infinite Wealth Generation</strong>
+                    Through its continuous production of perfect gold rings, Draupnir provides an inexhaustible source of wealth. Over time, the accumulated rings would represent fortune beyond measure, making their possessor economically supreme and ensuring they could never exhaust their treasure-hoard.
+                </div>
+                <div class="power-item">
+                    <strong>Perfect Replication Quality</strong>
+                    Each ring produced by Draupnir matches the original in weight and purity. They are not inferior copies but genuine treasures, each worth the same as Draupnir itself in material terms, though lacking the self-replicating enchantment. This ensures consistent, high-quality wealth generation.
+                </div>
+                <div class="power-item">
+                    <strong>Sacred Number Embodiment</strong>
+                    Draupnir's function embodies the sacred numbers eight and nine, connecting it to fundamental cosmic cycles in Norse belief. This makes the ring not just a treasure but a physical manifestation of divine mathematical principles, linking material wealth to spiritual and cosmic order.
+                </div>
+                <div class="power-item">
+                    <strong>Symbol of Authority</strong>
+                    As an arm ring, Draupnir symbolized Odin's authority and his role as ring-giver (beaggifa in Old Norse)—the generous lord who rewards loyalty and service. Possession of such a ring elevated the wearer's status and marked them as worthy of divine favor and capable of infinite generosity.
+                </div>
+                <div class="power-item">
+                    <strong>Oath-Making Power</strong>
+                    Arm rings in Norse culture served as oath-rings, sacred objects upon which binding oaths were sworn. Draupnir, as the supreme ring owned by Odin—god of oaths—would have made any oath sworn upon it absolutely binding and enforced by divine power.
+                </div>
+                <div class="power-item">
+                    <strong>Gift of Ultimate Honor</strong>
+                    When Odin placed Draupnir on Baldr's funeral pyre, it demonstrated the ring's power to convey ultimate honor and respect. The willingness to give up such a treasure showed the depth of Odin's love for his son and the ring's significance in Norse ritual and funerary practice.
+                </div>
+                <div class="power-item">
+                    <strong>Return from Death</strong>
+                    In a remarkable demonstration of attachment or perhaps magical loyalty, Draupnir returned to Odin from Helheim after Baldr's funeral. Baldr sent the ring back with Hermóðr, suggesting it possessed the ability to traverse the boundary between life and death, or at least to maintain connection to its true owner.
+                </div>
+                <div class="power-item">
+                    <strong>Dwarven Craftwork Perfection</strong>
+                    As a product of Sindri's supreme craftsmanship, Draupnir embodies the highest achievement of dwarven smithing. It would be indestructible by normal means, immune to tarnish or damage, and its enchantment permanent and unbreakable.
+                </div>
+                <div class="power-item">
+                    <strong>Social Bond Creation</strong>
+                    The rings produced by Draupnir could be given to warriors, allies, and favored mortals, creating bonds of loyalty and obligation. Each ring carried the prestige of coming from Odin himself, making them more valuable than their material worth through their divine provenance.
+                </div>
+                <div class="power-item">
+                    <strong>Economic Stabilization</strong>
+                    Paradoxically, despite producing infinite wealth, Draupnir's measured generation—only eight rings every nine nights—prevented economic collapse through hyperinflation. The ring created abundance without flooding the world with so much gold as to render it worthless.
+                </div>
+                <div class="power-item">
+                    <strong>Mystical Power Source</strong>
+                    Some interpretations suggest Draupnir's generative power made it a source of magical energy, its constant creation of matter from nothing representing a well of power Odin could draw upon for his sorcery and wisdom-seeking. The ring thus served as both material and mystical resource.
+                </div>
+            </div>
+
+            <div class="content-text">
+                <h4 class="subsection-title">Symbolic and Metaphysical Powers</h4>
+                <p>
+                    Beyond its practical abilities, Draupnir embodied several metaphysical concepts central to Norse thought. The ring represented the principle of abundance arising from sacrifice—just as Odin sacrificed himself on Yggdrasil to gain the runes, the ring's multiplication suggested that proper offerings and sacrifices would be returned manifold.
+                </p>
+                <p>
+                    The timing of the ring's production—every ninth night—connected it to the lunar cycle and the passage of time itself. Nine nights represented a complete Norse week (a nine-day period in some reckonings), and the appearance of new rings marked these cycles, making Draupnir a kind of calendar or cosmic clock that physically manifested the turning of time through material creation.
+                </p>
+                <p>
+                    Additionally, Draupnir's placement on Baldr's funeral pyre and subsequent return from Hel demonstrated the ring's role in connecting different realms of existence. It could pass from Midgard to Asgard to Helheim and back, suggesting it transcended the normal boundaries that separated the Nine Worlds.
+                </p>
+            </div>
+        </div>
+
+        <!-- ASSOCIATED MYTHS -->
+        <div class="glass-card">
+            <h3 class="section-title">Associated Myths and Stories</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Major Myths Involving Draupnir</h4>
+
+                <div class="highlight-box">
+                    <p><strong>The Death of Baldr and the Journey to Hel</strong></p>
+                    <p>
+                        The most significant myth involving Draupnir centers on the death of Baldr the Beautiful, Odin's beloved son. Baldr had been experiencing prophetic dreams of his own death, which filled all the gods with dread, for Baldr was the best and most beloved of them all—wise, beautiful, and kind, embodying everything good in the world.
+                    </p>
+                    <p>
+                        Frigg, Baldr's mother, extracted oaths from everything in creation not to harm her son—from stones and metals, trees and plants, beasts and birds, diseases and poisons. Only the mistletoe seemed too young and insignificant to swear. The gods then made a game of throwing things at Baldr, who could not be harmed, finding amusement in his invulnerability.
+                    </p>
+                    <p>
+                        Loki, jealous and malicious, learned of the mistletoe exception. He fashioned a dart from mistletoe and gave it to Baldr's blind brother Höðr, guiding his hand to throw it at Baldr. The dart pierced Baldr's heart, and he fell dead—a catastrophe that foreshadowed Ragnarok itself, for Baldr's death was the beginning of the end of the gods.
+                    </p>
+                    <p>
+                        The gods were devastated. They prepared the grandest funeral pyre ever seen, placing Baldr's body aboard his ship Hringhorni, the greatest of all ships. But in their grief, none could launch it until the giantess Hyrrokkin came and pushed it into the sea with such force that the rollers caught fire and the earth quaked.
+                    </p>
+                    <p>
+                        Odin, standing at the pyre, performed the ultimate act of paternal love and honor. He took Draupnir, his precious ring with its infinite wealth, and placed it on Baldr's breast. This gift represented not just material treasure but Odin's willingness to sacrifice what was most valuable to him to honor his beloved son. In Norse culture, grave goods demonstrated the deceased's status and the survivors' love—and no gift could be more precious than Draupnir.
+                    </p>
+                    <p>
+                        Hermóðr the Brave volunteered to ride to Helheim to attempt to ransom Baldr back from death. He rode Odin's eight-legged steed Sleipnir for nine nights through dark valleys until he reached the gates of Hel. There he found Baldr seated in the place of honor at Hel's table, for even in death, Baldr commanded respect.
+                    </p>
+                    <p>
+                        Hel agreed to release Baldr on one condition: every thing in creation must weep for him, proving he was truly loved. If even one thing refused to weep, Baldr must remain in her realm. Hermóðr prepared to return with this news, but before departing, Baldr gave him Draupnir to return to Odin. The ring had accompanied Baldr to death itself, but now returned to its master, crossing the boundary between life and death.
+                    </p>
+                    <p>
+                        This return of Draupnir is deeply significant. It showed that even death could not keep Odin's treasures from him, that some bonds transcended even the separation of the grave. It also demonstrated that Baldr, even in Hel's realm, thought of his father and honored their relationship by returning this precious gift.
+                    </p>
+                    <p>
+                        The attempt to free Baldr ultimately failed when the giantess Þökk (likely Loki in disguise) refused to weep, declaring "Let Hel hold what she has." Baldr remained in Helheim, where he will stay until after Ragnarok, when he will emerge to rule the new world. Until then, Draupnir remains with Odin, a reminder of his lost son and the tragedy that presaged the doom of the gods.
+                    </p>
+
+                    <p><strong>Draupnir and the Nine Worlds</strong></p>
+                    <p>
+                        Though not explicitly detailed in the Eddas, later tradition and scholarly interpretation suggest that Draupnir's multiplication pattern—eight rings from one original—symbolically represented the Nine Worlds of Norse cosmology arranged on Yggdrasil the World Tree.
+                    </p>
+                    <p>
+                        The original ring represented Asgard, the realm of the Aesir where Odin dwelt. The eight rings produced every ninth night represented the other eight worlds: Midgard (humans), Jotunheim (giants), Vanaheim (Vanir gods), Alfheim (light elves), Svartalfheim (dwarves), Niflheim (ice and mist), Muspelheim (fire), and Helheim (the dead).
+                    </p>
+                    <p>
+                        In this interpretation, Draupnir became a physical manifestation of the cosmic structure itself, with Odin's possession of it symbolizing his sovereignty over all Nine Worlds. Each time the ring produced its eight copies, it reenacted the creation and ordering of the cosmos, with Asgard at the center generating and sustaining the other realms.
+                    </p>
+
+                    <p><strong>Draupnir and Odin's Wandering</strong></p>
+                    <p>
+                        In his role as Vegtam (Wanderer), Odin frequently traveled through Midgard and the other worlds, often in disguise as an old man with a broad hat, cloak, and staff. According to some sagas and folk traditions, Odin used rings from Draupnir to reward worthy mortals he encountered on these journeys.
+                    </p>
+                    <p>
+                        A king who showed proper hospitality might find a gold ring left behind after the old wanderer departed. A warrior who demonstrated courage and wisdom in battle might receive a ring from a mysterious one-eyed stranger. A skald who composed verses that pleased the old man might be gifted a ring of remarkable purity and weight.
+                    </p>
+                    <p>
+                        These rings served multiple purposes. They rewarded virtue and excellence, spreading Odin's favor throughout the mortal world. They identified the recipients as god-touched, marked by divine favor. And they created bonds of obligation and loyalty, for those who received gifts from Odin owed him service and honor in return.
+                    </p>
+                    <p>
+                        Some traditions held that these rings from Draupnir possessed minor magical properties of their own—bringing luck in battle, enhancing the wearer's reputation, or protecting against certain forms of harm. While not as powerful as Draupnir itself, they carried a residue of its divine enchantment.
+                    </p>
+
+                    <p><strong>The Weight of Generosity</strong></p>
+                    <p>
+                        One lesser-known tale preserved in Icelandic sources speaks of a legendary king named Gautrekr who received a ring from Odin. The ring, one of Draupnir's offspring, came with a curse disguised as a blessing: the king would become the most generous ruler who ever lived, unable to refuse any request or withhold any gift asked of him.
+                    </p>
+                    <p>
+                        At first, this seemed wonderful. Gautrekr distributed wealth freely, rewarded his warriors lavishly, and earned a reputation for unprecedented generosity. But the compulsion grew burdensome. He could not refuse even unreasonable requests. His treasury began to empty despite the ring's value. Warriors made increasingly extravagant demands, knowing he could not deny them.
+                    </p>
+                    <p>
+                        The tale served as a parable about the nature of gift-giving in Norse society. A lord must be generous to maintain loyalty and honor, but excessive generosity without wisdom could lead to ruin. Even Odin's gifts came with responsibilities and potential dangers. The ring from Draupnir brought wealth, but also the burden of living up to the standard of generosity that Odin himself embodied.
+                    </p>
+
+                    <p><strong>Draupnir at Ragnarok</strong></p>
+                    <p>
+                        While the Eddas do not explicitly detail Draupnir's fate during Ragnarok, the prophesied end of the gods and the current world order, some scholars and later interpreters have speculated about the ring's role in that final battle and the rebirth that follows.
+                    </p>
+                    <p>
+                        Some suggest that Odin might use Draupnir to pay the einherjar—the chosen slain warriors dwelling in Valhalla—for their service in the final battle. Each warrior might receive one of the ring's offspring as both payment and honor before marching to face the giants and monsters at the end of days.
+                    </p>
+                    <p>
+                        Other interpretations propose that Draupnir survives the destruction of Ragnarok along with Baldr, who returns from Hel to rule the new world. In this reading, Draupnir's ability to multiply represents hope and continuity—even after total destruction, the ring would provide the resources to rebuild civilization and restore abundance to the renewed earth.
+                    </p>
+                    <p>
+                        The ring's perpetual generation of wealth mirrors the cyclical Norse view of time and existence: destruction and creation, death and rebirth, winter and summer following each other eternally. Draupnir, by producing eight from one every nine nights, embodies this cycle in miniature, suggesting that creation always continues even in the face of apparent ending.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SYMBOLISM -->
+        <div class="glass-card">
+            <h3 class="section-title">Symbolism and Spiritual Meaning</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Abundance and Prosperity</h4>
+                <p>
+                    Draupnir's most obvious symbolic meaning is abundance—the ring represents wealth that never exhausts, generosity that never depletes its source. In a society where a chieftain's or god's status depended on their ability to distribute treasure to followers and allies, Draupnir symbolized the ideal of perfect, inexhaustible generosity.
+                </p>
+                <p>
+                    The ring embodied the hope that proper worship and right relationship with the divine would result in abundant blessings. Just as Draupnir multiplied without diminishing, so too would the fortunes of those who honored the gods and maintained right action. The ring promised that abundance was not a zero-sum game—wealth could be created and multiplied rather than merely redistributed.
+                </p>
+
+                <h4 class="subsection-title">Cyclical Time and Cosmic Order</h4>
+                <p>
+                    The specific timing of Draupnir's multiplication—eight rings every ninth night—embedded the ring deeply in Norse cosmological symbolism. The numbers eight and nine carried profound significance, relating to the structure of the cosmos, the nature of time, and the patterns of creation.
+                </p>
+                <p>
+                    Nine was the most sacred number: nine worlds, nine nights Odin hung on Yggdrasil, nine mothers of Heimdall. It represented completion, wholeness, and the passage from one state to another. Eight represented the created order, one less than sacred nine, the manifestation of cosmic principles in material form.
+                </p>
+                <p>
+                    Draupnir's cycle thus represented the eternal rhythm of creation—from divine source (nine) comes material manifestation (eight), over and over, endlessly. The ring made abstract cosmic patterns tangible and visible, demonstrating through gold and time how the universe perpetually renews itself.
+                </p>
+
+                <h4 class="subsection-title">The Gift Economy and Social Bonds</h4>
+                <p>
+                    In Norse society, gift-giving created and maintained social relationships. A lord gave rings to warriors, creating bonds of loyalty and obligation. The warriors gave service in return, and received more gifts for that service, creating a cycle of mutual obligation and honor. This gift economy held society together and defined one's place within it.
+                </p>
+                <p>
+                    Draupnir symbolized this system in perfected form. Odin, the ultimate ring-giver, possessed the ultimate ring—one that could never be exhausted, allowing him to maintain infinite social bonds and command absolute loyalty. The ring represented the ideal of lordship: generous, abundant, and capable of rewarding all worthy followers without ever running short.
+                </p>
+                <p>
+                    Moreover, the return of Draupnir from Baldr in Helheim demonstrated the reciprocal nature of the gift economy. Even from death, the gift relationship persisted—Baldr returned what was given, honoring the bond between father and son, giver and receiver. This showed that properly conducted gift-exchange created bonds that transcended even death.
+                </p>
+
+                <h4 class="subsection-title">Sacrifice and Return</h4>
+                <p>
+                    Odin's placement of Draupnir on Baldr's pyre, and the ring's subsequent return, created a powerful symbol of sacrifice and restoration. Odin gave up his most precious treasure to honor his son, holding nothing back even in the face of unbearable loss. This willingness to sacrifice everything, even infinite wealth, demonstrated the depth of paternal love and the priority of honor over material possessions.
+                </p>
+                <p>
+                    The ring's return, however, suggested that right sacrifice brings restoration. What is given up properly, in the right spirit and for the right reasons, comes back transformed. This paralleled Odin's own sacrifice on Yggdrasil—he gave up himself to himself, hanging for nine nights in self-sacrifice, and in return received the runes and greatest wisdom. Sacrifice made in the right way ultimately returns greater than what was given.
+                </p>
+
+                <h4 class="subsection-title">The Mystery of Creation</h4>
+                <p>
+                    At a deeper level, Draupnir symbolized the mystery of creation itself—how something comes from nothing, how one becomes many, how the divine generates the material world. The ring's multiplication seemed to violate natural law: gold appeared without mining, smelting, or crafting. Eight perfect rings emerged from one, materially identical but lacking the generative power of the original.
+                </p>
+                <p>
+                    This made Draupnir a physical embodiment of cosmogonic mystery. Just as the cosmos emerged from the interaction of fire and ice in Ginnungagap, the great void, so too did gold emerge from Draupnir without apparent source. The ring suggested that behind apparent physical limits lay deeper generative principles—that creation was ongoing, not merely a past event, and that divine power could produce material reality through means beyond mortal understanding.
+                </p>
+
+                <h4 class="subsection-title">Status and Divine Authority</h4>
+                <p>
+                    As an arm ring, Draupnir symbolized status, authority, and divine right. Arm rings in Norse culture were status symbols par excellence, worn by nobility and given as marks of honor. Draupnir, as the supreme ring owned by the supreme god, represented the apex of this system—divine authority made visible.
+                </p>
+                <p>
+                    Odin's possession of Draupnir legitimized his rule over gods and men. He was the ring-giver who could never be exceeded, the source of wealth and generosity that all other lords merely imitated. The ring demonstrated that his authority came not from strength alone (like Thor) or from primal power (like the giants), but from his position at the center of the cosmic gift economy, the axis around which all social and divine relationships revolved.
+                </p>
+
+                <h4 class="subsection-title">Modern Symbolic Interpretations</h4>
+                <p>
+                    In modern interpretations, Draupnir has been read as symbolizing various concepts beyond its original Norse context:
+                </p>
+                <ul>
+                    <li>Economic sustainability and the search for renewable resources that never deplete</li>
+                    <li>The principle of compound interest and wealth that generates more wealth</li>
+                    <li>Creative inspiration that multiplies the more it is shared rather than diminishing</li>
+                    <li>The gift economy versus market capitalism, representing alternative economic systems based on reciprocal relationships rather than commodity exchange</li>
+                    <li>Intellectual property and ideas that increase in value the more widely they are distributed</li>
+                    <li>The principle of abundance versus scarcity mindset in personal development and spirituality</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- MODERN DEPICTIONS -->
+        <div class="glass-card">
+            <h3 class="section-title">Modern Depictions in Culture</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Literature and Comics</h4>
+                <ul>
+                    <li><strong>Marvel Comics and MCU:</strong> While not prominently featured in the films, Draupnir appears in Marvel Comics as one of Odin's treasures in the Asgardian armory. Some storylines suggest it was melted down to create other artifacts or lost in various cosmic events.</li>
+                    <li><strong>Neil Gaiman's "Norse Mythology":</strong> Gaiman's retelling of Norse myths includes the creation of Draupnir in the story of Loki's wager with the dwarves, emphasizing both the ring's beauty and its mathematical precision in multiplication.</li>
+                    <li><strong>Rick Riordan's "Magnus Chase" series:</strong> Draupnir appears as a minor artifact in the Norse-themed series, though Riordan takes creative liberties with its powers and significance.</li>
+                    <li><strong>Joanne Harris's "Runemarks" series:</strong> Features Draupnir as an important magical artifact tied to Odin's power and the survival of the gods in a post-Ragnarok world.</li>
+                </ul>
+
+                <h4 class="subsection-title">Video Games</h4>
+                <ul>
+                    <li><strong>God of War (2018) and Ragnarök:</strong> Draupnir plays a crucial role in "God of War Ragnarök," where the dwarven brothers Brok and Sindri forge the "Draupnir Spear" for Kratos—a weapon that multiplies copies of itself when thrown, directly referencing the ring's replication power.</li>
+                    <li><strong>Fate/Grand Order:</strong> Draupnir appears as one of Odin's Noble Phantasms, though the game takes considerable creative liberties with Norse mythology overall.</li>
+                    <li><strong>Age of Mythology:</strong> While not specifically named, the Norse faction has economic bonuses that recall Draupnir's wealth-generating properties.</li>
+                    <li><strong>Crusader Kings III (Northern Lords DLC):</strong> Includes legendary Norse artifacts including rings that may reference Draupnir, providing economic bonuses and prestige.</li>
+                    <li><strong>Assassin's Creed Valhalla:</strong> Features numerous Norse mythological artifacts in its fantasy sequences, including rings associated with Odin, though not explicitly Draupnir.</li>
+                    <li><strong>Too Human:</strong> This Norse mythology-inspired sci-fi game includes various artifacts from Norse myth, including references to Odin's treasures.</li>
+                </ul>
+
+                <h4 class="subsection-title">Role-Playing Games</h4>
+                <ul>
+                    <li><strong>Dungeons & Dragons:</strong> Various editions have featured "Ring of Regeneration" or similar items that produce currency or multiply resources, inspired by Draupnir's powers.</li>
+                    <li><strong>GURPS Fantasy:</strong> Includes Draupnir as a legendary artifact in its Norse-themed sourcebooks, emphasizing both its economic and symbolic significance.</li>
+                    <li><strong>Fate Core System:</strong> Games set in Norse-inspired settings often include Draupnir or similar artifacts as ultimate rewards or quest objectives.</li>
+                </ul>
+
+                <h4 class="subsection-title">Music and Popular Culture</h4>
+                <ul>
+                    <li><strong>Amon Amarth:</strong> The Swedish melodic death metal band, known for Viking and Norse themes, references Draupnir and other Norse artifacts in their lyrics and album artwork.</li>
+                    <li><strong>Wardruna:</strong> The Norwegian music group dedicated to Norse cultural heritage has composed pieces inspired by Norse artifacts and mythology, including references to Odin's treasures.</li>
+                    <li><strong>Jewelry and Metalwork:</strong> Numerous jewelry companies and craftspeople create "Draupnir" rings inspired by the myth, often featuring Norse knotwork and runes, marketed to Norse mythology enthusiasts and Ásatrú practitioners.</li>
+                </ul>
+
+                <h4 class="subsection-title">Film and Television</h4>
+                <ul>
+                    <li><strong>Vikings (TV series):</strong> While the historical drama doesn't feature Draupnir specifically, arm rings play significant ceremonial and social roles reflecting their importance in Norse culture.</li>
+                    <li><strong>The Northman (2022):</strong> Robert Eggers's Viking revenge film, while focused on historical accuracy, includes glimpses of Norse material culture including arm rings similar to how Draupnir would have been worn.</li>
+                    <li><strong>Ragnarok (Netflix series):</strong> The Norwegian series reimagining Norse mythology in modern Norway references various Norse artifacts, though Draupnir doesn't feature prominently.</li>
+                </ul>
+
+                <h4 class="subsection-title">Scholarly and Educational Use</h4>
+                <p>
+                    Draupnir frequently appears in scholarly discussions of Norse mythology and culture:
+                </p>
+                <ul>
+                    <li>Economics courses use Draupnir as a thought experiment about inflation, value, and sustainable wealth generation</li>
+                    <li>Anthropology studies reference it when discussing gift economies and reciprocal exchange in pre-modern societies</li>
+                    <li>Religious studies programs analyzing Norse cosmology emphasize Draupnir's numerical symbolism and connection to sacred cycles</li>
+                    <li>Museum exhibitions on Viking Age culture often feature recreations or artistic depictions of Draupnir alongside other legendary artifacts</li>
+                </ul>
+
+                <h4 class="subsection-title">Neo-Pagan and Ásatrú Practice</h4>
+                <p>
+                    Modern Norse pagan practitioners (Ásatrú, Heathenry) frequently incorporate Draupnir symbolism into religious practice:
+                </p>
+                <ul>
+                    <li>Oath rings used in ceremonies are sometimes called "Draupnir" to invoke the sacredness of Odin's ring</li>
+                    <li>Meditations on abundance and generosity often focus on Draupnir as a symbol of divine blessing and reciprocal gift-giving</li>
+                    <li>The ring appears in modern artistic depictions of Odin in religious contexts</li>
+                    <li>Some groups create "Draupnir rites" focused on prosperity, cyclical time, and community bond-strengthening</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- RELATED ITEMS -->
+        <div class="glass-card">
+            <h3 class="section-title">Related Weapons and Items</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Other Treasures from the Wager</h4>
+                <ul>
+                    <li><strong>Mjolnir:</strong> Thor's hammer, forged by Sindri alongside Draupnir, the ultimate weapon of the Aesir</li>
+                    <li><strong>Gullinbursti:</strong> The golden boar created with Draupnir, Freyr's mount that could run through air and water</li>
+                    <li><strong>Gungnir:</strong> Odin's spear crafted by the Sons of Ivaldi, which never missed its mark</li>
+                    <li><strong>Skíðblaðnir:</strong> Freyr's magical ship that always had favorable wind and could be folded up</li>
+                    <li><strong>Sif's Golden Hair:</strong> The replacement hair that started the entire sequence of treasure-making</li>
+                </ul>
+
+                <h4 class="subsection-title">Other Norse Rings and Treasures</h4>
+                <ul>
+                    <li><strong>Andvaranaut:</strong> The cursed ring of Andvari the dwarf, which brought doom to all who possessed it, as told in the Völsunga saga</li>
+                    <li><strong>Svíagris:</strong> The "Swedish King's ring," a legendary arm ring associated with Swedish royal authority</li>
+                    <li><strong>The Oaths-Ring:</strong> Sacred rings kept at major temples upon which oaths were sworn</li>
+                    <li><strong>Brísingamen:</strong> Freya's magnificent necklace, another dwarf-crafted treasure of the gods</li>
+                    <li><strong>Gleipnir:</strong> The magical ribbon that bound Fenrir, showing dwarven ability to create impossibly strong yet delicate items</li>
+                </ul>
+
+                <h4 class="subsection-title">Multiplying Treasures from Other Traditions</h4>
+                <ul>
+                    <li><strong>The Widow's Cruse (Biblical):</strong> The jar of oil that never emptied, similar in principle to Draupnir's endless generation</li>
+                    <li><strong>Cornucopia (Greek/Roman):</strong> The horn of plenty that provided endless food and drink</li>
+                    <li><strong>Cintamani (Buddhist):</strong> The wish-fulfilling jewel that grants desires and produces treasures</li>
+                    <li><strong>Akshaya Patra (Hindu):</strong> The inexhaustible vessel that produces unlimited food</li>
+                    <li><strong>The Goose That Laid Golden Eggs (Fable):</strong> The archetypal story of renewable wealth, though with a cautionary moral absent from Draupnir's myth</li>
+                </ul>
+
+                <h4 class="subsection-title">Odin's Other Possessions</h4>
+                <ul>
+                    <li><strong>Sleipnir:</strong> Odin's eight-legged horse, fastest of all steeds, who carried Hermóðr to Hel to attempt Baldr's rescue</li>
+                    <li><strong>Gungni r:</strong> His never-missing spear, symbol of his authority and power in war</li>
+                    <li><strong>Huginn and Muninn:</strong> His two ravens (Thought and Memory) who fly across the world bringing him information</li>
+                    <li><strong>Geri and Freki:</strong> His two wolves who accompany him, fed with meat from his table as he himself consumes only wine</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- RELATED LINKS -->
+        <div class="glass-card">
+            <h3 class="section-title">Related Articles</h3>
+            <div class="related-links">
+                <a href="../weapons/mjolnir.html" class="related-link">Mjolnir - Thor's Hammer</a>
+                <a href="../weapons/gungnir.html" class="related-link">Gungnir - Odin's Spear</a>
+                <a href="brisingamen.html" class="related-link">Brísingamen - Freya's Necklace</a>
+                <a href="../../mythology/norse/odin.html" class="related-link">Odin - The All-Father</a>
+                <a href="../../mythology/norse/baldr.html" class="related-link">Baldr the Beautiful</a>
+                <a href="../../mythology/norse/loki.html" class="related-link">Loki the Trickster</a>
+                <a href="../../creatures/norse/dwarves.html" class="related-link">The Dwarves</a>
+                <a href="../../mythology/norse/ragnarok.html" class="related-link">Ragnarök</a>
+            </div>
+        </div>
+
+        <!-- BIBLIOGRAPHY -->
+        <div class="bibliography glass-card">
+            <h3 class="section-title">Bibliography and Further Reading</h3>
+            <ol>
+                <li>Snorri Sturluson. <em>The Prose Edda</em>. Trans. Jesse Byock. Penguin Classics, 2005.</li>
+                <li><em>The Poetic Edda</em>. Trans. Carolyne Larrington. Oxford World's Classics, 2014.</li>
+                <li>Lindow, John. <em>Norse Mythology: A Guide to Gods, Heroes, Rituals, and Beliefs</em>. Oxford University Press, 2002.</li>
+                <li>Simek, Rudolf. <em>Dictionary of Northern Mythology</em>. Trans. Angela Hall. D.S. Brewer, 1993.</li>
+                <li>Davidson, H.R. Ellis. <em>Gods and Myths of Northern Europe</em>. Penguin Books, 1964.</li>
+                <li>Turville-Petre, E.O.G. <em>Myth and Religion of the North: The Religion of Ancient Scandinavia</em>. Holt, Rinehart and Winston, 1964.</li>
+                <li>Hedeager, Lotte. <em>Iron Age Myth and Materiality: An Archaeology of Scandinavia AD 400-1000</em>. Routledge, 2011.</li>
+                <li>Price, Neil. <em>The Viking Way: Magic and Mind in Late Iron Age Scandinavia</em>. 2nd ed. Oxbow Books, 2019.</li>
+                <li>Dumézil, Georges. <em>Gods of the Ancient Northmen</em>. Ed. Einar Haugen. University of California Press, 1973.</li>
+                <li>Sturluson, Snorri. <em>Heimskringla: History of the Kings of Norway</em>. Trans. Lee M. Hollander. University of Texas Press, 1964.</li>
+                <li>Orchard, Andy. <em>Dictionary of Norse Myth and Legend</em>. Cassell, 1997.</li>
+                <li>Larrington, Carolyne. <em>The Norse Myths: A Guide to the Gods and Heroes</em>. Thames & Hudson, 2017.</li>
+                <li>Faulkes, Anthony, trans. <em>Snorri Sturluson: Edda: Skáldskaparmál</em>. 2 vols. Viking Society for Northern Research, 1998.</li>
+                <li>McKinnell, John, Rudolf Simek, and Klaus Düwel. <em>Runes, Magic and Religion: A Sourcebook</em>. Fassbaender, 2004.</li>
+                <li>Jesch, Judith. <em>The Viking Diaspora</em>. Routledge, 2015.</li>
+            </ol>
+        </div>
+    </main>
+</body>
+</html>
