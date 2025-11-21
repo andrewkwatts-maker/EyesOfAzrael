@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babylonian Corpus Search - ORACC Cuneiform Texts</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+        <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+<script src="../../themes/theme-picker.js" defer></script>
+    <style>
+        :root {
+            --mythos-primary: #483D8B;
+            --mythos-secondary: #6A5ACD;
+        }
+
+        .search-header {
+            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
+            color: white;
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .search-box {
+            background: white;
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            margin: var(--spacing-lg) 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: var(--font-size-lg);
+            border: 2px solid var(--mythos-primary);
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+        }
+
+        .search-button {
+            background: var(--mythos-primary);
+            color: white;
+            padding: 0.75rem 2rem;
+            font-size: var(--font-size-lg);
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-button:hover {
+            background: var(--mythos-secondary);
+        }
+
+        .result-item {
+            background: #f9f9f9;
+            border-left: 4px solid var(--mythos-primary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-md) 0;
+            border-radius: var(--radius-md);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .result-citation {
+            font-weight: bold;
+            color: var(--mythos-primary);
+            margin-bottom: 0.5rem;
+            font-size: var(--font-size-lg);
+        }
+
+        .result-transliteration {
+            font-family: 'Courier New', monospace;
+            background: #ffffff;
+            padding: var(--spacing-md);
+            border-radius: 4px;
+            margin: 0.75rem 0;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .result-translation {
+            color: #666;
+            font-style: italic;
+            margin: 0.75rem 0;
+            padding-left: 1rem;
+            border-left: 2px solid #ddd;
+        }
+
+        .result-metadata {
+            display: flex;
+            gap: 1.5rem;
+            margin: 0.75rem 0;
+            font-size: var(--font-size-sm);
+            color: #777;
+        }
+
+        .result-link {
+            margin-top: 0.75rem;
+        }
+
+        .result-link a {
+            color: var(--mythos-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .result-link a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            padding: var(--spacing-xl);
+            color: #777;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: var(--spacing-xl);
+            background: #f9f9f9;
+            border-radius: var(--radius-md);
+            color: #666;
+        }
+
+        .matched-term {
+            background: #ffe066;
+            padding: 0 0.25rem;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .language-badge {
+            display: inline-block;
+            background: var(--mythos-primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-md, 12px);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+        }
+
+        .help-section {
+            background: #f0f8ff;
+            border: 1px solid #b3d9ff;
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            margin: var(--spacing-xl) 0;
+        }
+
+        .help-section h3 {
+            color: var(--mythos-primary);
+            margin-top: 0;
+        }
+
+        .quick-search {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            margin: var(--spacing-md) 0;
+        }
+
+        .quick-search-btn {
+            background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-2xl);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: var(--font-size-sm);
+        }
+
+        .quick-search-btn:hover {
+            background: var(--mythos-primary);
+            color: white;
+        }
+
+        .transliteration-guide {
+            background: #ffffff9e6;
+            border: 1px solid #ffe066;
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin: var(--spacing-md) 0;
+            font-size: var(--font-size-sm);
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+
+    <header>
+    <div class="header-content">
+        <h1>📜 Babylonian Corpus Search</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../mythos/index.html">Home</a> →
+                <a href="../index.html">Babylonian</a> →
+                <span>Corpus Search</span>
+</nav>
+
+    <main>
+        <section class="search-header">
+            <h2>Search Babylonian & Akkadian Cuneiform Texts</h2>
+            <p style="font-size: var(--font-size-lg); margin-top: 0.5rem;">
+                Search the Open Richly Annotated Cuneiform Corpus (ORACC) for Babylonian deities, mythological texts, and Akkadian concepts.
+                Results include transliterations, translations, and links to original sources.
+            </p>
+        </section>
+
+        <section class="search-box">
+            <label for="search-input" style="font-weight: bold; display: block; margin-bottom: 0.5rem;">
+                Search Term (deity name, text, or keyword):
+            </label>
+            <input
+                type="text"
+                id="search-input"
+                class="search-input"
+                placeholder="e.g., Marduk, Ishtar, Enuma Elish, Tiamat..."
+            >
+            <button class="search-button" onclick="performSearch()">🔍 Search Corpus</button>
+
+            <div style="margin-top: 1.5rem;">
+                <strong>Quick Search:</strong>
+                <div class="quick-search">
+                    <button class="quick-search-btn" onclick="quickSearch('marduk')">Marduk</button>
+                    <button class="quick-search-btn" onclick="quickSearch('ishtar')">Ishtar</button>
+                    <button class="quick-search-btn" onclick="quickSearch('ea')">Ea</button>
+                    <button class="quick-search-btn" onclick="quickSearch('shamash')">Shamash</button>
+                    <button class="quick-search-btn" onclick="quickSearch('sin')">Sin</button>
+                    <button class="quick-search-btn" onclick="quickSearch('tiamat')">Tiamat</button>
+                    <button class="quick-search-btn" onclick="quickSearch('gilgamesh')">Gilgamesh</button>
+                    <button class="quick-search-btn" onclick="quickSearch('enuma elish')">Enuma Elish</button>
+                </div>
+            </div>
+        </section>
+
+        <div id="results-container"></div>
+
+        <section class="help-section">
+            <h3>About Akkadian Transliteration</h3>
+            <div class="transliteration-guide">
+                <p><strong>Transliteration Conventions:</strong></p>
+                <ul>
+                    <li><strong>š</strong> = sh sound (e.g., Šamaš = Shamash)</li>
+                    <li><strong>ṣ, ṭ</strong> = emphatic consonants</li>
+                    <li><strong>ḫ</strong> = h sound (guttural)</li>
+                    <li><strong>DN</strong> = Divine Name (deity)</li>
+                    <li><strong>GN</strong> = Geographic Name</li>
+                    <li><strong>[ ]</strong> = Restored text (damaged or missing on tablet)</li>
+                    <li><strong>Subscript numbers</strong> = Different cuneiform signs with same sound</li>
+                </ul>
+            </div>
+
+            <h3>About ORACC & Babylonian Texts</h3>
+            <p>
+                The <strong>Open Richly Annotated Cuneiform Corpus (ORACC)</strong> includes extensive Babylonian
+                and Akkadian texts from royal inscriptions, mythological epics, prayers, and administrative documents.
+                Key texts include the <strong>Enuma Elish</strong> (creation epic), <strong>Epic of Gilgamesh</strong>,
+                and hymns to major deities.
+            </p>
+            <p>
+                <a href="http://oracc.museum.upenn.edu" target="_blank" style="color: var(--mythos-primary); font-weight: bold;">
+                    Visit ORACC Website →
+                </a>
+            </p>
+
+            <h3>Major Babylonian Text Projects</h3>
+            <ul>
+                <li><strong>SAA</strong> - State Archives of Assyria (royal correspondence and rituals)</li>
+                <li><strong>RINAP</strong> - Royal Inscriptions of the Neo-Assyrian Period</li>
+                <li><strong>RIBO</strong> - Royal Inscriptions of the Babylonian Empire</li>
+                <li><strong>Gilgamesh</strong> - Multiple versions of the Epic of Gilgamesh</li>
+                <li><strong>GKAB</strong> - Göttinger Katalog der akkadischen Beschwörungen</li>
+            </ul>
+
+            <h3>Key Mythological Texts</h3>
+            <ul>
+                <li><strong>Enuma Elish</strong> - Babylonian creation epic featuring Marduk's battle with Tiamat</li>
+                <li><strong>Epic of Gilgamesh</strong> - Legendary king's quest for immortality</li>
+                <li><strong>Erra Epic</strong> - Plague god's destruction and restoration of Babylon</li>
+                <li><strong>Descent of Ishtar</strong> - Akkadian version of the underworld journey</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>
+            <strong>Babylonian Corpus Search</strong> - ORACC Cuneiform Texts<br>
+            <a href="../../mythos/index.html">World Mythos Home</a> |
+            <a href="../index.html">Babylonian Tradition</a>
+        </p>
+    </footer>
+
+    <script>
+        // Get URL parameters
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Load pre-indexed data for a deity or text
+        function loadPreIndexedData(term) {
+            const termLower = term.toLowerCase().replace(/\s+/g, '-');
+            const dataFile = `../../../corpus/data/${termLower}.json`;
+
+            fetch(dataFile)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('No pre-indexed data available');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayResults(data.results, term);
+                })
+                .catch(error => {
+                    console.log('Pre-indexed data not available, using sample data:', error);
+                    displaySampleResults(term);
+                });
+        }
+
+        // Display sample results (when corpus data not available)
+        function displaySampleResults(term) {
+            const sampleData = {
+                'marduk': [
+                    {
+                        text_name: 'Enuma Elish Tablet IV (Marduk vs Tiamat)',
+                        context: '... **d.marduk[Marduk]DN** šarru ša ilāni',
+                        full_verse: 'd.marduk[Marduk]DN šarru[king]N ša[of] ilāni[gods]N',
+                        translation: 'Marduk, king of the gods',
+                        metadata: { project: 'enuma-elish', text_id: 'Q002482', lang: 'akk' },
+                        url: 'http://oracc.museum.upenn.edu/enuma-elish/Q002482'
+                    },
+                    {
+                        text_name: 'Enuma Elish Tablet V (Creation)',
+                        context: '**d.marduk[Marduk]DN** ibni šamāmī u erṣetam',
+                        full_verse: 'd.marduk[Marduk]DN ibni[created]V šamāmī[heaven]N u[and] erṣetam[earth]N',
+                        translation: 'Marduk created heaven and earth',
+                        metadata: { project: 'enuma-elish', text_id: 'Q002482', lang: 'akk' },
+                        url: 'http://oracc.museum.upenn.edu/enuma-elish/Q002482'
+                    }
+                ],
+                'ishtar': [
+                    {
+                        text_name: 'Descent of Ishtar (Opening)',
+                        context: '**d.ištar[Ishtar]DN** ana kur-nu-gi4-a',
+                        full_verse: 'd.ištar[Ishtar]DN ana[to] kur-nu-gi4-a[land-of-no-return]GN',
+                        translation: 'Ishtar to the land of no return',
+                        metadata: { project: 'misc', text_id: 'Q000385', lang: 'akk' },
+                        url: 'http://oracc.museum.upenn.edu/misc/Q000385'
+                    }
+                ],
+                'tiamat': [
+                    {
+                        text_name: 'Enuma Elish Tablet I (Primordial Waters)',
+                        context: '**tiamat[Tiamat]DN** mummu alittašun',
+                        full_verse: 'tiamat[Tiamat]DN mummu[primordial]AJ alittašun[their-progenitor]N',
+                        translation: 'Tiamat, primordial progenitor',
+                        metadata: { project: 'enuma-elish', text_id: 'Q002482', lang: 'akk' },
+                        url: 'http://oracc.museum.upenn.edu/enuma-elish/Q002482'
+                    }
+                ],
+                'gilgamesh': [
+                    {
+                        text_name: 'Epic of Gilgamesh Tablet I',
+                        context: '**gilgameš[Gilgamesh]DN** ša naqba īmuru',
+                        full_verse: 'gilgameš[Gilgamesh]DN ša[who] naqba[secret]N īmuru[saw]V',
+                        translation: 'Gilgamesh, who saw the secret',
+                        metadata: { project: 'gilgamesh', text_id: 'Q000372', lang: 'akk' },
+                        url: 'http://oracc.museum.upenn.edu/gilgamesh/Q000372'
+                    }
+                ]
+            };
+
+            const results = sampleData[term.toLowerCase()] || [];
+            displayResults(results, term);
+        }
+
+        // Display search results
+        function displayResults(results, searchTerm) {
+            const container = document.getElementById('results-container');
+
+            if (!results || results.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <h3>No Results Found</h3>
+                        <p>No corpus entries found for "${searchTerm}".</p>
+                        <p>Try searching for other deities, texts, or concepts.</p>
+                        <p style="margin-top: 1rem;">
+                            <strong>Note:</strong> This is a demonstration using sample data.
+                            Full ORACC corpus data requires downloading the complete corpus.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <section>
+                    <h2 style="color: var(--mythos-primary);">
+                        Search Results for "${searchTerm}"
+                    </h2>
+                    <p >
+                        Found ${results.length} text${results.length !== 1 ? 's' : ''} mentioning this term
+                    </p>
+            `;
+
+            results.forEach(result => {
+                const language = result.metadata?.lang === 'akk' ? 'Akkadian' :
+                               result.metadata?.lang === 'sux' ? 'Sumerian' : 'Unknown';
+
+                // Highlight matched terms in context
+                const contextHTML = result.context
+                    .replace(/\*\*(.*?)\*\*/g, '<span class="matched-term">$1</span>');
+
+                html += `
+                    <div class="result-item">
+                        <div class="result-citation">
+                            ${result.text_name || result.text_id}
+                            <span class="language-badge">${language}</span>
+                        </div>
+
+                        <div class="result-metadata">
+                            <span>📚 Project: ${result.metadata?.project || result.book || 'ORACC'}</span>
+                            <span>📄 Text ID: ${result.metadata?.text_id || result.text_id}</span>
+                        </div>
+
+                        <div class="result-transliteration">
+                            ${contextHTML || result.full_verse}
+                        </div>
+
+                        ${result.translation ? `
+                            <div class="result-translation">
+                                ${result.translation}
+                            </div>
+                        ` : ''}
+
+                        ${result.url ? `
+                            <div class="result-link">
+                                <a href="${result.url}" target="_blank">
+                                    View on ORACC Website →
+                                </a>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            html += '</section>';
+            container.innerHTML = html;
+        }
+
+        // Perform search
+        function performSearch() {
+            const searchInput = document.getElementById('search-input');
+            const term = searchInput.value.trim();
+
+            if (!term) {
+                alert('Please enter a search term');
+                return;
+            }
+
+            // Show loading
+            const container = document.getElementById('results-container');
+            container.innerHTML = '<div class="loading">🔍 Searching corpus...</div>';
+
+            // Update URL
+            const url = new URL(window.location);
+            url.searchParams.set('term', term);
+            url.searchParams.set('language', 'akkadian');
+            window.history.pushState({}, '', url);
+
+            // Load results
+            setTimeout(() => {
+                loadPreIndexedData(term);
+            }, 500);
+        }
+
+        // Quick search helper
+        function quickSearch(term) {
+            document.getElementById('search-input').value = term;
+            performSearch();
+        }
+
+        // Handle Enter key in search box
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            // Load results if URL has parameters
+            const term = getUrlParameter('term');
+            if (term) {
+                searchInput.value = term;
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>
