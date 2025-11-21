@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Archetypes - Cross-Mythology Patterns</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../themes/corpus-links.css">
+    <script defer src="../themes/theme-animations.js"></script>
+    <script src="../themes/theme-picker.js" defer></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-2xl);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--spacing-4xl) var(--spacing-xl);
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.2),
+                rgba(var(--color-secondary-rgb), 0.2));
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-3xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: var(--font-size-4xl);
+            margin-bottom: var(--spacing-md);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            margin: var(--spacing-md) 0;
+            font-weight: var(--font-normal);
+        }
+
+        .search-container {
+            max-width: 800px;
+            margin: var(--spacing-3xl) auto;
+            padding: var(--spacing-lg);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: var(--font-size-base);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-lg);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-tag {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-primary);
+        }
+
+        .filter-tag:hover, .filter-tag.active {
+            background: rgba(var(--color-primary-rgb), 0.5);
+            border-color: var(--color-primary);
+            transform: translateY(-2px);
+        }
+
+        .mythology-nav {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: var(--spacing-3xl) 0;
+            padding: var(--spacing-md);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .mythology-link {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            font-weight: var(--font-medium);
+        }
+
+        .mythology-link:hover {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            color: var(--color-secondary);
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            font-size: var(--font-size-3xl);
+            color: var(--color-primary);
+            margin: var(--spacing-4xl) 0 var(--spacing-xl) 0;
+            text-align: center;
+            padding-bottom: var(--spacing-md);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .category-section {
+            margin-bottom: var(--spacing-4xl);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .category-icon {
+            font-size: var(--font-size-4xl);
+        }
+
+        .category-title {
+            font-size: var(--font-size-2xl);
+            color: var(--color-primary);
+            margin: 0;
+        }
+
+        .category-description {
+            color: var(--color-text-secondary);
+            text-align: center;
+            margin: var(--spacing-sm) 0;
+        }
+
+        .archetype-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-xl) 0;
+        }
+
+        .archetype-card {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-base);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .archetype-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .archetype-icon {
+            font-size: var(--font-size-5xl);
+            margin-bottom: var(--spacing-md);
+            text-align: center;
+        }
+
+        .archetype-title {
+            font-size: var(--font-size-2xl);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-md);
+            text-align: center;
+        }
+
+        .archetype-description {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-lg);
+            line-height: var(--leading-relaxed);
+            text-align: center;
+        }
+
+        .archetype-examples {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: var(--spacing-md);
+        }
+
+        .example-tag {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(var(--color-primary-rgb), 0.3);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .info-section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-xl) 0;
+            border: 2px solid var(--color-border);
+        }
+
+        .info-section h3 {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-xl);
+        }
+
+        .info-section p {
+            color: var(--color-text-secondary);
+            line-height: var(--leading-loose);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-fast);
+            margin: var(--spacing-sm);
+            box-shadow: var(--shadow-md);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+
+        footer {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            margin-top: var(--spacing-5xl);
+            border-top: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+    <div class="header-content">
+        <h1>🎭 Universal Archetypes</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../mythos/index.html">Home</a> → <a href="archetypes/index.html">Archetypes</a>
+</nav>
+
+        <div class="search-container">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search by archetype, deity, or keyword (e.g., 'Zeus', 'wisdom', 'war')...">
+            <div class="filter-tags">
+                <div class="filter-tag active" data-filter="all">All Archetypes</div>
+                <div class="filter-tag" data-filter="deity">Deity</div>
+                <div class="filter-tag" data-filter="elemental">Elemental</div>
+                <div class="filter-tag" data-filter="place">Place</div>
+                <div class="filter-tag" data-filter="story">Story</div>
+                <div class="filter-tag" data-filter="prophecy">Prophecy</div>
+                <div class="filter-tag" data-filter="journey">Journey</div>
+            </div>
+        </div>
+
+        <div class="mythology-nav">
+            <a href="../mythos/greek/index.html" class="mythology-link">🏛️ Greek</a>
+            <a href="../mythos/roman/index.html" class="mythology-link">🦅 Roman</a>
+            <a href="../mythos/egyptian/index.html" class="mythology-link">🔺 Egyptian</a>
+            <a href="../mythos/norse/index.html" class="mythology-link">⚡ Norse</a>
+            <a href="../mythos/hindu/index.html" class="mythology-link">🕉️ Hindu</a>
+            <a href="../mythos/buddhist/index.html" class="mythology-link">☸️ Buddhist</a>
+            <a href="../mythos/chinese/index.html" class="mythology-link">🐉 Chinese</a>
+            <a href="../mythos/sumerian/index.html" class="mythology-link">🏺 Sumerian</a>
+            <a href="../mythos/babylonian/index.html" class="mythology-link">🌙 Babylonian</a>
+            <a href="../mythos/persian/index.html" class="mythology-link">🔥 Persian</a>
+            <a href="../mythos/christian/index.html" class="mythology-link">✝️ Christian</a>
+            <a href="../mythos/islamic/index.html" class="mythology-link">☪️ Islamic</a>
+            <a href="../mythos/jewish/index.html" class="mythology-link">✡️ Jewish</a>
+            <a href="../mythos/tarot/index.html" class="mythology-link">🃏 Tarot</a>
+        </div>
+
+        <!-- DEITY ARCHETYPES -->
+        <div class="category-section" data-category="deity">
+            <div class="category-header">
+                <span class="category-icon">👑</span>
+                <div>
+                    <h2 class="category-title">Deity Archetypes</h2>
+                    <p class="category-description">Divine beings embodying fundamental cosmic forces and human concerns</p>
+                </div>
+            </div>
+
+            <div class="archetype-grid">
+                <a href="deity-archetypes/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="deity" data-keywords="deity god goddess divine pantheon">
+                        <div class="archetype-icon">👑</div>
+                        <h3 class="archetype-title">View All Deity Archetypes</h3>
+                        <p class="archetype-description">
+                            Explore the complete collection of divine archetypes across world mythologies.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="sky-father/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="deity" data-keywords="zeus jupiter odin dyaus jade ahura sky thunder king authority father patriarchal">
+                        <div class="archetype-icon">⚡</div>
+                        <h3 class="archetype-title">Sky Father</h3>
+                        <p class="archetype-description">
+                            The supreme patriarch dwelling in the heavens, wielding thunder and lightning.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="earth-mother/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="deity" data-keywords="gaia prithvi ninhursag tiamat earth mother fertility nature goddess primordial">
+                        <div class="archetype-icon">🌍</div>
+                        <h3 class="archetype-title">Earth Mother</h3>
+                        <p class="archetype-description">
+                            The primordial feminine force, giving birth to all life from her body.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="war/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="deity" data-keywords="ares mars tyr indra marduk war battle conflict violence courage warrior">
+                        <div class="archetype-icon">⚔️</div>
+                        <h3 class="archetype-title">War God</h3>
+                        <p class="archetype-description">
+                            The fierce warrior deity embodying martial prowess and battle.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="death/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="deity" data-keywords="hades yama anubis hel osiris nergal death underworld afterlife judgment psychopomp">
+                        <div class="archetype-icon">💀</div>
+                        <h3 class="archetype-title">Death God</h3>
+                        <p class="archetype-description">
+                            Sovereign of the underworld and guide of departed souls.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="wisdom/wisdom-goddess.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="deity" data-keywords="athena saraswati neith minerva sophia wisdom knowledge strategy intelligence craft">
+                        <div class="archetype-icon">🦉</div>
+                        <h3 class="archetype-title">Wisdom Goddess</h3>
+                        <p class="archetype-description">
+                            Divine intelligence embodied—strategy, crafts, and sacred knowledge.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="trickster/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="deity" data-keywords="loki anansi coyote hermes sun wukong trickster chaos deception cunning change">
+                        <div class="archetype-icon">🃏</div>
+                        <h3 class="archetype-title">Trickster</h3>
+                        <p class="archetype-description">
+                            The divine disruptor who breaks cosmic rules to enable transformation.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="love/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="deity" data-keywords="aphrodite venus inanna ishtar freya love beauty desire sexuality fertility romance">
+                        <div class="archetype-icon">💖</div>
+                        <h3 class="archetype-title">Love Goddess</h3>
+                        <p class="archetype-description">
+                            The embodiment of desire, beauty, and irresistible attraction.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="healing/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="deity" data-keywords="asclepius dhanvantari imhotep brigid healing medicine health restoration cure physician">
+                        <div class="archetype-icon">⚕️</div>
+                        <h3 class="archetype-title">Healing Deity</h3>
+                        <p class="archetype-description">
+                            The divine physician who restores health and cures disease.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="cosmic-creator/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="deity" data-keywords="brahma ptah atum an ra creation cosmos universe demiurge architect genesis">
+                        <div class="archetype-icon">🌌</div>
+                        <h3 class="archetype-title">Cosmic Creator</h3>
+                        <p class="archetype-description">
+                            The divine architect who brings the universe into existence.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="celestial/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="deity" data-keywords="angels devas amesha spentas celestial divine messenger intermediary spiritual hierarchy">
+                        <div class="archetype-icon">✨</div>
+                        <h3 class="archetype-title">Celestial Beings</h3>
+                        <p class="archetype-description">
+                            Divine messengers and intermediaries between deity and mortals.
+                        </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- ELEMENTAL ARCHETYPES -->
+        <div class="category-section" data-category="elemental">
+            <div class="category-header">
+                <span class="category-icon">🔥</span>
+                <div>
+                    <h2 class="category-title">Elemental Archetypes</h2>
+                    <p class="category-description">Fundamental forces of nature and existence across mythological systems</p>
+                </div>
+            </div>
+
+            <div class="archetype-grid">
+                <a href="elemental-archetypes/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="elemental" data-keywords="elements nature forces primordial">
+                        <div class="archetype-icon">🌊</div>
+                        <h3 class="archetype-title">View All Elemental Archetypes</h3>
+                        <p class="archetype-description">
+                            Explore the fundamental elemental forces across world mythologies.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="elemental-archetypes/fire/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="elemental" data-keywords="fire flame heat transformation purification destruction agni prometheus">
+                        <div class="archetype-icon">🔥</div>
+                        <h3 class="archetype-title">Fire</h3>
+                        <p class="archetype-description">
+                            Transformation, purification, passion, and creative destruction.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="elemental-archetypes/water/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="elemental" data-keywords="water ocean sea flow emotion life primordial tiamat poseidon">
+                        <div class="archetype-icon">💧</div>
+                        <h3 class="archetype-title">Water</h3>
+                        <p class="archetype-description">
+                            Flow, emotion, life source, and the primordial depths.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="elemental-archetypes/earth/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="elemental" data-keywords="earth soil stone stability fertility grounding gaia terra">
+                        <div class="archetype-icon">🌍</div>
+                        <h3 class="archetype-title">Earth</h3>
+                        <p class="archetype-description">
+                            Stability, fertility, grounding, and material foundation.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="elemental-archetypes/air/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="elemental" data-keywords="air wind breath intellect communication freedom vayu shu">
+                        <div class="archetype-icon">💨</div>
+                        <h3 class="archetype-title">Air</h3>
+                        <p class="archetype-description">
+                            Intellect, breath, communication, and spiritual freedom.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="elemental-archetypes/chaos-void/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="elemental" data-keywords="chaos void primordial formless infinite potential abyss nun ginnungagap">
+                        <div class="archetype-icon">🌀</div>
+                        <h3 class="archetype-title">Chaos/Void</h3>
+                        <p class="archetype-description">
+                            Primordial formlessness and infinite creative potential.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="elemental-archetypes/divine-light/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="elemental" data-keywords="light divine consciousness order truth creation logos genesis ahura">
+                        <div class="archetype-icon">✨</div>
+                        <h3 class="archetype-title">Divine Light</h3>
+                        <p class="archetype-description">
+                            Consciousness, order, divine truth, and sacred illumination.
+                        </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- PLACE ARCHETYPES -->
+        <div class="category-section" data-category="place">
+            <div class="category-header">
+                <span class="category-icon">🗺️</span>
+                <div>
+                    <h2 class="category-title">Place Archetypes</h2>
+                    <p class="category-description">Sacred cosmic geography and universal mythological locations</p>
+                </div>
+            </div>
+
+            <div class="archetype-grid">
+                <a href="place-archetypes/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="place" data-keywords="place location sacred geography cosmic space">
+                        <div class="archetype-icon">🗺️</div>
+                        <h3 class="archetype-title">View All Place Archetypes</h3>
+                        <p class="archetype-description">
+                            Explore sacred locations and cosmic geography across mythologies.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="place-archetypes/underworld/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="place" data-keywords="underworld afterlife hades duat sheol naraka xibalba">
+                        <div class="archetype-icon">⚰️</div>
+                        <h3 class="archetype-title">Underworld</h3>
+                        <p class="archetype-description">
+                            The realm of the dead and journey through the afterlife.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="place-archetypes/sacred-mountain/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="place" data-keywords="mountain olympus meru kailash sinai axis center">
+                        <div class="archetype-icon">⛰️</div>
+                        <h3 class="archetype-title">Sacred Mountain</h3>
+                        <p class="archetype-description">
+                            The cosmic center where heaven meets earth.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="place-archetypes/world-tree/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="place" data-keywords="tree yggdrasil axis mundi cosmic pillar ashvattha">
+                        <div class="archetype-icon">🌳</div>
+                        <h3 class="archetype-title">World Tree</h3>
+                        <p class="archetype-description">
+                            The cosmic axis connecting all realms of existence.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="place-archetypes/paradise/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="place" data-keywords="paradise eden elysium valhalla heaven golden age">
+                        <div class="archetype-icon">🌺</div>
+                        <h3 class="archetype-title">Paradise</h3>
+                        <p class="archetype-description">
+                            The perfect realm of abundance and eternal bliss.
+                        </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- STORY ARCHETYPES -->
+        <div class="category-section" data-category="story">
+            <div class="category-header">
+                <span class="category-icon">📖</span>
+                <div>
+                    <h2 class="category-title">Story Archetypes</h2>
+                    <p class="category-description">Universal narrative patterns that repeat across mythological traditions</p>
+                </div>
+            </div>
+
+            <div class="archetype-grid">
+                <a href="story-archetypes/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="story" data-keywords="story narrative myth pattern tale">
+                        <div class="archetype-icon">📖</div>
+                        <h3 class="archetype-title">View All Story Archetypes</h3>
+                        <p class="archetype-description">
+                            Explore universal narrative patterns across world mythologies.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="story-archetypes/creation-myth/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="story" data-keywords="creation genesis beginning cosmos universe origin enuma">
+                        <div class="archetype-icon">🌌</div>
+                        <h3 class="archetype-title">Creation Myth</h3>
+                        <p class="archetype-description">
+                            How the universe came into being from nothing or chaos.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="story-archetypes/flood-myth/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="story" data-keywords="flood deluge noah gilgamesh manu deucalion water destruction">
+                        <div class="archetype-icon">🌊</div>
+                        <h3 class="archetype-title">Flood Myth</h3>
+                        <p class="archetype-description">
+                            The great deluge that cleanses and renews the world.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="story-archetypes/hero-journey/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="story" data-keywords="hero journey quest monomyth campbell adventure">
+                        <div class="archetype-icon">🗡️</div>
+                        <h3 class="archetype-title">Hero's Journey</h3>
+                        <p class="archetype-description">
+                            The universal pattern of the hero's transformative quest.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="story-archetypes/dying-rising-god/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="story" data-keywords="dying rising death resurrection osiris dionysus inanna persephone">
+                        <div class="archetype-icon">🌱</div>
+                        <h3 class="archetype-title">Dying and Rising God</h3>
+                        <p class="archetype-description">
+                            The deity who dies and returns, symbolizing renewal.
+                        </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- PROPHECY ARCHETYPES -->
+        <div class="category-section" data-category="prophecy">
+            <div class="category-header">
+                <span class="category-icon">🔮</span>
+                <div>
+                    <h2 class="category-title">Prophecy Archetypes</h2>
+                    <p class="category-description">Recurring structures in how cultures envision cosmic destiny and transformation</p>
+                </div>
+            </div>
+
+            <div class="archetype-grid">
+                <a href="prophecy-archetypes/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="prophecy" data-keywords="prophecy oracle vision future foretelling destiny">
+                        <div class="archetype-icon">🔮</div>
+                        <h3 class="archetype-title">View All Prophecy Archetypes</h3>
+                        <p class="archetype-description">
+                            Explore prophetic patterns across world mythologies.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="prophecy-archetypes/apocalypse/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="prophecy" data-keywords="apocalypse ragnarok end times revelation destruction final battle">
+                        <div class="archetype-icon">🔥</div>
+                        <h3 class="archetype-title">Apocalypse</h3>
+                        <p class="archetype-description">
+                            The prophesied end of the world and cosmic destruction.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="prophecy-archetypes/golden-age-return/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="prophecy" data-keywords="golden age return paradise restoration utopia">
+                        <div class="archetype-icon">☀️</div>
+                        <h3 class="archetype-title">Return of Golden Age</h3>
+                        <p class="archetype-description">
+                            The prophecy of paradise restored and perfection renewed.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="prophecy-archetypes/messianic-prophecy/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="prophecy" data-keywords="messiah savior chosen one redeemer kalki maitreya">
+                        <div class="archetype-icon">⭐</div>
+                        <h3 class="archetype-title">Messianic Prophecy</h3>
+                        <p class="archetype-description">
+                            The foretold savior who will redeem and transform the world.
+                        </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- JOURNEY ARCHETYPES -->
+        <div class="category-section" data-category="journey">
+            <div class="category-header">
+                <span class="category-icon">🚶</span>
+                <div>
+                    <h2 class="category-title">Journey Archetypes</h2>
+                    <p class="category-description">Archetypal paths of transformation that heroes and seekers undertake</p>
+                </div>
+            </div>
+
+            <div class="archetype-grid">
+                <a href="journey-archetypes/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="journey" data-keywords="journey quest pilgrimage path transformation">
+                        <div class="archetype-icon">🚶</div>
+                        <h3 class="archetype-title">View All Journey Archetypes</h3>
+                        <p class="archetype-description">
+                            Explore transformative journeys across world mythologies.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="journey-archetypes/underworld-descent/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="journey" data-keywords="descent underworld katabasis inanna orpheus izanagi death">
+                        <div class="archetype-icon">⬇️</div>
+                        <h3 class="archetype-title">Underworld Descent</h3>
+                        <p class="archetype-description">
+                            The perilous journey into death's realm and return.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="journey-archetypes/heavenly-ascent/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="journey" data-keywords="ascent heaven ascension divine throne ladder enoch">
+                        <div class="archetype-icon">⬆️</div>
+                        <h3 class="archetype-title">Heavenly Ascent</h3>
+                        <p class="archetype-description">
+                            The mystic's journey upward to divine realms.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="journey-archetypes/quest-journey/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="journey" data-keywords="quest adventure grail odyssey rama gilgamesh jason">
+                        <div class="archetype-icon">🗺️</div>
+                        <h3 class="archetype-title">Quest Journey</h3>
+                        <p class="archetype-description">
+                            The hero's adventure to obtain the sacred object.
+                        </p>
+                    </div>
+                </a>
+
+                <a href="journey-archetypes/initiation/index.html" style="text-decoration: none;">
+                    <div class="archetype-card" data-category="journey" data-keywords="initiation rite passage transformation mystery ordeal">
+                        <div class="archetype-icon">🔑</div>
+                        <h3 class="archetype-title">Initiation</h3>
+                        <p class="archetype-description">
+                            The transformative ordeal that creates a new self.
+                        </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>What Are Universal Archetypes?</h3>
+            <p>
+                Archetypes are primordial patterns that appear across human consciousness—recurring themes, characters, and symbolic figures
+                that transcend individual cultures. Carl Jung identified these as structures of the collective unconscious, inherited templates
+                that shape how humans understand divine forces, natural phenomena, and psychological experiences.
+            </p>
+            <p>
+                When examining world mythology comparatively, astonishing patterns emerge: cultures separated by oceans and millennia
+                independently created remarkably similar divine figures, narrative structures, sacred places, and prophetic visions.
+                This suggests archetypes are not arbitrary cultural inventions but fundamental structures of human cognition.
+            </p>
+            <p>
+                This archetype system organizes universal patterns into six major categories:
+            </p>
+            <ul style="margin-left: var(--spacing-xl); color: var(--color-text-secondary); line-height: var(--leading-loose);">
+                <li><strong>Deity Archetypes:</strong> Divine beings embodying cosmic forces (Sky Father, Earth Mother, Trickster, etc.)</li>
+                <li><strong>Elemental Archetypes:</strong> Fundamental forces of nature and existence (Fire, Water, Earth, Air, Chaos, Light)</li>
+                <li><strong>Place Archetypes:</strong> Sacred cosmic geography (Underworld, Sacred Mountain, World Tree, Paradise)</li>
+                <li><strong>Story Archetypes:</strong> Universal narrative patterns (Creation Myths, Flood Myths, Hero's Journey)</li>
+                <li><strong>Prophecy Archetypes:</strong> Visions of cosmic destiny (Apocalypse, Golden Age Return, Messianic Prophecy)</li>
+                <li><strong>Journey Archetypes:</strong> Transformative paths (Underworld Descent, Quest, Initiation, Pilgrimage)</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin: var(--spacing-4xl) 0;">
+            <a href="cross-reference-matrix.html" class="cta-button">📊 View Cross-Reference Matrix</a>
+            <a href="../mythos/index.html" class="cta-button">🗺️ Explore All Mythologies</a>
+            <a href="../index.html" class="cta-button">🏠 Return Home</a>
+        </div>
+
+        <footer>
+            <p>Universal Archetypes • Patterns Across World Mythologies</p>
+            <p style="margin-top: var(--spacing-sm);">
+                <a href="../index.html" style="color: var(--color-primary); text-decoration: none; transition: color var(--transition-fast);">Home</a> |
+                <a href="cross-reference-matrix.html" style="color: var(--color-primary); text-decoration: none; transition: color var(--transition-fast);">Matrix</a> |
+                <a href="../mythos/index.html" style="color: var(--color-primary); text-decoration: none; transition: color var(--transition-fast);">Mythologies</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Search functionality
+        const searchBox = document.getElementById('searchBox');
+        const archetypeCards = document.querySelectorAll('.archetype-card');
+        const filterTags = document.querySelectorAll('.filter-tag');
+        const categorySections = document.querySelectorAll('.category-section');
+
+        let currentFilter = 'all';
+
+        searchBox.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            filterCards(searchTerm, currentFilter);
+        });
+
+        filterTags.forEach(tag => {
+            tag.addEventListener('click', function() {
+                filterTags.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                const searchTerm = searchBox.value.toLowerCase();
+                filterCards(searchTerm, currentFilter);
+            });
+        });
+
+        function filterCards(searchTerm, category) {
+            let visibleCardsInSection = {};
+
+            archetypeCards.forEach(card => {
+                const keywords = card.dataset.keywords || '';
+                const cardCategory = card.dataset.category || '';
+                const title = card.querySelector('.archetype-title').textContent.toLowerCase();
+                const description = card.querySelector('.archetype-description').textContent.toLowerCase();
+
+                const matchesSearch = searchTerm === '' ||
+                                    keywords.includes(searchTerm) ||
+                                    title.includes(searchTerm) ||
+                                    description.includes(searchTerm);
+
+                const matchesCategory = category === 'all' || cardCategory === category;
+
+                const parentLink = card.closest('a');
+                if (matchesSearch && matchesCategory) {
+                    parentLink.style.display = 'block';
+                    visibleCardsInSection[cardCategory] = (visibleCardsInSection[cardCategory] || 0) + 1;
+                } else {
+                    parentLink.style.display = 'none';
+                }
+            });
+
+            // Show/hide category sections based on visible cards
+            categorySections.forEach(section => {
+                const sectionCategory = section.dataset.category;
+                if (category === 'all' || category === sectionCategory) {
+                    if (visibleCardsInSection[sectionCategory] > 0 || searchTerm === '') {
+                        section.style.display = 'block';
+                    } else {
+                        section.style.display = 'none';
+                    }
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>
