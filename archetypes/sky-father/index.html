@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky Father - Universal Archetype</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-2xl);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .nav-breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            margin-bottom: var(--spacing-3xl);
+            padding: var(--spacing-md);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            flex-wrap: wrap;
+            border: 2px solid var(--color-border);
+        }
+
+        .nav-breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-breadcrumb a:hover {
+            color: var(--color-secondary);
+        }
+
+        h1 {
+            font-size: var(--font-size-4xl);
+            margin-bottom: var(--spacing-md);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .archetype-definition {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        h2 {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-2xl);
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        h3 {
+            color: var(--color-secondary);
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-xl);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-lg) 0;
+        }
+
+        th, td {
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th {
+            background: rgba(var(--color-primary-rgb), 0.15);
+            color: var(--color-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        tr:hover {
+            background: var(--color-surface-hover);
+        }
+
+        td a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        td a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        .characteristics ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .characteristics li {
+            padding: var(--spacing-sm);
+            margin: var(--spacing-sm) 0;
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 3px solid var(--color-primary);
+            border-radius: var(--radius-md);
+        }
+
+        .characteristics li:before {
+            content: "⚡ ";
+            color: var(--color-primary);
+            font-weight: var(--font-bold);
+            margin-right: var(--spacing-sm);
+        }
+
+        /* Codex Search Sections */
+        .codex-search-section {
+            margin: var(--spacing-lg) 0;
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            background: rgba(var(--color-primary-rgb), 0.05);
+            overflow: hidden;
+        }
+
+        .codex-search-header {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: opacity var(--transition-base);
+        }
+
+        .codex-search-header:hover {
+            opacity: 0.9;
+        }
+
+        .codex-search-header h3 {
+            margin: 0;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-semibold);
+            color: var(--color-text-primary);
+        }
+
+        .expand-icon {
+            font-size: var(--font-size-lg);
+            transition: transform var(--transition-base);
+        }
+
+        .expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .codex-search-content {
+            display: none;
+            padding: var(--spacing-md);
+            background: var(--color-surface);
+        }
+
+        .codex-search-content.show {
+            display: block;
+        }
+
+        .search-result-item {
+            margin: var(--spacing-sm) 0;
+            padding: var(--spacing-sm);
+            border-left: 3px solid var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.08);
+            border-radius: var(--radius-md);
+        }
+
+        .citation {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            cursor: pointer;
+            margin-bottom: var(--spacing-sm);
+            transition: color var(--transition-fast);
+        }
+
+        .citation:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        .verse-text {
+            display: none;
+            margin-top: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background: var(--color-surface-hover);
+            border-left: 2px solid var(--color-secondary);
+            font-style: italic;
+            color: var(--color-text-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        .verse-text.show {
+            display: block;
+        }
+
+        .book-reference {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+
+        .inline-link {
+            color: var(--color-primary);
+            text-decoration: none;
+            border-bottom: 1px dashed var(--color-primary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .inline-link:hover {
+            color: var(--color-secondary);
+            border-bottom-color: var(--color-secondary);
+        }
+
+        .content-list {
+            margin-left: var(--spacing-xl);
+            line-height: var(--leading-relaxed);
+        }
+
+        .content-list li {
+            margin-bottom: var(--spacing-sm);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-breadcrumb">
+            <a href="../../index.html">🏠 Home</a>
+            <span>→</span>
+            <a href="../index.html">Universal Archetypes</a>
+            <span>→</span>
+            <span>Sky Father</span>
+        </div>
+
+        <header>
+    <div class="header-content">
+        <h1>⚡ The Sky Father Archetype</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> → <a href="../index.html">Archetypes</a> → <a href="index.html">Sky Father</a>
+</nav>
+
+        <section class="characteristics glass-card">
+            <h2>Universal Characteristics</h2>
+            <ul>
+                <li><strong>Celestial Domain:</strong> Rules the sky, heavens, and atmospheric phenomena</li>
+                <li><strong>Thunder & Lightning:</strong> Wields storms as weapons and symbols of power</li>
+                <li><strong>Supreme Authority:</strong> King of the gods, highest in the divine hierarchy</li>
+                <li><strong>Cosmic Law:</strong> Upholds justice, order, oaths, and moral principles</li>
+                <li><strong>Patriarchal Power:</strong> Ultimate masculine authority, often "father" of gods and men</li>
+                <li><strong>Eagle or Bird Symbol:</strong> Associated with soaring birds of prey</li>
+                <li><strong>Mountain Dwelling:</strong> Often resides on sacred mountaintops closer to the sky</li>
+                <li><strong>Weather Control:</strong> Commands rain, drought, and seasonal patterns</li>
+                <li><strong>Divine Marriage:</strong> Paired with <a href="../earth-mother/index.html" class="inline-link">Earth Mother</a> in sacred <a href="#hierogamy" class="inline-link">hierogamy</a> (sacred marriage)</li>
+                <li><strong>Warrior King:</strong> Defeated primordial forces to establish cosmic order</li>
+            </ul>
+        </section>
+
+        <section class="cross-tradition-table glass-card">
+            <h2>Deities Embodying This Archetype</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tradition</th>
+                        <th>Deity</th>
+                        <th>Key Attributes</th>
+                        <th>Thunder Symbol</th>
+                        <th>Primary Domain</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Greek</td>
+                        <td><a href="../../mythos/greek/deities/zeus.html">Zeus</a></td>
+                        <td>King of Olympus, sky god, thunderbolt wielder</td>
+                        <td>Thunderbolt (Keraunos)</td>
+                        <td>Sky, justice, hospitality, oaths</td>
+                    </tr>
+                    <tr>
+                        <td>Roman</td>
+                        <td><a href="../../mythos/roman/deities/jupiter.html">Jupiter</a></td>
+                        <td>Optimus Maximus, protector of Rome, sky father</td>
+                        <td>Thunderbolt</td>
+                        <td>Sky, justice, kingship, Roman state</td>
+                    </tr>
+                    <tr>
+                        <td>Norse</td>
+                        <td><a href="../../mythos/norse/deities/odin.html">Odin</a></td>
+                        <td>All-Father, king of Asgard, wisdom seeker</td>
+                        <td>Spear (Gungnir)</td>
+                        <td>War, wisdom, magic, death, poetry</td>
+                    </tr>
+                    <tr>
+                        <td>Hindu (Vedic)</td>
+                        <td><a href="../../mythos/hindu/deities/dyaus.html">Dyaus Pita</a></td>
+                        <td>Sky Father, primordial patriarch</td>
+                        <td>Rain, storms</td>
+                        <td>Sky, fatherhood, cosmic order</td>
+                    </tr>
+                    <tr>
+                        <td>Hindu</td>
+                        <td><a href="../../mythos/hindu/deities/indra.html">Indra</a></td>
+                        <td>King of devas, storm god, dragon slayer</td>
+                        <td>Vajra (thunderbolt)</td>
+                        <td>Thunder, rain, war, heaven (Svarga)</td>
+                    </tr>
+                    <tr>
+                        <td>Chinese</td>
+                        <td><a href="../../mythos/chinese/deities/jade-emperor.html">Jade Emperor (Yuhuang)</a></td>
+                        <td>Supreme deity, heavenly emperor, cosmic bureaucrat</td>
+                        <td>Celestial mandate</td>
+                        <td>Heaven, cosmic order, divine bureaucracy</td>
+                    </tr>
+                    <tr>
+                        <td>Persian</td>
+                        <td><a href="../../mythos/persian/deities/ahura-mazda.html">Ahura Mazda</a></td>
+                        <td>Lord of Wisdom, supreme creator, light bringer</td>
+                        <td>Divine fire</td>
+                        <td>Light, truth, cosmic order (Asha)</td>
+                    </tr>
+                    <tr>
+                        <td>Canaanite</td>
+                        <td><a href="../../mythos/canaanite/deities/baal.html">Baal Hadad</a></td>
+                        <td>Storm lord, rider of clouds, king of gods</td>
+                        <td>Lightning bolt, club</td>
+                        <td>Storms, fertility, kingship</td>
+                    </tr>
+                    <tr>
+                        <td>Slavic</td>
+                        <td><a href="../../mythos/slavic/deities/perun.html">Perun</a></td>
+                        <td>Highest god, thunder god, sky lord</td>
+                        <td>Axe, thunder, lightning</td>
+                        <td>Sky, thunder, war, law</td>
+                    </tr>
+                    <tr>
+                        <td>Celtic</td>
+                        <td><a href="../../mythos/celtic/deities/taranis.html">Taranis</a></td>
+                        <td>Thunder god, wheel bearer</td>
+                        <td>Thunderbolt, wheel</td>
+                        <td>Thunder, sky, celestial wheel</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="glass-card">
+            <h2>Primary Sources: <a href="../../mythos/greek/deities/zeus.html" class="inline-link">Zeus</a> (Greek Tradition)</h2>
+            <p>
+                <a href="../../mythos/greek/deities/zeus.html" class="inline-link">Zeus</a> provides the most complete expression of the Sky Father archetype in Western tradition.
+                Let us examine the primary sources that establish his archetypal characteristics.
+            </p>
+
+            <!-- Birth and Rise to Power -->
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>📚 Zeus's Birth and Rise to Power</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Hesiod, Theogony:453-467
+                        </div>
+                        <div class="verse-text">
+                            "Rhea was subject in love to Cronos and bare splendid children... but he used to swallow them all...
+                            But when she was about to bear Zeus, the father of gods and men, then she besought her own dear parents...
+                            to devise some plan so that the birth of her dear child might be concealed, and that retribution might
+                            overtake great, crafty Cronos... And Gaia hid him in a remote cave beneath the secret places of holy earth."
+                        </div>
+                        <div class="book-reference">
+                            Source: Hesiod, Theogony (c. 700 BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Hesiod, Theogony:501-506
+                        </div>
+                        <div class="verse-text">
+                            "But when he had grown to his full strength, he came back again and subdued great Cronos by craft...
+                            First he made him bring up the stone which he had swallowed last, together with his own children...
+                            And Zeus loosed from their deadly bonds the brothers of his father, the sons of Heaven...
+                            and they gave him thunder and the blazing bolt and lightning."
+                        </div>
+                        <div class="book-reference">
+                            Source: Hesiod, Theogony (c. 700 BCE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thunder and Lightning Authority -->
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>⚡ Thunder as Divine Authority</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Homer, Iliad:8.132-144
+                        </div>
+                        <div class="verse-text">
+                            "As when the son of Kronos gathers the dense clouds and lightnings flash thick, and peals of thunder roll...
+                            Zeus who gathers the clouds took up his golden scales, and set in them two fates of death's long sorrow...
+                            Then the Father lifted high the sacred scales, and down sank the Achaians' day of doom."
+                        </div>
+                        <div class="book-reference">
+                            Source: Homer, Iliad (c. 8th century BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Homer, Iliad:1.528-530
+                        </div>
+                        <div class="verse-text">
+                            "The son of Kronos spoke, and bowed his dark brow in assent, and the ambrosial locks flowed down
+                            from the king's immortal head; and he made great Olympus quake."
+                        </div>
+                        <div class="book-reference">
+                            Source: Homer, Iliad (c. 8th century BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Homeric Hymn to Zeus:Fragment 1
+                        </div>
+                        <div class="verse-text">
+                            "Of Zeus I will sing, the best and greatest of gods, far-seeing, mighty, fulfiller of counsels,
+                            who confides his close-pressed secret thoughts to Themis as she sits leaning towards him.
+                            Be gracious, far-seeing son of Kronos, most glorious and most great!"
+                        </div>
+                        <div class="book-reference">
+                            Source: Homeric Hymns (c. 7th-6th century BCE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Justice and Cosmic Order -->
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>⚖️ Zeus as Upholder of Justice</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Hesiod, Works and Days:256-262
+                        </div>
+                        <div class="verse-text">
+                            "For the son of Kronos has ordained this law for men, that fishes and beasts and winged fowls
+                            should devour one another, for right is not in them; but to mankind he gave right which proves
+                            far the best. For whoever knows the right and is ready to speak it, far-seeing Zeus gives him prosperity;
+                            but whoever deliberately lies in his witness and forswears himself, and so hurts Justice and sins beyond repair,
+                            that man's generation is left obscure thereafter."
+                        </div>
+                        <div class="book-reference">
+                            Source: Hesiod, Works and Days (c. 700 BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Aeschylus, Suppliant Women:1-5
+                        </div>
+                        <div class="verse-text">
+                            "Zeus! Lord Zeus! Look down with kindness upon our band... We are fugitives, we maidens of pure birth...
+                            We flee from no court's judgment for the shedding of blood; but we abhor the thought of unholy marriage...
+                            May Zeus the suppliant's god look upon our cause with favor!"
+                        </div>
+                        <div class="book-reference">
+                            Source: Aeschylus, Suppliant Women (c. 463 BCE)
+                        </div>
+        </section>
+
+        <section class="glass-card">
+            <h2>Primary Sources: <a href="../../mythos/hindu/deities/indra.html" class="inline-link">Indra</a> (Hindu Tradition)</h2>
+            <p>
+                <a href="../../mythos/hindu/deities/indra.html" class="inline-link">Indra</a>, king of the devas in Vedic tradition, exemplifies the warrior aspect of the Sky Father,
+                wielding the <span class="inline-link" title="Vajra: diamond thunderbolt weapon">vajra</span> (thunderbolt) to defeat cosmic enemies and bring forth rain.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>📚 Indra Slays Vritra (Cosmic Dragon)</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Rigveda:1.32.1-5
+                        </div>
+                        <div class="verse-text">
+                            "Now I shall proclaim the heroic deeds of Indra, those foremost deeds that the wielder of the mace performed.
+                            He killed the serpent; he pierced through for the waters; he split open the bellies of the mountains.
+                            He killed the serpent who lay upon the mountain. For him Tvaṣṭṛ fashioned the resounding mace.
+                            Like lowing cows, the flowing waters rushed straight down to the sea... The serpent lay upon the mountain like a torn-apart trough,
+                            and the waters flowed over him. Those waters that Vṛtra had enclosed with his might—the serpent lay at their feet."
+                        </div>
+                        <div class="book-reference">
+                            Source: Rigveda, Mandala 1, Hymn 32 (c. 1500-1200 BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Rigveda:1.32.7-8
+                        </div>
+                        <div class="verse-text">
+                            "Indra is king over everything that moves and that is at rest, over the tame and the horned.
+                            As king of the people he encompasses them, as the rim encompasses the spokes."
+                        </div>
+                        <div class="book-reference">
+                            Source: Rigveda, Mandala 1, Hymn 32 (c. 1500-1200 BCE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>⚡ Indra's Thunderbolt (Vajra)</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Rigveda:1.80.1-3
+                        </div>
+                        <div class="verse-text">
+                            "With his great weapon Indra, the wielder of the vajra, slew the dragon who blocked the waters...
+                            Indra with his vajra in his arm is king. In him all moving creatures have their life.
+                            He is rich in light and light-giving; rich in praise and praised... The vajra-wielding Indra
+                            is the lord who grants precious goods."
+                        </div>
+                        <div class="book-reference">
+                            Source: Rigveda, Mandala 1, Hymn 80 (c. 1500-1200 BCE)
+                        </div>
+        </section>
+
+        <section class="glass-card">
+            <h2>Cross-Cultural Analysis</h2>
+
+            <h3>The Indo-European Sky Father Pattern</h3>
+            <p>
+                Linguistic and mythological research reveals the <span class="inline-link" title="Proto-Indo-European: Ancient ancestral language">Proto-Indo-European</span>
+                root *Dyēus Ph₂tēr ("Sky Father"), the ancestral deity from which many sky gods descended:
+            </p>
+            <ul class="content-list">
+                <li><strong>Greek:</strong> <a href="../../mythos/greek/deities/zeus.html" class="inline-link">Zeus</a> Pater → "Zeus Father"</li>
+                <li><strong>Latin:</strong> <a href="../../mythos/roman/deities/jupiter.html" class="inline-link">Ju-piter</a> → "Sky Father" (from *dyeu-pəter)</li>
+                <li><strong>Sanskrit:</strong> <a href="../../mythos/hindu/deities/dyaus.html" class="inline-link">Dyaus Pita</a> → "Sky Father"</li>
+                <li><strong>Germanic:</strong> *Tīwaz → <a href="../../mythos/norse/deities/tyr.html" class="inline-link">Týr</a> (Norse), connected to sky deity</li>
+            </ul>
+
+            <h3>Universal Attributes Across Traditions</h3>
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>🔗 Comparative Attributes Table</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <table style="width: 100%; margin-top: 15px;">
+                        <thead>
+                            <tr>
+                                <th>Attribute</th>
+                                <th><a href="../../mythos/greek/deities/zeus.html" class="inline-link">Zeus</a></th>
+                                <th><a href="../../mythos/hindu/deities/indra.html" class="inline-link">Indra</a></th>
+                                <th><a href="../../mythos/norse/deities/odin.html" class="inline-link">Odin</a></th>
+                                <th><a href="../../mythos/chinese/deities/jade-emperor.html" class="inline-link">Jade Emperor</a></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Thunder Weapon</td>
+                                <td><span class="inline-link" title="Keraunos: Zeus's thunderbolt">Keraunos</span> (thunderbolt)</td>
+                                <td><span class="inline-link" title="Vajra: diamond thunderbolt">Vajra</span> (diamond thunderbolt)</td>
+                                <td><span class="inline-link" title="Gungnir: Odin's magical spear">Gungnir</span> (spear)</td>
+                                <td>Celestial decree</td>
+                            </tr>
+                            <tr>
+                                <td>Sacred Animal</td>
+                                <td>Eagle</td>
+                                <td>White elephant (<span class="inline-link" title="Airavata: Indra's celestial elephant">Airavata</span>)</td>
+                                <td>Ravens (<span class="inline-link" title="Huginn and Muninn: Thought and Memory">Huginn & Muninn</span>)</td>
+                                <td>Dragon</td>
+                            </tr>
+                            <tr>
+                                <td>Cosmic Battle</td>
+                                <td>Defeated <a href="../../mythos/greek/beings/titans.html" class="inline-link">Titans</a>/<a href="../../mythos/greek/beings/typhon.html" class="inline-link">Typhon</a></td>
+                                <td>Slew <span class="inline-link" title="Vritra: cosmic serpent of chaos">Vritra</span> (dragon)</td>
+                                <td>Will fight at <a href="../../mythos/norse/events/ragnarok.html" class="inline-link">Ragnarok</a></td>
+                                <td>Maintains cosmic order</td>
+                            </tr>
+                            <tr>
+                                <td>Divine Seat</td>
+                                <td><a href="../../mythos/greek/places/olympus.html" class="inline-link">Mount Olympus</a></td>
+                                <td><span class="inline-link" title="Svarga: heavenly realm of Indra">Svarga</span> (heaven)</td>
+                                <td><a href="../../mythos/norse/places/asgard.html" class="inline-link">Asgard</a></td>
+                                <td>Celestial Palace</td>
+                            </tr>
+                            <tr>
+                                <td>Primary Role</td>
+                                <td>King of gods, justice</td>
+                                <td>King of devas, warrior</td>
+                                <td>All-Father, wisdom</td>
+                                <td>Supreme emperor, bureaucrat</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <h3>Psychological Significance</h3>
+            <p>
+                The Sky Father represents:
+            </p>
+            <ul class="content-list">
+                <li><strong>Transcendent Authority:</strong> Power that comes from "above," from the heavens, legitimizing earthly kingship</li>
+                <li><strong>Active Masculine Principle:</strong> The fertilizing sky (rain) penetrating the receptive earth (feminine)</li>
+                <li><strong>Order Over Chaos:</strong> The Sky Father typically defeats primordial <span class="inline-link" title="Chaos: primordial disorder before creation">chaos</span> monsters to establish cosmic law</li>
+                <li><strong>Lightning as Judgment:</strong> Thunder and lightning as sudden, unavoidable divine intervention—both punishment and blessing</li>
+                <li><strong>The Distant Father:</strong> Removed, celestial, requiring mediation through priests, temples, and rituals</li>
+            </ul>
+
+            <h3>Why Thunder?</h3>
+            <p>
+                Across all cultures, thunder represents the Sky Father's voice and power. The connection is universal because:
+            </p>
+            <ul class="content-list">
+                <li>Thunder originates from the sky, the domain of the supreme god</li>
+                <li>Lightning's power to destroy or ignite fire made it divine weapon par excellence</li>
+                <li>Thunder announces rain, bringing life-giving water (sky fertilizing earth)</li>
+                <li>The unpredictability and power of storms reflected the sovereign will of the highest deity</li>
+                <li>The flash-and-boom creates awe—the proper human response to divine presence</li>
+            </ul>
+        </section>
+
+        <section class="glass-card">
+            <h2>Symbolic Elements</h2>
+
+            <h3>The Eagle / Bird of Prey</h3>
+            <p>
+                <a href="../../mythos/greek/deities/zeus.html" class="inline-link">Zeus</a>'s eagle, <a href="../../mythos/hindu/deities/indra.html" class="inline-link">Indra</a>'s <span class="inline-link" title="Garuda: divine bird mount of Vishnu">Garuda</span>, <a href="../../mythos/norse/deities/odin.html" class="inline-link">Odin</a>'s ravens—birds connect Sky Father to his aerial domain:
+            </p>
+            <ul class="content-list">
+                <li>Soaring closest to the heavens, seeing all below (omniscience)</li>
+                <li>Swift messengers between heaven and earth</li>
+                <li>Predatory power reflecting divine authority</li>
+                <li>Freedom and transcendence above earthly concerns</li>
+            </ul>
+
+            <h3>The Mountain</h3>
+            <p>
+                <a href="../../mythos/greek/places/olympus.html" class="inline-link">Olympus</a>, <span class="inline-link" title="Mount Meru: cosmic mountain at center of universe">Meru</span>, <a href="../../mythos/norse/places/asgard.html" class="inline-link">Asgard</a>—Sky Fathers dwell on mountains:
+            </p>
+            <ul class="content-list">
+                <li>Physical proximity to the sky realm</li>
+                <li><span class="inline-link" title="Axis Mundi: world axis connecting heaven and earth">Axis mundi</span>—center of the world, connecting heaven and earth</li>
+                <li>Difficulty of access—only heroes and initiates may ascend</li>
+                <li>Cloud-wreathed peaks hidden from mortal view</li>
+            </ul>
+
+            <h3 id="hierogamy">Sacred Marriage (Hieros Gamos)</h3>
+            <p>
+                The union of Sky Father and <a href="../earth-mother/index.html" class="inline-link">Earth Mother</a> is foundational to creation:
+            </p>
+            <ul class="content-list">
+                <li><strong><a href="../../mythos/greek/deities/zeus.html" class="inline-link">Zeus</a> & <a href="../../mythos/greek/deities/hera.html" class="inline-link">Hera</a>/<a href="../../mythos/greek/deities/demeter.html" class="inline-link">Demeter</a>:</strong> Sky fertilizing earth through rain</li>
+                <li><strong><a href="../../mythos/hindu/deities/dyaus.html" class="inline-link">Dyaus Pita</a> & <span class="inline-link" title="Prithvi: Earth goddess">Prithvi</span>:</strong> "Sky Father and Earth Mother" explicitly named</li>
+                <li><strong>Cosmic Union:</strong> Heaven and earth must unite for life to flourish</li>
+            </ul>
+        </section>
+
+        <div class="glass-card" style="text-align: center; margin-top: var(--spacing-4xl);">
+            <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">Explore Related Archetypes</h3>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+                <a href="../earth-mother/index.html" class="btn btn-secondary">🌍 Earth Mother</a>
+                <a href="../war/index.html" class="btn btn-secondary">⚔️ War God</a>
+                <a href="../cosmic-creator/index.html" class="btn btn-secondary">🌌 Cosmic Creator</a>
+                <a href="../trickster/index.html" class="btn btn-secondary">🃏 Trickster</a>
+                <a href="../index.html" class="btn btn-primary">🎭 All Archetypes</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle expandable codex search section
+        function toggleCodexSearch(header) {
+            const section = header.parentElement;
+            const content = section.querySelector('.codex-search-content');
+
+            section.classList.toggle('expanded');
+            content.classList.toggle('show');
+        }
+
+        // Toggle individual verse display
+        function toggleVerse(citation) {
+            const verseText = citation.nextElementSibling;
+            verseText.classList.toggle('show');
+        }
+
+        // Deep linking to specific verses
+        function scrollToVerse(bookRef) {
+            const citations = document.querySelectorAll('.citation');
+            citations.forEach(citation => {
+                if (citation.textContent.trim() === bookRef) {
+                    citation.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    toggleVerse(citation);
+                    citation.parentElement.classList.add('highlight');
+                }
+            });
+        }
+    </script>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>

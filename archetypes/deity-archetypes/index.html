@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deity Archetypes - Universal Divine Patterns</title>
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        /* Deity Archetype Custom Theme Colors - Golden/Divine */
+        :root {
+            --archetype-primary: #d4af37;
+            --archetype-primary-light: #ffd700;
+            --archetype-primary-dark: #b8860b;
+            --archetype-primary-darker: #856404;
+            --archetype-accent: #f4e5c3;
+            --archetype-surface: rgba(212, 175, 55, 0.05);
+            --archetype-border: rgba(212, 175, 55, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Breadcrumb Navigation */
+        .nav-breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-md);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-md);
+            flex-wrap: wrap;
+            font-size: var(--font-size-sm);
+        }
+
+        .nav-breadcrumb a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-breadcrumb a:hover {
+            color: var(--archetype-primary-light);
+        }
+
+        /* Hero Section */
+        header {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            background: var(--archetype-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-2xl);
+            border: 2px solid var(--archetype-border);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            font-family: var(--font-heading);
+            margin-bottom: var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary), var(--archetype-primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .archetype-definition {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            margin: var(--spacing-lg) 0;
+            padding: var(--spacing-lg);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--archetype-primary);
+        }
+
+        /* Glass Card Sections */
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 2px solid var(--color-border);
+            transition: all var(--transition-base);
+        }
+
+        section:hover {
+            background: var(--color-surface-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        h2 {
+            color: var(--archetype-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-3xl);
+            font-family: var(--font-heading);
+            border-bottom: 2px solid var(--archetype-border);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        h3 {
+            color: var(--archetype-accent);
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-xl);
+            font-family: var(--font-heading);
+        }
+
+        /* Deity Grid */
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-xl);
+        }
+
+        .deity-card {
+            background: var(--archetype-surface);
+            border: 2px solid var(--archetype-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-base);
+            text-decoration: none;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .deity-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--archetype-primary), var(--archetype-primary-light));
+        }
+
+        .deity-card:hover {
+            background: rgba(212, 175, 55, 0.1);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--archetype-primary);
+        }
+
+        .deity-card-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+            display: block;
+        }
+
+        .deity-card-title {
+            font-size: var(--font-size-xl);
+            font-family: var(--font-heading);
+            font-weight: var(--font-bold);
+            color: var(--archetype-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .deity-card-subtitle {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-md);
+            font-style: italic;
+        }
+
+        .deity-card-description {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-primary);
+            line-height: var(--leading-relaxed);
+        }
+
+        /* Introduction Section */
+        .introduction {
+            background: var(--archetype-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 2px solid var(--archetype-border);
+        }
+
+        .introduction p {
+            margin-bottom: var(--spacing-md);
+            line-height: var(--leading-relaxed);
+        }
+
+        /* Key Themes List */
+        .key-themes {
+            list-style: none;
+            padding-left: 0;
+            margin-top: var(--spacing-lg);
+        }
+
+        .key-themes li {
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin: var(--spacing-sm) 0;
+            background: var(--archetype-surface);
+            border-left: 3px solid var(--archetype-primary);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .key-themes li:hover {
+            background: rgba(212, 175, 55, 0.1);
+            transform: translateX(4px);
+        }
+
+        .key-themes li:before {
+            content: "✦ ";
+            color: var(--archetype-primary);
+            font-weight: var(--font-bold);
+            margin-right: var(--spacing-sm);
+        }
+
+        /* Footer Navigation */
+        .footer-nav {
+            margin-top: var(--spacing-3xl);
+            text-align: center;
+            padding: var(--spacing-xl);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--archetype-border);
+        }
+
+        .footer-nav h3 {
+            color: var(--archetype-primary);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 2px solid var(--archetype-border);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .footer-links a:hover {
+            background: var(--archetype-primary);
+            color: var(--color-background);
+            border-color: var(--archetype-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-breadcrumb">
+            <a href="../../index.html">Home</a>
+            <span>→</span>
+            <a href="../index.html">Universal Archetypes</a>
+            <span>→</span>
+            <span>Deity Archetypes</span>
+        </div>
+
+        <header>
+    <div class="header-content">
+        <h1>Deity Archetypes - Universal Divine Patterns</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> → <a href="../index.html">Archetypes</a> → <a href="index.html">Deity Archetypes</a>
+</nav>
+
+        <section class="introduction">
+            <h2>Understanding Deity Archetypes</h2>
+            <p>
+                Throughout human history, cultures worldwide have envisioned divine beings who embody universal forces,
+                concerns, and aspirations. While the names and specific attributes vary, the underlying archetypal
+                patterns remain remarkably consistent across geographical and temporal boundaries.
+            </p>
+            <p>
+                These deity archetypes represent humanity's attempt to comprehend and relate to the fundamental
+                forces that shape existence: creation and destruction, order and chaos, life and death, wisdom and
+                passion. By studying these patterns, we gain insight into the collective human psyche and the
+                timeless questions that unite all cultures.
+            </p>
+
+            <h3>Key Themes in Deity Archetypes</h3>
+            <ul class="key-themes">
+                <li><strong>Cosmic Forces:</strong> Deities embodying creation, destruction, sky, earth, and celestial phenomena</li>
+                <li><strong>Human Concerns:</strong> Gods of war, love, healing, wisdom, and death addressing universal needs</li>
+                <li><strong>Moral Ambiguity:</strong> Trickster figures challenging order while serving necessary functions</li>
+                <li><strong>Gender Patterns:</strong> Sky fathers, earth mothers, and the balance of masculine/feminine divine</li>
+                <li><strong>Cultural Values:</strong> How each tradition shapes archetypes to reflect their worldview</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Explore Deity Archetypes</h2>
+            <div class="deity-grid">
+                <a href="../war/index.html" class="deity-card">
+                    <span class="deity-card-icon">⚔️</span>
+                    <h3 class="deity-card-title">War God</h3>
+                    <p class="deity-card-subtitle">Martial Valor & Combat</p>
+                    <p class="deity-card-description">
+                        Divine embodiment of warfare, from strategic battles to berserker rage.
+                        Explores Ares, Mars, Tyr, Indra, Sekhmet, and the dual nature of sacred violence.
+                    </p>
+                </a>
+
+                <a href="../death/index.html" class="deity-card">
+                    <span class="deity-card-icon">💀</span>
+                    <h3 class="deity-card-title">Death Deity</h3>
+                    <p class="deity-card-subtitle">Mortality & Afterlife</p>
+                    <p class="deity-card-description">
+                        Rulers of the underworld and guides of souls. From Hades to Anubis to Hel,
+                        exploring humanity's relationship with mortality and what lies beyond.
+                    </p>
+                </a>
+
+                <a href="../trickster/index.html" class="deity-card">
+                    <span class="deity-card-icon">🃏</span>
+                    <h3 class="deity-card-title">Trickster</h3>
+                    <p class="deity-card-subtitle">Chaos & Transformation</p>
+                    <p class="deity-card-description">
+                        Divine disruptors who challenge cosmic order. Loki, Anansi, Coyote, and Hermes
+                        reveal how chaos serves creation and transformation.
+                    </p>
+                </a>
+
+                <a href="../wisdom/index.html" class="deity-card">
+                    <span class="deity-card-icon">🦉</span>
+                    <h3 class="deity-card-title">Wisdom Goddess</h3>
+                    <p class="deity-card-subtitle">Knowledge & Strategy</p>
+                    <p class="deity-card-description">
+                        Divine embodiments of wisdom, learning, and strategic thought. Athena, Saraswati,
+                        Thoth, and the sacred power of knowledge and intellect.
+                    </p>
+                </a>
+
+                <a href="../cosmic-creator/index.html" class="deity-card">
+                    <span class="deity-card-icon">🌌</span>
+                    <h3 class="deity-card-title">Cosmic Creator</h3>
+                    <p class="deity-card-subtitle">Origin & Genesis</p>
+                    <p class="deity-card-description">
+                        Gods who shape reality from chaos. Brahma, Ptah, Viracocha, and the diverse
+                        ways cultures envision the birth of existence itself.
+                    </p>
+                </a>
+
+                <a href="../celestial/index.html" class="deity-card">
+                    <span class="deity-card-icon">⭐</span>
+                    <h3 class="deity-card-title">Celestial Beings</h3>
+                    <p class="deity-card-subtitle">Stars, Sun & Moon</p>
+                    <p class="deity-card-description">
+                        Divine manifestations of heavenly bodies. Solar deities, lunar goddesses,
+                        and star beings illuminating the relationship between heaven and earth.
+                    </p>
+                </a>
+
+                <a href="../sky-father/index.html" class="deity-card">
+                    <span class="deity-card-icon">⚡</span>
+                    <h3 class="deity-card-title">Sky Father</h3>
+                    <p class="deity-card-subtitle">Thunder & Authority</p>
+                    <p class="deity-card-description">
+                        Thunder-wielding kings of the gods. Zeus, Odin, Jupiter, Indra, and the
+                        archetype of divine masculine authority and cosmic law.
+                    </p>
+                </a>
+
+                <a href="../earth-mother/index.html" class="deity-card">
+                    <span class="deity-card-icon">🌍</span>
+                    <h3 class="deity-card-title">Earth Mother</h3>
+                    <p class="deity-card-subtitle">Fertility & Abundance</p>
+                    <p class="deity-card-description">
+                        Goddesses of earth, fertility, and nurturing life. Gaia, Pachamama, Demeter,
+                        and the sacred feminine principle of creation and sustenance.
+                    </p>
+                </a>
+
+                <a href="../love/index.html" class="deity-card">
+                    <span class="deity-card-icon">💖</span>
+                    <h3 class="deity-card-title">Love/Beauty Deity</h3>
+                    <p class="deity-card-subtitle">Passion & Desire</p>
+                    <p class="deity-card-description">
+                        Divine embodiments of love, beauty, and desire. Aphrodite, Venus, Freya,
+                        Kamadeva, and the sacred power of attraction and union.
+                    </p>
+                </a>
+
+                <a href="../healing/index.html" class="deity-card">
+                    <span class="deity-card-icon">🌿</span>
+                    <h3 class="deity-card-title">Healing Deity</h3>
+                    <p class="deity-card-subtitle">Medicine & Restoration</p>
+                    <p class="deity-card-description">
+                        Gods of medicine, health, and restoration. Asclepius, Dian Cecht, Eir,
+                        and the divine art of healing body and spirit.
+                    </p>
+                </a>
+            </div>
+        </section>
+
+        <div class="footer-nav">
+            <h3>Explore More Archetypes</h3>
+            <div class="footer-links">
+                <a href="../index.html">All Universal Archetypes</a>
+                <a href="../../index.html">Return to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>

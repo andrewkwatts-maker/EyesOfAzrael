@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healing Deity - Universal Archetype</title>
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        /* Healing Archetype Custom Theme Colors */
+        :root {
+            --archetype-primary: #32CD32;
+            --archetype-primary-light: #90EE90;
+            --archetype-primary-dark: #228B22;
+            --archetype-primary-darker: #1a5f1a;
+            --archetype-accent: #FFD700;
+            --archetype-accent-secondary: #9370DB;
+            --archetype-surface: rgba(50, 205, 50, 0.05);
+            --archetype-border: rgba(50, 205, 50, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Breadcrumb Navigation */
+        .nav-breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-md);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-md);
+            flex-wrap: wrap;
+            font-size: var(--font-size-sm);
+        }
+
+        .nav-breadcrumb a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-breadcrumb a:hover {
+            color: var(--archetype-primary-light);
+        }
+
+        /* Hero Section */
+        header {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            background: var(--archetype-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-2xl);
+            border: 2px solid var(--archetype-border);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            font-family: var(--font-heading);
+            margin-bottom: var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary), var(--archetype-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .archetype-definition {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            margin: var(--spacing-lg) 0;
+            padding: var(--spacing-lg);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--archetype-primary);
+        }
+
+        /* Glass Card Sections */
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 2px solid var(--color-border);
+            transition: all var(--transition-base);
+        }
+
+        section:hover {
+            background: var(--color-surface-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        h2 {
+            color: var(--archetype-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-3xl);
+            font-family: var(--font-heading);
+            border-bottom: 2px solid var(--archetype-border);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        h3 {
+            color: var(--archetype-accent-secondary);
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-xl);
+            font-family: var(--font-heading);
+        }
+
+        /* Styled Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-lg) 0;
+        }
+
+        th, td {
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--archetype-border);
+        }
+
+        th {
+            background: var(--archetype-surface);
+            color: var(--archetype-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        tr {
+            transition: background var(--transition-fast);
+        }
+
+        tr:hover {
+            background: var(--archetype-surface);
+        }
+
+        td a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        td a:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        /* Icon List */
+        .characteristics ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .characteristics li {
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin: var(--spacing-sm) 0;
+            background: var(--archetype-surface);
+            border-left: 3px solid var(--archetype-primary);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .characteristics li:hover {
+            background: rgba(50, 205, 50, 0.1);
+            transform: translateX(4px);
+        }
+
+        .characteristics li:before {
+            content: "⚕️ ";
+            font-weight: var(--font-bold);
+            margin-right: var(--spacing-sm);
+        }
+
+        /* Expandable Sections */
+        .codex-search-section {
+            margin: var(--spacing-lg) 0;
+            border: 2px solid var(--archetype-border);
+            border-radius: var(--radius-md);
+            background: var(--archetype-surface);
+            overflow: hidden;
+        }
+
+        .codex-search-header {
+            padding: var(--spacing-md) var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary-dark) 0%, var(--archetype-primary-darker) 100%);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background var(--transition-base);
+        }
+
+        .codex-search-header:hover {
+            background: linear-gradient(135deg, var(--archetype-primary) 0%, var(--archetype-primary-dark) 100%);
+        }
+
+        .codex-search-header h3 {
+            margin: 0;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-semibold);
+            color: white;
+        }
+
+        .expand-icon {
+            font-size: var(--font-size-xl);
+            transition: transform var(--transition-base);
+        }
+
+        .expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .codex-search-content {
+            display: none;
+            padding: var(--spacing-md);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .codex-search-content.show {
+            display: block;
+        }
+
+        .search-result-item {
+            margin: var(--spacing-sm) 0;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-left: 3px solid var(--archetype-primary);
+            background: rgba(50, 205, 50, 0.08);
+            border-radius: var(--radius-sm);
+        }
+
+        .citation {
+            font-weight: var(--font-semibold);
+            color: var(--archetype-primary);
+            cursor: pointer;
+            margin-bottom: var(--spacing-xs);
+            transition: color var(--transition-fast);
+        }
+
+        .citation:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        .verse-text {
+            display: none;
+            margin-top: var(--spacing-xs);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 2px solid var(--archetype-accent-secondary);
+            font-style: italic;
+            color: var(--color-text-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        .verse-text.show {
+            display: block;
+        }
+
+        .book-reference {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+
+        .inline-search-link {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            border-bottom: 1px dashed var(--archetype-primary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .inline-search-link:hover {
+            color: var(--archetype-accent);
+            border-bottom-color: var(--archetype-accent);
+        }
+
+        .archetype-match {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-md);
+            font-weight: var(--font-semibold);
+            color: var(--archetype-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-breadcrumb">
+            <a href="../../index.html">🏠 Home</a>
+            <span>→</span>
+            <a href="../index.html">Universal Archetypes</a>
+            <span>→</span>
+            <span>Healing Deity</span>
+        </div>
+
+        <header>
+    <div class="header-content">
+        <h1>⚕️ The Healing Deity Archetype</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> → <a href="../index.html">Archetypes</a> → <a href="index.html">Healing</a>
+</nav>
+
+        <section class="characteristics">
+            <h2>Universal Characteristics</h2>
+            <ul>
+                <li><strong>Divine Physician:</strong> Master of medicinal arts, healing both gods and mortals</li>
+                <li><strong>Knowledge of Herbs & Surgery:</strong> Deep understanding of plants, anatomy, and medical procedures</li>
+                <li><strong>Serpent Symbolism:</strong> Associated with snakes whose skin-shedding represents renewal and rebirth</li>
+                <li><strong>Temple Hospitals:</strong> Sacred spaces serving as both places of worship and healing centers</li>
+                <li><strong>Teacher of Medicine:</strong> Transmits healing knowledge to worthy human practitioners</li>
+                <li><strong>Mortality's Boundary:</strong> Can heal the sick but often forbidden to prevent or reverse death</li>
+                <li><strong>Divine Punishment:</strong> Sometimes struck down for overreaching (raising the dead, granting immortality)</li>
+                <li><strong>Solar & Water Connection:</strong> Associated with sun's vitality and water's purification</li>
+                <li><strong>Compassion as Divinity:</strong> Mercy and empathy elevated to divine attributes</li>
+                <li><strong>Holistic Healing:</strong> Treats body, mind, and spirit as interconnected whole</li>
+        </section>
+
+        <section class="cross-tradition-table">
+            <h2>Deities Embodying This Archetype</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tradition</th>
+                        <th>Deity</th>
+                        <th>Match</th>
+                        <th>Key Attributes</th>
+                        <th>Sacred Symbol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Greek</td>
+                        <td><a href="../../mythos/greek/deities/asclepius.html">Asclepius</a></td>
+                        <td><span class="archetype-match">98%</span></td>
+                        <td>God of medicine, son of Apollo, raised dead and was struck down by Zeus</td>
+                        <td>Rod with single serpent</td>
+                    </tr>
+                    <tr>
+                        <td>Hindu</td>
+                        <td><a href="../../mythos/hindu/deities/dhanvantari.html">Dhanvantari</a></td>
+                        <td><span class="archetype-match">97%</span></td>
+                        <td>Physician of gods, emerged from ocean churning holding amrita (immortality nectar)</td>
+                        <td>Pot of amrita, medicinal herbs</td>
+                    </tr>
+                    <tr>
+                        <td>Sumerian</td>
+                        <td><a href="../../mythos/sumerian/deities/gula.html">Gula (Ninisina)</a></td>
+                        <td><span class="archetype-match">95%</span></td>
+                        <td>"Great Physician," goddess of healing, accompanied by sacred dogs</td>
+                        <td>Dogs as healing companions</td>
+                    </tr>
+                    <tr>
+                        <td>Norse</td>
+                        <td><a href="../../mythos/norse/deities/eir.html">Eir</a></td>
+                        <td><span class="archetype-match">94%</span></td>
+                        <td>Goddess of healing and medical skill, handmaiden of Frigg or valkyrie</td>
+                        <td>Medicinal herbs, copper bowl</td>
+                    </tr>
+                    <tr>
+                        <td>Egyptian</td>
+                        <td><a href="../../mythos/egyptian/deities/imhotep.html">Imhotep (deified)</a></td>
+                        <td><span class="archetype-match">92%</span></td>
+                        <td>Mortal architect-healer elevated to god, patron of medicine and wisdom</td>
+                        <td>Scroll, papyrus of medical texts</td>
+                    </tr>
+                    <tr>
+                        <td>Celtic</td>
+                        <td><a href="../../mythos/celtic/deities/airmed.html">Airmed</a></td>
+                        <td><span class="archetype-match">91%</span></td>
+                        <td>Herbalist goddess who organized 365 healing herbs from grave of Miach</td>
+                        <td>Cloak spread with healing herbs</td>
+                    </tr>
+                    <tr>
+                        <td>Hittite</td>
+                        <td>Kamrusepa</td>
+                        <td><span class="archetype-match">90%</span></td>
+                        <td>Goddess of healing magic, ritual purification, and medical incantations</td>
+                        <td>Purifying fire, ritual spells</td>
+                    </tr>
+                    <tr>
+                        <td>Sami</td>
+                        <td>Beiwe</td>
+                        <td><span class="archetype-match">89%</span></td>
+                        <td>Sun goddess who restores health and sanity after long polar night</td>
+                        <td>Sun, reindeer, plants awakening</td>
+                    </tr>
+                    <tr>
+                        <td>Celtic</td>
+                        <td><a href="../../mythos/celtic/deities/brigid.html">Brigid</a></td>
+                        <td><span class="archetype-match">88%</span></td>
+                        <td>Triple goddess of healing, poetry, and smithcraft; sacred healing wells</td>
+                        <td>Sacred wells, eternal flame</td>
+                    </tr>
+                    <tr>
+                        <td>Buddhist</td>
+                        <td><a href="../../mythos/buddhist/deities/guanyin.html">Guanyin (Quan Yin)</a></td>
+                        <td><span class="archetype-match">86%</span></td>
+                        <td>Bodhisattva of compassion, miraculous healing through mercy</td>
+                        <td>Willow branch, vase of healing water</td>
+                    </tr>
+                    <tr>
+                        <td>Egyptian</td>
+                        <td><a href="../../mythos/egyptian/deities/sekhmet.html">Sekhmet</a></td>
+                        <td><span class="archetype-match">85%</span></td>
+                        <td>Paradoxical goddess: bringer of plagues AND healer (duality of disease/cure)</td>
+                        <td>Lioness, red linen, plague arrows</td>
+                    </tr>
+                    <tr>
+                        <td>Greek</td>
+                        <td><a href="../../mythos/greek/deities/apollo.html">Apollo</a></td>
+                        <td><span class="archetype-match">80%</span></td>
+                        <td>God of plague and healing, father of Asclepius, sun and purification</td>
+                        <td>Lyre, bow, laurel wreath</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Primary Sources: Asclepius (Greek Tradition)</h2>
+            <p>
+                Asclepius represents the archetype's fullest expression: the healer so skilled he challenged death itself,
+                raising the dead and thus violating the cosmic boundary between mortality and immortality.
+            </p>
+
+            <!-- Asclepius Raises the Dead -->
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>📚 Asclepius Raises the Dead and is Struck Down</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Apollodorus, Library:3.10.3-4
+                        </div>
+                        <div class="verse-text">
+                            "Asclepius practiced the healer's art to such a degree that he not only prevented deaths, but even raised the dead.
+                            For he received from Athena the blood that had flowed from the Gorgon's veins; with the blood from the veins
+                            on her left side he could destroy people, but with the blood from those on her right he could raise the dead.
+                            After reviving many, it is said that he even raised Hippolytus at Artemis' request. But some say Glaucus,
+                            others Capaneus, others Tyndareus, and still others Hymenaeus... Zeus, fearing that men might learn the art of
+                            healing from him and so come to rescue each other, struck him with a thunderbolt."
+                        </div>
+                        <div class="book-reference">
+                            Source: Apollodorus, Library (c. 2nd century CE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Pindar, Pythian Ode:3.55-58
+                        </div>
+                        <div class="verse-text">
+                            "Even the craft of healing is bound by harsh necessity. Once, for a princely fee,
+                            Asclepius brought back from death a man already claimed by fate. But the son of Kronos
+                            hurled with both hands his bolt, and swiftly stripped the breath from both their breasts,
+                            and his flashing thunderbolt hammered them down to doom."
+                        </div>
+                        <div class="book-reference">
+                            Source: Pindar, Pythian Ode 3 (c. 474 BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Ovid, Metamorphoses:2.642-648
+                        </div>
+                        <div class="verse-text">
+                            "Phoebus Apollo had begotten a son endowed with consummate skill in the healing art...
+                            Asclepius, whose bold hand had restored the life of Hippolytus. Jove, indignant that one
+                            born of mortals should rise from the Stygian shadows, hurled the discoverer of such an art,
+                            struck by the power of his thunder, down to the Stygian waves."
+                        </div>
+                        <div class="book-reference">
+                            Source: Ovid, Metamorphoses (c. 8 CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Serpent and Healing -->
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>🐍 The Sacred Serpent of Asclepius</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Pausanias, Description of Greece:2.27.1-2
+                        </div>
+                        <div class="verse-text">
+                            "The image of Asclepius is, in size, half that of the Olympian Zeus at Athens, and is made of ivory and gold...
+                            There is also a throne, with the god's serpent coiled beneath it. A dog is also sitting beside the image.
+                            Offerings are dedicated to Asclepius by the sick whom he has healed, and by those who have received oracles...
+                            The serpents, sacred to Asclepius, are a peculiar kind. They are yellow in color and are only found in Epidaurus."
+                        </div>
+                        <div class="book-reference">
+                            Source: Pausanias, Description of Greece (c. 150 CE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Aristophanes, Plutus:733-741
+                        </div>
+                        <div class="verse-text">
+                            "When the god perceived us entering, with our cakes and our offerings... a servant girl put cakes upon the altar,
+                            as food for the sacred serpent. Then the god went round to all the sick, examining each case carefully...
+                            Then a sacred serpent came gliding out from the sanctuary and made its round of all the patients,
+                            and it seemed to lick the eyelids of each one."
+                        </div>
+                        <div class="book-reference">
+                            Source: Aristophanes, Plutus (c. 388 BCE)
+                        </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: Dhanvantari (Hindu Tradition)</h2>
+            <p>
+                Dhanvantari, physician of the gods, emerged from the cosmic ocean bearing the pot of immortality,
+                establishing the divine origin of Ayurvedic medicine.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>📚 Dhanvantari Emerges with the Nectar of Immortality</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Bhagavata Purana:8.8.32-34
+                        </div>
+                        <div class="verse-text">
+                            "From the ocean emerged Dhanvantari, dark-complexioned and youthful, bearing in his hands a jar filled with nectar.
+                            Upon seeing him, the demons and the gods became very anxious to obtain the nectar. O King,
+                            thereafter, while the sons of the demigods gazed upon the beautiful form of Dhanvantari,
+                            who was dressed in yellow garments, his earrings gleaming, the Supreme Lord appeared,
+                            having assumed the form of an enchantress to distribute the nectar."
+                        </div>
+                        <div class="book-reference">
+                            Source: Bhagavata Purana (c. 500-1000 CE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Vishnu Purana:1.9
+                        </div>
+                        <div class="verse-text">
+                            "From the churned ocean, first arose the sacred cow Surabhi... then came the goddess Lakshmi...
+                            then appeared the moon... and at last Dhanvantari himself, radiant as the noon-day sun,
+                            bearing in his hands the white jar of amrita, the immortal nectar. The divine physician thus came forth,
+                            bringing with him the knowledge of medicine and healing that would preserve life."
+                        </div>
+                        <div class="book-reference">
+                            Source: Vishnu Purana (c. 400-900 CE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Sushruta Samhita, Sutrasthana:1.6-9
+                        </div>
+                        <div class="verse-text">
+                            "The sages, tormented by diseases, approached Dhanvantari, Lord of Kashi, and said:
+                            'O Lord, we wish to learn from you the science of medicine that destroys disease and decay.'
+                            And Dhanvantari, the immortal one, incarnate form of Vishnu, he who emerged from the milky ocean
+                            bearing amrita, taught them surgery and the eight branches of Ayurveda."
+                        </div>
+                        <div class="book-reference">
+                            Source: Sushruta Samhita (c. 600 BCE - 1000 CE)
+                        </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: Gula (Sumerian/Akkadian Tradition)</h2>
+            <p>
+                Gula, the "Great Physician" of Mesopotamia, was invoked for healing and accompanied by sacred dogs,
+                her temples serving as ancient hospitals.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>📚 Hymn to Gula: "Great Physician of the Dark-Headed People"</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Hymn to Gula:Lines 1-20
+                        </div>
+                        <div class="verse-text">
+                            "I will praise the great physician of the dark-headed people, Gula, who makes the sick healthy...
+                            You are the lady who revives the dying, who helps the weak to their feet. Gula, merciful mistress,
+                            who softens suffering, you carry the staff of life. Your word is reliable, your command is glorious...
+                            Great doctress of the dark-headed ones, creatress of life for the Land, the merciful one among the gods,
+                            who ensures well-being, who brings forth all the healing herbs. Gula, great chief doctor who fills all mouths,
+                            I praise you!"
+                        </div>
+                        <div class="book-reference">
+                            Source: Hymn to Gula (c. 2nd millennium BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Prayer to Gula:Akkadian Text
+                        </div>
+                        <div class="verse-text">
+                            "To Gula, great physician, lady of healing, who walks with dogs at her feet... I, your servant, have become sick.
+                            Look upon me favorably, accept my prayer! Command life for me, that I may praise your greatness.
+                            May your holy dogs bark for my recovery, may they chase away the demons of sickness that afflict me.
+                            You who bring back the breath to the dying, restore me to health!"
+                        </div>
+                        <div class="book-reference">
+                            Source: Akkadian Prayers to Gula (c. 1st millennium BCE)
+                        </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: Brigid (Celtic Tradition)</h2>
+            <p>
+                Brigid, the Irish triple goddess, governed healing alongside poetry and smithcraft, her sacred wells
+                renowned for miraculous cures.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>📚 Brigid's Healing Domain and Sacred Wells</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Cormac's Glossary:Entry on Brigid
+                        </div>
+                        <div class="verse-text">
+                            "Brigit, i.e., a learned woman, daughter of the Dagda. This is Brigit the female sage, or woman of wisdom,
+                            i.e., Brigit the goddess whom poets adored, because very great and very famous was her protecting care.
+                            It is therefore they call her goddess of poets... Brigit the goddess of healing, and Brigit the goddess of smithcraft...
+                            For among all Irishmen a goddess was called Brigit."
+                        </div>
+                        <div class="book-reference">
+                            Source: Cormac's Glossary (c. 9th-10th century CE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            The Second Battle of Mag Tuired:Section 34
+                        </div>
+                        <div class="verse-text">
+                            "Now Dian Cecht, the physician, and his children Miach and Airmed stood by the well called Health's Spring.
+                            They would cast their healing herbs into the well and chant incantations over it. Then the mortally wounded warriors
+                            were brought and plunged into the well, and they came forth healed and whole... And some say it was Brigid who
+                            first taught the healing craft to the physicians, for she was skilled in all the arts of restoration."
+                        </div>
+                        <div class="book-reference">
+                            Source: Cath Maige Tuired (c. 11th century CE, preserving older oral traditions)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Life of St. Brigid by Cogitosus:Chapter 32
+                        </div>
+                        <div class="verse-text">
+                            "A leper came to St. Brigid and said, 'If you bathe me in blessed water, I shall be cleansed.'
+                            She replied, 'I have no water at hand, but I will seek the help of my Lord.' She blessed the ground,
+                            and immediately a spring of pure water gushed forth. She washed the leper in its waters,
+                            and instantly his flesh became clean as a child's. From that time, the spring has healed all manner of diseases."
+                        </div>
+                        <div class="book-reference">
+                            Source: Life of St. Brigid by Cogitosus (c. 650 CE) - Christianized but preserving pagan healing goddess traditions
+                        </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: Imhotep (Egyptian Tradition)</h2>
+            <p>
+                Imhotep, the architect-physician of the Third Dynasty, was deified after death and became patron of scribes,
+                healers, and seekers of wisdom. His medical knowledge was considered divinely inspired.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>📚 Imhotep's Wisdom and Medical Knowledge</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Edwin Smith Papyrus:Introduction
+                        </div>
+                        <div class="verse-text">
+                            "Instructions concerning... injuries to the head, wounds to the skull, fractures of the collar-bone...
+                            This knowledge was passed down from the ancient physicians, from the time of Imhotep, wisest of healers,
+                            who knew the secrets of anatomy and the treatment of wounds through examination, diagnosis, and prognosis.
+                            It is said: 'If thou examinest a man having a gaping wound in his head, penetrating to the bone...
+                            thou shouldst probe the wound, and shouldst measure the wound with thy fingers.'"
+                        </div>
+                        <div class="book-reference">
+                            Source: Edwin Smith Papyrus (c. 1600 BCE, copying older sources from c. 3000 BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Ebers Papyrus:Opening Invocation
+                        </div>
+                        <div class="verse-text">
+                            "Here begins the book of healing all parts of the body. The remedies were made by the wise priests of old,
+                            chief among them Imhotep, son of Ptah, who was master of the healing arts. May his wisdom guide the physician's hand.
+                            This knowledge includes incantations, prescriptions, the proper herbs and their preparation,
+                            for healing is both practical and magical."
+                        </div>
+                        <div class="book-reference">
+                            Source: Ebers Papyrus (c. 1550 BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Temple Inscription at Saqqara:Dedication
+                        </div>
+                        <div class="verse-text">
+                            "The god Imhotep, son of Ptah, Chancellor of the King of Lower Egypt, first after the King of Upper Egypt,
+                            administrator of the great palace, hereditary noble, high priest of Heliopolis, chief carpenter, chief sculptor...
+                            In later ages he was called 'Prince of Peace,' and the sick came to sleep in his temples,
+                            seeking healing dreams sent by the deified Imhotep."
+                        </div>
+                        <div class="book-reference">
+                            Source: Temple inscriptions (c. 3rd Dynasty, c. 2650 BCE)
+                        </div>
+        </section>
+
+        <section>
+            <h2>Symbolic Analysis</h2>
+
+            <h3>The Serpent Symbol: Shedding Death for Life</h3>
+            <p>
+                Across nearly all healing traditions, the serpent appears as the healer's companion:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Renewal Through Shedding:</strong> The snake's ability to shed its skin became the universal metaphor
+                    for casting off sickness, emerging renewed</li>
+                <li><strong>Rod of Asclepius:</strong> Single serpent coiled around staff (not the caduceus with two snakes and wings,
+                    which belongs to Hermes as messenger)</li>
+                <li><strong>Chthonic Wisdom:</strong> Snakes, dwelling in earth, symbolize hidden knowledge from below,
+                    the secrets of herbs and poisons</li>
+                <li><strong>Poison and Cure:</strong> Venom that kills in large doses heals in small—the pharmaceutical principle
+                    embodied in the serpent</li>
+                <li><strong>Guardian of Sacred Spaces:</strong> Serpents at healing temples (Epidaurus, Sumerian sanctuaries)
+                    as living embodiments of the healing god</li>
+            </ul>
+
+            <h3>Healing as Sacred Art, Not Mere Craft</h3>
+            <p>
+                The healing deity teaches that medicine is a sacred calling:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Divine Knowledge:</strong> Medical wisdom flows from the gods—Asclepius from Apollo,
+                    Dhanvantari from the cosmic ocean, Imhotep elevated to divinity</li>
+                <li><strong>Compassion as Divinity:</strong> To heal requires not only skill but divine compassion
+                    (Guanyin's mercy, Brigid's nurturing, Gula's care)</li>
+                <li><strong>Temples as Hospitals:</strong> No separation between spiritual and physical healing—
+                    the Asclepieia combined shrine, hospital, and dream incubation center</li>
+                <li><strong>Prayer and Practice:</strong> Ancient medicine united empirical knowledge (surgery, herbs)
+                    with sacred ritual (incantations, offerings)</li>
+            </ul>
+
+            <h3>The Boundary of Mortality</h3>
+            <p>
+                The healing deity's tragic lesson: there are limits even divine medicine cannot cross.
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Asclepius Struck Down:</strong> Zeus destroys him for raising the dead—healing must respect death's finality</li>
+                <li><strong>Amrita Guarded:</strong> Dhanvantari brings immortality nectar but it remains for gods, not mortals</li>
+                <li><strong>The Healer's Humility:</strong> Even divine physicians cannot grant eternal life; healing restores
+                    but cannot prevent eventual death</li>
+                <li><strong>Acceptance of Mortality:</strong> True healing includes accepting death as natural boundary,
+                    not enemy to defeat</li>
+            </ul>
+
+            <h3>Sun and Water: Purification and Vitality</h3>
+            <p>
+                Healing deities connect to solar vitality and water's cleansing:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Apollo-Asclepius:</strong> Father-son solar connection; sun as life-giver and purifier</li>
+                <li><strong>Beiwe:</strong> Sun goddess restoring health after darkness—light as healing force</li>
+                <li><strong>Sacred Wells:</strong> Brigid's springs, temple baths at Epidaurus—water cleanses body and spirit</li>
+                <li><strong>Balance of Elements:</strong> Fire (fever, cauterization) and water (cooling, cleansing)
+                    in therapeutic harmony</li>
+        </section>
+
+        <section>
+            <h2>Cross-Cultural Parallels</h2>
+
+            <h3>Gender Balance in Divine Healing</h3>
+            <p>
+                Unlike many archetypes, healing deities include both masculine and feminine expressions equally:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Male Healers:</strong> <a href="../../mythos/greek/deities/asclepius.html" class="inline-search-link">Asclepius</a>, <a href="../../mythos/hindu/deities/dhanvantari.html" class="inline-search-link">Dhanvantari</a>, <a href="../../mythos/egyptian/deities/imhotep.html" class="inline-search-link">Imhotep</a>, <a href="../../mythos/greek/deities/apollo.html" class="inline-search-link">Apollo</a>—emphasize knowledge, technique, surgery</li>
+                <li><strong>Female Healers:</strong> <a href="../../mythos/celtic/deities/brigid.html" class="inline-search-link">Brigid</a>, <a href="../../mythos/norse/deities/eir.html" class="inline-search-link">Eir</a>, <a href="../../mythos/celtic/deities/airmed.html" class="inline-search-link">Airmed</a>, <a href="../../mythos/sumerian/deities/gula.html" class="inline-search-link">Gula</a>, <a href="../../mythos/buddhist/deities/guanyin.html" class="inline-search-link">Guanyin</a>—emphasize compassion, herbs, holistic care</li>
+                <li><strong>Complementary Skills:</strong> Neither gender monopolizes healing; both bring different aspects of the art</li>
+            </ul>
+
+            <h3>Triple Nature: Body, Mind, Spirit</h3>
+            <p>
+                Healing deities consistently address the whole person:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Physical:</strong> Surgery (Asclepius), herbs (Airmed), treatment protocols (Imhotep)</li>
+                <li><strong>Mental/Emotional:</strong> Dream incubation, psychological restoration, sanity after darkness (Beiwe)</li>
+                <li><strong>Spiritual:</strong> Ritual purification (Kamrusepa), compassion (Guanyin), sacred wells (Brigid)</li>
+                <li><strong>Brigid's Triple Form:</strong> Explicitly unites healing with poetry (mental) and smithcraft (physical skill)</li>
+            </ul>
+
+            <h3>Duality: Disease-Bringer and Healer</h3>
+            <p>
+                Some healing deities paradoxically control both sickness and cure:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong><a href="../../mythos/egyptian/deities/sekhmet.html" class="inline-search-link">Sekhmet</a>:</strong> Brings plague but also heals it—disease and cure from same source</li>
+                <li><strong><a href="../../mythos/greek/deities/apollo.html" class="inline-search-link">Apollo</a>:</strong> Sends plague (Iliad Book 1) but also teaches healing through <a href="../../mythos/greek/deities/asclepius.html" class="inline-search-link">Asclepius</a></li>
+                <li><strong>Pharmaceutical Wisdom:</strong> Venom becomes medicine; the one who understands poison understands cure</li>
+                <li><strong>Balance Restored:</strong> Healing deity maintains cosmic equilibrium between health and disease</li>
+            </ul>
+
+            <h3>Sacred Animals as Companions</h3>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Serpents:</strong> Asclepius, Gula—renewal, hidden knowledge, pharmacy</li>
+                <li><strong>Dogs:</strong> Gula's sacred dogs—loyalty, protection, companionship in illness</li>
+                <li><strong>Reindeer:</strong> Beiwe—restoration, return of vitality after harsh times</li>
+                <li><strong>White Elephant:</strong> Dhanvantari emerged after Airavata—strength, purity, cosmic origin</li>
+        </section>
+
+        <section>
+            <h2>Psychological and Cultural Significance</h2>
+
+            <h3>The Wounded Healer</h3>
+            <p>
+                Many healing deities embody the archetype of the wounded healer—one who has suffered and thus understands suffering:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Asclepius:</strong> Son born through violent C-section after mother's death—born from trauma</li>
+                <li><strong>Guanyin:</strong> Bodhisattva who chose to remain in samsara to help suffering beings</li>
+                <li><strong>Understanding Through Experience:</strong> True healing requires empathy born of one's own pain</li>
+            </ul>
+
+            <h3>Medicine as Mystery Religion</h3>
+            <p>
+                Ancient healing was initiatory, requiring purification and sacred dedication:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Asclepieia:</strong> Patients underwent ritual purification before dream incubation</li>
+                <li><strong>Ayurvedic Tradition:</strong> Dhanvantari teaching only to worthy sages who approached humbly</li>
+                <li><strong>Hippocratic Oath:</strong> Sacred pledge invoking Apollo, Asclepius, Hygieia—medicine as holy calling</li>
+                <li><strong>Secret Knowledge:</strong> Herbal lore, surgical techniques passed only to initiated students</li>
+            </ul>
+
+            <h3>Modern Resonance</h3>
+            <p>
+                The healing deity archetype continues in contemporary medical symbolism and ethics:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Rod of Asclepius:</strong> Official symbol of medicine and healthcare worldwide</li>
+                <li><strong>Compassion as Duty:</strong> Medical ethics emphasizing care, empathy, and patient dignity</li>
+                <li><strong>Holistic Medicine:</strong> Modern return to treating whole person (body-mind-spirit) echoes ancient practice</li>
+                <li><strong>Sacred Calling:</strong> Medicine still viewed as noble profession requiring dedication beyond material gain</li>
+                <li><strong>Limits of Medicine:</strong> Ongoing ethical debates about end-of-life care echo Asclepius myth—
+                    should we always prevent death?</li>
+        </section>
+
+        <div style="margin-top: 50px; text-align: center; padding: 30px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+            <h3 >Explore Related Content</h3>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <a href="../herbal-archetypes.html" >🌿 Herbal Archetypes</a>
+                <a href="../death/index.html" >💀 Death & Afterlife</a>
+                <a href="../wisdom/wisdom-goddess.html" >📚 Wisdom Keeper</a>
+                <a href="../cross-reference-matrix.html" >🔗 Cross-Reference Matrix</a>
+                <a href="../index.html" >🎭 All Archetypes</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle expandable codex search section
+        function toggleCodexSearch(header) {
+            const section = header.parentElement;
+            const content = section.querySelector('.codex-search-content');
+
+            section.classList.toggle('expanded');
+            content.classList.toggle('show');
+        }
+
+        // Toggle individual verse display
+        function toggleVerse(citation) {
+            const verseText = citation.nextElementSibling;
+            verseText.classList.toggle('show');
+        }
+
+        // Deep linking to specific verses
+        function scrollToVerse(bookRef) {
+            const citations = document.querySelectorAll('.citation');
+            citations.forEach(citation => {
+                if (citation.textContent.trim() === bookRef) {
+                    citation.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    toggleVerse(citation);
+                    citation.parentElement.classList.add('highlight');
+                }
+            });
+        }
+    </script>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>
