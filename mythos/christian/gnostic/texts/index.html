@@ -1,0 +1,1187 @@
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gnostic Sacred Texts - World Mythos Explorer</title>
+<link href="../../../../themes/theme-base.css" rel="stylesheet"/>
+<link href="../../../../styles.css" rel="stylesheet"/>
+<link href="../../../../themes/corpus-links.css" rel="stylesheet"/>
+    <script defer src="../../../../themes/theme-animations.js"></script>
+<script defer src="../../../../themes/theme-picker.js"></script>
+<style>
+        :root {
+            --mythos-primary: #8B008B;
+            --mythos-secondary: #FFD700;
+            --mythos-accent: #9370DB;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #2C003E 0%, #8B008B 50%, #4B0082 100%);
+            color: white;
+            padding: 4rem 2rem;
+            border-radius: var(--radius-2xl);
+            margin-bottom: 3rem;
+            text-align: center;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(255, 215, 0, 0.1), transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(147, 112, 219, 0.1), transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-section h2 {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-6);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-section p {
+            font-size: var(--text-xl);
+            max-width: 900px;
+            margin: var(--space-4) auto 0;
+            line-height: var(--leading-relaxed);
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .text-category {
+            background: var(--color-card-bg);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--mythos-primary);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .text-category h2 {
+            color: var(--mythos-primary);
+            font-size: var(--text-3xl);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-4);
+            border-bottom: 3px solid var(--mythos-primary);
+        }
+
+        .text-card {
+            background: var(--color-card-bg);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            transition: all var(--transition-base);
+        }
+
+        .text-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--mythos-accent);
+        }
+
+        .text-card h3 {
+            color: var(--mythos-accent);
+            font-size: var(--text-2xl);
+            margin-bottom: var(--space-4);
+        }
+
+        .text-card h4 {
+            color: var(--mythos-primary);
+            font-size: var(--text-lg);
+            margin-top: var(--space-4);
+            margin-bottom: var(--space-3);
+        }
+
+        .quote-box {
+            background: linear-gradient(135deg, rgba(139, 0, 139, 0.05), rgba(147, 112, 219, 0.05));
+            border-left: 4px solid var(--mythos-primary);
+            padding: var(--space-5);
+            margin: var(--space-4) 0;
+            border-radius: var(--radius-lg);
+            font-style: italic;
+            line-height: var(--leading-relaxed);
+        }
+
+        .quote-box cite {
+            display: block;
+            margin-top: var(--space-3);
+            font-style: normal;
+            font-size: var(--text-sm);
+            color: var(--mythos-accent);
+            font-weight: 600;
+        }
+
+        .key-themes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-6) 0;
+        }
+
+        .theme-tag {
+            background: linear-gradient(135deg, rgba(139, 0, 139, 0.1), rgba(147, 112, 219, 0.1));
+            border: 1px solid var(--mythos-accent);
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            font-weight: 600;
+            color: var(--mythos-accent);
+            transition: all var(--transition-fast);
+        }
+
+        .theme-tag:hover {
+            background: linear-gradient(135deg, rgba(139, 0, 139, 0.2), rgba(147, 112, 219, 0.2));
+            transform: scale(1.05);
+        }
+
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-6);
+            margin-top: var(--space-8);
+        }
+
+        .deity-card {
+            background: var(--color-card-bg);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-md);
+        }
+
+        .deity-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--mythos-primary);
+        }
+
+        .deity-icon {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-4);
+            text-align: center;
+        }
+
+        .deity-card h3 {
+            color: var(--mythos-accent);
+            margin-bottom: var(--space-3);
+            font-size: var(--text-xl);
+            text-align: center;
+        }
+
+        .deity-card p {
+            color: var(--color-text);
+            font-size: var(--text-sm);
+            line-height: var(--leading-relaxed);
+            text-align: center;
+            margin-bottom: 0;
+        }
+
+        .discovery-info {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(139, 0, 139, 0.1));
+            padding: var(--space-5);
+            border-radius: var(--radius-lg);
+            margin: var(--space-4) 0;
+            border: 1px solid var(--mythos-secondary);
+        }
+
+        .related-card {
+            background: var(--color-card-bg);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+        }
+
+        .related-card h3 {
+            color: var(--mythos-primary);
+            margin-bottom: var(--space-4);
+        }
+
+        .related-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .related-card li {
+            padding: var(--space-3) 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .related-card li:last-child {
+            border-bottom: none;
+        }
+
+        .related-card a {
+            color: var(--color-link);
+            transition: color var(--transition-fast);
+        }
+
+        .related-card a:hover {
+            color: var(--mythos-accent);
+        }
+    </style>
+</head>
+<body>
+<div id="theme-picker-container"></div>
+<header>
+    <div class="header-content">
+        <h1>Hidden Wisdom Revealed: Gnostic Sacred Texts</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../../../mythos/index.html">Home</a> →
+                <a href="../../../index.html">Christian</a> →
+                <a href="../../index.html">Gnostic</a> →
+                <span>Texts</span>
+</nav>
+<main>
+<section class="hero-section">
+<h2>The Lost Gospels of Divine Knowledge</h2>
+<p>
+                Discover the sacred writings of Gnostic Christianity that proclaim universal salvation,
+                the divine spark within all beings, and the restoration of the entire cosmos.
+                These ancient texts, hidden for centuries and rediscovered in the 20th century,
+                reveal a Christianity centered on mystical knowledge (gnosis), cosmic restoration,
+                and the ultimate redemption of all creation through Christ's victory over death and darkness.
+            </p>
+</section>
+
+<!-- Nag Hammadi Library Section -->
+<section class="text-category">
+<h2>The Nag Hammadi Library (1945)</h2>
+<div class="discovery-info">
+<h4>The Discovery That Changed Everything</h4>
+<p>
+                    In December 1945, Egyptian farmer Muhammad Ali al-Samman discovered a sealed jar near the town of
+                    Nag Hammadi in Upper Egypt. Inside were thirteen leather-bound codices containing 52 texts -
+                    the greatest collection of Gnostic writings ever found. Hidden around 390 CE to preserve them
+                    from destruction as Christianity became orthodox, these texts reveal an alternative vision of
+                    Christianity emphasizing inner knowledge, divine union, and cosmic restoration.
+                </p>
+</div>
+
+<div class="text-card">
+<h3>Gospel of Thomas</h3>
+<h4>Historical Context</h4>
+<p>
+                    Dated to approximately 50-140 CE, the Gospel of Thomas contains 114 sayings (logia) attributed
+                    to Jesus. Unlike narrative gospels, it presents Jesus' teachings without crucifixion or
+                    resurrection stories. Many scholars believe it preserves some of the earliest Jesus traditions,
+                    possibly independent of the canonical gospels. Its emphasis on seeking and finding divine wisdom
+                    aligns with Jewish wisdom traditions and mystical Judaism.
+                </p>
+
+<h4>Key Themes</h4>
+<div class="key-themes">
+<div class="theme-tag">Kingdom Within</div>
+<div class="theme-tag">Divine Self-Knowledge</div>
+<div class="theme-tag">Realized Eschatology</div>
+<div class="theme-tag">Light and Darkness</div>
+</div>
+
+<h4>Universal Salvation Teachings</h4>
+<div class="quote-box">
+                    "Jesus said, 'If they say to you, "Where did you come from?", say to them, "We came from the light,
+                    the place where the light came into being on its own accord and established itself and became manifest
+                    through their image." If they say to you, "Is it you?", say, "We are its children, we are the elect
+                    of the living father." If they ask you, "What is the sign of your father in you?", say to them,
+                    "It is movement and repose."'"
+<cite>Gospel of Thomas, Logion 50</cite>
+</div>
+
+<div class="quote-box">
+                    "Jesus said, 'I am the light that is over all things. I am all: from me all came forth, and to me
+                    all attained. Split a piece of wood; I am there. Lift up the stone, and you will find me there.'"
+<cite>Gospel of Thomas, Logion 77</cite>
+</div>
+
+<div class="quote-box">
+                    "Jesus said, 'When you make the two into one, and when you make the inner like the outer and the
+                    outer like the inner, and the upper like the lower, and when you make male and female into a single one,
+                    so that the male will not be male nor the female be female... then you will enter the kingdom.'"
+<cite>Gospel of Thomas, Logion 22</cite>
+</div>
+
+<h4>Connection to Jewish Mysticism</h4>
+<p>
+                    The Gospel of Thomas shares deep connections with Jewish mystical traditions, particularly the
+                    concept of the divine light within creation (similar to the later Kabbalistic concept of divine sparks),
+                    the emphasis on gnosis as transformative knowledge (da'at), and the restoration of primordial unity
+                    (tikkun). The image of Jesus as the Light over all things echoes the Shekinah (divine presence) that
+                    permeates creation.
+                </p>
+</div>
+
+<div class="text-card">
+<h3>Gospel of Philip</h3>
+<h4>Historical Context</h4>
+<p>
+                    Dated to the mid-3rd century CE, the Gospel of Philip is a Valentinian Gnostic text that presents
+                    Christian sacramental theology through mystical interpretation. It discusses baptism, chrism
+                    (anointing), eucharist, redemption, and the bridal chamber - the latter representing spiritual
+                    union with the divine. The text emphasizes transformation through sacred mysteries.
+                </p>
+
+<h4>Key Themes</h4>
+<div class="key-themes">
+<div class="theme-tag">Sacramental Mysteries</div>
+<div class="theme-tag">Bridal Chamber Union</div>
+<div class="theme-tag">Light and Image</div>
+<div class="theme-tag">Restoration of Unity</div>
+</div>
+
+<h4>Universal Restoration</h4>
+<div class="quote-box">
+                    "Light and darkness, life and death, right and left, are brothers of one another. They are inseparable.
+                    Because of this, neither are the good good, nor the evil evil, nor is life life, nor death death...
+                    Because of this, each one will dissolve into its original nature. But those who are exalted above the
+                    world are indissoluble, eternal."
+<cite>Gospel of Philip, Section 10</cite>
+</div>
+
+<div class="quote-box">
+                    "The Lord did everything in a mystery, a baptism and a chrism and a eucharist and a redemption and
+                    a bridal chamber... He said, 'I came to make the things below like the things above, and the things
+                    outside like those inside. I came to unite them in that place.' Those who say they will die first
+                    and then rise are in error. If they do not first receive the resurrection while they live, when they
+                    die they will receive nothing."
+<cite>Gospel of Philip, Section 67</cite>
+</div>
+
+<div class="quote-box">
+                    "When Eve was still in Adam, death did not exist. When she was separated from him, death came into being.
+                    If she again enters into him and he takes her into himself, death will no longer exist."
+<cite>Gospel of Philip, Section 71</cite>
+</div>
+
+<h4>The Bridal Chamber Mystery</h4>
+<p>
+                    The "bridal chamber" represents the ultimate sacrament of reunion - the soul's mystical marriage
+                    with its divine counterpart, restoring the primordial androgynous unity before the separation
+                    into male and female. This parallels Kabbalistic concepts of the reunification of the masculine
+                    and feminine aspects of God (Tiferet and Shekinah) and the restoration of Adam Kadmon
+                    (primordial humanity).
+                </p>
+</div>
+
+<div class="text-card">
+<h3>Gospel of Truth</h3>
+<h4>Historical Context</h4>
+<p>
+                    Written circa 140-180 CE, possibly by Valentinus himself (the founder of Valentinian Gnosticism),
+                    the Gospel of Truth is a meditation on salvation, knowledge, and the nature of Christ's redemptive work.
+                    It's not a gospel in the narrative sense but a homily or theological reflection on the "good news"
+                    of gnosis. Valentinus was a highly educated Christian teacher who nearly became Bishop of Rome around 143 CE.
+                </p>
+
+<h4>Key Themes</h4>
+<div class="key-themes">
+<div class="theme-tag">Forgetfulness and Memory</div>
+<div class="theme-tag">Christ as Revealer</div>
+<div class="theme-tag">Universal Enlightenment</div>
+<div class="theme-tag">Return to the Pleroma</div>
+</div>
+
+<h4>Christ's Cosmic Victory</h4>
+<div class="quote-box">
+                    "He was nailed to a tree; he published the edict of the Father on the cross. O such great teaching!
+                    He draws himself down to death though life eternal clothes him. Having stripped himself of the perishable
+                    rags, he put on imperishability, which no one can possibly take away from him. Having entered the empty
+                    territory of terrors, he passed through those who were stripped naked by forgetfulness, being both
+                    knowledge and perfection, proclaiming the things that are in the heart of the Father."
+<cite>Gospel of Truth, 20:25-34</cite>
+</div>
+
+<div class="quote-box">
+                    "For this reason, Error became angry at him, persecuted him, was distressed at him, and was brought to
+                    naught. He was nailed to a tree and he became a fruit of the knowledge of the Father. It did not, however,
+                    cause destruction because it was eaten, but to those who ate it, it gave cause to become glad in the
+                    discovery. For he discovered them in himself, and they discovered him in themselves - the incomprehensible,
+                    inconceivable one, the Father, the perfect one, the one who made all things."
+<cite>Gospel of Truth, 18:21-31</cite>
+</div>
+
+<div class="quote-box">
+                    "Say, then, from the heart that you are the perfect day and in you dwells the light that does not fail...
+                    For you are the understanding that is drawn forth. Greet one another, therefore, in good faith and
+                    perfect love. If any are not, he has not known the Father. For the Father is good, sweet and loving,
+                    and he wills the salvation of all."
+<cite>Gospel of Truth, 42:4-14</cite>
+</div>
+
+<h4>The Valentinian Vision</h4>
+<p>
+                    Valentinian theology presents a sophisticated cosmology where all souls are divine sparks from the
+                    Pleroma (Fullness) who have fallen into matter through the passion of Sophia (Wisdom). Christ's role
+                    is to restore gnosis - remembrance of their divine origin - enabling all to return to the Father.
+                    This system emphasizes that salvation is universal restoration, not selective salvation.
+                </p>
+</div>
+
+<div class="text-card">
+<h3>Apocryphon of John (Secret Book of John)</h3>
+<h4>Historical Context</h4>
+<p>
+                    Dating from the late 2nd century CE, the Apocryphon of John is one of the most important Sethian
+                    Gnostic texts. It presents an extensive cosmogony (creation myth) and soteriology (doctrine of salvation)
+                    revealed by the risen Christ to John the Apostle. Found in multiple versions at Nag Hammadi, it represents
+                    a sophisticated theological system blending Jewish mysticism, Platonic philosophy, and Christian revelation.
+                </p>
+
+<h4>Key Themes</h4>
+<div class="key-themes">
+<div class="theme-tag">Divine Emanations</div>
+<div class="theme-tag">Sophia's Fall</div>
+<div class="theme-tag">Archons and Liberation</div>
+<div class="theme-tag">Divine Foreknowledge</div>
+</div>
+
+<h4>The Divine Plan for All</h4>
+<div class="quote-box">
+                    "I am the Pronoia of the pure light; I am the thinking of the virginal Spirit... I am the voice
+                    speaking softly. I exist from the first. I dwell within the Silence... I am the image of the invisible
+                    Spirit. Through me, all things were brought to perfection. I am the Mother, the light... I am the womb
+                    that gives shape to all by giving birth to the Light that shines in splendor. I am the Aeon to come.
+                    I am the fulfillment of all things."
+<cite>Apocryphon of John, 30:11-31:2</cite>
+</div>
+
+<div class="quote-box">
+                    "I entered into the midst of their prison, which is the prison of the body. And I said, 'He who hears,
+                    let him arise from the deep sleep.' And he wept and shed tears. Bitter tears he wiped from himself and
+                    he said, 'Who is it that calls my name, and from where has this hope come to me, while I am in the chains
+                    of the prison?' And I said, 'I am the Pronoia of the pure Light; I am the thinking of the virginal Spirit,
+                    who raised you up to the honored place. Arise and remember that it is you who hearkened, and follow your
+                    root, which is I, the merciful one, and guard yourself against the angels of poverty and the demons of
+                    chaos and all those who ensnare you, and beware of the deep sleep and the enclosure of the inside of Hades.'"
+<cite>Apocryphon of John, 31:3-22</cite>
+</div>
+
+<div class="quote-box">
+                    "And I raised him up, and sealed him in the light of the water with five seals, in order that death
+                    might not have power over him from this time on. And behold, now I shall ascend to the perfect Aeon.
+                    I have completed everything for you in your hearing. I have said everything to you that you might write
+                    them down and give them secretly to your fellow spirits, for this is the mystery of the unmoved race."
+<cite>Apocryphon of John, 31:22-32</cite>
+</div>
+
+<h4>Sethian Cosmology and Universal Restoration</h4>
+<p>
+                    The Apocryphon presents a complex system where the material world results from Sophia's (Wisdom's)
+                    passionate desire to create without her consort. Her offspring, the Demiurge (often identified with
+                    the God of the Old Testament), creates the physical cosmos in ignorance. However, Sophia secretly
+                    places divine light (pneuma) in humanity. Christ descends to awaken this light, ensuring that all
+                    who possess the divine spark will eventually return to the Pleroma. The text emphasizes divine
+                    foreknowledge and providence ensuring universal restoration.
+                </p>
+</div>
+
+<div class="text-card">
+<h3>Thunder, Perfect Mind</h3>
+<h4>Historical Context</h4>
+<p>
+                    Dating from the 2nd-3rd century CE, Thunder, Perfect Mind is a remarkable revelation discourse
+                    spoken by a feminine divine power. Written in the "I am" formula common to ancient wisdom literature,
+                    it presents a series of paradoxes where the speaker claims to be both opposites simultaneously.
+                    The text represents the divine feminine voice - possibly Sophia, the Holy Spirit, or a hypostasis
+                    of the divine - revealing her presence throughout all existence.
+                </p>
+
+<h4>Key Themes</h4>
+<div class="key-themes">
+<div class="theme-tag">Divine Paradox</div>
+<div class="theme-tag">Sacred Feminine</div>
+<div class="theme-tag">Unity of Opposites</div>
+<div class="theme-tag">Universal Presence</div>
+</div>
+
+<h4>The Divine Feminine in All</h4>
+<div class="quote-box">
+                    "I am the first and the last. I am the honored one and the scorned one. I am the whore and the holy one.
+                    I am the wife and the virgin. I am the mother and the daughter... I am the silence that is incomprehensible
+                    and the idea whose remembrance is frequent. I am the voice whose sound is manifold and the word whose
+                    appearance is multiple. I am the utterance of my name."
+<cite>Thunder, Perfect Mind, 13:16-14:9</cite>
+</div>
+
+<div class="quote-box">
+                    "For I am knowledge and ignorance. I am shame and boldness. I am shameless; I am ashamed. I am strength
+                    and I am fear. I am war and peace. Give heed to me. I am the one who is disgraced and the great one...
+                    I am the union and the dissolution. I am the abiding and I am the dissolution. I am the one below,
+                    and they come up to me. I am the judgment and the acquittal."
+<cite>Thunder, Perfect Mind, 14:9-28</cite>
+</div>
+
+<div class="quote-box">
+                    "Do not be ignorant of me anywhere or any time. Be on your guard! Do not be ignorant of me.
+                    For I am the first and the last. I am she whose wedding is great, and I have not taken a husband...
+                    I am the mind of everyone and the rest of no one. I am the knowledge of my inquiry, and the finding
+                    of those who seek after me, and the command of those who ask of me, and the power of the powers
+                    in my knowledge."
+<cite>Thunder, Perfect Mind, 18:15-19:5</cite>
+</div>
+
+<h4>Connection to Sophia and Shekinah</h4>
+<p>
+                    Thunder, Perfect Mind presents striking parallels to both the Gnostic figure of Sophia (Wisdom)
+                    and the Jewish concept of Shekinah (divine presence). Like Sophia, the speaker embodies divine
+                    wisdom that has descended into the material world. Like Shekinah, she represents God's immanent
+                    presence dwelling with humanity in exile. The paradoxical "I am" statements mirror the Kabbalistic
+                    understanding that the divine encompasses all opposites, and that redemption comes through recognizing
+                    the divine presence in all states of existence - high and low, pure and profane.
+                </p>
+</div>
+
+<div class="text-card">
+<h3>Trimorphic Protennoia (Three-Formed First Thought)</h3>
+<h4>Historical Context</h4>
+<p>
+                    Dated to the late 2nd-3rd century CE, this Sethian text presents a three-part revelation discourse
+                    by the First Thought (Protennoia) of the Invisible Spirit. The divine revealer appears in three
+                    descents corresponding to Father, Mother, and Son - voice, speech, and word. It presents one of
+                    the most sophisticated Gnostic accounts of the divine logos (word) incarnating to liberate trapped
+                    divine sparks.
+                </p>
+
+<h4>Key Themes</h4>
+<div class="key-themes">
+<div class="theme-tag">Triple Descent</div>
+<div class="theme-tag">Divine Logos</div>
+<div class="theme-tag">Liberation from Archons</div>
+<div class="theme-tag">Restoration to Light</div>
+</div>
+
+<h4>The Three Descents of Liberation</h4>
+<div class="quote-box">
+                    "I am Protennoia, the Thought that dwells in the Light. I am the movement that dwells in the All...
+                    I exist before the All, and I am the All, since I exist in everyone. I am a Voice speaking softly.
+                    I exist from the first. I dwell within the Silence that surrounds every one of them. And it is the
+                    hidden Voice that dwells within me, within the incomprehensible, immeasurable Thought, within the
+                    immeasurable Silence."
+<cite>Trimorphic Protennoia, 35:1-17</cite>
+</div>
+
+<div class="quote-box">
+                    "I descended to the midst of the underworld, and I shone down upon the darkness. It is I who poured
+                    forth the water. It is I who am hidden within radiant waters. I am the one who gradually put forth the All
+                    by my Thought. It is I who am laden with the Voice... I put on Jesus. I bore him from the cursed wood,
+                    and established him in the dwelling places of his Father. And those who watch over their dwelling places
+                    did not recognize me. For I am unrestrainable, together with my seed; and my seed, which is mine,
+                    I shall place in the holy Light within an incomprehensible Silence."
+<cite>Trimorphic Protennoia, 50:12-51:2</cite>
+</div>
+
+<div class="quote-box">
+                    "I visited a bodily dwelling. I cast out the one who was in it first, and I went in... I spoke with
+                    the archons and authorities. I humbled them by the mouth, and by the Logos I made manifest the ineffability
+                    of the full completion, that the sons of the Light might be saved from their destruction and from all
+                    the bonds which bound them, and that they might return to the place from which they had descended at first."
+<cite>Trimorphic Protennoia, 49:15-50:10</cite>
+</div>
+
+<h4>Christ as Universal Liberator</h4>
+<p>
+                    The Trimorphic Protennoia presents Christ (the Logos incarnate) as the divine revealer who descends
+                    through all cosmic levels to liberate souls trapped by the archons (cosmic powers). The text emphasizes
+                    that this liberation is comprehensive - Christ does not save a select few but comes to restore all divine
+                    seeds to their origin in the Light. This vision connects to the Jewish mystical concept of raising
+                    the divine sparks (nitzotzot) scattered throughout creation, a central theme in Lurianic Kabbalah.
+                </p>
+</div>
+
+<div class="text-card">
+<h3>Gospel of Mary (Magdalene)</h3>
+<h4>Historical Context</h4>
+<p>
+                    Dating from the early 2nd century CE (likely 120-180 CE), the Gospel of Mary presents Mary Magdalene
+                    as a prominent disciple who receives special revelation from the risen Christ. Though fragmentary
+                    (pages 1-6 and 11-14 are missing), it reveals early Christian debates about authority, the role of
+                    women in spiritual leadership, and the nature of sin and salvation. Mary is portrayed as having
+                    superior understanding and as Christ's beloved disciple.
+                </p>
+
+<h4>Key Themes</h4>
+<div class="key-themes">
+<div class="theme-tag">Inner Vision</div>
+<div class="theme-tag">Nature of Sin</div>
+<div class="theme-tag">Ascent of the Soul</div>
+<div class="theme-tag">Spiritual Authority</div>
+</div>
+
+<h4>Christ's Teaching on Sin and Salvation</h4>
+<div class="quote-box">
+                    "The Savior said, 'There is no sin, but it is you who make sin when you do the things that are like
+                    the nature of adultery, which is called sin. That is why the Good came into your midst, to the essence
+                    of every nature in order to restore it to its root.' Then He continued and said, 'That is why you become
+                    sick and die, for you are deprived of the one who can heal you.'"
+<cite>Gospel of Mary, 7:14-22</cite>
+</div>
+
+<div class="quote-box">
+                    "Peter said to Mary, 'Sister we know that the Savior loved you more than the rest of women. Tell us
+                    the words of the Savior which you remember which you know, but we do not, nor have we heard them.'
+                    Mary answered and said, 'What is hidden from you I will proclaim to you.' And she began to speak to
+                    them these words: 'I,' she said, 'I saw the Lord in a vision and I said to Him, "Lord I saw you today
+                    in a vision." He answered and said to me, "Blessed are you that you did not waver at the sight of Me.
+                    For where the mind is there is the treasure."'"
+<cite>Gospel of Mary, 10:1-10</cite>
+</div>
+
+<h4>The Soul's Ascent</h4>
+<p>
+                    The Gospel of Mary presents a vision of the soul's ascent through hostile cosmic powers, overcoming
+                    them through gnosis rather than ritual. Mary's teaching emphasizes that sin is not inherent but a
+                    deviation from one's true divine nature, and that Christ came to restore all beings to their spiritual
+                    root. This restoration is universal, available to all who gain self-knowledge and recognize their
+                    divine origin.
+                </p>
+</div>
+
+<div class="text-card">
+<h3>Dialogue of the Savior</h3>
+<h4>Historical Context</h4>
+<p>
+                    Dating from the late 1st to mid-2nd century CE, the Dialogue of the Savior presents post-resurrection
+                    teachings of Jesus to three disciples: Judas (Thomas), Matthew, and Mary (Magdalene). It combines
+                    wisdom dialogue, cosmological revelation, and mystical ascent traditions. The fragmentary text
+                    emphasizes spiritual vision, the nature of the Pleroma (divine fullness), and the path of return
+                    to the Father.
+                </p>
+
+<h4>Key Themes</h4>
+<div class="key-themes">
+<div class="theme-tag">Seeking and Finding</div>
+<div class="theme-tag">Return to Rest</div>
+<div class="theme-tag">Dissolution of the Cosmos</div>
+<div class="theme-tag">Interior Light</div>
+</div>
+
+<h4>The Return of All to the Father</h4>
+<div class="quote-box">
+                    "The Lord said: 'Pray in the place where there is no woman,' meaning, 'Destroy the works of
+                    femaleness,' not because there is another birth, but because they will cease to give birth.
+                    Mary said to him, 'They will never be obliterated.' The Lord said, 'Who knows that they will
+                    not dissolve... and the works of femaleness will be destroyed, and the cosmos will return to
+                    its root, and all will return to the place from which they came forth at the beginning.'"
+<cite>Dialogue of the Savior, 144:15-145:5</cite>
+</div>
+
+<div class="quote-box">
+                    "The Lord said to them: 'Already the time has come, brothers, for us to abandon our labor and
+                    stand at rest. For whoever stands at rest will rest forever. And I say to you: Always stand
+                    above time... Be on guard so that you are not deceived. For many robbers seek to lead you astray.
+                    Where will you find such a guide? For the pathway is great, but the journeyers are few.'"
+<cite>Dialogue of the Savior, 120:2-18</cite>
+</div>
+
+<h4>The Cosmic Dissolution and Return</h4>
+<p>
+                    The Dialogue presents an eschatology of cosmic dissolution - the material world will eventually
+                    dissolve and all souls will return to their divine source. This is not annihilation but restoration
+                    to the primordial state of unity with the Father. The text emphasizes that this return is the destiny
+                    of all creation, echoing Jewish apocalyptic themes of cosmic renewal and the restoration of all things.
+                </p>
+</div>
+</section>
+
+<!-- Other Important Texts Section -->
+<section class="text-category">
+<h2>Other Important Gnostic Texts</h2>
+
+<div class="text-card">
+<h3>Pistis Sophia (Faith-Wisdom)</h3>
+<h4>Historical Context</h4>
+<p>
+                    Dating from the 3rd-4th century CE, Pistis Sophia is a lengthy Gnostic text presenting post-resurrection
+                    dialogues between Jesus and his disciples (especially Mary Magdalene, who asks more questions than
+                    any other disciple). The text focuses on the redemption of Sophia (Wisdom) who fell from the Light-realm
+                    and must be restored. It contains elaborate descriptions of cosmic hierarchies, repentance hymns,
+                    and the mysteries of salvation.
+                </p>
+
+<h4>Key Themes</h4>
+<div class="key-themes">
+<div class="theme-tag">Sophia's Redemption</div>
+<div class="theme-tag">Cosmic Hierarchies</div>
+<div class="theme-tag">Mysteries of Salvation</div>
+<div class="theme-tag">Universal Restoration</div>
+</div>
+
+<h4>The Restoration of All Through Sophia</h4>
+<div class="quote-box">
+                    "Jesus said: 'I have brought the mysteries into the world because all are under sin and all need my gift.
+                    For this cause I have brought the mysteries into the world, which undo all the bonds of the counter-feit
+                    spirit and make all men good and withdraw them from all sins. For this cause I have said unto you:
+                    "I am come to cast fire on the earth," that is: I am come to purify the sins of the whole world with fire.'"
+<cite>Pistis Sophia, Book 1, Chapter 26</cite>
+</div>
+
+<div class="quote-box">
+                    "And Jesus continued in his discourse and said: 'For this cause I have torn myself asunder and brought
+                    them the mysteries, that they may be purified from all their sins and be made pure light and be carried
+                    up into the Light. For this cause I have said unto you aforetime: "I am come to cast fire on the earth,"
+                    that is: I am come to purify the sins of the whole world with fire. And for this cause I have said unto
+                    you: "I have a baptism to be baptized with," and I have been in great constraint until it was accomplished.'"
+<cite>Pistis Sophia, Book 1, Chapter 26</cite>
+</div>
+
+<div class="quote-box">
+                    "When Pistis Sophia had said this, Jesus said unto her: 'Well said, Pistis Sophia. This is the solution
+                    of the mystery. Amen, amen, I say unto you: I will perfect you in all mysteries of the Light and all
+                    gnoses from the interior of the interiors to the exterior of the exteriors, from the Ineffable down
+                    to the darkness of darknesses, so that ye shall be called "the perfected in all gnoses."'"
+<cite>Pistis Sophia, Book 1, Chapter 29</cite>
+</div>
+
+<h4>Sophia as Symbol of Universal Redemption</h4>
+<p>
+                    Pistis Sophia's narrative of Sophia's fall and restoration serves as a cosmic template for the
+                    redemption of all souls. Just as Sophia, despite her fall into the material realms and her suffering,
+                    is ultimately redeemed and restored to her place in the Light through Christ's intervention, so too
+                    will all souls - regardless of how far they have fallen - ultimately return to the divine fullness.
+                    The text emphasizes that Christ brings the mysteries specifically to save ALL, not a select few.
+                    This connects to the Kabbalistic concept of the cosmic repair (tikkun) needed to restore the divine
+                    feminine aspect (Shekinah/Sophia) to unity with the divine masculine, healing all of creation.
+                </p>
+</div>
+
+<div class="text-card">
+<h3>Books of Jeu (First Book and Second Book)</h3>
+<h4>Historical Context</h4>
+<p>
+                    Dating from the 2nd-3rd century CE, the Books of Jeu (found in the Bruce Codex) contain esoteric
+                    teachings about the divine names, seals, and passwords needed for the soul's ascent through the
+                    cosmic realms. Jesus reveals the mysteries of the Treasury of Light and the complex cosmology of
+                    the divine emanations. The text emphasizes ritual knowledge and the proper invocations for salvation.
+                </p>
+
+<h4>Key Themes</h4>
+<div class="key-themes">
+<div class="theme-tag">Divine Names</div>
+<div class="theme-tag">Sacred Seals</div>
+<div class="theme-tag">Soul's Ascent</div>
+<div class="theme-tag">Treasury of Light</div>
+</div>
+
+<h4>The Path to the Treasury of Light</h4>
+<div class="quote-box">
+                    "Jesus said: 'Amen I say unto you, he who shall receive these mysteries of Jeu and guard them
+                    and fulfill them in truth, when he comes forth from the body of the matter of the rulers,
+                    the receivers of Melchisedek will follow after him. They will guide him into the regions of the Light.
+                    They will not let the magistrates which are in the regions of the way of the midst have power over him.
+                    But the receivers of Melchisedek will guide him into the regions of the Light until he comes to the
+                    region of his inheritance.'"
+<cite>First Book of Jeu, Chapter 43</cite>
+</div>
+
+<div class="quote-box">
+                    "The Savior said: 'I have brought all the mysteries down from the Treasury of Light for the
+                    sake of every man, so that every one who shall receive these mysteries and perform them in truth
+                    shall inherit the Kingdom of Light.'"
+<cite>Second Book of Jeu, Chapter 47</cite>
+</div>
+
+<h4>Connection to Jewish Mysticism</h4>
+<p>
+                    The Books of Jeu share remarkable similarities with Jewish merkavah (chariot) mysticism and
+                    hekhalot (palace) literature, which describe the soul's ascent through heavenly palaces guarded
+                    by angelic powers. The use of divine names, seals, and passwords parallels the Jewish mystical
+                    tradition of knowing the proper names and invocations to pass celestial guardians. The concept
+                    of Melchizedek as a cosmic mediator appears in both Gnostic and Jewish mystical texts, particularly
+                    in the Dead Sea Scrolls.
+                </p>
+</div>
+
+<div class="text-card">
+<h3>Gospel of Judas</h3>
+<h4>Historical Context</h4>
+<p>
+                    Discovered in the 1970s and published in 2006, the Gospel of Judas dates to the 2nd century CE
+                    (likely 130-170 CE). It presents a radically different view of Judas Iscariot - not as a traitor,
+                    but as Jesus' most trusted disciple who alone understands Jesus' true nature and helps him escape
+                    the prison of the body. The text reflects Sethian Gnostic theology where the material world is a
+                    prison created by the Demiurge, and liberation comes through escaping bodily existence.
+                </p>
+
+<h4>Key Themes</h4>
+<div class="key-themes">
+<div class="theme-tag">Judas as Hero</div>
+<div class="theme-tag">Escape from Flesh</div>
+<div class="theme-tag">True Understanding</div>
+<div class="theme-tag">Sacrificial Cosmos</div>
+</div>
+
+<h4>Judas as the Liberator</h4>
+<div class="quote-box">
+                    "Jesus said to him, 'You will exceed all of them. For you will sacrifice the man that clothes me.
+                    Already your horn has been raised, your wrath has been kindled, your star has shown brightly,
+                    and your heart has become strong.'"
+<cite>Gospel of Judas, 56:17-21</cite>
+</div>
+
+<div class="quote-box">
+                    "Jesus said to Judas: 'But you will exceed all of them. For you will sacrifice the man that bears me.
+                    Already your horn has been raised, and your wrath has been kindled, and your star has passed by,
+                    and your heart has prevailed.'"
+<cite>Gospel of Judas, 56:4-8</cite>
+</div>
+
+<h4>Liberation Through Knowledge</h4>
+<p>
+                    The Gospel of Judas presents Jesus' death not as a sacrifice for sin but as a liberation from the
+                    prison of matter. Judas, understanding this truth, helps Jesus shed his mortal body to return to
+                    the divine realm. This reflects the Gnostic view that salvation comes through escaping material
+                    existence and returning to the spiritual fullness. While controversial, the text emphasizes that
+                    true discipleship involves understanding the divine nature trapped in matter and facilitating its
+                    release - a cosmic principle applicable to all souls.
+                </p>
+</div>
+
+<div class="text-card">
+<h3>Acts of John</h3>
+<h4>Historical Context</h4>
+<p>
+                    Dating from the mid-2nd century CE (likely 150-180 CE), the Acts of John is one of the earliest
+                    apocryphal Acts, presenting legendary stories of John's missionary work and containing docetic
+                    Christology (Christ only appeared to have a physical body). The text includes the famous "Hymn
+                    of Jesus" or "Round Dance of the Cross," a mystical liturgy where Jesus leads the disciples in
+                    a sacred dance before his crucifixion, revealing cosmic mysteries.
+                </p>
+
+<h4>Key Themes</h4>
+<div class="key-themes">
+<div class="theme-tag">Docetic Christ</div>
+<div class="theme-tag">Cosmic Dance</div>
+<div class="theme-tag">Mystical Union</div>
+<div class="theme-tag">Spiritual Body</div>
+</div>
+
+<h4>The Hymn of Jesus - The Cosmic Dance</h4>
+<div class="quote-box">
+                    "Before I am delivered up unto them, let us sing a hymn to the Father, and so go forth to that which
+                    lieth before us. He bade us therefore make as it were a ring, holding one another's hands, and himself
+                    standing in the midst he said: Answer Amen unto me. He began, then, to sing a hymn and to say:
+                    'Glory be to thee, Father.' And we, going about in a ring, answered him: 'Amen.'
+                    'Glory be to thee, Word: Glory be to thee, Grace.' 'Amen.'
+                    'I would be saved, and I would save.' 'Amen.'
+                    'I would be loosed, and I would loose.' 'Amen.'
+                    'I would be pierced, and I would pierce.' 'Amen.'
+                    'I would be born, and I would bear.' 'Amen.'
+                    'I would eat, and I would be eaten.' 'Amen.'"
+<cite>Acts of John, 94-95</cite>
+</div>
+
+<div class="quote-box">
+                    "'The whole universe takes part in the dancing.' 'Amen.'
+                    'He who does not dance does not know what happens.' 'Amen.'
+                    'I would flee, and I would stay.' 'Amen.'
+                    'I would be united, and I would unite.' 'Amen.'
+                    'I have no house, and I have houses.' 'Amen.'
+                    'I have no place, and I have places.' 'Amen.'
+                    'I have no temple, and I have temples.' 'Amen.'"
+<cite>Acts of John, 95-96</cite>
+</div>
+
+<div class="quote-box">
+                    "Now answer thou unto my dancing. Behold thyself in me who speak, and seeing what I do, keep silence
+                    about my mysteries. Thou that dancest, perceive what I do, for thine is this passion of the manhood,
+                    which I am about to suffer. For thou couldest not at all have understood what thou sufferest if I had
+                    not been sent unto thee, as the word of the Father."
+<cite>Acts of John, 96</cite>
+</div>
+
+<h4>Christ Conquers Death Through Spiritual Reality</h4>
+<p>
+                    The Acts of John presents a Christ who transcends physical suffering through his divine nature.
+                    In a famous scene, while Jesus appears to be crucified, he simultaneously appears to John in a cave,
+                    explaining that he suffers no physical pain because he is not truly contained in a material body.
+                    This docetic Christology emphasizes that Christ's victory over death is complete because death only
+                    has power over matter, not over spirit. The text implies that all who recognize their spiritual nature
+                    participate in this same victory over death - a universal liberation from material bondage.
+                </p>
+</div>
+
+<div class="text-card">
+<h3>Odes of Solomon</h3>
+<h4>Historical Context</h4>
+<p>
+                    Dating from the late 1st to early 2nd century CE (possibly 80-125 CE), the Odes of Solomon comprise
+                    42 hymns (Ode 2 is lost) that represent some of the earliest Christian mystical poetry. Written
+                    in Syriac (possibly originally Greek), they express profound mystical experiences of union with
+                    Christ, the descent to Hades, and the liberation of captive souls. The Odes blend Jewish wisdom
+                    traditions, Johannine Christianity, and mystical theology.
+                </p>
+
+<h4>Key Themes</h4>
+<div class="key-themes">
+<div class="theme-tag">Mystical Union</div>
+<div class="theme-tag">Living Water</div>
+<div class="theme-tag">Harrowing of Hades</div>
+<div class="theme-tag">Crown of Truth</div>
+</div>
+
+<h4>Christ's Descent and Universal Liberation</h4>
+<div class="quote-box">
+                    "Sheol saw me and was shattered, and Death ejected me and many with me. I have been vinegar and
+                    bitterness to it, and I went down with it as far as its depth. Then the feet and the head it released,
+                    because it was not able to endure my face. And I made a congregation of living among its dead;
+                    and I spoke with them by living lips; in order that my word may not fail. And those who had died
+                    ran toward me; and they cried out and said, 'Son of God, have pity on us. And deal with us according
+                    to your kindness, and bring us out from the chains of darkness. And open for us the door by which
+                    we may come forth to you, for we perceive that our death does not touch you. May we also be saved
+                    with you, because you are our Savior.' Then I heard their voice, and placed their faith in my heart.
+                    And I placed my name upon their head, because they are free and they are mine."
+<cite>Odes of Solomon, Ode 42:11-20</cite>
+</div>
+
+<div class="quote-box">
+                    "I went up to the light of truth as into a chariot, and the truth led me and brought me. And caused
+                    me to come over chasms and ravines, and from the rocks and the waves it preserved me. And it became
+                    to me a haven of salvation, and set me on the arms of immortal life. And it went with me and caused
+                    me to rest, and did not allow me to err, because it was and is the truth. And there was no danger for me,
+                    because I walked with it. And I did not err in anything because I obeyed the truth."
+<cite>Odes of Solomon, Ode 38:1-6</cite>
+</div>
+
+<div class="quote-box">
+                    "As the hand moves over the harp and the strings speak, so speaks in my members the Spirit of the Lord,
+                    and I speak by his love. For it destroys what is foreign, and everything is of the Lord. For thus it
+                    was from the beginning and will be until the end, so that nothing shall be contrary, and nothing shall
+                    rise up against him. The Lord has multiplied his knowledge, and he was zealous that those things should
+                    be known which through his grace have been given to us. And his praise he gave us on account of his name,
+                    our spirits praise his Holy Spirit."
+<cite>Odes of Solomon, Ode 6:1-7</cite>
+</div>
+
+<h4>The Harrowing of Hades and Universal Salvation</h4>
+<p>
+                    The Odes of Solomon contain some of the earliest and most beautiful descriptions of Christ's descent
+                    to Hades (the "Harrowing of Hell") where he liberates the souls imprisoned there. Ode 42 explicitly
+                    states that Christ went to the depths of Sheol, shattered its power, and brought out the dead, making
+                    them a "congregation of living." This theme became central to Eastern Orthodox theology and art.
+                    The Odes emphasize that Christ's victory over death is comprehensive - he doesn't leave anyone behind
+                    in the underworld. All who cry out to him are freed, their chains broken, becoming "free and mine."
+                    This vision of universal liberation connects to Jewish traditions of the righteous descending to
+                    rescue souls from Gehenna and the mystical concept that no soul is ultimately abandoned.
+                </p>
+</div>
+</section>
+
+<!-- Connections to Jewish Mysticism Section -->
+<section class="text-category">
+<h2>Connections to Jewish Mysticism and Kabbalah</h2>
+<div class="text-card">
+<h3>Common Themes and Parallels</h3>
+
+<h4>Divine Sparks and Pneuma</h4>
+<p>
+                    The Gnostic concept of divine pneuma (spirit) or divine sparks trapped in matter closely parallels
+                    the Kabbalistic teaching of nitzotzot (divine sparks) that fell into the material world during the
+                    shattering of vessels (Shevirat HaKelim). Both systems teach that liberation involves gathering
+                    these sparks and returning them to their divine source - a process of cosmic restoration.
+                </p>
+
+<h4>Sophia and Shekinah</h4>
+<p>
+                    The Gnostic figure of Sophia (Wisdom) who falls from the Pleroma bears striking resemblance to
+                    the Kabbalistic concept of Shekinah (divine presence) in exile. Both represent the feminine aspect
+                    of divinity that descends into the material world and must be redeemed. The restoration of Sophia
+                    parallels the Kabbalistic concept of tikkun (cosmic repair) that reunites Shekinah with the masculine
+                    divine aspect.
+                </p>
+
+<h4>Pleroma and Ein Sof</h4>
+<p>
+                    The Gnostic Pleroma (Fullness) - the realm of divine emanations and aeons - shares conceptual
+                    similarities with the Kabbalistic system of sefirot emanating from Ein Sof (the Infinite). Both
+                    describe a complex divine structure mediating between the utterly transcendent God and the material
+                    world.
+                </p>
+
+<h4>Gnosis and Da'at</h4>
+<p>
+                    The saving knowledge (gnosis) central to Gnostic soteriology parallels the concept of da'at
+                    (knowledge/awareness) in Jewish mysticism - not intellectual knowledge but direct experiential
+                    awareness of divine reality that transforms the knower.
+                </p>
+
+<h4>Merkavah and Soul Ascent</h4>
+<p>
+                    Gnostic descriptions of the soul's ascent through hostile cosmic powers (archons) closely parallel
+                    Jewish merkavah mysticism's descriptions of ascending through heavenly palaces (hekalot) guarded
+                    by angelic gatekeepers. Both traditions emphasize knowing proper divine names and passwords for
+                    safe passage.
+                </p>
+
+<h4>Universal Restoration</h4>
+<p>
+                    Both Gnostic Christianity and Jewish mysticism envision an ultimate restoration (apokatastasis/tikkun olam)
+                    where all creation returns to harmony with the divine. No divine spark is permanently lost;
+                    all will eventually be gathered back to the source. This vision of universal salvation appears
+                    in both traditions as the ultimate expression of divine mercy and the inevitable triumph of light
+                    over darkness.
+                </p>
+</div>
+</section>
+
+<!-- Navigation to Individual Text Pages -->
+<section class="text-category">
+<h2>Explore Individual Texts</h2>
+<div class="deity-grid">
+<a href="gospel-of-thomas.html" class="deity-card">
+<div class="deity-icon">📖</div>
+<h3>Gospel of Thomas</h3>
+<p>114 sayings of Jesus on the kingdom within and divine knowledge</p>
+</a>
+
+<a href="gospel-of-philip.html" class="deity-card">
+<div class="deity-icon">💒</div>
+<h3>Gospel of Philip</h3>
+<p>Sacramental theology and the mystery of the bridal chamber</p>
+</a>
+
+<a href="gospel-of-truth.html" class="deity-card">
+<div class="deity-icon">✨</div>
+<h3>Gospel of Truth</h3>
+<p>Valentinian meditation on Christ's redemptive revelation</p>
+</a>
+
+<a href="apocryphon-of-john.html" class="deity-card">
+<div class="deity-icon">🌌</div>
+<h3>Apocryphon of John</h3>
+<p>Sethian cosmogony and the divine plan for all souls</p>
+</a>
+
+<a href="thunder-perfect-mind.html" class="deity-card">
+<div class="deity-icon">⚡</div>
+<h3>Thunder, Perfect Mind</h3>
+<p>The divine feminine speaking in paradoxes and unity</p>
+</a>
+
+<a href="trimorphic-protennoia.html" class="deity-card">
+<div class="deity-icon">🔱</div>
+<h3>Trimorphic Protennoia</h3>
+<p>Three descents of the divine logos for universal liberation</p>
+</a>
+
+<a href="gospel-of-mary.html" class="deity-card">
+<div class="deity-icon">🌹</div>
+<h3>Gospel of Mary</h3>
+<p>Mary Magdalene's teachings and the soul's ascent</p>
+</a>
+
+<a href="dialogue-of-savior.html" class="deity-card">
+<div class="deity-icon">💬</div>
+<h3>Dialogue of the Savior</h3>
+<p>Post-resurrection teachings on seeking and return</p>
+</a>
+
+<a href="pistis-sophia.html" class="deity-card">
+<div class="deity-icon">💎</div>
+<h3>Pistis Sophia</h3>
+<p>Sophia's fall and redemption as cosmic template</p>
+</a>
+
+<a href="books-of-jeu.html" class="deity-card">
+<div class="deity-icon">🔐</div>
+<h3>Books of Jeu</h3>
+<p>Divine names and mysteries of the Treasury of Light</p>
+</a>
+
+<a href="gospel-of-judas.html" class="deity-card">
+<div class="deity-icon">🗝️</div>
+<h3>Gospel of Judas</h3>
+<p>Judas as hero helping Jesus escape material prison</p>
+</a>
+
+<a href="acts-of-john.html" class="deity-card">
+<div class="deity-icon">💃</div>
+<h3>Acts of John</h3>
+<p>Docetic Christ and the cosmic dance of liberation</p>
+</a>
+
+<a href="odes-of-solomon.html" class="deity-card">
+<div class="deity-icon">🎵</div>
+<h3>Odes of Solomon</h3>
+<p>Mystical hymns of union and harrowing of Hades</p>
+</a>
+</div>
+</section>
+
+<!-- Related Concepts Section -->
+<section class="related-concepts" style="margin-top: 3rem;">
+<h2>Related Concepts</h2>
+<div class="deity-grid">
+<div class="related-card">
+<h3>Within Gnostic Christianity</h3>
+<ul>
+<li><a href="../../cosmology/index.html">Gnostic Cosmology</a> - Pleroma, Aeons, and Archons</li>
+<li><a href="../../deities/index.html">Gnostic Figures</a> - Sophia, Demiurge, and Christ</li>
+<li><a href="../../concepts/gnosis.html">Gnosis</a> - Divine knowledge and self-realization</li>
+<li><a href="../../concepts/apokatastasis.html">Apokatastasis</a> - Universal restoration</li>
+</ul>
+</div>
+<div class="related-card">
+<h3>Related Traditions</h3>
+<ul>
+<li><a href="../../../jewish/mysticism/kabbalah.html">Jewish Kabbalah</a> - Sefirot and divine emanations</li>
+<li><a href="../../../christian/theology/universalism.html">Christian Universalism</a> - All shall be saved</li>
+<li><a href="../../../buddhist/concepts/bodhisattva.html">Bodhisattva Vow</a> - Saving all beings</li>
+<li><a href="../../../hindu/concepts/moksha.html">Moksha</a> - Liberation from cycle</li>
+</ul>
+</div>
+<div class="related-card">
+<h3>Other Christian Texts</h3>
+<ul>
+<li><a href="../../../christian/texts/apocrypha.html">Biblical Apocrypha</a></li>
+<li><a href="../../../christian/texts/patristic.html">Early Church Fathers</a></li>
+<li><a href="../../../christian/texts/mystical.html">Christian Mystical Writings</a></li>
+</ul>
+</div>
+</div>
+</section>
+</main>
+
+<footer>
+<p>
+<strong>Gnostic Sacred Texts</strong> - World Mythos Explorer<br/>
+<a href="../../../../mythos/index.html">World Mythos Home</a> |
+        <a href="../../../index.html">Christian Tradition</a> |
+        <a href="../../index.html">Gnostic Christianity</a>
+</p>
+</footer>
+
+<script>
+    function toggleCodexSearch(header) {
+        const section = header.parentElement;
+        const content = section.querySelector('.codex-search-content');
+        section.classList.toggle('expanded');
+        content.classList.toggle('show');
+    }
+
+    function toggleVerse(citation) {
+        const verseText = citation.nextElementSibling;
+        verseText.classList.toggle('show');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Christ as Cosmic Redeemer - Christian Gnostic Thought</title>
+
+    <style>
+        h1 { border-bottom: 3px solid #DAA520; padding-bottom: 10px; }
+        h2 { margin-top: 30px; color: var(--color-primary); }
+        h3 { margin-top: 20px; color: var(--color-secondary); }
+
+        .victory-card {
+            background: linear-gradient(135deg, rgba(218, 165, 32, 0.1), rgba(255, 215, 0, 0.05));
+            border-left: 5px solid #DAA520;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: var(--radius-lg, 8px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .scripture-quote {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(75, 0, 130, 0.05));
+            border-left: 4px solid #8A2BE2;
+            padding: 15px 20px;
+            margin: 15px 0;
+            font-style: italic;
+            border-radius: var(--radius-md, 6px);
+        }
+
+        .scripture-reference {
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-top: 8px;
+            font-style: normal;
+        }
+
+        .aspect-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .aspect-card {
+            background: var(--color-card-bg);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: 25px;
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-md);
+        }
+
+        .aspect-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--color-primary);
+        }
+
+        .aspect-card h3 {
+            color: var(--color-primary);
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: var(--text-2xl);
+        }
+
+        .cosmic-section {
+            background: radial-gradient(circle at center, rgba(138, 43, 226, 0.15), transparent);
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: var(--radius-2xl);
+        }
+
+        .restoration-box {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(218, 165, 32, 0.1));
+            border: 2px solid #DAA520;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: var(--radius-xl);
+        }
+
+        .gnostic-card {
+            background: linear-gradient(135deg, rgba(75, 0, 130, 0.2), rgba(138, 43, 226, 0.1));
+            border: 2px solid #8A2BE2;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .key-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .key-list li {
+            padding: 12px 15px;
+            margin: 10px 0;
+            background: var(--color-card-bg);
+            border-left: 4px solid var(--color-primary);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .key-list li:hover {
+            background: var(--color-card-hover-bg);
+            transform: translateX(8px);
+        }
+
+        .key-list li::before {
+            content: "⚡ ";
+            color: #DAA520;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .cross-reference {
+            display: inline-block;
+            background: rgba(138, 43, 226, 0.2);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            margin: 5px;
+            font-size: 0.9em;
+            transition: all var(--transition-fast);
+        }
+
+        .cross-reference:hover {
+            background: rgba(138, 43, 226, 0.4);
+            transform: scale(1.05);
+        }
+
+        .triumph-header {
+            background: linear-gradient(135deg, #DAA520, #FFD700);
+            color: #000;
+            padding: 15px 25px;
+            border-radius: var(--radius-lg);
+            margin: 25px 0;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(218, 165, 32, 0.3);
+        }
+
+        .collapsible-section {
+            margin: 20px 0;
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .collapsible-header {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.3), rgba(75, 0, 130, 0.2));
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+            font-weight: 600;
+            color: var(--color-heading);
+        }
+
+        .collapsible-header:hover {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.4), rgba(75, 0, 130, 0.3));
+        }
+
+        .expand-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 20px;
+            background: var(--color-surface);
+        }
+
+        .collapsible-content.show {
+            display: block;
+        }
+
+        .hero-victory {
+            background: linear-gradient(135deg, rgba(218, 165, 32, 0.3), rgba(138, 43, 226, 0.2));
+            padding: 40px 30px;
+            text-align: center;
+            border-radius: var(--radius-2xl);
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .hero-victory h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--color-hero-heading);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-victory p {
+            font-size: 1.3rem;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+    </style>
+
+    <link rel="stylesheet" href="../../../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../../../themes/corpus-links.css">
+    <script defer src="../../../../themes/theme-animations.js"></script>
+    <script defer src="../../../../themes/theme-picker.js"></script>
+</head>
+<body>
+<div id="theme-picker-container"></div>
+
+<header>
+    <div class="header-content">
+        <h1>✝️ <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> as Cosmic <a class="corpus-link" data-term="Redeemer" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Redeemer'">Redeemer</a> and Victor over <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a></h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../../../mythos/index.html">Home</a> →
+            <a href="../../../index.html">Christian</a> →
+            <a href="../../index.html">Gnostic</a> →
+            <span>Christ Redeemer</span>
+</nav>
+
+<main style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+
+<div class="hero-victory">
+    <h2>The King of <a class="corpus-link" href="corpus-search.html" title="View heaven in ancient texts">Heaven</a> and <a class="corpus-link" data-term="Hell" data-tradition="islamic" href="corpus-search.html" title="Search corpus for 'Hell'">Hell</a></h2>
+    <p>
+        <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> has achieved total, cosmic victory—descending to the lowest depths, harrowing <a class="corpus-link" data-term="Hell" data-tradition="islamic" href="corpus-search.html" title="Search corpus for 'Hell'">hell</a>,
+        shattering the gates of <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>, freeing the captives, and ascending to reign over all realms.
+        Every power, every authority, every cosmic force has been subjected to Him.
+        He holds the keys. <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> itself has been defeated. Nothing remains outside His <a class="corpus-link" data-term="Redemption" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Redemption'">redemption</a>.
+    </p>
+</div>
+
+<!-- SECTION 1: THE DESCENT INTO HADES -->
+<section>
+    <div class="triumph-header">
+        <h2 style="margin: 0;">🔓 The Descent into Hades (Harrowing of <a class="corpus-link" data-term="Hell" data-tradition="islamic" href="corpus-search.html" title="Search corpus for 'Hell'">Hell</a>)</h2>
+    </div>
+
+    <div class="victory-card">
+        <h3>The <a class="corpus-link" data-term="Anastasis" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Anastasis'">Anastasis</a> - <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a>'s Victory in the Underworld</h3>
+        <p>
+            Between His <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> and <a class="corpus-link" data-term="Resurrection" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Resurrection'">resurrection</a>, <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> descended to the realm of the dead—not as a prisoner,
+            but as a conquering King. He stormed the gates of Hades, trampled down <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> by <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>,
+            and liberated all the righteous who had been held captive since the beginning of the world.
+        </p>
+    </div>
+
+    <div class="aspect-grid">
+        <div class="aspect-card">
+            <h3>📖 <a class="corpus-link" href="corpus-search.html" title="View biblical in ancient texts">Biblical</a> Foundations</h3>
+            <ul class="key-list" style="margin-top: 15px;">
+                <li><strong>1 <a class="corpus-link" data-term="Peter" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Peter'">Peter</a> 3:19-20:</strong> "<a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> went and proclaimed to the spirits in prison"</li>
+                <li><strong>1 <a class="corpus-link" data-term="Peter" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Peter'">Peter</a> 4:6:</strong> "Gospel preached even to those who are dead"</li>
+                <li><strong>Ephesians 4:8-10:</strong> "He descended into the lower regions... led captivity captive"</li>
+                <li><strong>Psalm 16:10:</strong> "You will not abandon my soul to Sheol"</li>
+            </ul>
+        </div>
+
+        <div class="aspect-card">
+            <h3>⚔️ The Battle in Hades</h3>
+            <p>
+                The <strong>Gospel of <a class="corpus-link" data-term="Nicodemus" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Nicodemus'">Nicodemus</a></strong> (Acts of Pilate) recounts the dramatic confrontation:
+            </p>
+            <ul class="key-list" style="margin-top: 15px;">
+                <li>Hades and <a class="corpus-link" data-term="Satan" data-tradition="islamic" href="corpus-search.html" title="Search corpus for 'Satan'">Satan</a> trembled at <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a>'s approach</li>
+                <li><a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> shattered the bronze gates and iron bars</li>
+                <li>He trampled <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> underfoot</li>
+                <li>He bound <a class="corpus-link" data-term="Satan" data-tradition="islamic" href="corpus-search.html" title="Search corpus for 'Satan'">Satan</a> and stripped him of power</li>
+            </ul>
+        </div>
+
+        <div class="aspect-card">
+            <h3>👑 Freeing the Captives</h3>
+            <p>
+                <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> liberated those held in the prison of <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>:
+            </p>
+            <ul class="key-list" style="margin-top: 15px;">
+                <li><strong><a class="corpus-link" data-term="Adam" data-tradition="islamic" href="corpus-search.html" title="Search corpus for 'Adam'">Adam</a> and Eve</strong> - First parents of humanity</li>
+                <li><strong>The Patriarchs</strong> - <a class="corpus-link" data-term="Abraham" data-tradition="islamic" href="corpus-search.html" title="Search corpus for 'Abraham'">Abraham</a>, <a class="corpus-link" data-term="Isaac" data-tradition="jewish" href="corpus-search.html" title="Search corpus for 'Isaac'">Isaac</a>, <a class="corpus-link" data-term="Jacob" data-tradition="jewish" href="corpus-search.html" title="Search corpus for 'Jacob'">Jacob</a></li>
+                <li><strong>The Prophets</strong> - All who died in <a class="corpus-link" data-term="Faith" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Faith'">faith</a></li>
+                <li><strong>The Righteous Dead</strong> - All awaiting the <a class="corpus-link" data-term="Messiah" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Messiah'">Messiah</a></li>
+            </ul>
+        </div>
+
+        <div class="aspect-card">
+            <h3>🗝️ Taking the Keys</h3>
+            <div class="scripture-quote">
+                "I died, and behold I am alive forevermore, and I have the keys of <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> and Hades."
+                <div class="scripture-reference">— <a class="corpus-link" data-term="Revelation" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Revelation'">Revelation</a> 1:18</div>
+            </div>
+            <p>
+                <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> seized the keys of <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> and Hades from their previous holders.
+                He now has sovereign authority over the realm of the dead.
+                No one dies or rises without His permission. <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> no longer reigns—<a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> does.
+            </p>
+        </div>
+    </div>
+
+    <div class="gnostic-card">
+        <h3>🎨 The <a class="corpus-link" data-term="Icon" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Icon'">Icon</a> of the <a class="corpus-link" data-term="Anastasis" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Anastasis'">Anastasis</a></h3>
+        <p>
+            Eastern Orthodox iconography depicts this moment powerfully: <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> stands triumphantly on the shattered gates of <a class="corpus-link" data-term="Hell" data-tradition="islamic" href="corpus-search.html" title="Search corpus for 'Hell'">hell</a>,
+            pulling <a class="corpus-link" data-term="Adam" data-tradition="islamic" href="corpus-search.html" title="Search corpus for 'Adam'">Adam</a> and Eve up by their wrists from their tombs. Broken locks, chains, and keys scatter beneath His feet.
+            The darkness of Hades is pierced by radiant <a class="corpus-link" data-term="Light" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Light'">light</a>. <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> itself—personified—lies defeated and bound.
+        </p>
+        <p>
+            This is not merely symbolic. It depicts an actual cosmic event: the invasion and conquest of the underworld by the God-Man,
+            the liberation of humanity from its ancient prison, and the beginning of the reversal of the Fall.
+        </p>
+    </div>
+</section>
+
+<!-- SECTION 2: CHRIST AS NEW KING -->
+<section class="cosmic-section">
+    <div class="triumph-header">
+        <h2 style="margin: 0;">👑 <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> as New King of <a class="corpus-link" href="corpus-search.html" title="View heaven in ancient texts">Heaven</a> and <a class="corpus-link" data-term="Hell" data-tradition="islamic" href="corpus-search.html" title="Search corpus for 'Hell'">Hell</a></h2>
+    </div>
+
+    <div class="scripture-quote">
+        "All authority in <a class="corpus-link" href="corpus-search.html" title="View heaven in ancient texts">heaven</a> and on earth has been given to me."
+        <div class="scripture-reference">— Matthew 28:18</div>
+    </div>
+
+    <div class="aspect-grid">
+        <div class="aspect-card">
+            <h3>🗝️ The Keyholder</h3>
+            <div class="scripture-quote">
+                "I hold the keys of <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> and Hades."
+                <div class="scripture-reference">— <a class="corpus-link" data-term="Revelation" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Revelation'">Revelation</a> 1:18</div>
+            </div>
+            <p>
+                <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> possesses the keys to every realm. He opens and no one shuts. He shuts and no one opens.
+                <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> and Hades are now under His dominion, not as hostile forces, but as conquered territories.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>⚡ Universal Sovereignty</h3>
+            <div class="scripture-quote">
+                "The kingdom of the world has become the kingdom of our Lord and of his <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a>,
+                and he shall reign forever and ever."
+                <div class="scripture-reference">— <a class="corpus-link" data-term="Revelation" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Revelation'">Revelation</a> 11:15</div>
+            </div>
+            <p>
+                The Lord has taken His great power and begun to reign. All rival kingdoms, all competing powers,
+                all rebellious authorities are being brought into submission to <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a>.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>🙇 Every Knee Shall Bow</h3>
+            <div class="scripture-quote">
+                "God has highly exalted him and bestowed on him the name that is above every name,
+                so that at the name of <a class="corpus-link" data-term="Jesus" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Jesus'">Jesus</a> every knee should bow,
+                in <a class="corpus-link" href="corpus-search.html" title="View heaven in ancient texts">heaven</a> and on earth and under the earth,
+                and every tongue confess that <a class="corpus-link" href="corpus-search.html" title="View jesus christ in ancient texts">Jesus Christ</a> is Lord."
+                <div class="scripture-reference">— Philippians 2:9-11</div>
+            </div>
+            <p>
+                This encompasses all realms: celestial, terrestrial, and infernal.
+                Angels bow. Humans bow. Demons bow. Every created being acknowledges <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a>'s supreme lordship.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>✝️ Triumph over Powers</h3>
+            <div class="scripture-quote">
+                "He disarmed the rulers and authorities and put them to open shame,
+                by triumphing over them in him."
+                <div class="scripture-reference">— Colossians 2:15</div>
+            </div>
+            <p>
+                At the <a class="corpus-link" data-term="Cross" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Cross'">cross</a>, <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> publicly stripped the cosmic powers of their weapons and authority.
+                He made a spectacle of them, leading them in His triumphal procession as defeated foes.
+            </p>
+        </div>
+    </div>
+
+    <div class="victory-card">
+        <h3>⚔️ Destroying the Power of <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a></h3>
+        <div class="scripture-quote">
+            "Since therefore the children share in flesh and blood, he himself likewise partook of the same things,
+            that through <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> he might destroy the one who has the power of <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>, that is, the devil,
+            and deliver all those who through fear of <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> were subject to lifelong slavery."
+            <div class="scripture-reference">— Hebrews 2:14-15</div>
+        </div>
+        <p>
+            <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> entered into <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> to destroy <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> from within. He broke the devil's stranglehold over humanity.
+            The fear of <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>—which had enslaved the entire human race—has been abolished.
+        </p>
+    </div>
+</section>
+
+<!-- SECTION 3: THE COSMIC CHRIST IN GNOSTIC THOUGHT -->
+<section>
+    <div class="triumph-header">
+        <h2 style="margin: 0;">🌌 The Cosmic <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> in Gnostic Thought</h2>
+    </div>
+
+    <div class="gnostic-card">
+        <h3>💡 <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> as the <a class="corpus-link" data-term="Logos" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Logos'">Logos</a></h3>
+        <p>
+            The <strong>Gospel of Truth</strong> (Nag Hammadi) presents <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> as the <a class="corpus-link" data-term="Logos" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Logos'">Logos</a>—the Word who brings knowledge (<a class="corpus-link" data-term="Gnosis" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Gnosis'">gnosis</a>) of the true God.
+            He is the revelation that breaks through the veil of ignorance imposed by the <a class="corpus-link" data-term="Archons" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Archons'">archons</a> (cosmic rulers).
+        </p>
+        <p>
+            "<a class="corpus-link" data-term="Jesus" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Jesus'">Jesus</a> appeared, put on that book, was nailed to a tree, and published the <a class="corpus-link" data-term="Father" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Father'">Father</a>'s edict on the <a class="corpus-link" data-term="Cross" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Cross'">cross</a>."
+        </p>
+    </div>
+
+    <div class="aspect-grid">
+        <div class="aspect-card">
+            <h3>💫 <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> the Illuminator</h3>
+            <p>
+                In Gnostic texts, <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> brings <strong><a class="corpus-link" data-term="Gnosis" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Gnosis'">gnosis</a></strong>—saving knowledge of one's true divine origin.
+                He awakens souls from the sleep of ignorance and reminds them that they are children of <a class="corpus-link" data-term="Light" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Light'">Light</a>,
+                not native to this material prison.
+            </p>
+            <ul class="key-list" style="margin-top: 15px;">
+                <li>He reveals the Unknown <a class="corpus-link" data-term="Father" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Father'">Father</a></li>
+                <li>He dispels the darkness of material existence</li>
+                <li>He shows the way to escape the cosmos</li>
+                <li>He restores the divine spark within humanity</li>
+            </ul>
+        </div>
+
+        <div class="aspect-card">
+            <h3>🌟 Unknown to the <a class="corpus-link" data-term="Archons" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Archons'">Archons</a></h3>
+            <p>
+                Gnostic texts emphasize that <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> came from beyond the cosmos created by the <a class="corpus-link" data-term="Demiurge" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Demiurge'">Demiurge</a>.
+                The <a class="corpus-link" data-term="Archons" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Archons'">archons</a>—the cosmic rulers—did not recognize Him.
+                Had they known, "they would not have crucified the Lord of Glory" (1 Corinthians 2:8).
+            </p>
+            <p>
+                <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> descended in disguise, revealing the true God whom the cosmic powers did not know.
+                This revelation undermines their authority and exposes their ignorance.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>📉 Descent Through the Spheres</h3>
+            <p>
+                Gnostic <a class="corpus-link" href="corpus-search.html" title="View cosmology in ancient texts">cosmology</a> envisions multiple celestial spheres, each ruled by an <a class="corpus-link" data-term="Archon" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Archon'">archon</a>.
+                <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a>'s <a class="corpus-link" data-term="Incarnation" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Incarnation'">incarnation</a> required descending through all these spheres,
+                taking on the form appropriate to each realm to pass undetected.
+            </p>
+            <p>
+                At each level, He defeated the presiding power—not by force, but by revelation.
+                He stripped each <a class="corpus-link" data-term="Archon" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Archon'">archon</a> of authority by exposing their derivative nature and limited knowledge.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>🕊️ <a class="corpus-link" data-term="Hymn of the Pearl" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Hymn of the Pearl'">Hymn of the Pearl</a></h3>
+            <p>
+                The <strong><a class="corpus-link" data-term="Hymn of the Pearl" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Hymn of the Pearl'">Hymn of the Pearl</a></strong> (Acts of Thomas) depicts <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> as the prince sent from the realm of <a class="corpus-link" data-term="Light" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Light'">Light</a>
+                to retrieve the lost pearl (the soul/humanity) from the serpent (material world).
+            </p>
+            <ul class="key-list" style="margin-top: 15px;">
+                <li>Sent from the Kingdom of <a class="corpus-link" data-term="Light" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Light'">Light</a></li>
+                <li>Descends into the dark world</li>
+                <li>Temporarily forgets His mission (like souls forgetting their origin)</li>
+                <li>Awakened by a letter from home</li>
+                <li>Retrieves the pearl and returns victorious</li>
+                <li>Reunited with His royal robes</li>
+            </ul>
+            <p>
+                This allegory beautifully captures the pattern of descent, <a class="corpus-link" data-term="Redemption" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Redemption'">redemption</a>, and ascent central to Gnostic <a class="corpus-link" href="corpus-search.html" title="View christology in ancient texts">Christology</a>.
+            </p>
+        </div>
+    </div>
+
+    <div class="collapsible-section">
+        <div class="collapsible-header" onclick="toggleSection(this)">
+            <h3 style="margin: 0;">📜 The Tripartite Tractate on Cosmic <a class="corpus-link" data-term="Redemption" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Redemption'">Redemption</a></h3>
+            <span class="expand-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+            <p>
+                The <strong>Tripartite Tractate</strong> (Nag Hammadi) presents a sophisticated Valentinian account of cosmic <a class="corpus-link" data-term="Redemption" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Redemption'">redemption</a>:
+            </p>
+            <ul class="key-list">
+                <li>The fall occurred at the cosmic level, not merely human</li>
+                <li><a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> is the <strong><a class="corpus-link" data-term="Logos" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Logos'">Logos</a></strong> who brings order to chaos</li>
+                <li>His <a class="corpus-link" data-term="Redemption" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Redemption'">redemption</a> extends to all three classes of beings: spiritual, psychic, and material</li>
+                <li>Even the <a class="corpus-link" data-term="Demiurge" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Demiurge'">Demiurge</a> (creator god) is ultimately redeemed through <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a></li>
+                <li>The goal is the restoration of the Pleroma (Fullness)—all emanations returning to unity</li>
+                <li>Nothing is left outside; even matter is transformed</li>
+            </ul>
+            <p>
+                This vision of <strong>universal cosmic restoration</strong> anticipates orthodox doctrines of <a class="corpus-link" data-term="Apokatastasis" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Apokatastasis'">apokatastasis</a>
+                (restoration of all things) taught by Church Fathers like <a class="corpus-link" data-term="Origen" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Origen'">Origen</a> and <a class="corpus-link" data-term="Gregory of Nyssa" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Gregory of Nyssa'">Gregory of Nyssa</a>.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 4: PAULINE COSMIC CHRISTOLOGY -->
+<section class="cosmic-section">
+    <div class="triumph-header">
+        <h2 style="margin: 0;">📖 Pauline Cosmic <a class="corpus-link" href="corpus-search.html" title="View christology in ancient texts">Christology</a></h2>
+    </div>
+
+    <div class="victory-card">
+        <h3>🌟 The Cosmic <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> of Colossians</h3>
+        <div class="scripture-quote">
+            "He is the image of the invisible God, the firstborn of all <a class="corpus-link" href="corpus-search.html" title="View creation in ancient texts">creation</a>.
+            For by him all things were created, in <a class="corpus-link" href="corpus-search.html" title="View heaven in ancient texts">heaven</a> and on earth, visible and invisible,
+            whether thrones or dominions or rulers or authorities—all things were created through him and for him.
+            And he is before all things, and in him all things hold together...
+            For in him all the fullness of God was pleased to dwell,
+            and through him to reconcile to himself all things, whether on earth or in <a class="corpus-link" href="corpus-search.html" title="View heaven in ancient texts">heaven</a>,
+            making <a class="corpus-link" data-term="Peace" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Peace'">peace</a> by the blood of his <a class="corpus-link" data-term="Cross" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Cross'">cross</a>."
+            <div class="scripture-reference">— Colossians 1:15-20</div>
+        </div>
+        <p>
+            This staggering passage presents <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> as:
+        </p>
+        <ul class="key-list">
+            <li><strong>Creator of all</strong> - Including all cosmic powers and spiritual authorities</li>
+            <li><strong>Pre-existent</strong> - Before all <a class="corpus-link" href="corpus-search.html" title="View creation in ancient texts">creation</a></li>
+            <li><strong>Sustainer</strong> - Holding all reality together</li>
+            <li><strong>Goal of <a class="corpus-link" href="corpus-search.html" title="View creation in ancient texts">Creation</a></strong> - All made "for him"</li>
+            <li><strong>Universal Reconciler</strong> - Reconciling ALL THINGS, not just humans</li>
+        </ul>
+    </div>
+
+    <div class="aspect-grid">
+        <div class="aspect-card">
+            <h3>🔮 <a class="corpus-link" href="corpus-search.html" title="View mystery in ancient texts">Mystery</a> of God's Will</h3>
+            <div class="scripture-quote">
+                "He made known to us the <a class="corpus-link" href="corpus-search.html" title="View mystery in ancient texts">mystery</a> of his will, according to his purpose,
+                which he set forth in <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> as a plan for the fullness of time,
+                to unite all things in him, things in <a class="corpus-link" href="corpus-search.html" title="View heaven in ancient texts">heaven</a> and things on earth."
+                <div class="scripture-reference">— Ephesians 1:9-10</div>
+            </div>
+            <p>
+                God's ultimate plan is <strong><a class="corpus-link" data-term="Anakephalaiosis" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Anakephalaiosis'">anakephalaiosis</a></strong> (Greek: ἀνακεφαλαίωσις) -
+                to sum up, recapitulate, or unite ALL THINGS in <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a>.
+                <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> is the head under which all reality is being gathered.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>⚔️ Destroying Every Rule and Authority</h3>
+            <div class="scripture-quote">
+                "Then comes the end, when he delivers the kingdom to God the <a class="corpus-link" data-term="Father" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Father'">Father</a>
+                after destroying every rule and every authority and power.
+                For he must reign until he has put all his enemies under his feet.
+                The last enemy to be destroyed is <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>...
+                When all things are subjected to him, then the <a class="corpus-link" data-term="Son" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Son'">Son</a> himself will also be subjected
+                to him who put all things in subjection under him,
+                that God may be all in all."
+                <div class="scripture-reference">— 1 Corinthians 15:24-28</div>
+            </div>
+            <p>
+                <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a>'s reign is not merely spiritual—it is cosmic and political.
+                Every competing power structure is being dismantled.
+                Every authority that exalts itself against God is being overthrown.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>🌍 <a class="corpus-link" href="corpus-search.html" title="View creation in ancient texts">Creation</a> Awaits Liberation</h3>
+            <div class="scripture-quote">
+                "For the <a class="corpus-link" href="corpus-search.html" title="View creation in ancient texts">creation</a> waits with eager longing for the revealing of the sons of God.
+                For the <a class="corpus-link" href="corpus-search.html" title="View creation in ancient texts">creation</a> was subjected to futility, not willingly, but because of him who subjected it,
+                in hope that the <a class="corpus-link" href="corpus-search.html" title="View creation in ancient texts">creation</a> itself will be set free from its bondage to corruption
+                and obtain the freedom of the glory of the children of God."
+                <div class="scripture-reference">— Romans 8:19-23</div>
+            </div>
+            <p>
+                <a class="corpus-link" data-term="Redemption" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Redemption'">Redemption</a> is not only for humans but for all <a class="corpus-link" href="corpus-search.html" title="View creation in ancient texts">creation</a>.
+                The material world itself—subjected to decay and entropy—will be liberated.
+                The cosmos groans in labor pains, awaiting its rebirth.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>💀 <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> of <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a></h3>
+            <div class="scripture-quote">
+                "Then <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> and Hades were thrown into the lake of fire.
+                This is the second <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>, the lake of fire."
+                <div class="scripture-reference">— <a class="corpus-link" data-term="Revelation" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Revelation'">Revelation</a> 20:14</div>
+            </div>
+            <p>
+                <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> itself will be destroyed. Not just defeated—<strong>annihilated</strong>.
+                <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> and Hades, personified powers, will be cast into the lake of fire.
+                <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> will die. This is the ultimate victory.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 5: CHRIST CONQUERING DEATH -->
+<section>
+    <div class="triumph-header">
+        <h2 style="margin: 0;">💀 <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> Conquering <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a></h2>
+    </div>
+
+    <div class="scripture-quote">
+        "<a class="corpus-link" href="corpus-search.html" title="View christ in ancient texts">Christ</a> <a class="corpus-link" href="corpus-search.html" title="View jesus in ancient texts">Jesus</a>... abolished <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> and brought life and immortality to <a class="corpus-link" data-term="Light" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Light'">light</a> through the gospel."
+        <div class="scripture-reference">— 2 Timothy 1:10</div>
+    </div>
+
+    <div class="aspect-grid">
+        <div class="aspect-card">
+            <h3>⚰️ The Last Enemy</h3>
+            <div class="scripture-quote">
+                "The last enemy to be destroyed is <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>."
+                <div class="scripture-reference">— 1 Corinthians 15:26</div>
+            </div>
+            <p>
+                <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> is called an <strong>enemy</strong>—hostile, alien, opposed to God's will.
+                It is the final enemy standing between humanity and complete restoration.
+                But <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> has already sealed its fate. <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a>'s destruction is certain.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>🎺 Swallowed Up in Victory</h3>
+            <div class="scripture-quote">
+                "When the perishable puts on the imperishable, and the mortal puts on immortality,
+                then shall come to pass the saying that is written:
+                '<a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> is swallowed up in victory.'
+                'O <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>, where is your victory? O <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>, where is your sting?'
+                The sting of <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> is sin, and the power of sin is the law.
+                But thanks be to God, who gives us the victory through our Lord <a class="corpus-link" href="corpus-search.html" title="View jesus christ in ancient texts">Jesus Christ</a>."
+                <div class="scripture-reference">— 1 Corinthians 15:54-57</div>
+            </div>
+            <p>
+                <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a>'s power came from sin, and sin's power came from the law's condemnation.
+                <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> broke this chain: He fulfilled the law, bore sin's penalty, and removed <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>'s sting.
+                Now <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> is a defeated foe, mocked and taunted.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>🔥 <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> Cast into Fire</h3>
+            <div class="scripture-quote">
+                "Then <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> and Hades were thrown into the lake of fire."
+                <div class="scripture-reference">— <a class="corpus-link" data-term="Revelation" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Revelation'">Revelation</a> 20:14</div>
+            </div>
+            <p>
+                In the final consummation, <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> and Hades—personified as cosmic entities—are thrown into the lake of fire.
+                This is the "second <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>"—the <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> of <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> itself.
+                <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> will no longer exist. It will be utterly annihilated.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>🌅 No More <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a></h3>
+            <div class="scripture-quote">
+                "He will wipe away every tear from their eyes,
+                and <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> shall be no more,
+                neither shall there be mourning, nor crying, nor pain anymore,
+                for the former things have passed away."
+                <div class="scripture-reference">— <a class="corpus-link" data-term="Revelation" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Revelation'">Revelation</a> 21:4</div>
+            </div>
+            <p>
+                In the new <a class="corpus-link" href="corpus-search.html" title="View creation in ancient texts">creation</a>, <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> will not merely be rare or conquered—it will be <strong>no more</strong>.
+                It will not exist. Humanity will live in a deathless reality,
+                the way God originally intended before the Fall.
+            </p>
+        </div>
+    </div>
+
+    <div class="restoration-box">
+        <h3>✨ <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> Trampling <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> by <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a></h3>
+        <p>
+            The Orthodox Paschal hymn proclaims:
+        </p>
+        <p style="font-style: italic; font-size: 1.2em; text-align: center; margin: 20px 0;">
+            "<a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> is risen from the dead, trampling down <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> by <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>,
+            and upon those in the tombs bestowing life!"
+        </p>
+        <p>
+            <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> used <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> itself as a weapon against <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>.
+            He entered into <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> and exploded it from within.
+            Like a divine Trojan horse, He infiltrated <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>'s domain and destroyed it from the inside out.
+        </p>
+    </div>
+</section>
+
+<!-- SECTION 6: RESTORATION OF ALL THINGS -->
+<section class="cosmic-section">
+    <div class="triumph-header">
+        <h2 style="margin: 0;">🌟 The Restoration of All Things (<a class="corpus-link" data-term="Apokatastasis" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Apokatastasis'">Apokatastasis</a>)</h2>
+    </div>
+
+    <div class="restoration-box">
+        <div class="scripture-quote">
+            "...that he may send the <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> appointed for you, <a class="corpus-link" data-term="Jesus" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Jesus'">Jesus</a>,
+            whom <a class="corpus-link" href="corpus-search.html" title="View heaven in ancient texts">heaven</a> must receive until the time for restoring all the things
+            about which God spoke by the mouth of his holy prophets long ago."
+            <div class="scripture-reference">— Acts 3:20-21</div>
+        </div>
+        <p>
+            The Greek term <strong><a class="corpus-link" data-term="Apokatastasis" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Apokatastasis'">apokatastasis</a></strong> (ἀποκατάστασις) means "restoration" or "reestablishment."
+            <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> will remain in <a class="corpus-link" href="corpus-search.html" title="View heaven in ancient texts">heaven</a> until the time appointed for restoring <strong>all things</strong> (πάντων).
+        </p>
+    </div>
+
+    <div class="aspect-grid">
+        <div class="aspect-card">
+            <h3>🌍 The Renovation of <a class="corpus-link" href="corpus-search.html" title="View creation in ancient texts">Creation</a></h3>
+            <p>
+                The entire cosmos will be renewed:
+            </p>
+            <ul class="key-list">
+                <li><strong>New <a class="corpus-link" href="corpus-search.html" title="View heaven in ancient texts">Heaven</a></strong> - The celestial realm remade</li>
+                <li><strong>New Earth</strong> - Material reality purified and glorified</li>
+                <li><strong>New Jerusalem</strong> - The holy city descending from <a class="corpus-link" href="corpus-search.html" title="View heaven in ancient texts">heaven</a></li>
+                <li><strong>No More Sea</strong> - The primordial chaos abolished</li>
+                <li><strong>No More Curse</strong> - The curse of Genesis 3 reversed</li>
+                <li><strong>Tree of Life Restored</strong> - Access to immortality regained</li>
+            </ul>
+        </div>
+
+        <div class="aspect-card">
+            <h3>🔄 <a class="corpus-link" data-term="Redemption" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Redemption'">Redemption</a> Extends to All Realms</h3>
+            <p>
+                <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a>'s <a class="corpus-link" data-term="Redemption" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Redemption'">redemption</a> is not confined to humanity:
+            </p>
+            <ul class="key-list">
+                <li><strong>Angels</strong> - Confirmed in goodness</li>
+                <li><strong>Humanity</strong> - Raised and glorified</li>
+                <li><strong>Animals</strong> - No longer predatory (Isaiah 11:6-9)</li>
+                <li><strong>Plants</strong> - Bearing fruit abundantly</li>
+                <li><strong>Earth</strong> - No more thorns and thistles</li>
+                <li><strong>Even Demons?</strong> - Church Fathers debated this</li>
+            </ul>
+        </div>
+
+        <div class="aspect-card">
+            <h3>🕊️ Nothing Left Unredeemed</h3>
+            <div class="scripture-quote">
+                "For in him all the fullness of God was pleased to dwell,
+                and through him to reconcile to himself <strong>all things</strong>,
+                whether on earth or in <a class="corpus-link" href="corpus-search.html" title="View heaven in ancient texts">heaven</a>,
+                making <a class="corpus-link" data-term="Peace" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Peace'">peace</a> by the blood of his <a class="corpus-link" data-term="Cross" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Cross'">cross</a>."
+                <div class="scripture-reference">— Colossians 1:19-20</div>
+            </div>
+            <p>
+                The scope is staggering: <strong>all things</strong> (τὰ πάντα).
+                Not just "some things" or "most things"—<strong>all things</strong>.
+                Heaven and earth. Visible and invisible. Every realm. Every being.
+                All reconciled to God through <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a>.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>💖 God's Ultimate Purpose</h3>
+            <div class="scripture-quote">
+                "...that God may be all in all."
+                <div class="scripture-reference">— 1 Corinthians 15:28</div>
+            </div>
+            <p>
+                The final state: <strong>God will be all in all</strong> (πάντα ἐν πᾶσιν).
+                No corner of reality will be outside God's loving presence.
+                No shadow where His <a class="corpus-link" data-term="Light" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Light'">light</a> does not shine.
+                No heart that does not know Him.
+                This is the telos—the ultimate goal toward which all history moves.
+            </p>
+        </div>
+    </div>
+
+    <div class="gnostic-card">
+        <h3>📚 Church Fathers on Universal Restoration</h3>
+        <p>
+            Several major Church Fathers taught or strongly leaned toward universal <a class="corpus-link" data-term="Salvation" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Salvation'">salvation</a>:
+        </p>
+        <ul class="key-list">
+            <li><strong><a class="corpus-link" data-term="Origen" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Origen'">Origen</a> of Alexandria</strong> - Taught that even <a class="corpus-link" data-term="Satan" data-tradition="islamic" href="corpus-search.html" title="Search corpus for 'Satan'">Satan</a> might ultimately be restored</li>
+            <li><strong><a class="corpus-link" data-term="Gregory of Nyssa" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Gregory of Nyssa'">Gregory of Nyssa</a></strong> - Argued that evil is finite and cannot eternally resist infinite goodness</li>
+            <li><strong><a class="corpus-link" data-term="Isaac of Nineveh" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Isaac of Nineveh'">Isaac of Nineveh</a></strong> - <a class="corpus-link" data-term="Hell" data-tradition="islamic" href="corpus-search.html" title="Search corpus for 'Hell'">Hell</a> is God's love experienced as torment by those who resist it</li>
+            <li><strong><a class="corpus-link" data-term="Clement of Alexandria" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Clement of Alexandria'">Clement of Alexandria</a></strong> - God's punishment is remedial, not retributive</li>
+            <li><strong>Maximus the Confessor</strong> - All will be saved, though some "as through fire"</li>
+        </ul>
+        <p>
+            While later condemned at the Fifth Ecumenical Council (553 CE) in its Origenist form,
+            the vision of ultimate universal restoration remained influential and continues to be debated.
+        </p>
+    </div>
+</section>
+
+<!-- SECTION 7: INTEGRATION WITH JEWISH/KABBALISTIC THOUGHT -->
+<section>
+    <div class="triumph-header">
+        <h2 style="margin: 0;">✡️ Integration with Jewish and Kabbalistic Thought</h2>
+    </div>
+
+    <div class="aspect-grid">
+        <div class="aspect-card">
+            <h3>🌍 <a class="corpus-link" data-term="Tikkun Olam" data-tradition="jewish" href="corpus-search.html" title="Search corpus for 'Tikkun Olam'">Tikkun Olam</a> (Repairing the World)</h3>
+            <p>
+                The Jewish concept of <strong><a class="corpus-link" data-term="Tikkun Olam" data-tradition="jewish" href="corpus-search.html" title="Search corpus for 'Tikkun Olam'">tikkun olam</a></strong> (תיקון עולם) means "repairing" or "mending" the world.
+                It is humanity's task to partner with God in restoring <a class="corpus-link" href="corpus-search.html" title="View creation in ancient texts">creation</a> to its intended wholeness.
+            </p>
+            <p>
+                In Christian <a class="corpus-link" href="corpus-search.html" title="View theology in ancient texts">theology</a>, <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> is the ultimate <a class="corpus-link" data-term="Tikkun" data-tradition="jewish" href="corpus-search.html" title="Search corpus for 'Tikkun'">tikkun</a>—the repair of all things.
+                His <a class="corpus-link" data-term="Incarnation" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Incarnation'">incarnation</a>, <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>, and <a class="corpus-link" data-term="Resurrection" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Resurrection'">resurrection</a> begin the cosmic restoration.
+                Believers continue this work as His body, the Church.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>✨ Gathering the Sparks (Kabbalah)</h3>
+            <p>
+                In Lurianic <a class="corpus-link" data-term="Kabbalah" data-tradition="jewish" href="corpus-search.html" title="Search corpus for 'Kabbalah'">Kabbalah</a>, the concept of <strong><a class="corpus-link" data-term="Nitzotzot" data-tradition="jewish" href="corpus-search.html" title="Search corpus for 'Nitzotzot'">nitzotzot</a></strong> (sparks) teaches that
+                when the divine vessels shattered during <a class="corpus-link" href="corpus-search.html" title="View creation in ancient texts">creation</a> (<strong>Shevirat HaKelim</strong>),
+                sparks of divine <a class="corpus-link" data-term="Light" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Light'">light</a> became trapped in material reality.
+            </p>
+            <p>
+                <a class="corpus-link" data-term="Redemption" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Redemption'">Redemption</a> involves "gathering the sparks"—liberating these fragments of divine presence
+                and restoring them to their source. This parallels:
+            </p>
+            <ul class="key-list">
+                <li><a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> gathering His scattered people (John 11:52)</li>
+                <li>The Spirit bringing all things into unity</li>
+                <li>The ultimate reconciliation of all things to God</li>
+                <li>Nothing lost, everything redeemed</li>
+            </ul>
+        </div>
+
+        <div class="aspect-card">
+            <h3>👑 The <a class="corpus-link" data-term="Messiah" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Messiah'">Messiah</a>'s Cosmic Role</h3>
+            <p>
+                Jewish <a class="corpus-link" data-term="Messianic" data-tradition="jewish" href="corpus-search.html" title="Search corpus for 'Messianic'">messianic</a> expectation includes:
+            </p>
+            <ul class="key-list">
+                <li><strong>Defeating death</strong> - "He will swallow up <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a> forever" (Isaiah 25:8)</li>
+                <li><strong>Restoring <a class="corpus-link" href="corpus-search.html" title="View creation in ancient texts">creation</a></strong> - Wolf dwelling with <a class="corpus-link" data-term="Lamb" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Lamb'">lamb</a> (Isaiah 11)</li>
+                <li><strong>Universal <a class="corpus-link" data-term="Knowledge" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Knowledge'">knowledge</a> of God</strong> - "The earth shall be full of the knowledge of the Lord" (Isaiah 11:9)</li>
+                <li><strong>Resurrection of the dead</strong> - (Daniel 12:2)</li>
+                <li><strong><a class="corpus-link" href="corpus-search.html" title="View peace in ancient texts">Peace</a> for all nations</strong> - Swords into plowshares (Isaiah 2:4)</li>
+            </ul>
+            <p>
+                Christians see all these fulfilled in <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a>—inaugurated now, consummated at His return.
+            </p>
+        </div>
+
+        <div class="aspect-card">
+            <h3>📖 Connection to Enochian Visions</h3>
+            <p>
+                The <strong>Book of <a class="corpus-link" data-term="Enoch" data-tradition="jewish" href="corpus-search.html" title="Search corpus for 'Enoch'">Enoch</a></strong> presents the "<a class="corpus-link" data-term="Son of Man" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Son of Man'">Son of Man</a>" as a pre-existent,
+                heavenly figure who will judge all creation and establish God's kingdom.
+            </p>
+            <p>
+                <a class="corpus-link" data-term="Jesus" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Jesus'">Jesus</a> deliberately identified with this figure, claiming the title "<a class="corpus-link" data-term="Son of Man" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Son of Man'">Son of Man</a>"
+                more than any other. He presented Himself as:
+            </p>
+            <ul class="key-list">
+                <li>The heavenly judge of all humanity</li>
+                <li>The one who inherits dominion over all nations</li>
+                <li>The revealer of divine secrets</li>
+                <li>The restorer of cosmic order</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- CONCLUSION -->
+<section>
+    <div class="restoration-box" style="text-align: center; padding: 40px;">
+        <h2 style="font-size: 2rem; margin-bottom: 20px;">The Completeness of <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a>'s Victory</h2>
+        <p style="font-size: 1.2rem; line-height: 1.8;">
+            <a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> has accomplished total, cosmic <a class="corpus-link" data-term="Redemption" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Redemption'">redemption</a>.
+            He descended to the lowest depths, harrowed <a class="corpus-link" data-term="Hell" data-tradition="islamic" href="corpus-search.html" title="Search corpus for 'Hell'">hell</a>, freed the captives,
+            rose victorious over <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">death</a>, ascended above all heavens,
+            and now reigns as King over every realm.
+        </p>
+        <p style="font-size: 1.2rem; line-height: 1.8;">
+            He holds the keys. He has disarmed the powers. He is reconciling all things.
+            <a class="corpus-link" href="corpus-search.html" title="View death in ancient texts">Death</a> itself will be thrown into the fire.
+            Nothing remains outside His <a class="corpus-link" data-term="Redemption" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Redemption'">redemption</a>.
+            Nothing can resist His love forever.
+        </p>
+        <p style="font-size: 1.3rem; font-weight: bold; margin-top: 30px; color: var(--color-primary);">
+            God will be all in all.
+        </p>
+    </div>
+</section>
+
+<!-- RELATED LINKS -->
+<section class="related-concepts" style="margin-top: 3rem;">
+    <h2>🔗 Related Concepts</h2>
+    <div class="aspect-grid">
+        <div class="aspect-card">
+            <h3>Within Christian Tradition</h3>
+            <ul class="key-list">
+                <li><a href="../../cosmology/crucifixion.html"><a class="corpus-link" data-term="Crucifixion" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Crucifixion'">Crucifixion</a> & <a class="corpus-link" data-term="Resurrection" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Resurrection'">Resurrection</a></a></li>
+                <li><a href="../../cosmology/eschatology.html">End Times & <a class="corpus-link" data-term="Final Judgment" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Final Judgment'">Final Judgment</a></a></li>
+                <li><a href="../../deities/jesus-christ.html"><a class="corpus-link" href="corpus-search.html" title="View jesus christ in ancient texts">Jesus Christ</a> - The God-Man</a></li>
+                <li><a href="../../cosmology/afterlife.html"><a class="corpus-link" href="corpus-search.html" title="View afterlife in ancient texts">Afterlife</a> Journey</a></li>
+            </ul>
+        </div>
+
+        <div class="aspect-card">
+            <h3>Gnostic & Apocryphal Texts</h3>
+            <ul class="key-list">
+                <li><a href="../../texts/gospel-nicodemus.html">Gospel of <a class="corpus-link" data-term="Nicodemus" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Nicodemus'">Nicodemus</a></a></li>
+                <li><a href="../../texts/gospel-truth.html">Gospel of Truth</a></li>
+                <li><a href="../../texts/tripartite-tractate.html">Tripartite Tractate</a></li>
+                <li><a href="../../texts/hymn-pearl.html"><a class="corpus-link" data-term="Hymn of the Pearl" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Hymn of the Pearl'">Hymn of the Pearl</a></a></li>
+            </ul>
+        </div>
+
+        <div class="aspect-card">
+            <h3>Jewish Connections</h3>
+            <ul class="key-list">
+                <li><a href="../../../jewish/cosmology/messiah.html">Jewish <a class="corpus-link" data-term="Messiah" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Messiah'">Messiah</a></a></li>
+                <li><a href="../../../jewish/texts/enoch.html">Book of <a class="corpus-link" data-term="Enoch" data-tradition="jewish" href="corpus-search.html" title="Search corpus for 'Enoch'">Enoch</a></a></li>
+                <li><a href="../../../jewish/cosmology/tikkun-olam.html"><a class="corpus-link" data-term="Tikkun Olam" data-tradition="jewish" href="corpus-search.html" title="Search corpus for 'Tikkun Olam'">Tikkun Olam</a></a></li>
+                <li><a href="../../../jewish/cosmology/kabbalah.html">Kabbalah & Sparks</a></li>
+            </ul>
+        </div>
+
+        <div class="aspect-card">
+            <h3>Theological Concepts</h3>
+            <ul class="key-list">
+                <li><a href="../../cosmology/universal-salvation.html">Universal <a class="corpus-link" data-term="Salvation" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Salvation'">Salvation</a></a></li>
+                <li><a href="../../cosmology/apokatastasis.html"><a class="corpus-link" data-term="Apokatastasis" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Apokatastasis'">Apokatastasis</a></a></li>
+                <li><a href="../../cosmology/spiritual-warfare.html">Spiritual Warfare</a></li>
+                <li><a href="../../cosmology/kingdom-of-god.html">Kingdom of God</a></li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<footer>
+    <p>
+        <strong><a class="corpus-link" data-term="Christ" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Christ'">Christ</a> as Cosmic <a class="corpus-link" data-term="Redeemer" data-tradition="christian" href="corpus-search.html" title="Search corpus for 'Redeemer'">Redeemer</a></strong> - Christian Gnostic Thought<br/>
+        <a href="../../../../mythos/index.html">World Mythos Home</a> |
+        <a href="../../../index.html">Christian Tradition</a> |
+        <a href="../../index.html">Gnostic Thought</a>
+    </p>
+</footer>
+
+<script>
+function toggleSection(header) {
+    const section = header.parentElement;
+    const content = section.querySelector('.collapsible-content');
+    section.classList.toggle('expanded');
+    content.classList.toggle('show');
+}
+</script>
+
+</body>
+</html>

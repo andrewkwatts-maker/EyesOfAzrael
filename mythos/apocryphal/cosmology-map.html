@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Cosmology Map - Enochian Realms</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center,
+                rgba(var(--color-bg-rgb), 0.9) 0%,
+                rgba(var(--color-bg-rgb), 1) 100%);
+            font-family: var(--font-primary);
+            color: var(--color-text-primary);
+            overflow-x: hidden;
+        }
+
+        .header-nav {
+            padding: 1rem 2rem;
+            background: rgba(var(--color-bg-secondary-rgb), 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--color-primary);
+        }
+
+        .breadcrumb {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--color-accent);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-family: var(--font-display);
+            color: var(--color-primary);
+            text-align: center;
+            margin: 2rem 0 1rem;
+            text-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .map-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .map-section {
+            background: rgba(var(--color-bg-secondary-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .map-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-family: var(--font-display);
+            color: var(--color-accent);
+            margin-bottom: 1rem;
+            text-align: center;
+            border-bottom: 2px solid var(--color-accent);
+            padding-bottom: 0.5rem;
+        }
+
+        /* 3D Cosmology Diagram */
+        .cosmology-3d {
+            perspective: 1200px;
+            min-height: 800px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+
+        .realm {
+            width: 300px;
+            height: 80px;
+            margin: 10px 0;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.3),
+                rgba(var(--color-secondary-rgb), 0.3));
+            border: 2px solid var(--color-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .realm::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+                transparent 0%,
+                rgba(var(--color-accent-rgb), 0.2) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .realm:hover::before {
+            opacity: 1;
+        }
+
+        .realm:hover {
+            transform: scale(1.1) translateZ(50px);
+            box-shadow: 0 20px 60px rgba(var(--color-primary-rgb), 0.6);
+            border-color: var(--color-accent);
+        }
+
+        .realm.active {
+            background: linear-gradient(135deg,
+                rgba(var(--color-accent-rgb), 0.5),
+                rgba(var(--color-primary-rgb), 0.5));
+            transform: scale(1.15) translateZ(60px);
+        }
+
+        .realm-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .heaven-7 { transform: translateZ(300px) rotateX(-5deg); }
+        .heaven-6 { transform: translateZ(250px) rotateX(-4deg); }
+        .heaven-5 { transform: translateZ(200px) rotateX(-3deg); }
+        .heaven-4 { transform: translateZ(150px) rotateX(-2deg); }
+        .heaven-3 { transform: translateZ(100px) rotateX(-1deg); }
+        .heaven-2 { transform: translateZ(50px); }
+        .heaven-1 { transform: translateZ(0px); }
+        .earth {
+            width: 350px;
+            height: 100px;
+            margin: 20px 0;
+            background: linear-gradient(135deg,
+                rgba(76, 175, 80, 0.4),
+                rgba(139, 69, 19, 0.4));
+        }
+        .sheol { transform: translateZ(-50px) rotateX(1deg); }
+        .abyss { transform: translateZ(-100px) rotateX(2deg); }
+
+        .realm-info {
+            position: absolute;
+            top: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(var(--color-bg-rgb), 0.95);
+            border: 2px solid var(--color-accent);
+            border-radius: 8px;
+            padding: 1rem;
+            min-width: 300px;
+            max-width: 400px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        }
+
+        .realm.active .realm-info {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .realm-info h4 {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .realm-info p {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Merkabah Throne Room SVG */
+        .merkabah-container {
+            width: 100%;
+            height: 700px;
+            position: relative;
+        }
+
+        .merkabah-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .creature {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .creature:hover {
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+        }
+
+        .wheel {
+            animation: rotate 20s linear infinite;
+            transform-origin: center;
+            cursor: pointer;
+        }
+
+        .wheel:hover {
+            animation-duration: 5s;
+            filter: drop-shadow(0 0 15px rgba(100, 200, 255, 0.9));
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .throne-glow {
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .fire-river {
+            animation: flow 4s linear infinite;
+        }
+
+        @keyframes flow {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(20px); }
+        }
+
+        /* Storehouses Map */
+        .storehouses-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            position: relative;
+        }
+
+        .storehouse {
+            background: rgba(var(--color-bg-secondary-rgb), 0.5);
+            border: 2px solid var(--color-primary);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .storehouse:hover {
+            transform: scale(1.05);
+            border-color: var(--color-accent);
+            background: rgba(var(--color-accent-rgb), 0.2);
+            box-shadow: 0 0 20px rgba(var(--color-accent-rgb), 0.4);
+        }
+
+        .storehouse-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .storehouse-name {
+            font-weight: bold;
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .storehouse-desc {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* Judgment Locations */
+        .judgment-map {
+            position: relative;
+            height: 600px;
+            background: radial-gradient(ellipse at center,
+                rgba(var(--color-primary-rgb), 0.1) 0%,
+                transparent 70%);
+        }
+
+        .location {
+            position: absolute;
+            width: 140px;
+            padding: 1rem;
+            background: rgba(var(--color-bg-secondary-rgb), 0.8);
+            border: 2px solid var(--color-primary);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .location:hover {
+            transform: scale(1.1);
+            border-color: var(--color-accent);
+            box-shadow: 0 0 30px rgba(var(--color-accent-rgb), 0.6);
+            z-index: 10;
+        }
+
+        .location-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .location-name {
+            font-weight: bold;
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .location-info {
+            font-size: 0.8rem;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .location:hover .location-info,
+        .location.active .location-info {
+            opacity: 1;
+            max-height: 300px;
+        }
+
+        .paradise { top: 20%; left: 10%; border-color: #4caf50; }
+        .gehenna { top: 20%; right: 10%; border-color: #f44336; }
+        .dudael { bottom: 20%; left: 10%; border-color: #ff9800; }
+        .abyss-loc { bottom: 20%; right: 10%; border-color: #9c27b0; }
+
+        .path {
+            position: absolute;
+            border-top: 2px dashed var(--color-primary);
+            opacity: 0.4;
+            z-index: 0;
+        }
+
+        .path1 { top: 25%; left: 22%; width: 55%; transform: rotate(-5deg); }
+        .path2 { top: 50%; left: 15%; width: 30%; transform: rotate(65deg); }
+        .path3 { top: 50%; right: 15%; width: 30%; transform: rotate(-65deg); }
+        .path4 { bottom: 25%; left: 22%; width: 55%; }
+
+        /* Info Panel */
+        .info-panel {
+            position: fixed;
+            right: -400px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 380px;
+            max-height: 80vh;
+            background: rgba(var(--color-bg-rgb), 0.95);
+            border: 2px solid var(--color-accent);
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            padding: 2rem;
+            transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .info-panel.active {
+            right: 0;
+        }
+
+        .info-panel h3 {
+            color: var(--color-accent);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .info-panel p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .info-panel .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--color-accent);
+            border: none;
+            color: var(--color-text-primary);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .info-panel .close-btn:hover {
+            background: var(--color-primary);
+            transform: rotate(90deg);
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10000;
+            max-width: 250px;
+        }
+
+        .instructions {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(var(--color-accent-rgb), 0.1);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--color-accent);
+        }
+
+        .instructions p {
+            margin: 0.5rem 0;
+            opacity: 0.9;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+            border-top: 2px solid var(--color-primary);
+            opacity: 0.8;
+        }
+
+        footer a {
+            color: var(--color-primary);
+            text-decoration: none;
+            margin: 0 0.5rem;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: var(--color-accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="header-nav">
+        <nav class="breadcrumb">
+            <a href="../../mythos/index.html">Home</a> →
+            <a href="index.html">Apocryphal Mythology</a> →
+            <a href="cosmology/index.html">Cosmology</a> →
+            <span>Interactive Map</span>
+        </nav>
+    </div>
+
+    <h1>Interactive Cosmology Map</h1>
+
+    <div class="instructions">
+        <p><strong>Explore the Enochian Universe</strong></p>
+        <p>Click or hover over any realm, symbol, or location to reveal detailed information</p>
+    </div>
+
+    <div class="map-container">
+        <!-- Main 3D Cosmology Diagram -->
+        <div class="map-section" style="grid-column: 1 / -1;">
+            <h2 class="section-title">The Vertical Cosmos - Seven Heavens</h2>
+            <div class="cosmology-3d">
+                <div class="realm heaven-7" data-realm="araboth">
+                    <span class="realm-name">Seventh Heaven - Araboth</span>
+                    <div class="realm-info">
+                        <h4>Araboth - The Highest Heaven</h4>
+                        <p>The dwelling place of God, where the divine throne sits upon the Merkabah. Here are righteousness, justice, mercy, and the souls of the unborn. The Seraphim cry "Holy, Holy, Holy!"</p>
+                        <p><em>Inhabitants:</em> God, Seraphim, Ophanim, Archangels, Metatron</p>
+                    </div>
+                </div>
+
+                <div class="realm heaven-6" data-realm="machon">
+                    <span class="realm-name">Sixth Heaven - Machon</span>
+                    <div class="realm-info">
+                        <h4>Machon - The Foundation</h4>
+                        <p>Home of scholar angels who study Torah, astronomy, and sciences of creation. The heavenly archives storing records of all earthly events are kept here.</p>
+                        <p><em>Inhabitants:</em> Scholar Angels, Cherubim, Phoenixes, Keepers of Records</p>
+                    </div>
+                </div>
+
+                <div class="realm heaven-5" data-realm="maon">
+                    <span class="realm-name">Fifth Heaven - Maon</span>
+                    <div class="realm-info">
+                        <h4>Maon - The Residence</h4>
+                        <p>Home of the Ishim, angels of fire who eternally sing praises. The Watchers' leaders including Azazel are imprisoned here. Massive angelic armies await divine commands.</p>
+                        <p><em>Inhabitants:</em> Ishim (fiery angels), Angels of Destruction, Imprisoned Chiefs</p>
+                    </div>
+                </div>
+
+                <div class="realm heaven-4" data-realm="zebul">
+                    <span class="realm-name">Fourth Heaven - Zebul</span>
+                    <div class="realm-info">
+                        <h4>Zebul - The Dwelling</h4>
+                        <p>Contains the heavenly Jerusalem and Holy Temple where Michael serves as High Priest. The Sun and Moon have thrones here, directed by Uriel and Gabriel.</p>
+                        <p><em>Inhabitants:</em> Michael, Temple Angels, Sun and Moon, Chariot Wheels</p>
+                    </div>
+                </div>
+
+                <div class="realm heaven-3" data-realm="shehaqim">
+                    <span class="realm-name">Third Heaven - Shehaqim</span>
+                    <div class="realm-info">
+                        <h4>Shehaqim - The Clouds</h4>
+                        <p>Paradise (Eden) and Gehenna coexist here. The Tree of Life grows in the north where the righteous dwell, while fire and ice torture the wicked in the south.</p>
+                        <p><em>Inhabitants:</em> Righteous Souls, Tormented Wicked, Angels of Paradise, Phoenix</p>
+                    </div>
+                </div>
+
+                <div class="realm heaven-2" data-realm="raquia">
+                    <span class="realm-name">Second Heaven - Raquia</span>
+                    <div class="realm-info">
+                        <h4>Raquia - The Firmament</h4>
+                        <p>Prison of the fallen Watchers who await final judgment. Here in darkness and chains, 200 rebellious angels suffer. Contains the treasury of celestial fire.</p>
+                        <p><em>Inhabitants:</em> Imprisoned Watchers, Angels of Luminaries, Spirits of Darkness</p>
+                    </div>
+                </div>
+
+                <div class="realm heaven-1" data-realm="vilon">
+                    <span class="realm-name">First Heaven - Vilon</span>
+                    <div class="realm-info">
+                        <h4>Vilon - The Veil</h4>
+                        <p>The lowest heaven, containing storehouses of snow, hail, dew, and rain. Angels who govern weather and seasons dwell here. The Elders command the stars.</p>
+                        <p><em>Inhabitants:</em> Angels of Weather, Star-Elders, Clouds of Glory</p>
+                    </div>
+                </div>
+
+                <div class="realm earth" data-realm="earth">
+                    <span class="realm-name">Earth - Eretz</span>
+                    <div class="realm-info">
+                        <h4>Earth - The Material World</h4>
+                        <p>The middle realm where humanity dwells. Created on the third day, it is the stage for spiritual warfare and the testing ground of souls.</p>
+                        <p><em>Inhabitants:</em> Humans, Animals, Plants, Spirits</p>
+                    </div>
+                </div>
+
+                <div class="realm sheol" data-realm="sheol">
+                    <span class="realm-name">Sheol / Gehenna</span>
+                    <div class="realm-info">
+                        <h4>Sheol / Gehenna - The Underworld</h4>
+                        <p>The realm beneath earth where the dead await judgment. Paradise for the righteous, seven chambers of punishment for the wicked. Some are purified, others remain forever.</p>
+                        <p><em>Locations:</em> Paradise, Seven Chambers of Gehenna</p>
+                    </div>
+                </div>
+
+                <div class="realm abyss" data-realm="abyss">
+                    <span class="realm-name">The Abyss</span>
+                    <div class="realm-info">
+                        <h4>The Abyss - Deepest Prison</h4>
+                        <p>Deep chambers where the Watchers are imprisoned in chains of darkness, awaiting final judgment. A place of weeping, torment, and eternal separation from the divine light.</p>
+                        <p><em>Inhabitants:</em> Bound Watchers, Fallen Angels, Demons</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-layout">
+            <!-- Merkabah Throne Room -->
+            <div class="map-section">
+                <h2 class="section-title">The Merkabah - Divine Throne</h2>
+                <div class="merkabah-container">
+                    <svg class="merkabah-svg" viewBox="0 0 600 700" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Crystal Firmament -->
+                        <defs>
+                            <linearGradient id="crystalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:rgba(100,200,255,0.3);stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:rgba(150,220,255,0.1);stop-opacity:1" />
+                            </linearGradient>
+                            <radialGradient id="throneGlow">
+                                <stop offset="0%" style="stop-color:rgba(65,105,225,0.8);stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:rgba(65,105,225,0.4);stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:rgba(65,105,225,0);stop-opacity:0" />
+                            </radialGradient>
+                            <linearGradient id="fireGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ff6b00;stop-opacity:0.8" />
+                                <stop offset="50%" style="stop-color:#ff0000;stop-opacity:0.9" />
+                                <stop offset="100%" style="stop-color:#8b0000;stop-opacity:0.7" />
+                            </linearGradient>
+                        </defs>
+
+                        <!-- Crystal Firmament -->
+                        <ellipse cx="300" cy="280" rx="280" ry="40" fill="url(#crystalGrad)" stroke="cyan" stroke-width="2" opacity="0.6"/>
+
+                        <!-- Throne Glow -->
+                        <circle class="throne-glow" cx="300" cy="200" r="120" fill="url(#throneGlow)"/>
+
+                        <!-- Sapphire Throne -->
+                        <g id="throne">
+                            <rect x="260" y="180" width="80" height="100" fill="rgba(65,105,225,0.7)" stroke="#4169E1" stroke-width="3" rx="10"/>
+                            <rect x="250" y="160" width="100" height="30" fill="rgba(65,105,225,0.8)" stroke="#4169E1" stroke-width="3" rx="5"/>
+                            <path d="M 250 180 L 240 270 L 250 270 Z" fill="rgba(65,105,225,0.6)" stroke="#4169E1" stroke-width="2"/>
+                            <path d="M 350 180 L 360 270 L 350 270 Z" fill="rgba(65,105,225,0.6)" stroke="#4169E1" stroke-width="2"/>
+                            <!-- Divine Presence -->
+                            <ellipse cx="300" cy="200" rx="30" ry="40" fill="rgba(255,215,0,0.6)" stroke="gold" stroke-width="2"/>
+                            <circle cx="300" cy="190" r="15" fill="rgba(255,255,255,0.8)"/>
+                        </g>
+
+                        <!-- Four Living Creatures -->
+                        <!-- Man (South) -->
+                        <g class="creature" data-creature="man">
+                            <circle cx="300" cy="380" r="45" fill="rgba(255,220,180,0.3)" stroke="#DAA520" stroke-width="3"/>
+                            <text x="300" y="390" text-anchor="middle" font-size="30" fill="#DAA520">👤</text>
+                            <text x="300" y="440" text-anchor="middle" font-size="14" fill="#DAA520" font-weight="bold">MAN</text>
+                        </g>
+
+                        <!-- Lion (North) -->
+                        <g class="creature" data-creature="lion">
+                            <circle cx="300" cy="80" r="45" fill="rgba(255,140,0,0.3)" stroke="#FF8C00" stroke-width="3"/>
+                            <text x="300" y="90" text-anchor="middle" font-size="30" fill="#FF8C00">🦁</text>
+                            <text x="300" y="50" text-anchor="middle" font-size="14" fill="#FF8C00" font-weight="bold">LION</text>
+                        </g>
+
+                        <!-- Ox (West) -->
+                        <g class="creature" data-creature="ox">
+                            <circle cx="120" cy="230" r="45" fill="rgba(139,69,19,0.3)" stroke="#8B4513" stroke-width="3"/>
+                            <text x="120" y="240" text-anchor="middle" font-size="30" fill="#8B4513">🐂</text>
+                            <text x="120" y="290" text-anchor="middle" font-size="14" fill="#8B4513" font-weight="bold">OX</text>
+                        </g>
+
+                        <!-- Eagle (East) -->
+                        <g class="creature" data-creature="eagle">
+                            <circle cx="480" cy="230" r="45" fill="rgba(160,82,45,0.3)" stroke="#A0522D" stroke-width="3"/>
+                            <text x="480" y="240" text-anchor="middle" font-size="30" fill="#A0522D">🦅</text>
+                            <text x="480" y="290" text-anchor="middle" font-size="14" fill="#A0522D" font-weight="bold">EAGLE</text>
+                        </g>
+
+                        <!-- Wings connecting creatures -->
+                        <line x1="300" y1="125" x2="300" y2="335" stroke="rgba(200,200,255,0.3)" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="165" y1="230" x2="435" y2="230" stroke="rgba(200,200,255,0.3)" stroke-width="2" stroke-dasharray="5,5"/>
+
+                        <!-- Ophanim - Wheels within Wheels -->
+                        <g class="wheel" data-wheel="outer">
+                            <circle cx="300" cy="230" r="140" fill="none" stroke="rgba(100,200,255,0.6)" stroke-width="4"/>
+                            <circle cx="300" cy="230" r="135" fill="none" stroke="rgba(100,200,255,0.3)" stroke-width="1"/>
+                            <!-- Eyes on the wheel -->
+                            <circle cx="300" cy="90" r="4" fill="#00FFFF"/>
+                            <circle cx="440" cy="230" r="4" fill="#00FFFF"/>
+                            <circle cx="300" cy="370" r="4" fill="#00FFFF"/>
+                            <circle cx="160" cy="230" r="4" fill="#00FFFF"/>
+                            <circle cx="370" cy="130" r="4" fill="#00FFFF"/>
+                            <circle cx="370" cy="330" r="4" fill="#00FFFF"/>
+                            <circle cx="230" cy="130" r="4" fill="#00FFFF"/>
+                            <circle cx="230" cy="330" r="4" fill="#00FFFF"/>
+                        </g>
+
+                        <g class="wheel" data-wheel="inner" style="animation-direction: reverse;">
+                            <circle cx="300" cy="230" r="100" fill="none" stroke="rgba(100,200,255,0.8)" stroke-width="5"/>
+                            <circle cx="300" cy="230" r="95" fill="none" stroke="rgba(100,200,255,0.4)" stroke-width="1"/>
+                            <!-- Inner wheel eyes -->
+                            <circle cx="300" cy="130" r="3" fill="#00FFFF"/>
+                            <circle cx="400" cy="230" r="3" fill="#00FFFF"/>
+                            <circle cx="300" cy="330" r="3" fill="#00FFFF"/>
+                            <circle cx="200" cy="230" r="3" fill="#00FFFF"/>
+                            <circle cx="350" cy="170" r="3" fill="#00FFFF"/>
+                            <circle cx="350" cy="290" r="3" fill="#00FFFF"/>
+                            <circle cx="250" cy="170" r="3" fill="#00FFFF"/>
+                            <circle cx="250" cy="290" r="3" fill="#00FFFF"/>
+                            <circle cx="370" cy="200" r="3" fill="#00FFFF"/>
+                            <circle cx="370" cy="260" r="3" fill="#00FFFF"/>
+                            <circle cx="230" cy="200" r="3" fill="#00FFFF"/>
+                            <circle cx="230" cy="260" r="3" fill="#00FFFF"/>
+                        </g>
+
+                        <!-- Rivers of Fire -->
+                        <g class="fire-river">
+                            <path d="M 280 280 Q 260 350 240 420 Q 230 480 220 540 Q 215 590 210 650"
+                                  fill="none" stroke="url(#fireGrad)" stroke-width="15" opacity="0.7"/>
+                            <path d="M 320 280 Q 340 350 360 420 Q 370 480 380 540 Q 385 590 390 650"
+                                  fill="none" stroke="url(#fireGrad)" stroke-width="15" opacity="0.7"/>
+                        </g>
+
+                        <!-- Labels -->
+                        <text x="300" y="30" text-anchor="middle" font-size="16" fill="cyan" font-weight="bold">MERKABAH - THE DIVINE CHARIOT</text>
+                        <text x="300" y="680" text-anchor="middle" font-size="14" fill="#FF6B00" font-style="italic">Rivers of Fire</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Storehouses & Treasuries -->
+            <div class="map-section">
+                <h2 class="section-title">Storehouses & Treasuries</h2>
+                <div class="storehouses-grid">
+                    <div class="storehouse" data-storehouse="winds">
+                        <div class="storehouse-icon">💨</div>
+                        <div class="storehouse-name">Storehouse of Winds</div>
+                        <div class="storehouse-desc">Four chambers holding the winds of north, south, east, and west. Angels release them by divine command to govern weather across the earth.</div>
+                    </div>
+
+                    <div class="storehouse" data-storehouse="snow">
+                        <div class="storehouse-icon">❄️</div>
+                        <div class="storehouse-name">Treasury of Snow</div>
+                        <div class="storehouse-desc">Where winter's white is kept until needed. Measured precisely for each season and location on earth.</div>
+                    </div>
+
+                    <div class="storehouse" data-storehouse="hail">
+                        <div class="storehouse-icon">🧊</div>
+                        <div class="storehouse-name">Chambers of Hail</div>
+                        <div class="storehouse-desc">Ice weapons stored for divine judgment. Reserved for the day of battle and war.</div>
+                    </div>
+
+                    <div class="storehouse" data-storehouse="light">
+                        <div class="storehouse-icon">💡</div>
+                        <div class="storehouse-name">Fountains of Light</div>
+                        <div class="storehouse-desc">Sources for sun, moon, stars, and lightning. Angels draw from these wells to illuminate creation.</div>
+                    </div>
+
+                    <div class="storehouse" data-storehouse="darkness">
+                        <div class="storehouse-icon">🌑</div>
+                        <div class="storehouse-name">Wells of Darkness</div>
+                        <div class="storehouse-desc">Origin of shadows and night. Kept in balance with light to maintain cosmic order.</div>
+                    </div>
+
+                    <div class="storehouse" data-storehouse="souls">
+                        <div class="storehouse-icon">👶</div>
+                        <div class="storehouse-name">Souls of the Unborn</div>
+                        <div class="storehouse-desc">In the Seventh Heaven, spirits await their appointed time for earthly incarnation. The Chamber of Souls (Guf).</div>
+                    </div>
+
+                    <div class="storehouse" data-storehouse="rain">
+                        <div class="storehouse-icon">🌧️</div>
+                        <div class="storehouse-name">Reservoirs of Rain</div>
+                        <div class="storehouse-desc">Clouds of blessing stored in the First Heaven. Released to water the earth and bring forth life.</div>
+                    </div>
+
+                    <div class="storehouse" data-storehouse="manna">
+                        <div class="storehouse-icon">🍞</div>
+                        <div class="storehouse-name">Manna Factory</div>
+                        <div class="storehouse-desc">Angels in the Third Heaven constantly manufacture manna to feed the blessed souls in Paradise.</div>
+                    </div>
+
+                    <div class="storehouse" data-storehouse="dew">
+                        <div class="storehouse-icon">💧</div>
+                        <div class="storehouse-name">Dew of Resurrection</div>
+                        <div class="storehouse-desc">The sacred dew that will resurrect the dead on Judgment Day. Kept in the Seventh Heaven, most precious of all treasures.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Judgment Locations Map -->
+        <div class="map-section" style="grid-column: 1 / -1;">
+            <h2 class="section-title">Places of Judgment & Detention</h2>
+            <div class="judgment-map">
+                <!-- Connection Paths -->
+                <div class="path path1"></div>
+                <div class="path path2"></div>
+                <div class="path path3"></div>
+                <div class="path path4"></div>
+
+                <!-- Paradise -->
+                <div class="location paradise" data-location="paradise">
+                    <div class="location-icon">🌺</div>
+                    <div class="location-name">Paradise (Gan Eden)</div>
+                    <div class="location-info">
+                        <p><strong>Location:</strong> Third Heaven, Northern Section</p>
+                        <p>The garden where the righteous dwell in eternal bliss. The Tree of Life grows here, its fragrance permeates ten thousand worlds. Rivers of balsam and honey flow through gardens of light.</p>
+                        <p><strong>Features:</strong> Tree of Life, Rivers of Paradise, Halls of Study, Chambers of Rest</p>
+                        <p><strong>Inhabitants:</strong> Righteous souls, Angels of Paradise, The Phoenix</p>
+                    </div>
+                </div>
+
+                <!-- Gehenna -->
+                <div class="location gehenna" data-location="gehenna">
+                    <div class="location-icon">🔥</div>
+                    <div class="location-name">Gehenna</div>
+                    <div class="location-info">
+                        <p><strong>Location:</strong> Third Heaven, Southern Section / Beneath Earth</p>
+                        <p>Valley of fire and ice where the wicked undergo purification or eternal punishment. Contains seven chambers of increasing severity.</p>
+                        <p><strong>Seven Chambers:</strong></p>
+                        <ul style="font-size: 0.75rem; margin-left: 1rem;">
+                            <li>1. Sheol - Grave/Dust</li>
+                            <li>2. Abaddon - Destruction</li>
+                            <li>3. Titahion - Miry Clay</li>
+                            <li>4. Bar Shachath - Pit of Corruption</li>
+                            <li>5. Tzoah Rotachat - Boiling Mud</li>
+                            <li>6. Shaare Mavet - Gates of Death</li>
+                            <li>7. Gehinnom - Valley of Hinnom (Fire & Ice)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Dudael -->
+                <div class="location dudael" data-location="dudael">
+                    <div class="location-icon">⛓️</div>
+                    <div class="location-name">Dudael</div>
+                    <div class="location-info">
+                        <p><strong>Location:</strong> Desert Wilderness</p>
+                        <p>The desert prison where Azazel, leader of the Watchers, is bound beneath sharp rocks and cast into darkness. Here he awaits the Day of Judgment when he will be thrown into eternal fire.</p>
+                        <p><strong>Prisoner:</strong> Azazel, chief of the fallen Watchers</p>
+                        <p><strong>Condition:</strong> Bound in total darkness under jagged stones, separate from all light and life</p>
+                    </div>
+                </div>
+
+                <!-- The Abyss -->
+                <div class="location abyss-loc" data-location="abyss">
+                    <div class="location-icon">🌑</div>
+                    <div class="location-name">The Abyss</div>
+                    <div class="location-info">
+                        <p><strong>Location:</strong> Deep chambers in Second Heaven / Beneath the Earth</p>
+                        <p>Prison where the 200 fallen Watchers are bound in chains of everlasting darkness, awaiting the final judgment. A place of weeping, gnashing of teeth, and eternal torment.</p>
+                        <p><strong>Prisoners:</strong> The 200 Watchers who descended to Mount Hermon and corrupted humanity</p>
+                        <p><strong>Leaders imprisoned:</strong> Semyaza, Araqiel, Ramiel, Kokabiel, Tamiel, Ramiel, and others</p>
+                        <p><strong>Duration:</strong> 70 generations until final judgment</p>
+                    </div>
+                </div>
+
+                <!-- Central Info -->
+                <div style="position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); text-align: center; opacity: 0.6;">
+                    <p style="font-size: 1.2rem; font-weight: bold; color: var(--color-accent);">Paths of Souls</p>
+                    <p style="font-size: 0.9rem;">The righteous ascend to Paradise</p>
+                    <p style="font-size: 0.9rem;">The wicked descend to punishment</p>
+                    <p style="font-size: 0.9rem;">The fallen are bound until judgment</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="info-panel" id="infoPanel">
+        <button class="close-btn" onclick="closeInfo()">×</button>
+        <h3 id="infoTitle">Select an element</h3>
+        <div id="infoContent">
+            <p>Click on any realm, creature, wheel, storehouse, or judgment location to learn more about it.</p>
+        </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div class="tooltip" id="tooltip"></div>
+
+    <footer>
+        <p>
+            <strong>Interactive Cosmology Map</strong> - Enochian Realms Visualization<br>
+            <a href="cosmology/index.html">Back to Cosmology</a> |
+            <a href="index.html">Apocryphal Home</a> |
+            <a href="../../mythos/index.html">All Mythologies</a>
+        </p>
+    </footer>
+
+    <script>
+        // Realm interactions
+        const realms = document.querySelectorAll('.realm');
+        let activeRealm = null;
+
+        realms.forEach(realm => {
+            realm.addEventListener('click', function(e) {
+                e.stopPropagation();
+
+                if (activeRealm === this) {
+                    this.classList.remove('active');
+                    activeRealm = null;
+                } else {
+                    if (activeRealm) {
+                        activeRealm.classList.remove('active');
+                    }
+                    this.classList.add('active');
+                    activeRealm = this;
+                }
+            });
+        });
+
+        // Close active realm when clicking outside
+        document.addEventListener('click', function(e) {
+            if (activeRealm && !e.target.closest('.realm')) {
+                activeRealm.classList.remove('active');
+                activeRealm = null;
+            }
+        });
+
+        // Merkabah creature interactions
+        const creatures = document.querySelectorAll('.creature');
+        const creatureInfo = {
+            man: {
+                title: 'Face of Man',
+                content: '<p><strong>Symbolism:</strong> Humanity, Intelligence, Divine Image</p><p>Represents the rational aspect of creation and the image of God in mankind. This creature faces south and embodies wisdom and understanding.</p><p><strong>Wings:</strong> Four wings - two spread upward touching companions, two covering the body</p><p><strong>Movement:</strong> Moves forward without turning, following the Spirit\'s direction</p>'
+            },
+            lion: {
+                title: 'Face of Lion',
+                content: '<p><strong>Symbolism:</strong> Kingship, Might, Sovereignty</p><p>Represents divine power and royal authority. The lion faces north and embodies strength and courage.</p><p><strong>Nature:</strong> King of beasts, representing God\'s supreme rulership over all creation</p><p><strong>Voice:</strong> Its roar is like thunder, proclaiming divine majesty</p>'
+            },
+            ox: {
+                title: 'Face of Ox',
+                content: '<p><strong>Symbolism:</strong> Service, Strength, Sacrifice</p><p>Represents patient service and sacrificial love. The ox faces west and embodies humble strength and dedication.</p><p><strong>Role:</strong> Bearer of burdens, symbol of priestly service in the celestial temple</p><p><strong>Character:</strong> Gentle yet powerful, willing and obedient</p>'
+            },
+            eagle: {
+                title: 'Face of Eagle',
+                content: '<p><strong>Symbolism:</strong> Swiftness, Vision, Heavenly Nature</p><p>Represents divine speed and far-seeing wisdom. The eagle faces east and embodies celestial perspective and swift judgment.</p><p><strong>Vision:</strong> Sees all things from heaven\'s vantage point</p><p><strong>Flight:</strong> Swift as lightning, carrying divine messages across creation</p>'
+            }
+        };
+
+        creatures.forEach(creature => {
+            creature.addEventListener('click', function() {
+                const type = this.dataset.creature;
+                const info = creatureInfo[type];
+                showInfo(info.title, info.content);
+            });
+        });
+
+        // Wheel interactions
+        const wheels = document.querySelectorAll('.wheel');
+        wheels.forEach(wheel => {
+            wheel.addEventListener('click', function() {
+                const wheelType = this.dataset.wheel;
+                const title = wheelType === 'outer' ? 'Outer Wheel (Ophan)' : 'Inner Wheel (Ophan)';
+                const content = `
+                    <p><strong>The Ophanim - Wheel Beings</strong></p>
+                    <p>Wheels within wheels, rim to rim covered with eyes, representing divine omniscience and omnipresence. These living wheels move in any direction instantly without turning.</p>
+                    <p><strong>Appearance:</strong> Gleaming like beryl or topaz, shining like terrible crystal</p>
+                    <p><strong>Eyes:</strong> Covered all around with eyes, seeing everything in all directions</p>
+                    <p><strong>Motion:</strong> When the creatures rise, the wheels rise; when they stand still, the wheels stand still. The spirit of the living creatures is in the wheels.</p>
+                    <p><strong>Sound:</strong> Like the roar of many waters, like the voice of the Almighty, like the tumult of an army camp</p>
+                `;
+                showInfo(title, content);
+            });
+        });
+
+        // Storehouse interactions
+        const storehouses = document.querySelectorAll('.storehouse');
+        const storehouseInfo = {
+            winds: {
+                title: 'Storehouse of Winds',
+                content: '<p><strong>Location:</strong> First Heaven</p><p>Four great chambers hold the winds from the four cardinal directions. Angels open and close gates to release winds according to divine command.</p><p><strong>North Wind:</strong> Cold and harsh, brings winter</p><p><strong>South Wind:</strong> Hot and dry, brings summer</p><p><strong>East Wind:</strong> Morning breeze, brings spring</p><p><strong>West Wind:</strong> Evening wind, brings autumn</p>'
+            },
+            snow: {
+                title: 'Treasury of Snow',
+                content: '<p><strong>Location:</strong> First Heaven</p><p>Vast chambers where snow is stored until its appointed time. Angels measure out precise amounts for each location on earth according to divine wisdom.</p><p><strong>Purpose:</strong> Provides water for the earth, beautifies creation, teaches lessons about purity</p>'
+            },
+            hail: {
+                title: 'Chambers of Hail',
+                content: '<p><strong>Location:</strong> First Heaven</p><p>Ice weapons kept for the day of trouble, for the day of battle and war. Used in divine judgments throughout history (Egypt, Joshua\'s battle, end times).</p><p><strong>Scripture:</strong> "Have you entered the storehouses of snow, or have you seen the storehouses of hail, which I have reserved for the time of trouble?" - Job 38:22-23</p>'
+            },
+            light: {
+                title: 'Fountains of Light',
+                content: '<p><strong>Location:</strong> Second Heaven</p><p>The sources from which all celestial light flows - sun, moon, stars, and lightning. Angels draw from these fountains to illuminate creation.</p><p><strong>Nature:</strong> Pure, uncreated light from before the luminaries were made</p><p><strong>Keepers:</strong> Uriel governs the sun, Gabriel the moon</p>'
+            },
+            darkness: {
+                title: 'Wells of Darkness',
+                content: '<p><strong>Location:</strong> Second Heaven</p><p>The origin of shadows and night, kept in careful balance with light. Not evil, but necessary for rest, sleep, and the rhythm of creation.</p><p><strong>Purpose:</strong> Provides rest for creation, conceals mysteries, marks time</p>'
+            },
+            souls: {
+                title: 'Souls of the Unborn',
+                content: '<p><strong>Location:</strong> Seventh Heaven (Araboth)</p><p>The Chamber of Souls (Guf) where spirits await their appointed time for earthly incarnation. When this chamber is empty, the Messiah will come.</p><p><strong>Teaching:</strong> Every soul has existed since creation, waiting for its moment to enter the world and fulfill its destiny</p><p><strong>Nature:</strong> Pure spirits not yet clothed in flesh, dwelling in the presence of God</p>'
+            },
+            rain: {
+                title: 'Reservoirs of Rain',
+                content: '<p><strong>Location:</strong> First Heaven</p><p>Clouds of blessing that water the earth. Released according to divine schedule to bring forth crops and sustain life.</p><p><strong>Types:</strong> Early rain (autumn), latter rain (spring), rain of blessing, rain of judgment</p>'
+            },
+            manna: {
+                title: 'Manna Factory',
+                content: '<p><strong>Location:</strong> Third Heaven</p><p>Angels constantly manufacture manna to feed the blessed souls in Paradise. The same manna that fell in the wilderness now feeds the righteous eternally.</p><p><strong>Nature:</strong> Bread of angels, spiritual food that takes on any flavor desired</p>'
+            },
+            dew: {
+                title: 'Dew of Resurrection',
+                content: '<p><strong>Location:</strong> Seventh Heaven</p><p>The most precious of all treasures - the sacred dew that will resurrect the dead on the Day of Judgment. God Himself guards this treasury.</p><p><strong>Power:</strong> Will restore life to dry bones, reconstitute flesh, reunite body and soul</p><p><strong>Promise:</strong> "Your dead shall live, their corpses shall rise... for your dew is a radiant dew" - Isaiah 26:19</p>'
+            }
+        };
+
+        storehouses.forEach(storehouse => {
+            storehouse.addEventListener('click', function() {
+                const type = this.dataset.storehouse;
+                const info = storehouseInfo[type];
+                showInfo(info.title, info.content);
+            });
+        });
+
+        // Judgment location interactions
+        const locations = document.querySelectorAll('.location');
+        locations.forEach(location => {
+            location.addEventListener('click', function(e) {
+                e.stopPropagation();
+                locations.forEach(loc => loc.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Info panel functions
+        function showInfo(title, content) {
+            document.getElementById('infoTitle').textContent = title;
+            document.getElementById('infoContent').innerHTML = content;
+            document.getElementById('infoPanel').classList.add('active');
+        }
+
+        function closeInfo() {
+            document.getElementById('infoPanel').classList.remove('active');
+        }
+
+        // Tooltip functionality
+        const tooltip = document.getElementById('tooltip');
+        const interactiveElements = document.querySelectorAll('.realm, .creature, .wheel, .storehouse, .location');
+
+        interactiveElements.forEach(element => {
+            element.addEventListener('mouseenter', function(e) {
+                const rect = this.getBoundingClientRect();
+                let text = '';
+
+                if (this.classList.contains('realm')) {
+                    text = 'Click to view realm details';
+                } else if (this.classList.contains('creature')) {
+                    text = 'Click to learn about this living creature';
+                } else if (this.classList.contains('wheel')) {
+                    text = 'Click to learn about the Ophanim';
+                } else if (this.classList.contains('storehouse')) {
+                    text = 'Click to explore this storehouse';
+                } else if (this.classList.contains('location')) {
+                    text = 'Click for detailed information';
+                }
+
+                tooltip.textContent = text;
+                tooltip.style.opacity = '1';
+                tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';
+                tooltip.style.top = (rect.top - 40) + 'px';
+            });
+
+            element.addEventListener('mouseleave', function() {
+                tooltip.style.opacity = '0';
+            });
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeInfo();
+                if (activeRealm) {
+                    activeRealm.classList.remove('active');
+                    activeRealm = null;
+                }
+                locations.forEach(loc => loc.classList.remove('active'));
+            }
+        });
+
+        // Animate elements on page load
+        window.addEventListener('load', function() {
+            const sections = document.querySelectorAll('.map-section');
+            sections.forEach((section, index) => {
+                setTimeout(() => {
+                    section.style.opacity = '0';
+                    section.style.transform = 'translateY(30px)';
+                    section.style.transition = 'opacity 0.6s, transform 0.6s';
+                    setTimeout(() => {
+                        section.style.opacity = '1';
+                        section.style.transform = 'translateY(0)';
+                    }, 50);
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>
