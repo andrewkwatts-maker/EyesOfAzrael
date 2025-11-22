@@ -5,55 +5,214 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Sumerian Mythology - World Mythos Explorer</title>
     <link href="../../themes/theme-base.css" rel="stylesheet"/>
+    <link href="../../styles.css" rel="stylesheet"/>
     <link href="../../themes/corpus-links.css" rel="stylesheet"/>
     <script defer src="../../themes/theme-picker.js"></script>
     <script defer src="../../themes/theme-animations.js"></script>
     <style>
-        :root {
-            --mythos-primary: #c17a4d;
-            --mythos-secondary: #8b6340;
+        /* ============================================
+           MODERN GLASS UI TEMPLATE - Sumerian Mythos
+           Based on Christian reference with full theme support
+           ============================================ */
+
+        /* Breadcrumb - Full-width bar attached below header */
+        .breadcrumb {
+            position: sticky;
+            top: 60px; /* Below the sticky header */
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(var(--color-surface-rgb), 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: var(--spacing-xs) var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
         }
+
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        /* Hero Section - Modern Glass Styling */
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon-display {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 1rem auto;
+            line-height: 1.7;
+        }
+
+        /* Glass Card - With Hover Animation */
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+            border-color: rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        /* Deity Cards - Modern Glass Pattern */
+        .deity-card {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-base, 0.3s ease);
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+
+        .deity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg), 0 0 15px rgba(var(--color-primary-rgb), 0.2);
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            text-decoration: none;
+        }
+
+        .deity-card h3 {
+            color: var(--color-primary);
+            margin-top: 0.5rem;
+        }
+
+        .deity-card p {
+            line-height: 1.7;
+        }
+
+        .deity-icon {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        /* Cuneiform styling - using CSS variables */
         .cuneiform {
             font-size: var(--text-4xl);
-            color: var(--mythos-primary);
+            color: var(--color-primary);
             opacity: 0.9;
         }
+
+        /* Path Stage Cards - Subsection style with hover */
         .path-stage {
-            background: var(--color-card-bg);
+            background: rgba(var(--color-primary-rgb), 0.05);
             backdrop-filter: blur(10px);
-            border-left: 4px solid var(--mythos-primary);
-            border: 2px solid var(--color-border);
+            -webkit-backdrop-filter: blur(10px);
+            border-left: 4px solid var(--color-primary);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
             border-radius: var(--radius-xl);
-            padding: var(--space-6);
-            margin-bottom: var(--space-6);
-            transition: all var(--transition-base);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            transition: all var(--transition-base, 0.3s ease);
         }
+
         .path-stage:hover {
             transform: translateX(4px);
             box-shadow: var(--shadow-lg);
-            border-left-color: var(--color-primary);
+            border-left-color: var(--color-secondary);
+            background: rgba(var(--color-primary-rgb), 0.1);
         }
+
         .path-stage h3 {
-            color: var(--mythos-primary);
-            margin-bottom: var(--space-4);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        /* Section Headers */
+        .section-header {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        /* Grid Layouts */
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .deity-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .hero-icon-display {
+                font-size: 3rem;
+            }
+
+            .breadcrumb {
+                font-size: var(--font-size-xs);
+                padding: var(--spacing-xs) var(--spacing-md);
+                top: 50px; /* Smaller header on mobile */
+            }
         }
     </style>
 </head>
 <body>
-    <div id="theme-picker-container"></div>
-    <header>
-    <div class="header-content"></div>
+<!-- Theme Picker Container -->
+<div id="theme-picker"></div>
+
+<div id="theme-picker-container"></div>
+<header>
+    <div class="header-content">
+        <h1><a class="corpus-link" data-term="𒀭" data-tradition="sumerian" href="../../corpus-results/sumerian/an.html" title="Search corpus for '𒀭'">𒀭</a> Ancient Sumerian Mythology</h1>
+    </div>
 </header>
 <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="../../mythos/index.html">Home</a> →
             <span aria-current="page">Ancient Sumerian <a data-term="Mythology" data-tradition="sumerian" class="corpus-link" href="../../corpus-results/sumerian/mythology.html" title="View mythology in ancient texts">Mythology</a></span>
 </nav>
 
-    <main>
-        <div class="hero-section">
-            <div class="hero-icon-display"><a class="corpus-link" data-term="𒀭" data-tradition="sumerian" href="../../corpus-results/sumerian/an.html" title="Search corpus for '𒀭'">𒀭</a></div>
-            <h1>Ancient Sumerian <a data-term="Mythology" data-tradition="sumerian" class="corpus-link" href="../../corpus-results/sumerian/mythology.html" title="View mythology in ancient texts">Mythology</a> &amp; The <a class="corpus-link" data-term="Anunnaki" data-tradition="babylonian" href="../../corpus-results/babylonian/anunnaki.html" title="Search corpus for 'Anunnaki'">Anunnaki</a></h1>
-            <p class="hero-description">
+<main>
+<div class="hero-section">
+    <h2>The Anunnaki &amp; The First Civilization</h2>
+    <div class="hero-icon-display"><a class="corpus-link" data-term="𒀭" data-tradition="sumerian" href="../../corpus-results/sumerian/an.html" title="Search corpus for '𒀭'">𒀭</a></div>
+    <p class="hero-description">
                 Sumerian civilization emerged in southern Mesopotamia around 4500 BCE, creating the world's first
                 written language (<a data-term="Cuneiform" data-tradition="sumerian" class="corpus-link" href="../../corpus-results/sumerian/cuneiform.html" title="View cuneiform in ancient texts">cuneiform</a>) and the oldest recorded mythology. The Sumerians believed the gods
                 created humanity to serve them, building temples called ziggurats to house the divine. From the
@@ -158,7 +317,7 @@
                     <p>Supreme deity of the heavens. <a class="corpus-link" data-term="Father of the Gods" data-tradition="babylonian" href="../../corpus-results/babylonian/anu.html" title="Search corpus for 'Father of the Gods'">Father of the gods</a>. Personification of the sky vault. Authority figure who decrees fates.</p>
                     <p><em>Domain:</em> <a data-term="Heaven" data-tradition="sumerian" class="corpus-link" href="../../corpus-results/sumerian/heaven.html" title="View heaven in ancient texts">Heaven</a>, authority, kingship</p>
                     <p><em>Symbol:</em> Horned crown, star</p>
-                    <p><a href="deities/an.html" style="color: var(--mythos-primary);">→ Full Profile</a></p>
+                    <p><a href="deities/an.html" style="color: var(--color-primary);">→ Full Profile</a></p>
                 </div>
 
                 <div class="deity-card">
@@ -168,7 +327,7 @@
                     <p>Most powerful of the <a data-term="Anunnaki" data-tradition="sumerian" class="corpus-link" href="../../corpus-results/sumerian/anunnaki.html" title="View anunnaki in ancient texts">Anunnaki</a>. Commanded the great flood. Separated heaven and earth. King of Nippur.</p>
                     <p><em>Domain:</em> Wind, storms, <a data-term="Earth" data-tradition="sumerian" class="corpus-link" href="../../corpus-results/sumerian/earth.html" title="View earth in ancient texts">earth</a>, kingship</p>
                     <p><em>Symbol:</em> Horned crown, seven tablets</p>
-                    <p><a href="deities/enlil.html" style="color: var(--mythos-primary);">→ Full Profile</a></p>
+                    <p><a href="deities/enlil.html" style="color: var(--color-primary);">→ Full Profile</a></p>
                 </div>
 
                 <div class="deity-card">
@@ -178,7 +337,7 @@
                     <p>Goddess of love, war, and fertility. Descended to the underworld. Stole divine powers (<a class="corpus-link" data-term="Me" data-tradition="sumerian" href="../../corpus-results/sumerian/me.html" title="Search corpus for 'Me'">Me</a>). Most widely worshipped goddess.</p>
                     <p><em>Domain:</em> Love, war, fertility, power</p>
                     <p><em>Symbol:</em> Eight-pointed star, lion</p>
-                    <p><a href="deities/inanna.html" style="color: var(--mythos-primary);">→ Full Profile</a></p>
+                    <p><a href="deities/inanna.html" style="color: var(--color-primary);">→ Full Profile</a></p>
                 </div>
 
                 <div class="deity-card">
@@ -188,7 +347,7 @@
                     <p>God of fresh water, wisdom, magic, and crafts. Created humanity from clay with <a href="deities/index.html">Ninhursag</a>. Saved mankind from <a href="cosmology/creation.html">the flood</a>.</p>
                     <p><em>Domain:</em> Water, wisdom, magic, creation</p>
                     <p><em>Symbol:</em> Goat-fish, flowing water</p>
-                    <p><a href="deities/enki.html" style="color: var(--mythos-primary);">→ Full Profile</a></p>
+                    <p><a href="deities/enki.html" style="color: var(--color-primary);">→ Full Profile</a></p>
                 </div>
 
                 <div class="deity-card">
@@ -198,7 +357,7 @@
                     <p>God of the sun and justice. Travels across sky daily. Illuminates truth and punishes the wicked. Twin of <a href="deities/inanna.html">Inanna</a>.</p>
                     <p><em>Domain:</em> Sun, justice, law, truth</p>
                     <p><em>Symbol:</em> Solar disk with rays</p>
-                    <p><a href="deities/utu.html" style="color: var(--mythos-primary);">→ Full Profile</a></p>
+                    <p><a href="deities/utu.html" style="color: var(--color-primary);">→ Full Profile</a></p>
                 </div>
 
                 <div class="deity-card">
@@ -217,7 +376,7 @@
                     <p>Goddess who rules <a href="cosmology/afterlife.html">Kur (underworld)</a>. Sister of <a href="deities/inanna.html">Inanna</a>. Keeper of the dead. No one returns from her realm.</p>
                     <p><em>Domain:</em> Death, underworld, darkness</p>
                     <p><em>Symbol:</em> Crown of the dead</p>
-                    <p><a href="deities/ereshkigal.html" style="color: var(--mythos-primary);">→ Full Profile</a></p>
+                    <p><a href="deities/ereshkigal.html" style="color: var(--color-primary);">→ Full Profile</a></p>
                 </div>
 
                 <div class="deity-card">
@@ -344,7 +503,7 @@
                     <p><strong>Divine Protective Spirits</strong></p>
                     <p>Winged bulls or lions with human heads. Guardian <a data-term="Deities" data-tradition="sumerian" class="corpus-link" href="../../corpus-results/sumerian/deities.html" title="View deities in ancient texts">deities</a> placed at palace and temple entrances to ward off evil. Symbols of divine protection and royal power.</p>
                     <p><em>Role:</em> Protection, guardianship, royal power</p>
-                    <p><a href="creatures/lamassu.html" style="color: var(--mythos-primary);">→ Full Profile</a></p>
+                    <p><a href="creatures/lamassu.html" style="color: var(--color-primary);">→ Full Profile</a></p>
                 </div>
             </div>
         </section>

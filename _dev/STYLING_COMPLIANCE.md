@@ -36,15 +36,14 @@ This document defines the standard HTML structure and styling patterns that ALL 
 
 ```html
 <body>
-<!-- Theme picker is auto-injected by theme-picker.js as fixed top-right button -->
-<!-- These containers are optional placeholders -->
-<div id="theme-picker"></div>
-<div id="theme-picker-container"></div>
+<!-- Theme picker is auto-injected by theme-picker.js INTO header-content (far right) -->
+<!-- These containers are legacy placeholders, can be removed -->
 
-<!-- HEADER: Contains title -->
+<!-- HEADER: Contains title and theme picker (auto-injected) -->
 <header>
     <div class="header-content">
         <h1>🎨 Page Title</h1>
+        <!-- Theme picker button auto-injected here on far right -->
     </div>
 </header>
 
@@ -231,6 +230,10 @@ var(--transition-base)  /* Standard transition */
     text-decoration: none;
     display: block;
     color: inherit;
+    /* IMPORTANT: Text containment */
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .deity-card:hover {
@@ -246,16 +249,23 @@ var(--transition-base)  /* Standard transition */
     margin-top: 0.5rem;
 }
 
+/* Ensure text doesn't overflow card boundaries */
+.deity-card p,
+.deity-card h3 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .deity-icon {
     font-size: 2.5rem;
     text-align: center;
 }
 ```
 
-### Header Content
+### Header Content & Theme Picker
 ```css
 /* Header is styled by styles.css with glass morphism */
-/* The header-content wrapper centers the title */
+/* The header-content wrapper uses flexbox to position title and theme picker */
 .header-content {
     max-width: 1400px;
     margin: 0 auto;
@@ -266,13 +276,21 @@ var(--transition-base)  /* Standard transition */
     gap: 1.5rem;
 }
 
-/* Theme picker is auto-injected as fixed top-right */
-/* Styling is in theme-base.css */
-.theme-picker {
+/* Theme picker is auto-injected INTO header-content by theme-picker.js */
+/* It appears on the far right of the header */
+.header-content > .theme-picker {
+    flex-shrink: 0;
+    order: 99;  /* Push to end */
+    position: relative;
+    margin-left: auto;
+}
+
+/* Fallback: If no header-content found, falls back to fixed positioning */
+body > .theme-picker {
     position: fixed;
     top: var(--spacing-md);
     right: var(--spacing-md);
-    z-index: var(--z-fixed);  /* 300 */
+    z-index: var(--z-fixed);
 }
 ```
 

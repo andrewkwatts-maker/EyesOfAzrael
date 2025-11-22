@@ -8,20 +8,47 @@
 <link href="../../styles.css" rel="stylesheet"/>
 <link href="../../themes/corpus-links.css" rel="stylesheet"/>
     <script defer src="../../themes/theme-animations.js"></script>
-<script defer="None" src="../../themes/theme-picker.js"></script>
+<script defer src="../../themes/theme-picker.js"></script>
 <style>
-        :root {
-            --mythos-primary: #cd853f;
-            --mythos-secondary: #daa520;
-            --color-primary-rgb: 205, 133, 63;
-            --color-secondary-rgb: 218, 165, 32;
+        /* ============================================
+           MODERN GLASS UI TEMPLATE - Egyptian Mythos
+           Based on Christian reference with full theme support
+           ============================================ */
+
+        /* Breadcrumb - Full-width bar attached below header */
+        .breadcrumb {
+            position: sticky;
+            top: 60px; /* Below the sticky header */
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(var(--color-surface-rgb), 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: var(--spacing-xs) var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
         }
 
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        /* Hero Section - Modern Glass Styling */
         .hero-section {
             background: linear-gradient(135deg,
                 rgba(var(--color-primary-rgb), 0.8),
                 rgba(var(--color-secondary-rgb), 0.8));
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 2px solid var(--color-primary);
             color: var(--color-text-primary);
             padding: 3rem 2rem;
@@ -31,66 +58,171 @@
             box-shadow: var(--shadow-xl);
         }
 
+        .hero-icon-display {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 1rem auto;
+            line-height: 1.7;
+        }
+
+        /* Glass Card - With Hover Animation */
         .glass-card {
             background: rgba(var(--color-surface-rgb), 0.6);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(var(--color-primary-rgb), 0.2);
             border-radius: var(--radius-lg);
-            padding: 2rem;
+            padding: var(--spacing-xl);
             margin: 2rem 0;
             box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base, 0.3s ease);
         }
 
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+            border-color: rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        /* Subsection Card - Hover Effects */
         .subsection-card {
             background: rgba(var(--color-primary-rgb), 0.05);
-            border-left: 4px solid var(--mythos-primary);
-            padding: 1.5rem;
-            margin: 1.5rem 0;
+            border-left: 4px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
             border-radius: var(--radius-md);
             transition: all var(--transition-base, 0.3s ease);
         }
 
         .subsection-card:hover {
             background: rgba(var(--color-primary-rgb), 0.1);
-            transform: translateY(-4px);
+            transform: translateX(5px);
             box-shadow: var(--shadow-md);
         }
+
+        .subsection-card h3 {
+            color: var(--color-primary);
+            margin-top: 0;
+        }
+
+        .subsection-card p {
+            line-height: 1.7;
+        }
+
+        /* Grid Layouts */
         .deity-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
         }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        /* Deity Cards - Modern Glass Pattern */
         .deity-card {
-            background: var(--color-surface);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--mythos-primary);
-            border-radius: var(--radius-xl);
-            padding: 1.5rem;
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
             transition: all var(--transition-base, 0.3s ease);
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
         }
+
         .deity-card:hover {
-            background: var(--color-surface-hover);
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(205, 133, 63, 0.4), var(--shadow-glow);
+            box-shadow: var(--shadow-lg), 0 0 15px rgba(var(--color-primary-rgb), 0.2);
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            text-decoration: none;
         }
+
+        .deity-card h3 {
+            color: var(--color-primary);
+            margin-top: 0.5rem;
+        }
+
+        .deity-card p {
+            line-height: 1.7;
+        }
+
+        .deity-icon {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        /* Hieroglyph styling */
         .hieroglyph {
             font-size: 2rem;
-            color: var(--mythos-secondary);
+            color: var(--color-secondary);
         }
+
+        /* Section Headers */
+        .section-header {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .card-title {
+            color: var(--color-primary);
+            margin-top: 0;
+        }
+
+        /* Path Stage Cards */
         .path-stage {
-            background: var(--color-surface);
+            background: rgba(var(--color-surface-rgb), 0.6);
             backdrop-filter: blur(10px);
-            border-left: 4px solid var(--mythos-primary);
-            border: 2px solid var(--color-border);
-            padding: 1.5rem;
+            -webkit-backdrop-filter: blur(10px);
+            border-left: 4px solid var(--color-primary);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+            padding: var(--spacing-lg);
             margin: 1rem 0;
             border-radius: var(--radius-lg);
             transition: all var(--transition-base, 0.3s ease);
         }
+
         .path-stage:hover {
-            background: var(--color-surface-hover);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            transform: translateX(5px);
             box-shadow: var(--shadow-md);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+
+            .deity-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .hero-icon-display {
+                font-size: 3rem;
+            }
+
+            .breadcrumb {
+                font-size: var(--font-size-xs);
+                padding: var(--spacing-xs) var(--spacing-md);
+                top: 50px; /* Smaller header on mobile */
+            }
         }
     </style>
 </head>
@@ -133,197 +265,197 @@
 </div>
 <div class="glass-card" id="pantheon">
 <h2 style="color: var(--color-primary);">The <a data-term="Egyptian" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=egyptian" title="View egyptian in ancient texts">Egyptian</a> <a class="corpus-link" data-term="Ennead" data-tradition="egyptian" href="corpus-search.html?term=ennead" title="Search corpus for 'Ennead'">Ennead</a> &amp; Major Deities</h2>
-<p style="line-height: 1.7;">The Great <a class="corpus-link" data-term="Ennead" data-tradition="egyptian" href="corpus-search.html?term=ennead" title="Search corpus for 'Ennead'">Ennead</a> of Heliopolis represents the nine primary gods of <a data-term="Creation" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=creation" title="View creation in ancient texts">creation</a>. <a href="deities/index.html" style="color: var(--mythos-secondary);">→ Explore Full Pantheon</a></p>
+<p style="line-height: 1.7;">The Great <a class="corpus-link" data-term="Ennead" data-tradition="egyptian" href="corpus-search.html?term=ennead" title="Search corpus for 'Ennead'">Ennead</a> of Heliopolis represents the nine primary gods of <a data-term="Creation" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=creation" title="View creation in ancient texts">creation</a>. <a href="deities/index.html" style="color: var(--color-secondary);">→ Explore Full Pantheon</a></p>
 <h3>The Heliopolitan <a data-term="Ennead" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=ennead" title="View ennead in ancient texts">Ennead</a></h3>
 <div class="deity-grid">
 <div class="deity-card">
 <div class="hieroglyph">𓁨</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/ra.html">☀️ Ra (Re)</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/ra.html">☀️ Ra (Re)</a></h3>
 <p><strong>The Sun God, Creator</strong></p>
 <p>Supreme solar deity who travels across sky in barque. Merges with <a class="corpus-link" data-term="Amun" data-tradition="egyptian" href="corpus-search.html?term=amun" title="Search corpus for 'Amun'">Amun</a> as <a class="corpus-link" data-term="Amun" data-tradition="egyptian" href="corpus-search.html?term=amun" title="Search corpus for 'Amun'">Amun</a>-<a class="corpus-link" data-term="Ra" data-tradition="egyptian" href="corpus-search.html?term=ra" title="Search corpus for 'Ra'">Ra</a>. Creates world <a data-term="Through" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=through" title="View through in ancient texts">through</a> speech.</p>
 <p><em>Symbol:</em> Sun disk, falcon, scarab</p>
 <p><em>Center:</em> Heliopolis</p>
-<p><a href="deities/ra.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/ra.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓁩</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/osiris.html">👑 Osiris</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/osiris.html">👑 Osiris</a></h3>
 <p><strong>God of <a data-term="Afterlife" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=afterlife" title="View afterlife in ancient texts">Afterlife</a> &amp; Resurrection</strong></p>
 <p>Judge of the dead, murdered by <a class="corpus-link" data-term="Set" data-tradition="egyptian" href="corpus-search.html?term=set" title="Search corpus for 'Set'">Set</a>, resurrected by <a class="corpus-link" data-term="Isis" data-tradition="egyptian" href="corpus-search.html?term=isis" title="Search corpus for 'Isis'">Isis</a>. Rules <a class="corpus-link" data-term="Duat" data-tradition="egyptian" href="corpus-search.html?term=duat" title="Search corpus for 'Duat'">Duat</a> (<a class="corpus-link" data-term="Underworld" data-tradition="egyptian" href="corpus-search.html?term=duat" title="Search corpus for 'Underworld'">underworld</a>). Green-skinned mummy-wrapped figure.</p>
 <p><em>Symbol:</em> Crook, flail, atef crown</p>
 <p><em>Festival:</em> <a data-term="Osiris" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=osiris" title="View osiris in ancient texts">Osiris</a> Mysteries</p>
-<p><a href="deities/osiris.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/osiris.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓁐</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/isis.html">✨ Isis (Aset)</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/isis.html">✨ Isis (Aset)</a></h3>
 <p><strong>Goddess of Magic &amp; Motherhood</strong></p>
 <p>Wife of <a data-term="Osiris" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=osiris" title="View osiris in ancient texts">Osiris</a>, mother of <a class="corpus-link" data-term="Horus" data-tradition="egyptian" href="corpus-search.html?term=horus" title="Search corpus for 'Horus'">Horus</a>. Greatest magician. Resurrected <a class="corpus-link" data-term="Osiris" data-tradition="egyptian" href="corpus-search.html?term=osiris" title="Search corpus for 'Osiris'">Osiris</a>. Protective mother goddess and throne of pharaoh.</p>
 <p><em>Symbol:</em> Throne headdress, sistrum, wings</p>
 <p><em>Cult:</em> Widespread, lasted into Roman era</p>
-<p><a href="deities/isis.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/isis.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓃻</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/set.html">🐺 Set (Seth)</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/set.html">🐺 Set (Seth)</a></h3>
 <p><strong>God of Chaos &amp; Desert</strong></p>
 <p>Murdered <a data-term="Osiris" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=osiris" title="View osiris in ancient texts">Osiris</a>, battles <a class="corpus-link" data-term="Horus" data-tradition="egyptian" href="corpus-search.html?term=horus" title="Search corpus for 'Horus'">Horus</a>. God of storms, desert, foreigners. Both destroyer and protector of <a class="corpus-link" data-term="Ra" data-tradition="egyptian" href="corpus-search.html?term=ra" title="Search corpus for 'Ra'">Ra</a>'s barque.</p>
 <p><em>Symbol:</em> <a class="corpus-link" data-term="Set" data-tradition="egyptian" href="corpus-search.html?term=set" title="Search corpus for 'Set'">Set</a> animal, <a class="corpus-link" data-term="Was" data-tradition="egyptian" href="corpus-search.html?term=was" title="Search corpus for 'Was'">was</a> scepter</p>
 <p><em>Duality:</em> Necessary chaos <a data-term="Within" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=within" title="View within in ancient texts">within</a> <a class="corpus-link" data-term="Order" data-tradition="egyptian" href="corpus-search.html?term=maat" title="Search corpus for 'Order'">order</a></p>
-<p><a href="deities/set.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/set.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓅃</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/horus.html">🦅 Horus</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/horus.html">🦅 Horus</a></h3>
 <p><strong>Sky God, Divine Pharaoh</strong></p>
 <p>Son of <a data-term="Osiris" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=osiris" title="View osiris in ancient texts">Osiris</a> and <a class="corpus-link" data-term="Isis" data-tradition="egyptian" href="corpus-search.html?term=isis" title="Search corpus for 'Isis'">Isis</a>. Avenged father, defeated <a class="corpus-link" data-term="Set" data-tradition="egyptian" href="corpus-search.html?term=set" title="Search corpus for 'Set'">Set</a>. Living pharaoh = <a class="corpus-link" data-term="Horus" data-tradition="egyptian" href="corpus-search.html?term=horus" title="Search corpus for 'Horus'">Horus</a> incarnate. Sky as his wings, sun and moon as eyes.</p>
 <p><em>Symbol:</em> Falcon, Eye of <a data-term="Horus" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=horus" title="View horus in ancient texts">Horus</a> (wadjet)</p>
 <p><em>Forms:</em> <a data-term="Horus" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=horus" title="View horus in ancient texts">Horus</a> the Elder, <a class="corpus-link" data-term="Horus" data-tradition="egyptian" href="corpus-search.html?term=horus" title="Search corpus for 'Horus'">Horus</a> the Younger</p>
-<p><a href="deities/horus.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/horus.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓏏</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/maat.html">🪶 Ma'at</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/maat.html">🪶 Ma'at</a></h3>
 <p><strong>Goddess of <a class="corpus-link" data-term="Truth" data-tradition="egyptian" href="corpus-search.html?term=maat" title="Search corpus for 'Truth'">Truth</a> &amp; Cosmic <a class="corpus-link" data-term="Order" data-tradition="egyptian" href="corpus-search.html?term=maat" title="Search corpus for 'Order'">Order</a></strong></p>
 <p>Personification of <a class="corpus-link" data-term="Truth" data-tradition="egyptian" href="corpus-search.html?term=maat" title="Search corpus for 'Truth'">truth</a>, <a class="corpus-link" data-term="Justice" data-tradition="egyptian" href="corpus-search.html?term=maat" title="Search corpus for 'Justice'">justice</a>, cosmic balance. Heart weighed against her feather. Upholds <a data-term="Creation" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=creation" title="View creation in ancient texts">creation</a> from chaos.</p>
 <p><em>Symbol:</em> Ostrich feather, scales</p>
 <p><em>Concept:</em> Universal <a class="corpus-link" data-term="Order" data-tradition="egyptian" href="corpus-search.html?term=maat" title="Search corpus for 'Order'">order</a>, ethics</p>
-<p><a href="deities/maat.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/maat.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓃾</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/sobek.html">🐊 Sobek</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/sobek.html">🐊 Sobek</a></h3>
 <p><strong>Crocodile God</strong></p>
 <p>Nile fertility, military prowess, protection. Dual nature: dangerous and protective. Patron of pharaohs.</p>
 <p><em>Symbol:</em> Crocodile</p>
 <p><em>Center:</em> Faiyum, Kom Ombo</p>
-<p><a href="deities/sobek.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/sobek.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓃰</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/anubis.html">⚰️ Anubis (Inpu)</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/anubis.html">⚰️ Anubis (Inpu)</a></h3>
 <p><strong>God of Mummification</strong></p>
 <p>Guide of souls to <a class="corpus-link" data-term="Duat" data-tradition="egyptian" href="corpus-search.html?term=duat" title="Search corpus for 'Duat'">Duat</a>. Performs mummification. Protects tombs. Weighs heart against feather of <a class="corpus-link" data-term="Ma'at" data-tradition="egyptian" href="corpus-search.html?term=maat" title="Search corpus for 'Ma'at'">Ma'at</a>.</p>
 <p><em>Symbol:</em> Black jackal, canopic jars</p>
 <p><em>Role:</em> Psychopomp, embalmer</p>
-<p><a href="deities/anubis.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/anubis.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓏴</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/thoth.html">📚 Thoth (Djehuty)</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/thoth.html">📚 Thoth (Djehuty)</a></h3>
 <p><strong>God of Wisdom &amp; Writing</strong></p>
 <p>Inventor of writing, magic, science. Scribe of the gods. Records judgment of dead. Keeper of cosmic knowledge.</p>
 <p><em>Symbol:</em> Ibis, baboon, writing palette</p>
 <p><em>Center:</em> Hermopolis</p>
-<p><a href="deities/thoth.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/thoth.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓏤</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/hathor.html">🎭 Hathor</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/hathor.html">🎭 Hathor</a></h3>
 <p><strong>Goddess of Love &amp; Joy</strong></p>
 <p>Cow goddess, music, dance, foreign lands, motherhood. Also wrathful as Sekhmet. Protector of women.</p>
 <p><em>Symbol:</em> Cow horns with sun disk, sistrum</p>
 <p><em>Duality:</em> Gentle <a class="corpus-link" data-term="Hathor" data-tradition="egyptian" href="corpus-search.html?term=hathor" title="Search corpus for 'Hathor'">Hathor</a> / Fierce Sekhmet</p>
-<p><a href="deities/hathor.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/hathor.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓌗</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/sekhmet.html">🦁 Sekhmet</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/sekhmet.html">🦁 Sekhmet</a></h3>
 <p><strong>Lioness Goddess of War</strong></p>
 <p>Fierce protector, plague bringer, healer. <a class="corpus-link" data-term="Eye of Ra" data-tradition="egyptian" href="corpus-search.html?term=bastet" title="Search corpus for 'Eye of Ra'">Eye of Ra</a> unleashed. Breathes fire. Calmed by beer dyed red.</p>
 <p><em>Symbol:</em> Lioness, sun disk</p>
 <p><em>Duality:</em> Destroyer and healer</p>
-<p><a href="deities/sekhmet.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/sekhmet.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓊪</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/ptah.html">🌀 Ptah</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/ptah.html">🌀 Ptah</a></h3>
 <p><strong>Creator God &amp; Craftsman</strong></p>
 <p>Created world <a data-term="Through" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=through" title="View through in ancient texts">through</a> thought and word. Patron of craftsmen, artists, architects. Memphis theology.</p>
 <p><em>Symbol:</em> <a class="corpus-link" data-term="Was" data-tradition="egyptian" href="corpus-search.html?term=was" title="Search corpus for 'Was'">Was</a> scepter, <a class="corpus-link" data-term="Djed" data-tradition="egyptian" href="corpus-search.html?term=djed" title="Search corpus for 'Djed'">djed</a> pillar</p>
 <p><em>Center:</em> Memphis</p>
-<p><a href="deities/ptah.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/ptah.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓆙</div>
-<h3 style="color: var(--mythos-primary);">🐍 Apep (Apophis)</h3>
+<h3 style="color: var(--color-primary);">🐍 Apep (Apophis)</h3>
 <p><strong>Serpent of Chaos</strong></p>
 <p>Primordial chaos serpent who attacks Ra's solar barque nightly. Embodiment of isfet (chaos, disorder). Eternal enemy of Ma'at and creation itself.</p>
 <p><em>Symbol:</em> Serpent, darkness</p>
 <p><em>Nature:</em> Chaos incarnate, un-creation</p>
-<p><a href="deities/apep.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/apep.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓏏</div>
-<h3 style="color: var(--mythos-primary);">🏹 Neith</h3>
+<h3 style="color: var(--color-primary);">🏹 Neith</h3>
 <p><strong>Goddess of War & Weaving</strong></p>
 <p>Ancient warrior goddess and creator deity. Patroness of weaving and hunting. Mother figure who created the world by weaving it into existence. Associated with Lower Egypt.</p>
 <p><em>Symbol:</em> Crossed arrows, weaving shuttle, shield</p>
 <p><em>Center:</em> Sais (Lower Egypt)</p>
-<p><a href="deities/neith.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/neith.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓏏𓅱</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/amun-ra.html">☀️ Amun-Ra</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/amun-ra.html">☀️ Amun-Ra</a></h3>
 <p><strong>King of the Gods</strong></p>
 <p>Syncretic fusion of Amun (hidden one) and Ra (sun god). Supreme deity of New Kingdom. Combined transcendent mystery with manifest solar power.</p>
 <p><em>Symbol:</em> Sun disk, ram horns, double plumes</p>
 <p><em>Center:</em> Karnak, Thebes</p>
-<p><a href="deities/amun-ra.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/amun-ra.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓁟</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/atum.html">🌅 Atum</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/atum.html">🌅 Atum</a></h3>
 <p><strong>Creator God, The Complete One</strong></p>
 <p>Self-created primordial deity who emerged from Nun. Evening form of Ra. Father of Shu and Tefnut. Represents completion and the setting sun.</p>
 <p><em>Symbol:</em> Double crown, benben stone</p>
 <p><em>Center:</em> Heliopolis</p>
-<p><a href="deities/atum.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/atum.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓅬</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/geb.html">🌍 Geb</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/geb.html">🌍 Geb</a></h3>
 <p><strong>God of the Earth</strong></p>
 <p>Earth personified. Son of Shu and Tefnut. Husband/brother of Nut (sky). Father of Osiris, Isis, Set, and Nephthys. Laughter causes earthquakes.</p>
 <p><em>Symbol:</em> Goose, earth, green skin</p>
 <p><em>Ennead:</em> Third generation</p>
-<p><a href="deities/geb.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/geb.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓇼</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/nut.html">🌌 Nut</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/nut.html">🌌 Nut</a></h3>
 <p><strong>Goddess of the Sky</strong></p>
 <p>Sky personified. Sister/wife of Geb. Mother of Osiris, Isis, Set, Nephthys. Swallows sun at dusk, births it at dawn. Body arches over earth.</p>
 <p><em>Symbol:</em> Star-covered body, water pot</p>
 <p><em>Ennead:</em> Third generation</p>
-<p><a href="deities/nut.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/nut.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓆃</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/anhur.html">🦁 Anhur</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/anhur.html">🦁 Anhur</a></h3>
 <p><strong>God of War & Hunting</strong></p>
 <p>Warrior god, protector of armies. Associated with the hunt and military prowess. Merged with Shu in some traditions.</p>
 <p><em>Symbol:</em> Spear, four feathers</p>
 <p><em>Center:</em> Thinis, Abydos</p>
-<p><a href="deities/anhur.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/anhur.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓅓</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/montu.html">🦅 Montu</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/montu.html">🦅 Montu</a></h3>
 <p><strong>Falcon God of War</strong></p>
 <p>War deity associated with military might and the pharaoh's victory. Falcon-headed with sun disk. Patron of Theban warriors.</p>
 <p><em>Symbol:</em> Falcon, curved sword, sun disk</p>
 <p><em>Center:</em> Thebes, Armant</p>
-<p><a href="deities/montu.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/montu.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 <div class="deity-card">
 <div class="hieroglyph">𓊵</div>
-<h3 style="color: var(--mythos-primary);"><a href="deities/imhotep.html">🏛️ Imhotep</a></h3>
+<h3 style="color: var(--color-primary);"><a href="deities/imhotep.html">🏛️ Imhotep</a></h3>
 <p><strong>Deified Architect & Healer</strong></p>
 <p>Historical figure (c. 2650 BCE) deified centuries after death. Architect of Step Pyramid. God of medicine, wisdom, and architecture.</p>
 <p><em>Symbol:</em> Papyrus scroll, staff</p>
 <p><em>Cult:</em> Later Period, Greco-Roman era</p>
-<p><a href="deities/imhotep.html" style="color: var(--mythos-secondary);">→ Full Profile</a></p>
+<p><a href="deities/imhotep.html" style="color: var(--color-secondary);">→ Full Profile</a></p>
 </div>
 </div>
 </div>
@@ -331,10 +463,10 @@
 </div>
 <div class="glass-card" id="cosmology">
 <h2 style="color: var(--color-primary);">Egyptian <a data-term="Cosmology" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=cosmology" title="View cosmology in ancient texts">Cosmology</a> &amp; The Journey Through <a class="corpus-link" data-term="Duat" data-tradition="egyptian" href="corpus-search.html?term=duat" title="Search corpus for 'Duat'">Duat</a></h2>
-<p><a href="cosmology/index.html" style="color: var(--mythos-secondary);">→ Full Cosmology Overview</a> |
-            <a href="cosmology/creation.html" style="color: var(--mythos-secondary);">→ Creation Myths</a> |
-            <a href="cosmology/afterlife.html" style="color: var(--mythos-secondary);">→ Afterlife Journey</a> |
-            <a href="cosmology/duat.html" style="color: var(--mythos-secondary);">→ The Duat (12 Hours)</a></p>
+<p><a href="cosmology/index.html" style="color: var(--color-secondary);">→ Full Cosmology Overview</a> |
+            <a href="cosmology/creation.html" style="color: var(--color-secondary);">→ Creation Myths</a> |
+            <a href="cosmology/afterlife.html" style="color: var(--color-secondary);">→ Afterlife Journey</a> |
+            <a href="cosmology/duat.html" style="color: var(--color-secondary);">→ The Duat (12 Hours)</a></p>
 <h3><a data-term="Creation Myths" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=creation-myths" title="View creation myths in ancient texts">Creation Myths</a></h3>
 <p><strong>Heliopolitan <a data-term="Creation" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=creation" title="View creation in ancient texts">Creation</a>:</strong></p>
 <ul>
@@ -352,27 +484,27 @@
 <h3>The <a data-term="Afterlife" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=afterlife" title="View afterlife in ancient texts">Afterlife</a> Journey (From <a class="corpus-link" data-term="Book of the Dead" data-tradition="egyptian" href="corpus-search.html?term=book_of_dead" title="Search corpus for 'Book of the Dead'">Book of the Dead</a>)</h3>
 <div class="deity-grid">
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">1. Death &amp; Preservation</h4>
+<h4 style="color: var(--color-primary);">1. Death &amp; Preservation</h4>
 <p>Body mummified (70 days). <a class="corpus-link" data-term="Ka" data-tradition="egyptian" href="corpus-search.html?term=ka" title="Search corpus for 'Ka'">Ka</a> (<a class="corpus-link" data-term="Life force" data-tradition="egyptian" href="corpus-search.html?term=ka" title="Search corpus for 'Life force'">life force</a>) and <a class="corpus-link" data-term="Ba" data-tradition="egyptian" href="corpus-search.html?term=ba" title="Search corpus for 'Ba'">Ba</a> (<a class="corpus-link" data-term="Personality" data-tradition="egyptian" href="corpus-search.html?term=ba" title="Search corpus for 'Personality'">personality</a>) preserved. <a class="corpus-link" data-term="Book of the Dead" data-tradition="egyptian" href="corpus-search.html?term=book_of_dead" title="Search corpus for 'Book of the Dead'">Book of the Dead</a> placed in tomb.</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">2. Journey <a data-term="Through" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=through" title="View through in ancient texts">Through</a> <a class="corpus-link" data-term="Duat" data-tradition="egyptian" href="corpus-search.html?term=duat" title="Search corpus for 'Duat'">Duat</a></h4>
+<h4 style="color: var(--color-primary);">2. Journey <a data-term="Through" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=through" title="View through in ancient texts">Through</a> <a class="corpus-link" data-term="Duat" data-tradition="egyptian" href="corpus-search.html?term=duat" title="Search corpus for 'Duat'">Duat</a></h4>
 <p><a class="corpus-link" data-term="Soul" data-tradition="egyptian" href="corpus-search.html?term=ba" title="Search corpus for 'Soul'">Soul</a> navigates <a class="corpus-link" data-term="Twelve Hours" data-tradition="egyptian" href="corpus-search.html?term=amduat" title="Search corpus for 'Twelve Hours'">twelve hours</a> of night. Faces gates, demons, trials. Guided by funerary spells.</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">3. Weighing of the Heart</h4>
+<h4 style="color: var(--color-primary);">3. Weighing of the Heart</h4>
 <p>Heart weighed against feather of <a class="corpus-link" data-term="Ma'at" data-tradition="egyptian" href="corpus-search.html?term=maat" title="Search corpus for 'Ma'at'">Ma'at</a>. <a data-term="Anubis" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=anubis" title="View anubis in ancient texts">Anubis</a> performs weighing. <a class="corpus-link" data-term="Thoth" data-tradition="egyptian" href="corpus-search.html?term=thoth" title="Search corpus for 'Thoth'">Thoth</a> records result.</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">4. Judgment</h4>
+<h4 style="color: var(--color-primary);">4. Judgment</h4>
 <p>If heart lighter than feather: proceed to Field of Reeds. If heavier: devoured by Ammit (<a class="corpus-link" data-term="Soul" data-tradition="egyptian" href="corpus-search.html?term=ba" title="Search corpus for 'Soul'">soul</a> death).</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">5. Field of Reeds (Aaru)</h4>
+<h4 style="color: var(--color-primary);">5. Field of Reeds (Aaru)</h4>
 <p>Paradise. Perfect version of Egypt. <a class="corpus-link" data-term="Soul" data-tradition="egyptian" href="corpus-search.html?term=ba" title="Search corpus for 'Soul'">Soul</a> reunites with loved ones. Works blessed fields. Lives eternally.</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">6. Union with <a data-term="Osiris" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=osiris" title="View osiris in ancient texts">Osiris</a></h4>
+<h4 style="color: var(--color-primary);">6. Union with <a data-term="Osiris" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=osiris" title="View osiris in ancient texts">Osiris</a></h4>
 <p>Justified <a class="corpus-link" data-term="Soul" data-tradition="egyptian" href="corpus-search.html?term=ba" title="Search corpus for 'Soul'">soul</a> becomes "<a class="corpus-link" data-term="Osiris" data-tradition="egyptian" href="corpus-search.html?term=osiris" title="Search corpus for 'Osiris'">Osiris</a> [Name]". Participates in solar barque <a data-term="Journey" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=journey" title="View journey in ancient texts">journey</a>. Achieves immortality.</p>
 </div>
 </div>
@@ -392,84 +524,84 @@
 <p><a data-term="Egyptian" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=egyptian" title="View egyptian in ancient texts">Egyptian</a> medicine and magic were inseparable. Plants were sacred gifts of the gods used in healing, ritual, and mummification.</p>
 <div class="deity-grid">
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">🌸 Blue Lotus (Nymphaea caerulea)</h4>
+<h4 style="color: var(--color-primary);">🌸 Blue Lotus (Nymphaea caerulea)</h4>
 <p><strong><a data-term="Sacred" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=sacred" title="View sacred in ancient texts">Sacred</a> to <a class="corpus-link" data-term="Ra" data-tradition="egyptian" href="corpus-search.html?term=ra" title="Search corpus for 'Ra'">Ra</a></strong></p>
 <p>Opens at sunrise, closes at sunset. Symbol of rebirth. Mild psychoactive - spiritual opening, relaxation, euphoria. Offered to gods.</p>
 <p><em>Uses:</em> Temple <a data-term="Offerings" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=offerings" title="View offerings in ancient texts">offerings</a>, ritual intoxication, perfume, meditation</p>
 <p><em>Preparation:</em> Wine infusion, tea, oil extraction</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">🌲 Frankincense &amp; Myrrh</h4>
+<h4 style="color: var(--color-primary);">🌲 Frankincense &amp; Myrrh</h4>
 <p><strong>Temple Incense of Punt</strong></p>
 <p>Imported from Land of Punt (Somalia/Yemen). Burned in all temples. Used in mummification. Gift to gods.</p>
 <p><em>Uses:</em> Temple incense, embalming, perfume, medicine</p>
 <p><em>Significance:</em> So valuable entire expeditions sent to obtain</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">🧄 Garlic (Allium sativum)</h4>
+<h4 style="color: var(--color-primary);">🧄 Garlic (Allium sativum)</h4>
 <p><strong>Worker's Strength</strong></p>
 <p>Given to pyramid builders for strength and health. Protection against evil spirits. Medicinal powerhouse.</p>
 <p><em>Uses:</em> Food, medicine, protection amulets, strength</p>
 <p><em>Ritual:</em> Hung in homes, worn by workers</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">🧅 Onion (Allium cepa)</h4>
+<h4 style="color: var(--color-primary);">🧅 Onion (Allium cepa)</h4>
 <p><strong>Symbol of Eternal <a class="corpus-link" data-term="Life" data-tradition="egyptian" href="corpus-search.html?term=ankh" title="Search corpus for 'Life'">Life</a></strong></p>
 <p>Layers = layers of universe. Sprouting = resurrection. Placed in tombs. Food offering to dead.</p>
 <p><em>Uses:</em> Mummification (placed in body), food <a data-term="Offerings" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=offerings" title="View offerings in ancient texts">offerings</a>, medicine</p>
 <p><em>Symbolism:</em> Eternal <a class="corpus-link" data-term="Life" data-tradition="egyptian" href="corpus-search.html?term=ankh" title="Search corpus for 'Life'">life</a>, cosmos structure</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">🌴 Date Palm (Phoenix dactylifera)</h4>
+<h4 style="color: var(--color-primary);">🌴 Date Palm (Phoenix dactylifera)</h4>
 <p><strong>Tree of <a class="corpus-link" data-term="Life" data-tradition="egyptian" href="corpus-search.html?term=ankh" title="Search corpus for 'Life'">Life</a></strong></p>
 <p>Sustenance, fertility, abundance. Fronds used in ceremonies. Dates = food of immortals. Wood for <a data-term="Sacred" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=sacred" title="View sacred in ancient texts">sacred</a> objects.</p>
 <p><em>Uses:</em> Food, wine, building, ceremony</p>
 <p><em>Symbol:</em> Eternal <a class="corpus-link" data-term="Life" data-tradition="egyptian" href="corpus-search.html?term=ankh" title="Search corpus for 'Life'">life</a>, fertility</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">🌿 Papyrus (Cyperus papyrus)</h4>
+<h4 style="color: var(--color-primary);">🌿 Papyrus (Cyperus papyrus)</h4>
 <p><strong><a class="corpus-link" data-term="Life" data-tradition="egyptian" href="corpus-search.html?term=ankh" title="Search corpus for 'Life'">Life</a> from the Nile</strong></p>
 <p>Writing material, boats, sandals. Symbol of Lower Egypt. Habitat of <a class="corpus-link" data-term="Hathor" data-tradition="egyptian" href="corpus-search.html?term=hathor" title="Search corpus for 'Hathor'">Hathor</a>. Represents primordial marsh of <a data-term="Creation" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=creation" title="View creation in ancient texts">creation</a>.</p>
 <p><em>Uses:</em> Writing, boats, mats, symbol of <a class="corpus-link" data-term="Life" data-tradition="egyptian" href="corpus-search.html?term=ankh" title="Search corpus for 'Life'">life</a></p>
 <p><em>Sacred:</em> Primordial plant of first land</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">🌿 Henna (Lawsonia inermis)</h4>
+<h4 style="color: var(--color-primary);">🌿 Henna (Lawsonia inermis)</h4>
 <p><strong>Beauty &amp; Protection</strong></p>
 <p>Body art for living and dead. Cools body, scents, beautifies. Used on mummies. Associated with <a class="corpus-link" data-term="Hathor" data-tradition="egyptian" href="corpus-search.html?term=hathor" title="Search corpus for 'Hathor'">Hathor</a>.</p>
 <p><em>Uses:</em> Body decoration, hair dye, cooling, perfume</p>
 <p><em>Ritual:</em> Applied before <a data-term="Festivals" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=festivals" title="View festivals in ancient texts">festivals</a>, on mummies</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">🌿 Moringa (Moringa oleifera)</h4>
+<h4 style="color: var(--color-primary);">🌿 Moringa (Moringa oleifera)</h4>
 <p><strong>The Miracle Tree</strong></p>
 <p>Medicinal tree of incredible potency. Every part usable. Oil for perfumes and anointing. Called "shagara al rauwaq" (drumstick tree).</p>
 <p><em>Uses:</em> Oil (ben oil), medicine, food, water purification</p>
 <p><em>Properties:</em> Nutritive, healing, preservative</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">🌾 Wheat &amp; Barley</h4>
+<h4 style="color: var(--color-primary);">🌾 Wheat &amp; Barley</h4>
 <p><strong>Gifts of <a data-term="Osiris" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=osiris" title="View osiris in ancient texts">Osiris</a></strong></p>
 <p><a class="corpus-link" data-term="Osiris" data-tradition="egyptian" href="corpus-search.html?term=osiris" title="Search corpus for 'Osiris'">Osiris</a> taught agriculture. Grain = resurrection (seeds die, sprout). Beer and bread - staples of <a class="corpus-link" data-term="Life" data-tradition="egyptian" href="corpus-search.html?term=ankh" title="Search corpus for 'Life'">life</a> and <a data-term="Afterlife" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=afterlife" title="View afterlife in ancient texts">afterlife</a>.</p>
 <p><em>Uses:</em> Bread, beer, <a data-term="Offerings" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=offerings" title="View offerings in ancient texts">offerings</a>, resurrection symbolism</p>
 <p><em><a class="corpus-link" data-term="Osiris" data-tradition="egyptian" href="corpus-search.html?term=osiris" title="Search corpus for 'Osiris'">Osiris</a>:</em> God of grain = god of rebirth</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">🌿 Castor Oil Plant (Ricinus communis)</h4>
+<h4 style="color: var(--color-primary);">🌿 Castor Oil Plant (Ricinus communis)</h4>
 <p><strong>Medicine &amp; Lamps</strong></p>
 <p>Oil for lamps in temples. Medicine for many ailments. Seeds HIGHLY TOXIC (ricin) but oil safe when processed.</p>
 <p><em>Uses:</em> Lamp fuel, laxative, skin treatment</p>
 <p><em>Warning:</em> Seeds deadly poisonous</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">🌿 Coriander &amp; Cumin</h4>
+<h4 style="color: var(--color-primary);">🌿 Coriander &amp; Cumin</h4>
 <p><strong>Embalming Spices</strong></p>
 <p>Used in mummification process. Preservative and aromatic. Culinary and medicinal uses. Found in tombs.</p>
 <p><em>Uses:</em> Embalming, cooking, medicine, <a data-term="Offerings" data-tradition="egyptian" class="corpus-link" href="corpus-search.html?term=offerings" title="View offerings in ancient texts">offerings</a></p>
 <p><em>Found:</em> In Tutankhamun's tomb</p>
 </div>
 <div class="deity-card">
-<h4 style="color: var(--mythos-primary);">🌿 Aloe Vera</h4>
+<h4 style="color: var(--color-primary);">🌿 Aloe Vera</h4>
 <p><strong>Plant of Immortality</strong></p>
 <p>Planted near tombs. Used in embalming. Healing burns and skin. Symbol of eternal <a class="corpus-link" data-term="Life" data-tradition="egyptian" href="corpus-search.html?term=ankh" title="Search corpus for 'Life'">life</a> and protection.</p>
 <p><em>Uses:</em> Mummification, medicine, skin care, burial gifts</p>
