@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alchemy - The Royal Art of Transmutation</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--space-5);
+        }
+
+        .container {
+            max-width: var(--container-lg);
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--space-16) var(--space-5);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-10);
+            border: 2px solid var(--color-border);
+        }
+
+        h1 {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-5);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: var(--text-xl);
+            color: var(--color-text-secondary);
+            margin: var(--space-5) 0;
+            font-style: italic;
+        }
+
+        .section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+        }
+
+        h2 {
+            font-size: var(--text-3xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-6);
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: var(--space-3);
+        }
+
+        h3 {
+            font-size: var(--text-2xl);
+            color: var(--color-secondary);
+            margin: var(--space-6) 0 var(--space-4) 0;
+        }
+
+        h4 {
+            font-size: var(--text-xl);
+            color: var(--color-primary);
+            margin: var(--space-5) 0 var(--space-3) 0;
+        }
+
+        p {
+            margin-bottom: var(--space-4);
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin: var(--space-4) 0;
+            padding-left: var(--space-8);
+        }
+
+        li {
+            margin-bottom: var(--space-3);
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--space-5);
+            margin: var(--space-5) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .practice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .practice-card {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            transition: all var(--transition-base);
+        }
+
+        .practice-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .tools-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-5);
+            margin: var(--space-5) 0;
+        }
+
+        .tool-item {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+        }
+
+        .tool-name {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .source-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 3px solid var(--color-secondary);
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
+            border-radius: var(--radius-md);
+        }
+
+        .source-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .source-author {
+            font-style: italic;
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+        }
+
+        .cross-ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-5) 0;
+        }
+
+        .cross-ref-link {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            text-align: center;
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+            display: block;
+        }
+
+        .cross-ref-link:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .nav-section {
+            display: flex;
+            gap: var(--space-4);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--space-8);
+        }
+
+        .nav-button {
+            padding: var(--space-4) var(--space-6);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .warning-box {
+            background: rgba(255, 100, 100, 0.1);
+            border-left: 4px solid #ff6464;
+            padding: var(--space-5);
+            margin: var(--space-5) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        blockquote {
+            font-style: italic;
+            border-left: 4px solid var(--color-primary);
+            padding-left: var(--space-5);
+            margin: var(--space-5) 0;
+            color: var(--color-text-secondary);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: var(--space-8);
+            margin: var(--space-6) 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--color-border);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: var(--space-6);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -42px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            border: 3px solid var(--color-background);
+        }
+
+        .timeline-date {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .stage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-5);
+            margin: var(--space-5) 0;
+        }
+
+        .stage-card {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+        }
+
+        .stage-name {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+            font-size: var(--text-lg);
+        }
+
+        .symbol-text {
+            font-size: var(--text-3xl);
+            text-align: center;
+            color: var(--color-primary);
+            margin: var(--space-4) 0;
+            letter-spacing: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Alchemy</h1>
+        <p class="subtitle">The Royal Art of Transmutation</p>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../mythos/index.html">Home</a> &rarr; <a href="../index.html">Magic</a> &rarr; <a href="index.html">Traditions</a> &rarr; <span>Alchemy</span>
+</nav>
+
+        <!-- OVERVIEW SECTION -->
+        <section class="section">
+            <h2>Overview</h2>
+            <p>
+                Alchemy, the "Royal Art" or "Great Work" (Magnum Opus), represents one of humanity's most ambitious
+                and enduring spiritual-scientific traditions. While popularly conceived as merely the quest to
+                transmute base metals into gold, authentic alchemy encompasses a comprehensive philosophical system
+                aimed at understanding and perfecting nature at every level - mineral, vegetable, animal, and human.
+                The physical laboratory work was inseparable from spiritual practice; the transformation of matter
+                mirrored and facilitated the transformation of the alchemist's own soul.
+            </p>
+
+            <div class="symbol-text">
+                &#9883; &#9790; &#9737; &#128142; &#9884;
+            </div>
+
+            <div class="highlight-box">
+                <h4>The Emerald Tablet</h4>
+                <p>
+                    The foundational text of Western alchemy, attributed to Hermes Trismegistus, encapsulates the
+                    alchemical worldview: "As above, so below; as below, so above." This principle of correspondence
+                    between macrocosm and microcosm underlies all alchemical theory and practice. The operations
+                    performed in the laboratory reflect cosmic processes; the substances worked upon mirror aspects
+                    of the alchemist's soul; and the goal - the Philosopher's Stone - represents both physical
+                    transmutation agent and the perfected human being.
+                </p>
+            </div>
+
+            <h3>Historical Development</h3>
+            <p>
+                Alchemy emerged from the synthesis of Egyptian metallurgical and embalming knowledge, Greek
+                natural philosophy (especially Aristotelian matter theory), and Gnostic-Hermetic spiritual
+                traditions in Hellenistic Alexandria. The name likely derives from "khem," the ancient name for
+                Egypt (meaning "black land"), making alchemy "the Egyptian art." Over two millennia, the tradition
+                developed distinct branches while maintaining core principles and practices.
+            </p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">1st-3rd Century CE</div>
+                    <p>Alexandrian origins; Zosimos of Panopolis; earliest surviving alchemical texts in Greek</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">8th-12th Century</div>
+                    <p>Arabic Golden Age; Jabir ibn Hayyan (Geber); Al-Razi; sophisticated chemical techniques develop</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">12th-13th Century</div>
+                    <p>Latin translations from Arabic; European alchemy begins; Albertus Magnus, Roger Bacon</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">15th-16th Century</div>
+                    <p>Paracelsus revolutionizes alchemy toward medicine; iatrochemistry develops</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">17th Century</div>
+                    <p>Final flowering; Newton secretly practices alchemy; gradual separation into chemistry</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">19th-20th Century</div>
+                    <p>Revival through occult orders; Carl Jung interprets alchemy psychologically</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Contemporary</div>
+                    <p>Practical alchemy continues; spagyrics; scholarly study; psychological interpretations</p>
+                </div>
+            </div>
+
+            <h3>Theoretical Framework</h3>
+            <p>
+                Classical alchemy operated on several fundamental principles. All matter was believed to consist
+                of combinations of basic elements (Earth, Water, Air, Fire) or philosophical principles (Sulfur,
+                Mercury, Salt). Metals were thought to "grow" in the earth, slowly maturing toward gold - the
+                most perfect metal. The alchemist sought to accelerate and perfect this natural process through
+                art, creating a catalyst (the Philosopher's Stone) capable of instantly completing the maturation.
+            </p>
+
+            <blockquote>
+                "Visit the interior of the earth; by rectification thou shalt find the hidden stone."
+                (VITRIOL - Visita Interiora Terrae Rectificando Invenies Occultum Lapidem)
+                <br><em>- Classic alchemical motto</em>
+            </blockquote>
+        </section>
+
+        <!-- THE GREAT WORK -->
+        <section class="section">
+            <h2>The Great Work (Magnum Opus)</h2>
+            <p>
+                The Great Work describes both the goal and process of alchemy. Various texts describe different
+                numbers of stages, but most agree on a general progression from the initial "black" stage through
+                intermediate colors to the final "red" or "gold" - the completed Stone. These stages apply equally
+                to laboratory operations and the alchemist's spiritual development.
+            </p>
+
+            <div class="stage-grid">
+                <div class="stage-card">
+                    <div class="stage-name">Nigredo (Blackening)</div>
+                    <p>
+                        The first stage involves putrefaction and decomposition - breaking down the initial matter
+                        into its most basic form (prima materia). Psychologically, this corresponds to confronting
+                        the shadow, dissolving ego structures, and experiencing the "dark night of the soul." The
+                        material turns black as all impurities are revealed. This is the necessary death that
+                        precedes rebirth.
+                    </p>
+                </div>
+
+                <div class="stage-card">
+                    <div class="stage-name">Albedo (Whitening)</div>
+                    <p>
+                        Through washing and purification, the blackened matter becomes white - the "White Stone"
+                        or "White Queen." This represents purification, the emergence of consciousness from the
+                        unconscious, and the development of the "lunar" or receptive aspect of the soul. The
+                        white stage can transmute base metals to silver.
+                    </p>
+                </div>
+
+                <div class="stage-card">
+                    <div class="stage-name">Citrinitas (Yellowing)</div>
+                    <p>
+                        Sometimes described as an intermediate stage between white and red, citrinitas represents
+                        the dawning of solar consciousness. The yellow color indicates approaching gold. Not all
+                        systems include this stage, some moving directly from albedo to rubedo.
+                    </p>
+                </div>
+
+                <div class="stage-card">
+                    <div class="stage-name">Rubedo (Reddening)</div>
+                    <p>
+                        The final stage produces the Red Stone, the Philosopher's Stone proper, capable of
+                        transmuting base metals to gold. Psychologically, this represents the complete integration
+                        of opposites, the union of masculine and feminine principles, and the achievement of
+                        spiritual wholeness. The "Red King" and "White Queen" are united in chemical marriage.
+                    </p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h4>The Twelve Operations</h4>
+                <p>
+                    Various systems enumerate specific operations that accomplish the Great Work. A common scheme
+                    lists twelve: Calcination (burning), Dissolution (dissolving), Separation (isolating), Conjunction
+                    (combining), Fermentation (introducing life), Distillation (purifying), and Coagulation (solidifying),
+                    among others. Each operation corresponds to zodiacal signs, planetary influences, and psychological
+                    processes. The sequence is often cycled multiple times at increasingly subtle levels.
+                </p>
+            </div>
+        </section>
+
+        <!-- CORE PRACTICES -->
+        <section class="section">
+            <h2>Core Practices</h2>
+
+            <div class="practice-grid">
+                <div class="practice-card">
+                    <h4>Laboratory Work (Opus)</h4>
+                    <p>
+                        Practical alchemy involves sophisticated chemical operations in the laboratory. Substances
+                        are heated, cooled, distilled, calcined, dissolved, filtered, and recombined through lengthy
+                        procedures. Traditional materials include antimony, mercury, sulfur, lead, and various
+                        salts. The operations must be performed at correct astrological times, in proper vessels,
+                        with focused intention. The work is slow, requiring patience measured in months or years.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Spagyrics (Plant Alchemy)</h4>
+                    <p>
+                        Spagyric work applies alchemical principles to the plant kingdom, producing purified and
+                        potentiated medicines. The process separates a plant into its three principles (Sulfur/essential
+                        oils, Mercury/alcohol, Salt/mineral salts), purifies each, then reunites them into an
+                        "exalted" form. This branch is more accessible than mineral alchemy and produces genuinely
+                        useful medicines.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Meditation and Contemplation</h4>
+                    <p>
+                        Physical laboratory work was accompanied by spiritual practice. The alchemist meditated
+                        on symbolic imagery, contemplated the operations' meanings, and cultivated the inner
+                        states necessary for the Work. Many texts insist that spiritual preparation is essential -
+                        the Stone cannot be produced by one whose soul remains unregenerate. Prayer, purification,
+                        and moral development supported the laboratory operations.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Study of Texts and Symbols</h4>
+                    <p>
+                        Alchemical literature is notoriously obscure, filled with coded language, mythological
+                        allegories, and symbolic imagery. Serious practitioners spent years studying texts,
+                        deciphering their meanings, and comparing different authors' approaches. The imagery -
+                        dragons, kings and queens, the ouroboros, the pelican - encoded practical knowledge
+                        for initiated readers while concealing it from the uninitiated.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Work with the Three Principles</h4>
+                    <p>
+                        Paracelsus' innovation was emphasizing the "tria prima" - Sulfur (soul, consciousness,
+                        individuality), Mercury (spirit, life force, connection), and Salt (body, matter, form).
+                        These aren't the common substances of those names but philosophical principles present
+                        in all things. Separating, purifying, and recombining the three principles forms the
+                        core of spagyric and medical alchemy.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Observing Natural Processes</h4>
+                    <p>
+                        Alchemists were keen observers of nature, seeing natural processes as models for their
+                        art. The growth of plants, the generation of animals, geological formation, astronomical
+                        cycles - all provided analogies for laboratory work. "Nature shows the way," and the
+                        alchemist follows and accelerates natural processes rather than contradicting them.
+                    </p>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>Dangers of Practice</h4>
+                <p>
+                    Historical alchemy involved significant dangers. Mercury and lead poisoning afflicted many
+                    practitioners. Explosions, fires, and toxic fumes were common hazards. Beyond physical dangers,
+                    psychological risks attended deep engagement with the symbolic material. Obsession, financial
+                    ruin, and mental instability claimed many who pursued the Stone. Traditional texts warn
+                    repeatedly that the Work requires patience, moral development, and divine grace.
+                </p>
+            </div>
+        </section>
+
+        <!-- TOOLS & MATERIALS -->
+        <section class="section">
+            <h2>Tools & Materials</h2>
+
+            <div class="tools-list">
+                <div class="tool-item">
+                    <div class="tool-name">The Athanor</div>
+                    <p>
+                        A specialized furnace designed to maintain constant, gentle heat over long periods -
+                        sometimes months. The name derives from Arabic "at-tannur" (oven). Its design allowed
+                        the alchemist to control temperature precisely, essential for delicate operations.
+                        Various designs existed for different purposes.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">The Philosophical Egg</div>
+                    <p>
+                        A sealed glass vessel in which the matter of the Stone is contained during the Great
+                        Work. Its egg shape symbolizes the containment and gestation of new life. The vessel
+                        must be hermetically sealed (hence "hermetic") to prevent any loss of volatile substances.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">The Alembic</div>
+                    <p>
+                        Distillation apparatus consisting of a cucurbit (boiling vessel) and head that collects
+                        and condenses vapors, directing them into a receiver. Multiple distillations purified
+                        substances, separating the subtle from the gross. The alembic became the symbol of
+                        alchemy itself.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">The Retort</div>
+                    <p>
+                        A one-piece distillation vessel with a long neck bent downward, useful for distilling
+                        corrosive substances. Glass retorts replaced earlier clay and metal versions, allowing
+                        observation of color changes during operations.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Crucibles and Cupels</div>
+                    <p>
+                        Heat-resistant vessels for calcination and high-temperature operations. Cupels were
+                        porous cups used in assaying, absorbing base metals while leaving noble metals behind.
+                        Various materials (clay, bone ash, iron) served different purposes.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Balances and Measures</div>
+                    <p>
+                        Precise measurement was essential. Alchemists developed increasingly accurate balances
+                        and standardized their measurements. The weighing of materials before and after operations
+                        provided evidence of transmutation - or revealed its failure.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">The Secret Fire</div>
+                    <p>
+                        Beyond physical fire, alchemists spoke of a "secret fire" necessary for the Work. This
+                        might be interpreted as vital energy, the alchemist's focused attention, or a specific
+                        chemical substance (some identify it with the "philosophical mercury"). Its nature was
+                        among the most closely guarded secrets.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">The Prima Materia</div>
+                    <p>
+                        The "first matter" from which the Stone is generated. Alchemists differed on what this
+                        was - some said it was found everywhere and cost nothing; others worked with specific
+                        minerals. Antimony ore (stibnite), common mercury, and various other substances have
+                        been proposed. The true prima materia was both material and spiritual.
+                    </p>
+                </div>
+            </div>
+
+            <h3>The Planetary Metals</h3>
+            <p>
+                Classical alchemy assigned each metal to a celestial body, reflecting the Hermetic principle
+                of correspondence:
+            </p>
+
+            <ul>
+                <li><strong>Gold (Sol):</strong> The Sun - perfect, incorruptible, the goal of transmutation</li>
+                <li><strong>Silver (Luna):</strong> The Moon - pure but less perfect than gold; intermediate stage</li>
+                <li><strong>Mercury (Mercury):</strong> Quicksilver - volatile, transformative, the philosophical principle</li>
+                <li><strong>Copper (Venus):</strong> Associated with love, beauty, and the feminine</li>
+                <li><strong>Iron (Mars):</strong> Warlike, hard, associated with masculine force</li>
+                <li><strong>Tin (Jupiter):</strong> Benevolent, associated with expansion and growth</li>
+                <li><strong>Lead (Saturn):</strong> Heavy, slow, the starting point of metallic transmutation</li>
+            </ul>
+        </section>
+
+        <!-- LINEAGES & SCHOOLS -->
+        <section class="section">
+            <h2>Lineages & Schools</h2>
+
+            <h3>Historical Traditions</h3>
+
+            <h4>Alexandrian/Hellenistic Alchemy</h4>
+            <p>
+                The earliest identifiable alchemical tradition flourished in Greco-Roman Egypt, particularly
+                Alexandria. Zosimos of Panopolis (c. 300 CE) left the most substantial early texts, describing
+                both practical operations and visionary experiences. This tradition synthesized Egyptian crafts,
+                Greek philosophy, and Gnostic-Hermetic spirituality into a coherent system.
+            </p>
+
+            <h4>Arabic/Islamic Alchemy</h4>
+            <p>
+                Arabic-speaking scholars preserved and developed Greek alchemical knowledge after Alexandria's
+                decline. Jabir ibn Hayyan (Geber, 8th-9th century) systematized alchemical theory and practice,
+                developing the sulfur-mercury theory of metals. Al-Razi (Rhazes) and later Arabic alchemists
+                advanced practical chemistry substantially. Arabic alchemy introduced distillation equipment
+                and many chemical processes to the tradition.
+            </p>
+
+            <h4>European Medieval Alchemy</h4>
+            <p>
+                Latin translations from Arabic brought alchemy to Europe in the 12th century. Figures like
+                Albertus Magnus, Roger Bacon, and Pseudo-Geber (author of the Summa Perfectionis) developed
+                European alchemical traditions. This period saw alchemy's close association with the Church
+                and universities, though it was never officially sanctioned and often persecuted.
+            </p>
+
+            <div class="highlight-box">
+                <h4>Paracelsus and Iatrochemistry</h4>
+                <p>
+                    Philippus Aureolus Theophrastus Bombastus von Hohenheim (1493-1541), known as Paracelsus,
+                    revolutionized alchemy by emphasizing its medical applications. His "three principles"
+                    (Sulfur, Mercury, Salt) replaced or supplemented the four elements. Paracelsus created
+                    pharmaceutical preparations using alchemical methods, founding iatrochemistry (medical
+                    chemistry). His followers included Jan Baptist van Helmont and other early modern scientists.
+                </p>
+            </div>
+
+            <h4>Renaissance and Early Modern Alchemy</h4>
+            <p>
+                The 15th-17th centuries saw alchemy's final flowering before its gradual separation into
+                chemistry. Major figures included Heinrich Khunrath, Michael Maier, and Robert Fludd. Isaac
+                Newton devoted enormous energy to alchemical research, though he kept this work secret. The
+                Rosicrucian manifestos (1614-1616) presented alchemy as part of a spiritual reform movement.
+            </p>
+
+            <h3>Modern Developments</h3>
+
+            <h4>Occult Revival</h4>
+            <p>
+                19th-century occult orders like the Golden Dawn incorporated alchemical symbolism into their
+                systems, though practical laboratory work was less emphasized than spiritual interpretation.
+                Aleister Crowley, Dion Fortune, and others interpreted alchemical texts as guides to spiritual
+                transformation.
+            </p>
+
+            <h4>Jungian Psychology</h4>
+            <p>
+                Carl Jung devoted years to studying alchemical texts, seeing in them a symbolic language for
+                psychological transformation. His "Psychology and Alchemy" and related works interpret the
+                Great Work as individuation - the integration of conscious and unconscious, the development
+                of the Self. Jung's interpretation has profoundly influenced modern understanding of alchemy.
+            </p>
+
+            <h4>Contemporary Practice</h4>
+            <p>
+                Practical alchemy continues through organizations like the Philosophers of Nature (PON) and
+                various spagyric practitioners. Modern alchemists combine traditional methods with contemporary
+                chemical knowledge. Spagyric medicines are commercially available, and some practitioners
+                continue working toward the mineral Stone.
+            </p>
+        </section>
+
+        <!-- PRIMARY SOURCES -->
+        <section class="section">
+            <h2>Primary Sources</h2>
+
+            <div class="source-item">
+                <div class="source-title">The Emerald Tablet of Hermes Trismegistus</div>
+                <div class="source-author">Attributed to Hermes; various translations; see Hauck's edition, 1999</div>
+                <p>
+                    The foundational text of Western alchemy, a brief cryptic statement of alchemical principles.
+                    "As above, so below" and related axioms derive from this source. Multiple translations and
+                    commentaries exist, each revealing different aspects of its meaning.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Turba Philosophorum</div>
+                <div class="source-author">Medieval Arabic compilation; trans. A.E. Waite, 1896</div>
+                <p>
+                    One of the oldest alchemical texts in Latin, supposedly recording debates among ancient
+                    philosophers about the Great Work. Important source for understanding early alchemical theory
+                    and its transmission from Arabic to European traditions.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Rosarium Philosophorum</div>
+                <div class="source-author">Anonymous, 16th century; trans. in The Art of Distillation by John French, 1651</div>
+                <p>
+                    A highly influential illustrated alchemical text showing the stages of the Great Work through
+                    images of the King and Queen's union. Jung used its imagery extensively in his psychological
+                    interpretation of alchemy.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Alchemy Reader</div>
+                <div class="source-author">Ed. Stanton J. Linden, Cambridge University Press, 2003</div>
+                <p>
+                    Excellent scholarly anthology of primary alchemical texts from antiquity through the 18th
+                    century. Includes selections from major authors with helpful introductions and notes.
+                    Essential for serious study.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">Psychology and Alchemy</div>
+                <div class="source-author">Carl G. Jung, Collected Works Vol. 12, 1944/1953</div>
+                <p>
+                    Jung's major work on alchemy, interpreting the Great Work as symbolic description of
+                    psychological individuation. Whether or not one accepts Jung's interpretation, this work
+                    shaped modern understanding of alchemical symbolism.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Complete Idiot's Guide to Alchemy</div>
+                <div class="source-author">Dennis William Hauck, Alpha Books, 2008</div>
+                <p>
+                    Despite the title, a serious introduction to alchemical history, theory, and practice by
+                    a respected contemporary alchemist. Covers both spiritual interpretation and practical
+                    laboratory work. Good starting point for beginners.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">Real Alchemy: A Primer of Practical Alchemy</div>
+                <div class="source-author">Robert Allen Bartlett, Ibis Press, 2009</div>
+                <p>
+                    Practical manual for spagyric and mineral alchemy by an experienced laboratory alchemist.
+                    Provides actual procedures, safety information, and philosophical context. For those
+                    interested in hands-on practice.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Forge and the Crucible</div>
+                <div class="source-author">Mircea Eliade, University of Chicago Press, 1962</div>
+                <p>
+                    Classic scholarly study examining alchemy within the broader context of sacred metallurgy,
+                    initiation, and the religious significance of matter transformation. Places Western alchemy
+                    alongside Chinese and Indian traditions.
+                </p>
+            </div>
+        </section>
+
+        <!-- CROSS-REFERENCES -->
+        <section class="section">
+            <h2>Cross-References & Related Traditions</h2>
+
+            <div class="cross-ref-grid">
+                <a href="heka.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">&#128737;</div>
+                    <div><strong>Heka</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Egyptian magical roots</div>
+                </a>
+
+                <a href="practical-kabbalah.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">&#10017;</div>
+                    <div><strong>Practical Kabbalah</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Jewish mystical parallels</div>
+                </a>
+
+                <a href="../texts/emerald-tablet.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">&#128142;</div>
+                    <div><strong>Emerald Tablet</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Foundational text</div>
+                </a>
+
+                <a href="theurgy.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">&#9883;</div>
+                    <div><strong>Theurgy</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Divine transformation</div>
+                </a>
+
+                <a href="../herbalism/index.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">&#127807;</div>
+                    <div><strong>Herbalism</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Spagyric connections</div>
+                </a>
+
+                <a href="enochian.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">&#128302;</div>
+                    <div><strong>Enochian</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Renaissance magic</div>
+                </a>
+            </div>
+
+            <h3 style="margin-top: var(--space-8);">Related Traditions</h3>
+            <ul>
+                <li><strong>Chinese Alchemy (Waidan/Neidan):</strong> Parallel tradition seeking immortality through external and internal practices</li>
+                <li><strong>Indian Rasayana:</strong> Alchemical tradition seeking rejuvenation and spiritual transformation through mercury</li>
+                <li><strong>Hermeticism:</strong> Philosophical framework underlying Western alchemy</li>
+                <li><strong>Rosicrucianism:</strong> 17th-century movement incorporating alchemical symbolism</li>
+                <li><strong>Golden Dawn:</strong> Victorian order systematizing alchemical correspondences</li>
+                <li><strong>Anthroposophy:</strong> Rudolf Steiner's system incorporating alchemical ideas</li>
+            </ul>
+        </section>
+
+        <!-- INTERLINK PANEL -->
+        <section class="section">
+            <section class="interlink-panel">
+                <h3 class="interlink-header" style="display: flex; align-items: center; gap: var(--space-3); color: var(--color-primary); margin-bottom: var(--space-6);">
+                    <span class="interlink-icon">&#128279;</span>
+                    Related Across the Mythos
+                </h3>
+
+                <div class="interlink-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-6);">
+                    <!-- Source Tradition -->
+                    <div class="interlink-section">
+                        <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--color-secondary); margin-bottom: var(--space-4);">Source Tradition</div>
+                        <a href="../../mythos/hermetic/index.html" class="cross-ref-link" style="display: block; padding: var(--space-5); background: rgba(var(--color-primary-rgb), 0.1); border: 2px solid var(--color-border); border-radius: var(--radius-lg); text-decoration: none;">
+                            <div style="font-size: 2rem; margin-bottom: var(--space-2); text-align: center;">&#128142;</div>
+                            <div style="text-align: center;"><strong style="color: var(--color-primary);">Hermetic Tradition</strong></div>
+                            <div style="font-size: var(--text-sm); color: var(--color-text-secondary); text-align: center;">Philosophy of Hermes Trismegistus</div>
+                        </a>
+                    </div>
+
+                    <!-- Key Figures -->
+                    <div class="interlink-section">
+                        <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--color-secondary); margin-bottom: var(--space-4);">Key Figures</div>
+                        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                            <a href="../../figures/mythic/hermes-trismegistus.html" class="cross-ref-link" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none;">
+                                <span style="font-size: 1.5rem;">&#128142;</span>
+                                <div>
+                                    <strong style="color: var(--color-primary);">Hermes Trismegistus</strong>
+                                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Legendary founder of alchemy</div>
+                                </div>
+                            </a>
+                            <a href="../../figures/historical/paracelsus.html" class="cross-ref-link" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none;">
+                                <span style="font-size: 1.5rem;">&#128300;</span>
+                                <div>
+                                    <strong style="color: var(--color-primary);">Paracelsus</strong>
+                                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Father of medical alchemy</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Related Practices -->
+                    <div class="interlink-section">
+                        <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--color-secondary); margin-bottom: var(--space-4);">Related Practices</div>
+                        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                            <a href="../herbalism/spagyrics.html" class="cross-ref-link" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none;">
+                                <span style="font-size: 1.5rem;">&#127807;</span>
+                                <div>
+                                    <strong style="color: var(--color-primary);">Spagyrics</strong>
+                                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Plant alchemy</div>
+                                </div>
+                            </a>
+                            <a href="theurgy.html" class="cross-ref-link" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none;">
+                                <span style="font-size: 1.5rem;">&#9883;</span>
+                                <div>
+                                    <strong style="color: var(--color-primary);">Theurgy</strong>
+                                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Divine transformation magic</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cross-Cultural Parallels -->
+                <div class="parallel-traditions" style="margin-top: var(--space-8); padding: var(--space-6); background: rgba(var(--color-primary-rgb), 0.05); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+                    <h4 style="color: var(--color-primary); margin-bottom: var(--space-4);">&#127757; Cross-Cultural Parallel Practices</h4>
+                    <p style="color: var(--color-text-secondary); margin-bottom: var(--space-4); font-size: var(--text-sm);">Transmutation and transformation traditions:</p>
+                    <div class="parallel-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-4);">
+                        <a href="heka.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; transition: all var(--transition-base);">
+                            <span class="tradition-flag" style="font-size: 1.5rem;">&#128737;</span>
+                            <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Heka</span>
+                            <span class="tradition-label" style="font-size: var(--text-sm); color: var(--color-text-secondary);">Egyptian</span>
+                        </a>
+                        <a href="tantra.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; transition: all var(--transition-base);">
+                            <span class="tradition-flag" style="font-size: 1.5rem;">&#128329;</span>
+                            <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Tantra</span>
+                            <span class="tradition-label" style="font-size: var(--text-sm); color: var(--color-text-secondary);">Hindu/Buddhist</span>
+                        </a>
+                        <a href="practical-kabbalah.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; transition: all var(--transition-base);">
+                            <span class="tradition-flag" style="font-size: 1.5rem;">&#10017;</span>
+                            <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Kabbalah</span>
+                            <span class="tradition-label" style="font-size: var(--text-sm); color: var(--color-text-secondary);">Jewish</span>
+                        </a>
+                        <a href="vedic-magic.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; transition: all var(--transition-base);">
+                            <span class="tradition-flag" style="font-size: 1.5rem;">&#128329;</span>
+                            <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Rasayana</span>
+                            <span class="tradition-label" style="font-size: var(--text-sm); color: var(--color-text-secondary);">Indian</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- See Also -->
+                <div class="see-also-section" style="margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--color-border);">
+                    <h4 style="color: var(--color-primary); margin-bottom: var(--space-4);">&#128218; See Also</h4>
+                    <div class="see-also-links" style="display: flex; flex-wrap: wrap; gap: var(--space-3);">
+                        <a href="../../archetypes/magician/index.html" class="see-also-link" style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-full); text-decoration: none; font-size: var(--text-sm); color: var(--color-text-primary);">
+                            <span>&#10024;</span> Magician Archetype
+                        </a>
+                        <a href="../texts/emerald-tablet.html" class="see-also-link" style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-full); text-decoration: none; font-size: var(--text-sm); color: var(--color-text-primary);">
+                            <span>&#128142;</span> Emerald Tablet
+                        </a>
+                        <a href="../../concepts/transmutation.html" class="see-also-link" style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-full); text-decoration: none; font-size: var(--text-sm); color: var(--color-text-primary);">
+                            <span>&#9883;</span> Transmutation
+                        </a>
+                        <a href="../../concepts/philosophers-stone.html" class="see-also-link" style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-full); text-decoration: none; font-size: var(--text-sm); color: var(--color-text-primary);">
+                            <span>&#128142;</span> Philosopher's Stone
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- NAVIGATION -->
+        <nav class="nav-section">
+            <a href="../index.html" class="nav-button">Return to Magic Index</a>
+            <a href="../../mythos/hermetic/index.html" class="nav-button">Hermetic Tradition</a>
+            <a href="../../index.html" class="nav-button">Home</a>
+        </nav>
+    </div>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>

@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Threshold Guardian - Universal Archetype</title>
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        /* Threshold Guardian Archetype Custom Theme Colors */
+        :root {
+            --archetype-primary: #6366f1;
+            --archetype-primary-light: #818cf8;
+            --archetype-primary-dark: #4f46e5;
+            --archetype-primary-darker: #4338ca;
+            --archetype-accent: #a5b4fc;
+            --archetype-surface: rgba(99, 102, 241, 0.05);
+            --archetype-border: rgba(99, 102, 241, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Breadcrumb Navigation */
+        .nav-breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-md);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-md);
+            flex-wrap: wrap;
+            font-size: var(--font-size-sm);
+        }
+
+        .nav-breadcrumb a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-breadcrumb a:hover {
+            color: var(--archetype-primary-light);
+        }
+
+        /* Hero Section */
+        header {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            background: var(--archetype-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-2xl);
+            border: 2px solid var(--archetype-border);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            font-family: var(--font-heading);
+            margin-bottom: var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary), var(--archetype-primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .archetype-definition {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            margin: var(--spacing-lg) 0;
+            padding: var(--spacing-lg);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--archetype-primary);
+        }
+
+        /* Glass Card Sections */
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 2px solid var(--color-border);
+            transition: all var(--transition-base);
+        }
+
+        section:hover {
+            background: var(--color-surface-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        h2 {
+            color: var(--archetype-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-3xl);
+            font-family: var(--font-heading);
+            border-bottom: 2px solid var(--archetype-border);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        h3 {
+            color: var(--archetype-accent);
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-xl);
+            font-family: var(--font-heading);
+        }
+
+        /* Styled Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-lg) 0;
+        }
+
+        th, td {
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--archetype-border);
+        }
+
+        th {
+            background: var(--archetype-surface);
+            color: var(--archetype-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        tr {
+            transition: background var(--transition-fast);
+        }
+
+        tr:hover {
+            background: var(--archetype-surface);
+        }
+
+        td a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        td a:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        /* Icon List */
+        .characteristics ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .characteristics li {
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin: var(--spacing-sm) 0;
+            background: var(--archetype-surface);
+            border-left: 3px solid var(--archetype-primary);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .characteristics li:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateX(4px);
+        }
+
+        .characteristics li:before {
+            content: "&#x1F6AA; ";
+            color: var(--archetype-primary);
+            font-weight: var(--font-bold);
+            margin-right: var(--spacing-sm);
+        }
+
+        /* Expandable Sections */
+        .codex-search-section {
+            margin: var(--spacing-lg) 0;
+            border: 2px solid var(--archetype-border);
+            border-radius: var(--radius-md);
+            background: var(--archetype-surface);
+            overflow: hidden;
+        }
+
+        .codex-search-header {
+            padding: var(--spacing-md) var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary-dark) 0%, var(--archetype-primary-darker) 100%);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background var(--transition-base);
+        }
+
+        .codex-search-header:hover {
+            background: linear-gradient(135deg, var(--archetype-primary) 0%, var(--archetype-primary-dark) 100%);
+        }
+
+        .codex-search-header h3 {
+            margin: 0;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-semibold);
+            color: white;
+        }
+
+        .expand-icon {
+            font-size: var(--font-size-xl);
+            transition: transform var(--transition-base);
+        }
+
+        .expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .codex-search-content {
+            display: none;
+            padding: var(--spacing-md);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .codex-search-content.show {
+            display: block;
+        }
+
+        .search-result-item {
+            margin: var(--spacing-sm) 0;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-left: 3px solid var(--archetype-primary);
+            background: rgba(99, 102, 241, 0.08);
+            border-radius: var(--radius-sm);
+        }
+
+        .citation {
+            font-weight: var(--font-semibold);
+            color: var(--archetype-primary);
+            cursor: pointer;
+            margin-bottom: var(--spacing-xs);
+            transition: color var(--transition-fast);
+        }
+
+        .citation:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        .verse-text {
+            display: none;
+            margin-top: var(--spacing-xs);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 2px solid var(--archetype-accent);
+            font-style: italic;
+            color: var(--color-text-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        .verse-text.show {
+            display: block;
+        }
+
+        .book-reference {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+
+        p {
+            margin-bottom: var(--spacing-md);
+            line-height: var(--leading-relaxed);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-breadcrumb">
+            <a href="../../index.html">Home</a> <span>-></span>
+            <a href="../index.html">Universal Archetypes</a> <span>-></span>
+            <span>Threshold Guardian</span>
+        </div>
+
+        <header>
+            <h1>The Threshold Guardian Archetype</h1>
+            <div class="archetype-definition">
+                The Threshold Guardian stands at the boundary between worlds - the liminal deity who guards
+                doorways, crossroads, and points of transition between states of being. This archetype
+                embodies the challenge that must be faced before transformation can occur. Whether permitting
+                or denying passage, the guardian tests worthiness, protects sacred spaces, and marks the
+                moment where one reality ends and another begins.
+            </div>
+        </header>
+
+        <section class="characteristics">
+            <h2>Universal Characteristics</h2>
+            <ul>
+                <li><strong>Liminal Position:</strong> Exists at boundaries, doorways, crossroads, and points of transition</li>
+                <li><strong>Dual Nature:</strong> Often has two faces, looking both forward and backward, or toward multiple directions</li>
+                <li><strong>Testing Function:</strong> Challenges those who seek passage, demanding proof of worthiness</li>
+                <li><strong>Protector Role:</strong> Guards sacred spaces from the unworthy or uninitiated</li>
+                <li><strong>Between-State Existence:</strong> Neither fully of one world nor another</li>
+                <li><strong>Key/Gate Symbolism:</strong> Often holds keys, stands by doors, or is associated with locks and barriers</li>
+                <li><strong>Psychopomp Overlap:</strong> May guide souls between life and death</li>
+                <li><strong>Temporal Awareness:</strong> Associated with beginnings, endings, and transitional moments</li>
+                <li><strong>Offering Requirements:</strong> Demands tribute or ritual acknowledgment before allowing passage</li>
+                <li><strong>Shape-Shifting Ability:</strong> Can transform to match the nature of the threshold being guarded</li>
+            </ul>
+        </section>
+
+        <section class="cross-tradition-table">
+            <h2>Threshold Guardians Across Traditions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tradition</th>
+                        <th>Deity/Figure</th>
+                        <th>Threshold Guarded</th>
+                        <th>Distinctive Features</th>
+                        <th>Role/Function</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Roman</td>
+                        <td><a href="../../mythos/roman/deities/janus.html">Janus</a></td>
+                        <td>Doorways, beginnings, time</td>
+                        <td>Two faces looking opposite directions</td>
+                        <td>God of transitions, January named for him</td>
+                    </tr>
+                    <tr>
+                        <td>Norse</td>
+                        <td><a href="../../mythos/norse/deities/heimdall.html">Heimdall</a></td>
+                        <td>Bifrost Bridge to Asgard</td>
+                        <td>All-seeing, all-hearing, golden teeth</td>
+                        <td>Watchman of the gods, announces Ragnarok</td>
+                    </tr>
+                    <tr>
+                        <td>Egyptian</td>
+                        <td><a href="../../mythos/egyptian/deities/anubis.html">Anubis</a></td>
+                        <td>Entrance to underworld, tombs</td>
+                        <td>Jackal head, weigher of hearts</td>
+                        <td>Judges souls, guides dead, protects tombs</td>
+                    </tr>
+                    <tr>
+                        <td>Greek</td>
+                        <td><a href="../../mythos/greek/creatures/cerberus.html">Cerberus</a></td>
+                        <td>Gates of Hades</td>
+                        <td>Three-headed dog, serpent tail</td>
+                        <td>Prevents living from entering, dead from leaving</td>
+                    </tr>
+                    <tr>
+                        <td>Greek</td>
+                        <td><a href="../../mythos/greek/deities/hecate.html">Hecate</a></td>
+                        <td>Crossroads, doorways, witchcraft</td>
+                        <td>Triple form, torches, keys</td>
+                        <td>Goddess of liminal spaces and magic</td>
+                    </tr>
+                    <tr>
+                        <td>Hindu</td>
+                        <td><a href="../../mythos/hindu/deities/ganesha.html">Ganesha</a></td>
+                        <td>Doorways, new beginnings</td>
+                        <td>Elephant head, remover of obstacles</td>
+                        <td>Invoked at all beginnings, guards thresholds</td>
+                    </tr>
+                    <tr>
+                        <td>Japanese</td>
+                        <td><a href="../../mythos/japanese/deities/nio.html">Nio</a></td>
+                        <td>Temple gates</td>
+                        <td>Fearsome warriors, paired guardians</td>
+                        <td>Protect Buddhist temples from evil</td>
+                    </tr>
+                    <tr>
+                        <td>Chinese</td>
+                        <td><a href="../../mythos/chinese/figures/menshen.html">Menshen</a></td>
+                        <td>Doors of homes and temples</td>
+                        <td>Fierce generals, painted on doors</td>
+                        <td>Ward off evil spirits from entering</td>
+                    </tr>
+                    <tr>
+                        <td>Yoruba</td>
+                        <td><a href="../../mythos/yoruba/deities/eshu.html">Eshu/Elegba</a></td>
+                        <td>Crossroads, communication</td>
+                        <td>Trickster, messenger, unpredictable</td>
+                        <td>Mediates between humans and orishas</td>
+                    </tr>
+                    <tr>
+                        <td>Mesopotamian</td>
+                        <td><a href="../../mythos/sumerian/figures/lamassu.html">Lamassu</a></td>
+                        <td>Palace and temple gates</td>
+                        <td>Winged bull with human head</td>
+                        <td>Protective spirits warding off chaos</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/roman/deities/janus.html" style="color: var(--archetype-primary); text-decoration: none;">Janus</a> (Roman Tradition)</h2>
+            <p>
+                Janus is the quintessential threshold guardian of classical antiquity. As the god of beginnings,
+                transitions, and endings, he was invoked at the start of every ritual, journey, and undertaking.
+                His two faces looking in opposite directions symbolize awareness of past and future, entrance and exit.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>The Two-Faced God of Beginnings</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Ovid, Fasti 1.89-144
+                        </div>
+                        <div class="verse-text">
+                            "'Janus,' I said, 'what's your nature? Greece has no deity like you.' He replied:
+                            'I am called Chaos, for I am a primal thing... When Chaos first condensed and the
+                            three elements separated... I, till then a shapeless lump, became a god with form
+                            and features worthy of divinity. Even now, as a small token of my once-chaotic state,
+                            my front and back appear the same.' Then I asked why he alone of the heavenly ones
+                            could see both ways. 'Every door,' he answered, 'has two faces, this way and that,
+                            one looks out at the crowd, the other sees the Lar within; and just as your human
+                            doorman seated by the entrance sees the comings and goings, so I, doorkeeper of
+                            the heavenly court, look upon the East and West at once.'"
+                        </div>
+                        <div class="book-reference">
+                            Source: Ovid, Fasti (c. 8 CE)
+                        </div>
+                    </div>
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Ovid, Fasti 1.171-182
+                        </div>
+                        <div class="verse-text">
+                            "I asked the god why the year begins in the cold season rather than in spring...
+                            'Midwinter is the first of the new sun and the last of the old; Phoebus and the year
+                            take the same starting point.' Then I asked why the Kalends of January are marked
+                            with words of good omen, and why we give and receive good wishes. 'Omens,' he said,
+                            'attend beginnings; at the first word you prick up your anxious ears; the augur reads
+                            the bird first seen. The temples and ears of the gods are open; no tongue utters
+                            prayers in vain, and words have weight.' January was given to me, who guard the
+                            threshold, so that the year may begin at my door."
+                        </div>
+                        <div class="book-reference">
+                            Source: Ovid, Fasti (c. 8 CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/norse/deities/heimdall.html" style="color: var(--archetype-primary); text-decoration: none;">Heimdall</a> (Norse Tradition)</h2>
+            <p>
+                Heimdall is the vigilant guardian of Bifrost, the rainbow bridge connecting Midgard (the human world)
+                to Asgard (realm of the gods). His supernatural senses allow him to perceive threats across all the
+                nine worlds, and his horn Gjallarhorn will announce Ragnarok.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>The Watchman of the Gods</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Prose Edda, Gylfaginning 27
+                        </div>
+                        <div class="verse-text">
+                            "There is one called Heimdall. He is known as the White God, and he is great and holy.
+                            Nine maidens bore him as their son, and all were sisters... He is also called
+                            Hallinskidi and Gullintanni, because his teeth are of gold. His horse is called
+                            Gulltoppr. He dwells at a place called Himinbjorg, by Bifrost. He is the watchman
+                            of the gods and sits there at the end of heaven guarding the bridge against the
+                            mountain giants. He needs less sleep than a bird. He can see, by night just as well
+                            as by day, for more than a hundred leagues. He can hear grass growing on the earth
+                            and wool on sheep, and everything that makes more noise than that."
+                        </div>
+                        <div class="book-reference">
+                            Source: Snorri Sturluson, Prose Edda (c. 1220 CE)
+                        </div>
+                    </div>
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Voluspa, Stanza 46
+                        </div>
+                        <div class="verse-text">
+                            "Mim's sons dance, and fate is kindled / At the ancient Gjallarhorn; / Heimdall blows
+                            loud, his horn aloft, / And Odin speaks with Mim's head. / Yggdrasil trembles, the
+                            standing ash, / The old tree groans, and the giant breaks free."
+                        </div>
+                        <div class="book-reference">
+                            Source: Voluspa, Poetic Edda (c. 10th century CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/egyptian/deities/anubis.html" style="color: var(--archetype-primary); text-decoration: none;">Anubis</a> (Egyptian Tradition)</h2>
+            <p>
+                Anubis guards the ultimate threshold - the boundary between life and death. As the jackal-headed
+                god of embalming and the dead, he oversees the weighing of the heart against Ma'at's feather,
+                determining who may enter the afterlife.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Guardian of the Dead</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Book of the Dead, Spell 125
+                        </div>
+                        <div class="verse-text">
+                            "O Anubis, foremost of the divine booth... I have come before you that you may see
+                            my righteousness. I have not done falsehood against men. I have not impoverished
+                            my associates... I have not done what the gods detest. Hail to you, gods who are
+                            in the Hall of the Two Truths, who have no lies in their bodies, who live on truth
+                            in Heliopolis... See, I have come to you without sin, without guilt, without evil,
+                            without a witness against me, without one against whom I have acted. I live on
+                            truth, I feed on truth."
+                        </div>
+                        <div class="book-reference">
+                            Source: Book of the Dead, Spell 125 (c. 1550-50 BCE)
+                        </div>
+                    </div>
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Pyramid Texts, Utterance 437
+                        </div>
+                        <div class="verse-text">
+                            "Anubis, the Counter of Hearts, has examined the heart of the Osiris N. He has found
+                            it righteous and true. He has found no wrongdoing in it. He has not acted against
+                            the gods. He has not cursed the king. Anubis, foremost of the sacred land, places
+                            his hands upon the Osiris N, that he may enter into the presence of Osiris."
+                        </div>
+                        <div class="book-reference">
+                            Source: Pyramid Texts (c. 2400-2300 BCE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Cross-Cultural Analysis</h2>
+
+            <h3>The Dual or Multiple Form</h3>
+            <p>
+                Threshold guardians frequently possess dual or multiple forms, reflecting their position between states:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Janus:</strong> Two faces looking in opposite directions (past/future, in/out)</li>
+                <li><strong>Hecate:</strong> Triple form at crossroads, looking three ways</li>
+                <li><strong>Nio:</strong> Paired guardians, one with open mouth (Ah), one closed (Un)</li>
+                <li><strong>Menshen:</strong> Two door gods, always depicted as a pair</li>
+                <li><strong>Cerberus:</strong> Three heads guarding a single gate</li>
+            </ul>
+
+            <h3>The Hero's Journey Connection</h3>
+            <p>
+                In Joseph Campbell's monomyth, the Threshold Guardian is a crucial stage of the hero's journey:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>First Threshold:</strong> The hero must pass the guardian to leave the ordinary world</li>
+                <li><strong>Testing:</strong> The guardian tests the hero's commitment and worthiness</li>
+                <li><strong>Transformation Required:</strong> Passing the guardian requires inner change</li>
+                <li><strong>Return Threshold:</strong> A second crossing must occur to bring the boon back</li>
+            </ul>
+
+            <h3>Types of Thresholds Guarded</h3>
+            <p>
+                Different threshold guardians protect different types of boundaries:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Physical Doors:</strong> Janus, Menshen - literal doorways and entrances</li>
+                <li><strong>Cosmic Bridges:</strong> Heimdall (Bifrost) - paths between realms</li>
+                <li><strong>Underworld Gates:</strong> Anubis, Cerberus - boundary of death</li>
+                <li><strong>Crossroads:</strong> Hecate, Eshu - decision points and liminal spaces</li>
+                <li><strong>Sacred Spaces:</strong> Nio, Lamassu - temples and holy sites</li>
+                <li><strong>Temporal Thresholds:</strong> Janus, Ganesha - beginnings and transitions in time</li>
+            </ul>
+
+            <h3>The Guardian's Test</h3>
+            <p>
+                Threshold guardians typically require something from those who would pass:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Anubis:</strong> A pure heart, weighed against Ma'at</li>
+                <li><strong>Cerberus:</strong> Proper burial rites (honey cake), or heroic valor</li>
+                <li><strong>Ganesha:</strong> Proper offerings and invocations at beginnings</li>
+                <li><strong>Eshu:</strong> Tribute and acknowledgment before any ritual</li>
+                <li><strong>Janus:</strong> Prayers and good omens at every beginning</li>
+            </ul>
+
+            <h3>Psychological Significance</h3>
+            <p>
+                The threshold guardian represents internal barriers to transformation:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Fear of Change:</strong> The guardian embodies resistance to leaving the known</li>
+                <li><strong>Self-Doubt:</strong> The test reveals whether we believe ourselves worthy</li>
+                <li><strong>Integration Challenge:</strong> Passing requires acknowledging both worlds</li>
+                <li><strong>Rite of Passage:</strong> Psychological thresholds require "death" of the old self</li>
+            </ul>
+        </section>
+
+        <!-- DEITIES EMBODYING THIS ARCHETYPE - Visual Cards -->
+        <section style="margin-top: var(--spacing-3xl);">
+            <h2 style="text-align: center; margin-bottom: var(--spacing-md);">Threshold Guardians Across Traditions</h2>
+            <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: var(--spacing-xl);">
+                Click any guardian to explore their full mythology
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--spacing-lg);">
+                <a href="../../mythos/roman/deities/janus.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F6AA;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Janus</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Roman</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Two-Faced God of Beginnings</div>
+                </a>
+                <a href="../../mythos/norse/deities/heimdall.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F308;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Heimdall</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Norse</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Watchman of the Gods</div>
+                </a>
+                <a href="../../mythos/egyptian/deities/anubis.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F43A;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Anubis</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Egyptian</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Guardian of the Dead</div>
+                </a>
+                <a href="../../mythos/hindu/deities/ganesha.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F418;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Ganesha</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Hindu</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Remover of Obstacles</div>
+                </a>
+                <a href="../../mythos/greek/deities/hecate.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F5DD;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Hecate</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Greek</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Goddess of Crossroads</div>
+                </a>
+            </div>
+        </section>
+
+        <!-- RELATED ARCHETYPES -->
+        <section style="margin-top: var(--spacing-3xl);">
+            <h2 style="text-align: center; margin-bottom: var(--spacing-md);">Related Archetypes</h2>
+            <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: var(--spacing-xl);">
+                The Threshold Guardian connects with these universal patterns
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+                <a href="../story-archetypes/hero-journey/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">&#x1F5E1;</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Hero's Journey</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">The threshold guardian is a key stage in the monomyth</p>
+                </a>
+                <a href="../death/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">&#x1F480;</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Death God</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Many guardians protect the boundary between life and death</p>
+                </a>
+                <a href="../journey-archetypes/underworld-descent/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">&#x2B07;</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Underworld Descent</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Heroes must pass guardians to enter and exit the underworld</p>
+                </a>
+                <a href="../trickster/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">&#x1F0CF;</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Trickster</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Some guardians like Eshu share trickster characteristics</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- SEE ALSO / EXPLORE RELATED -->
+        <div style="margin-top: var(--spacing-4xl); text-align: center; padding: var(--spacing-xl); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border);">
+            <h3 style="color: var(--archetype-primary); margin-bottom: var(--spacing-lg);">See Also</h3>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap; margin-bottom: var(--spacing-xl);">
+                <a href="../death/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Death God</a>
+                <a href="../trickster/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Trickster</a>
+                <a href="../wisdom/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Wisdom</a>
+                <a href="../war/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">War God</a>
+            </div>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+                <a href="../place-archetypes/underworld/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Underworld</a>
+                <a href="../journey-archetypes/initiation/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Initiation</a>
+                <a href="../place-archetypes/sacred-mountain/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Sacred Mountain</a>
+                <a href="../cross-reference-matrix.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Cross-Reference Matrix</a>
+            </div>
+            <div style="margin-top: var(--spacing-xl);">
+                <a href="../index.html" style="display: inline-block; padding: var(--spacing-md) var(--spacing-2xl); background: linear-gradient(135deg, var(--archetype-primary), var(--archetype-primary-dark)); color: white; text-decoration: none; border-radius: var(--radius-lg); font-weight: var(--font-semibold);">All Archetypes</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCodexSearch(header) {
+            const section = header.parentElement;
+            const content = section.querySelector('.codex-search-content');
+            section.classList.toggle('expanded');
+            content.classList.toggle('show');
+        }
+        function toggleVerse(citation) {
+            const verseText = citation.nextElementSibling;
+            verseText.classList.toggle('show');
+        }
+    </script>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>
