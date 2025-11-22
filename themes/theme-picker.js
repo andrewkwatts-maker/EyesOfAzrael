@@ -247,8 +247,15 @@
         container.appendChild(button);
         container.appendChild(dropdown);
 
-        // Add to page
-        document.body.appendChild(container);
+        // Add to page - prefer header-content if available, otherwise body
+        const headerContent = document.querySelector('.header-content');
+        if (headerContent) {
+            container.style.position = 'relative';
+            container.style.marginLeft = 'auto';
+            headerContent.appendChild(container);
+        } else {
+            document.body.appendChild(container);
+        }
     }
 
     /**
