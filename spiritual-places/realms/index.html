@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mythic Realms - Sacred Places</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .realms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--space-6);
+        }
+
+        .realm-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            transition: all var(--transition-base, 0.3s ease);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .realm-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.4);
+            background: rgba(var(--color-primary-rgb), 0.1);
+        }
+
+        .realm-icon {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-4);
+            text-align: center;
+        }
+
+        .realm-title {
+            font-size: var(--text-2xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-3);
+            text-align: center;
+        }
+
+        .realm-origin {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+            text-align: center;
+            margin-bottom: var(--space-4);
+            font-style: italic;
+        }
+
+        .realm-description {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-5);
+            line-height: var(--leading-relaxed);
+            text-align: center;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: var(--space-4);
+        }
+
+        .tradition-tag {
+            padding: var(--space-1) var(--space-3);
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .category-section {
+            margin: var(--space-12) 0;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+            padding: var(--space-6);
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .category-icon {
+            font-size: var(--text-5xl);
+        }
+
+        .category-title {
+            font-size: var(--text-3xl);
+            color: var(--color-primary);
+        }
+
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .related-link {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            text-align: center;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .related-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+        <div class="header-content">
+            <h1>Mythic Realms & Otherworlds</h1>
+        </div>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../index.html">Home</a> &rarr;
+        <a href="../index.html">Sacred Places</a> &rarr;
+        <span>Mythic Realms</span>
+    </nav>
+
+    <main>
+        <div class="hero-section">
+            <h2>Beyond the Mortal World</h2>
+            <p style="font-size: 1.2rem; max-width: 800px; margin: 1rem auto;">
+                Explore the otherworldly realms of mythology - paradises, afterlives, cosmic structures, and
+                mystical lands that exist beyond ordinary perception. These sacred places represent humanity's
+                eternal quest to understand what lies beyond death, where the gods dwell, and the structure
+                of the cosmos itself.
+            </p>
+        </div>
+
+        <!-- Afterlife Paradises -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">\u2728</span>
+                <h2 class="category-title">Afterlife Paradises</h2>
+            </div>
+            <div class="realms-grid">
+                <a href="valhalla.html" class="realm-card">
+                    <div class="realm-icon">\u2694\uFE0F</div>
+                    <h3 class="realm-title">Valhalla</h3>
+                    <p class="realm-origin">Norse Mythology</p>
+                    <p class="realm-description">
+                        The Hall of the Slain in Asgard where Odin houses warriors who died bravely in battle.
+                        They feast and fight eternally, preparing for Ragnar&#246;k.
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Norse</span>
+                        <span class="tradition-tag">Germanic</span>
+                        <span class="tradition-tag">Warrior Paradise</span>
+                    </div>
+                </a>
+
+                <a href="tir-na-nog.html" class="realm-card">
+                    <div class="realm-icon">\u2618\uFE0F</div>
+                    <h3 class="realm-title">T&iacute;r na nOg</h3>
+                    <p class="realm-origin">Irish Celtic Mythology</p>
+                    <p class="realm-description">
+                        The Land of Eternal Youth, home of the Tuatha D&eacute; Danann. A paradise where no one
+                        ages, sickness is unknown, and joy never fades.
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Irish</span>
+                        <span class="tradition-tag">Celtic</span>
+                        <span class="tradition-tag">Otherworld</span>
+                    </div>
+                </a>
+
+                <a href="avalon.html" class="realm-card">
+                    <div class="realm-icon">\uD83C\uDF4E</div>
+                    <h3 class="realm-title">Avalon</h3>
+                    <p class="realm-origin">Celtic British / Arthurian Legend</p>
+                    <p class="realm-description">
+                        The Isle of Apples, mystical island where King Arthur was taken after his final battle.
+                        Ruled by Morgan le Fay and her sisterhood of nine priestesses.
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Celtic</span>
+                        <span class="tradition-tag">Arthurian</span>
+                        <span class="tradition-tag">British</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Cosmic Structures -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">\uD83C\uDF0D</span>
+                <h2 class="category-title">Cosmic Structures</h2>
+            </div>
+            <div class="realms-grid">
+                <a href="yggdrasil.html" class="realm-card">
+                    <div class="realm-icon">\uD83C\uDF33</div>
+                    <h3 class="realm-title">Yggdrasil</h3>
+                    <p class="realm-origin">Norse Mythology</p>
+                    <p class="realm-description">
+                        The World Tree, an immense ash that connects the Nine Worlds of Norse cosmology.
+                        Odin hung upon it for nine nights to gain the wisdom of the runes.
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Norse</span>
+                        <span class="tradition-tag">Germanic</span>
+                        <span class="tradition-tag">Axis Mundi</span>
+                    </div>
+                </a>
+
+                <a href="mount-meru.html" class="realm-card">
+                    <div class="realm-icon">\uD83C\uDFD4\uFE0F</div>
+                    <h3 class="realm-title">Mount Meru</h3>
+                    <p class="realm-origin">Hindu / Buddhist / Jain Cosmology</p>
+                    <p class="realm-description">
+                        The sacred cosmic mountain at the center of all existence. Its golden peak touches
+                        heaven while its roots reach the depths, connecting all realms.
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                        <span class="tradition-tag">Buddhist</span>
+                        <span class="tradition-tag">Jain</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Explore by Tradition -->
+        <section class="interlink-panel glass-card">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">\uD83D\uDD17</span>
+                Explore by Tradition
+            </h3>
+
+            <div class="interlink-grid">
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Norse Realms</div>
+                    <div class="quick-links-grid">
+                        <a href="valhalla.html" class="quick-link">
+                            <span class="quick-link-icon">\u2694\uFE0F</span> Valhalla
+                        </a>
+                        <a href="yggdrasil.html" class="quick-link">
+                            <span class="quick-link-icon">\uD83C\uDF33</span> Yggdrasil
+                        </a>
+                    </div>
+                </div>
+
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Celtic Otherworlds</div>
+                    <div class="quick-links-grid">
+                        <a href="tir-na-nog.html" class="quick-link">
+                            <span class="quick-link-icon">\u2618\uFE0F</span> T&iacute;r na nOg
+                        </a>
+                        <a href="avalon.html" class="quick-link">
+                            <span class="quick-link-icon">\uD83C\uDF4E</span> Avalon
+                        </a>
+                    </div>
+                </div>
+
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Eastern Cosmology</div>
+                    <div class="quick-links-grid">
+                        <a href="mount-meru.html" class="quick-link">
+                            <span class="quick-link-icon">\uD83C\uDFD4\uFE0F</span> Mount Meru
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cross-Cultural Themes -->
+        <div class="glass-card">
+            <h2 style="color: var(--color-primary); margin-bottom: var(--space-5); display: flex; align-items: center; gap: 1rem;">
+                <span>\uD83C\uDF0F</span> Cross-Cultural Themes
+            </h2>
+            <p style="line-height: 1.8; margin-bottom: 1.5rem;">
+                Despite arising from vastly different cultures and time periods, these mythic realms share
+                remarkable similarities that reveal universal human concerns and spiritual aspirations:
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                <div style="padding: 1.5rem; background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-lg);">
+                    <h4 style="color: var(--color-primary); margin-bottom: 0.5rem;">\u23F3 Altered Time</h4>
+                    <p style="font-size: 0.9rem; color: var(--color-text-secondary);">
+                        In Tir na nOg, Avalon, and similar realms, time flows differently. Days there equal
+                        centuries in the mortal world - a common motif representing the eternal nature of the divine.
+                    </p>
+                </div>
+                <div style="padding: 1.5rem; background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-lg);">
+                    <h4 style="color: var(--color-primary); margin-bottom: 0.5rem;">\uD83C\uDF33 World Center</h4>
+                    <p style="font-size: 0.9rem; color: var(--color-text-secondary);">
+                        Yggdrasil and Mount Meru both represent the axis mundi - the cosmic pillar connecting
+                        heaven, earth, and underworld, organizing all existence around a sacred center.
+                    </p>
+                </div>
+                <div style="padding: 1.5rem; background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-lg);">
+                    <h4 style="color: var(--color-primary); margin-bottom: 0.5rem;">\u2728 Eternal Youth</h4>
+                    <p style="font-size: 0.9rem; color: var(--color-text-secondary);">
+                        From Tir na nOg's agelessness to Valhalla's daily resurrection, these realms offer
+                        escape from mortality - humanity's eternal dream of conquering death.
+                    </p>
+                </div>
+                <div style="padding: 1.5rem; background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-lg);">
+                    <h4 style="color: var(--color-primary); margin-bottom: 0.5rem;">\uD83C\uDF0A Western Islands</h4>
+                    <p style="font-size: 0.9rem; color: var(--color-text-secondary);">
+                        Celtic tradition places otherworlds like Avalon and Tir na nOg beyond the western sea,
+                        where the sun sets - symbolizing passage to the realm beyond life.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Categories -->
+        <div class="glass-card">
+            <h2 style="color: var(--color-primary); margin-bottom: var(--space-5);">Explore More Sacred Places</h2>
+            <div class="related-links">
+                <a href="../mountains/index.html" class="related-link">
+                    \u26F0\uFE0F Sacred Mountains
+                </a>
+                <a href="../temples/index.html" class="related-link">
+                    \uD83C\uDFDB\uFE0F Temples & Sanctuaries
+                </a>
+                <a href="../groves/index.html" class="related-link">
+                    \uD83C\uDF32 Sacred Groves
+                </a>
+                <a href="../pilgrimage/index.html" class="related-link">
+                    \uD83D\uDEB6 Pilgrimage Sites
+                </a>
+                <a href="../index.html" class="related-link">
+                    \uD83D\uDDFA\uFE0F All Sacred Places
+                </a>
+                <a href="../../index.html" class="related-link">
+                    \uD83C\uDFE0 Home
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
