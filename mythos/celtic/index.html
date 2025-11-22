@@ -10,11 +10,43 @@
     <script defer src="../../themes/theme-animations.js"></script>
 <script defer="" src="../../themes/theme-picker.js"></script>
 <style>
-        /* Custom Celtic theme colors */
+        /* ============================================
+           MODERN GLASS UI TEMPLATE - Celtic Mythos
+           Based on Christian reference with full theme support
+           ============================================ */
+
+        /* Breadcrumb - Full-width bar attached below header */
+        .breadcrumb {
+            position: sticky;
+            top: 60px; /* Below the sticky header */
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(var(--color-surface-rgb), 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: var(--spacing-xs) var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
+        }
+
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        /* Custom Celtic Hero Section */
         .celtic-hero {
             background: linear-gradient(135deg,
-                rgba(var(--color-primary-rgb, 245, 158, 11), 0.2),
-                rgba(var(--color-secondary-rgb, 251, 191, 36), 0.2));
+                rgba(var(--color-primary-rgb), 0.2),
+                rgba(var(--color-secondary-rgb), 0.2));
             border: 2px solid var(--color-primary);
             border-radius: var(--radius-2xl);
             padding: var(--spacing-xs2) var(--spacing-xl);
@@ -46,11 +78,118 @@
         }
 
         .tag {
-            background: rgba(var(--color-primary-rgb, 245, 158, 11), 0.3);
+            background: rgba(var(--color-primary-rgb), 0.3);
             padding: var(--spacing-sm) var(--spacing-md);
             border-radius: var(--radius-full);
             font-size: var(--text-sm);
             color: var(--color-text-primary);
+        }
+
+        /* Glass Card - With Hover Animation */
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+            border-color: rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        /* Deity Grid Layout */
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        /* Deity Cards - Modern Glass Pattern with Glow Hover */
+        .deity-card {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-base, 0.3s ease);
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+            overflow: hidden;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .deity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg), 0 0 15px rgba(var(--color-primary-rgb), 0.2);
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            text-decoration: none;
+        }
+
+        .deity-card h3 {
+            color: var(--color-primary);
+            margin-top: 0.5rem;
+        }
+
+        .deity-card p {
+            line-height: 1.7;
+        }
+
+        /* Nav Bar Styling */
+        .nav-bar {
+            display: flex;
+            gap: var(--spacing-sm);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+            flex-wrap: wrap;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .nav-link {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .deity-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .celtic-hero {
+                padding: 2rem 1rem;
+            }
+
+            .celtic-hero h1 {
+                font-size: var(--text-2xl);
+            }
+
+            .breadcrumb {
+                font-size: var(--font-size-xs);
+                padding: var(--spacing-xs) var(--spacing-md);
+                top: 50px; /* Smaller header on mobile */
+            }
         }
     </style>
 </head>
@@ -64,13 +203,13 @@
 <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="../../index.html">Home</a> → <a href="../index.html">Mythos</a> → <a href="index.html">Celtic</a>
 </nav>
-<nav class="nav-bar" style="display: flex; gap: var(--spacing-sm); background: var(--color-surface); backdrop-filter: blur(10px); padding: var(--spacing-md); border-radius: var(--radius-xl); border: 2px solid var(--color-border); flex-wrap: wrap; margin-bottom: var(--spacing-xl);">
-<a class="nav-link" href="../../mythos/index.html" style="padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); color: var(--color-text-secondary); text-decoration: none; transition: all 0.2s ease;">← All Mythologies</a>
-<a class="nav-link" href="deities/index.html" style="padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); color: var(--color-text-secondary); text-decoration: none; transition: all 0.2s ease;">Deities</a>
-<a class="nav-link" href="cosmology/index.html" style="padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); color: var(--color-text-secondary); text-decoration: none; transition: all 0.2s ease;">Cosmology</a>
-<a class="nav-link" href="#herbalism" style="padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); color: var(--color-text-secondary); text-decoration: none; transition: all 0.2s ease;">Herbalism</a>
-<a class="nav-link" href="#rituals" style="padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); color: var(--color-text-secondary); text-decoration: none; transition: all 0.2s ease;">Rituals</a>
-<a class="nav-link" href="#path" style="padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); color: var(--color-text-secondary); text-decoration: none; transition: all 0.2s ease;">Spiritual Path</a>
+<nav class="nav-bar">
+<a class="nav-link" href="../../mythos/index.html">← All Mythologies</a>
+<a class="nav-link" href="deities/index.html">Deities</a>
+<a class="nav-link" href="cosmology/index.html">Cosmology</a>
+<a class="nav-link" href="#herbalism">Herbalism</a>
+<a class="nav-link" href="#rituals">Rituals</a>
+<a class="nav-link" href="#path">Spiritual Path</a>
 </nav>
 <main style="max-width: var(--container-xl); margin: 0 auto; padding: 0 var(--spacing-lg);">
 <div class="celtic-hero">
@@ -88,144 +227,117 @@
 <span class="tag">☘️ Threefold Nature</span>
 </div>
 </div>
-<div class="glass-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-lg); margin: var(--spacing-xl) 0;">
-<h2 style="color: var(--color-primary); font-size: var(--text-2xl); margin-bottom: var(--spacing-md);">Explore Celtic <a data-term="Mythology" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/mythology.html" title="View mythology in ancient texts">Mythology</a></h2>
-<p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg);">Dive deep into specific areas of <a data-term="Celtic Tradition" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/celtic-tradition.html" title="View celtic tradition in ancient texts">Celtic tradition</a>:</p>
-<div class="deity-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-lg);">
-<div class="deity-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-primary); border-radius: var(--radius-xl); padding: var(--spacing-lg); transition: all var(--transition-base, 0.3s ease);">
-<h3 style="color: var(--color-primary); margin-bottom: var(--spacing-sm);">⚡ <a href="deities/index.html" style="color: var(--color-primary); text-decoration: none;">The Tuatha Dé Danann</a></h3>
-<p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-md);">Explore the gods and goddesses of Celtic Ireland - the divine race who dwell in <a data-term="The Otherworld" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/the-otherworld.html" title="View the otherworld in ancient texts">the Otherworld</a>.</p>
-<ul style="margin: var(--spacing-sm) 0 0 var(--spacing-lg); font-size: var(--text-sm); color: var(--color-text-secondary); line-height: var(--leading-relaxed);">
-<li><a href="deities/dagda.html" style="color: var(--color-accent); text-decoration: none;">The Dagda</a> - <a class="corpus-link" data-term="The Good God" data-tradition="celtic" href="../../corpus-results/celtic/dagda.html" title="Search corpus for 'The Good God'">The Good God</a></li>
-<li><a href="deities/brigid.html" style="color: var(--color-accent); text-decoration: none;">Brigid</a> - Fire &amp; Poetry</li>
-<li><a href="deities/lugh.html" style="color: var(--color-accent); text-decoration: none;">Lugh</a> - The Many-Skilled</li>
-<li><a href="deities/index.html" style="color: var(--color-accent); text-decoration: none;">View All Deities →</a></li>
+<section class="glass-card">
+<h2 style="color: var(--color-primary);">Explore Celtic <a data-term="Mythology" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/mythology.html" title="View mythology in ancient texts">Mythology</a></h2>
+<p style="line-height: 1.7;">Dive deep into specific areas of <a data-term="Celtic Tradition" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/celtic-tradition.html" title="View celtic tradition in ancient texts">Celtic tradition</a>:</p>
+<div class="deity-grid">
+<div class="deity-card">
+<h3>⚡ <a href="deities/index.html" style="color: var(--color-primary); text-decoration: none;">The Tuatha Dé Danann</a></h3>
+<p>Explore the gods and goddesses of Celtic Ireland - the divine race who dwell in <a data-term="The Otherworld" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/the-otherworld.html" title="View the otherworld in ancient texts">the Otherworld</a>.</p>
+<ul style="margin: var(--spacing-sm) 0 0 var(--spacing-lg); font-size: var(--text-sm); line-height: var(--leading-relaxed);">
+<li><a href="deities/dagda.html" style="color: var(--color-primary);">The Dagda</a> - <a class="corpus-link" data-term="The Good God" data-tradition="celtic" href="../../corpus-results/celtic/dagda.html" title="Search corpus for 'The Good God'">The Good God</a></li>
+<li><a href="deities/brigid.html" style="color: var(--color-primary);">Brigid</a> - Fire &amp; Poetry</li>
+<li><a href="deities/lugh.html" style="color: var(--color-primary);">Lugh</a> - The Many-Skilled</li>
+<li><a href="deities/index.html" style="color: var(--color-primary);">View All Deities →</a></li>
 </ul>
 </div>
-<div class="deity-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-primary); border-radius: var(--radius-xl); padding: var(--spacing-lg); transition: all var(--transition-base, 0.3s ease);">
-<h3 style="color: var(--color-primary); margin-bottom: var(--spacing-sm);">🌀 <a href="cosmology/index.html" style="color: var(--color-primary); text-decoration: none;">Cosmology &amp; Realms</a></h3>
-<p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-md);">Understand the structure of Celtic reality - the Three Realms, <a data-term="The Otherworld" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/the-otherworld.html" title="View the otherworld in ancient texts">the Otherworld</a>, and the boundaries between.</p>
-<ul style="margin: var(--spacing-sm) 0 0 var(--spacing-lg); font-size: var(--text-sm); color: var(--color-text-secondary); line-height: var(--leading-relaxed);">
-<li><a href="cosmology/creation.html" style="color: var(--color-accent); text-decoration: none;">Creation &amp; Invasions</a></li>
-<li><a href="cosmology/afterlife.html" style="color: var(--color-accent); text-decoration: none;">Death &amp; the Otherworld</a></li>
-<li><a href="cosmology/index.html" style="color: var(--color-accent); text-decoration: none;">Cosmology Overview →</a></li>
+<div class="deity-card">
+<h3>🌀 <a href="cosmology/index.html" style="color: var(--color-primary); text-decoration: none;">Cosmology &amp; Realms</a></h3>
+<p>Understand the structure of Celtic reality - the Three Realms, <a data-term="The Otherworld" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/the-otherworld.html" title="View the otherworld in ancient texts">the Otherworld</a>, and the boundaries between.</p>
+<ul style="margin: var(--spacing-sm) 0 0 var(--spacing-lg); font-size: var(--text-sm); line-height: var(--leading-relaxed);">
+<li><a href="cosmology/creation.html" style="color: var(--color-primary);">Creation &amp; Invasions</a></li>
+<li><a href="cosmology/afterlife.html" style="color: var(--color-primary);">Death &amp; the Otherworld</a></li>
+<li><a href="cosmology/index.html" style="color: var(--color-primary);">Cosmology Overview →</a></li>
 </ul>
 </div>
-<div class="deity-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-lg); transition: all var(--transition-base, 0.3s ease); opacity: 0.7;">
-<h3 style="color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">🌿 <a data-term="Sacred" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/sacred.html" title="View sacred in ancient texts">Sacred</a> Herbalism</h3>
-<p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-md);">Learn about the <a data-term="Sacred" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/sacred.html" title="View sacred in ancient texts">sacred</a> plants of the Celts - oak, mistletoe, vervain, and the wisdom of the green world.</p>
-<p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm); color: var(--color-text-secondary);">Coming soon...</p>
+<div class="deity-card" style="opacity: 0.7;">
+<h3>🌿 <a data-term="Sacred" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/sacred.html" title="View sacred in ancient texts">Sacred</a> Herbalism</h3>
+<p>Learn about the <a data-term="Sacred" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/sacred.html" title="View sacred in ancient texts">sacred</a> plants of the Celts - oak, mistletoe, vervain, and the wisdom of the green world.</p>
+<p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm);">Coming soon...</p>
 </div>
-<div class="deity-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-lg); transition: all var(--transition-base, 0.3s ease); opacity: 0.7;">
-<h3 style="color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">🔥 Rituals &amp; <a data-term="Festivals" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/festivals.html" title="View festivals in ancient texts">Festivals</a></h3>
-<p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-md);">Discover the sacred calendar - <a class="corpus-link" data-term="Samhain" data-tradition="celtic" href="../../corpus-results/celtic/samhain.html" title="Search corpus for 'Samhain'">Samhain</a>, <a class="corpus-link" data-term="Imbolc" data-tradition="celtic" href="../../corpus-results/celtic/imbolc.html" title="Search corpus for 'Imbolc'">Imbolc</a>, <a class="corpus-link" data-term="Beltane" data-tradition="celtic" href="../../corpus-results/celtic/beltane.html" title="Search corpus for 'Beltane'">Beltane</a>, <a class="corpus-link" data-term="Lughnasadh" data-tradition="celtic" href="../../corpus-results/celtic/lughnasadh.html" title="Search corpus for 'Lughnasadh'">Lughnasadh</a> - and the <a data-term="Rituals" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/rituals.html" title="View rituals in ancient texts">rituals</a> that connect worlds.</p>
-<p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm); color: var(--color-text-secondary);">Coming soon...</p>
+<div class="deity-card" style="opacity: 0.7;">
+<h3>🔥 Rituals &amp; <a data-term="Festivals" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/festivals.html" title="View festivals in ancient texts">Festivals</a></h3>
+<p>Discover the sacred calendar - <a class="corpus-link" data-term="Samhain" data-tradition="celtic" href="../../corpus-results/celtic/samhain.html" title="Search corpus for 'Samhain'">Samhain</a>, <a class="corpus-link" data-term="Imbolc" data-tradition="celtic" href="../../corpus-results/celtic/imbolc.html" title="Search corpus for 'Imbolc'">Imbolc</a>, <a class="corpus-link" data-term="Beltane" data-tradition="celtic" href="../../corpus-results/celtic/beltane.html" title="Search corpus for 'Beltane'">Beltane</a>, <a class="corpus-link" data-term="Lughnasadh" data-tradition="celtic" href="../../corpus-results/celtic/lughnasadh.html" title="Search corpus for 'Lughnasadh'">Lughnasadh</a> - and the <a data-term="Rituals" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/rituals.html" title="View rituals in ancient texts">rituals</a> that connect worlds.</p>
+<p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm);">Coming soon...</p>
 </div>
-<div class="deity-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-lg); transition: all var(--transition-base, 0.3s ease); opacity: 0.7;">
-<h3 style="color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">🎓 The Druidic Path</h3>
-<p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-md);">Follow the 20-year journey from Ollaire to Arch-Druid - the training, practices, and mysteries of the ancient Druids.</p>
-<p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm); color: var(--color-text-secondary);">Coming soon...</p>
+<div class="deity-card" style="opacity: 0.7;">
+<h3>🎓 The Druidic Path</h3>
+<p>Follow the 20-year journey from Ollaire to Arch-Druid - the training, practices, and mysteries of the ancient Druids.</p>
+<p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm);">Coming soon...</p>
 </div>
-<div class="deity-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-lg); transition: all var(--transition-base, 0.3s ease); opacity: 0.7;">
-<h3 style="color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">⚔️ Heroes &amp; Legends</h3>
-<p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-md);">Meet the legendary heroes - <a class="corpus-link" data-term="Cú Chulainn" data-tradition="celtic" href="../../corpus-results/celtic/cu_chulainn.html" title="Search corpus for 'Cú Chulainn'">Cú Chulainn</a>, <a class="corpus-link" data-term="Fionn mac Cumhaill" data-tradition="celtic" href="../../corpus-results/celtic/fionn.html" title="Search corpus for 'Fionn mac Cumhaill'">Fionn mac Cumhaill</a>, and the great champions of <a data-term="Celtic" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/celtic.html" title="View celtic in ancient texts">Celtic</a> myth.</p>
-<p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm); color: var(--color-text-secondary);">Coming soon...</p>
+<div class="deity-card" style="opacity: 0.7;">
+<h3>⚔️ Heroes &amp; Legends</h3>
+<p>Meet the legendary heroes - <a class="corpus-link" data-term="Cú Chulainn" data-tradition="celtic" href="../../corpus-results/celtic/cu_chulainn.html" title="Search corpus for 'Cú Chulainn'">Cú Chulainn</a>, <a class="corpus-link" data-term="Fionn mac Cumhaill" data-tradition="celtic" href="../../corpus-results/celtic/fionn.html" title="Search corpus for 'Fionn mac Cumhaill'">Fionn mac Cumhaill</a>, and the great champions of <a data-term="Celtic" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/celtic.html" title="View celtic in ancient texts">Celtic</a> myth.</p>
+<p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm);">Coming soon...</p>
 </div>
 </div>
-</div>
-<div class="glass-card" id="pantheon" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-lg); margin: var(--spacing-xl) 0;">
-<h2 style="color: var(--color-primary); font-size: var(--text-2xl); margin-bottom: var(--spacing-md);">The <a data-term="Tuatha Dé Danann" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/tuatha-dé-danann.html" title="View tuatha dé danann in ancient texts">Tuatha Dé Danann</a> &amp; Celtic Deities</h2>
-<p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg);">The divine race who ruled Ireland before the arrival of the Milesians (humans).</p>
-<h3 style="color: var(--color-primary); font-size: var(--text-xl); margin: var(--spacing-lg) 0 var(--spacing-md) 0;">Major <a data-term="Deities" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/deities.html" title="View deities in ancient texts">Deities</a></h3>
-<div class="deity-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-lg);">
-<div class="deity-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-primary); border-radius: var(--radius-xl); padding: var(--spacing-lg); transition: all var(--transition-base, 0.3s ease);">
-<h3 style="color: var(--color-primary);">🌊 <a href="deities/dagda.html" style="color: var(--color-primary); text-decoration: none;">The Dagda</a></h3>
-<p style="margin: var(--spacing-sm) 0;"><strong><a class="corpus-link" data-term="The Good God" data-tradition="celtic" href="../../corpus-results/celtic/dagda.html" title="Search corpus for 'The Good God'">The Good God</a>, <a class="corpus-link" data-term="Father of All" data-tradition="celtic" href="../../corpus-results/celtic/dagda.html" title="Search corpus for 'Father of All'">Father of All</a></strong></p>
-<p style="color: var(--color-text-secondary); line-height: var(--leading-relaxed);">King of <a href="deities/index.html" style="color: var(--color-accent);">Tuatha Dé Danann</a>. Owns magic cauldron (never empty), club (kills with one end, revives with <a data-term="Other" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/other.html" title="View other in ancient texts">other</a>), harp that controls seasons.</p>
-<p style="margin-top: var(--spacing-sm);"><em>Symbols:</em> Cauldron, club, harp</p>
+</section>
+<section class="glass-card" id="pantheon">
+<h2 style="color: var(--color-primary);">The <a data-term="Tuatha Dé Danann" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/tuatha-dé-danann.html" title="View tuatha dé danann in ancient texts">Tuatha Dé Danann</a> &amp; Celtic Deities</h2>
+<p style="line-height: 1.7;">The divine race who ruled Ireland before the arrival of the Milesians (humans).</p>
+<h3 style="color: var(--color-primary);">Major <a data-term="Deities" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/deities.html" title="View deities in ancient texts">Deities</a></h3>
+<div class="deity-grid">
+<div class="deity-card">
+<h3>🌊 <a href="deities/dagda.html" style="color: var(--color-primary); text-decoration: none;">The Dagda</a></h3>
+<p><strong><a class="corpus-link" data-term="The Good God" data-tradition="celtic" href="../../corpus-results/celtic/dagda.html" title="Search corpus for 'The Good God'">The Good God</a>, <a class="corpus-link" data-term="Father of All" data-tradition="celtic" href="../../corpus-results/celtic/dagda.html" title="Search corpus for 'Father of All'">Father of All</a></strong></p>
+<p>King of <a href="deities/index.html" style="color: var(--color-primary);">Tuatha Dé Danann</a>. Owns magic cauldron (never empty), club (kills with one end, revives with <a data-term="Other" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/other.html" title="View other in ancient texts">other</a>), harp that controls seasons.</p>
+<p><em>Symbols:</em> Cauldron, club, harp</p>
 <p><em>Domains:</em> Abundance, protection, magic, time</p>
 </div>
-<div class="deity-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-primary); border-radius: var(--radius-xl); padding: var(--spacing-lg); transition: all var(--transition-base, 0.3s ease);">
-<h3 style="color: var(--color-primary);">🔥 <a href="deities/brigid.html" style="color: var(--color-primary); text-decoration: none;">Brigid</a></h3>
-<p style="margin: var(--spacing-sm) 0;"><strong>Goddess of Fire &amp; Poetry</strong></p>
-<p style="color: var(--color-text-secondary); line-height: var(--leading-relaxed);">Triple goddess: fire of hearth, fire of forge, fire of inspiration. Healing, smithcraft, poetry. Later Christianized as St. <a href="deities/brigid.html" style="color: var(--color-accent);">Brigid</a>.</p>
-<p style="margin-top: var(--spacing-sm);"><em>Symbols:</em> Eternal flame, <a class="corpus-link" data-term="Brigid" data-tradition="celtic" href="../../corpus-results/celtic/brigid.html" title="Search corpus for 'Brigid'">Brigid</a>'s cross, <a data-term="Sacred" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/sacred.html" title="View sacred in ancient texts">sacred</a> wells</p>
+<div class="deity-card">
+<h3>🔥 <a href="deities/brigid.html" style="color: var(--color-primary); text-decoration: none;">Brigid</a></h3>
+<p><strong>Goddess of Fire &amp; Poetry</strong></p>
+<p>Triple goddess: fire of hearth, fire of forge, fire of inspiration. Healing, smithcraft, poetry. Later Christianized as St. <a href="deities/brigid.html" style="color: var(--color-primary);">Brigid</a>.</p>
+<p><em>Symbols:</em> Eternal flame, <a class="corpus-link" data-term="Brigid" data-tradition="celtic" href="../../corpus-results/celtic/brigid.html" title="Search corpus for 'Brigid'">Brigid</a>'s cross, <a data-term="Sacred" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/sacred.html" title="View sacred in ancient texts">sacred</a> wells</p>
 <p><em>Festival:</em> <a class="corpus-link" data-term="Imbolc" data-tradition="celtic" href="../../corpus-results/celtic/imbolc.html" title="Search corpus for 'Imbolc'">Imbolc</a> (Feb 1)</p>
 </div>
-<div class="deity-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-primary); border-radius: var(--radius-xl); padding: var(--spacing-lg); transition: all var(--transition-base, 0.3s ease);">
-<h3 style="color: var(--color-primary);">☀️ <a href="deities/lugh.html" style="color: var(--color-primary); text-decoration: none;">Lugh</a></h3>
-<p style="margin: var(--spacing-sm) 0;"><strong>The Many-Skilled, Shining One</strong></p>
-<p style="color: var(--color-text-secondary); line-height: var(--leading-relaxed);">Master of all arts. Sun god, warrior, craftsman. Killed Balor with sling stone. Leader of <a href="deities/index.html" style="color: var(--color-accent);">Tuatha Dé Danann</a> in battle.</p>
-<p style="margin-top: var(--spacing-sm);"><em>Symbols:</em> Spear, sling, raven</p>
+<div class="deity-card">
+<h3>☀️ <a href="deities/lugh.html" style="color: var(--color-primary); text-decoration: none;">Lugh</a></h3>
+<p><strong>The Many-Skilled, Shining One</strong></p>
+<p>Master of all arts. Sun god, warrior, craftsman. Killed Balor with sling stone. Leader of <a href="deities/index.html" style="color: var(--color-primary);">Tuatha Dé Danann</a> in battle.</p>
+<p><em>Symbols:</em> Spear, sling, raven</p>
 <p><em>Festival:</em> <a class="corpus-link" data-term="Lughnasadh" data-tradition="celtic" href="../../corpus-results/celtic/lughnasadh.html" title="Search corpus for 'Lughnasadh'">Lughnasadh</a> (Aug 1)</p>
 </div>
-<div class="deity-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-primary); border-radius: var(--radius-xl); padding: var(--spacing-lg); transition: all var(--transition-base, 0.3s ease);">
-<h3 style="color: var(--color-primary);">🌿 <a href="deities/danu.html" style="color: var(--color-primary); text-decoration: none;">Danu</a></h3>
-<p style="margin: var(--spacing-sm) 0;"><strong>Mother Goddess</strong></p>
-<p style="color: var(--color-text-secondary); line-height: var(--leading-relaxed);">Primordial mother of <a href="deities/index.html" style="color: var(--color-accent);">Tuatha Dé Danann</a>. Earth mother, fertility, sovereignty. River goddess (Danube named for her).</p>
-<p style="margin-top: var(--spacing-sm);"><em>Symbols:</em> Rivers, hills, earth</p>
+<div class="deity-card">
+<h3>🌿 <a href="deities/danu.html" style="color: var(--color-primary); text-decoration: none;">Danu</a></h3>
+<p><strong>Mother Goddess</strong></p>
+<p>Primordial mother of <a href="deities/index.html" style="color: var(--color-primary);">Tuatha Dé Danann</a>. Earth mother, fertility, sovereignty. River goddess (Danube named for her).</p>
+<p><em>Symbols:</em> Rivers, hills, earth</p>
 <p><em>Manifestation:</em> The land itself</p>
 </div>
-<div class="deity-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-primary); border-radius: var(--radius-xl); padding: var(--spacing-lg); transition: all var(--transition-base, 0.3s ease);">
-<h3 style="color: var(--color-primary);">⚔️ <a href="deities/morrigan.html" style="color: var(--color-primary); text-decoration: none;">The Morrigan</a></h3>
-<p style="margin: var(--spacing-sm) 0;"><strong>Phantom Queen, Goddess of War</strong></p>
-<p style="color: var(--color-text-secondary); line-height: var(--leading-relaxed);">Triple goddess (<a class="corpus-link" data-term="Badb" data-tradition="celtic" href="../../corpus-results/celtic/morrigan.html" title="Search corpus for 'Badb'">Badb</a>, <a class="corpus-link" data-term="Macha" data-tradition="celtic" href="../../corpus-results/celtic/morrigan.html" title="Search corpus for 'Macha'">Macha</a>, <a class="corpus-link" data-term="Nemain" data-tradition="celtic" href="../../corpus-results/celtic/morrigan.html" title="Search corpus for 'Nemain'">Nemain</a>). Battle fury, prophecy, fate. Shape-shifter (often crow/raven). Appears before battles.</p>
-<p style="margin-top: var(--spacing-sm);"><em>Symbols:</em> Crow, raven, eel, wolf</p>
+<div class="deity-card">
+<h3>⚔️ <a href="deities/morrigan.html" style="color: var(--color-primary); text-decoration: none;">The Morrigan</a></h3>
+<p><strong>Phantom Queen, Goddess of War</strong></p>
+<p>Triple goddess (<a class="corpus-link" data-term="Badb" data-tradition="celtic" href="../../corpus-results/celtic/morrigan.html" title="Search corpus for 'Badb'">Badb</a>, <a class="corpus-link" data-term="Macha" data-tradition="celtic" href="../../corpus-results/celtic/morrigan.html" title="Search corpus for 'Macha'">Macha</a>, <a class="corpus-link" data-term="Nemain" data-tradition="celtic" href="../../corpus-results/celtic/morrigan.html" title="Search corpus for 'Nemain'">Nemain</a>). Battle fury, prophecy, fate. Shape-shifter (often crow/raven). Appears before battles.</p>
+<p><em>Symbols:</em> Crow, raven, eel, wolf</p>
 <p><em>Domains:</em> War, fate, death, sovereignty</p>
 </div>
-<div class="deity-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-lg); transition: all var(--transition-base, 0.3s ease);">
-<h3 style="color: var(--color-primary);">🌳 <a class="corpus-link" data-term="Cernunnos" data-tradition="celtic" href="../../corpus-results/celtic/cernunnos.html" title="Search corpus for 'Cernunnos'">Cernunnos</a></h3>
-<p style="margin: var(--spacing-sm) 0;"><strong><a class="corpus-link" data-term="The Horned God" data-tradition="celtic" href="../../corpus-results/celtic/cernunnos.html" title="Search corpus for 'The Horned God'">The Horned God</a></strong></p>
-<p style="color: var(--color-text-secondary); line-height: var(--leading-relaxed);">Lord of animals, nature, fertility, underworld. Cross-legged figure with antlers. Holds torque and serpent.</p>
-<p style="margin-top: var(--spacing-sm);"><em>Symbols:</em> Antlers, torque, serpent, animals</p>
+<div class="deity-card">
+<h3>🌳 <a class="corpus-link" data-term="Cernunnos" data-tradition="celtic" href="../../corpus-results/celtic/cernunnos.html" title="Search corpus for 'Cernunnos'">Cernunnos</a></h3>
+<p><strong><a class="corpus-link" data-term="The Horned God" data-tradition="celtic" href="../../corpus-results/celtic/cernunnos.html" title="Search corpus for 'The Horned God'">The Horned God</a></strong></p>
+<p>Lord of animals, nature, fertility, underworld. Cross-legged figure with antlers. Holds torque and serpent.</p>
+<p><em>Symbols:</em> Antlers, torque, serpent, animals</p>
 <p><em>Depiction:</em> Gundestrup Cauldron</p>
 </div>
 </div>
 <p style="text-align: center; margin-top: var(--spacing-xl);"><a class="btn btn-primary" href="deities/index.html" style="display: inline-block; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all 0.2s ease;">View All Celtic Deities →</a></p>
-</div>
-<div class="glass-card" style="background: var(--color-surface); backdrop-filter: blur(10px); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-lg); margin: var(--spacing-xl) 0;">
-<h2 style="color: var(--color-primary); font-size: var(--text-2xl); margin-bottom: var(--spacing-md);">Key Texts &amp; <a data-term="Sources" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/sources.html" title="View sources in ancient texts">Sources</a></h2>
-<ul style="color: var(--color-text-secondary); line-height: var(--leading-loose); margin-left: var(--spacing-lg);">
+</section>
+<section class="glass-card">
+<h2 style="color: var(--color-primary);">Key Texts &amp; <a data-term="Sources" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/sources.html" title="View sources in ancient texts">Sources</a></h2>
+<ul style="line-height: var(--leading-loose); margin-left: var(--spacing-lg);">
 <li><strong>Lebor Gabála Érenn</strong> - "Book of Invasions" (Irish <a data-term="Mythology" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/mythology.html" title="View mythology in ancient texts">mythology</a> compilation)</li>
 <li><strong>The Mabinogion</strong> - Welsh mythological cycles</li>
 <li><strong>Ulster Cycle</strong> - Táin Bó Cúailnge (Cattle Raid of Cooley), <a class="corpus-link" data-term="Cú Chulainn" data-tradition="celtic" href="../../corpus-results/celtic/cu_chulainn.html" title="Search corpus for 'Cú Chulainn'">Cú Chulainn</a> tales</li>
 <li><strong>Fenian Cycle</strong> - <a class="corpus-link" data-term="Fionn mac Cumhaill" data-tradition="celtic" href="../../corpus-results/celtic/fionn.html" title="Search corpus for 'Fionn mac Cumhaill'">Fionn mac Cumhaill</a> and the Fianna</li>
-<li><strong>Mythological Cycle</strong> - <a href="deities/index.html" style="color: var(--color-accent);">Tuatha Dé Danann</a> stories</li>
+<li><strong>Mythological Cycle</strong> - <a href="deities/index.html" style="color: var(--color-primary);">Tuatha Dé Danann</a> stories</li>
 <li><strong>Classical <a data-term="Sources" data-tradition="celtic" class="corpus-link" href="../../corpus-results/celtic/sources.html" title="View sources in ancient texts">Sources</a></strong> - Julius Caesar (Gallic Wars), Pliny, Strabo on Druids</li>
 <li><strong>Medieval Irish Texts</strong> - Dinnshenchas (place-name lore), Brehon Laws</li>
 <li><strong>Welsh Triads</strong> - Poetic mnemonics preserving lore</li>
 </ul>
-</div>
+</section>
 </main>
 <footer style="background: var(--color-surface); backdrop-filter: blur(10px); padding: var(--spacing-xl); border-top: 2px solid var(--color-border); margin-top: var(--spacing-xs2); text-align: center;">
 <p style="color: var(--color-text-secondary);">© 2025 World Mythos Explorer | <a href="../../mythos/index.html" style="color: var(--color-primary); text-decoration: none;">← Back to All Mythologies</a></p>
 </footer>
-<script>
-        // Add hover effects to nav links
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('mouseenter', function() {
-                this.style.color = 'var(--color-primary)';
-                this.style.background = 'rgba(255, 255, 255, 0.05)';
-            });
-            link.addEventListener('mouseleave', function() {
-                if (!this.classList.contains('active')) {
-                    this.style.color = 'var(--color-text-secondary)';
-                    this.style.background = 'transparent';
-                }
-            });
-        });
-
-        // Add hover effects to deity cards
-        document.querySelectorAll('.deity-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-8px)';
-                this.style.boxShadow = '0 10px 30px rgba(var(--color-primary-rgb, 245, 158, 11), 0.4)';
-            });
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-                this.style.boxShadow = 'none';
-            });
-        });
-    </script>
 </body>
 </html>
