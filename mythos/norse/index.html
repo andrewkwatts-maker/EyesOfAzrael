@@ -10,11 +10,45 @@
 <link href="../../styles.css" rel="stylesheet"/>
 <script defer="" src="../../themes/theme-picker.js"></script>
 <style>
+        /* ============================================
+           MODERN GLASS UI TEMPLATE - Norse Mythos
+           Based on Christian reference with full theme support
+           ============================================ */
+
+        /* Breadcrumb - Full-width bar attached below header */
+        .breadcrumb {
+            position: sticky;
+            top: 60px; /* Below the sticky header */
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(var(--color-surface-rgb), 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: var(--spacing-xs) var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
+        }
+
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        /* Hero Section - Modern Glass Styling */
         .hero-section {
             background: linear-gradient(135deg,
                 rgba(var(--color-primary-rgb), 0.8),
                 rgba(var(--color-secondary-rgb), 0.8));
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 2px solid var(--color-primary);
             color: var(--color-text-primary);
             padding: 3rem 2rem;
@@ -24,28 +58,51 @@
             box-shadow: var(--shadow-xl);
         }
 
+        .hero-icon-display {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 1rem auto;
+            line-height: 1.7;
+        }
+
+        /* Glass Card - With Hover Animation */
         .glass-card {
             background: rgba(var(--color-surface-rgb), 0.6);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(var(--color-primary-rgb), 0.2);
             border-radius: var(--radius-lg);
-            padding: 2rem;
+            padding: var(--spacing-xl);
             margin: 2rem 0;
             box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base, 0.3s ease);
         }
 
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+            border-color: rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        /* Subsection Card - Hover Effects */
         .subsection-card {
             background: rgba(var(--color-primary-rgb), 0.05);
             border-left: 4px solid var(--color-primary);
-            padding: 1.5rem;
-            margin: 1.5rem 0;
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
             border-radius: var(--radius-md);
             transition: all var(--transition-base, 0.3s ease);
         }
 
         .subsection-card:hover {
             background: rgba(var(--color-primary-rgb), 0.1);
-            transform: translateY(-4px);
+            transform: translateX(5px);
             box-shadow: var(--shadow-md);
         }
 
@@ -58,27 +115,115 @@
             line-height: 1.7;
         }
 
+        /* Grid Layouts */
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        /* Deity Cards - Modern Glass Pattern */
+        .deity-card {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-base, 0.3s ease);
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+            overflow: hidden;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .deity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg), 0 0 15px rgba(var(--color-primary-rgb), 0.2);
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            text-decoration: none;
+        }
+
+        .deity-card h3 {
+            color: var(--color-primary);
+            margin-top: 0.5rem;
+        }
+
+        .deity-card p {
+            line-height: 1.7;
+        }
+
+        .deity-icon {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        /* Sub Links - Pill Navigation */
         .sub-links {
             display: flex;
             flex-wrap: wrap;
-            gap: var(--space-2);
-            margin-top: var(--space-4);
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
         }
 
         .sub-link {
-            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-            color: white;
-            padding: var(--space-2) var(--space-4);
+            background: var(--color-primary);
+            color: var(--color-text-primary);
+            padding: var(--spacing-sm) var(--spacing-md);
             border-radius: var(--radius-full);
             text-decoration: none;
-            font-size: var(--text-sm);
+            font-size: var(--font-size-sm);
             transition: all var(--transition-base, 0.3s ease);
-            border: 1px solid transparent;
         }
 
         .sub-link:hover {
+            background: var(--color-secondary);
             transform: scale(1.05);
-            box-shadow: var(--shadow-glow);
+        }
+
+        /* Section Headers */
+        .section-header {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .card-title {
+            color: var(--color-primary);
+            margin-top: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+
+            .deity-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .hero-icon-display {
+                font-size: 3rem;
+            }
+
+            .breadcrumb {
+                font-size: var(--font-size-xs);
+                padding: var(--spacing-xs) var(--spacing-md);
+                top: 50px; /* Smaller header on mobile */
+            }
         }
     </style>
 </head>
@@ -99,7 +244,8 @@
 <main>
 <div class="hero-section">
 <h2>The Sagas of <a class="corpus-link" href="corpus-search.html?tradition=norse&term=asgard" title="View asgard in ancient texts">Asgard</a> and the <a class="corpus-link" data-term="World Tree" data-tradition="norse" href="corpus-search.html?tradition=norse&term=yggdrasil" title="Search corpus for 'World Tree'">World Tree</a></h2>
-<p style="font-size: 1.2rem; max-width: 800px; margin: 1rem auto;">
+<div class="hero-icon-display">🔨🌳</div>
+<p class="hero-description">
                 Explore the <a class="corpus-link" href="corpus-search.html?tradition=norse&term=mythology" title="View mythology in ancient texts">mythology</a> of the Norsemen - from the creation of the cosmos from Ymir's body to the
                 prophesied destruction and rebirth at <a class="corpus-link" data-term="Ragnarok" data-tradition="norse" href="corpus-search.html?tradition=norse&term=ragnarok" title="Search corpus for 'Ragnarok'">Ragnarok</a>. Discover the wisdom of <a class="corpus-link" data-term="Odin" data-tradition="norse" href="corpus-search.html?tradition=norse&term=odin" title="Search corpus for 'Odin'">Odin</a>, the might of <a class="corpus-link" data-term="Thor" data-tradition="norse" href="corpus-search.html?tradition=norse&term=thor" title="Search corpus for 'Thor'">Thor</a>,
                 the magic of <a class="corpus-link" data-term="Freyja" data-tradition="norse" href="corpus-search.html?tradition=norse&term=freyja" title="Search corpus for 'Freyja'">Freyja</a>, and the mysteries of the Nine Realms connected by <a class="corpus-link" data-term="Yggdrasil" data-tradition="norse" href="corpus-search.html?tradition=norse&term=yggdrasil" title="Search corpus for 'Yggdrasil'">Yggdrasil</a>, the <a class="corpus-link" data-term="World Tree" data-tradition="norse" href="corpus-search.html?tradition=norse&term=yggdrasil" title="Search corpus for 'World Tree'">World Tree</a>.
@@ -227,42 +373,48 @@
 </div></div></section>
 <section class="glass-card">
 <h2 style="color: var(--color-primary);">📚 <a class="corpus-link" href="corpus-search.html?tradition=norse&term=other" title="View other in ancient texts">Other</a> Norse Sections</h2>
-<div class="grid">
-<div class="card" onclick="window.location.href='heroes/index.html'">
-<h3>⚔️ Heroes &amp; Legends</h3>
+<div class="deity-grid">
+<a class="deity-card" href="heroes/index.html">
+<div class="deity-icon">⚔️</div>
+<h3>Heroes &amp; Legends</h3>
 <p>Sigurd the dragon-slayer, Beowulf, and legendary warriors whose deeds echo through the ages.</p>
-</div>
-<div class="card" onclick="window.location.href='creatures/index.html'">
-<h3>🐉 Mythical Creatures</h3>
+</a>
+<a class="deity-card" href="creatures/index.html">
+<div class="deity-icon">🐉</div>
+<h3>Mythical Creatures</h3>
 <p>Giants, dwarves, elves, Valkyries, dragons, and the monstrous children of <a class="corpus-link" href="corpus-search.html?tradition=norse&term=loki" title="View loki in ancient texts">Loki</a>.</p>
-</div>
-<div class="card" onclick="window.location.href='texts/index.html'">
-<h3>📜 <a class="corpus-link" href="corpus-search.html?tradition=norse&term=sacred" title="View sacred in ancient texts">Sacred</a> Texts</h3>
+</a>
+<a class="deity-card" href="texts/index.html">
+<div class="deity-icon">📜</div>
+<h3><a class="corpus-link" href="corpus-search.html?tradition=norse&term=sacred" title="View sacred in ancient texts">Sacred</a> Texts</h3>
 <p>Poetic Edda, Prose Edda, Sagas, and the sources preserving <a class="corpus-link" href="corpus-search.html?tradition=norse&term=norse" title="View norse in ancient texts">Norse</a> wisdom.</p>
-</div>
-<div class="card" onclick="window.location.href='symbols/index.html'">
-<h3>🔨 <a class="corpus-link" href="corpus-search.html?tradition=norse&term=sacred" title="View sacred in ancient texts">Sacred</a> Symbols</h3>
+</a>
+<a class="deity-card" href="symbols/index.html">
+<div class="deity-icon">🔨</div>
+<h3><a class="corpus-link" href="corpus-search.html?tradition=norse&term=sacred" title="View sacred in ancient texts">Sacred</a> Symbols</h3>
 <p><a class="corpus-link" data-term="Mjolnir" data-tradition="norse" href="corpus-search.html?tradition=norse&term=mjolnir" title="Search corpus for 'Mjolnir'">Mjolnir</a>, Valknut, <a class="corpus-link" href="corpus-search.html?tradition=norse&term=yggdrasil" title="View yggdrasil in ancient texts">Yggdrasil</a>, and the powerful symbols of Norse spirituality.</p>
-</div></div></section>
-<section class="related-concepts" style="margin-top: var(--space-12);">
+</a>
+</div></section>
+<section class="glass-card" style="margin-top: var(--spacing-xl);">
 <h2 style="color: var(--color-primary);">🔗 Related <a class="corpus-link" href="corpus-search.html?tradition=norse&term=traditions" title="View traditions in ancient texts">Traditions</a></h2>
-<p>Norse mythology shares themes and influences with other Indo-European <a class="corpus-link" href="corpus-search.html?tradition=norse&term=traditions" title="View traditions in ancient texts">traditions</a>:</p>
-<div class="grid">
-<div class="related-card">
-<h3>Greek <a class="corpus-link" href="corpus-search.html?tradition=norse&term=mythology" title="View mythology in ancient texts">Mythology</a></h3>
-<p>Zeus/<a class="corpus-link" href="corpus-search.html?tradition=norse&term=odin" title="View odin in ancient texts">Odin</a> parallels, heroic cycles, complex divine families</p>
-<a href="../greek/index.html">Explore Greek →</a>
+<p style="margin-bottom: var(--spacing-lg); line-height: 1.7;">Norse mythology shares themes and influences with other Indo-European <a class="corpus-link" href="corpus-search.html?tradition=norse&term=traditions" title="View traditions in ancient texts">traditions</a>:</p>
+<div class="grid-2col">
+<div class="glass-card">
+<h3 style="color: var(--color-primary); margin-top: 0;">Greek <a class="corpus-link" href="corpus-search.html?tradition=norse&term=mythology" title="View mythology in ancient texts">Mythology</a></h3>
+<p style="margin-bottom: var(--spacing-md); line-height: 1.7;">Zeus/<a class="corpus-link" href="corpus-search.html?tradition=norse&term=odin" title="View odin in ancient texts">Odin</a> parallels, heroic cycles, complex divine families</p>
+<a class="btn btn-primary" href="../greek/index.html">Explore Greek →</a>
 </div>
-<div class="related-card">
-<h3>Celtic <a class="corpus-link" href="corpus-search.html?tradition=norse&term=mythology" title="View mythology in ancient texts">Mythology</a></h3>
-<p>Druidic magic, <a class="corpus-link" href="corpus-search.html?tradition=norse&term=sacred" title="View sacred in ancient texts">sacred</a> trees, warrior culture, Otherworld realms</p>
-<a href="../celtic/index.html">Explore Celtic →</a>
+<div class="glass-card">
+<h3 style="color: var(--color-primary); margin-top: 0;">Celtic <a class="corpus-link" href="corpus-search.html?tradition=norse&term=mythology" title="View mythology in ancient texts">Mythology</a></h3>
+<p style="margin-bottom: var(--spacing-md); line-height: 1.7;">Druidic magic, <a class="corpus-link" href="corpus-search.html?tradition=norse&term=sacred" title="View sacred in ancient texts">sacred</a> trees, warrior culture, Otherworld realms</p>
+<a class="btn btn-primary" href="../celtic/index.html">Explore Celtic →</a>
 </div>
-<div class="related-card">
-<h3>Hindu <a class="corpus-link" href="corpus-search.html?tradition=norse&term=mythology" title="View mythology in ancient texts">Mythology</a></h3>
-<p><a class="corpus-link" data-term="World Tree" data-tradition="norse" href="corpus-search.html?tradition=norse&term=yggdrasil" title="Search corpus for 'World Tree'">World Tree</a> (Ashvattha), cosmic cycles, divine warriors (Indra/<a class="corpus-link" href="corpus-search.html?tradition=norse&term=thor" title="View thor in ancient texts">Thor</a>)</p>
-<a href="../hindu/index.html">Explore Hindu →</a>
-</div></div></section>
+<div class="glass-card">
+<h3 style="color: var(--color-primary); margin-top: 0;">Hindu <a class="corpus-link" href="corpus-search.html?tradition=norse&term=mythology" title="View mythology in ancient texts">Mythology</a></h3>
+<p style="margin-bottom: var(--spacing-md); line-height: 1.7;"><a class="corpus-link" data-term="World Tree" data-tradition="norse" href="corpus-search.html?tradition=norse&term=yggdrasil" title="Search corpus for 'World Tree'">World Tree</a> (Ashvattha), cosmic cycles, divine warriors (Indra/<a class="corpus-link" href="corpus-search.html?tradition=norse&term=thor" title="View thor in ancient texts">Thor</a>)</p>
+<a class="btn btn-primary" href="../hindu/index.html">Explore Hindu →</a>
+</div>
+</div></section>
 </main>
 <footer>
 <p>
