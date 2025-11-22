@@ -308,6 +308,26 @@ function updateStats() {
     const stats = corpusSearch.getStats();
     document.getElementById('stat-loaded-texts').textContent = stats.loadedTexts;
     document.getElementById('stat-cache-size').textContent = `${stats.cacheSize} KB`;
+
+    // Update additional stats if elements exist
+    const cacheHitEl = document.getElementById('stat-cache-hits');
+    const cacheRateEl = document.getElementById('stat-cache-rate');
+    const localStorageEl = document.getElementById('stat-localStorage');
+    const sessionStorageEl = document.getElementById('stat-sessionStorage');
+
+    if (cacheHitEl) cacheHitEl.textContent = stats.cacheHits;
+    if (cacheRateEl) cacheRateEl.textContent = `${stats.cacheHitRate}%`;
+    if (localStorageEl) localStorageEl.textContent = `${stats.localStorageUsed} KB`;
+    if (sessionStorageEl) sessionStorageEl.textContent = `${stats.sessionStorageUsed} KB`;
+}
+
+// Clear cache function (exposed globally)
+function clearCorpusCache() {
+    if (corpusSearch) {
+        corpusSearch.clearCache();
+        updateStats();
+        showSuccess('Cache cleared successfully! Files will be re-downloaded on next search.');
+    }
 }
 
 // Show error message

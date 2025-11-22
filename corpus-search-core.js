@@ -43,20 +43,38 @@ class CorpusSearch {
   async fetchWithCache(url, repoId, filename, options = {}) {
     const cacheKey = `corpus_${repoId}_${filename}`;
     const maxRetries = options.maxRetries || 3;
+    const maxAge = this.config.cache_duration_minutes * 60 * 1000;
 
-    // Check cache
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached && !options.bypassCache) {
-      try {
-        const { content, timestamp } = JSON.parse(cached);
-        const age = Date.now() - timestamp;
-        const maxAge = this.config.cache_duration_minutes * 60 * 1000;
-        if (age < maxAge) {
-          return content;
+    // Check localStorage first (persistent), then sessionStorage (fallback)
+    const checkCache = (storage) => {
+      const cached = storage.getItem(cacheKey);
+      if (cached && !options.bypassCache) {
+        try {
+          const { content, timestamp } = JSON.parse(cached);
+          const age = Date.now() - timestamp;
+          if (age < maxAge) {
+            return content;
+          }
+          storage.removeItem(cacheKey);
+        } catch (e) {
+          storage.removeItem(cacheKey);
         }
-      } catch (e) {
-        sessionStorage.removeItem(cacheKey);
       }
+      return null;
+    };
+
+    // Try localStorage first (persistent across sessions)
+    let cachedContent = checkCache(localStorage);
+    if (cachedContent) {
+      this.cacheHits = (this.cacheHits || 0) + 1;
+      return cachedContent;
+    }
+
+    // Fallback to sessionStorage
+    cachedContent = checkCache(sessionStorage);
+    if (cachedContent) {
+      this.cacheHits = (this.cacheHits || 0) + 1;
+      return cachedContent;
     }
 
     // Fetch with retry
@@ -83,16 +101,31 @@ class CorpusSearch {
 
         const content = await response.text();
 
-        // Cache
+        // Cache to localStorage (persistent) with fallback to sessionStorage
+        const cacheData = JSON.stringify({
+          content,
+          timestamp: Date.now(),
+          url: url
+        });
+
         try {
-          sessionStorage.setItem(cacheKey, JSON.stringify({
-            content,
-            timestamp: Date.now()
-          }));
+          localStorage.setItem(cacheKey, cacheData);
         } catch (e) {
-          console.warn('Cache quota exceeded:', e);
+          // localStorage full, try sessionStorage
+          try {
+            sessionStorage.setItem(cacheKey, cacheData);
+          } catch (e2) {
+            console.warn('Both caches full, clearing old entries...');
+            this.cleanupOldCache();
+            try {
+              localStorage.setItem(cacheKey, cacheData);
+            } catch (e3) {
+              console.warn('Cache quota exceeded, content will not be cached');
+            }
+          }
         }
 
+        this.cacheMisses = (this.cacheMisses || 0) + 1;
         return content;
       } catch (error) {
         if (attempt === maxRetries - 1) {
@@ -101,6 +134,30 @@ class CorpusSearch {
         await this.sleep(1000 * Math.pow(2, attempt));
       }
     }
+  }
+
+  cleanupOldCache() {
+    const now = Date.now();
+    const maxAge = (this.config?.cache_duration_minutes || 60) * 60 * 1000;
+    const storages = [localStorage, sessionStorage];
+
+    storages.forEach(storage => {
+      const keysToRemove = [];
+      for (let i = 0; i < storage.length; i++) {
+        const key = storage.key(i);
+        if (key && key.startsWith('corpus_')) {
+          try {
+            const { timestamp } = JSON.parse(storage.getItem(key));
+            if (now - timestamp > maxAge) {
+              keysToRemove.push(key);
+            }
+          } catch (e) {
+            keysToRemove.push(key);
+          }
+        }
+      }
+      keysToRemove.forEach(key => storage.removeItem(key));
+    });
   }
 
   async loadSelectedRepos(selectedRepoIds, callbacks = {}) {
@@ -254,33 +311,72 @@ class CorpusSearch {
 
   clearCache() {
     this.loadedTexts.clear();
-    const keys = [];
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
-      if (key.startsWith('corpus_')) {
-        keys.push(key);
+    this.cacheHits = 0;
+    this.cacheMisses = 0;
+
+    // Clear both localStorage and sessionStorage
+    [localStorage, sessionStorage].forEach(storage => {
+      const keys = [];
+      for (let i = 0; i < storage.length; i++) {
+        const key = storage.key(i);
+        if (key && key.startsWith('corpus_')) {
+          keys.push(key);
+        }
       }
-    }
-    keys.forEach(key => sessionStorage.removeItem(key));
+      keys.forEach(key => storage.removeItem(key));
+    });
   }
 
   getStats() {
+    const cacheInfo = this.getCacheInfo();
     return {
       loadedTexts: this.loadedTexts.size,
-      cacheSize: this.getCacheSize(),
-      repositories: this.config?.repositories.length || 0
+      cacheSize: cacheInfo.totalSizeKB,
+      cacheItems: cacheInfo.itemCount,
+      cacheHits: this.cacheHits || 0,
+      cacheMisses: this.cacheMisses || 0,
+      cacheHitRate: this.cacheHits && this.cacheMisses
+        ? Math.round((this.cacheHits / (this.cacheHits + this.cacheMisses)) * 100)
+        : 0,
+      repositories: this.config?.repositories.length || 0,
+      localStorageUsed: cacheInfo.localStorageKB,
+      sessionStorageUsed: cacheInfo.sessionStorageKB
     };
   }
 
   getCacheSize() {
-    let totalSize = 0;
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
-      if (key.startsWith('corpus_')) {
-        totalSize += sessionStorage.getItem(key).length;
+    return this.getCacheInfo().totalSizeKB;
+  }
+
+  getCacheInfo() {
+    let localStorageSize = 0;
+    let sessionStorageSize = 0;
+    let itemCount = 0;
+
+    // Check localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('corpus_')) {
+        localStorageSize += localStorage.getItem(key).length;
+        itemCount++;
       }
     }
-    return Math.round(totalSize / 1024);
+
+    // Check sessionStorage
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key && key.startsWith('corpus_')) {
+        sessionStorageSize += sessionStorage.getItem(key).length;
+        itemCount++;
+      }
+    }
+
+    return {
+      itemCount,
+      totalSizeKB: Math.round((localStorageSize + sessionStorageSize) / 1024),
+      localStorageKB: Math.round(localStorageSize / 1024),
+      sessionStorageKB: Math.round(sessionStorageSize / 1024)
+    };
   }
 
   sleep(ms) {
