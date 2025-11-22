@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valhalla - Hall of the Slain - Sacred Realms</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .location {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            color: var(--color-primary);
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            color: var(--color-primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-icon {
+            font-size: 2.5rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all var(--transition-base);
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .feature-title {
+            color: var(--color-primary);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .tradition-tag {
+            padding: 0.5rem 1rem;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            color: var(--color-text-primary);
+        }
+
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .related-link {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            text-align: center;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .related-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .quote-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        }
+
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .deity-card {
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all var(--transition-base);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .deity-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .list-styled {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .list-styled li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .list-styled li::before {
+            content: '\2694';
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+        <div class="header-content">
+            <h1>Valhalla</h1>
+        </div>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../index.html">Home</a> &rarr;
+        <a href="../index.html">Sacred Places</a> &rarr;
+        <a href="./index.html">Mythic Realms</a> &rarr;
+        <span>Valhalla</span>
+    </nav>
+
+    <main>
+        <div class="hero-section">
+            <div class="hero-icon">\2694\uFE0F</div>
+            <h2>Valhalla (Valh&#246;ll)</h2>
+            <p class="location">Asgard, Norse Cosmos</p>
+            <p class="subtitle">"Hall of the Slain" - Odin's Majestic Hall of Fallen Warriors</p>
+            <div class="tradition-tags">
+                <span class="tradition-tag">Norse</span>
+                <span class="tradition-tag">Germanic</span>
+                <span class="tradition-tag">Viking Age</span>
+                <span class="tradition-tag">Afterlife Realm</span>
+            </div>
+        </div>
+
+        <!-- Description and Appearance -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83C\uDFF0</span>
+                Description & Appearance
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                Valhalla (Old Norse: Valh&#246;ll, meaning "Hall of the Slain") is the magnificent great hall in Asgard
+                where the god Odin houses the einherjar - the souls of warriors who died bravely in battle. Rising
+                majestically amidst the realm of the gods, Valhalla represents the ultimate warrior's paradise, where
+                the honored dead feast, fight, and prepare for the final battle of Ragnar&#246;k.
+            </p>
+
+            <div class="quote-box">
+                "Five hundred doors and forty more, I think, are in Valhalla.
+                Eight hundred warriors will go through each door,
+                when they go to fight the wolf."
+                - Grimnismal, Poetic Edda
+            </div>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDFDB\uFE0F Architectural Grandeur</h3>
+                    <ul class="list-styled">
+                        <li>540 doors, each wide enough for 800 warriors</li>
+                        <li>Roof thatched with golden shields</li>
+                        <li>Walls built from polished spear shafts</li>
+                        <li>Benches covered in fine mail coats</li>
+                        <li>Rafters made from massive spears</li>
+                        <li>Wolf Geri guards the western door</li>
+                        <li>Eagle perches above the eastern entrance</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDF1F Celestial Location</h3>
+                    <ul class="list-styled">
+                        <li>Located in Asgard, realm of the Aesir gods</li>
+                        <li>Stands in the plain of Gl&#230;sisvellir (Shining Fields)</li>
+                        <li>Near Odin's throne Hlidskjalf</li>
+                        <li>Adjacent to the sacred grove Glasir</li>
+                        <li>Overlooks the Bifrost rainbow bridge</li>
+                        <li>Surrounded by the river Thund</li>
+                        <li>Gates called Valgrind (Death Gate)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDCA1 Illumination & Splendor</h3>
+                    <ul class="list-styled">
+                        <li>Lit by gleaming swords, no fire needed</li>
+                        <li>Golden pillars support immense roof</li>
+                        <li>Seats enough for countless einherjar</li>
+                        <li>Odin's high seat at the head of hall</li>
+                        <li>Never-ending supply of mead flows</li>
+                        <li>The goat Hei&#240;r&#250;n provides endless mead</li>
+                        <li>Eternal feasting tables stretch the length</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDF32 Sacred Grove Glasir</h3>
+                    <ul class="list-styled">
+                        <li>Grove of trees with golden leaves</li>
+                        <li>Stands before Valhalla's gates</li>
+                        <li>Most beautiful of all groves</li>
+                        <li>Leaves shimmer like gold in light</li>
+                        <li>Sacred to Odin and the einherjar</li>
+                        <li>Symbol of eternal glory</li>
+                        <li>Never loses its golden splendor</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mythology and Stories -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83D\uDCDC</span>
+                Mythology & Stories
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                The mythology of Valhalla is central to Norse cosmology, representing not merely an afterlife
+                destination but a crucial staging ground for the apocalyptic events of Ragnar&#246;k. The tales
+                of Valhalla illuminate Norse values of courage, honor in battle, and the warrior's eternal purpose.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">\u2694\uFE0F The Einherjar</h3>
+                    <p style="margin-bottom: 1rem;">
+                        The einherjar ("lone fighters" or "army of one") are the souls of warriors chosen by
+                        Odin and the Valkyries from those slain in battle.
+                    </p>
+                    <ul class="list-styled">
+                        <li>Selected by Valkyries from battlefield dead</li>
+                        <li>Must die bravely in combat to qualify</li>
+                        <li>Fight each other daily on Vigrid plain</li>
+                        <li>Wounds heal each evening completely</li>
+                        <li>Rise again whole for the feast</li>
+                        <li>Train eternally for Ragnar&#246;k</li>
+                        <li>Number grows daily until end times</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDC7C The Valkyries</h3>
+                    <p style="margin-bottom: 1rem;">
+                        The Valkyries (v&#225;lkyrjur, "choosers of the slain") serve Odin by selecting
+                        the worthy dead and bringing them to Valhalla.
+                    </p>
+                    <ul class="list-styled">
+                        <li>Odin's shield-maidens and choosers</li>
+                        <li>Ride winged horses over battlefields</li>
+                        <li>Select the bravest fallen warriors</li>
+                        <li>Escort souls to Asgard</li>
+                        <li>Serve mead in Valhalla</li>
+                        <li>Notable Valkyries: Brynhildr, Sigrdr&#237;fa, Skuld</li>
+                        <li>Half of slain go to Freyja's F&#243;lkvangr</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDC17 S&#230;hr&#237;mnir the Boar</h3>
+                    <ul class="list-styled">
+                        <li>Cosmic boar slaughtered each day</li>
+                        <li>Cooked by the cook Andhrimnir</li>
+                        <li>Boiled in the cauldron Eldhr&#237;mnir</li>
+                        <li>Provides endless meat for einherjar</li>
+                        <li>Regenerates whole each morning</li>
+                        <li>Symbolizes abundance and renewal</li>
+                        <li>Never runs out, feeds all warriors</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDF7A Hei&#240;r&#250;n the Goat</h3>
+                    <ul class="list-styled">
+                        <li>Stands atop Valhalla's roof</li>
+                        <li>Feeds on leaves of Laera&#240;</li>
+                        <li>Produces endless mead from udders</li>
+                        <li>Fills a vast vat each day</li>
+                        <li>Enough to satisfy all einherjar</li>
+                        <li>Mead said to be finest in cosmos</li>
+                        <li>Symbol of eternal celebration</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDD25 Ragnar&#246;k Purpose</h3>
+                    <p style="margin-bottom: 1rem;">
+                        Valhalla's ultimate purpose is to gather warriors for the final battle
+                        at the end of the world.
+                    </p>
+                    <ul class="list-styled">
+                        <li>Einherjar train for Ragnar&#246;k</li>
+                        <li>Will fight alongside the gods</li>
+                        <li>Face giants, Fenrir, and J&#246;rmungandr</li>
+                        <li>Most will fall in final battle</li>
+                        <li>Their sacrifice aids cosmic renewal</li>
+                        <li>Odin needs their numbers to stand a chance</li>
+                        <li>Honorable death ensures rebirth</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDCDA Literary Sources</h3>
+                    <ul class="list-styled">
+                        <li><strong>Poetic Edda:</strong> Grimnismal, V&#246;lusp&#225;</li>
+                        <li><strong>Prose Edda:</strong> Snorri's detailed descriptions</li>
+                        <li><strong>Gylfaginning:</strong> Valhalla's appearance</li>
+                        <li><strong>Skaldic Poetry:</strong> Praise poems mention Valhalla</li>
+                        <li><strong>Sagas:</strong> Heroes aspire to Valhalla</li>
+                        <li><strong>Rune Stones:</strong> Memorial inscriptions</li>
+                        <li><strong>Beowulf:</strong> Anglo-Saxon parallels</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Associated Deities -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83D\uDC51</span>
+                Associated Deities
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                Valhalla is primarily associated with Odin, the Allfather, but several other deities
+                and beings play important roles in this sacred hall.
+            </p>
+
+            <div class="deity-grid">
+                <a href="../../mythos/norse/deities/odin.html" class="deity-card">
+                    <div style="font-size: 3rem;">\uD83D\uDC41\uFE0F</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Odin</h3>
+                    <p>Allfather, ruler of Valhalla, gathers the einherjar for Ragnar&#246;k. Sits on his
+                    high seat observing all worlds.</p>
+                </a>
+
+                <a href="../../mythos/norse/deities/freyja.html" class="deity-card">
+                    <div style="font-size: 3rem;">\uD83D\uDC8E</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Freyja</h3>
+                    <p>Receives half the battle-slain in her hall F&#243;lkvangr. First choice of
+                    warriors, shares the honored dead with Odin.</p>
+                </a>
+
+                <a href="../../mythos/norse/deities/thor.html" class="deity-card">
+                    <div style="font-size: 3rem;">\u26A1</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Thor</h3>
+                    <p>Though his own hall is Bilskirnir, Thor joins the feasts. Will lead
+                    einherjar against J&#246;rmungandr at Ragnar&#246;k.</p>
+                </a>
+
+                <a href="../../mythos/norse/beings/valkyries.html" class="deity-card">
+                    <div style="font-size: 3rem;">\uD83D\uDC7C</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Valkyries</h3>
+                    <p>Odin's shield-maidens who choose the slain and escort them to
+                    Valhalla. Serve mead to the einherjar.</p>
+                </a>
+
+                <a href="../../mythos/norse/deities/tyr.html" class="deity-card">
+                    <div style="font-size: 3rem;">\u2694\uFE0F</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Tyr</h3>
+                    <p>God of war and heroic glory. Warriors invoke Tyr for victory,
+                    hoping to earn place in Valhalla.</p>
+                </a>
+
+                <a href="../../mythos/norse/deities/heimdall.html" class="deity-card">
+                    <div style="font-size: 3rem;">\uD83C\uDF08</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Heimdall</h3>
+                    <p>Guardian of Bifrost who will sound Gjallarhorn when Ragnar&#246;k
+                    begins, summoning einherjar to battle.</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Cultural Significance -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83C\uDFDB\uFE0F</span>
+                Cultural Significance
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">\u2694\uFE0F Warrior Ethos</h3>
+                    <ul class="list-styled">
+                        <li>Dying in battle seen as highest honor</li>
+                        <li>Cowardice meant exclusion from Valhalla</li>
+                        <li>Warriors chose dangerous lives for glory</li>
+                        <li>Berserkers sought battle-death fervently</li>
+                        <li>Shape Viking Age warfare mentality</li>
+                        <li>Fear of death diminished by belief</li>
+                        <li>Last words often invoked Odin</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\u26B0\uFE0F Burial Practices</h3>
+                    <ul class="list-styled">
+                        <li>Weapons buried with warriors</li>
+                        <li>Ship burials for notable figures</li>
+                        <li>Grave goods for journey to Valhalla</li>
+                        <li>Funeral pyres sent spirits upward</li>
+                        <li>Rune stones commemorated fallen</li>
+                        <li>Women could reach Valhalla if warriors</li>
+                        <li>Sacrifices made to aid journey</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDDEE\uD83C\uDDF8 Nordic Identity</h3>
+                    <ul class="list-styled">
+                        <li>Central to Norse religious identity</li>
+                        <li>United Germanic tribes in belief</li>
+                        <li>Survived into Christian era symbolically</li>
+                        <li>Revived in Romantic nationalism</li>
+                        <li>Influenced medieval Scandinavian law</li>
+                        <li>Endures in Nordic cultural memory</li>
+                        <li>Symbol of courage and honor</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDFA8 Artistic Legacy</h3>
+                    <ul class="list-styled">
+                        <li>Depicted in Viking Age art</li>
+                        <li>Picture stones show Valkyries</li>
+                        <li>Influenced Romantic era painting</li>
+                        <li>Wagner's Ring Cycle operatic setting</li>
+                        <li>Modern fantasy literature staple</li>
+                        <li>Video games and film adaptations</li>
+                        <li>Metal music iconography</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDCDA Modern Interpretations</h3>
+                    <ul class="list-styled">
+                        <li>Neo-pagan Asatru worship</li>
+                        <li>Military and veteran symbolism</li>
+                        <li>Popular culture phenomenon</li>
+                        <li>Marvel comics and films</li>
+                        <li>Academic study of Norse religion</li>
+                        <li>Archaeological discoveries continue</li>
+                        <li>DNA research on Viking migrations</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\u2696\uFE0F Ethical Framework</h3>
+                    <ul class="list-styled">
+                        <li>Bravery valued above all</li>
+                        <li>Loyalty to kin and lord</li>
+                        <li>Generosity and hospitality</li>
+                        <li>Fame through heroic deeds</li>
+                        <li>Honorable death over cowardly life</li>
+                        <li>Community over individual</li>
+                        <li>Prepared acceptance of fate</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- How to Reach Valhalla -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83D\uDEE4\uFE0F</span>
+                How to Reach Valhalla (Mythologically)
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                Reaching Valhalla was not a journey one could undertake voluntarily - it required
+                selection by Odin's Valkyries and death in honorable combat.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">\u2694\uFE0F Qualifications</h3>
+                    <ul class="list-styled">
+                        <li>Must die in battle (not of old age or illness)</li>
+                        <li>Display exceptional bravery</li>
+                        <li>Die with weapon in hand</li>
+                        <li>Face death without fear</li>
+                        <li>Maintain honor throughout life</li>
+                        <li>Show loyalty to oaths and lords</li>
+                        <li>Be chosen by a Valkyrie</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDC7C The Selection Process</h3>
+                    <ul class="list-styled">
+                        <li>Valkyries observe all battles</li>
+                        <li>Note warriors showing greatest valor</li>
+                        <li>May influence battle's outcome</li>
+                        <li>Select half of worthy dead for Odin</li>
+                        <li>Other half goes to Freyja</li>
+                        <li>Carry souls on flying steeds</li>
+                        <li>Present chosen to Odin</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDEEB The Journey</h3>
+                    <ul class="list-styled">
+                        <li>Soul rises from fallen body</li>
+                        <li>Met by a Valkyrie</li>
+                        <li>Rides across Bifrost bridge</li>
+                        <li>Enters Asgard realm of gods</li>
+                        <li>Approaches golden-shielded hall</li>
+                        <li>Passes through Valgrind gates</li>
+                        <li>Welcomed by einherjar within</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\u26D4 Disqualifications</h3>
+                    <ul class="list-styled">
+                        <li>Death from old age (goes to Hel)</li>
+                        <li>Death from illness (goes to Hel)</li>
+                        <li>Cowardice in battle</li>
+                        <li>Oath-breaking (nithing)</li>
+                        <li>Dying without weapon</li>
+                        <li>Fleeing from combat</li>
+                        <li>Murder of kinsmen</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDC80 Alternative Afterlives</h3>
+                    <ul class="list-styled">
+                        <li><strong>F&#243;lkvangr:</strong> Freyja's hall for half of slain</li>
+                        <li><strong>Hel:</strong> For those who die of age/illness</li>
+                        <li><strong>R&#225;n's Hall:</strong> For those drowned at sea</li>
+                        <li><strong>Burial Mounds:</strong> Remain with ancestors</li>
+                        <li><strong>N&#225;str&#246;nd:</strong> For oath-breakers and murderers</li>
+                        <li><strong>Rebirth:</strong> Some souls reborn in family line</li>
+                        <li>Not all afterlives were punishment</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDF96\uFE0F Earning Favor</h3>
+                    <ul class="list-styled">
+                        <li>Worship and sacrifice to Odin</li>
+                        <li>Learn runes and wisdom</li>
+                        <li>Seek honorable battles</li>
+                        <li>Mark weapons with runes</li>
+                        <li>Compose poetry of valor</li>
+                        <li>Keep oaths absolutely</li>
+                        <li>Die speaking Odin's name</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Archetype Connection -->
+        <section class="interlink-panel glass-card">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">\uD83D\uDD17</span>
+                Related Across the Mythos
+            </h3>
+
+            <div class="interlink-grid">
+                <!-- Archetype Section -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Archetypes</div>
+                    <div style="display: grid; gap: var(--spacing-md, 1rem);">
+                        <a href="../../archetypes/warrior-paradise/" class="archetype-link-card">
+                            <div class="archetype-badge">\u2694\uFE0F WARRIOR PARADISE</div>
+                            <p class="archetype-context">Valhalla as the archetypal warrior's afterlife - eternal combat, feasting, and glory among the honored dead.</p>
+                            <span class="see-parallels">See parallels: Elysium, Tir na nOg, Firdaus &rarr;</span>
+                        </a>
+                        <a href="../../archetypes/heavenly-realm/" class="archetype-link-card">
+                            <div class="archetype-badge">\u2728 HEAVENLY REALM</div>
+                            <p class="archetype-context">A divine realm in the sky where mortals achieve immortality alongside the gods.</p>
+                            <span class="see-parallels">See parallels: Olympus, Svarga, Tian &rarr;</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Associated Deities Section -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Key Figures</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--spacing-sm, 0.5rem);">
+                        <a href="../../mythos/norse/deities/odin.html" class="deity-card" style="padding: 1rem;">
+                            <div style="font-size: 2rem;">\uD83D\uDC41\uFE0F</div>
+                            <h4 style="color: var(--color-primary); margin: 0.5rem 0 0.25rem;">Odin</h4>
+                            <p style="font-size: 0.8rem; margin: 0;">Lord of Valhalla</p>
+                        </a>
+                        <a href="../../mythos/norse/deities/freyja.html" class="deity-card" style="padding: 1rem;">
+                            <div style="font-size: 2rem;">\uD83D\uDC8E</div>
+                            <h4 style="color: var(--color-primary); margin: 0.5rem 0 0.25rem;">Freyja</h4>
+                            <p style="font-size: 0.8rem; margin: 0;">Lady of F&#243;lkvangr</p>
+                        </a>
+                        <a href="../../mythos/norse/beings/valkyries.html" class="deity-card" style="padding: 1rem;">
+                            <div style="font-size: 2rem;">\uD83D\uDC7C</div>
+                            <h4 style="color: var(--color-primary); margin: 0.5rem 0 0.25rem;">Valkyries</h4>
+                            <p style="font-size: 0.8rem; margin: 0;">Choosers of Slain</p>
+                        </a>
+                        <a href="../../mythos/norse/deities/thor.html" class="deity-card" style="padding: 1rem;">
+                            <div style="font-size: 2rem;">\u26A1</div>
+                            <h4 style="color: var(--color-primary); margin: 0.5rem 0 0.25rem;">Thor</h4>
+                            <p style="font-size: 0.8rem; margin: 0;">Champion of Asgard</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cross-Cultural Parallel Places -->
+            <div class="parallel-traditions" style="margin-top: var(--spacing-lg, 1.5rem);">
+                <h4>\uD83C\uDF0D Cross-Cultural Afterlife Paradises</h4>
+                <div class="parallel-grid">
+                    <a href="./elysium.html" class="parallel-card">
+                        <span class="tradition-flag">\uD83C\uDFDB\uFE0F</span>
+                        <span class="parallel-name">Elysium</span>
+                        <span class="tradition-label">Greek</span>
+                    </a>
+                    <a href="./tir-na-nog.html" class="parallel-card">
+                        <span class="tradition-flag">\u2618\uFE0F</span>
+                        <span class="parallel-name">Tir na nOg</span>
+                        <span class="tradition-label">Celtic</span>
+                    </a>
+                    <a href="./avalon.html" class="parallel-card">
+                        <span class="tradition-flag">\uD83C\uDF4E</span>
+                        <span class="parallel-name">Avalon</span>
+                        <span class="tradition-label">Celtic</span>
+                    </a>
+                    <a href="../../mythos/hindu/places/svarga.html" class="parallel-card">
+                        <span class="tradition-flag">\uD83D\uDD49\uFE0F</span>
+                        <span class="parallel-name">Svarga</span>
+                        <span class="tradition-label">Hindu</span>
+                    </a>
+                    <a href="./yggdrasil.html" class="parallel-card">
+                        <span class="tradition-flag">\uD83C\uDF33</span>
+                        <span class="parallel-name">Yggdrasil</span>
+                        <span class="tradition-label">Norse</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- See Also Section -->
+            <div class="see-also-section" style="margin-top: var(--spacing-lg, 1.5rem);">
+                <h4>\uD83D\uDCDA See Also</h4>
+                <div class="see-also-links">
+                    <a href="../../mythos/norse/index.html" class="see-also-link">
+                        <span>\u2694\uFE0F</span> Norse Mythology
+                    </a>
+                    <a href="../../mythos/norse/events/ragnarok.html" class="see-also-link">
+                        <span>\uD83D\uDD25</span> Ragnar&#246;k
+                    </a>
+                    <a href="./yggdrasil.html" class="see-also-link">
+                        <span>\uD83C\uDF33</span> Yggdrasil World Tree
+                    </a>
+                    <a href="../../spiritual-items/norse/weapons.html" class="see-also-link">
+                        <span>\u2694\uFE0F</span> Norse Sacred Weapons
+                    </a>
+                    <a href="../../magic/traditions/seidr.html" class="see-also-link">
+                        <span>\u2728</span> Sei&#240;r Magic
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related Links -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83D\uDD17</span>
+                Related Topics & Further Exploration
+            </h2>
+
+            <div class="related-links">
+                <a href="./yggdrasil.html" class="related-link">
+                    \uD83C\uDF33 Yggdrasil - World Tree
+                </a>
+                <a href="./elysium.html" class="related-link">
+                    \uD83C\uDFDB\uFE0F Elysium - Greek Paradise
+                </a>
+                <a href="./tir-na-nog.html" class="related-link">
+                    \u2618\uFE0F Tir na nOg - Land of Youth
+                </a>
+                <a href="../../mythos/norse/index.html" class="related-link">
+                    \u2694\uFE0F Norse Mythology
+                </a>
+                <a href="../index.html" class="related-link">
+                    \uD83D\uDDFA\uFE0F All Sacred Places
+                </a>
+                <a href="../../index.html" class="related-link">
+                    \uD83C\uDFE0 Home
+                </a>
+            </div>
+        </div>
+
+        <!-- Sources -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83D\uDCDA</span>
+                Sources & Further Reading
+            </h2>
+
+            <div style="line-height: 2; font-size: 1rem;">
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Primary Sources:</h3>
+                <ul class="list-styled">
+                    <li>Snorri Sturluson. <em>Prose Edda</em> (Gylfaginning, Sk&#225;ldskaparm&#225;l)</li>
+                    <li><em>Poetic Edda</em> - Grimnismal, V&#246;lusp&#225;, Havamal</li>
+                    <li>Saxo Grammaticus. <em>Gesta Danorum</em></li>
+                    <li>Various Icelandic Sagas and Skaldic Poetry</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Academic Sources:</h3>
+                <ul class="list-styled">
+                    <li>Lindow, John. <em>Norse Mythology: A Guide to Gods, Heroes, Rituals, and Beliefs</em></li>
+                    <li>Davidson, H.R. Ellis. <em>Gods and Myths of Northern Europe</em></li>
+                    <li>Simek, Rudolf. <em>Dictionary of Northern Mythology</em></li>
+                    <li>Price, Neil. <em>The Viking Way: Religion and War in Late Iron Age Scandinavia</em></li>
+                    <li>Turville-Petre, E.O.G. <em>Myth and Religion of the North</em></li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Archaeological Evidence:</h3>
+                <ul class="list-styled">
+                    <li>Gotland Picture Stones - Valkyrie imagery</li>
+                    <li>Oseberg Ship Burial - Elite Viking burial</li>
+                    <li>Rune Stones mentioning Valhalla</li>
+                    <li>Warrior grave goods across Scandinavia</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
