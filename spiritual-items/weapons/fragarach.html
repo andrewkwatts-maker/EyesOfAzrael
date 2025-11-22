@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fragarach - Divine Weapons - World Mythos Explorer</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-text-primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            color: var(--color-primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .subsection-title {
+            color: var(--color-primary);
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .info-item {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-value {
+            color: var(--color-text-primary);
+            font-size: 1.1rem;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+            justify-content: center;
+        }
+
+        .tradition-tag {
+            background: var(--color-primary);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .related-link {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .related-link:hover {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border-color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .quote-box {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border-left: 4px solid var(--color-secondary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        }
+
+        .content-text {
+            line-height: 1.8;
+            color: var(--color-text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .content-text p {
+            margin-bottom: 1rem;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.2),
+                rgba(var(--color-secondary-rgb), 0.2));
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+            color: var(--color-text-secondary);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .bibliography {
+            background: rgba(var(--color-surface-rgb), 0.4);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            margin-top: 3rem;
+        }
+
+        .bibliography ol {
+            list-style-type: decimal;
+        }
+
+        .bibliography li {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+        }
+
+        .power-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .power-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .power-item strong {
+            color: var(--color-primary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+    <div class="header-content">
+        <h1>Fragarach</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> &rarr;
+                <a href="../index.html">Sacred Items</a> &rarr;
+                <a href="index.html">Weapons</a> &rarr;
+                <span>Fragarach</span>
+</nav>
+
+    <main>
+        <!-- HERO SECTION -->
+        <div class="hero-section" data-item="fragarach" data-tradition="Celtic,Irish" data-type="weapon">
+            <div class="hero-icon">&#9876;</div>
+            <h2 class="hero-title">Fragarach</h2>
+            <p class="hero-subtitle">The Answerer - Sword of Truth and Final Retort</p>
+            <div class="tradition-tags">
+                <span class="tradition-tag">Celtic</span>
+                <span class="tradition-tag">Irish</span>
+                <span class="tradition-tag">Tuatha De Danann</span>
+                <span class="tradition-tag">Mythological Cycle</span>
+            </div>
+        </div>
+
+        <!-- QUICK INFO -->
+        <div class="glass-card">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Weapon Type</div>
+                    <div class="info-value">Magical Sword</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Primary Wielder</div>
+                    <div class="info-value">Manannan mac Lir, Lugh Lamhfada</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Origin</div>
+                    <div class="info-value">Forged in the Otherworld by the gods</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Primary Power</div>
+                    <div class="info-value">Compels truth, cuts through any armor, controls wind</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="glass-card">
+            <h3 class="section-title">Description and Appearance</h3>
+            <div class="content-text">
+                <p>
+                    Fragarach (Old Irish: "The Answerer" or "The Retaliator"), also known as Freagarthach or the
+                    Sword of Air, stands among the most legendary weapons in Celtic mythology. This magical blade
+                    belonged to Manannan mac Lir, the sea god and ruler of the Otherworld island of Tir na nOg,
+                    before being passed to Lugh Lamhfada, the master of all arts and champion of the Tuatha De Danann.
+                </p>
+                <p>
+                    The sword's name derives from its most distinctive power: when pointed at someone's throat,
+                    Fragarach compelled absolute truth from the victim. No lie could be spoken while under its
+                    influence, and no question could be evaded. This made Fragarach not merely a weapon of war
+                    but an instrument of divine justice, capable of settling disputes, uncovering treachery, and
+                    ensuring that oaths were honored.
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <h4 class="subsection-title">Physical Characteristics:</h4>
+                <ul>
+                    <li><strong>Blade:</strong> A shimmering silver-blue blade that seemed to hold captured starlight
+                    within its metal, said to have been forged from materials gathered from across the nine realms
+                    of Celtic cosmology</li>
+                    <li><strong>Edge:</strong> Impossibly sharp, capable of cutting through any armor or shield,
+                    leaving wounds that could not be healed by normal means</li>
+                    <li><strong>Hilt:</strong> Wrapped in gold and silver wire with intricate knotwork patterns,
+                    set with a single blue gem that glowed when the sword's powers were invoked</li>
+                    <li><strong>Balance:</strong> Perfect in hand, as if the sword anticipated and guided its
+                    wielder's movements rather than simply responding to them</li>
+                    <li><strong>Aura:</strong> Emanated a subtle hum when drawn, and the air around it stirred
+                    as if responding to the breath of the wind itself</li>
+                </ul>
+            </div>
+
+            <div class="content-text">
+                <p>
+                    Fragarach was one of the Four Treasures of the Tuatha De Danann, the divine race that ruled
+                    Ireland before the coming of the Milesians. These treasures - the Stone of Fal, the Spear of
+                    Lugh, the Cauldron of the Dagda, and Fragarach - were brought from the four mystical cities
+                    of the north: Falias, Gorias, Finias, and Murias. Each treasure embodied a fundamental aspect
+                    of sovereignty and divine power.
+                </p>
+            </div>
+        </div>
+
+        <!-- ORIGIN MYTH -->
+        <div class="glass-card">
+            <h3 class="section-title">Origin and History</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Forging in the Otherworld</h4>
+                <p>
+                    According to the oldest traditions, Fragarach was forged by the gods themselves in one of the
+                    four mystical cities - specifically Findias (or Finias) - before the Tuatha De Danann descended
+                    upon Ireland. The smith who created it was said to have captured the essence of the winds in
+                    the blade, giving it power over the element of air itself. The metal was quenched in sacred
+                    waters and blessed with enchantments that would never fade.
+                </p>
+                <p>
+                    Manannan mac Lir, as lord of the Otherworld and guardian of the passages between realms,
+                    became the sword's first wielder among the gods. He used Fragarach to defend the borders
+                    between the mortal world and the realms beyond, ensuring that neither the living nor the
+                    dead could pass without proper authority.
+                </p>
+
+                <h4 class="subsection-title">Transfer to Lugh</h4>
+                <p>
+                    When Lugh Lamhfada - the young god who mastered every art and craft - came to take his place
+                    among the Tuatha De Danann, Manannan bestowed upon him several gifts essential for the coming
+                    battle against the Fomorians. Among these was Fragarach, which Lugh would wield alongside
+                    his famous spear in the Second Battle of Mag Tuired.
+                </p>
+                <p>
+                    In that great conflict, Lugh used Fragarach to devastating effect against the Fomorian
+                    champions. The sword's power to cut through any armor negated the magical protections that
+                    many Fomorian warriors relied upon, while its truth-compelling properties helped Lugh
+                    identify traitors and ensure the loyalty of his forces.
+                </p>
+
+                <h4 class="subsection-title">Legacy Through the Ages</h4>
+                <p>
+                    After the age of the Tuatha De Danann, Fragarach passed through various hands. Some
+                    traditions claim it was eventually wielded by Conn of the Hundred Battles, the legendary
+                    High King of Ireland, and later by his descendants. The sword became associated with
+                    legitimate kingship - only a true ruler, chosen by the gods, could wield Fragarach
+                    without being harmed by its power.
+                </p>
+            </div>
+
+            <div class="quote-box">
+                "No one could tell a lie with Fragarach at his throat, no armor could stand before its edge,
+                and the wind itself obeyed the one who bore it."
+                <br><br>- Traditional Irish saying
+            </div>
+        </div>
+
+        <!-- POWERS AND ABILITIES -->
+        <div class="glass-card">
+            <h3 class="section-title">Powers and Abilities</h3>
+            <div class="content-text">
+                <p>
+                    Fragarach possessed multiple magical abilities that made it one of the most formidable
+                    weapons in all of Celtic mythology. Its powers combined martial supremacy with supernatural
+                    authority over truth, wind, and the very nature of combat itself.
+                </p>
+            </div>
+
+            <div class="power-list">
+                <div class="power-item">
+                    <strong>Truth Compulsion</strong>
+                    The sword's signature ability - when Fragarach was placed against anyone's throat, they
+                    were incapable of speaking falsehood. Every question had to be answered truthfully, making
+                    the sword invaluable for interrogations, trials, and the settling of disputes. This power
+                    worked on mortal, god, and spirit alike.
+                </div>
+                <div class="power-item">
+                    <strong>Armor Piercing</strong>
+                    No shield, armor, or magical protection could withstand Fragarach's edge. The blade passed
+                    through any defense as if it were not there, making its strikes absolutely lethal regardless
+                    of what protections an enemy might possess.
+                </div>
+                <div class="power-item">
+                    <strong>Wind Command</strong>
+                    As the "Sword of Air," Fragarach granted its wielder control over the winds. The bearer
+                    could summon gales, redirect storms, or create zones of absolute stillness. In naval
+                    combat, this made the sword's wielder virtually unstoppable.
+                </div>
+                <div class="power-item">
+                    <strong>The Final Retort</strong>
+                    The name "Answerer" also referred to the sword's ability to strike the killing blow in
+                    any combat. When wielded righteously, Fragarach ensured that its bearer would always
+                    have the "last word" in battle - the final, decisive strike that ended the conflict.
+                </div>
+                <div class="power-item">
+                    <strong>Wound Infliction</strong>
+                    Wounds caused by Fragarach could not be healed through normal means or conventional
+                    magic. Only the most powerful healing arts or the blessing of a god could close injuries
+                    made by this blade.
+                </div>
+                <div class="power-item">
+                    <strong>Loyalty to Righteousness</strong>
+                    Fragarach could not be used for unjust purposes. If its wielder attempted to use the
+                    sword for evil or to enforce lies rather than truth, the blade would turn against them,
+                    refusing to cut or even burning their hand with its touch.
+                </div>
+            </div>
+        </div>
+
+        <!-- ASSOCIATED DEITIES -->
+        <div class="glass-card">
+            <h3 class="section-title">Associated Deities and Figures</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Manannan mac Lir</h4>
+                <p>
+                    The sea god and ruler of the Otherworld was Fragarach's original wielder. Manannan is one of
+                    the most complex figures in Celtic mythology - simultaneously a god of the sea, a psychopomp
+                    who guides souls to the afterlife, a trickster, and a guardian of the boundaries between
+                    worlds. His possession of Fragarach symbolized his role as the keeper of cosmic order and
+                    the one who ensures that truth prevails over deception.
+                </p>
+                <p>
+                    Manannan's other famous possessions included his crane bag (containing magical treasures),
+                    his horse Enbarr that could travel over sea as easily as land, and his ship Wave Sweeper
+                    that needed no sails or oars. Together with Fragarach, these items marked him as master of
+                    all the liminal spaces - sea, air, and the threshold between life and death.
+                </p>
+
+                <h4 class="subsection-title">Lugh Lamhfada</h4>
+                <p>
+                    Lugh "of the Long Arm" was the champion of the Tuatha De Danann and one of the greatest
+                    figures in Irish mythology. He was the master of every skill and craft - warrior, king,
+                    poet, harper, smith, sorcerer, and more. When Lugh arrived at the court of King Nuada to
+                    join the Tuatha De Danann, he demonstrated mastery of every art, earning him the title
+                    "Samildanach" (Equally Skilled in All Arts).
+                </p>
+                <p>
+                    Fragarach complemented Lugh's other weapons - his famous spear Gae Assail and his sling
+                    with which he slew Balor of the Evil Eye. Together, these weapons made Lugh virtually
+                    invincible and enabled him to lead the Tuatha De Danann to victory in their greatest battles.
+                </p>
+            </div>
+        </div>
+
+        <!-- CULTURAL SIGNIFICANCE -->
+        <div class="glass-card">
+            <h3 class="section-title">Cultural and Mythological Significance</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Symbol of Justice</h4>
+                <p>
+                    Fragarach's truth-compelling power made it a symbol of divine justice in Celtic thought.
+                    The concept that truth could be enforced by divine power reflected the Celtic belief that
+                    cosmic order depended on honesty and the keeping of oaths. In a society where verbal
+                    contracts and sworn agreements formed the basis of law, a weapon that guaranteed truth
+                    represented the ultimate legal authority.
+                </p>
+
+                <h4 class="subsection-title">The Four Treasures</h4>
+                <p>
+                    As one of the Four Treasures of the Tuatha De Danann, Fragarach represented one of the
+                    four essential aspects of legitimate rule:
+                </p>
+                <ul>
+                    <li><strong>The Stone of Fal:</strong> Confirmed the true king by crying out</li>
+                    <li><strong>The Spear of Lugh:</strong> Guaranteed victory in battle</li>
+                    <li><strong>The Cauldron of the Dagda:</strong> Provided endless sustenance</li>
+                    <li><strong>Fragarach:</strong> Ensured justice and truth</li>
+                </ul>
+                <p>
+                    Together, these treasures embodied the requirements of Celtic kingship: divine selection,
+                    military prowess, abundance for the people, and just rule.
+                </p>
+
+                <h4 class="subsection-title">Elemental Association</h4>
+                <p>
+                    The Four Treasures were associated with the four classical elements, with Fragarach
+                    representing Air. This connection to the element of air manifested in the sword's power
+                    over wind but also in deeper symbolic meanings - air represents breath, speech, and truth.
+                    The sword of air was thus naturally the sword of truth-telling.
+                </p>
+            </div>
+        </div>
+
+        <!-- MODERN DEPICTIONS -->
+        <div class="glass-card">
+            <h3 class="section-title">Modern Depictions</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Literature</h4>
+                <ul>
+                    <li><strong>Jim Butcher's "Dresden Files":</strong> Features Fragarach as a significant
+                    artifact, maintaining its truth-compelling and armor-piercing properties</li>
+                    <li><strong>Morgan Llywelyn's Irish Historical Novels:</strong> Reference the Four Treasures
+                    in their mythological context</li>
+                    <li><strong>Celtic Fantasy Genre:</strong> Fragarach appears frequently in modern Celtic
+                    fantasy as an exemplar of divine weaponry</li>
+                </ul>
+
+                <h4 class="subsection-title">Video Games</h4>
+                <ul>
+                    <li><strong>Final Fantasy Series:</strong> Various entries include Fragarach as a high-tier sword</li>
+                    <li><strong>Fate/Grand Order:</strong> Features Fragarach in connection with Celtic heroes</li>
+                    <li><strong>Various RPGs:</strong> Celtic-themed games often include the Four Treasures</li>
+                </ul>
+
+                <h4 class="subsection-title">Cultural Impact</h4>
+                <p>
+                    The concept of a "sword of truth" has influenced countless fantasy works, with Fragarach
+                    serving as one of the primary mythological sources for truth-compelling magical weapons.
+                    The idea that a blade could enforce honesty speaks to deep human desires for justice and
+                    the exposure of deception.
+                </p>
+            </div>
+        </div>
+
+        <!-- RELATED LINKS -->
+        <div class="glass-card">
+            <h3 class="section-title">Related Articles</h3>
+            <div class="related-links">
+                <a href="gae-bolg.html" class="related-link">Gae Bolg</a>
+                <a href="claiomh-solais.html" class="related-link">Claiomh Solais</a>
+                <a href="excalibur.html" class="related-link">Excalibur</a>
+                <a href="gram.html" class="related-link">Gram</a>
+                <a href="../../mythology/celtic/lugh.html" class="related-link">Lugh Lamhfada</a>
+                <a href="../../mythology/celtic/manannan.html" class="related-link">Manannan mac Lir</a>
+                <a href="../../mythology/celtic/tuatha-de-danann.html" class="related-link">Tuatha De Danann</a>
+            </div>
+        </div>
+
+        <!-- BIBLIOGRAPHY -->
+        <div class="bibliography glass-card">
+            <h3 class="section-title">Bibliography and Further Reading</h3>
+            <ol>
+                <li>Cross, Tom Peete and Clark Harris Slover. <em>Ancient Irish Tales</em>. Barnes & Noble, 1936.</li>
+                <li>MacKillop, James. <em>Dictionary of Celtic Mythology</em>. Oxford University Press, 1998.</li>
+                <li>Green, Miranda. <em>Celtic Myths</em>. University of Texas Press, 1993.</li>
+                <li>Squire, Charles. <em>Celtic Myth and Legend</em>. Newcastle Publishing, 1975.</li>
+                <li>MacCana, Proinsias. <em>Celtic Mythology</em>. Hamlyn, 1970.</li>
+            </ol>
+        </div>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel glass-card">
+            <h3 class="interlink-header">Explore Connections</h3>
+            <div class="interlink-grid">
+                <div class="interlink-section">
+                    <h4 class="interlink-section-title">Owner/Wielder</h4>
+                    <a href="../../mythology/celtic/lugh.html" class="item-link-card">
+                        <span class="link-icon">god</span>
+                        <span class="link-name">Lugh Lamhfada</span>
+                        <span class="link-desc">Master of all arts</span>
+                    </a>
+                    <a href="../../mythology/celtic/manannan.html" class="item-link-card">
+                        <span class="link-icon">god</span>
+                        <span class="link-name">Manannan mac Lir</span>
+                        <span class="link-desc">God of the sea and Otherworld</span>
+                    </a>
+                </div>
+                <div class="interlink-section">
+                    <h4 class="interlink-section-title">Source Tradition</h4>
+                    <a href="../../mythology/celtic/index.html" class="item-link-card">
+                        <span class="link-icon">tradition</span>
+                        <span class="link-name">Celtic Mythology</span>
+                        <span class="link-desc">Irish and Welsh traditions</span>
+                    </a>
+                </div>
+            </div>
+            <div class="parallel-traditions">
+                <h4 class="interlink-section-title">Cross-Cultural Parallels</h4>
+                <div class="parallel-grid">
+                    <a href="excalibur.html" class="parallel-card">
+                        <span class="parallel-tradition">Arthurian</span>
+                        <span class="parallel-name">Excalibur</span>
+                        <span class="parallel-desc">Sword of rightful kingship</span>
+                    </a>
+                    <a href="gram.html" class="parallel-card">
+                        <span class="parallel-tradition">Norse</span>
+                        <span class="parallel-name">Gram</span>
+                        <span class="parallel-desc">Dragon-slaying sword</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
