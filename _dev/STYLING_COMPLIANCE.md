@@ -48,7 +48,7 @@ This document defines the standard HTML structure and styling patterns that ALL 
     </div>
 </header>
 
-<!-- BREADCRUMB: Fixed at top center, OUTSIDE and AFTER header -->
+<!-- BREADCRUMB: Fixed at top left, OUTSIDE and AFTER header -->
 <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{parent-path}/index.html">Home</a> →
     <span>Current Page</span>
@@ -276,13 +276,12 @@ var(--transition-base)  /* Standard transition */
 }
 ```
 
-### Breadcrumb Navigation (Fixed at Top Center)
+### Breadcrumb Navigation (Fixed at Top Left)
 ```css
 .breadcrumb {
     position: fixed;
     top: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    left: var(--spacing-lg);
     z-index: 1001;  /* Above header (1000) */
     background: rgba(var(--color-surface-rgb), 0.95);
     backdrop-filter: blur(12px);
