@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Analysis & Theories - Cross-Mythology Research</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../themes/corpus-links.css">
+    <script defer src="../themes/theme-animations.js"></script>
+    <script src="../themes/theme-picker.js" defer></script>
+
+    <style>
+        :root {
+            /* Cosmic Purple Theme Override */
+            --theory-primary: #9333ea;
+            --theory-primary-rgb: 147, 51, 234;
+            --theory-secondary: #c084fc;
+            --theory-secondary-rgb: 192, 132, 252;
+            --theory-accent: #a855f7;
+            --theory-dark: #581c87;
+            --cosmic-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: #0a0a1a;
+            background-image:
+                radial-gradient(ellipse at 20% 30%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(192, 132, 252, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(88, 28, 135, 0.05) 0%, transparent 70%);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-2xl);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: var(--cosmic-gradient);
+            border: 2px solid var(--theory-primary);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-4xl) var(--spacing-xl);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239333ea' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-lg);
+            filter: drop-shadow(0 0 30px rgba(147, 51, 234, 0.5));
+        }
+
+        h1 {
+            font-size: var(--font-size-4xl);
+            margin-bottom: var(--spacing-md);
+            background: linear-gradient(135deg, var(--theory-secondary), #f0abfc, var(--theory-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: var(--font-size-xl);
+            color: rgba(255, 255, 255, 0.8);
+            margin: var(--spacing-md) 0;
+            font-weight: var(--font-normal);
+        }
+
+        .hero-description {
+            max-width: 800px;
+            margin: var(--spacing-lg) auto 0;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: var(--leading-relaxed);
+        }
+
+        /* Navigation Breadcrumb */
+        nav.breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            flex-wrap: wrap;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        nav.breadcrumb a {
+            color: var(--theory-secondary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        nav.breadcrumb a:hover {
+            color: var(--theory-primary);
+        }
+
+        /* Section Cards */
+        .section-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: var(--spacing-xl);
+            margin: var(--spacing-3xl) 0;
+        }
+
+        .section-card {
+            background: rgba(30, 27, 75, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid rgba(147, 51, 234, 0.4);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            transition: all var(--transition-base);
+            text-decoration: none;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--theory-primary), var(--theory-secondary));
+            opacity: 0;
+            transition: opacity var(--transition-base);
+        }
+
+        .section-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(147, 51, 234, 0.3);
+            border-color: var(--theory-primary);
+        }
+
+        .section-card:hover::before {
+            opacity: 1;
+        }
+
+        .section-icon {
+            font-size: var(--font-size-5xl);
+            margin-bottom: var(--spacing-lg);
+            display: block;
+        }
+
+        .section-title {
+            font-size: var(--font-size-2xl);
+            color: var(--theory-secondary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .section-description {
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .section-meta {
+            display: flex;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            padding: var(--spacing-xs) var(--spacing-md);
+            background: rgba(147, 51, 234, 0.2);
+            border: 1px solid rgba(147, 51, 234, 0.3);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+            color: var(--theory-secondary);
+        }
+
+        /* Info Panel */
+        .info-panel {
+            background: rgba(30, 27, 75, 0.5);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-3xl) 0;
+        }
+
+        .info-panel h2 {
+            color: var(--theory-secondary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-2xl);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .info-panel p {
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .info-panel ul {
+            color: var(--color-text-secondary);
+            margin-left: var(--spacing-xl);
+            line-height: var(--leading-loose);
+        }
+
+        .info-panel li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .info-panel strong {
+            color: var(--theory-secondary);
+        }
+
+        /* Disclaimer Box */
+        .disclaimer-box {
+            background: rgba(251, 146, 60, 0.1);
+            border: 2px solid rgba(251, 146, 60, 0.4);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-3xl) 0;
+        }
+
+        .disclaimer-box h3 {
+            color: #fb923c;
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .disclaimer-box p {
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        /* Quick Links */
+        .quick-links {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: var(--spacing-2xl) 0;
+        }
+
+        .quick-link {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: rgba(147, 51, 234, 0.2);
+            border: 1px solid rgba(147, 51, 234, 0.4);
+            border-radius: var(--radius-lg);
+            color: var(--theory-secondary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            font-weight: var(--font-medium);
+        }
+
+        .quick-link:hover {
+            background: rgba(147, 51, 234, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(147, 51, 234, 0.3);
+        }
+
+        /* Featured Theories Preview */
+        .featured-theories {
+            margin: var(--spacing-3xl) 0;
+        }
+
+        .featured-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .featured-header h2 {
+            color: var(--theory-secondary);
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .featured-card {
+            background: rgba(30, 27, 75, 0.4);
+            border: 1px solid rgba(147, 51, 234, 0.3);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-decoration: none;
+            transition: all var(--transition-base);
+        }
+
+        .featured-card:hover {
+            border-color: var(--theory-primary);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(147, 51, 234, 0.2);
+        }
+
+        .featured-card-icon {
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .featured-card-title {
+            color: var(--theory-secondary);
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .featured-card-desc {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            line-height: var(--leading-relaxed);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            margin-top: var(--spacing-5xl);
+            border-top: 1px solid rgba(147, 51, 234, 0.3);
+            color: var(--color-text-secondary);
+        }
+
+        footer a {
+            color: var(--theory-secondary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        footer a:hover {
+            color: var(--theory-primary);
+        }
+
+        @media (max-width: 768px) {
+            .section-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-section {
+                padding: var(--spacing-2xl) var(--spacing-lg);
+            }
+
+            h1 {
+                font-size: var(--font-size-3xl);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../index.html">Home</a> <span>/</span>
+            <span>Pattern Analysis & Theories</span>
+        </nav>
+
+        <header class="hero-section">
+            <span class="hero-icon">🔬</span>
+            <h1>Pattern Analysis & Theories</h1>
+            <p class="subtitle">Cross-Mythology Research & AI-Generated Analysis</p>
+            <p class="hero-description">
+                Exploring unusual patterns, recurring themes, and mysterious connections
+                that appear across world mythologies. From universal flood narratives to
+                serpent symbolism spanning every continent, we analyze the evidence
+                objectively and present multiple interpretations.
+            </p>
+        </header>
+
+        <!-- Main Section Cards -->
+        <div class="section-grid">
+            <a href="ai-analysis/index.html" class="section-card">
+                <span class="section-icon">🤖</span>
+                <h2 class="section-title">AI-Generated Analysis</h2>
+                <p class="section-description">
+                    Systematic pattern recognition across mythological traditions using
+                    computational analysis. Explores correlations, statistical anomalies,
+                    and cross-cultural themes with objective evidence assessment.
+                </p>
+                <div class="section-meta">
+                    <span class="meta-tag">5 Analyses</span>
+                    <span class="meta-tag">Pattern Recognition</span>
+                    <span class="meta-tag">Evidence-Based</span>
+                </div>
+            </a>
+
+            <a href="user-submissions/index.html" class="section-card">
+                <span class="section-icon">📝</span>
+                <h2 class="section-title">User Submissions</h2>
+                <p class="section-description">
+                    Community-contributed theories and observations. Share your own
+                    discoveries of cross-cultural patterns, propose new connections,
+                    and discuss interpretations with fellow researchers.
+                </p>
+                <div class="section-meta">
+                    <span class="meta-tag">Coming Soon</span>
+                    <span class="meta-tag">Community</span>
+                    <span class="meta-tag">Discussion</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Featured Theories Preview -->
+        <section class="featured-theories">
+            <div class="featured-header">
+                <h2>Featured Analyses</h2>
+                <p style="color: var(--color-text-secondary);">Deep dives into the most significant cross-cultural patterns</p>
+            </div>
+
+            <div class="featured-grid">
+                <a href="ai-analysis/flood-myths.html" class="featured-card">
+                    <span class="featured-card-icon">🌊</span>
+                    <h3 class="featured-card-title">Universal Flood Myths</h3>
+                    <p class="featured-card-desc">
+                        Why do nearly every culture have flood narratives? Examining Noah,
+                        Gilgamesh, Manu, Deucalion, and dozens more.
+                    </p>
+                </a>
+
+                <a href="ai-analysis/sky-gods-ancient-technology.html" class="featured-card">
+                    <span class="featured-card-icon">🛸</span>
+                    <h3 class="featured-card-title">Sky Gods & Ancient Technology</h3>
+                    <p class="featured-card-desc">
+                        Analyzing "gods from the sky" narratives and various interpretations
+                        from astronomical events to cargo cult theory.
+                    </p>
+                </a>
+
+                <a href="ai-analysis/serpent-symbolism.html" class="featured-card">
+                    <span class="featured-card-icon">🐍</span>
+                    <h3 class="featured-card-title">Universal Serpent Symbolism</h3>
+                    <p class="featured-card-desc">
+                        From Quetzalcoatl to the Nagas to Jormungandr - why serpents
+                        appear as cosmic beings in virtually every culture.
+                    </p>
+                </a>
+
+                <a href="ai-analysis/lost-civilizations.html" class="featured-card">
+                    <span class="featured-card-icon">🏛️</span>
+                    <h3 class="featured-card-title">Lost Civilization Theories</h3>
+                    <p class="featured-card-desc">
+                        Atlantis, Lemuria, Mu - examining ancient accounts alongside
+                        modern geological and archaeological evidence.
+                    </p>
+                </a>
+
+                <a href="ai-analysis/consciousness-shamanism.html" class="featured-card">
+                    <span class="featured-card-icon">🧠</span>
+                    <h3 class="featured-card-title">Consciousness & Shamanism</h3>
+                    <p class="featured-card-desc">
+                        Cross-cultural altered states, universal visionary themes,
+                        and what science reveals about mystical experiences.
+                    </p>
+                </a>
+            </div>
+        </section>
+
+        <!-- Info Panel -->
+        <div class="info-panel">
+            <h2><span>📊</span> Our Analytical Approach</h2>
+            <p>
+                Each analysis in this section follows a rigorous methodology designed to
+                present information objectively while acknowledging the inherent uncertainties
+                in comparative mythology:
+            </p>
+            <ul>
+                <li><strong>Multiple Perspectives:</strong> We present mainstream academic views alongside alternative theories, clearly labeling each.</li>
+                <li><strong>Evidence Quality Assessment:</strong> Sources are rated based on archaeological support, scholarly consensus, and primary text availability.</li>
+                <li><strong>Confidence Levels:</strong> Each claim includes a confidence rating based on the strength of supporting evidence.</li>
+                <li><strong>Cross-References:</strong> Extensive links to original mythology pages for deeper exploration.</li>
+                <li><strong>Transparent Limitations:</strong> We acknowledge what we don't know and where evidence is contested.</li>
+            </ul>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="disclaimer-box">
+            <h3><span>⚠️</span> Important Disclaimer</h3>
+            <p>
+                The theories presented in this section range from mainstream academic consensus
+                to speculative hypotheses. We present them for educational and exploratory purposes,
+                not as established facts. Some theories (particularly in the "alternative" category)
+                are rejected by mainstream scholarship but are included to provide a complete picture
+                of how people have interpreted these patterns throughout history. Always consult
+                primary academic sources for research purposes.
+            </p>
+        </div>
+
+        <!-- Quick Navigation -->
+        <div class="quick-links">
+            <a href="../archetypes/index.html" class="quick-link">Universal Archetypes</a>
+            <a href="../mythos/index.html" class="quick-link">World Mythologies</a>
+            <a href="../magic/index.html" class="quick-link">Magical Systems</a>
+            <a href="../spiritual-places/index.html" class="quick-link">Sacred Places</a>
+            <a href="../herbalism/index.html" class="quick-link">Sacred Herbalism</a>
+        </div>
+
+        <footer>
+            <p>Pattern Analysis & Theories - Cross-Mythology Research</p>
+            <p style="margin-top: var(--spacing-sm);">
+                <a href="../index.html">Home</a> |
+                <a href="../archetypes/index.html">Archetypes</a> |
+                <a href="../mythos/index.html">Mythologies</a> |
+                <a href="../magic/index.html">Magic</a> |
+                <a href="../herbalism/index.html">Herbalism</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>
