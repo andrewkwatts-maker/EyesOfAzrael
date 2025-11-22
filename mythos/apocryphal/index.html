@@ -1,19 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Apocryphal & Enochian Mythology - World Mythos Explorer</title>
-    <link rel="stylesheet" href="../../themes/theme-base.css">
-    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link href="../../themes/theme-base.css" rel="stylesheet"/>
+    <link href="../../styles.css" rel="stylesheet"/>
+    <link href="../../themes/corpus-links.css" rel="stylesheet"/>
     <script defer src="../../themes/theme-picker.js"></script>
     <script defer src="../../themes/theme-animations.js"></script>
     <style>
+        /* ============================================
+           MODERN GLASS UI TEMPLATE - Apocryphal Mythos
+           Based on Christian reference with full theme support
+           ============================================ */
+
+        /* Breadcrumb - Full-width bar attached below header */
+        .breadcrumb {
+            position: sticky;
+            top: 60px; /* Below the sticky header */
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(var(--color-surface-rgb), 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: var(--spacing-xs) var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
+        }
+
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        /* Hero Section - Modern Glass Styling */
         .hero-section {
             background: linear-gradient(135deg,
                 rgba(var(--color-primary-rgb), 0.8),
                 rgba(var(--color-secondary-rgb), 0.8));
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 2px solid var(--color-primary);
             color: var(--color-text-primary);
             padding: 3rem 2rem;
@@ -23,21 +58,189 @@
             box-shadow: var(--shadow-xl);
         }
 
-        .clickable-card {
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .hero-icon-display {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
         }
 
-        .clickable-card:hover {
+        .hero-description {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 1rem auto;
+            line-height: 1.7;
+        }
+
+        /* Glass Card - With Hover Animation */
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .glass-card:hover {
             transform: translateY(-4px);
-            box-shadow: var(--shadow-2xl, 0 25px 50px -12px rgba(0, 0, 0, 0.25));
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+            border-color: rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        /* Subsection Card - Hover Effects */
+        .subsection-card {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .subsection-card:hover {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            transform: translateX(5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .subsection-card h3 {
+            color: var(--color-primary);
+            margin-top: 0;
+        }
+
+        .subsection-card p {
+            line-height: 1.7;
+        }
+
+        /* Grid Layouts */
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        /* Deity Cards - Modern Glass Pattern with Glow Hover */
+        .deity-card {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-base, 0.3s ease);
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+            overflow: hidden;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .deity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg), 0 0 15px rgba(var(--color-primary-rgb), 0.2);
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            text-decoration: none;
+        }
+
+        .deity-card h3 {
+            color: var(--color-primary);
+            margin-top: 0.5rem;
+        }
+
+        .deity-card p {
+            line-height: 1.7;
+        }
+
+        /* Ensure text doesn't overflow card boundaries */
+        .deity-card p,
+        .deity-card h3 {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .deity-icon {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        /* Section Headers */
+        .section-header {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .card-title {
+            color: var(--color-primary);
+            margin-top: 0;
+        }
+
+        /* Styled List */
+        .styled-list {
+            line-height: 1.8;
+            padding-left: var(--spacing-lg);
+        }
+
+        .styled-list li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .styled-list a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .styled-list a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+
+            .deity-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .hero-icon-display {
+                font-size: 3rem;
+            }
+
+            .breadcrumb {
+                font-size: var(--font-size-xs);
+                padding: var(--spacing-xs) var(--spacing-md);
+                top: 50px; /* Smaller header on mobile */
+            }
         }
     </style>
 </head>
 <body>
-    <div id="theme-picker-container"></div>
-    <header>
-    <div class="header-content"></div>
+<!-- Theme Picker Container -->
+<div id="theme-picker"></div>
+
+<div id="theme-picker-container"></div>
+<header>
+    <div class="header-content">
+        <h1>📖 Apocryphal & Enochian Mythology</h1>
+    </div>
 </header>
 <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="../../mythos/index.html">Home</a> →
@@ -45,8 +248,8 @@
 </nav>
     <main>
         <div class="hero-section">
-            <div class="hero-icon-display">📖</div>
-            <h1>Apocryphal & Enochian Traditions</h1>
+            <div class="hero-icon-display">📖✨</div>
+            <h2>Hidden Wisdom of the Apocryphal & Enochian Traditions</h2>
             <p class="hero-description">
                 Explore the hidden wisdom of apocryphal texts and Enochian mysteries. Discover the Books of Enoch,
                 the Watchers who fell from heaven, the Nephilim giants, and the angelic hierarchies revealed to
@@ -62,33 +265,33 @@
             <div class="deity-grid">
                 <div class="glass-card">
                     <div class="deity-icon">👁️</div>
-                    <h3>The Watchers</h3>
-                    <p>The fallen angels who descended to Earth and taught forbidden knowledge to humanity.</p>
+                    <h3 class="card-title">The Watchers</h3>
+                    <p style="line-height: 1.7;">The fallen angels who descended to Earth and taught forbidden knowledge to humanity.</p>
                 </div>
                 <div class="glass-card">
                     <div class="deity-icon">⚔️</div>
-                    <h3>Nephilim</h3>
-                    <p>The giant offspring of angels and humans, heroes of old and mighty warriors.</p>
+                    <h3 class="card-title">Nephilim</h3>
+                    <p style="line-height: 1.7;">The giant offspring of angels and humans, heroes of old and mighty warriors.</p>
                 </div>
                 <div class="glass-card">
                     <div class="deity-icon">🌌</div>
-                    <h3>Seven Heavens</h3>
-                    <p>The celestial realms through which Enoch journeyed to witness divine mysteries.</p>
+                    <h3 class="card-title">Seven Heavens</h3>
+                    <p style="line-height: 1.7;">The celestial realms through which Enoch journeyed to witness divine mysteries.</p>
                 </div>
                 <div class="glass-card">
                     <div class="deity-icon">📜</div>
-                    <h3>Hidden Wisdom</h3>
-                    <p>Secret knowledge of astronomy, herbalism, divination, and the nature of reality.</p>
+                    <h3 class="card-title">Hidden Wisdom</h3>
+                    <p style="line-height: 1.7;">Secret knowledge of astronomy, herbalism, divination, and the nature of reality.</p>
                 </div>
                 <div class="glass-card">
                     <div class="deity-icon">⚡</div>
-                    <h3>Angelic Names</h3>
-                    <p>The sacred names and offices of angels, archangels, and celestial beings.</p>
+                    <h3 class="card-title">Angelic Names</h3>
+                    <p style="line-height: 1.7;">The sacred names and offices of angels, archangels, and celestial beings.</p>
                 </div>
                 <div class="glass-card">
                     <div class="deity-icon">🔥</div>
-                    <h3>Divine Judgment</h3>
-                    <p>Prophecies of the end times, the final judgment, and the fate of the wicked.</p>
+                    <h3 class="card-title">Divine Judgment</h3>
+                    <p style="line-height: 1.7;">Prophecies of the end times, the final judgment, and the fate of the wicked.</p>
                 </div>
             </div>
         </section>
@@ -96,32 +299,32 @@
         <section style="margin-top: var(--spacing-xl);">
             <h2 class="section-header">📚 Explore Apocryphal Traditions</h2>
             <div class="deity-grid">
-                <a class="deity-card" href="angels/index.html" style="text-decoration: none;">
+                <a class="deity-card" href="angels/index.html">
                     <div class="deity-icon">👼</div>
                     <h3>Angels & Watchers</h3>
                     <p>Metatron, Uriel, Azazel, Samyaza, and the celestial hierarchies</p>
                 </a>
-                <a class="deity-card" href="cosmology/index.html" style="text-decoration: none;">
+                <a class="deity-card" href="cosmology/index.html">
                     <div class="deity-icon">🌠</div>
                     <h3>Cosmology</h3>
                     <p>The structure of heaven, the throne of God, and the celestial temple</p>
                 </a>
-                <a class="deity-card" href="heroes/index.html" style="text-decoration: none;">
+                <a class="deity-card" href="heroes/index.html">
                     <div class="deity-icon">📿</div>
                     <h3>Prophets & Seers</h3>
                     <p>Enoch, Elijah, and those who walked with God</p>
                 </a>
-                <a class="deity-card" href="creatures/index.html" style="text-decoration: none;">
+                <a class="deity-card" href="creatures/index.html">
                     <div class="deity-icon">🐉</div>
                     <h3>Creatures & Giants</h3>
                     <p>Nephilim, Leviathan, Behemoth, and the beasts of apocalypse</p>
                 </a>
-                <a class="deity-card" href="magic/index.html" style="text-decoration: none;">
+                <a class="deity-card" href="magic/index.html">
                     <div class="deity-icon">✨</div>
                     <h3>Forbidden Knowledge</h3>
                     <p>The arts taught by the Watchers: astrology, metallurgy, enchantments</p>
                 </a>
-                <a class="deity-card" href="texts/index.html" style="text-decoration: none;">
+                <a class="deity-card" href="texts/index.html">
                     <div class="deity-icon">📖</div>
                     <h3>Sacred Texts</h3>
                     <p>Books of Enoch, Jubilees, Testament of Solomon, and other apocrypha</p>
@@ -132,29 +335,29 @@
         <section style="margin-top: var(--spacing-xl);">
             <h2 class="section-header">🎨 Interactive Visualizations</h2>
             <div class="glass-card" style="margin-bottom: var(--spacing-lg);">
-                <h3 style="text-align: center; color: var(--color-accent); margin-bottom: 1rem;">Explore Enochian Knowledge Visually</h3>
-                <p style="text-align: center; margin-bottom: 1.5rem;">
+                <h3 class="card-title" style="text-align: center; margin-bottom: var(--spacing-md);">Explore Enochian Knowledge Visually</h3>
+                <p style="text-align: center; margin-bottom: var(--spacing-lg); line-height: 1.7;">
                     Journey through interactive diagrams and visualizations that make the complex mysteries of Enochian
                     cosmology, angelology, and sacred texts easier to understand. Experience the seven heavens, explore
                     dimensional portals, and discover the celestial temple architecture.
                 </p>
                 <div class="deity-grid">
-                    <a class="deity-card" href="enoch-visualizations.html" style="text-decoration: none;">
+                    <a class="deity-card" href="enoch-visualizations.html">
                         <div class="deity-icon">🌟</div>
                         <h3>Seven Heavens Journey</h3>
                         <p>Interactive ascent through all seven heavens, Watchers' fall, and Nephilim family tree</p>
                     </a>
-                    <a class="deity-card" href="cosmology-map.html" style="text-decoration: none;">
+                    <a class="deity-card" href="cosmology-map.html">
                         <div class="deity-icon">🗺️</div>
                         <h3>3D Cosmology Map</h3>
                         <p>Explore the Merkabah throne, storehouses, judgment locations, and vertical cosmic structure</p>
                     </a>
-                    <a class="deity-card" href="portals-and-gates.html" style="text-decoration: none;">
+                    <a class="deity-card" href="portals-and-gates.html">
                         <div class="deity-icon">🚪</div>
                         <h3>Portals & Gates</h3>
                         <p>Timeline of heavenly gates, access requirements, journey paths, and dimensional portals</p>
                     </a>
-                    <a class="deity-card" href="temple-mysteries.html" style="text-decoration: none;">
+                    <a class="deity-card" href="temple-mysteries.html">
                         <div class="deity-icon">🏛️</div>
                         <h3>Temple & Mysteries</h3>
                         <p>Celestial temple floor plan, angelic hierarchy, forbidden knowledge, and mysteries explained</p>
@@ -165,22 +368,24 @@
 
         <section style="margin-top: var(--spacing-xl);">
             <h2 class="section-header">📖 Primary Sources</h2>
-            <ul class="styled-list">
-                <li><strong>1 Enoch (Ethiopic Enoch)</strong> - The most complete Enochian text, detailing the Watchers and celestial journeys (3rd-1st century BCE)</li>
-                <li><strong>2 Enoch (Slavonic Enoch)</strong> - Account of Enoch's ascent through the heavens (1st century CE)</li>
-                <li><strong>3 Enoch (Hebrew Enoch)</strong> - Transformation of Enoch into the angel Metatron (5th-6th century CE)</li>
-                <li><strong>Book of Jubilees</strong> - Retelling of Genesis with expanded angelology (2nd century BCE)</li>
-                <li><strong>Book of Giants</strong> - Dead Sea Scroll fragments about the Nephilim (2nd-1st century BCE)</li>
-                <li><strong>Testament of Solomon</strong> - King Solomon's mastery over demons (1st-3rd century CE)</li>
-                <li><strong>Apocalypse of Abraham</strong> - Visions of creation and the end times (1st-2nd century CE)</li>
-            </ul>
+            <div class="glass-card">
+                <ul class="styled-list">
+                    <li><strong>1 Enoch (Ethiopic Enoch)</strong> - The most complete Enochian text, detailing the Watchers and celestial journeys (3rd-1st century BCE)</li>
+                    <li><strong>2 Enoch (Slavonic Enoch)</strong> - Account of Enoch's ascent through the heavens (1st century CE)</li>
+                    <li><strong>3 Enoch (Hebrew Enoch)</strong> - Transformation of Enoch into the angel Metatron (5th-6th century CE)</li>
+                    <li><strong>Book of Jubilees</strong> - Retelling of Genesis with expanded angelology (2nd century BCE)</li>
+                    <li><strong>Book of Giants</strong> - Dead Sea Scroll fragments about the Nephilim (2nd-1st century BCE)</li>
+                    <li><strong>Testament of Solomon</strong> - King Solomon's mastery over demons (1st-3rd century CE)</li>
+                    <li><strong>Apocalypse of Abraham</strong> - Visions of creation and the end times (1st-2nd century CE)</li>
+                </ul>
+            </div>
         </section>
 
         <section style="margin-top: var(--spacing-xl);">
             <h2 class="section-header">🔗 Related Traditions</h2>
             <div class="grid-2col">
                 <div class="glass-card">
-                    <h3>Cross-Cultural Connections</h3>
+                    <h3 class="card-title">Cross-Cultural Connections</h3>
                     <ul class="styled-list">
                         <li><a href="../jewish/index.html">Jewish Mythology</a> - Foundation for Enochian traditions and Kabbalah</li>
                         <li><a href="../christian/index.html">Christian Mythology</a> - Early Christian apocalyptic literature and angelology</li>
@@ -189,7 +394,7 @@
                     </ul>
                 </div>
                 <div class="glass-card">
-                    <h3>Similar Concepts Across Traditions</h3>
+                    <h3 class="card-title">Similar Concepts Across Traditions</h3>
                     <ul class="styled-list">
                         <li><strong>Divine Rebellion:</strong> Watchers (Apocryphal) ↔ Titans (Greek) ↔ Asuras (Hindu)</li>
                         <li><strong>Giant Offspring:</strong> Nephilim (Apocryphal) ↔ Titans (Greek) ↔ Jotnar (Norse)</li>
