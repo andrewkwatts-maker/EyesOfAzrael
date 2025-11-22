@@ -48,7 +48,7 @@ This document defines the standard HTML structure and styling patterns that ALL 
     </div>
 </header>
 
-<!-- BREADCRUMB: Fixed at top left, OUTSIDE and AFTER header -->
+<!-- BREADCRUMB: Full-width bar below header, OUTSIDE and AFTER header -->
 <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{parent-path}/index.html">Home</a> →
     <span>Current Page</span>
@@ -276,23 +276,21 @@ var(--transition-base)  /* Standard transition */
 }
 ```
 
-### Breadcrumb Navigation (Fixed at Top Left)
+### Breadcrumb Navigation (Full-width bar below header)
 ```css
 .breadcrumb {
-    position: fixed;
-    top: 0;
-    left: var(--spacing-lg);
-    z-index: 1001;  /* Above header (1000) */
-    background: rgba(var(--color-surface-rgb), 0.95);
+    position: sticky;
+    top: 60px;  /* Below the sticky header */
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    background: rgba(var(--color-surface-rgb), 0.9);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    padding: var(--spacing-sm) var(--spacing-lg);
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    padding: var(--spacing-xs) var(--spacing-lg);
     font-size: var(--font-size-sm);
     color: var(--color-text-secondary);
-    box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-    border-top: none;
+    border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
 }
 
 .breadcrumb a {
@@ -311,6 +309,7 @@ var(--transition-base)  /* Standard transition */
     .breadcrumb {
         font-size: var(--font-size-xs);
         padding: var(--spacing-xs) var(--spacing-md);
+        top: 50px;  /* Smaller header on mobile */
     }
 }
 ```
