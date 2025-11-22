@@ -89,17 +89,46 @@
             border: 2px solid var(--color-border);
             border-radius: var(--radius-xl);
             padding: var(--spacing-lg);
-            transition: all var(--transition-base);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
             position: relative;
             overflow: hidden;
         }
 
+        .magic-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(var(--mythos-primary-rgb), 0.15), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .magic-card:hover::before {
+            opacity: 1;
+        }
+
         .magic-card:hover {
-            background: rgba(var(--mythos-primary-rgb), 0.1);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(var(--mythos-primary-rgb), 0.4);
+            background: rgba(var(--mythos-primary-rgb), 0.15);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow:
+                0 15px 40px rgba(var(--mythos-primary-rgb), 0.4),
+                0 0 30px rgba(var(--mythos-primary-rgb), 0.2),
+                inset 0 0 20px rgba(var(--mythos-primary-rgb), 0.05);
             border-color: var(--mythos-primary);
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(var(--mythos-primary-rgb), 0.3); }
+            50% { box-shadow: 0 0 35px rgba(var(--mythos-primary-rgb), 0.5); }
+        }
+
+        .magic-card:hover .magic-icon {
+            animation: pulse-glow 2s ease-in-out infinite;
         }
 
         .magic-icon {
@@ -252,7 +281,10 @@
             <div class="interlink-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-lg);">
                 <!-- Traditions -->
                 <div class="interlink-section">
-                    <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--mythos-primary); margin-bottom: var(--spacing-md);">🌍 Tradition-Specific Magic</div>
+                    <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--mythos-primary); margin-bottom: var(--spacing-md); display: flex; justify-content: space-between; align-items: center;">
+                        <span>🌍 Tradition-Specific Magic</span>
+                        <a href="traditions/index.html" style="font-size: var(--font-size-sm); color: var(--mythos-secondary); text-decoration: none;">View All &rarr;</a>
+                    </div>
                     <div class="quick-links-grid" style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
                         <a href="traditions/seidr.html" class="quick-link" data-smart style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
                             <span class="quick-link-icon">🔮</span> Seidr (Norse)
@@ -274,7 +306,10 @@
 
                 <!-- Divination -->
                 <div class="interlink-section">
-                    <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--mythos-primary); margin-bottom: var(--spacing-md);">🔮 Divination Systems</div>
+                    <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--mythos-primary); margin-bottom: var(--spacing-md); display: flex; justify-content: space-between; align-items: center;">
+                        <span>🔮 Divination Systems</span>
+                        <a href="divination/index.html" style="font-size: var(--font-size-sm); color: var(--mythos-secondary); text-decoration: none;">View All &rarr;</a>
+                    </div>
                     <div class="quick-links-grid" style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
                         <a href="divination/tarot.html" class="quick-link" data-smart style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
                             <span class="quick-link-icon">🃏</span> Tarot
@@ -293,7 +328,10 @@
 
                 <!-- Energy Work -->
                 <div class="interlink-section">
-                    <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--mythos-primary); margin-bottom: var(--spacing-md);">⚡ Energy Work</div>
+                    <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--mythos-primary); margin-bottom: var(--spacing-md); display: flex; justify-content: space-between; align-items: center;">
+                        <span>⚡ Energy Work</span>
+                        <a href="energy/index.html" style="font-size: var(--font-size-sm); color: var(--mythos-secondary); text-decoration: none;">View All &rarr;</a>
+                    </div>
                     <div class="quick-links-grid" style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
                         <a href="energy/chakra-work.html" class="quick-link" data-smart style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
                             <span class="quick-link-icon">🧘</span> Chakra Work
@@ -312,7 +350,10 @@
 
                 <!-- Ritual Magic -->
                 <div class="interlink-section">
-                    <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--mythos-primary); margin-bottom: var(--spacing-md);">🕯️ Ritual Magic</div>
+                    <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--mythos-primary); margin-bottom: var(--spacing-md); display: flex; justify-content: space-between; align-items: center;">
+                        <span>🕯️ Ritual Magic</span>
+                        <a href="ritual/index.html" style="font-size: var(--font-size-sm); color: var(--mythos-secondary); text-decoration: none;">View All &rarr;</a>
+                    </div>
                     <div class="quick-links-grid" style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
                         <a href="ritual/ceremonial-magic.html" class="quick-link" data-smart style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
                             <span class="quick-link-icon">🔯</span> Ceremonial Magic
@@ -545,6 +586,7 @@
             <div class="category-header">
                 <span class="category-icon">📖</span>
                 <h2 class="category-title">Sacred Texts & Grimoires</h2>
+                <a href="texts/index.html" style="margin-left: auto; font-size: var(--font-size-sm); color: var(--mythos-secondary); text-decoration: none; padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md);">View All &rarr;</a>
             </div>
             <div class="magic-grid">
                 <div class="magic-card" onclick="location.href='texts/sefer-yetzirah.html'">
@@ -626,6 +668,7 @@
             <div class="category-header">
                 <span class="category-icon">🪄</span>
                 <h2 class="category-title">Practical Magic</h2>
+                <a href="practical/index.html" style="margin-left: auto; font-size: var(--font-size-sm); color: var(--mythos-secondary); text-decoration: none; padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md);">View All &rarr;</a>
             </div>
             <div class="magic-grid">
                 <div class="magic-card" onclick="location.href='practical/sigil-magic.html'">
