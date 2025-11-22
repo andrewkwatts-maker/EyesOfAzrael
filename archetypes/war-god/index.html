@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>War God - Universal Archetype</title>
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        /* War God Archetype Custom Theme Colors */
+        :root {
+            --archetype-primary: #dc143c;
+            --archetype-primary-light: #ff6b6b;
+            --archetype-primary-dark: #8b0000;
+            --archetype-primary-darker: #3a0000;
+            --archetype-accent: #cd7f32;
+            --archetype-surface: rgba(220, 20, 60, 0.05);
+            --archetype-border: rgba(220, 20, 60, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Breadcrumb Navigation */
+        .nav-breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-md);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-md);
+            flex-wrap: wrap;
+            font-size: var(--font-size-sm);
+        }
+
+        .nav-breadcrumb a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-breadcrumb a:hover {
+            color: var(--archetype-primary-light);
+        }
+
+        /* Hero Section */
+        header {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            background: var(--archetype-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-2xl);
+            border: 2px solid var(--archetype-border);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            font-family: var(--font-heading);
+            margin-bottom: var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary), var(--archetype-primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .archetype-definition {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            margin: var(--spacing-lg) 0;
+            padding: var(--spacing-lg);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--archetype-primary);
+        }
+
+        /* Glass Card Sections */
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 2px solid var(--color-border);
+            transition: all var(--transition-base);
+        }
+
+        section:hover {
+            background: var(--color-surface-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        h2 {
+            color: var(--archetype-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-3xl);
+            font-family: var(--font-heading);
+            border-bottom: 2px solid var(--archetype-border);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        h3 {
+            color: var(--archetype-accent);
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-xl);
+            font-family: var(--font-heading);
+        }
+
+        /* Styled Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-lg) 0;
+        }
+
+        th, td {
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--archetype-border);
+        }
+
+        th {
+            background: var(--archetype-surface);
+            color: var(--archetype-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        tr {
+            transition: background var(--transition-fast);
+        }
+
+        tr:hover {
+            background: var(--archetype-surface);
+        }
+
+        td a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        td a:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        /* Icon List */
+        .characteristics ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .characteristics li {
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin: var(--spacing-sm) 0;
+            background: var(--archetype-surface);
+            border-left: 3px solid var(--archetype-primary);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .characteristics li:hover {
+            background: rgba(220, 20, 60, 0.1);
+            transform: translateX(4px);
+        }
+
+        .characteristics li:before {
+            content: "X ";
+            color: var(--archetype-primary);
+            font-weight: var(--font-bold);
+            margin-right: var(--spacing-sm);
+        }
+
+        /* Expandable Sections */
+        .codex-search-section {
+            margin: var(--spacing-lg) 0;
+            border: 2px solid var(--archetype-border);
+            border-radius: var(--radius-md);
+            background: var(--archetype-surface);
+            overflow: hidden;
+        }
+
+        .codex-search-header {
+            padding: var(--spacing-md) var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary-dark) 0%, var(--archetype-primary-darker) 100%);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background var(--transition-base);
+        }
+
+        .codex-search-header:hover {
+            background: linear-gradient(135deg, var(--archetype-primary) 0%, var(--archetype-primary-dark) 100%);
+        }
+
+        .codex-search-header h3 {
+            margin: 0;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-semibold);
+            color: white;
+        }
+
+        .expand-icon {
+            font-size: var(--font-size-xl);
+            transition: transform var(--transition-base);
+        }
+
+        .expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .codex-search-content {
+            display: none;
+            padding: var(--spacing-md);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .codex-search-content.show {
+            display: block;
+        }
+
+        .search-result-item {
+            margin: var(--spacing-sm) 0;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-left: 3px solid var(--archetype-primary);
+            background: rgba(220, 20, 60, 0.08);
+            border-radius: var(--radius-sm);
+        }
+
+        .citation {
+            font-weight: var(--font-semibold);
+            color: var(--archetype-primary);
+            cursor: pointer;
+            margin-bottom: var(--spacing-xs);
+            transition: color var(--transition-fast);
+        }
+
+        .citation:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        .verse-text {
+            display: none;
+            margin-top: var(--spacing-xs);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 2px solid var(--archetype-accent);
+            font-style: italic;
+            color: var(--color-text-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        .verse-text.show {
+            display: block;
+        }
+
+        .book-reference {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+
+        .match-score {
+            color: var(--archetype-accent);
+            font-weight: var(--font-semibold);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: var(--spacing-md);
+            }
+            h1 {
+                font-size: var(--font-size-3xl);
+            }
+            table {
+                font-size: var(--font-size-sm);
+            }
+            th, td {
+                padding: var(--spacing-sm);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-breadcrumb">
+            <a href="../../index.html">Home</a> <span>-></span>
+            <a href="../index.html">Universal Archetypes</a> <span>-></span>
+            <span>War God</span>
+        </div>
+
+        <header>
+            <div class="header-content">
+                <h1>The War God Archetype</h1>
+            </div>
+        </header>
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../index.html">Home</a> -> <a href="../index.html">Archetypes</a> -> <a href="index.html">War God</a>
+        </nav>
+
+        <div class="archetype-definition">
+            <p>
+                <strong>The War God</strong> embodies the divine aspect of combat, martial prowess, and the violence inherent
+                in human civilization. This archetype appears in two primary forms: the savage, bloodthirsty deity who delights
+                in slaughter (like <a href="../../mythos/greek/deities/ares.html" style="color: var(--archetype-primary);">Ares</a>),
+                and the honorable warrior who embodies courage, strategy, and just warfare (like
+                <a href="../../mythos/norse/deities/tyr.html" style="color: var(--archetype-primary);">Tyr</a> or
+                <a href="../../mythos/roman/deities/mars.html" style="color: var(--archetype-primary);">Mars</a>).
+                The War God represents humanity's relationship with organized violence—both its necessity for survival and
+                its potential for destruction.
+            </p>
+        </div>
+
+        <section class="characteristics">
+            <h2>Universal Characteristics</h2>
+            <ul>
+                <li><strong>Martial Excellence:</strong> Supreme skill in combat, weapons mastery, and battle tactics—the divine warrior ideal</li>
+                <li><strong>Physical Power:</strong> Embodies strength, endurance, and the masculine warrior body in its most formidable form</li>
+                <li><strong>Blood Offerings:</strong> Demands sacrifice—animal, human, or symbolic—acknowledging war's cost in blood</li>
+                <li><strong>Dual Nature:</strong> Can be both destructive berserker and honorable champion, depending on cultural values</li>
+                <li><strong>Association with Iron/Bronze:</strong> Connected to weapons technology and metallurgy, the tools of war</li>
+                <li><strong>Animal Companions:</strong> Linked to predatory or fierce animals—wolves, boars, ravens, eagles, horses</li>
+                <li><strong>Fertility Connection:</strong> In agricultural societies, war god often linked to spring planting and harvest protection</li>
+                <li><strong>Fatherhood of Heroes:</strong> Sires legendary warriors and founders of martial lineages</li>
+                <li><strong>Courage Embodiment:</strong> Represents the valor needed to face death in battle</li>
+                <li><strong>Order Through Violence:</strong> Maintains cosmic or social order through controlled application of force</li>
+            </ul>
+        </section>
+
+        <section class="cross-tradition-table">
+            <h2>Deities Embodying This Archetype</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tradition</th>
+                        <th>Deity</th>
+                        <th>Match</th>
+                        <th>Key Attributes</th>
+                        <th>War Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Greek</td>
+                        <td><a href="../../mythos/greek/deities/ares.html">Ares</a></td>
+                        <td><span class="match-score">100%</span></td>
+                        <td>Violence incarnate, bloodlust, brutal strength, fear and terror</td>
+                        <td>Savage, chaotic warfare</td>
+                    </tr>
+                    <tr>
+                        <td>Roman</td>
+                        <td><a href="../../mythos/roman/deities/mars.html">Mars</a></td>
+                        <td><span class="match-score">98%</span></td>
+                        <td>Father of Rome, agricultural guardian, martial honor, disciplined legions</td>
+                        <td>Honorable, state warfare</td>
+                    </tr>
+                    <tr>
+                        <td>Norse</td>
+                        <td><a href="../../mythos/norse/deities/tyr.html">Tyr</a></td>
+                        <td><span class="match-score">95%</span></td>
+                        <td>God of war and justice, sacrificed hand to Fenrir, battle courage</td>
+                        <td>Just warfare, honor, oaths</td>
+                    </tr>
+                    <tr>
+                        <td>Norse</td>
+                        <td><a href="../../mythos/norse/deities/odin.html">Odin</a></td>
+                        <td><span class="match-score">85%</span></td>
+                        <td>Lord of the slain, Valkyries, battle fury, chooser of victory</td>
+                        <td>Strategic, magical warfare</td>
+                    </tr>
+                    <tr>
+                        <td>Hindu</td>
+                        <td><a href="../../mythos/hindu/deities/kartikeya.html">Kartikeya/Skanda</a></td>
+                        <td><span class="match-score">96%</span></td>
+                        <td>Commander of divine armies, peacock mount, demon slayer</td>
+                        <td>Righteous cosmic warfare</td>
+                    </tr>
+                    <tr>
+                        <td>Hindu</td>
+                        <td><a href="../../mythos/hindu/deities/indra.html">Indra</a></td>
+                        <td><span class="match-score">90%</span></td>
+                        <td>King of gods, thunderbolt wielder, dragon slayer Vritra</td>
+                        <td>Heroic, cosmic battle</td>
+                    </tr>
+                    <tr>
+                        <td>Mesopotamian</td>
+                        <td><a href="../../mythos/sumerian/deities/nergal.html">Nergal</a></td>
+                        <td><span class="match-score">94%</span></td>
+                        <td>War and plague, lord of underworld, destruction incarnate</td>
+                        <td>Destructive, disease warfare</td>
+                    </tr>
+                    <tr>
+                        <td>Egyptian</td>
+                        <td><a href="../../mythos/egyptian/deities/montu.html">Montu</a></td>
+                        <td><span class="match-score">92%</span></td>
+                        <td>Falcon war god, divine fury, pharaonic military power</td>
+                        <td>Royal, aggressive warfare</td>
+                    </tr>
+                    <tr>
+                        <td>Egyptian</td>
+                        <td><a href="../../mythos/egyptian/deities/sekhmet.html">Sekhmet</a></td>
+                        <td><span class="match-score">88%</span></td>
+                        <td>Lioness goddess, bloodthirsty destroyer, Ra's weapon</td>
+                        <td>Berserker, divine wrath</td>
+                    </tr>
+                    <tr>
+                        <td>Aztec</td>
+                        <td><a href="../../mythos/aztec/deities/huitzilopochtli.html">Huitzilopochtli</a></td>
+                        <td><span class="match-score">97%</span></td>
+                        <td>Hummingbird of the South, sun warrior, human sacrifice</td>
+                        <td>Sacred, sacrificial warfare</td>
+                    </tr>
+                    <tr>
+                        <td>Celtic</td>
+                        <td><a href="../../mythos/celtic/deities/nuada.html">Nuada</a></td>
+                        <td><span class="match-score">87%</span></td>
+                        <td>Silver-handed king, sword of light, first king of Tuatha De Danann</td>
+                        <td>Kingship through warfare</td>
+                    </tr>
+                    <tr>
+                        <td>Japanese</td>
+                        <td><a href="../../mythos/japanese/deities/hachiman.html">Hachiman</a></td>
+                        <td><span class="match-score">93%</span></td>
+                        <td>Divine archer, protector of Japan, samurai patron</td>
+                        <td>Protective, honorable warfare</td>
+                    </tr>
+                    <tr>
+                        <td>Slavic</td>
+                        <td><a href="../../mythos/slavic/deities/perun.html">Perun</a></td>
+                        <td><span class="match-score">89%</span></td>
+                        <td>Thunder god, dragon fighter, protector of warriors</td>
+                        <td>Storm warfare, cosmic battle</td>
+                    </tr>
+                    <tr>
+                        <td>Chinese</td>
+                        <td><a href="../../mythos/chinese/deities/guan-yu.html">Guan Yu</a></td>
+                        <td><span class="match-score">91%</span></td>
+                        <td>Deified general, loyalty embodied, red-faced warrior</td>
+                        <td>Righteous, brotherly warfare</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/greek/deities/ares.html" style="color: var(--archetype-primary); text-decoration: none;">Ares</a> (Greek Tradition)</h2>
+            <p>
+                <a href="../../mythos/greek/deities/ares.html" style="color: var(--archetype-primary); text-decoration: none;">Ares</a>
+                represents war at its most brutal and chaotic—the Greeks viewed him with ambivalence, acknowledging his power
+                while often portraying him as cruel, cowardly when wounded, and inferior to strategic warfare embodied by
+                <a href="../../mythos/greek/deities/athena.html" style="color: var(--archetype-primary); text-decoration: none;">Athena</a>.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Ares: The Savage War God</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Homer, Iliad 5.889-898
+                        </div>
+                        <div class="verse-text">
+                            "<a href="../../mythos/greek/deities/zeus.html" style="color: var(--archetype-accent);">Zeus</a> spoke to him:
+                            'Do not sit beside me and whine, you double-faced liar. To me you are the most hateful of all gods who
+                            hold <a href="../../mythos/greek/locations/olympus.html" style="color: var(--archetype-accent);">Olympus</a>.
+                            Forever quarreling is dear to your heart, wars and battles. You have your mother
+                            <a href="../../mythos/greek/deities/hera.html" style="color: var(--archetype-accent);">Hera's</a>
+                            intolerable, unyielding spirit. By words of command I can hardly control her either. Therefore it is by
+                            her design, I think, that you suffer these things. Yet I cannot endure to see you in pain for long,
+                            since you are my son.'"
+                        </div>
+                        <div class="book-reference">
+                            Source: Homer, Iliad, Book 5 (c. 8th century BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Homeric Hymn to Ares
+                        </div>
+                        <div class="verse-text">
+                            "<a href="../../mythos/greek/deities/ares.html" style="color: var(--archetype-accent);">Ares</a>,
+                            exceeding in strength, chariot-rider, golden-helmed, doughty in heart, shield-bearer, savior of cities,
+                            harnessed in bronze, strong of arm, unwearying, mighty with the spear, O defense of
+                            <a href="../../mythos/greek/locations/olympus.html" style="color: var(--archetype-accent);">Olympus</a>,
+                            father of warlike Victory, ally of Themis, stern governor of the rebellious, leader of righteous men,
+                            sceptered King of manliness, who whirl your fiery sphere among the planets in their sevenfold courses
+                            through the aether wherein your blazing steeds ever bear you above the third firmament of heaven..."
+                        </div>
+                        <div class="book-reference">
+                            Source: Homeric Hymn 8: To Ares (c. 7th-6th century BCE or later)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Ares Wounded by Diomedes</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Homer, Iliad 5.855-867
+                        </div>
+                        <div class="verse-text">
+                            "Then <a href="../../mythos/greek/heroes/diomedes.html" style="color: var(--archetype-accent);">Diomedes</a>
+                            of the great war cry drove at <a href="../../mythos/greek/deities/ares.html" style="color: var(--archetype-accent);">Ares</a>
+                            with his bronze spear. And <a href="../../mythos/greek/deities/athena.html" style="color: var(--archetype-accent);">Pallas Athena</a>,
+                            laying her hand upon the yoke, guided the spear to strike the nethermost part of his belly where he was
+                            girt with his tassets. There did <a href="../../mythos/greek/heroes/diomedes.html" style="color: var(--archetype-accent);">Diomedes</a>
+                            wound him, rending his fair flesh, and drew the spear out again. Then brazen
+                            <a href="../../mythos/greek/deities/ares.html" style="color: var(--archetype-accent);">Ares</a>
+                            bellowed loud as nine thousand warriors or ten thousand cry in battle as they join in the strife of war.
+                            Thereat trembling seized Achaeans and Trojans alike, in their fear: so mighty was the bellowing of
+                            <a href="../../mythos/greek/deities/ares.html" style="color: var(--archetype-accent);">Ares</a> insatiate of war."
+                        </div>
+                        <div class="book-reference">
+                            Source: Homer, Iliad, Book 5 (c. 8th century BCE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/roman/deities/mars.html" style="color: var(--archetype-primary); text-decoration: none;">Mars</a> (Roman Tradition)</h2>
+            <p>
+                <a href="../../mythos/roman/deities/mars.html" style="color: var(--archetype-primary); text-decoration: none;">Mars</a>
+                differs significantly from <a href="../../mythos/greek/deities/ares.html" style="color: var(--archetype-primary); text-decoration: none;">Ares</a>—
+                he was one of Rome's most important deities, second only to
+                <a href="../../mythos/roman/deities/jupiter.html" style="color: var(--archetype-primary); text-decoration: none;">Jupiter</a>,
+                combining war, agriculture, and civic duty in the Roman ideal of the citizen-soldier.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Mars: Father of Rome</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Livy, Ab Urbe Condita 1.4
+                        </div>
+                        <div class="verse-text">
+                            "The Vestal was forcibly violated and, having given birth to twins, declared
+                            <a href="../../mythos/roman/deities/mars.html" style="color: var(--archetype-accent);">Mars</a>
+                            as their father, whether she actually believed it or because it was less disgraceful to have a god
+                            as the author of her shame. But neither gods nor men protected her or her children from the king's
+                            cruelty... By some chance the Tiber had overflowed its banks and formed stagnant pools, so that
+                            nowhere could the regular channel be approached. The bearers of the children imagined that infants
+                            could be drowned in any water... They placed the trough containing the twins in the nearest pool,
+                            where now stands the Ruminal fig tree. There a she-wolf, seeking water, found them and gave them
+                            suck. Thus <a href="../../mythos/roman/heroes/romulus.html" style="color: var(--archetype-accent);">Romulus</a>
+                            and <a href="../../mythos/roman/heroes/remus.html" style="color: var(--archetype-accent);">Remus</a>,
+                            sons of <a href="../../mythos/roman/deities/mars.html" style="color: var(--archetype-accent);">Mars</a>,
+                            founded the eternal city."
+                        </div>
+                        <div class="book-reference">
+                            Source: Livy, Ab Urbe Condita (History of Rome), Book 1 (c. 27-25 BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            The Salii Hymn to Mars
+                        </div>
+                        <div class="verse-text">
+                            "Help us, <a href="../../mythos/roman/deities/mars.html" style="color: var(--archetype-accent);">Mars</a>!
+                            Never let plague and ruin fall upon the multitude! Be satiated, fierce
+                            <a href="../../mythos/roman/deities/mars.html" style="color: var(--archetype-accent);">Mars</a>!
+                            Leap the threshold! Halt, wild one! By turns call upon all the gods of seed-time! Help us,
+                            <a href="../../mythos/roman/deities/mars.html" style="color: var(--archetype-accent);">Mars</a>!
+                            Triumph, triumph!"
+                        </div>
+                        <div class="book-reference">
+                            Source: Carmen Saliare (Hymn of the Salii Priests), archaic Latin (c. 7th century BCE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Mars as Agricultural Protector</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Cato, De Agricultura 141
+                        </div>
+                        <div class="verse-text">
+                            "Father <a href="../../mythos/roman/deities/mars.html" style="color: var(--archetype-accent);">Mars</a>,
+                            I pray and beseech thee that thou be gracious and merciful to me, my house and household; to which intent
+                            I have bidden this suovetaurilia to be led around my land, my ground, my farm; that thou keep away, ward
+                            off, and remove sickness, seen and unseen, barrenness and destruction, ruin and unseasonable influence;
+                            and that thou permit my harvests, my grain, my vineyards, and my plantations to flourish and to come to
+                            good issue; preserve in health my shepherds and my flocks, and give good health and strength to me, my
+                            house and my household."
+                        </div>
+                        <div class="book-reference">
+                            Source: Cato the Elder, De Agricultura (On Agriculture) (c. 160 BCE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/norse/deities/tyr.html" style="color: var(--archetype-primary); text-decoration: none;">Tyr</a> (Norse Tradition)</h2>
+            <p>
+                <a href="../../mythos/norse/deities/tyr.html" style="color: var(--archetype-primary); text-decoration: none;">Tyr</a>
+                embodies honorable warfare and the warrior's sacrifice. His loss of his hand to the wolf
+                <a href="../../mythos/norse/creatures/fenrir.html" style="color: var(--archetype-primary); text-decoration: none;">Fenrir</a>
+                represents the price of keeping oaths and maintaining cosmic order through martial courage.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Tyr Binds Fenrir</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Prose Edda, Gylfaginning 34
+                        </div>
+                        <div class="verse-text">
+                            "The gods saw the wolf's offspring being brought up at home, and since prophecy foretold that this kindred
+                            would be their doom, they feared great harm from them. Twice the gods tried to bind
+                            <a href="../../mythos/norse/creatures/fenrir.html" style="color: var(--archetype-accent);">Fenrir</a>
+                            with chains, and twice he broke free. Then the dwarves forged Gleipnir—smooth and soft as a silk ribbon
+                            but stronger than any chain, made from the sound of a cat's footstep, the beard of a woman, the roots
+                            of a mountain, the sinews of a bear, the breath of a fish, and the spittle of a bird. When the gods
+                            asked <a href="../../mythos/norse/creatures/fenrir.html" style="color: var(--archetype-accent);">Fenrir</a>
+                            to test this bond, he grew suspicious. 'Let one of you place his hand in my mouth as a pledge of good
+                            faith.' None would risk it—until <a href="../../mythos/norse/deities/tyr.html" style="color: var(--archetype-accent);">Tyr</a>
+                            put his right hand in the wolf's mouth. When
+                            <a href="../../mythos/norse/creatures/fenrir.html" style="color: var(--archetype-accent);">Fenrir</a>
+                            found he could not break free, he bit off
+                            <a href="../../mythos/norse/deities/tyr.html" style="color: var(--archetype-accent);">Tyr's</a>
+                            hand at the wrist. And so the god of war became one-handed."
+                        </div>
+                        <div class="book-reference">
+                            Source: Snorri Sturluson, Prose Edda, Gylfaginning (c. 1220 CE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Tyr at Ragnarok
+                        </div>
+                        <div class="verse-text">
+                            "Then <a href="../../mythos/norse/creatures/garm.html" style="color: var(--archetype-accent);">Garm</a>,
+                            the hound at <a href="../../mythos/norse/locations/hel.html" style="color: var(--archetype-accent);">Hel's</a>
+                            gate, shall break free and face <a href="../../mythos/norse/deities/tyr.html" style="color: var(--archetype-accent);">Tyr</a>
+                            in battle. Each shall slay the other. The god of war shall fall, but not before dealing the death-blow
+                            to the beast that guards the realm of the dead."
+                        </div>
+                        <div class="book-reference">
+                            Source: Snorri Sturluson, Prose Edda, Gylfaginning (c. 1220 CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/aztec/deities/huitzilopochtli.html" style="color: var(--archetype-primary); text-decoration: none;">Huitzilopochtli</a> (Aztec Tradition)</h2>
+            <p>
+                <a href="../../mythos/aztec/deities/huitzilopochtli.html" style="color: var(--archetype-primary); text-decoration: none;">Huitzilopochtli</a>,
+                "Hummingbird of the South" or "Hummingbird on the Left," was the patron deity of the Aztec capital Tenochtitlan.
+                He required human sacrifice to fuel his daily battle against darkness, linking war inextricably with cosmic duty.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Birth of the War God</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Florentine Codex, Book 3
+                        </div>
+                        <div class="verse-text">
+                            "<a href="../../mythos/aztec/deities/coatlicue.html" style="color: var(--archetype-accent);">Coatlicue</a>,
+                            'Serpent Skirt,' was sweeping on Coatepec mountain when a ball of feathers fell from the sky. She placed
+                            it in her bosom and became pregnant. Her four hundred sons, the Centzon Huitznahua, and her daughter
+                            <a href="../../mythos/aztec/deities/coyolxauhqui.html" style="color: var(--archetype-accent);">Coyolxauhqui</a>,
+                            were enraged and came to kill her. As they approached,
+                            <a href="../../mythos/aztec/deities/huitzilopochtli.html" style="color: var(--archetype-accent);">Huitzilopochtli</a>
+                            sprang from his mother's womb fully grown and armed with the
+                            <a href="../../mythos/aztec/items/xiuhcoatl.html" style="color: var(--archetype-accent);">Xiuhcoatl</a>,
+                            the fire serpent. He struck off <a href="../../mythos/aztec/deities/coyolxauhqui.html" style="color: var(--archetype-accent);">Coyolxauhqui's</a>
+                            head and sent her body tumbling down the mountainside. Then he pursued and scattered the four hundred
+                            brothers across the sky—they became the southern stars."
+                        </div>
+                        <div class="book-reference">
+                            Source: Florentine Codex (General History of the Things of New Spain), Book 3 (c. 1545-1590 CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Symbolic Analysis: The War God Pattern</h2>
+
+            <h3>Two Types of War Gods</h3>
+            <p>
+                Cross-cultural analysis reveals two primary expressions of the War God archetype:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Savage/Chaotic:</strong> <a href="../../mythos/greek/deities/ares.html" style="color: var(--archetype-primary);">Ares</a>, <a href="../../mythos/sumerian/deities/nergal.html" style="color: var(--archetype-primary);">Nergal</a>—embodies war's brutality, bloodlust, and destruction</li>
+                <li><strong>Honorable/Strategic:</strong> <a href="../../mythos/roman/deities/mars.html" style="color: var(--archetype-primary);">Mars</a>, <a href="../../mythos/norse/deities/tyr.html" style="color: var(--archetype-primary);">Tyr</a>, <a href="../../mythos/japanese/deities/hachiman.html" style="color: var(--archetype-primary);">Hachiman</a>—represents martial virtue, discipline, and just warfare</li>
+            </ul>
+
+            <h3>War and Fertility</h3>
+            <p>
+                The connection between war gods and agriculture appears across cultures:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong><a href="../../mythos/roman/deities/mars.html" style="color: var(--archetype-primary);">Mars</a>:</strong> Originally an agricultural deity before becoming primarily martial</li>
+                <li><strong>Spring Festivals:</strong> Many war god festivals occur in spring—time for both planting and military campaigns</li>
+                <li><strong>Blood as Fertilizer:</strong> Sacrifice of enemies enriches the land—death feeds new life</li>
+                <li><strong>Defender of Crops:</strong> Warrior protects harvest from raiders and wild animals</li>
+            </ul>
+
+            <h3>The Price of Victory</h3>
+            <p>
+                War God mythology consistently acknowledges war's cost:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong><a href="../../mythos/norse/deities/tyr.html" style="color: var(--archetype-primary);">Tyr's</a> Hand:</strong> Even gods pay a price for binding chaos</li>
+                <li><strong>Blood Offerings:</strong> War gods demand sacrifice—acknowledging that war requires death</li>
+                <li><strong>Warrior's Death:</strong> The honorable death in battle is glorified precisely because it is terrible</li>
+                <li><strong>Post-Battle Trauma:</strong> Some traditions acknowledge warrior madness and haunting by the slain</li>
+            </ul>
+
+            <h3>Relationship with Wisdom Goddess</h3>
+            <p>
+                Many traditions pair the War God with a complementary wisdom/strategy deity:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong><a href="../../mythos/greek/deities/ares.html" style="color: var(--archetype-primary);">Ares</a> vs <a href="../../mythos/greek/deities/athena.html" style="color: var(--archetype-primary);">Athena</a>:</strong> Brute force versus strategic warfare</li>
+                <li><strong><a href="../../mythos/norse/deities/tyr.html" style="color: var(--archetype-primary);">Tyr</a> and <a href="../../mythos/norse/deities/odin.html" style="color: var(--archetype-primary);">Odin</a>:</strong> Honor versus cunning in warfare</li>
+                <li><strong><a href="../../mythos/hindu/deities/kartikeya.html" style="color: var(--archetype-primary);">Kartikeya</a>:</strong> Combines martial prowess with philosophical wisdom</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Cross-Cultural Comparison</h2>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Comparative Analysis: Ares vs Mars vs Tyr</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <table style="width: 100%; margin-top: 15px;">
+                        <thead>
+                            <tr>
+                                <th>Attribute</th>
+                                <th>Ares (Greek)</th>
+                                <th>Mars (Roman)</th>
+                                <th>Tyr (Norse)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Status</td>
+                                <td>Despised by Zeus, feared by mortals</td>
+                                <td>Second most important Roman god</td>
+                                <td>Ancient sky god, highly honored</td>
+                            </tr>
+                            <tr>
+                                <td>War Type</td>
+                                <td>Savage, chaotic, brutal</td>
+                                <td>Disciplined, civic, protective</td>
+                                <td>Honorable, oath-bound, just</td>
+                            </tr>
+                            <tr>
+                                <td>Associated Values</td>
+                                <td>Violence, fear, bloodlust</td>
+                                <td>Duty, agriculture, fatherhood</td>
+                                <td>Justice, courage, sacrifice</td>
+                            </tr>
+                            <tr>
+                                <td>Animal Symbol</td>
+                                <td>Dogs, vultures, boar</td>
+                                <td>Wolf, woodpecker, horse</td>
+                                <td>Wolf (as opponent)</td>
+                            </tr>
+                            <tr>
+                                <td>Offspring</td>
+                                <td>Phobos, Deimos (Fear, Terror)</td>
+                                <td>Romulus and Remus</td>
+                                <td>Unknown in surviving sources</td>
+                            </tr>
+                            <tr>
+                                <td>Sacred Month</td>
+                                <td>No dedicated month</td>
+                                <td>March (Martius)</td>
+                                <td>Tuesday (Tyr's day)</td>
+                            </tr>
+                            <tr>
+                                <td>Distinctive Feature</td>
+                                <td>Often wounded, humiliated</td>
+                                <td>Father of Roman people</td>
+                                <td>One-handed (sacrifice)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Psychological and Spiritual Significance</h2>
+
+            <h3>Jungian Interpretation</h3>
+            <p>
+                The War God represents essential psychological patterns:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>The Warrior Archetype:</strong> Inner strength to face challenges, set boundaries, and fight for values</li>
+                <li><strong>Aggression Integration:</strong> War God mythology shows healthy and unhealthy expressions of aggression</li>
+                <li><strong>Courage:</strong> The willingness to face fear, pain, and death for meaningful cause</li>
+                <li><strong>Shadow Work:</strong> <a href="../../mythos/greek/deities/ares.html" style="color: var(--archetype-primary);">Ares</a>' brutality represents rejected aggressive impulses that need integration</li>
+            </ul>
+
+            <h3>Spiritual Dimensions</h3>
+            <p>
+                For devotees across traditions, the War God offers:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Protection:</strong> Divine warrior guards the community from external threats</li>
+                <li><strong>Courage in Adversity:</strong> Model for facing life's battles with valor</li>
+                <li><strong>Sacred Violence:</strong> Recognition that sometimes destruction serves higher purposes</li>
+                <li><strong>Martial Virtue:</strong> Discipline, honor, loyalty, self-sacrifice for community</li>
+            </ul>
+
+            <h3>Modern Relevance</h3>
+            <p>
+                The War God archetype speaks to contemporary concerns:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Just War Theory:</strong> <a href="../../mythos/norse/deities/tyr.html" style="color: var(--archetype-primary);">Tyr</a>/<a href="../../mythos/roman/deities/mars.html" style="color: var(--archetype-primary);">Mars</a> tradition informs ethical warfare discussions</li>
+                <li><strong>Violence Critique:</strong> <a href="../../mythos/greek/deities/ares.html" style="color: var(--archetype-primary);">Ares</a>' negative portrayal offers anti-war perspective</li>
+                <li><strong>Warrior Trauma:</strong> Ancient acknowledgment of war's psychological toll</li>
+                <li><strong>Civic Duty:</strong> <a href="../../mythos/roman/deities/mars.html" style="color: var(--archetype-primary);">Mars</a> model of citizen-soldier defending community</li>
+            </ul>
+        </section>
+
+        <!-- DEITIES EMBODYING THIS ARCHETYPE - Visual Cards -->
+        <section style="margin-top: var(--spacing-3xl);">
+            <h2 style="text-align: center; margin-bottom: var(--spacing-md);">Deities Embodying This Archetype</h2>
+            <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: var(--spacing-xl);">
+                Click any deity to explore their full mythology
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--spacing-lg);">
+                <a href="../../mythos/greek/deities/ares.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">X</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Ares</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Greek</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">God of Savage War</div>
+                </a>
+                <a href="../../mythos/roman/deities/mars.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">X</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Mars</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Roman</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Father of Rome</div>
+                </a>
+                <a href="../../mythos/norse/deities/tyr.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">X</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Tyr</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Norse</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">One-Handed God of Justice</div>
+                </a>
+                <a href="../../mythos/hindu/deities/kartikeya.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">X</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Kartikeya</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Hindu</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Commander of Divine Armies</div>
+                </a>
+                <a href="../../mythos/aztec/deities/huitzilopochtli.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">X</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Huitzilopochtli</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Aztec</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Hummingbird of the South</div>
+                </a>
+            </div>
+        </section>
+
+        <!-- RELATED STORY ARCHETYPES -->
+        <section style="margin-top: var(--spacing-3xl);">
+            <h2 style="text-align: center; margin-bottom: var(--spacing-md);">Related Story Archetypes</h2>
+            <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: var(--spacing-xl);">
+                The War God features prominently in these universal narrative patterns
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+                <a href="../story-archetypes/hero-journey/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">></span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Hero's Journey</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">War gods sire heroes and guide warriors through trials of combat and courage</p>
+                </a>
+                <a href="../story-archetypes/dragon-slaying/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">~</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Dragon/Chaos Combat</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Indra vs Vritra, Tyr vs Fenrir - cosmic battle against primordial chaos</p>
+                </a>
+                <a href="../prophecy-archetypes/apocalypse/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">!</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Apocalypse/Final Battle</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Ragnarok, Kurukshetra - the ultimate war that ends and renews the cosmos</p>
+                </a>
+                <a href="../divine-twins/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">||</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Divine Twins</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Romulus and Remus, warrior twins who found civilizations through combat</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- SEE ALSO / EXPLORE RELATED -->
+        <div style="margin-top: var(--spacing-4xl); text-align: center; padding: var(--spacing-xl); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border);">
+            <h3 style="color: var(--archetype-primary); margin-bottom: var(--spacing-lg);">See Also</h3>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap; margin-bottom: var(--spacing-xl);">
+                <a href="../sky-father/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Sky Father</a>
+                <a href="../great-goddess/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Great Goddess</a>
+                <a href="../death/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Death God</a>
+                <a href="../culture-hero/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Culture Hero</a>
+            </div>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+                <a href="../divine-smith/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Divine Smith</a>
+                <a href="../sun-god/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Sun God</a>
+                <a href="../threshold-guardian/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Threshold Guardian</a>
+                <a href="../cross-reference-matrix.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Cross-Reference Matrix</a>
+            </div>
+            <div style="margin-top: var(--spacing-xl);">
+                <a href="../index.html" style="display: inline-block; padding: var(--spacing-md) var(--spacing-2xl); background: linear-gradient(135deg, var(--archetype-primary), var(--archetype-primary-dark)); color: white; text-decoration: none; border-radius: var(--radius-lg); font-weight: var(--font-semibold);">All Archetypes</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCodexSearch(header) {
+            const section = header.parentElement;
+            const content = section.querySelector('.codex-search-content');
+            section.classList.toggle('expanded');
+            content.classList.toggle('show');
+        }
+        function toggleVerse(citation) {
+            const verseText = citation.nextElementSibling;
+            verseText.classList.toggle('show');
+        }
+    </script>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>
