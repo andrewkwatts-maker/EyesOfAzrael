@@ -181,17 +181,6 @@ const MYTHOLOGY_BRANCHES = [
         era: '~1200 BCE - 400 CE',
         keyTexts: ['Mabinogion', 'Ulster Cycle', 'Táin Bó Cúailnge'],
         coreConcepts: ['Tuatha Dé Danann', 'Otherworld', 'Druids', 'Sacred Groves', 'Threefold Death']
-    },
-    {
-        id: 'freemasons',
-        name: 'Freemasonry',
-        displayName: 'Freemasonry',
-        color: '#1a1a1a',
-        icon: '<img src="mythos/freemasons/freemasons.png" style="width:2em;height:2em;display:inline-block;" alt="Kintinkantan">',
-        description: '"Looks on the level to me"',
-        regions: ['Isolated'],
-        era: '~1717 CE - Present',
-        coreConcepts: []
     }
 ];
 
