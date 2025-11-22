@@ -1,6 +1,7 @@
 /**
  * Smart Links - Dropdown Hyperlink System
  * Priority: 1) Matching pages, 2) Related pages, 3) Corpus search (last)
+ * Also handles fixing broken corpus-results links
  */
 
 (function() {
@@ -18,8 +19,67 @@
         chinese: { name: 'Chinese Classics', icon: '🐉', lang: 'Classical Chinese', path: '/mythos/chinese/corpus-search.html' },
         buddhist: { name: 'Buddhist Texts', icon: '☸️', lang: 'Pali/Sanskrit', path: '/mythos/buddhist/corpus-search.html' },
         roman: { name: 'Latin Texts', icon: '🦅', lang: 'Latin', path: '/mythos/roman/corpus-search.html' },
-        christian: { name: 'Biblical Texts', icon: '✝️', lang: 'Greek/Hebrew', path: '/mythos/christian/corpus-search.html' }
+        christian: { name: 'Biblical Texts', icon: '✝️', lang: 'Greek/Hebrew', path: '/mythos/christian/corpus-search.html' },
+        persian: { name: 'Persian Texts', icon: '🔥', lang: 'Avestan', path: '/mythos/persian/corpus-search.html' },
+        celtic: { name: 'Celtic Texts', icon: '☘️', lang: 'Old Irish', path: '/mythos/celtic/corpus-search.html' },
+        tarot: { name: 'Hermetic Texts', icon: '🃏', lang: 'Latin/English', path: '/mythos/tarot/corpus-search.html' },
+        japanese: { name: 'Japanese Texts', icon: '⛩️', lang: 'Japanese', path: '/mythos/japanese/corpus-search.html' },
+        aztec: { name: 'Aztec Texts', icon: '🦅', lang: 'Nahuatl', path: '/mythos/aztec/corpus-search.html' }
     };
+
+    /**
+     * Fix broken corpus-results links by converting them to corpus-search URLs
+     */
+    function fixCorpusLinkHref(link) {
+        const href = link.getAttribute('href') || '';
+
+        // Only fix corpus-results links that don't point to corpus-search
+        if (!href.includes('corpus-results/') || href.includes('corpus-search.html')) {
+            return href;
+        }
+
+        // Extract tradition from href or data attributes
+        let tradition = link.dataset.tradition || link.dataset.corpus;
+        if (!tradition) {
+            const match = href.match(/corpus-results\/([^\/]+)\//);
+            if (match) tradition = match[1].toLowerCase();
+        }
+
+        // Extract term from href or data attributes
+        let term = link.dataset.term;
+        if (!term) {
+            const match = href.match(/corpus-results\/[^\/]+\/([^\.]+)\.html/);
+            if (match) {
+                term = match[1].replace(/-/g, ' ');
+            }
+        }
+        if (!term) {
+            term = link.textContent.replace('📖', '').trim();
+        }
+
+        // Build corrected URL
+        if (tradition && term && CORPUS_CONFIG[tradition]) {
+            const newHref = `${CORPUS_CONFIG[tradition].path}?term=${encodeURIComponent(term)}`;
+            link.setAttribute('href', newHref);
+            return newHref;
+        }
+
+        // Fallback: try to detect tradition from current page path
+        if (term) {
+            const currentPath = window.location.pathname;
+            const tradMatch = currentPath.match(/\/mythos\/([^\/]+)\//);
+            if (tradMatch) {
+                tradition = tradMatch[1];
+                if (CORPUS_CONFIG[tradition]) {
+                    const newHref = `${CORPUS_CONFIG[tradition].path}?term=${encodeURIComponent(term)}`;
+                    link.setAttribute('href', newHref);
+                    return newHref;
+                }
+            }
+        }
+
+        return href;
+    }
 
     // Page index built from all links on the page
     let pageIndex = {};
@@ -100,6 +160,11 @@
         }
 
         convertExistingLinks() {
+            // First, fix all broken corpus-link hrefs
+            document.querySelectorAll('.corpus-link').forEach(link => {
+                fixCorpusLinkHref(link);
+            });
+
             // Convert links with data-smart attribute
             document.querySelectorAll('a[data-smart]').forEach(link => {
                 if (!link.closest('.smart-link')) {
