@@ -245,6 +245,24 @@
     padding: var(--spacing-lg);
     transition: all var(--transition-base);
     cursor: pointer;
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Ensure text inside deity cards is properly contained */
+.deity-card p,
+.deity-card h3,
+.card p,
+.card h3 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.deity-card a,
+.card a {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .deity-card:hover,
@@ -444,10 +462,21 @@
 /* === Theme Picker UI === */
 
 .theme-picker {
+    position: relative;
+    z-index: var(--z-fixed);
+}
+
+/* Fallback if not in header (appended to body) */
+body > .theme-picker {
     position: fixed;
     top: var(--spacing-md);
     right: var(--spacing-md);
-    z-index: var(--z-fixed);
+}
+
+/* When inside header-content, position inline */
+.header-content > .theme-picker {
+    position: relative;
+    margin-left: auto;
 }
 
 .theme-button {
