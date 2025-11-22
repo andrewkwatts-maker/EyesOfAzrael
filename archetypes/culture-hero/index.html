@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Culture Hero - Universal Archetype</title>
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        /* Culture Hero Archetype Custom Theme Colors */
+        :root {
+            --archetype-primary: #f97316;
+            --archetype-primary-light: #fb923c;
+            --archetype-primary-dark: #ea580c;
+            --archetype-primary-darker: #c2410c;
+            --archetype-accent: #fdba74;
+            --archetype-surface: rgba(249, 115, 22, 0.05);
+            --archetype-border: rgba(249, 115, 22, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Breadcrumb Navigation */
+        .nav-breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-md);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-md);
+            flex-wrap: wrap;
+            font-size: var(--font-size-sm);
+        }
+
+        .nav-breadcrumb a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-breadcrumb a:hover {
+            color: var(--archetype-primary-light);
+        }
+
+        /* Hero Section */
+        header {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            background: var(--archetype-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-2xl);
+            border: 2px solid var(--archetype-border);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            font-family: var(--font-heading);
+            margin-bottom: var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary), var(--archetype-primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .archetype-definition {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            margin: var(--spacing-lg) 0;
+            padding: var(--spacing-lg);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--archetype-primary);
+        }
+
+        /* Glass Card Sections */
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 2px solid var(--color-border);
+            transition: all var(--transition-base);
+        }
+
+        section:hover {
+            background: var(--color-surface-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        h2 {
+            color: var(--archetype-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-3xl);
+            font-family: var(--font-heading);
+            border-bottom: 2px solid var(--archetype-border);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        h3 {
+            color: var(--archetype-accent);
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-xl);
+            font-family: var(--font-heading);
+        }
+
+        /* Styled Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-lg) 0;
+        }
+
+        th, td {
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--archetype-border);
+        }
+
+        th {
+            background: var(--archetype-surface);
+            color: var(--archetype-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        tr {
+            transition: background var(--transition-fast);
+        }
+
+        tr:hover {
+            background: var(--archetype-surface);
+        }
+
+        td a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        td a:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        /* Icon List */
+        .characteristics ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .characteristics li {
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin: var(--spacing-sm) 0;
+            background: var(--archetype-surface);
+            border-left: 3px solid var(--archetype-primary);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .characteristics li:hover {
+            background: rgba(249, 115, 22, 0.1);
+            transform: translateX(4px);
+        }
+
+        .characteristics li:before {
+            content: "&#x1F525; ";
+            color: var(--archetype-primary);
+            font-weight: var(--font-bold);
+            margin-right: var(--spacing-sm);
+        }
+
+        /* Expandable Sections */
+        .codex-search-section {
+            margin: var(--spacing-lg) 0;
+            border: 2px solid var(--archetype-border);
+            border-radius: var(--radius-md);
+            background: var(--archetype-surface);
+            overflow: hidden;
+        }
+
+        .codex-search-header {
+            padding: var(--spacing-md) var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary-dark) 0%, var(--archetype-primary-darker) 100%);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background var(--transition-base);
+        }
+
+        .codex-search-header:hover {
+            background: linear-gradient(135deg, var(--archetype-primary) 0%, var(--archetype-primary-dark) 100%);
+        }
+
+        .codex-search-header h3 {
+            margin: 0;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-semibold);
+            color: white;
+        }
+
+        .expand-icon {
+            font-size: var(--font-size-xl);
+            transition: transform var(--transition-base);
+        }
+
+        .expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .codex-search-content {
+            display: none;
+            padding: var(--spacing-md);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .codex-search-content.show {
+            display: block;
+        }
+
+        .search-result-item {
+            margin: var(--spacing-sm) 0;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-left: 3px solid var(--archetype-primary);
+            background: rgba(249, 115, 22, 0.08);
+            border-radius: var(--radius-sm);
+        }
+
+        .citation {
+            font-weight: var(--font-semibold);
+            color: var(--archetype-primary);
+            cursor: pointer;
+            margin-bottom: var(--spacing-xs);
+            transition: color var(--transition-fast);
+        }
+
+        .citation:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        .verse-text {
+            display: none;
+            margin-top: var(--spacing-xs);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 2px solid var(--archetype-accent);
+            font-style: italic;
+            color: var(--color-text-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        .verse-text.show {
+            display: block;
+        }
+
+        .book-reference {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+
+        p {
+            margin-bottom: var(--spacing-md);
+            line-height: var(--leading-relaxed);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-breadcrumb">
+            <a href="../../index.html">Home</a> <span>-></span>
+            <a href="../index.html">Universal Archetypes</a> <span>-></span>
+            <span>Culture Hero</span>
+        </div>
+
+        <header>
+            <h1>The Culture Hero Archetype</h1>
+            <div class="archetype-definition">
+                The Culture Hero is a mythological figure who transforms the primordial chaos into a habitable
+                world for humanity, often through theft, trickery, or great personal sacrifice. Unlike gods
+                who create from nothing, the culture hero typically steals essential gifts from divine powers -
+                fire, agriculture, writing, medicine - and delivers them to mortals. This archetype represents
+                the civilizing force that bridges the gap between divine abundance and human need.
+            </div>
+        </header>
+
+        <section class="characteristics">
+            <h2>Universal Characteristics</h2>
+            <ul>
+                <li><strong>Divine Theft:</strong> Steals essential gifts (fire, knowledge, tools) from the gods for humanity</li>
+                <li><strong>Transgressive Acts:</strong> Breaks divine law or cosmic order to benefit mortals</li>
+                <li><strong>Punishment and Suffering:</strong> Often endures terrible punishment for acts of benevolence</li>
+                <li><strong>Semi-Divine Nature:</strong> Typically a demigod, titan, or liminal figure between divine and mortal</li>
+                <li><strong>Civilizing Gifts:</strong> Brings agriculture, fire, writing, metallurgy, or other civilization-founding technologies</li>
+                <li><strong>Landscape Shaping:</strong> Often creates or modifies geography - mountains, rivers, islands</li>
+                <li><strong>Monster Slaying:</strong> Defeats primordial monsters or chaos beings threatening humanity</li>
+                <li><strong>Teaching Role:</strong> Instructs humanity in arts, crafts, laws, and sacred rituals</li>
+                <li><strong>Trickster Overlap:</strong> Frequently shares characteristics with the trickster archetype</li>
+                <li><strong>Sacrificial Dimension:</strong> Personal cost or sacrifice for the benefit of civilization</li>
+            </ul>
+        </section>
+
+        <section class="cross-tradition-table">
+            <h2>Culture Heroes Across Traditions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tradition</th>
+                        <th>Hero</th>
+                        <th>Primary Gift to Humanity</th>
+                        <th>Method of Acquisition</th>
+                        <th>Consequence/Fate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Greek</td>
+                        <td><a href="../../mythos/greek/deities/prometheus.html">Prometheus</a></td>
+                        <td>Fire, civilization, forethought</td>
+                        <td>Theft from Zeus/Olympus</td>
+                        <td>Eternally bound, liver eaten by eagle</td>
+                    </tr>
+                    <tr>
+                        <td>Polynesian</td>
+                        <td><a href="../../mythos/polynesian/deities/maui.html">Maui</a></td>
+                        <td>Fire, islands, slowed sun</td>
+                        <td>Trickery, fishing, snaring the sun</td>
+                        <td>Killed attempting to conquer death</td>
+                    </tr>
+                    <tr>
+                        <td>West African</td>
+                        <td><a href="../../mythos/african/deities/anansi.html">Anansi</a></td>
+                        <td>All stories, wisdom, trickery</td>
+                        <td>Cunning bargains with sky god</td>
+                        <td>Becomes owner of all stories</td>
+                    </tr>
+                    <tr>
+                        <td>Native American</td>
+                        <td><a href="../../mythos/native-american/deities/coyote.html">Coyote</a></td>
+                        <td>Fire, death, daylight</td>
+                        <td>Theft and trickery</td>
+                        <td>Often dies and resurrects</td>
+                    </tr>
+                    <tr>
+                        <td>Native American</td>
+                        <td><a href="../../mythos/native-american/deities/raven.html">Raven</a></td>
+                        <td>Sun, moon, stars, fire, water</td>
+                        <td>Shape-shifting, deception</td>
+                        <td>Feathers turned black by stolen sun</td>
+                    </tr>
+                    <tr>
+                        <td>Sumerian</td>
+                        <td><a href="../../mythos/sumerian/deities/enki.html">Enki/Ea</a></td>
+                        <td>Civilization (me), wisdom, water</td>
+                        <td>Kept from destruction god Enlil</td>
+                        <td>Becomes patron of humanity</td>
+                    </tr>
+                    <tr>
+                        <td>Egyptian</td>
+                        <td><a href="../../mythos/egyptian/deities/thoth.html">Thoth</a></td>
+                        <td>Writing, magic, wisdom, moon</td>
+                        <td>Divine creation/invention</td>
+                        <td>Becomes scribe of gods</td>
+                    </tr>
+                    <tr>
+                        <td>Chinese</td>
+                        <td><a href="../../mythos/chinese/figures/fuxi.html">Fuxi</a></td>
+                        <td>Trigrams, fishing, writing, music</td>
+                        <td>Divine observation, invention</td>
+                        <td>First of Three Sovereigns</td>
+                    </tr>
+                    <tr>
+                        <td>Japanese</td>
+                        <td><a href="../../mythos/japanese/deities/okuninushi.html">Okuninushi</a></td>
+                        <td>Agriculture, medicine, civilization</td>
+                        <td>Heroic trials, gifts from underworld</td>
+                        <td>Rules unseen world</td>
+                    </tr>
+                    <tr>
+                        <td>Norse</td>
+                        <td><a href="../../mythos/norse/deities/odin.html">Odin</a></td>
+                        <td>Runes, poetry, wisdom</td>
+                        <td>Self-sacrifice, theft of mead</td>
+                        <td>Wounded but gains cosmic knowledge</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/greek/deities/prometheus.html" style="color: var(--archetype-primary); text-decoration: none;">Prometheus</a> (Greek Tradition)</h2>
+            <p>
+                Prometheus ("Forethought") is the quintessential culture hero of Western mythology. A Titan
+                who sided with Zeus against his own kind, he nonetheless defied the Olympians to steal fire
+                for humanity, enduring eternal punishment as a result.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>The Theft of Fire</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Hesiod, Theogony 561-569
+                        </div>
+                        <div class="verse-text">
+                            "But the good son of Iapetos deceived him and stole the far-seen gleam of unwearying fire
+                            in a hollow fennel-stalk. And Zeus who thunders on high was stung in spirit, and his
+                            heart was angered when he saw among men the far-seen ray of fire. Forthwith he made an
+                            evil thing for men as the price of fire; for the very famous Limping God formed of earth
+                            the likeness of a modest maid, as the son of Kronos willed."
+                        </div>
+                        <div class="book-reference">
+                            Source: Hesiod, Theogony (c. 700 BCE)
+                        </div>
+                    </div>
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Hesiod, Works and Days 47-58
+                        </div>
+                        <div class="verse-text">
+                            "For the gods keep hidden from men the means of life. Else you would easily do work
+                            enough in a day to supply you for a full year even without working; soon would you
+                            put away your rudder over the smoke, and the fields worked by ox and sturdy mule
+                            would run to waste. But Zeus in the anger of his heart hid it, because Prometheus
+                            the crafty deceived him; therefore he planned sorrow and mischief against men."
+                        </div>
+                        <div class="book-reference">
+                            Source: Hesiod, Works and Days (c. 700 BCE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>The Punishment of Prometheus</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Aeschylus, Prometheus Bound 1-30
+                        </div>
+                        <div class="verse-text">
+                            "We have come to the plain at the end of the earth, the Scythian tract, an untrodden
+                            solitude. Hephaistos, yours is the charge to observe the mandates laid upon you by
+                            the Father - to clamp this miscreant upon the high craggy rocks in fetters of binding
+                            adamant that cannot be broken. For your own flower, the gleam of fire that devises
+                            all, he has purloined and bestowed upon mortals... For this offence he must requite
+                            the gods, that he may learn to bear with the sovereignty of Zeus and cease his
+                            man-loving ways."
+                        </div>
+                        <div class="book-reference">
+                            Source: Aeschylus, Prometheus Bound (c. 450 BCE)
+                        </div>
+                    </div>
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Aeschylus, Prometheus Bound 436-471
+                        </div>
+                        <div class="verse-text">
+                            "Hear rather the miseries that beset mankind - how they were witless before and I made
+                            them have sense and endowed them with reason... First of all, though they had eyes
+                            to see, they saw to no avail; they had ears, but understood not... They did everything
+                            without judgment, until I taught them to discern the rising of the stars and their
+                            settings... I found for them numbers, that most excellent device, and the combining
+                            of letters, the creative mother of the Muses' arts. I was the first to yoke beasts
+                            to serve under the saddle... Besides, who else can claim to have found the mariner's
+                            flaxen-winged car that roams the sea? Such arts I devised for men."
+                        </div>
+                        <div class="book-reference">
+                            Source: Aeschylus, Prometheus Bound (c. 450 BCE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/polynesian/deities/maui.html" style="color: var(--archetype-primary); text-decoration: none;">Maui</a> (Polynesian Tradition)</h2>
+            <p>
+                Maui is the great culture hero of Polynesia, appearing in myths from Hawaii to New Zealand.
+                His exploits include fishing up islands from the sea, snaring the sun to lengthen the day,
+                stealing fire from the underworld, and his fatal attempt to defeat death itself.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Maui Snares the Sun</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Maori Traditional Account
+                        </div>
+                        <div class="verse-text">
+                            "In those days the sun used to race across the sky so fast that people had no time to
+                            cook their food or dry their bark cloth. Maui's mother Taranga complained that there
+                            was not enough light for her work. So Maui braided strong ropes from the sacred hair
+                            of his sister Hina-ika and went to the edge of the pit from which the sun rises.
+                            When the sun began to climb out, Maui cast his ropes and snared him. With his
+                            grandmother's enchanted jawbone he beat the sun until it agreed to travel slowly.
+                            And from that day the sun moves slowly enough for all work to be done."
+                        </div>
+                        <div class="book-reference">
+                            Source: Traditional Maori narrative
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Maui Steals Fire</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Hawaiian Traditional Account
+                        </div>
+                        <div class="verse-text">
+                            "Maui extinguished all the fires in the world so that he might have an excuse to visit
+                            Mahu-ika, the fire goddess who lived in the underworld. He found her in her dwelling
+                            and asked for fire. She pulled out one of her burning fingernails and gave it to him.
+                            He secretly extinguished it and returned for another, and another, until she had given
+                            away all her fingernails and toenails except one. Realizing his trickery, she threw
+                            the last nail at him in anger. Fire spread everywhere, and Maui called upon the rain
+                            to save him. The fire took refuge in certain trees, and from that day forward, people
+                            could make fire by rubbing those sacred woods together."
+                        </div>
+                        <div class="book-reference">
+                            Source: Traditional Hawaiian narrative
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/african/deities/anansi.html" style="color: var(--archetype-primary); text-decoration: none;">Anansi</a> (West African/Caribbean Tradition)</h2>
+            <p>
+                Anansi the Spider is the great culture hero and trickster of the Akan people, whose stories
+                spread throughout the African diaspora. He acquired ownership of all stories through cunning
+                and perseverance, becoming the patron of storytelling itself.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Anansi Buys All Stories</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Akan Traditional Account
+                        </div>
+                        <div class="verse-text">
+                            "In the beginning, all stories belonged to Nyame, the Sky God. Anansi went to Nyame
+                            and asked to buy the stories. Nyame laughed and said the price was three impossible
+                            things: Onini the Python, Osebo the Leopard, and the Mmoboro Hornets. Many had tried
+                            and failed, but Anansi was clever. He captured Onini by arguing about his length
+                            until the python stretched out along a bamboo pole to be measured, then tied him
+                            fast. He caught Osebo in a pit trap and offered to help him out with his webs,
+                            binding him tight. He captured the hornets by sprinkling them with water and
+                            offering them shelter in a gourd. When Anansi brought all three to Nyame, the
+                            Sky God kept his word. From that day on, all stories are called 'Spider Stories'
+                            and belong to Anansi."
+                        </div>
+                        <div class="book-reference">
+                            Source: Traditional Akan/Ashanti narrative
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Cross-Cultural Analysis</h2>
+
+            <h3>The Fire-Bringer Pattern</h3>
+            <p>
+                The theft of fire for humanity appears across nearly every mythology, suggesting a universal
+                recognition of fire as the foundation of civilization:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Prometheus:</strong> Steals fire from Olympus in a fennel stalk</li>
+                <li><strong>Maui:</strong> Tricks the fire goddess Mahu-ika for her burning nails</li>
+                <li><strong>Coyote/Raven:</strong> Steal fire from hoarding spirits or gods</li>
+                <li><strong>Rabbit (Cherokee):</strong> Carries fire from the Thunderers on his ears</li>
+                <li><strong>Crow (Australian Aboriginal):</strong> Steals fire from selfish keepers</li>
+            </ul>
+
+            <h3>Culture Hero vs. Creator God</h3>
+            <p>
+                The culture hero is distinct from the creator deity in important ways:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Creator:</strong> Makes the world from nothing or chaos through divine power</li>
+                <li><strong>Culture Hero:</strong> Transforms or improves an already-existing world for human habitation</li>
+                <li><strong>Creator:</strong> Typically distant, transcendent, uninvolved with humanity</li>
+                <li><strong>Culture Hero:</strong> Active advocate for humanity, often at personal cost</li>
+                <li><strong>Creator:</strong> Source of cosmic order and divine law</li>
+                <li><strong>Culture Hero:</strong> May break divine law to benefit mortals</li>
+            </ul>
+
+            <h3>The Cost of Civilization</h3>
+            <p>
+                Culture heroes frequently suffer for their gifts to humanity, suggesting a mythological
+                awareness that civilization comes at a price:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Prometheus:</strong> Eternal torture, liver eaten daily</li>
+                <li><strong>Maui:</strong> Death while attempting to defeat mortality</li>
+                <li><strong>Odin:</strong> Self-hanging, eye sacrifice for wisdom</li>
+                <li><strong>Jesus:</strong> Crucifixion to redeem humanity (in Christian framing)</li>
+            </ul>
+
+            <h3>Trickster-Hero Overlap</h3>
+            <p>
+                Many culture heroes share characteristics with tricksters, using cunning rather than force:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Deception:</strong> Prometheus deceives Zeus; Anansi tricks everyone</li>
+                <li><strong>Shape-shifting:</strong> Raven and Coyote transform to accomplish theft</li>
+                <li><strong>Boundary-crossing:</strong> Moving between divine and mortal realms</li>
+                <li><strong>Rule-breaking:</strong> Violating cosmic order for human benefit</li>
+            </ul>
+        </section>
+
+        <!-- DEITIES EMBODYING THIS ARCHETYPE - Visual Cards -->
+        <section style="margin-top: var(--spacing-3xl);">
+            <h2 style="text-align: center; margin-bottom: var(--spacing-md);">Culture Heroes Across Traditions</h2>
+            <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: var(--spacing-xl);">
+                Click any hero to explore their full mythology
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--spacing-lg);">
+                <a href="../../mythos/greek/deities/prometheus.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F525;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Prometheus</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Greek</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Fire-Bringer, Titan Champion</div>
+                </a>
+                <a href="../../mythos/polynesian/deities/maui.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F3A3;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Maui</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Polynesian</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Island Fisher, Sun Snarer</div>
+                </a>
+                <a href="../../mythos/african/deities/anansi.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F577;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Anansi</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">West African</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Spider, Story Owner</div>
+                </a>
+                <a href="../../mythos/native-american/deities/coyote.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F43A;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Coyote</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Native American</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Fire Thief, Sacred Fool</div>
+                </a>
+                <a href="../../mythos/sumerian/deities/enki.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F4A7;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Enki</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Sumerian</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Keeper of Wisdom, Friend of Man</div>
+                </a>
+            </div>
+        </section>
+
+        <!-- RELATED ARCHETYPES -->
+        <section style="margin-top: var(--spacing-3xl);">
+            <h2 style="text-align: center; margin-bottom: var(--spacing-md);">Related Archetypes</h2>
+            <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: var(--spacing-xl);">
+                The Culture Hero connects with these universal patterns
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+                <a href="../trickster/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">&#x1F0CF;</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Trickster</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Many culture heroes use trickster methods to obtain gifts for humanity</p>
+                </a>
+                <a href="../story-archetypes/hero-journey/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">&#x1F5E1;</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Hero's Journey</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">The culture hero's quest follows the monomyth pattern</p>
+                </a>
+                <a href="../divine-smith/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">&#x1F528;</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Divine Smith</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Culture heroes often bring metallurgy and crafting to humanity</p>
+                </a>
+                <a href="../dying-god/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">&#x1F331;</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Dying God</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Culture heroes often suffer or die for their gifts to humanity</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- SEE ALSO / EXPLORE RELATED -->
+        <div style="margin-top: var(--spacing-4xl); text-align: center; padding: var(--spacing-xl); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border);">
+            <h3 style="color: var(--archetype-primary); margin-bottom: var(--spacing-lg);">See Also</h3>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap; margin-bottom: var(--spacing-xl);">
+                <a href="../trickster/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Trickster</a>
+                <a href="../wisdom/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Wisdom</a>
+                <a href="../divine-smith/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Divine Smith</a>
+                <a href="../sky-father/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Sky Father</a>
+            </div>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+                <a href="../elemental-archetypes/fire/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Fire Element</a>
+                <a href="../story-archetypes/creation-myth/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Creation Myth</a>
+                <a href="../journey-archetypes/quest-journey/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Quest Journey</a>
+                <a href="../cross-reference-matrix.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Cross-Reference Matrix</a>
+            </div>
+            <div style="margin-top: var(--spacing-xl);">
+                <a href="../index.html" style="display: inline-block; padding: var(--spacing-md) var(--spacing-2xl); background: linear-gradient(135deg, var(--archetype-primary), var(--archetype-primary-dark)); color: white; text-decoration: none; border-radius: var(--radius-lg); font-weight: var(--font-semibold);">All Archetypes</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCodexSearch(header) {
+            const section = header.parentElement;
+            const content = section.querySelector('.codex-search-content');
+            section.classList.toggle('expanded');
+            content.classList.toggle('show');
+        }
+        function toggleVerse(citation) {
+            const verseText = citation.nextElementSibling;
+            verseText.classList.toggle('show');
+        }
+    </script>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>

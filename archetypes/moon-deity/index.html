@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moon Deity - Universal Archetype</title>
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        /* Moon Deity Archetype Custom Theme Colors */
+        :root {
+            --archetype-primary: #7f8c8d;
+            --archetype-primary-light: #bdc3c7;
+            --archetype-primary-dark: #5d6d7e;
+            --archetype-primary-darker: #2c3e50;
+            --archetype-accent: #9b59b6;
+            --archetype-surface: rgba(127, 140, 141, 0.05);
+            --archetype-border: rgba(127, 140, 141, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Breadcrumb Navigation */
+        .nav-breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-md);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-md);
+            flex-wrap: wrap;
+            font-size: var(--font-size-sm);
+        }
+
+        .nav-breadcrumb a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-breadcrumb a:hover {
+            color: var(--archetype-primary-light);
+        }
+
+        /* Hero Section */
+        header {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            background: var(--archetype-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-2xl);
+            border: 2px solid var(--archetype-border);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            font-family: var(--font-heading);
+            margin-bottom: var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary-light), var(--archetype-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .archetype-definition {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            margin: var(--spacing-lg) 0;
+            padding: var(--spacing-lg);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--archetype-primary);
+        }
+
+        /* Glass Card Sections */
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 2px solid var(--color-border);
+            transition: all var(--transition-base);
+        }
+
+        section:hover {
+            background: var(--color-surface-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        h2 {
+            color: var(--archetype-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-3xl);
+            font-family: var(--font-heading);
+            border-bottom: 2px solid var(--archetype-border);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        h3 {
+            color: var(--archetype-accent);
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-xl);
+            font-family: var(--font-heading);
+        }
+
+        /* Styled Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-lg) 0;
+        }
+
+        th, td {
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--archetype-border);
+        }
+
+        th {
+            background: var(--archetype-surface);
+            color: var(--archetype-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        tr {
+            transition: background var(--transition-fast);
+        }
+
+        tr:hover {
+            background: var(--archetype-surface);
+        }
+
+        td a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        td a:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        /* Icon List */
+        .characteristics ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .characteristics li {
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin: var(--spacing-sm) 0;
+            background: var(--archetype-surface);
+            border-left: 3px solid var(--archetype-primary);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .characteristics li:hover {
+            background: rgba(127, 140, 141, 0.1);
+            transform: translateX(4px);
+        }
+
+        .characteristics li:before {
+            content: ") ";
+            color: var(--archetype-primary);
+            font-weight: var(--font-bold);
+            margin-right: var(--spacing-sm);
+        }
+
+        /* Expandable Sections */
+        .codex-search-section {
+            margin: var(--spacing-lg) 0;
+            border: 2px solid var(--archetype-border);
+            border-radius: var(--radius-md);
+            background: var(--archetype-surface);
+            overflow: hidden;
+        }
+
+        .codex-search-header {
+            padding: var(--spacing-md) var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary-dark) 0%, var(--archetype-primary-darker) 100%);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background var(--transition-base);
+        }
+
+        .codex-search-header:hover {
+            background: linear-gradient(135deg, var(--archetype-primary) 0%, var(--archetype-primary-dark) 100%);
+        }
+
+        .codex-search-header h3 {
+            margin: 0;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-semibold);
+            color: white;
+        }
+
+        .expand-icon {
+            font-size: var(--font-size-xl);
+            transition: transform var(--transition-base);
+        }
+
+        .expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .codex-search-content {
+            display: none;
+            padding: var(--spacing-md);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .codex-search-content.show {
+            display: block;
+        }
+
+        .search-result-item {
+            margin: var(--spacing-sm) 0;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-left: 3px solid var(--archetype-primary);
+            background: rgba(127, 140, 141, 0.08);
+            border-radius: var(--radius-sm);
+        }
+
+        .citation {
+            font-weight: var(--font-semibold);
+            color: var(--archetype-primary);
+            cursor: pointer;
+            margin-bottom: var(--spacing-xs);
+            transition: color var(--transition-fast);
+        }
+
+        .citation:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        .verse-text {
+            display: none;
+            margin-top: var(--spacing-xs);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 2px solid var(--archetype-accent);
+            font-style: italic;
+            color: var(--color-text-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        .verse-text.show {
+            display: block;
+        }
+
+        .book-reference {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+
+        .match-score {
+            color: var(--archetype-accent);
+            font-weight: var(--font-semibold);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: var(--spacing-md);
+            }
+            h1 {
+                font-size: var(--font-size-3xl);
+            }
+            table {
+                font-size: var(--font-size-sm);
+            }
+            th, td {
+                padding: var(--spacing-sm);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-breadcrumb">
+            <a href="../../index.html">Home</a> <span>-></span>
+            <a href="../index.html">Universal Archetypes</a> <span>-></span>
+            <span>Moon Deity</span>
+        </div>
+
+        <header>
+            <div class="header-content">
+                <h1>The Moon Deity Archetype</h1>
+            </div>
+        </header>
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../index.html">Home</a> -> <a href="../index.html">Archetypes</a> -> <a href="index.html">Moon Deity</a>
+        </nav>
+
+        <div class="archetype-definition">
+            <p>
+                <strong>The Moon Deity</strong> embodies the mysterious, cyclical, and transformative aspects of celestial divinity.
+                Unlike the constant sun, the moon visibly changes—waxing from invisibility to fullness, waning back to darkness,
+                then being "reborn." This makes the moon the natural symbol of cycles, change, time measurement, fertility, and
+                the hidden or unconscious realms. Notably, moon deities can be either male or female depending on culture:
+                feminine in Greek (<a href="../../mythos/greek/deities/selene.html" style="color: var(--archetype-primary);">Selene</a>),
+                masculine in Mesopotamian (<a href="../../mythos/sumerian/deities/nanna.html" style="color: var(--archetype-primary);">Nanna</a>/Sin)
+                and Hindu (<a href="../../mythos/hindu/deities/chandra.html" style="color: var(--archetype-primary);">Chandra</a>) traditions.
+            </p>
+        </div>
+
+        <section class="characteristics">
+            <h2>Universal Characteristics</h2>
+            <ul>
+                <li><strong>Cyclical Transformation:</strong> The moon's phases embody death-rebirth—waxing (growth), full (completion), waning (decline), new (death/rebirth)</li>
+                <li><strong>Time Measurement:</strong> Original calendar basis; "month" derives from "moon"—lunar cycles structure ritual time</li>
+                <li><strong>Feminine Association (Many Cultures):</strong> Menstrual cycle synchronicity, fertility, pregnancy (~9 moons), women's mysteries</li>
+                <li><strong>Masculine Association (Other Cultures):</strong> Father of the sun (Mesopotamia), wisdom keeper, cosmic regulator</li>
+                <li><strong>Night Illumination:</strong> Light in darkness, guide for travelers, hope in the night hours</li>
+                <li><strong>Tides and Waters:</strong> Controls ocean tides, associated with waters, rain, and bodily fluids</li>
+                <li><strong>Madness and Inspiration:</strong> "Lunacy" from luna—moon governs altered states, prophecy, and divine madness</li>
+                <li><strong>Hidden Knowledge:</strong> Unlike the revealing sun, moon illuminates mysteries and secrets</li>
+                <li><strong>Magic and Sorcery:</strong> Lunar phases govern magical workings; waxing for increase, waning for decrease</li>
+                <li><strong>Triple Goddess:</strong> In feminine form, often manifests as maiden-mother-crone reflecting lunar phases</li>
+            </ul>
+        </section>
+
+        <section class="cross-tradition-table">
+            <h2>Deities Embodying This Archetype</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tradition</th>
+                        <th>Deity</th>
+                        <th>Gender</th>
+                        <th>Key Attributes</th>
+                        <th>Primary Domains</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Greek</td>
+                        <td><a href="../../mythos/greek/deities/selene.html">Selene</a></td>
+                        <td>Female</td>
+                        <td>Titan moon goddess, silver chariot, lover of Endymion</td>
+                        <td>Moon, night, cycles, love</td>
+                    </tr>
+                    <tr>
+                        <td>Greek</td>
+                        <td><a href="../../mythos/greek/deities/artemis.html">Artemis</a></td>
+                        <td>Female</td>
+                        <td>Lunar huntress, virgin goddess, protector of women</td>
+                        <td>Moon, hunt, wilderness, childbirth</td>
+                    </tr>
+                    <tr>
+                        <td>Greek</td>
+                        <td><a href="../../mythos/greek/deities/hecate.html">Hecate</a></td>
+                        <td>Female</td>
+                        <td>Triple goddess, dark moon, crossroads, magic</td>
+                        <td>Magic, crossroads, ghosts, witchcraft</td>
+                    </tr>
+                    <tr>
+                        <td>Roman</td>
+                        <td><a href="../../mythos/roman/deities/luna.html">Luna</a></td>
+                        <td>Female</td>
+                        <td>Divine embodiment of moon, chariot driver</td>
+                        <td>Moon, months, cycles</td>
+                    </tr>
+                    <tr>
+                        <td>Egyptian</td>
+                        <td><a href="../../mythos/egyptian/deities/thoth.html">Thoth</a></td>
+                        <td>Male</td>
+                        <td>Ibis-headed scribe, moon calculator, wisdom keeper</td>
+                        <td>Moon, wisdom, writing, magic, time</td>
+                    </tr>
+                    <tr>
+                        <td>Egyptian</td>
+                        <td><a href="../../mythos/egyptian/deities/khonsu.html">Khonsu</a></td>
+                        <td>Male</td>
+                        <td>Traveler, youth with moon disc, healer</td>
+                        <td>Moon, time, healing, protection</td>
+                    </tr>
+                    <tr>
+                        <td>Hindu</td>
+                        <td><a href="../../mythos/hindu/deities/chandra.html">Chandra/Soma</a></td>
+                        <td>Male</td>
+                        <td>Silver chariot, sacred drink, twenty-seven wives (nakshatras)</td>
+                        <td>Moon, fertility, plants, mind</td>
+                    </tr>
+                    <tr>
+                        <td>Sumerian</td>
+                        <td><a href="../../mythos/sumerian/deities/nanna.html">Nanna/Sin</a></td>
+                        <td>Male</td>
+                        <td>Father of Utu/Shamash and Inanna, wisdom god</td>
+                        <td>Moon, wisdom, cattle, time</td>
+                    </tr>
+                    <tr>
+                        <td>Japanese</td>
+                        <td><a href="../../mythos/japanese/deities/tsukuyomi.html">Tsukuyomi</a></td>
+                        <td>Male</td>
+                        <td>Sibling of Amaterasu, separated by killing food goddess</td>
+                        <td>Moon, night, time</td>
+                    </tr>
+                    <tr>
+                        <td>Chinese</td>
+                        <td><a href="../../mythos/chinese/deities/chang-e.html">Chang'e</a></td>
+                        <td>Female</td>
+                        <td>Lady in the moon, immortality seeker, jade rabbit companion</td>
+                        <td>Moon, immortality, beauty</td>
+                    </tr>
+                    <tr>
+                        <td>Aztec</td>
+                        <td><a href="../../mythos/aztec/deities/coyolxauhqui.html">Coyolxauhqui</a></td>
+                        <td>Female</td>
+                        <td>Dismembered moon goddess, golden bells, defeated by Huitzilopochtli</td>
+                        <td>Moon, Milky Way, darkness</td>
+                    </tr>
+                    <tr>
+                        <td>Celtic</td>
+                        <td><a href="../../mythos/celtic/deities/arianrhod.html">Arianrhod</a></td>
+                        <td>Female</td>
+                        <td>Silver wheel, star goddess, initiation mysteries</td>
+                        <td>Moon, stars, fate, reincarnation</td>
+                    </tr>
+                    <tr>
+                        <td>Norse</td>
+                        <td><a href="../../mythos/norse/deities/mani.html">Mani</a></td>
+                        <td>Male</td>
+                        <td>Moon personification, brother of Sol, pursued by wolf Hati</td>
+                        <td>Moon, night, time</td>
+                    </tr>
+                    <tr>
+                        <td>Incan</td>
+                        <td><a href="../../mythos/incan/deities/mama-quilla.html">Mama Quilla</a></td>
+                        <td>Female</td>
+                        <td>Sister-wife of Inti, protector of women, silver disc</td>
+                        <td>Moon, women, calendar, marriage</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/egyptian/deities/thoth.html" style="color: var(--archetype-primary); text-decoration: none;">Thoth</a> (Egyptian Tradition)</h2>
+            <p>
+                <a href="../../mythos/egyptian/deities/thoth.html" style="color: var(--archetype-primary); text-decoration: none;">Thoth</a>
+                represents the moon as keeper of sacred knowledge. He invented writing, calculated time, maintained cosmic
+                order through measurement, and served as scribe of the gods and judge of the dead.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Thoth: Lord of Time and Writing</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Book of the Dead: Thoth the Scribe
+                        </div>
+                        <div class="verse-text">
+                            "I am <a href="../../mythos/egyptian/deities/thoth.html" style="color: var(--archetype-accent);">Thoth</a>,
+                            the skilled scribe whose hands are pure, a possessor of purity, who drives away evil, who writes
+                            what is true, who detests falsehood, whose pen protects the Lord of All... I am
+                            <a href="../../mythos/egyptian/deities/thoth.html" style="color: var(--archetype-accent);">Thoth</a>,
+                            who vindicated <a href="../../mythos/egyptian/deities/horus.html" style="color: var(--archetype-accent);">Horus</a>
+                            against his enemies. I am
+                            <a href="../../mythos/egyptian/deities/thoth.html" style="color: var(--archetype-accent);">Thoth</a>,
+                            who judged between the Two Combatants in that great trial in the House of the Prince in Heliopolis."
+                        </div>
+                        <div class="book-reference">
+                            Source: Egyptian Book of the Dead, Chapter 182 (c. 1550-50 BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Thoth Gambling with the Moon
+                        </div>
+                        <div class="verse-text">
+                            "When <a href="../../mythos/egyptian/deities/ra.html" style="color: var(--archetype-accent);">Ra</a>
+                            cursed <a href="../../mythos/egyptian/deities/nut.html" style="color: var(--archetype-accent);">Nut</a>
+                            that she could give birth on no day of the year,
+                            <a href="../../mythos/egyptian/deities/thoth.html" style="color: var(--archetype-accent);">Thoth</a>
+                            played draughts with the Moon and won from her a seventy-second part of each of her illuminations.
+                            From this light he composed five intercalary days, which he added to the three hundred and sixty,
+                            and on these days <a href="../../mythos/egyptian/deities/nut.html" style="color: var(--archetype-accent);">Nut</a>
+                            was able to give birth to <a href="../../mythos/egyptian/deities/osiris.html" style="color: var(--archetype-accent);">Osiris</a>,
+                            <a href="../../mythos/egyptian/deities/horus.html" style="color: var(--archetype-accent);">Horus the Elder</a>,
+                            <a href="../../mythos/egyptian/deities/set.html" style="color: var(--archetype-accent);">Set</a>,
+                            <a href="../../mythos/egyptian/deities/isis.html" style="color: var(--archetype-accent);">Isis</a>, and
+                            <a href="../../mythos/egyptian/deities/nephthys.html" style="color: var(--archetype-accent);">Nephthys</a>.
+                            Thus the moon wanes each month because
+                            <a href="../../mythos/egyptian/deities/thoth.html" style="color: var(--archetype-accent);">Thoth</a>
+                            took from her to create time itself."
+                        </div>
+                        <div class="book-reference">
+                            Source: Plutarch, De Iside et Osiride, Chapter 12 (c. 100 CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/hindu/deities/chandra.html" style="color: var(--archetype-primary); text-decoration: none;">Chandra/Soma</a> (Hindu Tradition)</h2>
+            <p>
+                <a href="../../mythos/hindu/deities/chandra.html" style="color: var(--archetype-primary); text-decoration: none;">Chandra</a>
+                (the moon) and <a href="../../mythos/hindu/deities/soma.html" style="color: var(--archetype-primary); text-decoration: none;">Soma</a>
+                (the sacred drink) are closely identified. The moon contains the soma that gods drink for immortality,
+                and its phases reflect the drink being consumed and replenished.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Vedic Hymns to Soma/Chandra</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Rigveda 9.1.1-5: Soma Pavamana
+                        </div>
+                        <div class="verse-text">
+                            "In sweetest and most gladdening stream flow pure, O
+                            <a href="../../mythos/hindu/deities/soma.html" style="color: var(--archetype-accent);">Soma</a>,
+                            on thy way, pressed out for
+                            <a href="../../mythos/hindu/deities/indra.html" style="color: var(--archetype-accent);">Indra</a>,
+                            for his drink. Fiend-queller, Friend of all men,
+                            <a href="../../mythos/hindu/deities/soma.html" style="color: var(--archetype-accent);">Soma</a>
+                            flow on to bring us wealth; as a steed to the pole, draw the car to bear the gift.
+                            <a href="../../mythos/hindu/deities/soma.html" style="color: var(--archetype-accent);">Soma</a>,
+                            flow on for wealth and strength, drive away our enemies, flow purified into the sieve...
+                            We have drunk <a href="../../mythos/hindu/deities/soma.html" style="color: var(--archetype-accent);">Soma</a>,
+                            we have become immortal, we have gone to the light, we have found the gods."
+                        </div>
+                        <div class="book-reference">
+                            Source: Rigveda, Mandala 9, Hymn 1 (c. 1500-1200 BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Chandra's Twenty-Seven Wives
+                        </div>
+                        <div class="verse-text">
+                            "<a href="../../mythos/hindu/deities/chandra.html" style="color: var(--archetype-accent);">Chandra</a>
+                            married the twenty-seven daughters of
+                            <a href="../../mythos/hindu/deities/daksha.html" style="color: var(--archetype-accent);">Daksha</a>—
+                            these are the twenty-seven nakshatras, the lunar mansions through which the moon passes each month.
+                            But <a href="../../mythos/hindu/deities/chandra.html" style="color: var(--archetype-accent);">Chandra</a>
+                            favored Rohini above all others, spending all his time with her. The other wives complained to their
+                            father <a href="../../mythos/hindu/deities/daksha.html" style="color: var(--archetype-accent);">Daksha</a>,
+                            who cursed the moon to waste away. The gods interceded, and the curse was modified: the moon would
+                            wax and wane, dying and being reborn each month, passing through each wife's mansion in turn. Thus
+                            the moon's phases reflect his equal attention to all the nakshatras."
+                        </div>
+                        <div class="book-reference">
+                            Source: Shiva Purana, Vidyeshvara Samhita (c. 700-1100 CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/greek/deities/selene.html" style="color: var(--archetype-primary); text-decoration: none;">Selene</a> and <a href="../../mythos/greek/deities/hecate.html" style="color: var(--archetype-primary); text-decoration: none;">Hecate</a> (Greek Tradition)</h2>
+            <p>
+                Greek tradition developed multiple moon goddesses:
+                <a href="../../mythos/greek/deities/selene.html" style="color: var(--archetype-primary); text-decoration: none;">Selene</a>
+                (full moon, romantic love),
+                <a href="../../mythos/greek/deities/artemis.html" style="color: var(--archetype-primary); text-decoration: none;">Artemis</a>
+                (crescent moon, wilderness, virginity), and
+                <a href="../../mythos/greek/deities/hecate.html" style="color: var(--archetype-primary); text-decoration: none;">Hecate</a>
+                (dark moon, magic, crossroads).
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Selene and Endymion</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Homeric Hymn to Selene
+                        </div>
+                        <div class="verse-text">
+                            "Muses, sweet-speaking daughters of
+                            <a href="../../mythos/greek/deities/zeus.html" style="color: var(--archetype-accent);">Zeus</a>
+                            Kronides, skilled in song, tell of the long-winged
+                            <a href="../../mythos/greek/deities/selene.html" style="color: var(--archetype-accent);">Selene</a>!
+                            From her immortal head a radiance is shown from heaven and embraces earth; and great is the beauty
+                            that arises from her shining light. The air, unlit before, glows with the light of her golden crown,
+                            and her rays beam clear whensoever bright
+                            <a href="../../mythos/greek/deities/selene.html" style="color: var(--archetype-accent);">Selene</a>,
+                            having bathed her lovely body in the waters of Ocean, and donned her far-gleaming raiment, and yoked
+                            her strong-necked, shining steeds, drives on her long-maned horses at full speed."
+                        </div>
+                        <div class="book-reference">
+                            Source: Homeric Hymn 32: To Selene (c. 7th-6th century BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            The Sleeping Shepherd
+                        </div>
+                        <div class="verse-text">
+                            "<a href="../../mythos/greek/deities/selene.html" style="color: var(--archetype-accent);">Selene</a>
+                            fell in love with the beautiful shepherd
+                            <a href="../../mythos/greek/heroes/endymion.html" style="color: var(--archetype-accent);">Endymion</a>
+                            and visited him nightly on Mount Latmus. She asked
+                            <a href="../../mythos/greek/deities/zeus.html" style="color: var(--archetype-accent);">Zeus</a>
+                            to grant him eternal sleep so that he would never age or die. There he sleeps forever in a cave,
+                            beautiful and ageless, and each night
+                            <a href="../../mythos/greek/deities/selene.html" style="color: var(--archetype-accent);">Selene</a>
+                            descends from her chariot to gaze upon him and lie beside him. By him she bore fifty daughters,
+                            symbolizing the fifty lunar months of an Olympiad."
+                        </div>
+                        <div class="book-reference">
+                            Source: Apollodorus, Bibliotheca 1.7.5 (c. 1st-2nd century CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Hecate: Dark Moon and Magic</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Hesiod, Theogony: Hecate's Honors
+                        </div>
+                        <div class="verse-text">
+                            "<a href="../../mythos/greek/deities/hecate.html" style="color: var(--archetype-accent);">Hecate</a>
+                            whom <a href="../../mythos/greek/deities/zeus.html" style="color: var(--archetype-accent);">Zeus</a>
+                            Kronides honored above all. He gave her splendid gifts—to have a share of the earth and of the
+                            unfruitful sea. She also has a share of honor in starry heaven, and is honored most of all by the
+                            deathless gods... For all who were born of Earth and Heaven who had honors, she has them all.
+                            Nor did the son of Kronos do her violence or take away what she received from the earlier gods
+                            called Titans, but she keeps the lot she had from the first division."
+                        </div>
+                        <div class="book-reference">
+                            Source: Hesiod, Theogony, lines 411-428 (c. 700 BCE)
+                        </div>
+                    </div>
+
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Hecate at the Crossroads
+                        </div>
+                        <div class="verse-text">
+                            "<a href="../../mythos/greek/deities/hecate.html" style="color: var(--archetype-accent);">Hecate</a>
+                            of the crossroads, three-formed, who holds the keys to all the universe... She appears on the dark
+                            nights of the month, when the moon is hidden, and her approach is signaled by the barking of dogs.
+                            Offerings are left at crossroads on the dark moon—the deipna of
+                            <a href="../../mythos/greek/deities/hecate.html" style="color: var(--archetype-accent);">Hecate</a>:
+                            garlic, fish, eggs, honey cakes, and dogs. She guides
+                            <a href="../../mythos/greek/deities/persephone.html" style="color: var(--archetype-accent);">Persephone</a>
+                            from the underworld each spring, torch in hand, and receives the souls of the dead."
+                        </div>
+                        <div class="book-reference">
+                            Source: Greek Magical Papyri and various sources (c. 2nd century BCE - 5th century CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Symbolic Analysis: The Moon Deity Pattern</h2>
+
+            <h3>The Lunar Phases</h3>
+            <p>
+                Each moon phase carries distinct symbolic meaning across cultures:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>New Moon (Dark Moon):</strong> Death, hidden mysteries, magic, endings, introspection, <a href="../../mythos/greek/deities/hecate.html" style="color: var(--archetype-primary);">Hecate</a>'s domain</li>
+                <li><strong>Waxing Crescent:</strong> New beginnings, growth, increase, youth, <a href="../../mythos/greek/deities/artemis.html" style="color: var(--archetype-primary);">Artemis</a> the maiden</li>
+                <li><strong>Full Moon:</strong> Completion, fertility, manifestation, power, <a href="../../mythos/greek/deities/selene.html" style="color: var(--archetype-primary);">Selene</a>'s fullness</li>
+                <li><strong>Waning Moon:</strong> Decrease, banishing, release, wisdom, elder aspects</li>
+            </ul>
+
+            <h3>Gender Variation</h3>
+            <p>
+                Unlike the sun (usually male), moon deity gender varies significantly:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Female Moon:</strong> Greek, Roman, Celtic, some Native American—emphasizes fertility, women's cycles, intuition</li>
+                <li><strong>Male Moon:</strong> Mesopotamian, Hindu, Japanese, Norse—emphasizes wisdom, measurement, cosmic regulation</li>
+                <li><strong>Sun/Moon Pairs:</strong> Often brother-sister (Japan, Norse) or husband-wife (Inca, Aztec)</li>
+            </ul>
+
+            <h3>Moon and Time</h3>
+            <p>
+                The moon provided humanity's first calendar:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Lunar Calendar:</strong> 29.5-day cycle creates "month"—still used in Islamic, Hebrew, Hindu calendars</li>
+                <li><strong><a href="../../mythos/egyptian/deities/thoth.html" style="color: var(--archetype-primary);">Thoth</a>:</strong> Invented writing partly to record lunar observations and calendar</li>
+                <li><strong>Agricultural Timing:</strong> Planting and harvesting scheduled by moon phases</li>
+                <li><strong>Festival Timing:</strong> Most ancient festivals tied to lunar phases (Passover, Easter, Diwali)</li>
+            </ul>
+
+            <h3>Moon and Water</h3>
+            <p>
+                The moon's connection to water appears universally:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Tides:</strong> Visible proof of moon's power over waters</li>
+                <li><strong>Menstruation:</strong> Monthly cycle linked to lunar cycle in many traditions</li>
+                <li><strong><a href="../../mythos/hindu/deities/soma.html" style="color: var(--archetype-primary);">Soma</a>:</strong> Lunar drink stored in moon, drained by gods drinking</li>
+                <li><strong>Rain:</strong> Some cultures believed moon governed rainfall</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Cross-Cultural Comparison</h2>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>Comparative Analysis: Selene vs Thoth vs Chandra</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <table style="width: 100%; margin-top: 15px;">
+                        <thead>
+                            <tr>
+                                <th>Attribute</th>
+                                <th>Selene (Greek)</th>
+                                <th>Thoth (Egyptian)</th>
+                                <th>Chandra (Hindu)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Gender</td>
+                                <td>Female</td>
+                                <td>Male</td>
+                                <td>Male</td>
+                            </tr>
+                            <tr>
+                                <td>Primary Symbol</td>
+                                <td>Silver chariot, crescent crown</td>
+                                <td>Ibis head, moon disc</td>
+                                <td>Lotus, hare, deer</td>
+                            </tr>
+                            <tr>
+                                <td>Main Domain</td>
+                                <td>Night illumination, love</td>
+                                <td>Wisdom, writing, magic</td>
+                                <td>Fertility, plants, mind</td>
+                            </tr>
+                            <tr>
+                                <td>Time Function</td>
+                                <td>Marks months</td>
+                                <td>Invented calendar, keeps records</td>
+                                <td>Governs ritual timing</td>
+                            </tr>
+                            <tr>
+                                <td>Associated Substance</td>
+                                <td>Silver, dew</td>
+                                <td>Silver, mercury</td>
+                                <td>Soma (sacred drink)</td>
+                            </tr>
+                            <tr>
+                                <td>Sun Relationship</td>
+                                <td>Sister to Helios</td>
+                                <td>Serves Ra, balances his light</td>
+                                <td>Brother to Surya</td>
+                            </tr>
+                            <tr>
+                                <td>Phase Explanation</td>
+                                <td>Natural cycle of chariot path</td>
+                                <td>Won from moon in game</td>
+                                <td>Curse modified to waxing/waning</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Psychological and Spiritual Significance</h2>
+
+            <h3>Jungian Interpretation</h3>
+            <p>
+                The Moon Deity represents essential psychological patterns:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>The Unconscious:</strong> Moon illuminates darkness, like dreams revealing hidden psyche</li>
+                <li><strong>Anima/Animus:</strong> Moon as feminine in male psyche, masculine in female psyche</li>
+                <li><strong>Cyclical Nature:</strong> Psychological states wax and wane; moods have natural rhythms</li>
+                <li><strong>Reflection:</strong> Moon reflects sunlight—consciousness reflected through unconscious</li>
+            </ul>
+
+            <h3>Spiritual Dimensions</h3>
+            <p>
+                For devotees across traditions, the Moon Deity offers:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Mystery:</strong> Hidden knowledge revealed through intuition rather than reason</li>
+                <li><strong>Cycles:</strong> Acceptance of change, death as prelude to rebirth</li>
+                <li><strong>Feminine Wisdom:</strong> Receptive, reflective knowing versus solar analysis</li>
+                <li><strong>Magic:</strong> Lunar phases govern timing of spells, rituals, workings</li>
+            </ul>
+
+            <h3>Modern Relevance</h3>
+            <p>
+                The Moon Deity archetype continues to resonate:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Menstrual Awareness:</strong> Reconnecting women's cycles with lunar rhythms</li>
+                <li><strong>Calendar Diversity:</strong> Understanding lunar vs solar time systems</li>
+                <li><strong>Tidal Science:</strong> Modern understanding of gravitational influence</li>
+                <li><strong>Circadian Research:</strong> Moon's effect on sleep, behavior, biology</li>
+                <li><strong>Space Exploration:</strong> Moon as destination, gateway to cosmos</li>
+            </ul>
+        </section>
+
+        <!-- DEITIES EMBODYING THIS ARCHETYPE - Visual Cards -->
+        <section style="margin-top: var(--spacing-3xl);">
+            <h2 style="text-align: center; margin-bottom: var(--spacing-md);">Deities Embodying This Archetype</h2>
+            <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: var(--spacing-xl);">
+                Click any deity to explore their full mythology
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--spacing-lg);">
+                <a href="../../mythos/greek/deities/selene.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">)</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Selene</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Greek</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Titan Moon Goddess</div>
+                </a>
+                <a href="../../mythos/egyptian/deities/thoth.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">)</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Thoth</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Egyptian</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Lord of Wisdom and Time</div>
+                </a>
+                <a href="../../mythos/hindu/deities/chandra.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">)</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Chandra</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Hindu</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Lord of the Nakshatras</div>
+                </a>
+                <a href="../../mythos/greek/deities/hecate.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">)</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Hecate</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Greek</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Dark Moon, Crossroads</div>
+                </a>
+                <a href="../../mythos/chinese/deities/chang-e.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">)</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Chang'e</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Chinese</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Lady in the Moon</div>
+                </a>
+            </div>
+        </section>
+
+        <!-- RELATED STORY ARCHETYPES -->
+        <section style="margin-top: var(--spacing-3xl);">
+            <h2 style="text-align: center; margin-bottom: var(--spacing-md);">Related Story Archetypes</h2>
+            <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: var(--spacing-xl);">
+                The Moon Deity features prominently in these universal narrative patterns
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+                <a href="../dying-god/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">~</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Dying and Rising God</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Moon's monthly death and rebirth models the resurrection pattern</p>
+                </a>
+                <a href="../journey-archetypes/underworld-descent/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">V</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Underworld Descent</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Hecate guides souls through darkness; moon illuminates the unseen</p>
+                </a>
+                <a href="../great-goddess/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">*</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Great Goddess</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Triple goddess (maiden-mother-crone) reflects lunar phases</p>
+                </a>
+                <a href="../wisdom/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">=</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Wisdom Archetype</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Thoth as wisdom keeper - hidden knowledge illuminated by reflected light</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- SEE ALSO / EXPLORE RELATED -->
+        <div style="margin-top: var(--spacing-4xl); text-align: center; padding: var(--spacing-xl); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border);">
+            <h3 style="color: var(--archetype-primary); margin-bottom: var(--spacing-lg);">See Also</h3>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap; margin-bottom: var(--spacing-xl);">
+                <a href="../sun-god/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Sun God</a>
+                <a href="../great-goddess/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Great Goddess</a>
+                <a href="../wisdom/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Wisdom</a>
+                <a href="../death/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Death God</a>
+            </div>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+                <a href="../celestial/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Celestial Archetypes</a>
+                <a href="../elemental-archetypes/water/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Water Element</a>
+                <a href="../love/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Love Archetype</a>
+                <a href="../cross-reference-matrix.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Cross-Reference Matrix</a>
+            </div>
+            <div style="margin-top: var(--spacing-xl);">
+                <a href="../index.html" style="display: inline-block; padding: var(--spacing-md) var(--spacing-2xl); background: linear-gradient(135deg, var(--archetype-primary), var(--archetype-primary-dark)); color: white; text-decoration: none; border-radius: var(--radius-lg); font-weight: var(--font-semibold);">All Archetypes</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCodexSearch(header) {
+            const section = header.parentElement;
+            const content = section.querySelector('.codex-search-content');
+            section.classList.toggle('expanded');
+            content.classList.toggle('show');
+        }
+        function toggleVerse(citation) {
+            const verseText = citation.nextElementSibling;
+            verseText.classList.toggle('show');
+        }
+    </script>
+
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+</body>
+</html>
