@@ -36,25 +36,26 @@ This document defines the standard HTML structure and styling patterns that ALL 
 
 ```html
 <body>
-<!-- Theme picker container (auto-populated by JS) -->
+<!-- Theme picker is auto-injected by theme-picker.js as fixed top-right button -->
+<!-- These containers are optional placeholders -->
 <div id="theme-picker"></div>
+<div id="theme-picker-container"></div>
 
-<!-- HEADER: Contains title and theme selector -->
+<!-- HEADER: Contains title -->
 <header>
     <div class="header-content">
-        <h1>Page Title</h1>
-        <div id="theme-picker-container"></div>
+        <h1>🎨 Page Title</h1>
     </div>
 </header>
 
-<!-- BREADCRUMB: Always OUTSIDE and AFTER header -->
+<!-- BREADCRUMB: Fixed at top center, OUTSIDE and AFTER header -->
 <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{parent-path}/index.html">Home</a> →
     <span>Current Page</span>
 </nav>
 
-<!-- MAIN CONTENT -->
-<main style="max-width: var(--container-xl); margin: 0 auto; padding: var(--space-6);">
+<!-- MAIN CONTENT (no inline styles needed - uses styles.css) -->
+<main>
     <!-- Hero Section (required for index pages) -->
     <div class="hero-section">
         <h2>Subtitle or Tagline</h2>
@@ -74,7 +75,7 @@ This document defines the standard HTML structure and styling patterns that ALL 
     </section>
 </main>
 
-<!-- FOOTER -->
+<!-- FOOTER (styled by styles.css) -->
 <footer>
     <p>
         <strong>World Mythos Explorer</strong> - Tradition Name<br/>
@@ -84,6 +85,8 @@ This document defines the standard HTML structure and styling patterns that ALL 
 </footer>
 </body>
 ```
+
+**Note:** The theme picker button (🎨) is automatically injected by `theme-picker.js` as a fixed element in the top-right corner. No manual placement needed.
 
 ## CSS Variable Usage (REQUIRED)
 
@@ -159,22 +162,24 @@ var(--transition-base)  /* Standard transition */
 }
 ```
 
-### Glass Card (main content container)
+### Glass Card (main content container with glow hover)
 ```css
 .glass-card {
     background: rgba(var(--color-surface-rgb), 0.6);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(var(--color-primary-rgb), 0.2);
     border-radius: var(--radius-lg);
     padding: var(--spacing-xl);
-    margin: 2rem var(--spacing-lg);
+    margin: 2rem 0;
     box-shadow: var(--shadow-lg);
     transition: all var(--transition-base, 0.3s ease);
 }
 
 .glass-card:hover {
-    box-shadow: var(--shadow-xl);
-    transform: translateY(-5px);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+    border-color: rgba(var(--color-primary-rgb), 0.4);
 }
 ```
 
@@ -214,7 +219,7 @@ var(--transition-base)  /* Standard transition */
 }
 ```
 
-### Clickable Cards (grid items)
+### Clickable Cards (grid items with glow hover)
 ```css
 .deity-card {
     background: rgba(var(--color-primary-rgb), 0.05);
@@ -223,58 +228,91 @@ var(--transition-base)  /* Standard transition */
     padding: var(--spacing-lg);
     transition: all var(--transition-base, 0.3s ease);
     cursor: pointer;
+    text-decoration: none;
+    display: block;
+    color: inherit;
 }
 
 .deity-card:hover {
     transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-lg), 0 0 15px rgba(var(--color-primary-rgb), 0.2);
     border-color: var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.1);
+    text-decoration: none;
+}
+
+.deity-card h3 {
+    color: var(--color-primary);
+    margin-top: 0.5rem;
+}
+
+.deity-icon {
+    font-size: 2.5rem;
+    text-align: center;
 }
 ```
 
 ### Header Content
 ```css
+/* Header is styled by styles.css with glass morphism */
+/* The header-content wrapper centers the title */
 .header-content {
-    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-lg);
+    flex-wrap: wrap;
+    gap: 1.5rem;
 }
 
-#theme-picker-container {
-    position: absolute;
-    top: 50%;
-    right: var(--spacing-lg);
-    transform: translateY(-50%);
+/* Theme picker is auto-injected as fixed top-right */
+/* Styling is in theme-base.css */
+.theme-picker {
+    position: fixed;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    z-index: var(--z-fixed);  /* 300 */
 }
 ```
 
-### Breadcrumb Navigation (Hovering)
+### Breadcrumb Navigation (Fixed at Top Center)
 ```css
 .breadcrumb {
     position: fixed;
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1000;
-    background: rgba(var(--color-surface-rgb), 0.9);
-    backdrop-filter: blur(10px);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--radius-md);
-    font-size: var(--text-sm);
-    color: var(--color-text-muted);
+    z-index: 1001;  /* Above header (1000) */
+    background: rgba(var(--color-surface-rgb), 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+    border-top: none;
 }
 
 .breadcrumb a {
-    color: var(--color-link);
+    color: var(--color-primary);
     text-decoration: none;
-    transition: color var(--transition-fast);
+    transition: all var(--transition-fast);
 }
 
 .breadcrumb a:hover {
-    color: var(--color-link-hover);
+    color: var(--color-secondary);
     text-decoration: underline;
+}
+
+/* Responsive breadcrumb */
+@media (max-width: 768px) {
+    .breadcrumb {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-xs) var(--spacing-md);
+    }
 }
 ```
 
