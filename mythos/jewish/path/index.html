@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Jewish Spiritual Path - World Mythos Explorer</title>
+    <link href="../../../themes/theme-base.css" rel="stylesheet"/>
+    <link href="../../../styles.css" rel="stylesheet"/>
+    <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../../themes/smart-links.css">
+    <script defer src="../../../themes/smart-links.js"></script>
+    <script defer src="../../../themes/theme-animations.js"></script>
+    <script defer src="../../../themes/theme-picker.js"></script>
+    <style>
+        :root {
+            --mythos-primary: #0047AB;
+            --mythos-secondary: #FFD700;
+            --mythos-primary-rgb: 0, 71, 171;
+            --mythos-secondary-rgb: 255, 215, 0;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--mythos-primary-rgb), 0.15),
+                rgba(var(--mythos-secondary-rgb), 0.15));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(var(--mythos-primary-rgb), 0.3);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-section h2 {
+            color: var(--color-primary);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 1rem auto;
+            line-height: 1.8;
+        }
+
+        /* Warning Panel */
+        .warning-panel {
+            background: linear-gradient(135deg,
+                rgba(255, 140, 0, 0.1),
+                rgba(255, 69, 0, 0.1));
+            border-left: 5px solid #FF8C00;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(8px);
+        }
+
+        .warning-panel h3 {
+            color: #FF8C00;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Timeline Container */
+        .timeline {
+            position: relative;
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg,
+                rgba(var(--mythos-primary-rgb), 0.3),
+                rgba(var(--mythos-secondary-rgb), 0.8));
+            transform: translateX(-50%);
+        }
+
+        /* Stage Card */
+        .stage-card {
+            background: rgba(var(--color-surface-rgb), 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 2px solid rgba(var(--mythos-primary-rgb), 0.3);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            margin: 2rem 0;
+            position: relative;
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stage-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-2xl), 0 0 30px rgba(var(--mythos-primary-rgb), 0.2);
+            border-color: rgba(var(--mythos-secondary-rgb), 0.6);
+        }
+
+        .stage-card.left {
+            margin-left: 0;
+            margin-right: calc(50% + 3rem);
+        }
+
+        .stage-card.right {
+            margin-left: calc(50% + 3rem);
+            margin-right: 0;
+        }
+
+        .stage-icon {
+            position: absolute;
+            top: 2rem;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg,
+                rgba(var(--mythos-primary-rgb), 0.9),
+                rgba(var(--mythos-secondary-rgb), 0.9));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--mythos-secondary-rgb), 0.5);
+            z-index: 10;
+            border: 4px solid var(--color-background);
+        }
+
+        .stage-card.left .stage-icon {
+            right: -40px;
+        }
+
+        .stage-card.right .stage-icon {
+            left: -40px;
+        }
+
+        .stage-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .stage-header h3 {
+            color: var(--color-primary);
+            font-size: 1.8rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .stage-duration {
+            color: var(--color-secondary);
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            background: rgba(var(--mythos-secondary-rgb), 0.2);
+            border-radius: var(--radius-full);
+        }
+
+        .stage-content {
+            margin-top: 1.5rem;
+        }
+
+        .stage-section {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(var(--mythos-primary-rgb), 0.05);
+            border-radius: var(--radius-md);
+            border-left: 3px solid rgba(var(--mythos-secondary-rgb), 0.5);
+        }
+
+        .stage-section h4 {
+            color: var(--color-primary);
+            margin: 0 0 0.75rem 0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stage-section ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .stage-section li {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+        }
+
+        .stage-section p {
+            margin: 0.5rem 0;
+            line-height: 1.7;
+        }
+
+        /* Progress Indicator */
+        .progress-indicator {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 3rem 0;
+            padding: 2rem;
+            background: rgba(var(--color-surface-rgb), 0.6);
+            border-radius: var(--radius-xl);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(var(--mythos-primary-rgb), 0.2);
+        }
+
+        .progress-step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .progress-step::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 20px;
+            font-size: 2rem;
+            color: rgba(var(--mythos-secondary-rgb), 0.6);
+        }
+
+        .progress-step:last-child::after {
+            display: none;
+        }
+
+        .progress-step-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-step-label {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            font-weight: 600;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(var(--mythos-primary-rgb), 0.08);
+            border: 2px solid rgba(var(--mythos-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .info-box h4 {
+            color: var(--color-primary);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Resources Section */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .resource-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(var(--mythos-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all var(--transition-base);
+        }
+
+        .resource-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(var(--mythos-secondary-rgb), 0.5);
+        }
+
+        .resource-card h4 {
+            color: var(--color-primary);
+            margin: 0 0 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .resource-card a {
+            color: var(--color-secondary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .resource-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .timeline::before {
+                left: 40px;
+            }
+
+            .stage-card.left,
+            .stage-card.right {
+                margin-left: 80px;
+                margin-right: 0;
+            }
+
+            .stage-card.left .stage-icon,
+            .stage-card.right .stage-icon {
+                left: -120px;
+                right: auto;
+            }
+
+            .progress-indicator {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .progress-step::after {
+                content: '↓';
+                right: auto;
+                top: auto;
+                bottom: -30px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero-section h2 {
+                font-size: 1.8rem;
+            }
+
+            .stage-header h3 {
+                font-size: 1.4rem;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+        <div class="header-content">
+            <h1>🪜 Jewish Spiritual Path</h1>
+        </div>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../../mythos/index.html">Home</a> →
+        <a href="../index.html">Jewish</a> →
+        <span>Path</span>
+    </nav>
+
+    <main>
+        <section class="hero-section">
+            <h2>The Journey Through Jewish Spiritual Development</h2>
+            <p>
+                A comprehensive roadmap through the depths of Jewish mysticism and spiritual practice,
+                from foundational Torah study to the heights of Kabbalistic mastery and divine consciousness.
+                This is not merely a study of Kabbalah, but the complete journey of spiritual transformation
+                through the Jewish tradition.
+            </p>
+            <p style="font-style: italic; margin-top: 1rem; color: var(--color-text-secondary);">
+                "The path is long, but every step brings you closer to the Divine.
+                Begin with sincerity, continue with dedication, and arrive with humility."
+            </p>
+        </section>
+
+        <div class="warning-panel">
+            <h3>⚠️ Essential Guidance</h3>
+            <p>
+                <strong>The Jewish spiritual path requires proper guidance from qualified teachers.</strong>
+                Traditional Jewish teaching emphasizes that one should not study Kabbalah before age 40,
+                having mastered Torah and Talmud, and only with a qualified rebbe or teacher. The stages
+                outlined here represent an ideal progression, but every student's journey is unique.
+                Do not attempt advanced practices without proper preparation and guidance.
+            </p>
+            <p style="margin-top: 1rem;">
+                This path requires <strong>20-30+ years</strong> of dedicated study and practice.
+                Patience, humility, and devotion are essential qualities for the journey.
+            </p>
+        </div>
+
+        <div class="progress-indicator">
+            <div class="progress-step">
+                <div class="progress-step-icon">🌱</div>
+                <div class="progress-step-label">Foundations<br/>(0-5 years)</div>
+            </div>
+            <div class="progress-step">
+                <div class="progress-step-icon">🌿</div>
+                <div class="progress-step-label">Deepening<br/>(5-10 years)</div>
+            </div>
+            <div class="progress-step">
+                <div class="progress-step-icon">🌳</div>
+                <div class="progress-step-label">Mystical<br/>(10-15 years)</div>
+            </div>
+            <div class="progress-step">
+                <div class="progress-step-icon">✨</div>
+                <div class="progress-step-label">Advanced<br/>(15-20 years)</div>
+            </div>
+            <div class="progress-step">
+                <div class="progress-step-icon">🌟</div>
+                <div class="progress-step-label">Integration<br/>(20-25 years)</div>
+            </div>
+            <div class="progress-step">
+                <div class="progress-step-icon">☀️</div>
+                <div class="progress-step-label">Mastery<br/>(25+ years)</div>
+            </div>
+        </div>
+
+        <section class="timeline">
+            <!-- Stage 1: Foundations -->
+            <div class="stage-card left">
+                <div class="stage-icon">🌱</div>
+                <div class="stage-header">
+                    <h3>Stage 1: Foundations (Yesodot)</h3>
+                    <span class="stage-duration">Years 0-5</span>
+                </div>
+
+                <div class="stage-content">
+                    <p style="font-size: 1.1rem; color: var(--color-text-primary); margin-bottom: 1rem;">
+                        Building the essential foundation of Jewish knowledge, practice, and community connection.
+                        This stage establishes the bedrock upon which all mystical understanding will rest.
+                    </p>
+
+                    <div class="stage-section">
+                        <h4>⏰ Time Commitment</h4>
+                        <p>1-2 hours daily study, plus Shabbat and holiday observance</p>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>📚 Study Areas</h4>
+                        <ul>
+                            <li><strong>Hebrew Language:</strong> Reading, writing, basic comprehension</li>
+                            <li><strong>Torah (Chumash):</strong> Weekly portion with commentaries (Rashi, Ibn Ezra)</li>
+                            <li><strong>Jewish Prayer:</strong> Siddur literacy, daily prayer structure</li>
+                            <li><strong>Jewish Calendar:</strong> Holidays, festivals, their meanings</li>
+                            <li><strong>Basic Halakha:</strong> Jewish law for daily life</li>
+                            <li><strong>Ethics (Pirkei Avot):</strong> Teachings of the Fathers</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>🕯️ Practices</h4>
+                        <ul>
+                            <li>Daily prayer (Shacharit, Mincha, Ma'ariv)</li>
+                            <li>Shabbat observance (lighting candles, Kiddush, rest)</li>
+                            <li>Kashrut (dietary laws)</li>
+                            <li>Weekly Torah study sessions</li>
+                            <li>Regular synagogue attendance</li>
+                            <li>Beginning meditation on Hebrew letters</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>✅ Milestones</h4>
+                        <ul>
+                            <li>Hebrew reading fluency</li>
+                            <li>Complete one cycle of Torah reading</li>
+                            <li>Memorize key prayers (Shema, Amidah)</li>
+                            <li>Establish daily prayer habit</li>
+                            <li>Understanding of major holidays and observances</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>⚠️ Challenges</h4>
+                        <p>Language barriers, integrating practice into daily life, finding community,
+                        overcoming impatience to reach mystical teachings</p>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>👨‍🏫 Teacher Requirements</h4>
+                        <p>Rabbi or knowledgeable community member for guidance in basic practices and study</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 2: Deepening Practice -->
+            <div class="stage-card right">
+                <div class="stage-icon">🌿</div>
+                <div class="stage-header">
+                    <h3>Stage 2: Deepening Practice (Ha'amakata)</h3>
+                    <span class="stage-duration">Years 5-10</span>
+                </div>
+
+                <div class="stage-content">
+                    <p style="font-size: 1.1rem; color: var(--color-text-primary); margin-bottom: 1rem;">
+                        Deepening knowledge of Torah, beginning Talmudic study, and developing sophisticated
+                        understanding of Jewish law, ethics, and theology.
+                    </p>
+
+                    <div class="stage-section">
+                        <h4>⏰ Time Commitment</h4>
+                        <p>2-3 hours daily study, deeper Shabbat preparation and observance</p>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>📚 Study Areas</h4>
+                        <ul>
+                            <li><strong>Talmud (Gemara):</strong> Beginning tractates, Talmudic reasoning</li>
+                            <li><strong>Advanced Torah:</strong> Multiple commentaries, deeper textual analysis</li>
+                            <li><strong>Mussar:</strong> Ethical development (Duties of the Heart, Orchot Tzaddikim)</li>
+                            <li><strong>Jewish Philosophy:</strong> Rambam, Ramban, Saadia Gaon</li>
+                            <li><strong>Advanced Hebrew:</strong> Biblical and Rabbinic Hebrew, Aramaic basics</li>
+                            <li><strong>Midrash:</strong> Homiletic interpretations of Torah</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>🕯️ Practices</h4>
+                        <ul>
+                            <li>Regular Talmud study (ideally daily)</li>
+                            <li>Mussar practice (character refinement exercises)</li>
+                            <li>Advanced prayer with kavvanah (intention)</li>
+                            <li>Hitbodedut (personal prayer/meditation)</li>
+                            <li>Chesed (acts of loving-kindness)</li>
+                            <li>Torah portion with multiple commentaries</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>✅ Milestones</h4>
+                        <ul>
+                            <li>Complete at least one tractate of Talmud</li>
+                            <li>Read major works of Jewish philosophy</li>
+                            <li>Develop consistent Mussar practice</li>
+                            <li>Achieve fluency in Hebrew prayer</li>
+                            <li>Begin to teach others basic Jewish concepts</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>⚠️ Challenges</h4>
+                        <p>Talmudic complexity, maintaining enthusiasm, balancing depth with breadth,
+                        developing authentic spiritual experiences beyond intellectual study</p>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>👨‍🏫 Teacher Requirements</h4>
+                        <p>Rabbi with Talmudic expertise, Mussar teacher or spiritual director</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 3: Mystical Studies -->
+            <div class="stage-card left">
+                <div class="stage-icon">🌳</div>
+                <div class="stage-header">
+                    <h3>Stage 3: Mystical Studies (Nistar)</h3>
+                    <span class="stage-duration">Years 10-15</span>
+                </div>
+
+                <div class="stage-content">
+                    <p style="font-size: 1.1rem; color: var(--color-text-primary); margin-bottom: 1rem;">
+                        Introduction to Kabbalah and Jewish mysticism, building on the solid foundation
+                        of Torah and Talmud. This is where the hidden dimension (Nistar) begins to reveal itself.
+                    </p>
+
+                    <div class="stage-section">
+                        <h4>⏰ Time Commitment</h4>
+                        <p>3-4 hours daily (Torah, Talmud, Kabbalah studies combined)</p>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>✋ Prerequisites</h4>
+                        <ul>
+                            <li>Strong foundation in Torah and Talmud</li>
+                            <li>Stable daily practice and observance</li>
+                            <li>Character refinement through Mussar</li>
+                            <li>Qualified teacher's approval to begin mystical studies</li>
+                            <li>Emotional maturity and spiritual grounding</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>📚 Study Areas</h4>
+                        <ul>
+                            <li><strong>Sefer Yetzirah:</strong> Book of Formation, Hebrew letters and creation</li>
+                            <li><strong>Introduction to Zohar:</strong> Selected passages with commentary</li>
+                            <li><strong>Basic Sefirot:</strong> The ten divine emanations</li>
+                            <li><strong>Four Worlds:</strong> Atzilut, Beriah, Yetzirah, Assiah</li>
+                            <li><strong>Kabbalistic Prayer:</strong> Mystical intentions in liturgy</li>
+                            <li><strong>Jewish Meditation:</strong> Techniques from Abulafia, Nachman of Breslov</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>🕯️ Practices</h4>
+                        <ul>
+                            <li>Meditation on Hebrew letters and divine names</li>
+                            <li>Prayer with Kabbalistic kavvanot (intentions)</li>
+                            <li>Study of Zohar with commentary</li>
+                            <li>Contemplation of the Sefirot</li>
+                            <li>Visualization practices</li>
+                            <li>Midnight study vigils (Tikkun Chatzot)</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>✅ Milestones</h4>
+                        <ul>
+                            <li>Understanding the basic structure of the Tree of Life</li>
+                            <li>Familiarity with key Zoharic concepts</li>
+                            <li>Ability to perceive multiple levels of Torah interpretation</li>
+                            <li>Development of personal mystical practice</li>
+                            <li>First experiences of expanded consciousness</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>⚠️ Challenges</h4>
+                        <p>Overwhelming complexity, distinguishing authentic from inauthentic experiences,
+                        maintaining balance between revealed and hidden Torah, avoiding spiritual pride</p>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>👨‍🏫 Teacher Requirements</h4>
+                        <p>Experienced Kabbalist or Rabbi trained in mystical tradition who can guide safely
+                        through these powerful teachings</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 4: Advanced Kabbalah -->
+            <div class="stage-card right">
+                <div class="stage-icon">✨</div>
+                <div class="stage-header">
+                    <h3>Stage 4: Advanced Kabbalah (Kabbalah Iyyunit)</h3>
+                    <span class="stage-duration">Years 15-20</span>
+                </div>
+
+                <div class="stage-content">
+                    <p style="font-size: 1.1rem; color: var(--color-text-primary); margin-bottom: 1rem;">
+                        Deep immersion in Lurianic Kabbalah and advanced mystical practices. Working with
+                        complex divine names, advanced meditation, and the deepest levels of Torah interpretation.
+                    </p>
+
+                    <div class="stage-section">
+                        <h4>⏰ Time Commitment</h4>
+                        <p>4-6 hours daily dedicated practice and study, ideally full-time if possible</p>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>📚 Study Areas</h4>
+                        <ul>
+                            <li><strong>Lurianic Kabbalah:</strong> Tzimtzum, Shevirat HaKelim, Tikkun</li>
+                            <li><strong>Etz Chaim:</strong> Advanced Tree of Life teachings</li>
+                            <li><strong>Advanced Zohar:</strong> Complex passages, Idra Rabba/Zuta</li>
+                            <li><strong>Divine Names:</strong> 72 Names, permutations, sacred use</li>
+                            <li><strong>Partzufim:</strong> Divine configurations and their interactions</li>
+                            <li><strong>Gilgul:</strong> Reincarnation and soul rectification</li>
+                            <li><strong>Advanced Meditation:</strong> Letter permutations, yichudim (unifications)</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>🕯️ Practices</h4>
+                        <ul>
+                            <li>Advanced divine name meditations</li>
+                            <li>Yichudim (mystical unifications)</li>
+                            <li>Complex Kabbalistic kavvanot in prayer</li>
+                            <li>Working with the Sefirot experientially</li>
+                            <li>Soul-root meditation and tikkun</li>
+                            <li>Extended periods of hitbodedut</li>
+                            <li>Regular immersion (mikveh) with intention</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>✅ Milestones</h4>
+                        <ul>
+                            <li>Deep understanding of Lurianic Kabbalah</li>
+                            <li>Ability to work safely with divine names</li>
+                            <li>Consistent experiences of devekut (cleaving to God)</li>
+                            <li>Integration of all Sefirot in consciousness</li>
+                            <li>Recognition of soul's unique tikkun (rectification)</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>⚠️ Challenges</h4>
+                        <p>Intense spiritual experiences requiring integration, danger of spiritual inflation,
+                        maintaining groundedness, balancing mystical heights with ordinary life responsibilities</p>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>👨‍🏫 Teacher Requirements</h4>
+                        <p>Master Kabbalist (Mekubal) with deep personal experience and transmission,
+                        preferably in a continuous teaching lineage</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 5: Integration & Teaching -->
+            <div class="stage-card left">
+                <div class="stage-icon">🌟</div>
+                <div class="stage-header">
+                    <h3>Stage 5: Integration & Teaching (Chinuch)</h3>
+                    <span class="stage-duration">Years 20-25</span>
+                </div>
+
+                <div class="stage-content">
+                    <p style="font-size: 1.1rem; color: var(--color-text-primary); margin-bottom: 1rem;">
+                        Living the teachings fully, integrating mystical awareness into every action,
+                        and beginning to guide others on the path. The student becomes the teacher.
+                    </p>
+
+                    <div class="stage-section">
+                        <h4>⏰ Time Commitment</h4>
+                        <p>Torah/Kabbalah study becomes integrated with all of life; formal study 3-4 hours daily,
+                        plus teaching and guiding others</p>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>📚 Study Areas</h4>
+                        <ul>
+                            <li><strong>Continuous Deepening:</strong> New insights in all previous texts</li>
+                            <li><strong>Chassidic Teachings:</strong> Baal Shem Tov, Chabad, other masters</li>
+                            <li><strong>Teaching Methods:</strong> How to transmit wisdom appropriately</li>
+                            <li><strong>Individual Soul-Paths:</strong> Understanding unique spiritual needs</li>
+                            <li><strong>Contemporary Application:</strong> Bringing ancient wisdom to modern life</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>🕯️ Practices</h4>
+                        <ul>
+                            <li>Living in constant awareness (devekut)</li>
+                            <li>Every action as divine service (Avodah)</li>
+                            <li>Teaching qualified students</li>
+                            <li>Community spiritual leadership</li>
+                            <li>Writing insights and chiddushim (novel interpretations)</li>
+                            <li>Blessing and guiding seekers</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>✅ Milestones</h4>
+                        <ul>
+                            <li>Seamless integration of mystical and practical life</li>
+                            <li>Ability to guide others safely on the path</li>
+                            <li>Recognition as a teacher/rebbe by community</li>
+                            <li>Continuous flow of new Torah insights</li>
+                            <li>Stable, grounded spiritual awareness</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>⚠️ Challenges</h4>
+                        <p>Responsibility of teaching, maintaining humility, meeting students where they are,
+                        avoiding becoming trapped in the teacher role, continuing one's own growth</p>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>👨‍🏫 Teacher Requirements</h4>
+                        <p>At this stage, one has become a teacher while still maintaining connection with
+                        one's own teacher or peer community of advanced practitioners</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 6: Mastery -->
+            <div class="stage-card right">
+                <div class="stage-icon">☀️</div>
+                <div class="stage-header">
+                    <h3>Stage 6: Mastery & Unity (Tzaddik)</h3>
+                    <span class="stage-duration">Years 25+</span>
+                </div>
+
+                <div class="stage-content">
+                    <p style="font-size: 1.1rem; color: var(--color-text-primary); margin-bottom: 1rem;">
+                        The highest stage of spiritual development: living in continuous unity consciousness,
+                        becoming a channel for divine blessing, prophetic awareness, and embodying the
+                        light of Torah. This is the consciousness of the Tzaddik.
+                    </p>
+
+                    <div class="stage-section">
+                        <h4>⏰ Time Commitment</h4>
+                        <p>Life itself is Torah; every moment is practice and study.
+                        No separation between sacred and mundane.</p>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>🌟 Characteristics</h4>
+                        <ul>
+                            <li><strong>Unity Consciousness:</strong> Direct perception of Ein Sof (Infinite)</li>
+                            <li><strong>Prophetic Awareness:</strong> Insight into hidden dimensions and future possibilities</li>
+                            <li><strong>Healing Presence:</strong> Ability to elevate and transform through one's very being</li>
+                            <li><strong>Living Torah:</strong> Embodiment of divine wisdom in human form</li>
+                            <li><strong>Continuous Devekut:</strong> Never separate from awareness of God</li>
+                            <li><strong>Miracle Working:</strong> Natural alignment with divine will manifests as "miracles"</li>
+                            <li><strong>Soul Vision:</strong> Seeing the divine spark in all beings</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>🕯️ Expression</h4>
+                        <ul>
+                            <li>Every word is Torah teaching</li>
+                            <li>Blessing that carries power</li>
+                            <li>Prayer that reaches the highest realms</li>
+                            <li>Presence that transforms environments</li>
+                            <li>Guidance that illuminates paths</li>
+                            <li>Living as a bridge between heaven and earth</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>✅ Recognition</h4>
+                        <ul>
+                            <li>Recognized by community as a Tzaddik or Mekubal</li>
+                            <li>Students seek guidance and blessing</li>
+                            <li>New paths of understanding open continuously</li>
+                            <li>Life becomes a continuous revelation</li>
+                            <li>Perfect integration of all previous stages</li>
+                        </ul>
+                    </div>
+
+                    <div class="stage-section">
+                        <h4>⚠️ Challenges</h4>
+                        <p>Remaining accessible to ordinary seekers, the burden of spiritual responsibility,
+                        avoiding being placed on a pedestal, maintaining privacy and boundaries,
+                        preparing worthy successors to carry the tradition forward</p>
+                    </div>
+
+                    <div class="info-box">
+                        <h4>💎 The Paradox of Mastery</h4>
+                        <p>
+                            True masters know they can never fully master the infinite. The greatest Tzaddikim
+                            maintain the humility of a beginning student, always discovering new depths in Torah.
+                            As the Baal Shem Tov taught: "Every day, begin again."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resources Section -->
+        <section style="margin: 4rem 0;">
+            <h2 style="color: var(--color-primary); text-align: center; margin-bottom: 2rem;">
+                📚 Essential Resources for the Journey
+            </h2>
+
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <h4>🕍 Find a Teacher</h4>
+                    <p>The most important resource. Seek out:</p>
+                    <ul style="margin-top: 0.5rem;">
+                        <li>Local Orthodox synagogue rabbi</li>
+                        <li>Chabad house (Lubavitch)</li>
+                        <li>Breslov community</li>
+                        <li>Qualified Kabbalist (for advanced stages)</li>
+                    </ul>
+                </div>
+
+                <div class="resource-card">
+                    <h4>📖 Primary Texts</h4>
+                    <ul>
+                        <li><a href="../texts/index.html">Torah with commentaries</a></li>
+                        <li>Talmud (Artscroll or Sefaria)</li>
+                        <li>Zohar (Matt translation)</li>
+                        <li>Sefer Yetzirah</li>
+                        <li>Etz Chaim (Lurianic texts)</li>
+                    </ul>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🌐 Online Resources</h4>
+                    <ul>
+                        <li><a href="https://www.sefaria.org" target="_blank">Sefaria.org</a> - Free Jewish texts</li>
+                        <li><a href="https://www.chabad.org" target="_blank">Chabad.org</a> - Daily study, Tanya</li>
+                        <li><a href="https://breslov.org" target="_blank">Breslov.org</a> - Rebbe Nachman teachings</li>
+                        <li><a href="https://www.aish.com" target="_blank">Aish.com</a> - Jewish learning</li>
+                    </ul>
+                </div>
+
+                <div class="resource-card">
+                    <h4>📚 Recommended Books</h4>
+                    <ul>
+                        <li>"Jewish Meditation" - Aryeh Kaplan</li>
+                        <li>"The Way of God" - Moshe Chaim Luzzatto</li>
+                        <li>"Innerspace" - Aryeh Kaplan</li>
+                        <li>"Anatomy of the Soul" - Chaim Kramer</li>
+                        <li>"Tanya" - Rabbi Schneur Zalman</li>
+                    </ul>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🏛️ Related Pages</h4>
+                    <ul>
+                        <li><a href="../kabbalah/index.html">Kabbalah Overview</a></li>
+                        <li><a href="../rituals/index.html">Jewish Rituals & Practices</a></li>
+                        <li><a href="../texts/index.html">Sacred Texts</a></li>
+                        <li><a href="../corpus-search.html">Torah Search</a></li>
+                    </ul>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🧘 Practice Communities</h4>
+                    <ul>
+                        <li>Local Chabad center</li>
+                        <li>Breslov gatherings</li>
+                        <li>Carlebach communities</li>
+                        <li>Jewish Renewal congregations</li>
+                        <li>Traditional study groups (chavurot)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Wisdom -->
+        <section style="margin: 3rem 0;">
+            <div class="info-box">
+                <h4>🌟 Final Words of Guidance</h4>
+                <p style="font-size: 1.1rem; line-height: 1.8;">
+                    The Jewish spiritual path is not a race to enlightenment, but a lifelong journey of
+                    deepening relationship with the Divine, with Torah, and with the Jewish people.
+                    Each stage builds upon the previous, and rushing ahead without proper foundation
+                    can be spiritually dangerous.
+                </p>
+                <p style="margin-top: 1rem; font-style: italic;">
+                    "It is not your duty to complete the work, but neither are you free to desist from it."
+                    <br/>- Rabbi Tarfon, Pirkei Avot 2:16
+                </p>
+                <p style="margin-top: 1rem;">
+                    Begin where you are. Study with dedication. Practice with sincerity. Seek guidance.
+                    And trust that the Holy One, Blessed be He, will guide your steps.
+                </p>
+            </div>
+        </section>
+
+        <!-- Related Concepts -->
+        <section class="related-concepts" style="margin-top: 3rem;">
+            <h2>🔗 Related Concepts</h2>
+            <div class="grid">
+                <div class="related-card">
+                    <h3>Within Jewish Tradition</h3>
+                    <ul>
+                        <li><a href="../kabbalah/index.html">Kabbalah</a> - The mystical tradition</li>
+                        <li><a href="../texts/index.html">Sacred Texts</a> - Torah, Talmud, Zohar</li>
+                        <li><a href="../rituals/index.html">Rituals</a> - Prayer and practice</li>
+                        <li><a href="../deities/index.html">Figures</a> - Patriarchs and prophets</li>
+                    </ul>
+                </div>
+                <div class="related-card">
+                    <h3>Spiritual Paths in Other Traditions</h3>
+                    <ul>
+                        <li><a href="../../islamic/path/index.html">Islamic Path</a> - Sufi journey</li>
+                        <li><a href="../../christian/path/index.html">Christian Path</a> - Mystical Christianity</li>
+                        <li><a href="../../buddhist/path/index.html">Buddhist Path</a> - Eightfold path</li>
+                        <li><a href="../../hindu/path/index.html">Hindu Path</a> - Yoga traditions</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interlink Panel -->
+        <section class="interlink-panel">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Related Across the Mythos
+            </h3>
+
+            <div class="interlink-grid">
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Core Journey</div>
+                    <a href="../../../archetypes/celestial/index.html" class="archetype-link-card">
+                        <div class="archetype-badge">🪜 THE ASCENDING PATH</div>
+                        <p class="archetype-context">
+                            The Jewish path is a journey of return (teshuvah) to divine unity,
+                            ascending through knowledge, practice, and mystical realization
+                            to cleave to the Infinite (devekut b'Ein Sof).
+                        </p>
+                        <span class="see-parallels">See parallels: Sufi Path, Christian Mysticism, Yoga →</span>
+                    </a>
+                </div>
+
+                <div class="interlink-section">
+                    <div class="interlink-section-title">The Guide</div>
+                    <a href="../deities/index.html" class="item-link-card">
+                        <div class="item-icon">📜</div>
+                        <div class="item-info">
+                            <h4>Torah</h4>
+                            <p class="item-type">Divine Teaching</p>
+                            <p class="item-context">The eternal guide</p>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="interlink-section">
+                    <div class="interlink-section-title">The Framework</div>
+                    <a href="../kabbalah/sefirot/index.html" class="place-link-card">
+                        <div class="place-visual">
+                            <span class="place-icon">🌳</span>
+                            <span class="place-type">Divine Map</span>
+                        </div>
+                        <div class="place-info">
+                            <h4>Tree of Life</h4>
+                            <p>Etz Chaim - the path's structure</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="parallel-traditions glass-card" style="margin-top: var(--spacing-lg);">
+                <h4>🌍 Mystical Paths Across Traditions</h4>
+                <div class="parallel-grid">
+                    <a href="../../islamic/path/index.html" class="parallel-card">
+                        <span class="tradition-flag">☪️</span>
+                        <span class="parallel-name">Sufi Tariqa</span>
+                        <span class="tradition-label">Islamic mysticism</span>
+                    </a>
+                    <a href="../../christian/path/index.html" class="parallel-card">
+                        <span class="tradition-flag">✝️</span>
+                        <span class="parallel-name">Mystic Christianity</span>
+                        <span class="tradition-label">Contemplative path</span>
+                    </a>
+                    <a href="../../hindu/path/index.html" class="parallel-card">
+                        <span class="tradition-flag">🕉️</span>
+                        <span class="parallel-name">Yoga Paths</span>
+                        <span class="tradition-label">Union with Brahman</span>
+                    </a>
+                    <a href="../../buddhist/path/index.html" class="parallel-card">
+                        <span class="tradition-flag">☸️</span>
+                        <span class="parallel-name">Noble Path</span>
+                        <span class="tradition-label">Way to enlightenment</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>
+            <strong>Jewish Spiritual Path</strong> - World Mythos Explorer<br/>
+            <a href="../../../mythos/index.html">World Mythos Home</a> |
+            <a href="../index.html">Jewish Tradition</a> |
+            <a href="../kabbalah/index.html">Kabbalah</a>
+        </p>
+    </footer>
+</body>
+</html>
