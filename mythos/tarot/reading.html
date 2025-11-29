@@ -123,60 +123,150 @@
         }
 
         .card-back {
-            width: 140px;
-            height: 210px;
-            background: linear-gradient(135deg, #2a1a4a, #4a2a6a);
-            border: 3px solid gold;
-            border-radius: var(--radius-md);
+            width: 160px;
+            height: 240px;
+            background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #1a0a2e 100%);
+            border: 4px solid #d4af37;
+            border-radius: 12px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             margin: 1rem;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-back::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            opacity: 0.5;
+        }
+
+        .card-back::after {
+            content: '✦';
+            position: absolute;
+            font-size: 4rem;
+            color: #d4af37;
+            opacity: 0.3;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
         }
 
         .card-back:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            transform: translateY(-15px) scale(1.08);
+            box-shadow: 0 16px 48px rgba(212, 175, 55, 0.5),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border-color: #ffd700;
+        }
+
+        .card-back:hover::after {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
         }
 
         .card-back.revealed {
-            animation: flipCard 0.6s ease-in-out;
+            animation: flipCard 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         @keyframes flipCard {
-            0% { transform: rotateY(0deg); }
-            50% { transform: rotateY(90deg); }
-            100% { transform: rotateY(0deg); }
+            0% { transform: rotateY(0deg) scale(1); }
+            50% { transform: rotateY(90deg) scale(1.1); opacity: 0.5; }
+            100% { transform: rotateY(0deg) scale(1); opacity: 1; }
         }
 
         .card-front {
-            width: 140px;
-            height: 210px;
-            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
-            border: 3px solid var(--color-primary);
-            border-radius: var(--radius-md);
-            padding: 1rem;
+            width: 160px;
+            height: 240px;
+            background: linear-gradient(180deg, #fdfcf8 0%, #f5f2e8 100%);
+            border: 4px solid var(--color-primary);
+            border-radius: 12px;
+            padding: 0;
             margin: 1rem;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            animation: flipCard 0.6s ease-in-out;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: flipCard 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-front::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            border: 2px solid var(--color-primary);
+            border-radius: 8px;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.15),
+                rgba(var(--color-secondary-rgb), 0.15));
+            padding: 0.8rem 0.5rem 0.5rem 0.5rem;
+            border-bottom: 2px solid rgba(var(--color-primary-rgb), 0.3);
         }
 
         .card-front h4 {
             margin: 0;
-            font-size: 0.9rem;
-            color: #333;
+            font-size: 0.95rem;
+            color: #2a1a4a;
             text-align: center;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
         }
 
-        .card-front p {
+        .card-icon-large {
+            font-size: 4rem;
+            text-align: center;
+            margin: 1.5rem 0;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .card-orientation {
+            text-align: center;
+            padding: 0.4rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin: 0.5rem 0.5rem 0 0.5rem;
+            border-radius: 6px;
+        }
+
+        .card-orientation.upright {
+            color: #2a7c2e;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        }
+
+        .card-orientation.reversed {
+            color: #a94442;
+            background: linear-gradient(135deg, #f2dede, #ebccd1);
+        }
+
+        .card-element {
+            text-align: center;
             font-size: 0.7rem;
             color: #666;
-            margin: 0.5rem 0;
-            text-align: center;
+            margin-top: auto;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.03);
+            font-style: italic;
         }
 
         .card-positions {
@@ -645,6 +735,32 @@
             }
         }
 
+        // Card icon mapping
+        function getCardIcon(cardName) {
+            const iconMap = {
+                'The Fool': '🃏', 'The Magician': '🎩', 'The High Priestess': '🌙',
+                'The Empress': '👑', 'The Emperor': '⚜️', 'The Hierophant': '⛪',
+                'The Lovers': '💕', 'The Chariot': '🏇', 'Strength': '🦁',
+                'The Hermit': '🕯️', 'Wheel of Fortune': '☸️', 'Justice': '⚖️',
+                'The Hanged Man': '🙃', 'Death': '💀', 'Temperance': '🏺',
+                'The Devil': '😈', 'The Tower': '🗼', 'The Star': '⭐',
+                'The Moon': '🌛', 'The Sun': '☀️', 'Judgement': '📯', 'The World': '🌍',
+                'Ace of Wands': '🔥', 'Ace of Cups': '🏆', 'Ace of Swords': '⚔️', 'Ace of Pentacles': '🪙',
+                'Page of Wands': '🧑‍🎨', 'Knight of Wands': '🏇', 'Queen of Wands': '👸', 'King of Wands': '🤴',
+                'Page of Cups': '🧚', 'Knight of Cups': '🦄', 'Queen of Cups': '🧜‍♀️', 'King of Cups': '🫅',
+                'Page of Swords': '🗡️', 'Knight of Swords': '⚔️', 'Queen of Swords': '👑', 'King of Swords': '🛡️',
+                'Page of Pentacles': '💰', 'Knight of Pentacles': '🐴', 'Queen of Pentacles': '💎', 'King of Pentacles': '👑'
+            };
+
+            // Check for suit cards by pattern
+            if (cardName.includes('Wands')) return '🔥';
+            if (cardName.includes('Cups')) return '💧';
+            if (cardName.includes('Swords')) return '⚔️';
+            if (cardName.includes('Pentacles')) return '🪙';
+
+            return iconMap[cardName] || '✨';
+        }
+
         function revealCard(index) {
             if (drawnCards[index].revealed) return;
 
@@ -661,14 +777,21 @@
 
             // Replace with card front after animation
             setTimeout(() => {
+                const orientationClass = isReversed ? 'reversed' : 'upright';
+                const orientationText = isReversed ? '↓ REVERSED ↓' : '↑ UPRIGHT ↑';
+                const cardIcon = getCardIcon(card.name);
+
                 cardElement.outerHTML = `
                     <div class="card-front">
-                        <h4>${card.name}</h4>
-                        <p>${isReversed ? '<span class="reversed-indicator">↓ REVERSED ↓</span>' : '↑ UPRIGHT ↑'}</p>
-                        <p style="font-size: 0.6rem; margin-top: auto;">${card.element || card.arcana}</p>
+                        <div class="card-header">
+                            <h4>${card.name}</h4>
+                        </div>
+                        <div class="card-icon-large">${cardIcon}</div>
+                        <div class="card-orientation ${orientationClass}">${orientationText}</div>
+                        <div class="card-element">${card.element || card.arcana}</div>
                     </div>
                 `;
-            }, 300);
+            }, 400);
 
             // Show continue button when all cards revealed
             if (revealedCount === drawnCards.length) {
