@@ -1,0 +1,486 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Eyes of Azrael Entity Schema",
+  "description": "Universal schema for all entities (items, places, deities, concepts, archetypes)",
+  "version": "1.0.0",
+
+  "definitions": {
+    "entityBase": {
+      "type": "object",
+      "required": ["id", "type", "name", "mythologies"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier (kebab-case)",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["item", "place", "deity", "concept", "archetype", "magic", "creature", "hero"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Unicode emoji or icon identifier"
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-friendly slug (auto-generated from id)"
+        },
+        "mythologies": {
+          "type": "array",
+          "description": "List of mythologies this entity appears in",
+          "items": {
+            "type": "string",
+            "enum": ["greek", "norse", "egyptian", "jewish", "hindu", "chinese", "celtic", "japanese", "roman", "mesopotamian", "universal"]
+          },
+          "minItems": 1
+        },
+        "primaryMythology": {
+          "type": "string",
+          "description": "Primary mythology where this entity originates",
+          "enum": ["greek", "norse", "egyptian", "jewish", "hindu", "chinese", "celtic", "japanese", "roman", "mesopotamian", "universal"]
+        },
+        "shortDescription": {
+          "type": "string",
+          "description": "One-sentence description (max 200 chars)",
+          "maxLength": 200
+        },
+        "fullDescription": {
+          "type": "string",
+          "description": "Complete description (markdown supported)"
+        },
+        "colors": {
+          "type": "object",
+          "properties": {
+            "primary": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+            "secondary": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+            "primaryRgb": {"type": "string", "pattern": "^[0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}$"}
+          }
+        },
+        "tags": {
+          "type": "array",
+          "description": "Searchable tags",
+          "items": {"type": "string"}
+        },
+        "relatedEntities": {
+          "type": "object",
+          "properties": {
+            "deities": {
+              "type": "array",
+              "items": {"$ref": "#/definitions/entityReference"}
+            },
+            "items": {
+              "type": "array",
+              "items": {"$ref": "#/definitions/entityReference"}
+            },
+            "places": {
+              "type": "array",
+              "items": {"$ref": "#/definitions/entityReference"}
+            },
+            "concepts": {
+              "type": "array",
+              "items": {"$ref": "#/definitions/entityReference"}
+            },
+            "archetypes": {
+              "type": "array",
+              "items": {"$ref": "#/definitions/entityReference"}
+            },
+            "creatures": {
+              "type": "array",
+              "items": {"$ref": "#/definitions/entityReference"}
+            },
+            "heroes": {
+              "type": "array",
+              "items": {"$ref": "#/definitions/entityReference"}
+            }
+          }
+        },
+        "metaphysicalProperties": {
+          "type": "object",
+          "properties": {
+            "element": {
+              "type": "string",
+              "enum": ["fire", "water", "earth", "air", "aether", "void", "wood", "metal"]
+            },
+            "energyType": {
+              "type": "string",
+              "enum": ["divine", "elemental", "psychic", "vital", "spiritual", "cosmic", "chaotic", "ordered"]
+            },
+            "chakra": {
+              "type": "string",
+              "enum": ["root", "sacral", "solar-plexus", "heart", "throat", "third-eye", "crown"]
+            },
+            "planet": {
+              "type": "string",
+              "enum": ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"]
+            },
+            "zodiac": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
+              }
+            },
+            "sefirot": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["keter", "chokmah", "binah", "chesed", "gevurah", "tiferet", "netzach", "hod", "yesod", "malkhut", "daath"]
+              }
+            },
+            "world": {
+              "type": "string",
+              "enum": ["atziluth", "beriah", "yetzirah", "assiah"]
+            }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "description": "Ancient text references",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {"type": "string"},
+              "author": {"type": "string"},
+              "passage": {"type": "string"},
+              "mythology": {"type": "string"},
+              "corpusUrl": {"type": "string", "format": "uri-reference"}
+            }
+          }
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "url": {"type": "string"},
+              "alt": {"type": "string"},
+              "caption": {"type": "string"},
+              "type": {"type": "string", "enum": ["photo", "artwork", "diagram", "svg"]}
+            }
+          }
+        },
+        "diagram": {
+          "type": "object",
+          "properties": {
+            "type": {"type": "string", "enum": ["svg", "mermaid", "d3"]},
+            "content": {"type": "string"},
+            "caption": {"type": "string"}
+          }
+        }
+      }
+    },
+
+    "entityReference": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "type": {"type": "string"},
+        "mythology": {"type": "string"},
+        "icon": {"type": "string"},
+        "url": {"type": "string", "format": "uri-reference"}
+      }
+    },
+
+    "mythologyContext": {
+      "type": "object",
+      "required": ["mythology", "usage"],
+      "properties": {
+        "mythology": {"type": "string"},
+        "usage": {"type": "string", "description": "How this entity is used in this tradition"},
+        "names": {
+          "type": "array",
+          "description": "Alternative names in this tradition",
+          "items": {"type": "string"}
+        },
+        "associatedDeities": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/entityReference"}
+        },
+        "rituals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "description": {"type": "string"},
+              "url": {"type": "string"}
+            }
+          }
+        },
+        "textReferences": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {"type": "string"},
+              "passage": {"type": "string"},
+              "context": {"type": "string"},
+              "corpusUrl": {"type": "string"}
+            }
+          }
+        },
+        "symbolism": {"type": "string"},
+        "culturalSignificance": {"type": "string"}
+      }
+    }
+  },
+
+  "oneOf": [
+    {"$ref": "#/definitions/itemEntity"},
+    {"$ref": "#/definitions/placeEntity"},
+    {"$ref": "#/definitions/deityEntity"},
+    {"$ref": "#/definitions/conceptEntity"},
+    {"$ref": "#/definitions/archetypeEntity"},
+    {"$ref": "#/definitions/magicEntity"}
+  ],
+
+  "definitions": {
+    "itemEntity": {
+      "allOf": [
+        {"$ref": "#/definitions/entityBase"},
+        {
+          "properties": {
+            "type": {"const": "item"},
+            "category": {
+              "type": "string",
+              "enum": ["herb", "artifact", "weapon", "tool", "material", "garment", "food", "incense", "oil", "stone", "book"]
+            },
+            "subCategory": {"type": "string"},
+            "properties": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "value": {"type": "string"}
+                }
+              }
+            },
+            "uses": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["healing", "protection", "divination", "consecration", "purification", "blessing", "cursing", "transformation", "summoning", "banishing"]
+              }
+            },
+            "mythologyContexts": {
+              "type": "array",
+              "items": {"$ref": "#/definitions/mythologyContext"}
+            }
+          }
+        }
+      ]
+    },
+
+    "placeEntity": {
+      "allOf": [
+        {"$ref": "#/definitions/entityBase"},
+        {
+          "properties": {
+            "type": {"const": "place"},
+            "category": {
+              "type": "string",
+              "enum": ["realm", "temple", "mountain", "city", "river", "underworld", "heaven", "sacred-site", "natural-feature"]
+            },
+            "geography": {
+              "type": "object",
+              "properties": {
+                "realm": {"type": "string"},
+                "location": {"type": "string"},
+                "coordinates": {
+                  "type": "object",
+                  "properties": {
+                    "lat": {"type": "number"},
+                    "lng": {"type": "number"}
+                  }
+                },
+                "accessibility": {"type": "string", "enum": ["mortal", "divine", "deceased", "initiated", "forbidden"]}
+              }
+            },
+            "inhabitants": {
+              "type": "array",
+              "items": {"$ref": "#/definitions/entityReference"}
+            },
+            "events": {
+              "type": "array",
+              "description": "Major mythological events at this location",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "description": {"type": "string"},
+                  "participants": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/entityReference"}
+                  }
+                }
+              }
+            },
+            "mythologyContexts": {
+              "type": "array",
+              "items": {"$ref": "#/definitions/mythologyContext"}
+            }
+          }
+        }
+      ]
+    },
+
+    "deityEntity": {
+      "allOf": [
+        {"$ref": "#/definitions/entityBase"},
+        {
+          "properties": {
+            "type": {"const": "deity"},
+            "titles": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "domains": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "symbols": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "sacredAnimals": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "sacredPlants": {
+              "type": "array",
+              "items": {"$ref": "#/definitions/entityReference"}
+            },
+            "family": {
+              "type": "object",
+              "properties": {
+                "parents": {"type": "array", "items": {"$ref": "#/definitions/entityReference"}},
+                "consorts": {"type": "array", "items": {"$ref": "#/definitions/entityReference"}},
+                "children": {"type": "array", "items": {"$ref": "#/definitions/entityReference"}},
+                "siblings": {"type": "array", "items": {"$ref": "#/definitions/entityReference"}}
+              }
+            },
+            "mythology": {
+              "type": "array",
+              "description": "Major myths involving this deity",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {"type": "string"},
+                  "summary": {"type": "string"},
+                  "url": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "conceptEntity": {
+      "allOf": [
+        {"$ref": "#/definitions/entityBase"},
+        {
+          "properties": {
+            "type": {"const": "concept"},
+            "category": {
+              "type": "string",
+              "enum": ["virtue", "force", "principle", "state", "process", "quality"]
+            },
+            "opposites": {
+              "type": "array",
+              "items": {"$ref": "#/definitions/entityReference"}
+            },
+            "manifestations": {
+              "type": "array",
+              "description": "How this concept manifests in different mythologies",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "mythology": {"type": "string"},
+                  "personification": {"$ref": "#/definitions/entityReference"},
+                  "description": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "archetypeEntity": {
+      "allOf": [
+        {"$ref": "#/definitions/entityBase"},
+        {
+          "properties": {
+            "type": {"const": "archetype"},
+            "category": {
+              "type": "string",
+              "enum": ["hero-journey", "creation", "flood", "trickster", "dying-god", "world-tree", "dragon-slayer", "divine-child", "great-mother", "wise-old-man"]
+            },
+            "jungianType": {"type": "string"},
+            "campbellStage": {"type": "string"},
+            "universalPattern": {"type": "string"},
+            "examples": {
+              "type": "array",
+              "description": "Examples of this archetype across mythologies",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "mythology": {"type": "string"},
+                  "entity": {"$ref": "#/definitions/entityReference"},
+                  "analysis": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "magicEntity": {
+      "allOf": [
+        {"$ref": "#/definitions/entityBase"},
+        {
+          "properties": {
+            "type": {"const": "magic"},
+            "category": {
+              "type": "string",
+              "enum": ["divination", "invocation", "evocation", "transformation", "healing", "protection", "binding", "banishing", "consecration", "enchantment"]
+            },
+            "method": {"type": "string"},
+            "requirements": {
+              "type": "object",
+              "properties": {
+                "items": {"type": "array", "items": {"$ref": "#/definitions/entityReference"}},
+                "location": {"$ref": "#/definitions/entityReference"},
+                "timing": {"type": "string"},
+                "practitioner": {"type": "string"}
+              }
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "order": {"type": "integer"},
+                  "action": {"type": "string"},
+                  "description": {"type": "string"}
+                }
+              }
+            },
+            "effects": {"type": "string"},
+            "warnings": {"type": "string"}
+          }
+        }
+      ]
+    }
+  }
+}
