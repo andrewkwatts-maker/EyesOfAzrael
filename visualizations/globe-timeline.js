@@ -72,6 +72,9 @@ class GlobeTimeline {
 
       console.log(`Loaded ${this.entities.length} entities with metadata`);
 
+      // Load relationship data
+      await this.loadRelationships();
+
       // Populate mythology filters
       const mythologies = [...new Set(this.entities.map(e => e.mythology))];
       const filtersContainer = document.getElementById('mythology-filters');
@@ -88,6 +91,17 @@ class GlobeTimeline {
 
     } catch (error) {
       console.error('Error loading entities:', error);
+    }
+  }
+
+  async loadRelationships() {
+    try {
+      const response = await fetch('../data/relationships-by-entity.json');
+      this.relationshipsData = await response.json();
+      console.log(`Loaded relationship data for ${Object.keys(this.relationshipsData).length} entities`);
+    } catch (error) {
+      console.error('Error loading relationships:', error);
+      this.relationshipsData = {};
     }
   }
 
@@ -575,14 +589,57 @@ class GlobeTimeline {
 
   findRelatedEntities(entity) {
     const related = [];
+    const seen = new Set();
 
-    // Check relatedEntities field
-    if (entity.relatedEntities) {
+    // Use loaded relationship data if available
+    if (this.relationshipsData && this.relationshipsData[entity.id]) {
+      const relationships = this.relationshipsData[entity.id];
+
+      // Process outgoing relationships
+      if (relationships.outgoing) {
+        relationships.outgoing.forEach(rel => {
+          if (seen.has(rel.to)) return;
+          seen.add(rel.to);
+
+          const relatedEntity = this.entities.find(e => e.id === rel.to);
+          if (relatedEntity) {
+            related.push({
+              relatedEntity,
+              relationship: rel.description || rel.type,
+              type: rel.type,
+              strength: rel.strength
+            });
+          }
+        });
+      }
+
+      // Process incoming relationships
+      if (relationships.incoming) {
+        relationships.incoming.forEach(rel => {
+          if (seen.has(rel.from)) return;
+          seen.add(rel.from);
+
+          const relatedEntity = this.entities.find(e => e.id === rel.from);
+          if (relatedEntity) {
+            related.push({
+              relatedEntity,
+              relationship: rel.description || rel.type,
+              type: rel.type,
+              strength: rel.strength
+            });
+          }
+        });
+      }
+    }
+
+    // Fallback: Check relatedEntities field
+    if (related.length === 0 && entity.relatedEntities) {
       Object.values(entity.relatedEntities).forEach(categoryEntities => {
         if (Array.isArray(categoryEntities)) {
           categoryEntities.forEach(rel => {
             const relatedEntity = this.entities.find(e => e.id === rel.id);
-            if (relatedEntity) {
+            if (relatedEntity && !seen.has(relatedEntity.id)) {
+              seen.add(relatedEntity.id);
               related.push({
                 relatedEntity,
                 relationship: rel.relationship || 'related',
@@ -594,59 +651,11 @@ class GlobeTimeline {
       });
     }
 
-    // Check crossCulturalParallels
-    if (entity.crossCulturalParallels) {
-      entity.crossCulturalParallels.forEach(parallel => {
-        const relatedEntity = this.entities.find(e => e.id === parallel.entity);
-        if (relatedEntity) {
-          related.push({
-            relatedEntity,
-            relationship: parallel.similarity || 'parallel',
-            type: 'parallel'
-          });
-        }
-      });
-    }
-
-    // Check same mythology (cultural continuity)
-    const sameMyth = this.entities.filter(e =>
-      e.mythology === entity.mythology &&
-      e.id !== entity.id &&
-      e.category === entity.category
-    );
-    sameMyth.slice(0, 5).forEach(relatedEntity => {
-      related.push({
-        relatedEntity,
-        relationship: 'same tradition',
-        type: 'cultural'
-      });
-    });
-
-    // Check same location (geographical proximity)
-    if (entity.geographical?.originPoint?.coordinates) {
-      const entityCoords = entity.geographical.originPoint.coordinates;
-      const nearby = this.entities.filter(e => {
-        if (e.id === entity.id || !e.geographical?.originPoint?.coordinates) return false;
-
-        const coords = e.geographical.originPoint.coordinates;
-        const latDiff = Math.abs(coords.latitude - entityCoords.latitude);
-        const lonDiff = Math.abs(coords.longitude - entityCoords.longitude);
-
-        return latDiff < 5 && lonDiff < 5; // ~500km radius
-      });
-
-      nearby.slice(0, 3).forEach(relatedEntity => {
-        if (!related.find(r => r.relatedEntity.id === relatedEntity.id)) {
-          related.push({
-            relatedEntity,
-            relationship: 'nearby location',
-            type: 'geographical'
-          });
-        }
-      });
-    }
-
-    return related;
+    // Limit to top 20 relationships sorted by strength
+    const strengthOrder = { strong: 3, moderate: 2, weak: 1, possible: 0 };
+    return related
+      .sort((a, b) => (strengthOrder[b.strength] || 0) - (strengthOrder[a.strength] || 0))
+      .slice(0, 20);
   }
 
   createRelationshipArrow(fromPos, toPos, relationship) {
