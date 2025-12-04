@@ -16,6 +16,9 @@ class GlobeTimeline {
     this.currentYear = -3000;
     this.isPlaying = false;
     this.animationSpeed = 1;
+    this.selectedEntity = null;
+    this.highlightedMarkers = new Set();
+    this.relationshipArrows = [];
     this.activeFilters = {
       mythologies: new Set(),
       types: new Set(['place', 'deity', 'concept', 'item', 'all'])
@@ -428,6 +431,11 @@ class GlobeTimeline {
     const mouse = new THREE.Vector2();
 
     window.addEventListener('click', (event) => {
+      // Ignore clicks on control panel
+      if (event.target.closest('#controls-panel') || event.target.closest('#info-panel')) {
+        return;
+      }
+
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -435,10 +443,250 @@ class GlobeTimeline {
       const intersects = raycaster.intersectObjects(this.markers);
 
       if (intersects.length > 0) {
-        const entity = intersects[0].object.userData.entity;
-        this.showEntityInfo(entity);
+        const marker = intersects[0].object;
+        const entity = marker.userData.entity;
+
+        // Toggle selection
+        if (this.selectedEntity?.id === entity.id) {
+          this.deselectEntity();
+        } else {
+          this.selectEntity(entity, marker);
+        }
+      } else {
+        // Clicked empty space - deselect
+        this.deselectEntity();
       }
     });
+
+    // Hover effect
+    window.addEventListener('mousemove', (event) => {
+      if (event.target.closest('#controls-panel') || event.target.closest('#info-panel')) {
+        return;
+      }
+
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, this.camera);
+      const intersects = raycaster.intersectObjects(this.markers);
+
+      if (intersects.length > 0) {
+        document.body.style.cursor = 'pointer';
+      } else {
+        document.body.style.cursor = 'default';
+      }
+    });
+  }
+
+  selectEntity(entity, marker) {
+    this.selectedEntity = entity;
+
+    // Show entity info
+    this.showEntityInfo(entity);
+
+    // Highlight selected marker
+    marker.scale.set(1.5, 1.5, 1.5);
+
+    // Find and highlight related entities
+    this.highlightRelationships(entity);
+  }
+
+  deselectEntity() {
+    if (!this.selectedEntity) return;
+
+    this.selectedEntity = null;
+
+    // Hide info panel
+    const panel = document.getElementById('info-panel');
+    panel.classList.remove('visible');
+
+    // Reset all marker scales
+    this.markers.forEach(marker => {
+      marker.scale.set(1, 1, 1);
+    });
+
+    // Clear relationship highlights
+    this.clearRelationshipHighlights();
+  }
+
+  highlightRelationships(entity) {
+    this.clearRelationshipHighlights();
+    this.highlightedMarkers.clear();
+
+    // Find related entities
+    const relatedEntities = this.findRelatedEntities(entity);
+
+    // Highlight related markers and create arrows
+    relatedEntities.forEach(({ relatedEntity, relationship }) => {
+      const relatedMarker = this.markers.find(m =>
+        m.userData.entity.id === relatedEntity.id
+      );
+
+      if (relatedMarker) {
+        // Highlight marker
+        this.highlightedMarkers.add(relatedMarker);
+        relatedMarker.scale.set(1.3, 1.3, 1.3);
+
+        // Dim non-related markers
+        this.markers.forEach(m => {
+          if (m.userData.entity.id !== entity.id &&
+              !this.highlightedMarkers.has(m)) {
+            m.material.opacity = 0.3;
+          }
+        });
+
+        // Create arrow showing relationship
+        const selectedMarker = this.markers.find(m =>
+          m.userData.entity.id === entity.id
+        );
+        if (selectedMarker) {
+          const arrow = this.createRelationshipArrow(
+            selectedMarker.position,
+            relatedMarker.position,
+            relationship
+          );
+          if (arrow) {
+            this.relationshipArrows.push(arrow);
+            this.scene.add(arrow);
+          }
+        }
+      }
+    });
+
+    console.log(`Found ${relatedEntities.length} related entities for ${entity.name}`);
+  }
+
+  clearRelationshipHighlights() {
+    // Remove relationship arrows
+    this.relationshipArrows.forEach(arrow => {
+      this.scene.remove(arrow);
+      arrow.geometry.dispose();
+      arrow.material.dispose();
+    });
+    this.relationshipArrows = [];
+
+    // Reset marker opacities
+    this.markers.forEach(marker => {
+      marker.material.opacity = 0.8;
+    });
+
+    this.highlightedMarkers.clear();
+  }
+
+  findRelatedEntities(entity) {
+    const related = [];
+
+    // Check relatedEntities field
+    if (entity.relatedEntities) {
+      Object.values(entity.relatedEntities).forEach(categoryEntities => {
+        if (Array.isArray(categoryEntities)) {
+          categoryEntities.forEach(rel => {
+            const relatedEntity = this.entities.find(e => e.id === rel.id);
+            if (relatedEntity) {
+              related.push({
+                relatedEntity,
+                relationship: rel.relationship || 'related',
+                type: 'direct'
+              });
+            }
+          });
+        }
+      });
+    }
+
+    // Check crossCulturalParallels
+    if (entity.crossCulturalParallels) {
+      entity.crossCulturalParallels.forEach(parallel => {
+        const relatedEntity = this.entities.find(e => e.id === parallel.entity);
+        if (relatedEntity) {
+          related.push({
+            relatedEntity,
+            relationship: parallel.similarity || 'parallel',
+            type: 'parallel'
+          });
+        }
+      });
+    }
+
+    // Check same mythology (cultural continuity)
+    const sameMyth = this.entities.filter(e =>
+      e.mythology === entity.mythology &&
+      e.id !== entity.id &&
+      e.category === entity.category
+    );
+    sameMyth.slice(0, 5).forEach(relatedEntity => {
+      related.push({
+        relatedEntity,
+        relationship: 'same tradition',
+        type: 'cultural'
+      });
+    });
+
+    // Check same location (geographical proximity)
+    if (entity.geographical?.originPoint?.coordinates) {
+      const entityCoords = entity.geographical.originPoint.coordinates;
+      const nearby = this.entities.filter(e => {
+        if (e.id === entity.id || !e.geographical?.originPoint?.coordinates) return false;
+
+        const coords = e.geographical.originPoint.coordinates;
+        const latDiff = Math.abs(coords.latitude - entityCoords.latitude);
+        const lonDiff = Math.abs(coords.longitude - entityCoords.longitude);
+
+        return latDiff < 5 && lonDiff < 5; // ~500km radius
+      });
+
+      nearby.slice(0, 3).forEach(relatedEntity => {
+        if (!related.find(r => r.relatedEntity.id === relatedEntity.id)) {
+          related.push({
+            relatedEntity,
+            relationship: 'nearby location',
+            type: 'geographical'
+          });
+        }
+      });
+    }
+
+    return related;
+  }
+
+  createRelationshipArrow(fromPos, toPos, relationship) {
+    // Determine color based on relationship type
+    const relationshipColors = {
+      direct: 0xFFD700,      // Gold for direct relationships
+      parallel: 0x9C27B0,    // Purple for parallels
+      cultural: 0x4CAF50,    // Green for cultural continuity
+      geographical: 0x2196F3 // Blue for geographical proximity
+    };
+
+    const color = relationshipColors[relationship.type] || 0xFFAA00;
+
+    // Create curved path
+    const start = fromPos.clone();
+    const end = toPos.clone();
+
+    // Calculate midpoint raised above surface
+    const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+    mid.normalize().multiplyScalar(120); // Arc outward from globe
+
+    const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+    const points = curve.getPoints(50);
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+    const material = new THREE.LineBasicMaterial({
+      color: color,
+      transparent: true,
+      opacity: 0.7,
+      linewidth: 2
+    });
+
+    const line = new THREE.Line(geometry, material);
+
+    // Add arrow head
+    const direction = new THREE.Vector3().subVectors(end, mid).normalize();
+    const arrowHelper = new THREE.ArrowHelper(direction, end, 5, color, 3, 2);
+    line.add(arrowHelper);
+
+    return line;
   }
 
   showEntityInfo(entity) {
@@ -459,6 +707,69 @@ class GlobeTimeline {
                      entity.geographical?.originPoint?.name ||
                      'Unknown';
     document.getElementById('entity-location').textContent = location;
+
+    // Show related entities
+    const relatedEntities = this.findRelatedEntities(entity);
+    const relatedList = document.getElementById('related-list');
+    relatedList.innerHTML = '';
+
+    if (relatedEntities.length > 0) {
+      document.getElementById('related-entities').style.display = 'block';
+
+      // Group by type
+      const byType = {
+        direct: [],
+        parallel: [],
+        cultural: [],
+        geographical: []
+      };
+
+      relatedEntities.forEach(({ relatedEntity, type }) => {
+        byType[type].push(relatedEntity);
+      });
+
+      // Display each type
+      Object.entries(byType).forEach(([type, entities]) => {
+        if (entities.length === 0) return;
+
+        const typeLabel = {
+          direct: '🔗 Direct Relations',
+          parallel: '🔀 Parallels',
+          cultural: '🌿 Same Tradition',
+          geographical: '📍 Nearby'
+        }[type];
+
+        const typeDiv = document.createElement('div');
+        typeDiv.style.marginTop = '0.5rem';
+        typeDiv.innerHTML = `<strong style="font-size: 0.85rem; color: var(--color-text-secondary);">${typeLabel}</strong>`;
+
+        const entitiesList = document.createElement('div');
+        entitiesList.style.marginLeft = '1rem';
+        entitiesList.style.fontSize = '0.85rem';
+
+        entities.slice(0, 5).forEach(rel => {
+          const item = document.createElement('div');
+          item.textContent = `• ${rel.name}`;
+          item.style.marginTop = '0.25rem';
+          item.style.color = 'var(--color-text-secondary)';
+          entitiesList.appendChild(item);
+        });
+
+        if (entities.length > 5) {
+          const more = document.createElement('div');
+          more.textContent = `  ... and ${entities.length - 5} more`;
+          more.style.fontStyle = 'italic';
+          more.style.marginTop = '0.25rem';
+          more.style.color = 'var(--color-text-tertiary)';
+          entitiesList.appendChild(more);
+        }
+
+        typeDiv.appendChild(entitiesList);
+        relatedList.appendChild(typeDiv);
+      });
+    } else {
+      document.getElementById('related-entities').style.display = 'none';
+    }
   }
 
   playTimeline() {
