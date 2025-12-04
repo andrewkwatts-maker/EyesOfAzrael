@@ -101,21 +101,21 @@ const CATEGORIES = {
     icon: '🌿',
     heroTitle: 'Sacred Plants & Herbs',
     heroDescription: 'Discover the sacred plants, herbs, and botanical wonders used in ancient practices.',
-    categoryId: 'herb'
+    categoryId: 'herb'  // Note: 'herb' category doesn't exist yet in data - these pages will be empty until herbs are added
   },
   rituals: {
     title: 'Rituals',
     icon: '🕯️',
     heroTitle: 'Sacred Ceremonies & Rituals',
     heroDescription: 'Understanding the ceremonial practices, rites, and sacred observances.',
-    categoryId: 'magic'
+    categoryId: 'magics'  // Fixed: was 'magic', but data uses 'magics' (plural)
   },
   magic: {
     title: 'Magic',
     icon: '✨',
     heroTitle: 'Magical Practices & Systems',
     heroDescription: 'Explore the magical traditions, spells, and mystical practices.',
-    categoryId: 'magic'
+    categoryId: 'magics'  // Fixed: was 'magic', but data uses 'magics' (plural)
   },
   concepts: {
     title: 'Concepts',
