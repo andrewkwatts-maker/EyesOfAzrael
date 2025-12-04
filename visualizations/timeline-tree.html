@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mythology Timeline Tree - Temporal Connections</title>
+
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../styles.css">
+
+    <!-- Theme System -->
+    <script defer src="../themes/theme-picker.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: var(--font-family-base);
+            background: var(--color-background);
+        }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #timeline-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+
+        #timeline-canvas:active {
+            cursor: grabbing;
+        }
+
+        #controls-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(var(--color-surface-rgb), 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(var(--color-border-rgb), 0.3);
+            min-width: 300px;
+            z-index: 10;
+        }
+
+        #controls-panel h2 {
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+            color: var(--color-text-primary);
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            font-size: 0.9rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .filter-chip {
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-md);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid rgba(var(--color-border-rgb), 0.3);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .filter-chip:hover {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            transform: translateY(-1px);
+        }
+
+        .filter-chip.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .zoom-button {
+            flex: 1;
+            padding: 0.6rem;
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid rgba(var(--color-border-rgb), 0.3);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .zoom-button:hover {
+            background: rgba(var(--color-primary-rgb), 0.2);
+        }
+
+        #entity-tooltip {
+            position: absolute;
+            background: rgba(var(--color-surface-rgb), 0.98);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(var(--color-border-rgb), 0.3);
+            max-width: 300px;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+        }
+
+        #entity-tooltip h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--color-text-primary);
+        }
+
+        #entity-tooltip p {
+            margin: 0.3rem 0;
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+        }
+
+        .timeline-era {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            border-left: 2px solid rgba(var(--color-border-rgb), 0.2);
+            pointer-events: none;
+        }
+
+        .era-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(var(--color-border-rgb), 0.2);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .legend-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .connection-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .connection-type {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .connection-line {
+            width: 30px;
+            height: 2px;
+            flex-shrink: 0;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--color-text-primary);
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <div id="container">
+        <canvas id="timeline-canvas"></canvas>
+
+        <div id="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading timeline data...</p>
+        </div>
+
+        <div id="controls-panel">
+            <h2>📅 Timeline Tree</h2>
+
+            <div class="control-group">
+                <label>Zoom</label>
+                <div class="zoom-controls">
+                    <button class="zoom-button" id="zoom-in">+</button>
+                    <button class="zoom-button" id="zoom-out">−</button>
+                    <button class="zoom-button" id="zoom-reset">⌂</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Filter by Mythology</label>
+                <div class="filter-group" id="mythology-filters">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Entity Types</label>
+                <div class="filter-group" id="type-filters">
+                    <div class="filter-chip active" data-type="all">All</div>
+                    <div class="filter-chip active" data-type="place">Places</div>
+                    <div class="filter-chip active" data-type="deity">Deities</div>
+                    <div class="filter-chip active" data-type="concept">Concepts</div>
+                    <div class="filter-chip active" data-type="item">Items</div>
+                </div>
+            </div>
+
+            <div class="legend">
+                <strong>Mythologies</strong>
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: #4169E1;"></div>
+                    <span>Greek</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: #DAA520;"></div>
+                    <span>Egyptian</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: #4682B4;"></div>
+                    <span>Norse</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: #FF6B35;"></div>
+                    <span>Hindu</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: #228B22;"></div>
+                    <span>Celtic</span>
+                </div>
+            </div>
+
+            <div class="connection-legend">
+                <strong>Connections</strong>
+                <div class="connection-type">
+                    <div class="connection-line" style="background: #FFD700; height: 3px;"></div>
+                    <span>Direct Influence</span>
+                </div>
+                <div class="connection-type">
+                    <div class="connection-line" style="background: #4CAF50; height: 2px; border-top: 2px dashed #4CAF50; background: none;"></div>
+                    <span>Cultural Spread</span>
+                </div>
+                <div class="connection-type">
+                    <div class="connection-line" style="background: #9C27B0; height: 2px;"></div>
+                    <span>Syncretism</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="entity-tooltip">
+            <h4 id="tooltip-name"></h4>
+            <p id="tooltip-date"></p>
+            <p id="tooltip-location"></p>
+            <p id="tooltip-description"></p>
+        </div>
+    </div>
+
+    <script src="./timeline-tree.js"></script>
+</body>
+</html>

@@ -1,0 +1,476 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Enhanced Entity Metadata Schema",
+  "description": "Complete metadata schema for temporal, geographical, and influence tracking to enable 3D globe visualization and timeline analysis",
+  "version": "2.1",
+
+  "definitions": {
+    "dateObject": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer",
+          "description": "Year (negative for BCE, positive for CE)"
+        },
+        "month": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "day": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 31
+        },
+        "circa": {
+          "type": "boolean",
+          "description": "Whether this is an approximate date"
+        },
+        "uncertainty": {
+          "type": "integer",
+          "description": "Uncertainty range in years (+/-)"
+        },
+        "display": {
+          "type": "string",
+          "description": "Human-readable display string (e.g., 'c. 500 BCE')"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["certain", "probable", "possible", "speculative"],
+          "description": "Confidence level in this date"
+        }
+      },
+      "required": ["year", "display"]
+    },
+
+    "coordinates": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "elevation": {
+          "type": "number",
+          "description": "Elevation in meters"
+        },
+        "accuracy": {
+          "type": "string",
+          "enum": ["exact", "approximate", "regional", "continental"],
+          "description": "How accurate these coordinates are"
+        }
+      },
+      "required": ["latitude", "longitude"]
+    },
+
+    "influence": {
+      "type": "object",
+      "properties": {
+        "entityId": {
+          "type": "string",
+          "description": "ID of the influenced/influencing entity"
+        },
+        "entityName": {
+          "type": "string"
+        },
+        "mythology": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["direct", "indirect", "parallel", "syncretism", "adaptation", "borrowing"],
+          "description": "Type of influence relationship"
+        },
+        "strength": {
+          "type": "string",
+          "enum": ["strong", "moderate", "weak", "possible"],
+          "description": "Strength of the influence"
+        },
+        "date": {
+          "$ref": "#/definitions/dateObject",
+          "description": "When this influence occurred"
+        },
+        "mechanism": {
+          "type": "string",
+          "enum": ["trade", "conquest", "migration", "literary", "religious-syncretism", "parallel-development", "cultural-diffusion"],
+          "description": "How the influence was transmitted"
+        },
+        "description": {
+          "type": "string",
+          "description": "Details about the influence relationship"
+        },
+        "evidence": {
+          "type": "string",
+          "description": "Archaeological, textual, or linguistic evidence"
+        }
+      },
+      "required": ["entityId", "entityName", "type", "strength"]
+    }
+  },
+
+  "properties": {
+    "linguistic": {
+      "type": "object",
+      "description": "Linguistic and etymological information",
+      "properties": {
+        "originalName": {
+          "type": "string",
+          "description": "Name in original language/script"
+        },
+        "originalScript": {
+          "type": "string",
+          "description": "Script system (greek, sanskrit, hebrew, etc.)"
+        },
+        "transliteration": {
+          "type": "string",
+          "description": "Romanized transliteration"
+        },
+        "pronunciation": {
+          "type": "string",
+          "description": "IPA or simplified pronunciation guide"
+        },
+        "languageCode": {
+          "type": "string",
+          "description": "ISO 639 language code"
+        },
+        "alternativeNames": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "language": { "type": "string" },
+              "context": { "type": "string" },
+              "meaning": { "type": "string" }
+            }
+          }
+        },
+        "etymology": {
+          "type": "object",
+          "properties": {
+            "rootLanguage": { "type": "string" },
+            "meaning": { "type": "string" },
+            "derivation": { "type": "string" },
+            "cognates": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "word": { "type": "string" },
+                  "language": { "type": "string" },
+                  "meaning": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "geographical": {
+      "type": "object",
+      "description": "Geographical origin and spread information",
+      "properties": {
+        "originPoint": {
+          "type": "object",
+          "description": "Primary point of origin",
+          "properties": {
+            "name": { "type": "string" },
+            "coordinates": { "$ref": "#/definitions/coordinates" },
+            "modernName": { "type": "string" },
+            "ancientName": { "type": "string" },
+            "type": { "type": "string" },
+            "description": { "type": "string" },
+            "significance": { "type": "string" }
+          }
+        },
+        "spreadPath": {
+          "type": "array",
+          "description": "Geographical spread over time",
+          "items": {
+            "type": "object",
+            "properties": {
+              "location": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "coordinates": { "$ref": "#/definitions/coordinates" },
+                  "region": { "type": "string" }
+                }
+              },
+              "date": { "$ref": "#/definitions/dateObject" },
+              "mechanism": {
+                "type": "string",
+                "enum": ["trade", "conquest", "migration", "missionary", "cultural-exchange"]
+              },
+              "strength": {
+                "type": "string",
+                "enum": ["dominant", "significant", "minor", "trace"]
+              }
+            }
+          }
+        },
+        "region": {
+          "type": "string",
+          "description": "Primary cultural region"
+        },
+        "culturalArea": {
+          "type": "string",
+          "description": "Broader cultural sphere"
+        },
+        "modernCountries": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Modern countries in this area"
+        },
+        "mapVisualization": {
+          "type": "object",
+          "description": "Data for map visualization",
+          "properties": {
+            "center": { "$ref": "#/definitions/coordinates" },
+            "zoom": { "type": "integer" },
+            "bounds": {
+              "type": "object",
+              "properties": {
+                "north": { "type": "number" },
+                "south": { "type": "number" },
+                "east": { "type": "number" },
+                "west": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "temporal": {
+      "type": "object",
+      "description": "Temporal information and timeline data",
+      "properties": {
+        "mythologicalDate": {
+          "type": "object",
+          "description": "Date within mythological chronology",
+          "properties": {
+            "start": { "$ref": "#/definitions/dateObject" },
+            "end": { "$ref": "#/definitions/dateObject" },
+            "display": { "type": "string" },
+            "era": {
+              "type": "string",
+              "description": "Mythological era (e.g., 'Golden Age', 'Age of Heroes')"
+            }
+          }
+        },
+        "historicalDate": {
+          "type": "object",
+          "description": "Historical dates of worship/belief",
+          "properties": {
+            "start": { "$ref": "#/definitions/dateObject" },
+            "end": { "$ref": "#/definitions/dateObject" },
+            "display": { "type": "string" }
+          }
+        },
+        "firstAttestation": {
+          "type": "object",
+          "description": "First known reference in historical record",
+          "properties": {
+            "date": { "$ref": "#/definitions/dateObject" },
+            "source": { "type": "string" },
+            "type": {
+              "type": "string",
+              "enum": ["literary", "archaeological", "epigraphic", "iconographic"]
+            },
+            "description": { "type": "string" },
+            "confidence": {
+              "type": "string",
+              "enum": ["certain", "probable", "possible", "speculative"]
+            }
+          }
+        },
+        "peakPopularity": {
+          "type": "object",
+          "description": "Period of greatest cultural prominence",
+          "properties": {
+            "start": { "$ref": "#/definitions/dateObject" },
+            "end": { "$ref": "#/definitions/dateObject" },
+            "display": { "type": "string" },
+            "context": { "type": "string" }
+          }
+        },
+        "decline": {
+          "type": "object",
+          "description": "Period of decline or transformation",
+          "properties": {
+            "date": { "$ref": "#/definitions/dateObject" },
+            "reason": { "type": "string" },
+            "transformedInto": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "entityId": { "type": "string" },
+                  "entityName": { "type": "string" },
+                  "mythology": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "revival": {
+          "type": "array",
+          "description": "Periods of revival or renewed interest",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": { "$ref": "#/definitions/dateObject" },
+              "context": { "type": "string" },
+              "movement": { "type": "string" }
+            }
+          }
+        },
+        "literaryReferences": {
+          "type": "array",
+          "description": "Key literary references with dates",
+          "items": {
+            "type": "object",
+            "properties": {
+              "work": { "type": "string" },
+              "author": { "type": "string" },
+              "date": { "$ref": "#/definitions/dateObject" },
+              "significance": { "type": "string" },
+              "passage": { "type": "string" }
+            }
+          }
+        },
+        "culturalPeriod": {
+          "type": "string",
+          "description": "Overall cultural period classification"
+        }
+      }
+    },
+
+    "influences": {
+      "type": "object",
+      "description": "Influence relationships for timeline and propagation visualization",
+      "properties": {
+        "influencedBy": {
+          "type": "array",
+          "description": "Entities that influenced this one",
+          "items": { "$ref": "#/definitions/influence" }
+        },
+        "influenced": {
+          "type": "array",
+          "description": "Entities influenced by this one",
+          "items": { "$ref": "#/definitions/influence" }
+        },
+        "parallelDevelopments": {
+          "type": "array",
+          "description": "Independently developed parallel concepts",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityId": { "type": "string" },
+              "entityName": { "type": "string" },
+              "mythology": { "type": "string" },
+              "similarity": { "type": "string" },
+              "explanation": { "type": "string" }
+            }
+          }
+        },
+        "syncretismWith": {
+          "type": "array",
+          "description": "Entities merged/syncretized with this one",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityId": { "type": "string" },
+              "entityName": { "type": "string" },
+              "mythology": { "type": "string" },
+              "date": { "$ref": "#/definitions/dateObject" },
+              "resultingEntity": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "visualizationData": {
+      "type": "object",
+      "description": "Pre-computed data for visualizations",
+      "properties": {
+        "timelinePosition": {
+          "type": "object",
+          "description": "Position on timeline visualization",
+          "properties": {
+            "primaryDate": { "type": "integer" },
+            "startDate": { "type": "integer" },
+            "endDate": { "type": "integer" },
+            "layer": {
+              "type": "string",
+              "description": "Vertical layer (deities, heroes, items, etc.)"
+            },
+            "branch": {
+              "type": "string",
+              "description": "Cultural branch (greek, norse, egyptian, etc.)"
+            }
+          }
+        },
+        "globeVisualization": {
+          "type": "object",
+          "description": "Data for 3D globe visualization",
+          "properties": {
+            "primaryMarker": {
+              "type": "object",
+              "properties": {
+                "coordinates": { "$ref": "#/definitions/coordinates" },
+                "size": {
+                  "type": "string",
+                  "enum": ["small", "medium", "large", "major"]
+                },
+                "color": { "type": "string" },
+                "icon": { "type": "string" }
+              }
+            },
+            "influenceArrows": {
+              "type": "array",
+              "description": "Arrows showing influence propagation",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "from": { "$ref": "#/definitions/coordinates" },
+                  "to": { "$ref": "#/definitions/coordinates" },
+                  "date": { "type": "integer" },
+                  "strength": { "type": "number" },
+                  "type": { "type": "string" },
+                  "animated": { "type": "boolean" }
+                }
+              }
+            },
+            "spreadAnimation": {
+              "type": "array",
+              "description": "Keyframes for showing spread over time",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "year": { "type": "integer" },
+                  "radius": { "type": "number" },
+                  "opacity": { "type": "number" },
+                  "locations": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/coordinates" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
