@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entity Panel System Test</title>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="components/panels/panels.css">
+
+    <!-- Scripts -->
+    <script defer src="themes/theme-animations.js"></script>
+    <script defer src="themes/theme-picker.js"></script>
+    <script defer src="components/panels/entity-panel.js"></script>
+
+    <style>
+        .demo-section {
+            margin: 3rem 0;
+            padding: 2rem;
+            background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.5);
+            border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.5);
+            border-radius: var(--radius-lg, 15px);
+        }
+
+        .demo-section h2 {
+            color: var(--color-primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .demo-code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: var(--radius-md, 10px);
+            border-left: 3px solid var(--color-primary);
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        .inline-demo {
+            padding: 1rem;
+            background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.3);
+            border-radius: var(--radius-md, 10px);
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Picker -->
+    <div id="theme-picker-container"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>🧪 Entity Panel System Test</h1>
+            <nav class="header-nav">
+                <a href="index.html">Home</a>
+                <a href="mythos/index.html">Mythologies</a>
+            </nav>
+        </div>
+    </header>
+
+    <main style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+
+        <!-- Introduction -->
+        <section class="demo-section">
+            <h2>Modular Entity Panel System</h2>
+            <p>
+                This system allows you to display any entity (item, place, deity, concept, archetype, magic)
+                anywhere on the site using a simple HTML attribute or JavaScript initialization.
+            </p>
+            <p>
+                <strong>Key Features:</strong>
+            </p>
+            <ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
+                <li>✅ Three display modes: mini, compact, full</li>
+                <li>✅ Automatic mythology context filtering</li>
+                <li>✅ Cross-references to related entities</li>
+                <li>✅ Metaphysical properties tracking</li>
+                <li>✅ Ancient text source citations</li>
+                <li>✅ Fully responsive and theme-compatible</li>
+            </ul>
+        </section>
+
+        <!-- Example 1: Mini Panel (Inline) -->
+        <section class="demo-section">
+            <h2>1. Mini Panel (Inline Reference)</h2>
+            <p>Use mini panels to reference entities inline within text:</p>
+
+            <div class="demo-code">
+&lt;div id="staff-mini" data-entity-panel
+     data-entity-id="staff-of-moses"
+     data-entity-type="item"
+     data-display-mode="mini"&gt;&lt;/div&gt;
+            </div>
+
+            <div class="inline-demo">
+                <p>
+                    Moses wielded the powerful
+                    <span id="staff-mini" data-entity-panel
+                          data-entity-id="staff-of-moses"
+                          data-entity-type="item"
+                          data-display-mode="mini"></span>
+                    to perform miracles and lead the Israelites out of Egypt.
+                </p>
+            </div>
+        </section>
+
+        <!-- Example 2: Compact Panel (Card View) -->
+        <section class="demo-section">
+            <h2>2. Compact Panel (Card View)</h2>
+            <p>Use compact panels in lists or sidebars to show quick information:</p>
+
+            <div class="demo-code">
+&lt;div id="staff-compact" data-entity-panel
+     data-entity-id="staff-of-moses"
+     data-entity-type="item"
+     data-display-mode="compact"
+     data-mythology="jewish"&gt;&lt;/div&gt;
+            </div>
+
+            <div id="staff-compact" data-entity-panel
+                 data-entity-id="staff-of-moses"
+                 data-entity-type="item"
+                 data-display-mode="compact"
+                 data-mythology="jewish"></div>
+        </section>
+
+        <!-- Example 3: Full Panel (Detailed View) -->
+        <section class="demo-section">
+            <h2>3. Full Panel (Detailed View)</h2>
+            <p>Use full panels for comprehensive entity information on dedicated pages:</p>
+
+            <div class="demo-code">
+&lt;div id="staff-full" data-entity-panel
+     data-entity-id="staff-of-moses"
+     data-entity-type="item"
+     data-display-mode="full"
+     data-mythology="jewish"&gt;&lt;/div&gt;
+            </div>
+
+            <div id="staff-full" data-entity-panel
+                 data-entity-id="staff-of-moses"
+                 data-entity-type="item"
+                 data-display-mode="full"
+                 data-mythology="jewish"></div>
+        </section>
+
+        <!-- JavaScript API -->
+        <section class="demo-section">
+            <h2>4. JavaScript API</h2>
+            <p>You can also initialize panels programmatically:</p>
+
+            <div class="demo-code">
+// Create a panel instance
+const panel = new EntityPanel({
+    entityId: 'staff-of-moses',
+    entityType: 'item',
+    displayMode: 'compact',
+    containerId: 'my-container',
+    mythology: 'jewish'
+});
+
+// Load and render
+panel.load();
+            </div>
+
+            <p style="margin-top: 1rem;">
+                <strong>Example Button:</strong>
+            </p>
+            <button id="load-panel-btn" class="btn-primary" style="margin-top: 1rem;">
+                Load Panel Dynamically
+            </button>
+            <div id="dynamic-panel" style="margin-top: 1rem;"></div>
+
+            <script>
+                document.getElementById('load-panel-btn').addEventListener('click', function() {
+                    const panel = new EntityPanel({
+                        entityId: 'staff-of-moses',
+                        entityType: 'item',
+                        displayMode: 'compact',
+                        containerId: 'dynamic-panel',
+                        mythology: 'jewish'
+                    });
+                    panel.load();
+                    this.disabled = true;
+                    this.textContent = '✅ Panel Loaded';
+                });
+            </script>
+        </section>
+
+        <!-- Data Schema -->
+        <section class="demo-section">
+            <h2>5. Entity Data Structure</h2>
+            <p>Entities are stored as JSON files following a universal schema:</p>
+
+            <div class="demo-code" style="white-space: pre-wrap;">
+{
+  "id": "staff-of-moses",
+  "type": "item",
+  "name": "Staff of Moses",
+  "icon": "🪄",
+  "mythologies": ["jewish"],
+  "primaryMythology": "jewish",
+  "shortDescription": "Divine rod wielded by Moses...",
+  "fullDescription": "The Staff of Moses...",
+  "category": "artifact",
+  "properties": [...],
+  "metaphysicalProperties": {
+    "element": "water",
+    "energyType": "divine",
+    "sefirot": ["gevurah", "chesed", "tiferet"],
+    "world": "beriah"
+  },
+  "mythologyContexts": [...],
+  "relatedEntities": {
+    "deities": [...],
+    "heroes": [...],
+    "places": [...],
+    "items": [...]
+  },
+  "sources": [...]
+}
+            </div>
+
+            <p style="margin-top: 1rem;">
+                <strong>Key Features:</strong>
+            </p>
+            <ul style="margin: 0.5rem 0 0 2rem; line-height: 1.8;">
+                <li><strong>Cross-mythology tracking:</strong> Items can appear in multiple traditions</li>
+                <li><strong>Relationship mapping:</strong> Automatic linking to related entities</li>
+                <li><strong>Metaphysical properties:</strong> Elements, energy types, Sefirot, chakras, planets</li>
+                <li><strong>Ancient text citations:</strong> Direct links to corpus search</li>
+                <li><strong>Ritual integration:</strong> How the item is used in various practices</li>
+            </ul>
+        </section>
+
+        <!-- Integration Examples -->
+        <section class="demo-section">
+            <h2>6. Real-World Integration Examples</h2>
+
+            <h3 style="color: var(--color-primary); margin-top: 1.5rem;">In Deity Pages</h3>
+            <p>When viewing Moses' page, show his associated items:</p>
+            <div class="demo-code">
+&lt;h3&gt;Associated Items&lt;/h3&gt;
+&lt;div id="moses-staff" data-entity-panel
+     data-entity-id="staff-of-moses"
+     data-entity-type="item"
+     data-display-mode="compact"&gt;&lt;/div&gt;
+
+&lt;div id="moses-tablets" data-entity-panel
+     data-entity-id="tablets-of-law"
+     data-entity-type="item"
+     data-display-mode="compact"&gt;&lt;/div&gt;
+            </div>
+
+            <h3 style="color: var(--color-primary); margin-top: 1.5rem;">In Place Pages</h3>
+            <p>When viewing the Burning Bush location, show related items and people:</p>
+            <div class="demo-code">
+&lt;h3&gt;Significant Events&lt;/h3&gt;
+&lt;p&gt;At this location, Moses received divine revelation and the
+&lt;span data-entity-panel data-entity-id="staff-of-moses"
+      data-entity-type="item" data-display-mode="mini"&gt;&lt;/span&gt;
+was transformed into a serpent as a sign of God's power.&lt;/p&gt;
+            </div>
+
+            <h3 style="color: var(--color-primary); margin-top: 1.5rem;">In Mythology Index Pages</h3>
+            <p>Create unified item browsers that show items from all mythologies:</p>
+            <div class="demo-code">
+&lt;!-- Sacred Staffs Across Mythologies --&gt;
+&lt;div class="archetype-collection"&gt;
+    &lt;h2&gt;Magical Staffs&lt;/h2&gt;
+
+    &lt;div data-entity-panel data-entity-id="staff-of-moses"
+         data-entity-type="item" data-display-mode="compact"&gt;&lt;/div&gt;
+
+    &lt;div data-entity-panel data-entity-id="caduceus"
+         data-entity-type="item" data-display-mode="compact"&gt;&lt;/div&gt;
+
+    &lt;div data-entity-panel data-entity-id="ruyi-jingu-bang"
+         data-entity-type="item" data-display-mode="compact"&gt;&lt;/div&gt;
+&lt;/div&gt;
+            </div>
+        </section>
+
+        <!-- Migration Strategy -->
+        <section class="demo-section">
+            <h2>7. Content Migration Strategy</h2>
+
+            <p><strong>Phase 1: Create Entity Data Files</strong></p>
+            <ol style="margin: 0.5rem 0 0 2rem; line-height: 1.8;">
+                <li>Extract data from existing mythology pages</li>
+                <li>Create JSON files in <code>/data/entities/{type}/{id}.json</code></li>
+                <li>Ensure all relationships are properly mapped</li>
+            </ol>
+
+            <p style="margin-top: 1rem;"><strong>Phase 2: Update Mythology Pages</strong></p>
+            <ol style="margin: 0.5rem 0 0 2rem; line-height: 1.8;">
+                <li>Keep mythology-specific files in their current locations</li>
+                <li>Replace full content with entity panel references where appropriate</li>
+                <li>Add mythology-specific context around panels</li>
+            </ol>
+
+            <p style="margin-top: 1rem;"><strong>Phase 3: Create Unified Browsers</strong></p>
+            <ol style="margin: 0.5rem 0 0 2rem; line-height: 1.8;">
+                <li>Build <code>/shared/items/index.html</code> showing all items</li>
+                <li>Build <code>/shared/places/index.html</code> showing all places</li>
+                <li>Build <code>/shared/archetypes/index.html</code> for pattern browsers</li>
+            </ol>
+
+            <p style="margin-top: 1rem;"><strong>Example: Moses' Staff Migration</strong></p>
+            <ul style="margin: 0.5rem 0 0 2rem; line-height: 1.8;">
+                <li>✅ <strong>Data file created:</strong> <code>/data/entities/item/staff-of-moses.json</code></li>
+                <li>📝 <strong>Keep existing:</strong> <code>/mythos/jewish/items/staff.html</code> (with panel integration)</li>
+                <li>🔗 <strong>Referenced from:</strong>
+                    <ul style="margin-left: 2rem;">
+                        <li><code>/mythos/jewish/heroes/moses.html</code></li>
+                        <li><code>/mythos/jewish/places/burning-bush.html</code></li>
+                        <li><code>/shared/items/index.html</code></li>
+                        <li><code>/shared/archetypes/magical-staff.html</code></li>
+                    </ul>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Next Steps -->
+        <section class="demo-section">
+            <h2>8. Next Steps</h2>
+
+            <div style="padding: 1.5rem; background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1); border-left: 3px solid var(--color-primary); border-radius: var(--radius-md, 10px);">
+                <p><strong>System is ready for deployment! </strong></p>
+                <p style="margin-top: 0.5rem;">The core infrastructure is complete. Now we need to:</p>
+                <ol style="margin: 0.5rem 0 0 2rem; line-height: 1.8;">
+                    <li><strong>Inventory all entities</strong> across all mythologies (items, places, deities, concepts)</li>
+                    <li><strong>Create JSON data files</strong> for each entity following the schema</li>
+                    <li><strong>Update existing pages</strong> to use entity panels where appropriate</li>
+                    <li><strong>Build unified browsers</strong> for cross-mythology exploration</li>
+                    <li><strong>Test and validate</strong> all cross-references and links</li>
+                </ol>
+            </div>
+
+            <p style="margin-top: 1.5rem;">
+                <a href="#" class="btn-primary" style="display: inline-block; text-decoration: none; padding: 0.75rem 1.5rem;">
+                    Begin Migration Process →
+                </a>
+            </p>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 2rem; margin-top: 4rem; color: var(--color-text-secondary);">
+        <p>&copy; 2025 Eyes of Azrael - Modular Entity System v1.0</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;">
+            <a href="/data/schemas/entity-schema.json" style="color: var(--color-primary);">View JSON Schema</a> |
+            <a href="/components/panels/entity-panel.js" style="color: var(--color-primary);">View Source Code</a>
+        </p>
+    </footer>
+
+</body>
+</html>
