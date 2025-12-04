@@ -30,7 +30,11 @@
       "Bash(then basename \"$file\" .json)",
       "Bash(fi)",
       "Bash(do test -f \"$file\")",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(do node -p \"JSON.parse(require(''''fs'''').readFileSync(''''$file'''', ''''utf8'''')); ''''''''\")",
+      "Bash(do if ! python -m json.tool \"$file\")",
+      "Bash(then echo \"$file\")",
+      "Bash(do echo \"=== Processing $cat ===\")"
     ],
     "deny": [],
     "ask": []
