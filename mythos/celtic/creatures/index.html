@@ -1,153 +1,238 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Celtic Creatures - World Mythos Explorer</title>
-<link href="../../../themes/theme-base.css" rel="stylesheet"/>
-<link href="../../../styles.css" rel="stylesheet"/>
-<link href="../../../themes/corpus-links.css" rel="stylesheet"/>
-<link rel="stylesheet" href="../../../themes/smart-links.css">
-<script defer src="../../../themes/smart-links.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creatures - Celtic Mythology</title>
+
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="../../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="../../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../../themes/smart-links.css">
+
+    <!-- Entity System -->
+    <link rel="stylesheet" href="../../../components/panels/panels.css">
+    <link rel="stylesheet" href="../../../components/panels/entity-panel-enhanced.css">
+    <link rel="stylesheet" href="../../../components/auto-populate.css">
+
+    <!-- Theme System -->
+    <script defer src="../../../themes/theme-picker.js"></script>
     <script defer src="../../../themes/theme-animations.js"></script>
-<script defer src="../../../themes/theme-picker.js"></script>
-<style>
+    <script defer src="../../../themes/smart-links.js"></script>
+
+    <!-- Entity Panel Components -->
+    <script src="../../../components/panels/entity-panel-enhanced.js"></script>
+    <script src="../../../components/auto-populate.js"></script>
+
+    <style>
         :root {
             --mythos-primary: #228B22;
             --mythos-secondary: #90EE90;
         }
 
-        .section-header {
+        .hero-section {
             background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
             color: white;
             padding: 3rem 2rem;
-            border-radius: 15px;
+            border-radius: var(--radius-2xl);
             margin-bottom: 2rem;
             text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero-section h2 {
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .section-divider {
+            margin: 4rem 0 2rem;
+            text-align: center;
+        }
+
+        .section-title {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.1),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border-radius: var(--radius-xl);
+            border: 2px solid rgba(var(--color-border-rgb), 0.3);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .entity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text-secondary);
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-<div id="theme-picker-container"></div>
-<header>
-    <div class="header-content">
-        <h1>🐉 Celtic Creatures</h1>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../../mythos/index.html">Home</a> →
-                <a href="../index.html">Celtic</a> →
-                <span>Creatures</span>
-</nav>
-<main>
-<section class="section-header">
-<h2>Mythical Beasts</h2>
-<p style="font-size: 1.2rem; margin-top: 1rem; max-width: 800px; margin-left: auto; margin-right: auto;">
-                Explore the legendary creatures and mythical beings of this tradition.
-            </p>
-</section>
-<section>
-<h2 style="color: var(--mythos-primary);">🔨 Under Development</h2>
-<div style="background: linear-gradient(to right, rgba(139, 69, 19, 0.1), rgba(218, 165, 32, 0.1)); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
-<p style="font-size: 1.1rem; line-height: 1.8;">
-                    This section is currently under development. We are working to bring you comprehensive information about
-                    Celtic creatures.
-                </p>
-<p style="margin-top: 1.5rem; font-style: italic;">
-                    Check back soon for detailed entries!
-                </p>
-</div>
-</section>
-<section class="related-concepts" style="margin-top: 3rem;">
-<h2>🔗 Related Concepts</h2>
-<div class="grid">
-<div class="related-card">
-<h3>Within Celtic Mythology</h3>
-<ul>
-<li><a href="../cosmology/index.html">Cosmology</a> - The structure of the universe</li>
-<li><a href="../deities/index.html">Deities</a> - The Celtic pantheon</li>
-<li><a href="../heroes/index.html">Heroes</a> - Legendary figures</li>
-</ul>
-</div>
-<div class="related-card">
-<h3>Creatures in Other Traditions</h3>
-<ul>
-<li><a href="../../greek/creatures/index.html">Greek Creatures</a></li>
-<li><a href="../../norse/creatures/index.html">Norse Creatures</a></li>
-<li><a href="../../egyptian/creatures/index.html">Egyptian Creatures</a></li>
-</ul>
-</div>
-</div>
-</section>
+    <div id="theme-picker-container"></div>
 
-    <section>
-        <h2>Additional Pages</h2>
-        <div class="nav-grid">
-        <div class="nav-card">
-            <h3><a href="index.html">Celtic Creatures - World Mythos Explorer</a></h3>
-            <p>
-                Explore the legendary creatures and mythical beings of this tradition.
-            ...</p>
+    <header>
+        <div class="header-content">
+            <h1>🐉 Creatures</h1>
         </div>
-        </div>
-    </section>
+    </header>
 
-<!-- Interlink Panel -->
-<section class="interlink-panel" style="margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, rgba(34, 139, 34, 0.08), rgba(50, 205, 50, 0.05)); border-radius: 15px; border: 1px solid rgba(34, 139, 34, 0.2);">
-    <h2 style="color: var(--mythos-primary); margin-bottom: 1.5rem;">Archetypal Connections</h2>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../../mythos/index.html">Home</a> →
+        <a href="../index.html">Celtic</a> →
+        <span>Creatures</span>
+    </nav>
 
-    <div class="interlink-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-        <div class="archetype-link-card" style="background: rgba(255,255,255,0.7); padding: 1.25rem; border-radius: 10px; border-left: 4px solid #228B22;">
-            <h4 style="color: #228B22; margin-bottom: 0.75rem;">The Guardian Beast</h4>
-            <p style="font-size: 0.95rem; margin-bottom: 0.75rem;">Protective creatures that watch over sacred places, treasures, or individuals.</p>
-            <a href="../../../archetypes/celestial/index.html" style="color: #32CD32; font-weight: 500;">Explore the Guardian Archetype</a>
-        </div>
-        <div class="archetype-link-card" style="background: rgba(255,255,255,0.7); padding: 1.25rem; border-radius: 10px; border-left: 4px solid #228B22;">
-            <h4 style="color: #228B22; margin-bottom: 0.75rem;">The Shapeshifter</h4>
-            <p style="font-size: 0.95rem; margin-bottom: 0.75rem;">Beings of transformation who transcend fixed forms and boundaries.</p>
-            <a href="../../../archetypes/celestial/index.html" style="color: #32CD32; font-weight: 500;">Explore the Shapeshifter Archetype</a>
-        </div>
-        <div class="archetype-link-card" style="background: rgba(255,255,255,0.7); padding: 1.25rem; border-radius: 10px; border-left: 4px solid #228B22;">
-            <h4 style="color: #228B22; margin-bottom: 0.75rem;">The Wild Nature</h4>
-            <p style="font-size: 0.95rem; margin-bottom: 0.75rem;">Untamed forces embodying the primal power of the natural world.</p>
-            <a href="../../../archetypes/celestial/index.html" style="color: #32CD32; font-weight: 500;">Explore the Wild Archetype</a>
-        </div>
-    </div>
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h2>Mythical Creatures & Beings</h2>
+            <p>Encounter the legendary creatures, monsters, and divine beasts.</p>
+        </section>
 
-    <h3 style="color: var(--mythos-primary); margin: 1.5rem 0 1rem;">Cross-Cultural Parallels</h3>
-    <div class="interlink-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-        <div class="parallel-card" style="background: rgba(255,255,255,0.5); padding: 1rem; border-radius: 8px;">
-            <h5 style="margin-bottom: 0.5rem;">Norse Creatures</h5>
-            <p style="font-size: 0.9rem; color: #666;">Dragons, wolves, and serpents of the Nine Worlds</p>
-            <a href="../../norse/creatures/index.html" style="color: #32CD32;">View Norse Creatures</a>
+        <!-- Main Entity Grid (Auto-Populated) -->
+        <div
+            data-auto-populate
+            data-mythology="celtic"
+            data-category="creature"
+            data-display-mode="compact"
+            data-show-corpus="true">
+            <!-- Loading state -->
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading Creatures...</p>
+            </div>
         </div>
-        <div class="parallel-card" style="background: rgba(255,255,255,0.5); padding: 1rem; border-radius: 8px;">
-            <h5 style="margin-bottom: 0.5rem;">Greek Creatures</h5>
-            <p style="font-size: 0.9rem; color: #666;">Mythical beasts from Olympian mythology</p>
-            <a href="../../greek/creatures/index.html" style="color: #32CD32;">View Greek Creatures</a>
-        </div>
-        <div class="parallel-card" style="background: rgba(255,255,255,0.5); padding: 1rem; border-radius: 8px;">
-            <h5 style="margin-bottom: 0.5rem;">Japanese Yokai</h5>
-            <p style="font-size: 0.9rem; color: #666;">Supernatural beings of Japanese folklore</p>
-            <a href="../../apocryphal/creatures/index.html" style="color: #32CD32;">View Japanese Creatures</a>
-        </div>
-    </div>
 
-    <h3 style="color: var(--mythos-primary); margin: 1.5rem 0 1rem;">See Also</h3>
-    <ul style="list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.75rem;">
-        <li><a href="../deities/index.html" style="background: rgba(34,139,34,0.1); padding: 0.5rem 1rem; border-radius: 20px; color: #228B22; text-decoration: none;">Celtic Deities</a></li>
-        <li><a href="../heroes/index.html" style="background: rgba(34,139,34,0.1); padding: 0.5rem 1rem; border-radius: 20px; color: #228B22; text-decoration: none;">Celtic Heroes</a></li>
-        <li><a href="../cosmology/index.html" style="background: rgba(34,139,34,0.1); padding: 0.5rem 1rem; border-radius: 20px; color: #228B22; text-decoration: none;">Celtic Cosmology</a></li>
-        <li><a href="../symbols/index.html" style="background: rgba(34,139,34,0.1); padding: 0.5rem 1rem; border-radius: 20px; color: #228B22; text-decoration: none;">Celtic Symbols</a></li>
-    </ul>
-</section>
-</main>
-<footer>
-<p>
-<strong>Celtic Creatures</strong> - World Mythos Explorer<br/>
-<a href="../../../mythos/index.html">World Mythos Home</a> |
+        <!-- Optional: Filtered Sections -->
+        <!-- Uncomment and customize as needed -->
+        <!--
+        <div class="section-divider">
+            <div class="section-title">Sacred Creatures</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="celtic"
+            data-category="creature"
+            data-subcategory="sacred"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+
+        <div class="section-divider">
+            <div class="section-title">Ritual Creatures</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="celtic"
+            data-category="creature"
+            data-subcategory="ritual"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+        -->
+
+        <!-- Cross-Cultural Parallels -->
+        <section class="interlink-panel" style="margin-top: 4rem;">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Creatures Across Mythologies
+            </h3>
+
+            <div class="parallel-traditions glass-card">
+                <h4>🌍 Explore Other Traditions</h4>
+                <div class="parallel-grid">
+                    <!-- Add links to similar categories in other mythologies -->
+                    
+                    <a href="../../greek/creatures/index.html" class="parallel-card">
+                        <span class="tradition-flag">🏛️</span>
+                        <span class="parallel-name">Greek Creatures</span>
+                        <span class="tradition-label">Greek</span>
+                    </a>
+                    <a href="../../norse/creatures/index.html" class="parallel-card">
+                        <span class="tradition-flag">⚔️</span>
+                        <span class="parallel-name">Norse Creatures</span>
+                        <span class="tradition-label">Norse</span>
+                    </a>
+                    <a href="../../egyptian/creatures/index.html" class="parallel-card">
+                        <span class="tradition-flag">𓂀</span>
+                        <span class="parallel-name">Egyptian Creatures</span>
+                        <span class="tradition-label">Egyptian</span>
+                    </a>
+                    <a href="../../hindu/creatures/index.html" class="parallel-card">
+                        <span class="tradition-flag">🕉️</span>
+                        <span class="parallel-name">Hindu Creatures</span>
+                        <span class="tradition-label">Hindu</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- See Also Section -->
+        <div class="see-also-section" style="margin-top: 3rem;">
+            <h4>📚 See Also</h4>
+            <div class="see-also-links">
+                <a href="../deities/index.html" class="see-also-link">
+                    <span>⚡</span> Deities
+                </a>
+                <a href="../heroes/index.html" class="see-also-link">
+                    <span>🦸</span> Heroes
+                </a>
+                <a href="../places/index.html" class="see-also-link">
+                    <span>📍</span> Places
+                </a>
+                <a href="../index.html" class="see-also-link">
+                    <span>🏛️</span> Celtic Home
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <strong>Creatures</strong> - Celtic Mythology<br>
+            <a href="../../../mythos/index.html">World Mythos Home</a> |
             <a href="../index.html">Celtic Tradition</a>
-</p>
-</footer>
+        </p>
+    </footer>
+
+    <!-- Initialize Auto-Populate -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const populator = new EntityAutoPopulator();
+            populator.populatePage();
+        });
+    </script>
 </body>
 </html>
