@@ -19,6 +19,7 @@ class GlobeTimeline {
     this.selectedEntity = null;
     this.highlightedMarkers = new Set();
     this.relationshipArrows = [];
+    this.hoveredArrow = null;
     this.activeFilters = {
       mythologies: new Set(),
       types: new Set(['place', 'deity', 'concept', 'item', 'all']),
@@ -474,7 +475,7 @@ class GlobeTimeline {
       }
     });
 
-    // Hover effect
+    // Hover effect for markers and arrows
     window.addEventListener('mousemove', (event) => {
       if (event.target.closest('#controls-panel') || event.target.closest('#info-panel')) {
         return;
@@ -484,12 +485,45 @@ class GlobeTimeline {
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
       raycaster.setFromCamera(mouse, this.camera);
-      const intersects = raycaster.intersectObjects(this.markers);
 
-      if (intersects.length > 0) {
+      // Check for marker hovers
+      const markerIntersects = raycaster.intersectObjects(this.markers);
+
+      // Check for arrow hovers
+      const arrowIntersects = raycaster.intersectObjects(this.relationshipArrows, true);
+
+      if (markerIntersects.length > 0) {
         document.body.style.cursor = 'pointer';
+        this.hideRelationshipTooltip();
+      } else if (arrowIntersects.length > 0) {
+        document.body.style.cursor = 'help';
+        // Find the top-level arrow object (not child ArrowHelper)
+        let arrow = arrowIntersects[0].object;
+        while (arrow.parent && !arrow.userData.relationshipType) {
+          arrow = arrow.parent;
+        }
+        if (arrow.userData.relationshipType) {
+          // Highlight arrow on hover
+          if (this.hoveredArrow && this.hoveredArrow !== arrow) {
+            this.hoveredArrow.material.opacity = this.hoveredArrow.userData.originalOpacity || 0.7;
+          }
+          if (this.hoveredArrow !== arrow) {
+            arrow.userData.originalOpacity = arrow.material.opacity;
+            arrow.material.opacity = Math.min(1.0, arrow.material.opacity + 0.2);
+            this.hoveredArrow = arrow;
+          }
+
+          this.showRelationshipTooltip(event.clientX, event.clientY, arrow.userData);
+        }
       } else {
         document.body.style.cursor = 'default';
+        this.hideRelationshipTooltip();
+
+        // Reset hovered arrow
+        if (this.hoveredArrow) {
+          this.hoveredArrow.material.opacity = this.hoveredArrow.userData.originalOpacity || 0.7;
+          this.hoveredArrow = null;
+        }
       }
     });
 
@@ -807,13 +841,49 @@ class GlobeTimeline {
     );
     tube.add(arrowHelper);
 
-    // Store relationship data for filtering
+    // Store relationship data for filtering and tooltips
     tube.userData = {
       relationshipType: relationship.type,
-      relationshipStrength: relationship.strength
+      relationshipStrength: relationship.strength,
+      relationshipDescription: relationship.description
     };
 
     return tube;
+  }
+
+  showRelationshipTooltip(x, y, relationshipData) {
+    const tooltip = document.getElementById('relationship-tooltip');
+    const typeLabels = {
+      cultural: '🌿 Cultural Relationship',
+      temporal: '⏱️ Temporal Relationship',
+      geographical: '📍 Geographical Relationship',
+      parallel: '🔀 Cross-Cultural Parallel',
+      etymological: '📖 Etymological Connection',
+      direct: '🔗 Direct Relationship'
+    };
+
+    const strengthLabels = {
+      strong: 'Strong',
+      moderate: 'Moderate',
+      weak: 'Weak',
+      possible: 'Possible'
+    };
+
+    tooltip.querySelector('.tooltip-type').textContent =
+      typeLabels[relationshipData.relationshipType] || 'Relationship';
+    tooltip.querySelector('.tooltip-strength').textContent =
+      `Strength: ${strengthLabels[relationshipData.relationshipStrength] || 'Unknown'}`;
+    tooltip.querySelector('.tooltip-desc').textContent =
+      relationshipData.relationshipDescription || 'No description available';
+
+    tooltip.style.display = 'block';
+    tooltip.style.left = `${x + 15}px`;
+    tooltip.style.top = `${y + 15}px`;
+  }
+
+  hideRelationshipTooltip() {
+    const tooltip = document.getElementById('relationship-tooltip');
+    tooltip.style.display = 'none';
   }
 
   showEntityInfo(entity) {
