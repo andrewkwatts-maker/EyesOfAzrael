@@ -21,7 +21,9 @@ class GlobeTimeline {
     this.relationshipArrows = [];
     this.activeFilters = {
       mythologies: new Set(),
-      types: new Set(['place', 'deity', 'concept', 'item', 'all'])
+      types: new Set(['place', 'deity', 'concept', 'item', 'all']),
+      relationshipTypes: new Set(['cultural', 'temporal', 'geographical', 'parallel', 'etymological', 'all']),
+      relationshipStrengths: new Set(['strong', 'moderate', 'weak', 'possible', 'all'])
     };
 
     this.mythologyColors = {
@@ -490,6 +492,82 @@ class GlobeTimeline {
         document.body.style.cursor = 'default';
       }
     });
+
+    // Relationship type filter listeners
+    document.querySelectorAll('#relationship-filters .filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const relType = chip.dataset.relType;
+
+        if (relType === 'all') {
+          // Toggle all
+          const allActive = chip.classList.contains('active');
+          document.querySelectorAll('#relationship-filters .filter-chip').forEach(c => {
+            if (allActive) {
+              c.classList.remove('active');
+              this.activeFilters.relationshipTypes.delete(c.dataset.relType);
+            } else {
+              c.classList.add('active');
+              this.activeFilters.relationshipTypes.add(c.dataset.relType);
+            }
+          });
+        } else {
+          // Toggle individual filter
+          chip.classList.toggle('active');
+          if (chip.classList.contains('active')) {
+            this.activeFilters.relationshipTypes.add(relType);
+          } else {
+            this.activeFilters.relationshipTypes.delete(relType);
+            // Uncheck "all" if unchecking individual
+            document.querySelector('#relationship-filters [data-rel-type="all"]')?.classList.remove('active');
+            this.activeFilters.relationshipTypes.delete('all');
+          }
+        }
+
+        // Re-highlight if entity is selected
+        if (this.selectedEntity) {
+          this.clearRelationshipHighlights();
+          this.highlightRelationships(this.selectedEntity);
+        }
+      });
+    });
+
+    // Relationship strength filter listeners
+    document.querySelectorAll('#strength-filters .filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const strength = chip.dataset.strength;
+
+        if (strength === 'all') {
+          // Toggle all
+          const allActive = chip.classList.contains('active');
+          document.querySelectorAll('#strength-filters .filter-chip').forEach(c => {
+            if (allActive) {
+              c.classList.remove('active');
+              this.activeFilters.relationshipStrengths.delete(c.dataset.strength);
+            } else {
+              c.classList.add('active');
+              this.activeFilters.relationshipStrengths.add(c.dataset.strength);
+            }
+          });
+        } else {
+          // Toggle individual filter
+          chip.classList.toggle('active');
+          if (chip.classList.contains('active')) {
+            this.activeFilters.relationshipStrengths.add(strength);
+          } else {
+            this.activeFilters.relationshipStrengths.delete(strength);
+            // Uncheck "all" if unchecking individual
+            document.querySelector('#strength-filters [data-strength="all"]')?.classList.remove('active');
+            this.activeFilters.relationshipStrengths.delete('all');
+          }
+        }
+
+        // Re-highlight if entity is selected
+        if (this.selectedEntity) {
+          this.clearRelationshipHighlights();
+          this.highlightRelationships(this.selectedEntity);
+        }
+      });
+    });
   }
 
   selectEntity(entity, marker) {
@@ -530,8 +608,21 @@ class GlobeTimeline {
     // Find related entities
     const relatedEntities = this.findRelatedEntities(entity);
 
-    // Highlight related markers and create arrows
-    relatedEntities.forEach(({ relatedEntity, relationship }) => {
+    // Highlight related markers and create arrows (with filters applied)
+    relatedEntities.forEach(({ relatedEntity, relationship, type, strength }) => {
+      // Apply relationship type filter
+      const hasAllTypes = this.activeFilters.relationshipTypes.has('all');
+      const typeMatches = hasAllTypes || this.activeFilters.relationshipTypes.has(type);
+
+      // Apply relationship strength filter
+      const hasAllStrengths = this.activeFilters.relationshipStrengths.has('all');
+      const strengthMatches = hasAllStrengths || this.activeFilters.relationshipStrengths.has(strength);
+
+      // Skip if doesn't match filters
+      if (!typeMatches || !strengthMatches) {
+        return;
+      }
+
       const relatedMarker = this.markers.find(m =>
         m.userData.entity.id === relatedEntity.id
       );
@@ -557,7 +648,7 @@ class GlobeTimeline {
           const arrow = this.createRelationshipArrow(
             selectedMarker.position,
             relatedMarker.position,
-            relationship
+            { type, strength, description: relationship }
           );
           if (arrow) {
             this.relationshipArrows.push(arrow);
@@ -664,10 +755,22 @@ class GlobeTimeline {
       direct: 0xFFD700,      // Gold for direct relationships
       parallel: 0x9C27B0,    // Purple for parallels
       cultural: 0x4CAF50,    // Green for cultural continuity
-      geographical: 0x2196F3 // Blue for geographical proximity
+      geographical: 0x2196F3, // Blue for geographical proximity
+      temporal: 0xFF6B6B,    // Red for temporal relationships
+      etymological: 0xFFA726 // Orange for etymological
     };
 
     const color = relationshipColors[relationship.type] || 0xFFAA00;
+
+    // Determine opacity and visual weight based on strength
+    const strengthConfig = {
+      strong: { opacity: 0.9, tubeRadius: 0.8, arrowSize: 6 },
+      moderate: { opacity: 0.7, tubeRadius: 0.5, arrowSize: 5 },
+      weak: { opacity: 0.5, tubeRadius: 0.3, arrowSize: 4 },
+      possible: { opacity: 0.3, tubeRadius: 0.2, arrowSize: 3 }
+    };
+
+    const config = strengthConfig[relationship.strength] || strengthConfig.weak;
 
     // Create curved path
     const start = fromPos.clone();
@@ -679,23 +782,38 @@ class GlobeTimeline {
 
     const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
     const points = curve.getPoints(50);
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
-    const material = new THREE.LineBasicMaterial({
+    // Use TubeGeometry for variable thickness instead of LineBasicMaterial
+    const tubeGeometry = new THREE.TubeGeometry(curve, 50, config.tubeRadius, 8, false);
+
+    const material = new THREE.MeshBasicMaterial({
       color: color,
       transparent: true,
-      opacity: 0.7,
-      linewidth: 2
+      opacity: config.opacity,
+      side: THREE.DoubleSide
     });
 
-    const line = new THREE.Line(geometry, material);
+    const tube = new THREE.Mesh(tubeGeometry, material);
 
-    // Add arrow head
+    // Add arrow head with appropriate size
     const direction = new THREE.Vector3().subVectors(end, mid).normalize();
-    const arrowHelper = new THREE.ArrowHelper(direction, end, 5, color, 3, 2);
-    line.add(arrowHelper);
+    const arrowHelper = new THREE.ArrowHelper(
+      direction,
+      end,
+      config.arrowSize,
+      color,
+      config.arrowSize * 0.5,
+      config.arrowSize * 0.4
+    );
+    tube.add(arrowHelper);
 
-    return line;
+    // Store relationship data for filtering
+    tube.userData = {
+      relationshipType: relationship.type,
+      relationshipStrength: relationship.strength
+    };
+
+    return tube;
   }
 
   showEntityInfo(entity) {
@@ -717,8 +835,43 @@ class GlobeTimeline {
                      'Unknown';
     document.getElementById('entity-location').textContent = location;
 
-    // Show related entities
+    // Calculate and show relationship statistics
     const relatedEntities = this.findRelatedEntities(entity);
+
+    if (relatedEntities.length > 0) {
+      // Show stats panel
+      document.getElementById('relationship-stats').style.display = 'block';
+
+      // Calculate statistics
+      const stats = {
+        total: relatedEntities.length,
+        strong: 0,
+        cultural: 0,
+        temporal: 0,
+        geographical: 0,
+        parallel: 0
+      };
+
+      relatedEntities.forEach(({ type, strength }) => {
+        if (strength === 'strong') stats.strong++;
+        if (type === 'cultural') stats.cultural++;
+        if (type === 'temporal') stats.temporal++;
+        if (type === 'geographical') stats.geographical++;
+        if (type === 'parallel') stats.parallel++;
+      });
+
+      // Update UI
+      document.getElementById('stat-total-rel').textContent = stats.total;
+      document.getElementById('stat-strong').textContent = stats.strong;
+      document.getElementById('stat-cultural').textContent = stats.cultural;
+      document.getElementById('stat-temporal').textContent = stats.temporal;
+      document.getElementById('stat-geo').textContent = stats.geographical;
+      document.getElementById('stat-parallel').textContent = stats.parallel;
+    } else {
+      document.getElementById('relationship-stats').style.display = 'none';
+    }
+
+    // Show related entities list
     const relatedList = document.getElementById('related-list');
     relatedList.innerHTML = '';
 
