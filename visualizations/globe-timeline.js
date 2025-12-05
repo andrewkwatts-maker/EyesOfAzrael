@@ -685,6 +685,12 @@ class GlobeTimeline {
             { type, strength, description: relationship }
           );
           if (arrow) {
+            // Add fade-in animation
+            const targetOpacity = arrow.material.opacity;
+            arrow.material.opacity = 0;
+            arrow.userData.targetOpacity = targetOpacity;
+            arrow.userData.animationProgress = 0;
+
             this.relationshipArrows.push(arrow);
             this.scene.add(arrow);
           }
@@ -1036,8 +1042,26 @@ class GlobeTimeline {
       }
     });
 
+    // Animate relationship arrows (fade in)
+    this.relationshipArrows.forEach(arrow => {
+      if (arrow.userData.animationProgress !== undefined && arrow.userData.animationProgress < 1) {
+        arrow.userData.animationProgress += 0.05; // 20 frames = ~333ms animation
+        const eased = this.easeOutCubic(arrow.userData.animationProgress);
+        arrow.material.opacity = arrow.userData.targetOpacity * eased;
+
+        if (arrow.userData.animationProgress >= 1) {
+          arrow.material.opacity = arrow.userData.targetOpacity;
+          delete arrow.userData.animationProgress; // Clean up after animation
+        }
+      }
+    });
+
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
+  }
+
+  easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3);
   }
 }
 
