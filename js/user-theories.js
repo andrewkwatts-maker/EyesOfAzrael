@@ -53,12 +53,16 @@ class UserTheories {
             return { success: false, error: 'Title must be at least 5 characters' };
         }
 
-        if (!data.content || data.content.trim().length < 50) {
-            return { success: false, error: 'Theory content must be at least 50 characters' };
+        // Support both old (content) and new (richContent) formats
+        const hasRichContent = data.richContent && data.richContent.panels && data.richContent.panels.length > 0;
+        const hasSimpleContent = data.content && data.content.trim().length >= 50;
+
+        if (!hasRichContent && !hasSimpleContent) {
+            return { success: false, error: 'Theory must have content panels or at least 50 characters of text' };
         }
 
-        if (!data.category) {
-            return { success: false, error: 'Please select a category' };
+        if (!data.category && !data.topic) {
+            return { success: false, error: 'Please select a category or topic' };
         }
 
         const currentUser = window.userAuth.getCurrentUser();
@@ -67,11 +71,26 @@ class UserTheories {
             id: this.generateId(),
             title: data.title.trim(),
             summary: data.summary ? data.summary.trim() : '',
-            content: data.content.trim(),
-            category: data.category,
+
+            // Rich content support (new format)
+            richContent: data.richContent || null,
+
+            // Legacy simple content support
+            content: data.content ? data.content.trim() : '',
+
+            // Taxonomy (new)
+            topic: data.topic || null,
+            topicName: data.topicName || null,
+            topicIcon: data.topicIcon || null,
+            subtopic: data.subtopic || null,
+            subtopicName: data.subtopicName || null,
+
+            // Legacy category support
+            category: data.category || data.topic || 'general',
+
             sources: data.sources ? data.sources.trim() : '',
             relatedMythologies: data.relatedMythologies || [],
-            relatedPage: data.relatedPage || null, // Page this theory relates to
+            relatedPage: data.relatedPage || null,
             author: currentUser.username,
             authorAvatar: currentUser.avatar,
             createdAt: new Date().toISOString(),
@@ -80,7 +99,8 @@ class UserTheories {
             voters: [],
             comments: [],
             status: 'published', // published, draft, archived
-            views: 0
+            views: 0,
+            tags: data.tags || []
         };
 
         this.theories.push(theory);
@@ -174,7 +194,17 @@ class UserTheories {
             filtered = filtered.filter(t => t.status === 'published');
         }
 
-        // Filter by category
+        // Filter by topic (new)
+        if (filters.topic) {
+            filtered = filtered.filter(t => t.topic === filters.topic);
+        }
+
+        // Filter by subtopic (new)
+        if (filters.subtopic) {
+            filtered = filtered.filter(t => t.subtopic === filters.subtopic);
+        }
+
+        // Filter by category (legacy)
         if (filters.category) {
             filtered = filtered.filter(t => t.category === filters.category);
         }
@@ -196,6 +226,20 @@ class UserTheories {
         // Filter by related page
         if (filters.relatedPage) {
             filtered = filtered.filter(t => t.relatedPage === filters.relatedPage);
+        }
+
+        // Search in title/content (new)
+        if (filters.search) {
+            const searchTerm = filters.search.toLowerCase();
+            filtered = filtered.filter(t => {
+                const inTitle = t.title.toLowerCase().includes(searchTerm);
+                const inContent = t.content?.toLowerCase().includes(searchTerm);
+                const inPanels = t.richContent?.panels?.some(p =>
+                    p.title?.toLowerCase().includes(searchTerm) ||
+                    p.content?.toLowerCase().includes(searchTerm)
+                );
+                return inTitle || inContent || inPanels;
+            });
         }
 
         // Sort
