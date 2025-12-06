@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Theory System - Test Page</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <script defer src="themes/theme-picker.js"></script>
+
+    <!-- User Auth & Theory System -->
+    <link rel="stylesheet" href="css/user-auth.css">
+    <script defer src="js/user-auth.js"></script>
+    <script defer src="js/user-theories.js"></script>
+    <script defer src="js/components/theory-widget.js"></script>
+
+    <style>
+        body {
+            font-family: var(--font-primary, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+            background: #0a0a1a;
+            background-image:
+                radial-gradient(ellipse at 20% 30%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(192, 132, 252, 0.1) 0%, transparent 50%);
+            color: var(--color-text-primary, #fff);
+            line-height: 1.6;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 4rem; /* Space for fixed header */
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, rgba(74, 94, 168, 0.3), rgba(147, 51, 234, 0.3));
+            border: 3px solid var(--mythos-primary, #9333ea);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            margin: 0 0 1rem 0;
+            background: linear-gradient(135deg, #c084fc, #f0abfc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .demo-section {
+            background: var(--color-surface, rgba(30, 27, 75, 0.6));
+            border: 2px solid rgba(147, 51, 234, 0.4);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .demo-section h2 {
+            color: var(--mythos-primary, #9333ea);
+            margin-top: 0;
+            font-size: 1.75rem;
+        }
+
+        .demo-section h3 {
+            color: var(--color-text-primary, #fff);
+            margin-top: 2rem;
+            font-size: 1.25rem;
+        }
+
+        .demo-section p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 1rem 0;
+        }
+
+        .demo-section code {
+            background: rgba(147, 51, 234, 0.2);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #c084fc;
+        }
+
+        .demo-section pre {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(147, 51, 234, 0.4);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .demo-section pre code {
+            background: none;
+            padding: 0;
+            color: #c084fc;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: rgba(147, 51, 234, 0.1);
+            border: 1px solid rgba(147, 51, 234, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .feature-card h4 {
+            color: #c084fc;
+            margin: 0 0 0.75rem 0;
+            font-size: 1.1rem;
+        }
+
+        .feature-card p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .instruction-box {
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .instruction-box h3 {
+            color: #86efac;
+            margin: 0 0 1rem 0;
+        }
+
+        .instruction-box ol {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .instruction-box li {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>🔐 User Theory System Test Page</h1>
+            <p>
+                Complete implementation of user authentication, theory submission,
+                voting, and commenting system for Eyes of Azrael
+            </p>
+        </header>
+
+        <!-- Instructions -->
+        <div class="instruction-box">
+            <h3>📝 Test Instructions</h3>
+            <ol>
+                <li><strong>Create an account:</strong> Click "Sign Up" in the top right corner</li>
+                <li><strong>Login:</strong> After creating an account, login with your credentials</li>
+                <li><strong>Add a theory:</strong> Click "Add Theory" button in the widget below</li>
+                <li><strong>Vote on theories:</strong> Use 👍 and 👎 buttons to vote</li>
+                <li><strong>View details:</strong> Click "View Full Theory" to see the complete theory with comments</li>
+                <li><strong>Comment:</strong> Add comments to theories when viewing details</li>
+                <li><strong>Edit:</strong> Edit your own theories using the "✏️ Edit" button</li>
+            </ol>
+        </div>
+
+        <!-- Features -->
+        <div class="demo-section">
+            <h2>✨ Features Implemented</h2>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>🔐 Authentication</h4>
+                    <p>Complete login/signup system with form validation and session management</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>💭 Theory Submission</h4>
+                    <p>Rich form for submitting theories with categories, sources, and mythology tags</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>👍 Voting System</h4>
+                    <p>Upvote/downvote theories with visual feedback and vote tracking</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>💬 Comments</h4>
+                    <p>Add comments to theories with threaded discussions</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>✏️ Edit & Delete</h4>
+                    <p>Authors can edit or delete their own theories</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>🎯 Page-Specific</h4>
+                    <p>Theories are linked to specific pages (deities, places, concepts, etc.)</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>📊 Statistics</h4>
+                    <p>View counts, vote counts, and comment counts for each theory</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>🎨 Beautiful UI</h4>
+                    <p>Modern glass morphism design with smooth animations</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theory Widget Demo - Button Mode -->
+        <div class="demo-section">
+            <h2>Demo 1: Button Mode Widget</h2>
+            <p>
+                Clicking the button opens a modal with all theories related to "Zeus - King of the Gods"
+            </p>
+
+            <!-- THE WIDGET -->
+            <div data-theory-widget
+                 data-page="deity/zeus"
+                 data-title="Zeus - King of the Gods"
+                 data-mode="button"></div>
+
+            <h3>Code:</h3>
+            <pre><code>&lt;div data-theory-widget
+     data-page="deity/zeus"
+     data-title="Zeus - King of the Gods"
+     data-mode="button"&gt;&lt;/div&gt;</code></pre>
+        </div>
+
+        <!-- Theory Widget Demo - Inline Mode -->
+        <div class="demo-section">
+            <h2>Demo 2: Inline Mode Widget</h2>
+            <p>
+                The inline widget displays theories directly on the page without a modal
+            </p>
+
+            <!-- THE WIDGET -->
+            <div data-theory-widget
+                 data-page="deity/zeus"
+                 data-title="Zeus - King of the Gods"
+                 data-mode="inline"></div>
+
+            <h3>Code:</h3>
+            <pre><code>&lt;div data-theory-widget
+     data-page="deity/zeus"
+     data-title="Zeus - King of the Gods"
+     data-mode="inline"&gt;&lt;/div&gt;</code></pre>
+        </div>
+
+        <!-- Different Page Examples -->
+        <div class="demo-section">
+            <h2>Demo 3: Multiple Page Contexts</h2>
+            <p>
+                Different widgets can be added for different pages/topics
+            </p>
+
+            <h3>Norse Mythology - Odin</h3>
+            <div data-theory-widget
+                 data-page="deity/odin"
+                 data-title="Odin - Allfather"
+                 data-mode="button"></div>
+
+            <h3>Egyptian Mythology - Ra</h3>
+            <div data-theory-widget
+                 data-page="deity/ra"
+                 data-title="Ra - Sun God"
+                 data-mode="button"></div>
+
+            <h3>Hindu Mythology - Shiva</h3>
+            <div data-theory-widget
+                 data-page="deity/shiva"
+                 data-title="Shiva - The Destroyer"
+                 data-mode="button"></div>
+        </div>
+
+        <!-- Implementation Guide -->
+        <div class="demo-section">
+            <h2>📚 Implementation Guide</h2>
+
+            <h3>1. Add Required Files to Your Page</h3>
+            <pre><code>&lt;!-- In &lt;head&gt; --&gt;
+&lt;link rel="stylesheet" href="/css/user-auth.css"&gt;
+&lt;script defer src="/js/user-auth.js"&gt;&lt;/script&gt;
+&lt;script defer src="/js/user-theories.js"&gt;&lt;/script&gt;
+&lt;script defer src="/js/components/theory-widget.js"&gt;&lt;/script&gt;</code></pre>
+
+            <h3>2. Add Auth Modal Template</h3>
+            <p>Copy the content from <code>auth-modal-template.html</code> and paste it at the end of your page's <code>&lt;body&gt;</code></p>
+
+            <h3>3. Add Theory Widgets Anywhere</h3>
+            <p>Insert theory widgets wherever you want users to discuss that page's content:</p>
+            <pre><code>&lt;!-- Button mode (opens modal) --&gt;
+&lt;div data-theory-widget
+     data-page="unique-page-id"
+     data-title="Page Title"
+     data-mode="button"&gt;&lt;/div&gt;
+
+&lt;!-- Inline mode (shows on page) --&gt;
+&lt;div data-theory-widget
+     data-page="unique-page-id"
+     data-title="Page Title"
+     data-mode="inline"&gt;&lt;/div&gt;</code></pre>
+
+            <h3>4. Customize (Optional)</h3>
+            <p>The system uses CSS variables from your theme. You can override these in your page's styles:</p>
+            <pre><code>:root {
+    --mythos-primary: #9333ea;  /* Primary color */
+    --color-surface: #1a1a2e;   /* Card backgrounds */
+    --color-border: rgba(147, 51, 234, 0.4); /* Borders */
+    --color-text-primary: #fff;  /* Primary text */
+    --color-text-secondary: #999; /* Secondary text */
+}</code></pre>
+        </div>
+
+        <!-- Data Persistence Note -->
+        <div class="demo-section">
+            <h2>💾 Data Storage</h2>
+            <p>
+                <strong>Current:</strong> All data is stored in browser localStorage (client-side only)
+            </p>
+            <p>
+                <strong>Future:</strong> This will be upgraded to a proper backend database for:
+            </p>
+            <ul>
+                <li>Cross-device synchronization</li>
+                <li>Permanent storage</li>
+                <li>Better security (proper password hashing)</li>
+                <li>Moderation tools</li>
+                <li>Search and filtering</li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; padding: 3rem 0; margin-top: 4rem; border-top: 1px solid rgba(147, 51, 234, 0.3);">
+            <p style="color: rgba(255, 255, 255, 0.6);">
+                User Theory System Demo | Eyes of Azrael<br>
+                <small style="color: rgba(255, 255, 255, 0.4);">Built with ❤️ by Claude Code</small>
+            </p>
+        </div>
+    </div>
+
+    <!-- Include Auth Modal Template -->
+    <script>
+        // Load the auth modal template
+        fetch('auth-modal-template.html')
+            .then(response => response.text())
+            .then(html => {
+                // Extract just the template content (remove comments)
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                document.body.insertAdjacentHTML('beforeend', tempDiv.innerHTML);
+            })
+            .catch(err => {
+                console.warn('Could not load auth modal template. Including it directly...');
+                // If fetch fails, include template directly
+                document.body.insertAdjacentHTML('beforeend', `
+                    ${document.querySelector('script[type="auth-template"]')?.textContent || ''}
+                `);
+            });
+    </script>
+
+    <!-- Inline auth template as fallback -->
+    <script type="auth-template">
+        <!-- Authentication Modal -->
+        <div id="auth-modal" class="auth-modal">
+            <div class="auth-modal-content">
+                <button class="auth-modal-close" onclick="window.userAuth.hideAuthModal()">&times;</button>
+                <h2 id="auth-modal-title" class="auth-modal-title">Login to Your Account</h2>
+                <div id="auth-message" class="auth-message"></div>
+
+                <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+                    <div class="auth-form-group">
+                        <label for="login-username">Username</label>
+                        <input type="text" id="login-username" name="username" required autocomplete="username">
+                    </div>
+                    <div class="auth-form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" name="password" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="auth-submit-btn">Login</button>
+                    <div class="auth-switch">
+                        Don't have an account?
+                        <a class="auth-switch-link" onclick="window.userAuth.switchAuthMode('signup')">Sign up</a>
+                    </div>
+                </form>
+
+                <form id="signup-form" class="auth-form" style="display: none;" onsubmit="handleSignup(event)">
+                    <div class="auth-form-group">
+                        <label for="signup-username">Username</label>
+                        <input type="text" id="signup-username" name="username" required minlength="3" autocomplete="username">
+                    </div>
+                    <div class="auth-form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" name="email" required autocomplete="email">
+                    </div>
+                    <div class="auth-form-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" name="password" required minlength="6" autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="auth-submit-btn">Create Account</button>
+                    <div class="auth-switch">
+                        Already have an account?
+                        <a class="auth-switch-link" onclick="window.userAuth.switchAuthMode('login')">Login</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="user-nav" style="position: fixed; top: 1rem; right: 1rem; z-index: 1000;">
+            <div data-auth-show="loggedOut" style="display: flex; gap: 0.5rem;">
+                <button class="auth-submit-btn" onclick="window.userAuth.showLoginModal()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Login</button>
+                <button class="auth-submit-btn" onclick="window.userAuth.showSignupModal()" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: linear-gradient(135deg, #22c55e, #16a34a);">Sign Up</button>
+            </div>
+            <div data-auth-show="loggedIn" style="display: none;">
+                <div class="user-display" onclick="toggleUserDropdown()">
+                    <img data-auth-avatar src="" alt="User Avatar" class="user-avatar">
+                    <span data-auth-username class="user-username"></span>
+                    <span>▼</span>
+                </div>
+                <div id="user-dropdown" class="user-dropdown">
+                    <a href="/theories/user-submissions/index.html" class="user-dropdown-item">My Theories</a>
+                    <a href="/profile.html" class="user-dropdown-item">Profile Settings</a>
+                    <div style="border-top: 1px solid rgba(147, 51, 234, 0.3); margin: 0.5rem 0;"></div>
+                    <button class="user-logout-btn" onclick="window.userAuth.logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        function handleLogin(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const result = window.userAuth.login(formData.get('username'), formData.get('password'));
+            if (result.success) {
+                window.userAuth.showAuthMessage(result.message, 'success');
+                setTimeout(() => window.userAuth.hideAuthModal(), 1000);
+            } else {
+                window.userAuth.showAuthMessage(result.error, 'error');
+            }
+        }
+
+        function handleSignup(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const result = window.userAuth.signup(formData.get('username'), formData.get('email'), formData.get('password'));
+            if (result.success) {
+                window.userAuth.showAuthMessage(result.message + ' You can now login.', 'success');
+                setTimeout(() => {
+                    window.userAuth.switchAuthMode('login');
+                    window.userAuth.clearAuthMessages();
+                }, 2000);
+            } else {
+                window.userAuth.showAuthMessage(result.error, 'error');
+            }
+        }
+
+        function toggleUserDropdown() {
+            document.getElementById('user-dropdown')?.classList.toggle('show');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-display') && !e.target.closest('#user-dropdown')) {
+                document.getElementById('user-dropdown')?.classList.remove('show');
+            }
+        });
+        </script>
+    </script>
+</body>
+</html>
