@@ -58,6 +58,33 @@
             background-clip: text;
         }
 
+        .page-header-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-submit-theory {
+            padding: 0.75rem 2rem;
+            background: linear-gradient(135deg, #9333ea 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-submit-theory:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(147, 51, 234, 0.4);
+        }
+
         /* Browse Controls */
         .browse-controls {
             background: var(--color-surface);
@@ -292,6 +319,17 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+
+        @keyframes highlight-pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(147, 51, 234, 0);
+                border-color: rgba(147, 51, 234, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px 10px rgba(147, 51, 234, 0.6);
+                border-color: rgba(147, 51, 234, 1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -300,6 +338,9 @@
     <div class="container">
         <header class="page-header">
             <h1>📚 Browse User Theories</h1>
+            <div class="page-header-actions">
+                <a href="submit.html" class="btn-submit-theory">✨ Submit Your Theory</a>
+            </div>
             <p>Explore theories organized by topic, subtopic, and author</p>
         </header>
 
@@ -407,6 +448,23 @@
 
                 // Listen for theory updates
                 window.addEventListener('theoriesUpdated', () => this.loadAndDisplay());
+
+                // Check for highlight parameter
+                this.checkHighlight();
+            }
+
+            checkHighlight() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const highlightId = urlParams.get('highlight');
+                if (highlightId) {
+                    setTimeout(() => {
+                        const theoryCard = document.querySelector(`[data-theory-id="${highlightId}"]`);
+                        if (theoryCard) {
+                            theoryCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            theoryCard.style.animation = 'highlight-pulse 2s ease-in-out';
+                        }
+                    }, 500);
+                }
             }
 
             populateFilters() {
@@ -591,7 +649,7 @@
 
             renderTheoryCard(theory) {
                 return `
-                    <div class="theory-card-compact" onclick="viewTheory('${theory.id}')">
+                    <div class="theory-card-compact" data-theory-id="${theory.id}" onclick="viewTheory('${theory.id}')">
                         <h3 class="theory-title">${this.escapeHtml(theory.title)}</h3>
                         <div class="theory-author">by ${theory.author}</div>
                         <div class="theory-meta">

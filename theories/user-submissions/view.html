@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Theory - Eyes of Azrael</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+
+    <!-- User System -->
+    <link rel="stylesheet" href="../../css/user-auth.css">
+    <script defer src="../../js/user-auth.js"></script>
+    <script defer src="../../js/user-theories.js"></script>
+
+    <style>
+        body {
+            font-family: var(--font-primary);
+            background: #0a0a1a;
+            background-image:
+                radial-gradient(ellipse at 20% 30%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(192, 132, 252, 0.1) 0%, transparent 50%);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding-top: 2rem;
+        }
+
+        .breadcrumb {
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .breadcrumb a {
+            color: var(--accent-purple, #9333ea);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .theory-view {
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: 16px;
+            padding: 3rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .theory-header {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid rgba(147, 51, 234, 0.2);
+        }
+
+        .theory-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #c084fc, #f0abfc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .theory-meta {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .theory-author {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .theory-stats {
+            display: flex;
+            gap: 1.5rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .theory-topic {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(147, 51, 234, 0.2);
+            border: 1px solid rgba(147, 51, 234, 0.4);
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .theory-summary {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(147, 51, 234, 0.1);
+            border-left: 4px solid rgba(147, 51, 234, 0.6);
+            border-radius: 8px;
+        }
+
+        .theory-content {
+            margin-bottom: 3rem;
+        }
+
+        .content-panel {
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px solid rgba(147, 51, 234, 0.2);
+            border-radius: 12px;
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-purple, #9333ea);
+        }
+
+        .panel-content {
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .theory-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .theory-image {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(147, 51, 234, 0.3);
+        }
+
+        .theory-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .image-caption {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .theory-links,
+        .theory-corpus {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-purple, #9333ea);
+        }
+
+        .link-item,
+        .corpus-item {
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+            border-radius: 8px;
+        }
+
+        .link-item a {
+            color: var(--accent-purple, #9333ea);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .link-item a:hover {
+            text-decoration: underline;
+        }
+
+        .link-description {
+            margin-top: 0.5rem;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .theory-sources {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-left: 4px solid rgba(147, 51, 234, 0.6);
+            border-radius: 8px;
+        }
+
+        .theory-actions {
+            display: flex;
+            gap: 1rem;
+            padding: 2rem 0;
+            border-top: 2px solid rgba(147, 51, 234, 0.2);
+            border-bottom: 2px solid rgba(147, 51, 234, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-vote {
+            background: rgba(147, 51, 234, 0.2);
+            color: white;
+            border: 2px solid rgba(147, 51, 234, 0.4);
+        }
+
+        .btn-vote:hover {
+            background: rgba(147, 51, 234, 0.4);
+        }
+
+        .btn-vote.voted {
+            background: rgba(147, 51, 234, 0.6);
+            border-color: rgba(147, 51, 234, 0.8);
+        }
+
+        .comments-section {
+            margin-top: 3rem;
+        }
+
+        .comment {
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px solid rgba(147, 51, 234, 0.2);
+            border-radius: 12px;
+        }
+
+        .comment-author {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .comment-content {
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .comment-date {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            opacity: 0.6;
+        }
+
+        .add-comment {
+            margin-top: 2rem;
+        }
+
+        .add-comment textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .add-comment textarea:focus {
+            outline: none;
+            border-color: rgba(147, 51, 234, 0.6);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid rgba(239, 68, 68, 0.5);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #fca5a5;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../../index.html">Home</a> /
+            <a href="browse.html">User Theories</a> /
+            <span id="breadcrumb-title">Theory</span>
+        </div>
+
+        <div id="theory-container">
+            <div class="loading" style="text-align: center; padding: 4rem;">
+                <div style="font-size: 3rem; animation: spin 1s linear infinite;">⏳</div>
+                <p>Loading theory...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal-container"></div>
+
+    <script>
+        let currentTheory = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTheory();
+
+            // Load auth modal
+            fetch('../../auth-modal-template.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('auth-modal-container').innerHTML = html;
+                });
+        });
+
+        function loadTheory() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const theoryId = urlParams.get('id');
+
+            if (!theoryId) {
+                showError('No theory ID provided');
+                return;
+            }
+
+            const theory = window.userTheories.getTheory(theoryId);
+
+            if (!theory) {
+                showError('Theory not found');
+                return;
+            }
+
+            currentTheory = theory;
+
+            // Increment view count
+            window.userTheories.incrementViews(theoryId);
+
+            // Update breadcrumb
+            document.getElementById('breadcrumb-title').textContent = theory.title;
+
+            // Render theory
+            renderTheory(theory);
+        }
+
+        function renderTheory(theory) {
+            const container = document.getElementById('theory-container');
+
+            const hasRichContent = theory.richContent && theory.richContent.panels && theory.richContent.panels.length > 0;
+
+            container.innerHTML = `
+                <div class="theory-view">
+                    <div class="theory-header">
+                        <h1 class="theory-title">${escapeHtml(theory.title)}</h1>
+
+                        <div class="theory-meta">
+                            <div class="theory-author">
+                                <img src="${theory.authorAvatar}" alt="${theory.author}" class="author-avatar">
+                                <span>by <strong>${theory.author}</strong></span>
+                            </div>
+
+                            <div class="theory-stats">
+                                <span>👁️ ${theory.views || 0} views</span>
+                                <span>👍 ${theory.votes} votes</span>
+                                <span>💬 ${theory.comments.length} comments</span>
+                            </div>
+
+                            ${theory.topicName ? `
+                                <div class="theory-topic">
+                                    <span>${theory.topicIcon || '📌'}</span>
+                                    <span>${theory.topicName} › ${theory.subtopicName || theory.subtopic}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    ${theory.summary ? `
+                        <div class="theory-summary">
+                            ${escapeHtml(theory.summary)}
+                        </div>
+                    ` : ''}
+
+                    <div class="theory-content">
+                        ${hasRichContent ? renderRichContent(theory.richContent) : renderSimpleContent(theory.content)}
+                    </div>
+
+                    ${theory.sources ? `
+                        <div class="theory-sources">
+                            <h2 class="section-title">📚 Sources</h2>
+                            <div style="white-space: pre-wrap;">${escapeHtml(theory.sources)}</div>
+                        </div>
+                    ` : ''}
+
+                    <div class="theory-actions">
+                        ${renderVoteButtons(theory)}
+                        <button class="btn" onclick="window.location.href='browse.html'">← Back to Browse</button>
+                    </div>
+
+                    <div class="comments-section">
+                        <h2 class="section-title">💬 Comments (${theory.comments.length})</h2>
+                        ${renderComments(theory.comments)}
+                        ${renderAddComment()}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRichContent(richContent) {
+            let html = '';
+
+            // Render panels
+            if (richContent.panels && richContent.panels.length > 0) {
+                richContent.panels.forEach(panel => {
+                    html += `
+                        <div class="content-panel">
+                            ${panel.title ? `<h2 class="panel-title">${escapeHtml(panel.title)}</h2>` : ''}
+                            <div class="panel-content">${escapeHtml(panel.content)}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Render images
+            if (richContent.images && richContent.images.length > 0) {
+                html += '<div class="theory-images">';
+                richContent.images.forEach(image => {
+                    html += `
+                        <div class="theory-image">
+                            <img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.alt || image.caption || '')}">
+                            ${image.caption ? `<div class="image-caption">${escapeHtml(image.caption)}</div>` : ''}
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            // Render links
+            if (richContent.links && richContent.links.length > 0) {
+                html += '<div class="theory-links"><h2 class="section-title">🔗 External Links</h2>';
+                richContent.links.forEach(link => {
+                    html += `
+                        <div class="link-item">
+                            <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener">${escapeHtml(link.title)}</a>
+                            ${link.description ? `<div class="link-description">${escapeHtml(link.description)}</div>` : ''}
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            // Render corpus searches
+            if (richContent.corpusSearches && richContent.corpusSearches.length > 0) {
+                html += '<div class="theory-corpus"><h2 class="section-title">📖 Corpus References</h2>';
+                richContent.corpusSearches.forEach(search => {
+                    html += `
+                        <div class="corpus-item">
+                            <strong>${escapeHtml(search.query)}</strong>
+                            ${search.corpus ? ` in <em>${escapeHtml(search.corpus)} texts</em>` : ''}
+                            ${search.description ? `<div class="link-description">${escapeHtml(search.description)}</div>` : ''}
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            return html;
+        }
+
+        function renderSimpleContent(content) {
+            return `<div class="content-panel"><div class="panel-content">${escapeHtml(content)}</div></div>`;
+        }
+
+        function renderVoteButtons(theory) {
+            const isLoggedIn = window.userAuth && window.userAuth.isLoggedIn();
+            const currentUser = isLoggedIn ? window.userAuth.getCurrentUser() : null;
+            const userVote = currentUser ? theory.voters.find(v => v.username === currentUser.username) : null;
+
+            return `
+                <button class="btn btn-vote ${userVote?.direction === 1 ? 'voted' : ''}"
+                        onclick="handleVote(1)"
+                        ${!isLoggedIn ? 'disabled title="Login to vote"' : ''}>
+                    👍 Upvote (${theory.votes >= 0 ? theory.votes : 0})
+                </button>
+            `;
+        }
+
+        function renderComments(comments) {
+            if (comments.length === 0) {
+                return '<p style="opacity: 0.6;">No comments yet. Be the first to comment!</p>';
+            }
+
+            return comments.map(comment => `
+                <div class="comment">
+                    <div class="comment-author">
+                        <img src="${comment.authorAvatar}" alt="${comment.author}" class="author-avatar" style="width: 30px; height: 30px;">
+                        ${comment.author}
+                    </div>
+                    <div class="comment-content">${escapeHtml(comment.content)}</div>
+                    <div class="comment-date">${formatDate(comment.createdAt)}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderAddComment() {
+            const isLoggedIn = window.userAuth && window.userAuth.isLoggedIn();
+
+            if (!isLoggedIn) {
+                return `
+                    <div class="add-comment">
+                        <p style="opacity: 0.6;">
+                            <button class="btn" onclick="window.userAuth?.openAuthModal('login')">Login</button>
+                            to add a comment
+                        </p>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="add-comment">
+                    <h3>Add a Comment</h3>
+                    <textarea id="comment-input" placeholder="Share your thoughts..."></textarea>
+                    <div id="comment-error"></div>
+                    <button class="btn btn-vote" onclick="handleAddComment()" style="margin-top: 1rem;">Post Comment</button>
+                </div>
+            `;
+        }
+
+        function handleVote(direction) {
+            if (!window.userAuth || !window.userAuth.isLoggedIn()) {
+                window.userAuth?.openAuthModal('login');
+                return;
+            }
+
+            const result = window.userTheories.voteTheory(currentTheory.id, direction);
+
+            if (result.success) {
+                // Reload theory to show updated votes
+                loadTheory();
+            } else {
+                alert(result.error);
+            }
+        }
+
+        function handleAddComment() {
+            const input = document.getElementById('comment-input');
+            const errorDiv = document.getElementById('comment-error');
+            const content = input.value.trim();
+
+            if (!content) {
+                errorDiv.innerHTML = '<div class="error-message">Please enter a comment</div>';
+                return;
+            }
+
+            const result = window.userTheories.addComment(currentTheory.id, content);
+
+            if (result.success) {
+                input.value = '';
+                errorDiv.innerHTML = '';
+                loadTheory(); // Reload to show new comment
+            } else {
+                errorDiv.innerHTML = `<div class="error-message">${result.error}</div>`;
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('theory-container').innerHTML = `
+                <div class="error-message">
+                    <strong>Error:</strong> ${message}
+                    <br><br>
+                    <button class="btn" onclick="window.location.href='browse.html'">← Back to Browse</button>
+                </div>
+            `;
+        }
+
+        function formatDate(isoString) {
+            return window.userTheories.formatDate(isoString);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Add spin animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
