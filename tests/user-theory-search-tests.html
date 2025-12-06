@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Theory Search Tests - Eyes of Azrael</title>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #9333ea;
+            margin-bottom: 2rem;
+        }
+
+        .test-suite {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .test-suite h2 {
+            color: #c084fc;
+            margin-top: 0;
+        }
+
+        .test-case {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 4px solid #666;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .test-case.pass {
+            border-left-color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .test-case.fail {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .test-case.running {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .test-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .test-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-pass {
+            background: #22c55e;
+            color: white;
+        }
+
+        .status-fail {
+            background: #ef4444;
+            color: white;
+        }
+
+        .status-running {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .test-details {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
+        .test-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #fca5a5;
+        }
+
+        .test-data {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), rgba(79, 70, 229, 0.2));
+            border: 2px solid rgba(147, 51, 234, 0.5);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .summary h2 {
+            margin-top: 0;
+            color: #c084fc;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .run-tests-btn {
+            background: linear-gradient(135deg, #9333ea, #4f46e5);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto 2rem;
+        }
+
+        .run-tests-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(147, 51, 234, 0.4);
+        }
+
+        .run-tests-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>User Theory Search Unit Tests</h1>
+
+        <div class="summary" id="summary">
+            <h2>Test Summary</h2>
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-tests">0</div>
+                    <div class="stat-label">Total Tests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #22c55e;" id="passed-tests">0</div>
+                    <div class="stat-label">Passed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #ef4444;" id="failed-tests">0</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #f59e0b;" id="duration">0ms</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="run-tests-btn" id="run-tests-btn" onclick="runAllTests()">
+            Run All Tests
+        </button>
+
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // Mock theory data for testing
+        const mockTheories = [
+            {
+                id: 'theory-1',
+                title: 'The Universal Flood Myth',
+                summary: 'Examining flood narratives across cultures',
+                content: 'The flood myth appears in virtually every ancient culture. From Noah in the Hebrew Bible to Deucalion in Greek mythology, from Utnapishtim in the Epic of Gilgamesh to Manu in Hindu texts. This universal narrative suggests either a common origin or shared human experience with catastrophic flooding events.',
+                richContent: {
+                    panels: [
+                        {title: 'Greek Flood', content: 'Deucalion and Pyrrha survived Zeus\' flood by building an ark'},
+                        {title: 'Mesopotamian Flood', content: 'Utnapishtim was warned by Ea to build a boat'}
+                    ],
+                    images: [{url: 'flood.jpg', caption: 'Ancient artwork depicting the flood'}],
+                    links: [{title: 'Source Material', url: 'http://example.com'}],
+                    corpusSearches: [{query: 'flood', corpus: 'greek-texts'}]
+                },
+                topic: 'mythologies',
+                topicName: 'Mythologies',
+                subtopic: 'comparative',
+                subtopicName: 'Comparative Mythology',
+                authorId: 'user-1',
+                authorName: 'Sarah Smith',
+                tags: ['flood', 'comparative', 'creation'],
+                votes: 15,
+                views: 234,
+                status: 'published',
+                createdAt: new Date('2024-01-15'),
+                updatedAt: new Date('2024-01-20')
+            },
+            {
+                id: 'theory-2',
+                title: 'Achilles and the Hero Archetype',
+                summary: 'How Achilles embodies the tragic hero',
+                content: 'Achilles represents the ultimate warrior hero whose greatest strength is also his fatal flaw. His invulnerability except for his heel, his choice between long life and eternal glory, and his rage-driven actions all contribute to his status as the archetypal tragic hero.',
+                richContent: {
+                    panels: [
+                        {title: 'The Choice', content: 'Achilles chose a short glorious life over a long peaceful one'}
+                    ],
+                    images: [],
+                    links: [{title: 'Homer\'s Iliad', url: 'http://example.com/iliad'}],
+                    corpusSearches: [{query: 'Achilles', corpus: 'greek-texts'}]
+                },
+                topic: 'mythologies',
+                topicName: 'Mythologies',
+                subtopic: 'greek',
+                subtopicName: 'Greek Mythology',
+                authorId: 'user-1',
+                authorName: 'Sarah Smith',
+                tags: ['heroes', 'greek', 'achilles'],
+                votes: 28,
+                views: 456,
+                status: 'published',
+                createdAt: new Date('2024-02-10'),
+                updatedAt: new Date('2024-02-15')
+            },
+            {
+                id: 'theory-3',
+                title: 'Odin\'s Self-Sacrifice for Knowledge',
+                summary: 'The hanging god motif in Norse mythology',
+                content: 'Odin hung himself on Yggdrasil for nine nights, pierced by his own spear, to gain knowledge of the runes. This self-sacrifice mirrors themes found in other mythologies, suggesting a universal pattern of divine suffering leading to wisdom.',
+                richContent: {
+                    panels: [
+                        {title: 'The Sacrifice', content: 'Nine nights he hung, wounded and alone'},
+                        {title: 'The Reward', content: 'He gained the knowledge of the runes'}
+                    ],
+                    images: [{url: 'yggdrasil.jpg', caption: 'The World Tree Yggdrasil'}],
+                    links: [],
+                    corpusSearches: [{query: 'Odin', corpus: 'norse-texts'}]
+                },
+                topic: 'mythologies',
+                topicName: 'Mythologies',
+                subtopic: 'norse',
+                subtopicName: 'Norse Mythology',
+                authorId: 'user-2',
+                authorName: 'Michael Chen',
+                tags: ['norse', 'sacrifice', 'wisdom'],
+                votes: 42,
+                views: 678,
+                status: 'published',
+                createdAt: new Date('2024-03-05'),
+                updatedAt: new Date('2024-03-05')
+            },
+            {
+                id: 'theory-4',
+                title: 'Egyptian Afterlife and Moral Judgment',
+                summary: 'The weighing of the heart ceremony',
+                content: 'In Egyptian mythology, the deceased must pass through the Hall of Ma\'at where their heart is weighed against the feather of truth. Anubis conducts the weighing while Osiris presides. If the heart is lighter than the feather, the soul may enter the Field of Reeds. This represents one of the earliest concepts of moral judgment in the afterlife.',
+                richContent: {
+                    panels: [
+                        {title: 'The Weighing', content: 'Anubis places the heart on the scales'},
+                        {title: 'The Judgment', content: 'Osiris determines the fate of the soul'}
+                    ],
+                    images: [{url: 'weighing.jpg', caption: 'Papyrus showing the weighing ceremony'}],
+                    links: [{title: 'Book of the Dead', url: 'http://example.com/dead'}],
+                    corpusSearches: [{query: 'Anubis', corpus: 'egyptian-texts'}]
+                },
+                topic: 'mythologies',
+                topicName: 'Mythologies',
+                subtopic: 'egyptian',
+                subtopicName: 'Egyptian Mythology',
+                authorId: 'user-2',
+                authorName: 'Michael Chen',
+                tags: ['egyptian', 'afterlife', 'judgment'],
+                votes: 31,
+                views: 523,
+                status: 'published',
+                createdAt: new Date('2024-01-25'),
+                updatedAt: new Date('2024-01-30')
+            },
+            {
+                id: 'theory-5',
+                title: 'The Hermetic Principle of Correspondence',
+                summary: 'As above, so below - exploring hermetic philosophy',
+                content: 'The principle of correspondence states that there is a harmony, agreement, and correspondence between the physical, mental, and spiritual planes. This principle explains that the same patterns repeat throughout the different planes of existence.',
+                richContent: {
+                    panels: [
+                        {title: 'Microcosm and Macrocosm', content: 'The universe reflects in the individual'}
+                    ],
+                    images: [],
+                    links: [{title: 'The Kybalion', url: 'http://example.com/kybalion'}],
+                    corpusSearches: []
+                },
+                topic: 'magic',
+                topicName: 'Magic',
+                subtopic: 'hermetic',
+                subtopicName: 'Hermetic Tradition',
+                authorId: 'user-3',
+                authorName: 'Elena Rodriguez',
+                tags: ['hermetic', 'philosophy', 'correspondence'],
+                votes: 19,
+                views: 312,
+                status: 'published',
+                createdAt: new Date('2024-02-20'),
+                updatedAt: new Date('2024-02-25')
+            },
+            {
+                id: 'theory-6',
+                title: 'Tarot Major Arcana and the Fool\'s Journey',
+                summary: 'The 22 card spiritual path from innocence to completion',
+                content: 'The Major Arcana represents a journey of spiritual development. The Fool begins at zero, innocent and unknowing, and progresses through 21 stages of growth, challenge, and enlightenment, culminating in The World card representing completion and cosmic consciousness.',
+                richContent: {
+                    panels: [
+                        {title: 'The Beginning', content: 'The Fool steps off the cliff in faith'},
+                        {title: 'The Middle', content: 'Trials and teachers appear along the way'},
+                        {title: 'The Completion', content: 'The World represents achieved wholeness'}
+                    ],
+                    images: [{url: 'fool.jpg', caption: 'The Fool card from Rider-Waite deck'}],
+                    links: [],
+                    corpusSearches: []
+                },
+                topic: 'magic',
+                topicName: 'Magic',
+                subtopic: 'tarot',
+                subtopicName: 'Tarot',
+                authorId: 'user-3',
+                authorName: 'Elena Rodriguez',
+                tags: ['tarot', 'journey', 'arcana'],
+                votes: 54,
+                views: 891,
+                status: 'published',
+                createdAt: new Date('2024-03-15'),
+                updatedAt: new Date('2024-03-20')
+            },
+            {
+                id: 'theory-7',
+                title: 'Kabbalah Tree of Life Structure',
+                summary: 'Understanding the ten Sephiroth and their relationships',
+                content: 'The Tree of Life consists of ten Sephiroth (emanations) connected by 22 paths. Each Sephirah represents a different aspect of divine manifestation, from Kether (Crown) at the top to Malkuth (Kingdom) at the bottom. The structure maps the process of creation and the path of spiritual ascent.',
+                richContent: {
+                    panels: [
+                        {title: 'The Three Pillars', content: 'Severity, Mercy, and Balance form the structure'},
+                        {title: 'The Lightning Flash', content: 'Divine energy descends through the Sephiroth'}
+                    ],
+                    images: [{url: 'tree.jpg', caption: 'Traditional diagram of the Tree of Life'}],
+                    links: [{title: 'Sefer Yetzirah', url: 'http://example.com/yetzirah'}],
+                    corpusSearches: []
+                },
+                topic: 'magic',
+                topicName: 'Magic',
+                subtopic: 'kabbalah',
+                subtopicName: 'Kabbalah',
+                authorId: 'user-4',
+                authorName: 'David Goldstein',
+                tags: ['kabbalah', 'sephiroth', 'tree-of-life'],
+                votes: 37,
+                views: 645,
+                status: 'published',
+                createdAt: new Date('2024-02-01'),
+                updatedAt: new Date('2024-02-05')
+            },
+            {
+                id: 'theory-8',
+                title: 'Alchemy and Psychological Transformation',
+                summary: 'Jung\'s interpretation of alchemical symbolism',
+                content: 'Carl Jung recognized that medieval alchemy was not merely proto-chemistry but a symbolic system for psychological transformation. The stages of nigredo, albedo, citrinitas, and rubedo represent the process of individuation and the integration of the shadow self.',
+                richContent: {
+                    panels: [
+                        {title: 'Nigredo', content: 'The blackening - confronting the shadow'},
+                        {title: 'Albedo', content: 'The whitening - purification and insight'},
+                        {title: 'Rubedo', content: 'The reddening - integration and wholeness'}
+                    ],
+                    images: [{url: 'alchemy.jpg', caption: 'Alchemical illustration of transformation'}],
+                    links: [],
+                    corpusSearches: []
+                },
+                topic: 'magic',
+                topicName: 'Magic',
+                subtopic: 'alchemy',
+                subtopicName: 'Alchemy',
+                authorId: 'user-4',
+                authorName: 'David Goldstein',
+                tags: ['alchemy', 'jung', 'transformation'],
+                votes: 26,
+                views: 478,
+                status: 'published',
+                createdAt: new Date('2024-01-10'),
+                updatedAt: new Date('2024-01-15')
+            },
+            {
+                id: 'theory-9',
+                title: 'The Cosmic Egg Creation Myth',
+                summary: 'Universal creation from the primordial egg',
+                content: 'Draft theory exploring the cosmic egg motif appearing in Hindu (Hiranyagarbha), Chinese (Pangu), Greek (Orphic egg), and Finnish (from which the world was created) mythologies. This universal symbol represents potential and the emergence of order from chaos.',
+                richContent: {
+                    panels: [],
+                    images: [],
+                    links: [],
+                    corpusSearches: []
+                },
+                topic: 'mythologies',
+                topicName: 'Mythologies',
+                subtopic: 'comparative',
+                subtopicName: 'Comparative Mythology',
+                authorId: 'user-1',
+                authorName: 'Sarah Smith',
+                tags: ['creation', 'comparative', 'cosmogony'],
+                votes: 3,
+                views: 45,
+                status: 'draft',
+                createdAt: new Date('2024-03-25'),
+                updatedAt: new Date('2024-03-27')
+            },
+            {
+                id: 'theory-10',
+                title: 'Prometheus and Fire Theft Parallels',
+                summary: 'Cross-cultural myths of stealing divine fire',
+                content: 'Prometheus stole fire from Zeus to give to humanity. Similar myths exist globally: the Polynesian Maui stole fire from the underworld, the Cherokee water spider brought fire in a clay pot, and the Aboriginal crow carried fire in a stick. These myths speak to humanity\'s relationship with technology and divine knowledge.',
+                richContent: {
+                    panels: [
+                        {title: 'The Theft', content: 'Prometheus takes fire from Mount Olympus'},
+                        {title: 'The Punishment', content: 'Zeus chains him to a rock where an eagle eats his liver daily'}
+                    ],
+                    images: [{url: 'prometheus.jpg', caption: 'Prometheus bound'}],
+                    links: [{title: 'Hesiod\'s Theogony', url: 'http://example.com/theogony'}],
+                    corpusSearches: [{query: 'Prometheus', corpus: 'greek-texts'}]
+                },
+                topic: 'mythologies',
+                topicName: 'Mythologies',
+                subtopic: 'comparative',
+                subtopicName: 'Comparative Mythology',
+                authorId: 'user-2',
+                authorName: 'Michael Chen',
+                tags: ['prometheus', 'fire', 'comparative', 'trickster'],
+                votes: 61,
+                views: 1023,
+                status: 'published',
+                createdAt: new Date('2024-02-28'),
+                updatedAt: new Date('2024-03-01')
+            }
+        ];
+
+        // Test framework
+        class TestSuite {
+            constructor(name) {
+                this.name = name;
+                this.tests = [];
+                this.passed = 0;
+                this.failed = 0;
+            }
+
+            addTest(name, testFn) {
+                this.tests.push({ name, testFn });
+            }
+
+            async run() {
+                const startTime = performance.now();
+                const resultsHtml = [];
+
+                resultsHtml.push(`<div class="test-suite"><h2>${this.name}</h2>`);
+
+                for (const test of this.tests) {
+                    const result = await this.runTest(test);
+                    resultsHtml.push(this.renderTestResult(result));
+                }
+
+                resultsHtml.push(`</div>`);
+
+                const duration = performance.now() - startTime;
+                return {
+                    html: resultsHtml.join(''),
+                    passed: this.passed,
+                    failed: this.failed,
+                    total: this.tests.length,
+                    duration
+                };
+            }
+
+            async runTest(test) {
+                try {
+                    const startTime = performance.now();
+                    await test.testFn();
+                    const duration = performance.now() - startTime;
+                    this.passed++;
+                    return {
+                        name: test.name,
+                        status: 'pass',
+                        duration,
+                        error: null
+                    };
+                } catch (error) {
+                    this.failed++;
+                    return {
+                        name: test.name,
+                        status: 'fail',
+                        duration: 0,
+                        error: error.message,
+                        stack: error.stack
+                    };
+                }
+            }
+
+            renderTestResult(result) {
+                const statusClass = result.status === 'pass' ? 'status-pass' : 'status-fail';
+                const testClass = result.status === 'pass' ? 'pass' : 'fail';
+
+                let html = `
+                    <div class="test-case ${testClass}">
+                        <div class="test-header">
+                            <div class="test-name">${result.name}</div>
+                            <div class="test-status ${statusClass}">
+                                ${result.status === 'pass' ? '✓ PASS' : '✗ FAIL'}
+                            </div>
+                        </div>
+                `;
+
+                if (result.status === 'pass') {
+                    html += `<div class="test-details">Completed in ${result.duration.toFixed(2)}ms</div>`;
+                } else {
+                    html += `
+                        <div class="test-error">
+                            <strong>Error:</strong> ${result.error}
+                        </div>
+                    `;
+                }
+
+                html += `</div>`;
+                return html;
+            }
+        }
+
+        // Assertion helpers
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        function assertEquals(actual, expected, message) {
+            if (actual !== expected) {
+                throw new Error(message || `Expected ${expected}, but got ${actual}`);
+            }
+        }
+
+        function assertArrayEquals(actual, expected, message) {
+            if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+                throw new Error(message || `Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(actual)}`);
+            }
+        }
+
+        function assertContains(array, item, message) {
+            if (!array.includes(item)) {
+                throw new Error(message || `Array does not contain ${item}`);
+            }
+        }
+
+        function assertGreaterThan(actual, expected, message) {
+            if (actual <= expected) {
+                throw new Error(message || `Expected ${actual} to be greater than ${expected}`);
+            }
+        }
+
+        function assertGreaterThanOrEqual(actual, expected, message) {
+            if (actual < expected) {
+                throw new Error(message || `Expected ${actual} to be greater than or equal to ${expected}`);
+            }
+        }
+
+        function assertLessThan(actual, expected, message) {
+            if (actual >= expected) {
+                throw new Error(message || `Expected ${actual} to be less than ${expected}`);
+            }
+        }
+
+        function assertArrayContains(array, predicate, message) {
+            if (!array.some(predicate)) {
+                throw new Error(message || 'Array does not contain matching item');
+            }
+        }
+
+        // User Theory Search Implementation
+        class UserTheorySearch {
+            constructor(theories) {
+                this.theories = theories;
+            }
+
+            // Basic content search
+            searchContent(keyword, options = {}) {
+                const { caseSensitive = false } = options;
+                const pattern = this.buildSearchPattern(keyword, caseSensitive);
+
+                return this.theories.filter(theory => {
+                    return pattern.test(theory.title) ||
+                           pattern.test(theory.summary) ||
+                           pattern.test(theory.content);
+                });
+            }
+
+            // Rich content search
+            searchRichContent(keyword, options = {}) {
+                const { caseSensitive = false } = options;
+                const pattern = this.buildSearchPattern(keyword, caseSensitive);
+
+                return this.theories.filter(theory => {
+                    // Search in panels
+                    const panelMatch = theory.richContent.panels.some(panel =>
+                        pattern.test(panel.title) || pattern.test(panel.content)
+                    );
+
+                    // Search in image captions
+                    const imageMatch = theory.richContent.images.some(img =>
+                        pattern.test(img.caption)
+                    );
+
+                    // Search in links
+                    const linkMatch = theory.richContent.links.some(link =>
+                        pattern.test(link.title)
+                    );
+
+                    return panelMatch || imageMatch || linkMatch;
+                });
+            }
+
+            // Author search
+            searchByAuthor(authorName, options = {}) {
+                const { exact = false } = options;
+
+                if (exact) {
+                    return this.theories.filter(theory =>
+                        theory.authorName === authorName
+                    );
+                } else {
+                    const pattern = new RegExp(authorName, 'i');
+                    return this.theories.filter(theory =>
+                        pattern.test(theory.authorName)
+                    );
+                }
+            }
+
+            // Topic/subtopic filtering
+            filterByTopic(topic, subtopic = null) {
+                return this.theories.filter(theory => {
+                    if (subtopic) {
+                        return theory.topic === topic && theory.subtopic === subtopic;
+                    }
+                    return theory.topic === topic;
+                });
+            }
+
+            // Tag search
+            searchByTag(tag) {
+                return this.theories.filter(theory =>
+                    theory.tags.includes(tag)
+                );
+            }
+
+            searchByTags(tags, mode = 'any') {
+                if (mode === 'any') {
+                    return this.theories.filter(theory =>
+                        tags.some(tag => theory.tags.includes(tag))
+                    );
+                } else { // mode === 'all'
+                    return this.theories.filter(theory =>
+                        tags.every(tag => theory.tags.includes(tag))
+                    );
+                }
+            }
+
+            // Date range filtering
+            filterByDateRange(startDate, endDate, field = 'createdAt') {
+                return this.theories.filter(theory => {
+                    const date = theory[field];
+                    return date >= startDate && date <= endDate;
+                });
+            }
+
+            // Vote/popularity filtering
+            filterByVotes(minVotes, maxVotes = Infinity) {
+                return this.theories.filter(theory =>
+                    theory.votes >= minVotes && theory.votes <= maxVotes
+                );
+            }
+
+            filterByViews(minViews, maxViews = Infinity) {
+                return this.theories.filter(theory =>
+                    theory.views >= minViews && theory.views <= maxViews
+                );
+            }
+
+            // Status filtering
+            filterByStatus(status) {
+                return this.theories.filter(theory => theory.status === status);
+            }
+
+            // Combined search
+            search(criteria = {}) {
+                let results = [...this.theories];
+
+                // Keyword search across all content
+                if (criteria.keyword) {
+                    const pattern = this.buildSearchPattern(criteria.keyword, criteria.caseSensitive);
+                    results = results.filter(theory =>
+                        this.matchesKeyword(theory, pattern)
+                    );
+                }
+
+                // Author filter
+                if (criteria.author) {
+                    const pattern = new RegExp(criteria.author, 'i');
+                    results = results.filter(theory =>
+                        pattern.test(theory.authorName)
+                    );
+                }
+
+                // Topic filter
+                if (criteria.topic) {
+                    results = results.filter(theory =>
+                        theory.topic === criteria.topic
+                    );
+                }
+
+                // Subtopic filter
+                if (criteria.subtopic) {
+                    results = results.filter(theory =>
+                        theory.subtopic === criteria.subtopic
+                    );
+                }
+
+                // Tags filter
+                if (criteria.tags && criteria.tags.length > 0) {
+                    const mode = criteria.tagMode || 'any';
+                    if (mode === 'any') {
+                        results = results.filter(theory =>
+                            criteria.tags.some(tag => theory.tags.includes(tag))
+                        );
+                    } else {
+                        results = results.filter(theory =>
+                            criteria.tags.every(tag => theory.tags.includes(tag))
+                        );
+                    }
+                }
+
+                // Date range filter
+                if (criteria.startDate || criteria.endDate) {
+                    const startDate = criteria.startDate || new Date(0);
+                    const endDate = criteria.endDate || new Date();
+                    const field = criteria.dateField || 'createdAt';
+                    results = results.filter(theory => {
+                        const date = theory[field];
+                        return date >= startDate && date <= endDate;
+                    });
+                }
+
+                // Vote filter
+                if (criteria.minVotes !== undefined) {
+                    results = results.filter(theory =>
+                        theory.votes >= criteria.minVotes
+                    );
+                }
+
+                if (criteria.maxVotes !== undefined) {
+                    results = results.filter(theory =>
+                        theory.votes <= criteria.maxVotes
+                    );
+                }
+
+                // Views filter
+                if (criteria.minViews !== undefined) {
+                    results = results.filter(theory =>
+                        theory.views >= criteria.minViews
+                    );
+                }
+
+                if (criteria.maxViews !== undefined) {
+                    results = results.filter(theory =>
+                        theory.views <= criteria.maxViews
+                    );
+                }
+
+                // Status filter
+                if (criteria.status) {
+                    results = results.filter(theory =>
+                        theory.status === criteria.status
+                    );
+                }
+
+                // Apply sorting
+                if (criteria.sortBy) {
+                    results = this.sortResults(results, criteria.sortBy, criteria.sortOrder);
+                }
+
+                // Apply pagination
+                if (criteria.limit !== undefined || criteria.offset !== undefined) {
+                    const offset = criteria.offset || 0;
+                    const limit = criteria.limit || results.length;
+                    results = results.slice(offset, offset + limit);
+                }
+
+                return results;
+            }
+
+            // Full-text search
+            fullTextSearch(query, options = {}) {
+                const { caseSensitive = false, includeRichContent = true } = options;
+                const pattern = this.buildSearchPattern(query, caseSensitive);
+
+                return this.theories.filter(theory =>
+                    this.matchesKeyword(theory, pattern, includeRichContent)
+                ).map(theory => ({
+                    ...theory,
+                    relevanceScore: this.calculateRelevance(theory, pattern)
+                })).sort((a, b) => b.relevanceScore - a.relevanceScore);
+            }
+
+            // Helper: Build search pattern
+            buildSearchPattern(keyword, caseSensitive = false) {
+                const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                return new RegExp(escaped, caseSensitive ? 'g' : 'gi');
+            }
+
+            // Helper: Check if theory matches keyword
+            matchesKeyword(theory, pattern, includeRichContent = true) {
+                // Check basic fields
+                if (pattern.test(theory.title)) return true;
+                if (pattern.test(theory.summary)) return true;
+                if (pattern.test(theory.content)) return true;
+
+                // Check tags
+                if (theory.tags.some(tag => pattern.test(tag))) return true;
+
+                // Check rich content if enabled
+                if (includeRichContent) {
+                    // Panels
+                    if (theory.richContent.panels.some(p =>
+                        pattern.test(p.title) || pattern.test(p.content)
+                    )) return true;
+
+                    // Image captions
+                    if (theory.richContent.images.some(img =>
+                        pattern.test(img.caption)
+                    )) return true;
+
+                    // Links
+                    if (theory.richContent.links.some(link =>
+                        pattern.test(link.title)
+                    )) return true;
+                }
+
+                return false;
+            }
+
+            // Helper: Calculate relevance score
+            calculateRelevance(theory, pattern) {
+                let score = 0;
+
+                // Title matches are most important
+                const titleMatches = (theory.title.match(pattern) || []).length;
+                score += titleMatches * 10;
+
+                // Summary matches
+                const summaryMatches = (theory.summary.match(pattern) || []).length;
+                score += summaryMatches * 5;
+
+                // Content matches
+                const contentMatches = (theory.content.match(pattern) || []).length;
+                score += contentMatches * 2;
+
+                // Tag matches
+                const tagMatches = theory.tags.filter(tag => pattern.test(tag)).length;
+                score += tagMatches * 7;
+
+                // Rich content matches
+                theory.richContent.panels.forEach(panel => {
+                    score += (panel.title.match(pattern) || []).length * 3;
+                    score += (panel.content.match(pattern) || []).length;
+                });
+
+                theory.richContent.images.forEach(img => {
+                    score += (img.caption.match(pattern) || []).length * 2;
+                });
+
+                // Boost by popularity
+                score += Math.log10(theory.votes + 1);
+                score += Math.log10(theory.views + 1) * 0.5;
+
+                return score;
+            }
+
+            // Helper: Sort results
+            sortResults(results, sortBy, sortOrder = 'desc') {
+                const sorted = [...results].sort((a, b) => {
+                    let comparison = 0;
+
+                    switch (sortBy) {
+                        case 'date':
+                        case 'createdAt':
+                            comparison = a.createdAt - b.createdAt;
+                            break;
+                        case 'updatedAt':
+                            comparison = a.updatedAt - b.updatedAt;
+                            break;
+                        case 'votes':
+                            comparison = a.votes - b.votes;
+                            break;
+                        case 'views':
+                            comparison = a.views - b.views;
+                            break;
+                        case 'title':
+                            comparison = a.title.localeCompare(b.title);
+                            break;
+                        case 'author':
+                            comparison = a.authorName.localeCompare(b.authorName);
+                            break;
+                        case 'relevance':
+                            comparison = (a.relevanceScore || 0) - (b.relevanceScore || 0);
+                            break;
+                        default:
+                            comparison = 0;
+                    }
+
+                    return sortOrder === 'asc' ? comparison : -comparison;
+                });
+
+                return sorted;
+            }
+
+            // Get unique values for filters
+            getAuthors() {
+                return [...new Set(this.theories.map(t => t.authorName))];
+            }
+
+            getTopics() {
+                return [...new Set(this.theories.map(t => t.topic))];
+            }
+
+            getSubtopics(topic = null) {
+                let theories = this.theories;
+                if (topic) {
+                    theories = theories.filter(t => t.topic === topic);
+                }
+                return [...new Set(theories.map(t => t.subtopic))];
+            }
+
+            getAllTags() {
+                const tags = new Set();
+                this.theories.forEach(t => t.tags.forEach(tag => tags.add(tag)));
+                return [...tags];
+            }
+
+            // Statistics
+            getStats() {
+                return {
+                    total: this.theories.length,
+                    published: this.theories.filter(t => t.status === 'published').length,
+                    draft: this.theories.filter(t => t.status === 'draft').length,
+                    totalVotes: this.theories.reduce((sum, t) => sum + t.votes, 0),
+                    totalViews: this.theories.reduce((sum, t) => sum + t.views, 0),
+                    authors: this.getAuthors().length,
+                    topics: this.getTopics().length,
+                    tags: this.getAllTags().length
+                };
+            }
+        }
+
+        // Initialize theory search
+        const theorySearch = new UserTheorySearch(mockTheories);
+
+        // Define test suites
+        async function runAllTests() {
+            const btn = document.getElementById('run-tests-btn');
+            btn.disabled = true;
+            btn.textContent = 'Running Tests...';
+
+            const resultsContainer = document.getElementById('test-results');
+            resultsContainer.innerHTML = '';
+
+            let totalPassed = 0;
+            let totalFailed = 0;
+            let totalTests = 0;
+            let totalDuration = 0;
+
+            const testStartTime = performance.now();
+
+            // Test Suite 1: Basic Keyword Search
+            const basicSearchTests = new TestSuite('1. Basic Keyword Search');
+
+            basicSearchTests.addTest('Should find theories by title keyword', async () => {
+                const results = theorySearch.searchContent('flood');
+                assert(results.length > 0, 'Should find flood theory');
+                assert(results[0].title.includes('Flood'), 'Should find Universal Flood Myth');
+            });
+
+            basicSearchTests.addTest('Should find theories by summary keyword', async () => {
+                const results = theorySearch.searchContent('hero');
+                assert(results.length > 0, 'Should find hero-related theories');
+            });
+
+            basicSearchTests.addTest('Should find theories by content keyword', async () => {
+                const results = theorySearch.searchContent('Achilles');
+                assert(results.length > 0, 'Should find Achilles theory');
+            });
+
+            basicSearchTests.addTest('Should be case-insensitive by default', async () => {
+                const results = theorySearch.searchContent('achilles');
+                assert(results.length > 0, 'Should find regardless of case');
+            });
+
+            basicSearchTests.addTest('Should respect case-sensitive option', async () => {
+                const results1 = theorySearch.searchContent('FLOOD', { caseSensitive: false });
+                const results2 = theorySearch.searchContent('FLOOD', { caseSensitive: true });
+                assertGreaterThan(results1.length, results2.length, 'Case-insensitive should find more');
+            });
+
+            basicSearchTests.addTest('Should return empty array for no matches', async () => {
+                const results = theorySearch.searchContent('xyz123nonexistent');
+                assertEquals(results.length, 0, 'Should return empty for no matches');
+            });
+
+            const result1 = await basicSearchTests.run();
+            resultsContainer.innerHTML += result1.html;
+            totalPassed += result1.passed;
+            totalFailed += result1.failed;
+            totalTests += result1.total;
+            totalDuration += result1.duration;
+
+            // Test Suite 2: Rich Content Search
+            const richContentTests = new TestSuite('2. Rich Content Search');
+
+            richContentTests.addTest('Should search within panel titles', async () => {
+                const results = theorySearch.searchRichContent('Greek Flood');
+                assert(results.length > 0, 'Should find panel title match');
+            });
+
+            richContentTests.addTest('Should search within panel content', async () => {
+                const results = theorySearch.searchRichContent('Deucalion');
+                assert(results.length > 0, 'Should find panel content match');
+            });
+
+            richContentTests.addTest('Should search within image captions', async () => {
+                const results = theorySearch.searchRichContent('Ancient artwork');
+                assert(results.length > 0, 'Should find image caption match');
+            });
+
+            richContentTests.addTest('Should search within link titles', async () => {
+                const results = theorySearch.searchRichContent('Source Material');
+                assert(results.length > 0, 'Should find link title match');
+            });
+
+            richContentTests.addTest('Should not match main content in rich content search', async () => {
+                // Search for something only in main content, not rich content
+                const results = theorySearch.searchRichContent('catastrophic');
+                assertEquals(results.length, 0, 'Should only search rich content fields');
+            });
+
+            const result2 = await richContentTests.run();
+            resultsContainer.innerHTML += result2.html;
+            totalPassed += result2.passed;
+            totalFailed += result2.failed;
+            totalTests += result2.total;
+            totalDuration += result2.duration;
+
+            // Test Suite 3: Author Search
+            const authorSearchTests = new TestSuite('3. Author Search and Attribution');
+
+            authorSearchTests.addTest('Should find theories by author name', async () => {
+                const results = theorySearch.searchByAuthor('Sarah Smith');
+                assertGreaterThan(results.length, 0, 'Should find Sarah Smith theories');
+                assert(results.every(r => r.authorName === 'Sarah Smith'), 'All should be by Sarah Smith');
+            });
+
+            authorSearchTests.addTest('Should find theories by partial author name', async () => {
+                const results = theorySearch.searchByAuthor('Chen');
+                assertGreaterThan(results.length, 0, 'Should find author with partial name');
+            });
+
+            authorSearchTests.addTest('Should be case-insensitive for author search', async () => {
+                const results = theorySearch.searchByAuthor('sarah smith');
+                assertGreaterThan(results.length, 0, 'Should find regardless of case');
+            });
+
+            authorSearchTests.addTest('Should support exact author match', async () => {
+                const results = theorySearch.searchByAuthor('Sarah Smith', { exact: true });
+                assert(results.every(r => r.authorName === 'Sarah Smith'), 'Exact match only');
+            });
+
+            authorSearchTests.addTest('Should list all unique authors', async () => {
+                const authors = theorySearch.getAuthors();
+                assert(authors.length >= 4, 'Should have multiple authors');
+                assertContains(authors, 'Sarah Smith', 'Should include Sarah Smith');
+                assertContains(authors, 'Michael Chen', 'Should include Michael Chen');
+            });
+
+            const result3 = await authorSearchTests.run();
+            resultsContainer.innerHTML += result3.html;
+            totalPassed += result3.passed;
+            totalFailed += result3.failed;
+            totalTests += result3.total;
+            totalDuration += result3.duration;
+
+            // Test Suite 4: Topic and Subtopic Filtering
+            const topicFilterTests = new TestSuite('4. Topic and Subtopic Filtering');
+
+            topicFilterTests.addTest('Should filter by topic', async () => {
+                const results = theorySearch.filterByTopic('mythologies');
+                assertGreaterThan(results.length, 0, 'Should find mythology theories');
+                assert(results.every(r => r.topic === 'mythologies'), 'All should be mythologies');
+            });
+
+            topicFilterTests.addTest('Should filter by topic and subtopic', async () => {
+                const results = theorySearch.filterByTopic('mythologies', 'greek');
+                assertGreaterThan(results.length, 0, 'Should find Greek mythology');
+                assert(results.every(r => r.subtopic === 'greek'), 'All should be Greek');
+            });
+
+            topicFilterTests.addTest('Should filter magic topic', async () => {
+                const results = theorySearch.filterByTopic('magic');
+                assertGreaterThan(results.length, 0, 'Should find magic theories');
+                assert(results.every(r => r.topic === 'magic'), 'All should be magic');
+            });
+
+            topicFilterTests.addTest('Should list all topics', async () => {
+                const topics = theorySearch.getTopics();
+                assertGreaterThanOrEqual(topics.length, 2, 'Should have multiple topics');
+                assertContains(topics, 'mythologies', 'Should include mythologies');
+                assertContains(topics, 'magic', 'Should include magic');
+            });
+
+            topicFilterTests.addTest('Should list subtopics for a topic', async () => {
+                const subtopics = theorySearch.getSubtopics('mythologies');
+                assertGreaterThan(subtopics.length, 0, 'Should have subtopics');
+                assertContains(subtopics, 'greek', 'Should include Greek');
+            });
+
+            const result4 = await topicFilterTests.run();
+            resultsContainer.innerHTML += result4.html;
+            totalPassed += result4.passed;
+            totalFailed += result4.failed;
+            totalTests += result4.total;
+            totalDuration += result4.duration;
+
+            // Test Suite 5: Tag-Based Search
+            const tagSearchTests = new TestSuite('5. Tag-Based Search');
+
+            tagSearchTests.addTest('Should find theories by single tag', async () => {
+                const results = theorySearch.searchByTag('flood');
+                assertGreaterThan(results.length, 0, 'Should find tagged theories');
+                assert(results.every(r => r.tags.includes('flood')), 'All should have flood tag');
+            });
+
+            tagSearchTests.addTest('Should find theories with any of multiple tags', async () => {
+                const results = theorySearch.searchByTags(['flood', 'norse'], 'any');
+                assertGreaterThan(results.length, 0, 'Should find theories with any tag');
+            });
+
+            tagSearchTests.addTest('Should find theories with all specified tags', async () => {
+                const results = theorySearch.searchByTags(['comparative', 'flood'], 'all');
+                assertGreaterThan(results.length, 0, 'Should find theories with all tags');
+                assert(results.every(r =>
+                    r.tags.includes('comparative') && r.tags.includes('flood')
+                ), 'All should have both tags');
+            });
+
+            tagSearchTests.addTest('Should list all unique tags', async () => {
+                const tags = theorySearch.getAllTags();
+                assertGreaterThan(tags.length, 0, 'Should have tags');
+                assertContains(tags, 'flood', 'Should include flood tag');
+                assertContains(tags, 'comparative', 'Should include comparative tag');
+            });
+
+            tagSearchTests.addTest('Should handle tags with no matches', async () => {
+                const results = theorySearch.searchByTag('nonexistenttag123');
+                assertEquals(results.length, 0, 'Should return empty for invalid tag');
+            });
+
+            const result5 = await tagSearchTests.run();
+            resultsContainer.innerHTML += result5.html;
+            totalPassed += result5.passed;
+            totalFailed += result5.failed;
+            totalTests += result5.total;
+            totalDuration += result5.duration;
+
+            // Test Suite 6: Date Range Filtering
+            const dateFilterTests = new TestSuite('6. Date Range Filtering');
+
+            dateFilterTests.addTest('Should filter by creation date range', async () => {
+                const startDate = new Date('2024-02-01');
+                const endDate = new Date('2024-02-28');
+                const results = theorySearch.filterByDateRange(startDate, endDate);
+                assertGreaterThan(results.length, 0, 'Should find theories in date range');
+                assert(results.every(r =>
+                    r.createdAt >= startDate && r.createdAt <= endDate
+                ), 'All should be in date range');
+            });
+
+            dateFilterTests.addTest('Should filter by update date', async () => {
+                const startDate = new Date('2024-01-01');
+                const endDate = new Date('2024-12-31');
+                const results = theorySearch.filterByDateRange(startDate, endDate, 'updatedAt');
+                assertGreaterThan(results.length, 0, 'Should filter by update date');
+            });
+
+            dateFilterTests.addTest('Should handle narrow date ranges', async () => {
+                const startDate = new Date('2024-01-15');
+                const endDate = new Date('2024-01-20');
+                const results = theorySearch.filterByDateRange(startDate, endDate);
+                // Should find at least the flood theory created on 2024-01-15
+                assertGreaterThanOrEqual(results.length, 1, 'Should find theories in narrow range');
+            });
+
+            const result6 = await dateFilterTests.run();
+            resultsContainer.innerHTML += result6.html;
+            totalPassed += result6.passed;
+            totalFailed += result6.failed;
+            totalTests += result6.total;
+            totalDuration += result6.duration;
+
+            // Test Suite 7: Popularity and Engagement Filtering
+            const popularityTests = new TestSuite('7. Popularity and Engagement Filtering');
+
+            popularityTests.addTest('Should filter by minimum votes', async () => {
+                const results = theorySearch.filterByVotes(30);
+                assertGreaterThan(results.length, 0, 'Should find highly voted theories');
+                assert(results.every(r => r.votes >= 30), 'All should have 30+ votes');
+            });
+
+            popularityTests.addTest('Should filter by vote range', async () => {
+                const results = theorySearch.filterByVotes(15, 40);
+                assertGreaterThan(results.length, 0, 'Should find theories in vote range');
+                assert(results.every(r => r.votes >= 15 && r.votes <= 40), 'All in range');
+            });
+
+            popularityTests.addTest('Should filter by minimum views', async () => {
+                const results = theorySearch.filterByViews(500);
+                assertGreaterThan(results.length, 0, 'Should find popular theories');
+                assert(results.every(r => r.views >= 500), 'All should have 500+ views');
+            });
+
+            popularityTests.addTest('Should filter by views range', async () => {
+                const results = theorySearch.filterByViews(200, 700);
+                assertGreaterThan(results.length, 0, 'Should find theories in view range');
+                assert(results.every(r => r.views >= 200 && r.views <= 700), 'All in range');
+            });
+
+            popularityTests.addTest('Should handle high threshold filters', async () => {
+                const results = theorySearch.filterByVotes(1000);
+                assertEquals(results.length, 0, 'Should return empty for unrealistic threshold');
+            });
+
+            const result7 = await popularityTests.run();
+            resultsContainer.innerHTML += result7.html;
+            totalPassed += result7.passed;
+            totalFailed += result7.failed;
+            totalTests += result7.total;
+            totalDuration += result7.duration;
+
+            // Test Suite 8: Status Filtering
+            const statusTests = new TestSuite('8. Status Filtering');
+
+            statusTests.addTest('Should filter published theories', async () => {
+                const results = theorySearch.filterByStatus('published');
+                assertGreaterThan(results.length, 0, 'Should find published theories');
+                assert(results.every(r => r.status === 'published'), 'All should be published');
+            });
+
+            statusTests.addTest('Should filter draft theories', async () => {
+                const results = theorySearch.filterByStatus('draft');
+                assertGreaterThan(results.length, 0, 'Should find draft theories');
+                assert(results.every(r => r.status === 'draft'), 'All should be drafts');
+            });
+
+            statusTests.addTest('Should handle deleted status', async () => {
+                const results = theorySearch.filterByStatus('deleted');
+                assertEquals(results.length, 0, 'Should find no deleted theories in mock data');
+            });
+
+            const result8 = await statusTests.run();
+            resultsContainer.innerHTML += result8.html;
+            totalPassed += result8.passed;
+            totalFailed += result8.failed;
+            totalTests += result8.total;
+            totalDuration += result8.duration;
+
+            // Test Suite 9: Combined Search Criteria
+            const combinedSearchTests = new TestSuite('9. Combined Search Criteria');
+
+            combinedSearchTests.addTest('Should combine keyword and topic filter', async () => {
+                const results = theorySearch.search({
+                    keyword: 'flood',
+                    topic: 'mythologies'
+                });
+                assertGreaterThan(results.length, 0, 'Should find matching theories');
+                assert(results.every(r => r.topic === 'mythologies'), 'All should be mythologies');
+            });
+
+            combinedSearchTests.addTest('Should combine author and tag filters', async () => {
+                const results = theorySearch.search({
+                    author: 'Sarah',
+                    tags: ['comparative']
+                });
+                assertGreaterThan(results.length, 0, 'Should find matching theories');
+            });
+
+            combinedSearchTests.addTest('Should combine multiple filters', async () => {
+                const results = theorySearch.search({
+                    topic: 'mythologies',
+                    minVotes: 20,
+                    status: 'published'
+                });
+                assertGreaterThan(results.length, 0, 'Should find matching theories');
+                assert(results.every(r =>
+                    r.topic === 'mythologies' && r.votes >= 20 && r.status === 'published'
+                ), 'All should match all criteria');
+            });
+
+            combinedSearchTests.addTest('Should combine date range with other filters', async () => {
+                const results = theorySearch.search({
+                    startDate: new Date('2024-01-01'),
+                    endDate: new Date('2024-02-28'),
+                    topic: 'mythologies',
+                    minVotes: 10
+                });
+                assertGreaterThan(results.length, 0, 'Should find matching theories');
+            });
+
+            combinedSearchTests.addTest('Should return empty for impossible combinations', async () => {
+                const results = theorySearch.search({
+                    topic: 'mythologies',
+                    subtopic: 'nonexistent'
+                });
+                assertEquals(results.length, 0, 'Should return empty for no matches');
+            });
+
+            const result9 = await combinedSearchTests.run();
+            resultsContainer.innerHTML += result9.html;
+            totalPassed += result9.passed;
+            totalFailed += result9.failed;
+            totalTests += result9.total;
+            totalDuration += result9.duration;
+
+            // Test Suite 10: Pagination
+            const paginationTests = new TestSuite('10. Pagination and Result Limiting');
+
+            paginationTests.addTest('Should limit results with limit parameter', async () => {
+                const results = theorySearch.search({ limit: 3 });
+                assertEquals(results.length, 3, 'Should return exactly 3 results');
+            });
+
+            paginationTests.addTest('Should handle offset for pagination', async () => {
+                const page1 = theorySearch.search({ limit: 3, offset: 0 });
+                const page2 = theorySearch.search({ limit: 3, offset: 3 });
+                assertEquals(page1.length, 3, 'First page should have 3 results');
+                assertEquals(page2.length, 3, 'Second page should have 3 results');
+                assert(page1[0].id !== page2[0].id, 'Pages should have different results');
+            });
+
+            paginationTests.addTest('Should handle partial last page', async () => {
+                const totalTheories = mockTheories.length;
+                const lastPageOffset = Math.floor(totalTheories / 3) * 3;
+                const results = theorySearch.search({ limit: 3, offset: lastPageOffset });
+                assertGreaterThan(results.length, 0, 'Should return remaining results');
+                assertLessThan(results.length, 4, 'Should not exceed limit');
+            });
+
+            paginationTests.addTest('Should handle offset beyond results', async () => {
+                const results = theorySearch.search({ limit: 10, offset: 1000 });
+                assertEquals(results.length, 0, 'Should return empty for offset beyond results');
+            });
+
+            const result10 = await paginationTests.run();
+            resultsContainer.innerHTML += result10.html;
+            totalPassed += result10.passed;
+            totalFailed += result10.failed;
+            totalTests += result10.total;
+            totalDuration += result10.duration;
+
+            // Test Suite 11: Sorting
+            const sortingTests = new TestSuite('11. Sorting Algorithms');
+
+            sortingTests.addTest('Should sort by date descending', async () => {
+                const results = theorySearch.search({ sortBy: 'date', sortOrder: 'desc' });
+                if (results.length > 1) {
+                    assertGreaterThanOrEqual(
+                        results[0].createdAt.getTime(),
+                        results[1].createdAt.getTime(),
+                        'Should sort newest first'
+                    );
+                }
+            });
+
+            sortingTests.addTest('Should sort by date ascending', async () => {
+                const results = theorySearch.search({ sortBy: 'date', sortOrder: 'asc' });
+                if (results.length > 1) {
+                    assertLessThan(
+                        results[0].createdAt.getTime(),
+                        results[1].createdAt.getTime(),
+                        'Should sort oldest first'
+                    );
+                }
+            });
+
+            sortingTests.addTest('Should sort by votes descending', async () => {
+                const results = theorySearch.search({ sortBy: 'votes', sortOrder: 'desc' });
+                if (results.length > 1) {
+                    assertGreaterThanOrEqual(results[0].votes, results[1].votes, 'Should sort by votes desc');
+                }
+            });
+
+            sortingTests.addTest('Should sort by views descending', async () => {
+                const results = theorySearch.search({ sortBy: 'views', sortOrder: 'desc' });
+                if (results.length > 1) {
+                    assertGreaterThanOrEqual(results[0].views, results[1].views, 'Should sort by views desc');
+                }
+            });
+
+            sortingTests.addTest('Should sort by title alphabetically', async () => {
+                const results = theorySearch.search({ sortBy: 'title', sortOrder: 'asc' });
+                if (results.length > 1) {
+                    assert(
+                        results[0].title.localeCompare(results[1].title) <= 0,
+                        'Should sort titles alphabetically'
+                    );
+                }
+            });
+
+            sortingTests.addTest('Should sort by author name', async () => {
+                const results = theorySearch.search({ sortBy: 'author', sortOrder: 'asc' });
+                if (results.length > 1) {
+                    assert(
+                        results[0].authorName.localeCompare(results[1].authorName) <= 0,
+                        'Should sort by author alphabetically'
+                    );
+                }
+            });
+
+            const result11 = await sortingTests.run();
+            resultsContainer.innerHTML += result11.html;
+            totalPassed += result11.passed;
+            totalFailed += result11.failed;
+            totalTests += result11.total;
+            totalDuration += result11.duration;
+
+            // Test Suite 12: Full-Text Search and Relevance
+            const fullTextTests = new TestSuite('12. Full-Text Search and Relevance');
+
+            fullTextTests.addTest('Should perform full-text search', async () => {
+                const results = theorySearch.fullTextSearch('flood');
+                assertGreaterThan(results.length, 0, 'Should find results');
+                assert(results[0].relevanceScore !== undefined, 'Should have relevance score');
+            });
+
+            fullTextTests.addTest('Should sort by relevance score', async () => {
+                const results = theorySearch.fullTextSearch('flood');
+                if (results.length > 1) {
+                    assertGreaterThanOrEqual(
+                        results[0].relevanceScore,
+                        results[1].relevanceScore,
+                        'Should sort by relevance'
+                    );
+                }
+            });
+
+            fullTextTests.addTest('Should prioritize title matches', async () => {
+                const results = theorySearch.fullTextSearch('flood');
+                assertGreaterThan(results.length, 0, 'Should find results');
+                // The theory with "Flood" in the title should score highest
+                assert(results[0].title.toLowerCase().includes('flood'), 'Title match should rank first');
+            });
+
+            fullTextTests.addTest('Should include rich content in full-text search', async () => {
+                const results = theorySearch.fullTextSearch('Deucalion');
+                assertGreaterThan(results.length, 0, 'Should find rich content matches');
+            });
+
+            fullTextTests.addTest('Should calculate relevance based on match frequency', async () => {
+                const results = theorySearch.fullTextSearch('the');
+                assertGreaterThan(results.length, 0, 'Should find common word');
+                // More matches should yield higher scores
+                assertGreaterThan(results[0].relevanceScore, 0, 'Should have positive relevance');
+            });
+
+            fullTextTests.addTest('Should boost popular theories in relevance', async () => {
+                const results = theorySearch.fullTextSearch('greek');
+                if (results.length > 1) {
+                    // Results should factor in votes/views
+                    assertGreaterThan(results[0].relevanceScore, 0, 'Should have relevance score');
+                }
+            });
+
+            const result12 = await fullTextTests.run();
+            resultsContainer.innerHTML += result12.html;
+            totalPassed += result12.passed;
+            totalFailed += result12.failed;
+            totalTests += result12.total;
+            totalDuration += result12.duration;
+
+            // Test Suite 13: Edge Cases and Error Handling
+            const edgeCaseTests = new TestSuite('13. Edge Cases and Performance');
+
+            edgeCaseTests.addTest('Should handle empty search criteria', async () => {
+                const results = theorySearch.search({});
+                assertEquals(results.length, mockTheories.length, 'Should return all theories');
+            });
+
+            edgeCaseTests.addTest('Should handle special characters in search', async () => {
+                const results = theorySearch.searchContent('hero\'s');
+                // Should not throw error
+                assert(Array.isArray(results), 'Should return array');
+            });
+
+            edgeCaseTests.addTest('Should handle null/undefined gracefully', async () => {
+                const results1 = theorySearch.search({ keyword: null });
+                assert(Array.isArray(results1), 'Should handle null keyword');
+
+                const results2 = theorySearch.search({ tags: [] });
+                assert(Array.isArray(results2), 'Should handle empty tags array');
+            });
+
+            edgeCaseTests.addTest('Should handle very long search queries', async () => {
+                const longQuery = 'a'.repeat(1000);
+                const results = theorySearch.searchContent(longQuery);
+                assert(Array.isArray(results), 'Should handle long queries');
+            });
+
+            edgeCaseTests.addTest('Should get statistics correctly', async () => {
+                const stats = theorySearch.getStats();
+                assertEquals(stats.total, mockTheories.length, 'Should count total theories');
+                assertGreaterThan(stats.published, 0, 'Should count published');
+                assertGreaterThan(stats.totalVotes, 0, 'Should sum votes');
+                assertGreaterThan(stats.totalViews, 0, 'Should sum views');
+            });
+
+            edgeCaseTests.addTest('Should handle tag mode edge cases', async () => {
+                const results1 = theorySearch.search({ tags: ['nonexistent1', 'nonexistent2'], tagMode: 'any' });
+                assertEquals(results1.length, 0, 'Should return empty for nonexistent tags');
+
+                const results2 = theorySearch.search({ tags: ['flood'], tagMode: 'all' });
+                assertGreaterThan(results2.length, 0, 'Should work with single tag in all mode');
+            });
+
+            const result13 = await edgeCaseTests.run();
+            resultsContainer.innerHTML += result13.html;
+            totalPassed += result13.passed;
+            totalFailed += result13.failed;
+            totalTests += result13.total;
+            totalDuration += result13.duration;
+
+            // Update summary
+            const finalDuration = performance.now() - testStartTime;
+            document.getElementById('total-tests').textContent = totalTests;
+            document.getElementById('passed-tests').textContent = totalPassed;
+            document.getElementById('failed-tests').textContent = totalFailed;
+            document.getElementById('duration').textContent = finalDuration.toFixed(0) + 'ms';
+
+            btn.disabled = false;
+            btn.textContent = totalFailed === 0 ? 'All Tests Passed! Run Again?' : 'Some Tests Failed - Run Again?';
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            runAllTests();
+        });
+    </script>
+</body>
+</html>

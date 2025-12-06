@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corpus Search Tests - Eyes of Azrael</title>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #9333ea;
+            margin-bottom: 2rem;
+        }
+
+        .test-suite {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .test-suite h2 {
+            color: #c084fc;
+            margin-top: 0;
+        }
+
+        .test-case {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 4px solid #666;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .test-case.pass {
+            border-left-color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .test-case.fail {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .test-case.running {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .test-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .test-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-pass {
+            background: #22c55e;
+            color: white;
+        }
+
+        .status-fail {
+            background: #ef4444;
+            color: white;
+        }
+
+        .status-running {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .test-details {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
+        .test-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #fca5a5;
+        }
+
+        .test-data {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), rgba(79, 70, 229, 0.2));
+            border: 2px solid rgba(147, 51, 234, 0.5);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .summary h2 {
+            margin-top: 0;
+            color: #c084fc;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .run-tests-btn {
+            background: linear-gradient(135deg, #9333ea, #4f46e5);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto 2rem;
+        }
+
+        .run-tests-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(147, 51, 234, 0.4);
+        }
+
+        .run-tests-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>📚 Corpus Search Unit Tests</h1>
+
+        <div class="summary" id="summary">
+            <h2>Test Summary</h2>
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-tests">0</div>
+                    <div class="stat-label">Total Tests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #22c55e;" id="passed-tests">0</div>
+                    <div class="stat-label">Passed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #ef4444;" id="failed-tests">0</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #f59e0b;" id="duration">0ms</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="run-tests-btn" id="run-tests-btn" onclick="runAllTests()">
+            🚀 Run All Tests
+        </button>
+
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // Mock corpus data for testing
+        const mockCorpusData = {
+            'greek-texts': {
+                'iliad': {
+                    title: 'The Iliad',
+                    author: 'Homer',
+                    content: `Rage—Goddess, sing the rage of Peleus' son Achilles, murderous, doomed, that cost the Achaeans countless losses.
+                    Many a brave soul did it send hurrying down to Hades, and many a hero did it yield a prey to dogs and vultures.
+                    The wrath of Achilles is the central theme. Zeus plays a crucial role in the fate of mortals.`
+                },
+                'odyssey': {
+                    title: 'The Odyssey',
+                    author: 'Homer',
+                    content: `Tell me, O muse, of that ingenious hero who travelled far and wide after he had sacked the famous town of Troy.
+                    Odysseus encountered many trials on his journey home. The goddess Athena guided him.
+                    Poseidon was his enemy, making his voyage difficult.`
+                }
+            },
+            'norse-texts': {
+                'poetic-edda': {
+                    title: 'Poetic Edda',
+                    author: 'Unknown',
+                    content: `Odin hung on Yggdrasil for nine nights, wounded by his own spear.
+                    He sacrificed himself to himself to gain knowledge of the runes.
+                    The world tree Yggdrasil connects all nine realms.`
+                }
+            },
+            'egyptian-texts': {
+                'book-of-dead': {
+                    title: 'Book of the Dead',
+                    author: 'Various',
+                    content: `The deceased must pass through the Hall of Ma'at for judgment.
+                    Anubis weighs the heart against the feather of truth.
+                    If pure, the soul may enter the Field of Reeds. Osiris presides over the afterlife.`
+                }
+            }
+        };
+
+        // Test framework
+        class TestSuite {
+            constructor(name) {
+                this.name = name;
+                this.tests = [];
+                this.passed = 0;
+                this.failed = 0;
+            }
+
+            addTest(name, testFn) {
+                this.tests.push({ name, testFn });
+            }
+
+            async run() {
+                const startTime = performance.now();
+                const resultsHtml = [];
+
+                resultsHtml.push(`<div class="test-suite"><h2>${this.name}</h2>`);
+
+                for (const test of this.tests) {
+                    const result = await this.runTest(test);
+                    resultsHtml.push(this.renderTestResult(result));
+                }
+
+                resultsHtml.push(`</div>`);
+
+                const duration = performance.now() - startTime;
+                return {
+                    html: resultsHtml.join(''),
+                    passed: this.passed,
+                    failed: this.failed,
+                    total: this.tests.length,
+                    duration
+                };
+            }
+
+            async runTest(test) {
+                try {
+                    const startTime = performance.now();
+                    await test.testFn();
+                    const duration = performance.now() - startTime;
+                    this.passed++;
+                    return {
+                        name: test.name,
+                        status: 'pass',
+                        duration,
+                        error: null
+                    };
+                } catch (error) {
+                    this.failed++;
+                    return {
+                        name: test.name,
+                        status: 'fail',
+                        duration: 0,
+                        error: error.message,
+                        stack: error.stack
+                    };
+                }
+            }
+
+            renderTestResult(result) {
+                const statusClass = result.status === 'pass' ? 'status-pass' : 'status-fail';
+                const testClass = result.status === 'pass' ? 'pass' : 'fail';
+
+                let html = `
+                    <div class="test-case ${testClass}">
+                        <div class="test-header">
+                            <div class="test-name">${result.name}</div>
+                            <div class="test-status ${statusClass}">
+                                ${result.status === 'pass' ? '✓ PASS' : '✗ FAIL'}
+                            </div>
+                        </div>
+                `;
+
+                if (result.status === 'pass') {
+                    html += `<div class="test-details">Completed in ${result.duration.toFixed(2)}ms</div>`;
+                } else {
+                    html += `
+                        <div class="test-error">
+                            <strong>Error:</strong> ${result.error}
+                        </div>
+                    `;
+                }
+
+                html += `</div>`;
+                return html;
+            }
+        }
+
+        // Assertion helpers
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        function assertEquals(actual, expected, message) {
+            if (actual !== expected) {
+                throw new Error(message || `Expected ${expected}, but got ${actual}`);
+            }
+        }
+
+        function assertArrayEquals(actual, expected, message) {
+            if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+                throw new Error(message || `Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(actual)}`);
+            }
+        }
+
+        function assertContains(array, item, message) {
+            if (!array.includes(item)) {
+                throw new Error(message || `Array does not contain ${item}`);
+            }
+        }
+
+        function assertGreaterThan(actual, expected, message) {
+            if (actual <= expected) {
+                throw new Error(message || `Expected ${actual} to be greater than ${expected}`);
+            }
+        }
+
+        // Corpus Search Implementation
+        class CorpusSearch {
+            constructor(corpusData) {
+                this.corpusData = corpusData;
+            }
+
+            search(query, options = {}) {
+                const {
+                    corpus = null,
+                    caseSensitive = false,
+                    wholeWord = false,
+                    regex = false,
+                    maxResults = 100
+                } = options;
+
+                const results = [];
+                const searchPattern = this.buildSearchPattern(query, { caseSensitive, wholeWord, regex });
+
+                // Determine which corpora to search
+                const corporaToSearch = corpus
+                    ? (this.corpusData[corpus] ? [corpus] : [])
+                    : Object.keys(this.corpusData);
+
+                for (const corpusName of corporaToSearch) {
+                    const corpusTexts = this.corpusData[corpusName];
+
+                    for (const [textId, text] of Object.entries(corpusTexts)) {
+                        const matches = this.searchInText(text, searchPattern, query);
+
+                        if (matches.length > 0) {
+                            results.push({
+                                corpus: corpusName,
+                                textId,
+                                title: text.title,
+                                author: text.author,
+                                matches,
+                                matchCount: matches.length
+                            });
+                        }
+                    }
+                }
+
+                // Sort by relevance (match count)
+                results.sort((a, b) => b.matchCount - a.matchCount);
+
+                return results.slice(0, maxResults);
+            }
+
+            buildSearchPattern(query, options) {
+                if (options.regex) {
+                    return new RegExp(query, options.caseSensitive ? 'g' : 'gi');
+                }
+
+                let pattern = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special chars
+
+                if (options.wholeWord) {
+                    pattern = `\\b${pattern}\\b`;
+                }
+
+                return new RegExp(pattern, options.caseSensitive ? 'g' : 'gi');
+            }
+
+            searchInText(text, pattern, query) {
+                const matches = [];
+                const content = text.content;
+                let match;
+
+                while ((match = pattern.exec(content)) !== null) {
+                    const start = Math.max(0, match.index - 50);
+                    const end = Math.min(content.length, match.index + query.length + 50);
+
+                    matches.push({
+                        excerpt: content.substring(start, end),
+                        position: match.index,
+                        matchedText: match[0]
+                    });
+                }
+
+                return matches;
+            }
+
+            searchByAuthor(author) {
+                const results = [];
+
+                for (const [corpusName, corpusTexts] of Object.entries(this.corpusData)) {
+                    for (const [textId, text] of Object.entries(corpusTexts)) {
+                        if (text.author.toLowerCase().includes(author.toLowerCase())) {
+                            results.push({
+                                corpus: corpusName,
+                                textId,
+                                title: text.title,
+                                author: text.author
+                            });
+                        }
+                    }
+                }
+
+                return results;
+            }
+
+            searchByTitle(title) {
+                const results = [];
+
+                for (const [corpusName, corpusTexts] of Object.entries(this.corpusData)) {
+                    for (const [textId, text] of Object.entries(corpusTexts)) {
+                        if (text.title.toLowerCase().includes(title.toLowerCase())) {
+                            results.push({
+                                corpus: corpusName,
+                                textId,
+                                title: text.title,
+                                author: text.author
+                            });
+                        }
+                    }
+                }
+
+                return results;
+            }
+
+            getCorpora() {
+                return Object.keys(this.corpusData);
+            }
+
+            getTextsInCorpus(corpusName) {
+                return this.corpusData[corpusName] || {};
+            }
+        }
+
+        // Initialize corpus search
+        const corpusSearch = new CorpusSearch(mockCorpusData);
+
+        // Define test suites
+        async function runAllTests() {
+            const btn = document.getElementById('run-tests-btn');
+            btn.disabled = true;
+            btn.textContent = '🔄 Running Tests...';
+
+            const resultsContainer = document.getElementById('test-results');
+            resultsContainer.innerHTML = '';
+
+            let totalPassed = 0;
+            let totalFailed = 0;
+            let totalTests = 0;
+            let totalDuration = 0;
+
+            const testStartTime = performance.now();
+
+            // Test Suite 1: Basic Search
+            const basicSearchTests = new TestSuite('Basic Search Functionality');
+
+            basicSearchTests.addTest('Should find results for simple query', async () => {
+                const results = corpusSearch.search('Achilles');
+                assert(results.length > 0, 'Should find at least one result');
+                assert(results[0].title === 'The Iliad', 'Should find Achilles in Iliad');
+            });
+
+            basicSearchTests.addTest('Should find results case-insensitive by default', async () => {
+                const results = corpusSearch.search('achilles');
+                assert(results.length > 0, 'Should find results regardless of case');
+            });
+
+            basicSearchTests.addTest('Should respect case-sensitive option', async () => {
+                const results = corpusSearch.search('achilles', { caseSensitive: true });
+                assert(results.length === 0, 'Should not find lowercase "achilles" in case-sensitive mode');
+            });
+
+            basicSearchTests.addTest('Should return empty array for no matches', async () => {
+                const results = corpusSearch.search('NonexistentTerm123456');
+                assertEquals(results.length, 0, 'Should return empty array for no matches');
+            });
+
+            basicSearchTests.addTest('Should find multiple matches in same text', async () => {
+                const results = corpusSearch.search('hero');
+                assert(results.length > 0, 'Should find results');
+                assert(results[0].matchCount >= 2, 'Should find multiple matches');
+            });
+
+            const result1 = await basicSearchTests.run();
+            resultsContainer.innerHTML += result1.html;
+            totalPassed += result1.passed;
+            totalFailed += result1.failed;
+            totalTests += result1.total;
+            totalDuration += result1.duration;
+
+            // Test Suite 2: Corpus Filtering
+            const corpusFilterTests = new TestSuite('Corpus Filtering');
+
+            corpusFilterTests.addTest('Should search only specified corpus', async () => {
+                const results = corpusSearch.search('Odysseus', { corpus: 'greek-texts' });
+                assert(results.length > 0, 'Should find results in Greek texts');
+                assert(results.every(r => r.corpus === 'greek-texts'), 'All results should be from Greek corpus');
+            });
+
+            corpusFilterTests.addTest('Should return empty for non-existent corpus', async () => {
+                const results = corpusSearch.search('test', { corpus: 'non-existent-corpus' });
+                assertEquals(results.length, 0, 'Should return empty for invalid corpus');
+            });
+
+            corpusFilterTests.addTest('Should search all corpora when corpus not specified', async () => {
+                const results = corpusSearch.search('the');
+                const corpora = [...new Set(results.map(r => r.corpus))];
+                assertGreaterThan(corpora.length, 1, 'Should search multiple corpora');
+            });
+
+            const result2 = await corpusFilterTests.run();
+            resultsContainer.innerHTML += result2.html;
+            totalPassed += result2.passed;
+            totalFailed += result2.failed;
+            totalTests += result2.total;
+            totalDuration += result2.duration;
+
+            // Test Suite 3: Search Options
+            const searchOptionsTests = new TestSuite('Search Options');
+
+            searchOptionsTests.addTest('Should find whole word matches only', async () => {
+                const results = corpusSearch.search('Odin', { wholeWord: true });
+                assert(results.length > 0, 'Should find whole word "Odin"');
+            });
+
+            searchOptionsTests.addTest('Should support regex patterns', async () => {
+                const results = corpusSearch.search('hero.*brave', { regex: true });
+                // May or may not match depending on corpus content
+                assert(Array.isArray(results), 'Should return array for regex search');
+            });
+
+            searchOptionsTests.addTest('Should limit results with maxResults', async () => {
+                const results = corpusSearch.search('the', { maxResults: 2 });
+                assert(results.length <= 2, 'Should limit results to maxResults');
+            });
+
+            const result3 = await searchOptionsTests.run();
+            resultsContainer.innerHTML += result3.html;
+            totalPassed += result3.passed;
+            totalFailed += result3.failed;
+            totalTests += result3.total;
+            totalDuration += result3.duration;
+
+            // Test Suite 4: Author and Title Search
+            const metaSearchTests = new TestSuite('Author and Title Search');
+
+            metaSearchTests.addTest('Should find texts by author', async () => {
+                const results = corpusSearch.searchByAuthor('Homer');
+                assertEquals(results.length, 2, 'Should find both Homer works');
+                assert(results.every(r => r.author === 'Homer'), 'All results should be by Homer');
+            });
+
+            metaSearchTests.addTest('Should find texts by partial author name', async () => {
+                const results = corpusSearch.searchByAuthor('Hom');
+                assertGreaterThan(results.length, 0, 'Should find authors with partial match');
+            });
+
+            metaSearchTests.addTest('Should find texts by title', async () => {
+                const results = corpusSearch.searchByTitle('Iliad');
+                assertGreaterThan(results.length, 0, 'Should find texts by title');
+                assert(results[0].title.includes('Iliad'), 'Result should include Iliad');
+            });
+
+            metaSearchTests.addTest('Should be case-insensitive for author search', async () => {
+                const results = corpusSearch.searchByAuthor('homer');
+                assertGreaterThan(results.length, 0, 'Should find author regardless of case');
+            });
+
+            const result4 = await metaSearchTests.run();
+            resultsContainer.innerHTML += result4.html;
+            totalPassed += result4.passed;
+            totalFailed += result4.failed;
+            totalTests += result4.total;
+            totalDuration += result4.duration;
+
+            // Test Suite 5: Result Structure
+            const resultStructureTests = new TestSuite('Result Structure and Format');
+
+            resultStructureTests.addTest('Should include all required fields in results', async () => {
+                const results = corpusSearch.search('Zeus');
+                assert(results.length > 0, 'Should have results');
+                const result = results[0];
+                assert(result.corpus, 'Should have corpus field');
+                assert(result.textId, 'Should have textId field');
+                assert(result.title, 'Should have title field');
+                assert(result.author, 'Should have author field');
+                assert(result.matches, 'Should have matches field');
+                assert(result.matchCount, 'Should have matchCount field');
+            });
+
+            resultStructureTests.addTest('Should include excerpts in matches', async () => {
+                const results = corpusSearch.search('Achilles');
+                assert(results.length > 0, 'Should have results');
+                assert(results[0].matches.length > 0, 'Should have matches');
+                const match = results[0].matches[0];
+                assert(match.excerpt, 'Should have excerpt');
+                assert(match.position !== undefined, 'Should have position');
+                assert(match.matchedText, 'Should have matchedText');
+            });
+
+            resultStructureTests.addTest('Should sort results by relevance', async () => {
+                const results = corpusSearch.search('the');
+                if (results.length > 1) {
+                    assert(results[0].matchCount >= results[1].matchCount, 'Should sort by match count descending');
+                }
+            });
+
+            const result5 = await resultStructureTests.run();
+            resultsContainer.innerHTML += result5.html;
+            totalPassed += result5.passed;
+            totalFailed += result5.failed;
+            totalTests += result5.total;
+            totalDuration += result5.duration;
+
+            // Test Suite 6: Corpus Metadata
+            const metadataTests = new TestSuite('Corpus Metadata');
+
+            metadataTests.addTest('Should list all available corpora', async () => {
+                const corpora = corpusSearch.getCorpora();
+                assert(corpora.length > 0, 'Should have at least one corpus');
+                assertContains(corpora, 'greek-texts', 'Should include greek-texts corpus');
+            });
+
+            metadataTests.addTest('Should get texts in specific corpus', async () => {
+                const texts = corpusSearch.getTextsInCorpus('greek-texts');
+                assert(Object.keys(texts).length > 0, 'Should have texts in corpus');
+                assert(texts['iliad'], 'Should have Iliad in greek-texts');
+            });
+
+            metadataTests.addTest('Should return empty object for non-existent corpus', async () => {
+                const texts = corpusSearch.getTextsInCorpus('non-existent');
+                assertEquals(Object.keys(texts).length, 0, 'Should return empty for invalid corpus');
+            });
+
+            const result6 = await metadataTests.run();
+            resultsContainer.innerHTML += result6.html;
+            totalPassed += result6.passed;
+            totalFailed += result6.failed;
+            totalTests += result6.total;
+            totalDuration += result6.duration;
+
+            // Update summary
+            const finalDuration = performance.now() - testStartTime;
+            document.getElementById('total-tests').textContent = totalTests;
+            document.getElementById('passed-tests').textContent = totalPassed;
+            document.getElementById('failed-tests').textContent = totalFailed;
+            document.getElementById('duration').textContent = finalDuration.toFixed(0) + 'ms';
+
+            btn.disabled = false;
+            btn.textContent = totalFailed === 0 ? '✅ All Tests Passed! Run Again?' : '❌ Some Tests Failed - Run Again?';
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            runAllTests();
+        });
+    </script>
+</body>
+</html>
