@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Judge Not - Divine Mercy Over Condemnation</title>
+    <link rel="stylesheet" href="../../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../../themes/smart-links.css">
+    <script defer src="../../../themes/smart-links.js"></script>
+    <script defer src="../../../themes/theme-animations.js"></script>
+    <script defer src="../../../themes/theme-picker.js"></script>
+    <style>
+        .mercy-hero {
+            background: linear-gradient(135deg,
+                rgba(99, 102, 241, 0.4),
+                rgba(147, 112, 219, 0.3),
+                rgba(236, 72, 153, 0.3));
+            backdrop-filter: blur(10px);
+            border: 3px solid #6366f1;
+            border-radius: var(--radius-2xl);
+            padding: var(--space-10);
+            margin: var(--space-8) 0;
+            box-shadow: var(--shadow-2xl);
+            text-align: center;
+        }
+
+        .mercy-hero h1 {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-6);
+            background: linear-gradient(135deg, #6366f1, #9370DB, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+        }
+
+        .glass-section {
+            background: var(--color-card-bg);
+            backdrop-filter: blur(10px);
+            padding: var(--space-8);
+            border-radius: var(--radius-xl);
+            margin: var(--space-8) 0;
+            border: 2px solid var(--color-border);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .glass-section h2 {
+            color: #6366f1;
+            font-size: var(--text-3xl);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-3);
+            border-bottom: 3px solid #6366f1;
+        }
+
+        .scripture-quote {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(147, 112, 219, 0.15));
+            backdrop-filter: blur(10px);
+            border-left: 5px solid #6366f1;
+            padding: var(--space-6);
+            border-radius: var(--radius-lg);
+            margin: var(--space-5) 0;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-base);
+        }
+
+        .scripture-quote:hover {
+            border-left-width: 8px;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(4px);
+        }
+
+        .scripture-quote .verse {
+            font-size: var(--text-lg);
+            line-height: var(--leading-relaxed);
+            font-style: italic;
+            margin-bottom: var(--space-3);
+            color: var(--color-text);
+        }
+
+        .scripture-quote .reference {
+            display: block;
+            font-weight: 700;
+            color: #6366f1;
+            font-size: var(--text-base);
+            font-style: normal;
+        }
+
+        .contrast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .contrast-card {
+            background: var(--color-card-bg);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-md);
+        }
+
+        .contrast-card.judgment {
+            border-color: rgba(220, 38, 38, 0.4);
+        }
+
+        .contrast-card.mercy {
+            border-color: rgba(99, 102, 241, 0.6);
+        }
+
+        .contrast-card:hover {
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-4px);
+        }
+
+        .contrast-card h4 {
+            font-size: var(--text-xl);
+            margin-bottom: var(--space-4);
+        }
+
+        .contrast-card.judgment h4 {
+            color: #dc2626;
+        }
+
+        .contrast-card.mercy h4 {
+            color: #6366f1;
+        }
+
+        .mercy-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(147, 112, 219, 0.1));
+            border: 2px solid #6366f1;
+            padding: var(--space-6);
+            margin: var(--space-6) 0;
+            border-radius: var(--radius-xl);
+            transition: all var(--transition-base);
+        }
+
+        .mercy-card:hover {
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-4px);
+        }
+
+        .mercy-card h3 {
+            color: #6366f1;
+            margin-top: 0;
+            margin-bottom: var(--space-4);
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(239, 68, 68, 0.1));
+            border: 3px solid #dc2626;
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .warning-box h4 {
+            color: #dc2626;
+            margin-top: 0;
+            margin-bottom: var(--space-3);
+        }
+
+        .wisdom-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(147, 112, 219, 0.2));
+            border: 3px solid #6366f1;
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin: var(--space-8) 0;
+            text-align: center;
+        }
+
+        .wisdom-box h3 {
+            color: #6366f1;
+            margin-top: 0;
+            font-size: var(--text-2xl);
+        }
+
+        .application-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .application-card {
+            background: var(--color-card-bg);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            transition: all var(--transition-base);
+        }
+
+        .application-card:hover {
+            border-color: #6366f1;
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-5px);
+        }
+
+        .application-card h4 {
+            color: #6366f1;
+            margin-bottom: var(--space-3);
+        }
+
+        .parable-card {
+            background: rgba(255, 215, 0, 0.1);
+            border-left: 4px solid var(--color-secondary);
+            padding: var(--space-6);
+            margin: var(--space-5) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .parable-card h4 {
+            color: var(--color-secondary);
+            margin-top: 0;
+            margin-bottom: var(--space-3);
+        }
+
+        @media (max-width: 768px) {
+            .contrast-grid, .application-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mercy-hero h1 {
+                font-size: var(--text-3xl);
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="theme-picker-container"></div>
+<header>
+    <div class="header-content">
+        <h1>Judge Not - Divine Mercy Over Condemnation</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../../mythos/index.html">Home</a> →
+    <a href="../../index.html">Christian</a> →
+    <a href="../index.html">Gnostic</a> →
+    <a href="sermon-on-mount.html">Sermon on the Mount</a> →
+    <span>Judge Not</span>
+</nav>
+<main>
+
+<div class="mercy-hero">
+    <h1>Judge Not</h1>
+    <p style="font-size: var(--text-2xl); color: #6366f1; font-weight: 600; margin-bottom: var(--space-4);">
+        The Divine Rejection of Condemnation
+    </p>
+    <div style="font-size: var(--text-xl); line-height: var(--leading-relaxed); max-width: 900px; margin: 0 auto;">
+        "Judge not, that you be not judged. For with the judgment you pronounce you will be judged, and with the measure you use it will be measured to you."
+        <div style="margin-top: var(--space-3); font-weight: 600;">— Matthew 7:1-2</div>
+    </div>
+</div>
+
+<div class="glass-section">
+    <h2>The Command Against Judgment</h2>
+    <p style="font-size: var(--text-lg); line-height: var(--leading-relaxed); margin-bottom: var(--space-6);">
+        In Matthew 7:1-5, Christ issues one of his clearest, most unambiguous commands: <strong>"Judge not."</strong> This is not a suggestion or ideal—it is an imperative. And in Gnostic understanding, it reveals a fundamental difference between the Demiurge (who judges, condemns, and separates) and the Monad (who loves, redeems, and unifies).
+    </p>
+
+    <div class="scripture-quote">
+        <p class="verse">
+            "Judge not, that you be not judged. For with the judgment you pronounce you will be judged, and with the measure you use it will be measured to you. Why do you see the speck that is in your brother's eye, but do not notice the log that is in your own eye? Or how can you say to your brother, 'Let me take the speck out of your eye,' when there is the log in your own eye? You hypocrite, first take the log out of your own eye, and then you will see clearly to take the speck out of your brother's eye."
+        </p>
+        <span class="reference">— Matthew 7:1-5</span>
+    </div>
+
+    <p style="margin-top: var(--space-6); font-size: var(--text-lg); line-height: var(--leading-relaxed);">
+        This teaching dismantles the entire apparatus of religious condemnation. It forbids the holier-than-thou attitude that divides humanity into righteous and wicked, saved and damned, worthy and unworthy. It reveals that <strong>judgment itself is the problem</strong>—not just unjust judgment, but the very act of positioning ourselves as judges over others' souls.
+    </p>
+</div>
+
+<div class="glass-section">
+    <h2>The Demiurge Judges, The Monad Loves</h2>
+
+    <div class="contrast-grid">
+        <div class="contrast-card judgment">
+            <h4>⚖️ The Demiurge's Way</h4>
+            <ul style="line-height: 1.8; margin-left: var(--space-4);">
+                <li><strong>Judgment Day:</strong> Final separation of sheep and goats</li>
+                <li><strong>Eternal Punishment:</strong> Everlasting conscious torment for the condemned</li>
+                <li><strong>Chosen vs. Rejected:</strong> Some elect for salvation, others predestined for hell</li>
+                <li><strong>Law and Condemnation:</strong> The law reveals sin and pronounces guilt</li>
+                <li><strong>Wrath of God:</strong> Divine anger against sinners</li>
+                <li><strong>Sacrificial Appeasement:</strong> Blood required to satisfy divine justice</li>
+                <li><strong>Fear-Based Religion:</strong> "Fear him who can destroy both soul and body in hell"</li>
+            </ul>
+        </div>
+
+        <div class="contrast-card mercy">
+            <h4>💙 The Monad's Way</h4>
+            <ul style="line-height: 1.8; margin-left: var(--space-4);">
+                <li><strong>No Condemnation:</strong> "God did not send his Son to condemn the world" (John 3:17)</li>
+                <li><strong>Redemptive Correction:</strong> All discipline is for restoration, not punishment</li>
+                <li><strong>Universal Call:</strong> "All people to be saved and come to knowledge of truth" (1 Tim 2:4)</li>
+                <li><strong>Grace and Freedom:</strong> The law was our tutor; grace is our liberation</li>
+                <li><strong>Love of God:</strong> "God IS love" (1 John 4:8) - not wrath</li>
+                <li><strong>Self-Giving Love:</strong> Christ died to reveal love, not appease wrath</li>
+                <li><strong>Love-Based Religion:</strong> "Perfect love casts out fear" (1 John 4:18)</li>
+            </ul>
+        </div>
+    </div>
+
+    <p style="margin-top: var(--space-6); font-size: var(--text-lg); line-height: var(--leading-relaxed);">
+        The contrast is absolute. The god who judges, condemns, and eternally punishes is <strong>not the same as the God Jesus reveals</strong>. The Demiurge judges; Christ says "Judge not." The Demiurge condemns; Christ came "not to condemn the world but to save it." These are fundamentally different divine natures.
+    </p>
+</div>
+
+<div class="glass-section">
+    <h2>Why "Judge Not"? The Gnostic Understanding</h2>
+
+    <div class="mercy-card">
+        <h3>1. We Lack the Gnosis to Judge</h3>
+        <p style="line-height: 1.8;">
+            The "log in your own eye" is more than moral hypocrisy—it represents <strong>fundamental ignorance</strong>. None of us possesses complete gnosis of another soul's journey. We don't know:
+        </p>
+        <ul style="line-height: 1.8; margin-left: var(--space-6); margin-top: var(--space-3);">
+            <li>What wounds they carry from this life and possibly others</li>
+            <li>What stage of spiritual awakening they've reached</li>
+            <li>What the divine plan is for their soul's development</li>
+            <li>How the archons have influenced and deceived them</li>
+            <li>What gnosis they will receive in the future</li>
+        </ul>
+        <p style="margin-top: var(--space-4); font-weight: bold; color: #6366f1;">
+            To judge another's eternal destiny when we lack this knowledge is not just unkind—it's fundamentally ignorant.
+        </p>
+    </div>
+
+    <div class="mercy-card">
+        <h3>2. All Are on the Journey Back to the Pleroma</h3>
+        <p style="line-height: 1.8;">
+            In Gnostic cosmology, every soul that descended from the Pleroma will eventually return. The journey back is not instantaneous—some souls are farther along than others. Some are still deeply asleep, while others have begun to awaken. Some are in the pig pen (like the prodigal), while others are already on the road home.
+        </p>
+        <p style="margin-top: var(--space-4); line-height: 1.8;">
+            When we judge another soul, we're essentially saying: "You haven't progressed as far as I have on the journey, therefore you are condemned." But this misses the entire point. <strong>Everyone is going home—the only question is when, not if.</strong>
+        </p>
+    </div>
+
+    <div class="scripture-quote">
+        <p class="verse">
+            "There is therefore now no condemnation for those who are in Christ Jesus."
+        </p>
+        <span class="reference">— Romans 8:1</span>
+    </div>
+
+    <div class="mercy-card">
+        <h3>3. Judgment Separates, Love Unifies</h3>
+        <p style="line-height: 1.8;">
+            The Demiurge's fundamental action is <strong>division</strong>—separating light from darkness, sheep from goats, chosen from rejected. This reflects his ignorance of the underlying unity of all being in the Monad.
+        </p>
+        <p style="margin-top: var(--space-4); line-height: 1.8;">
+            When we judge, we participate in this archonic division. We create artificial separations: "I am righteous, you are wicked. I am saved, you are damned. I have gnosis, you are ignorant." But gnosis reveals the opposite: <strong>we are all one</strong>, all emanations from the same divine source, all containing the same divine spark, all destined for the same return.
+        </p>
+    </div>
+
+    <div class="scripture-quote">
+        <p class="verse">
+            "For he himself is our peace, who has made us both one and has broken down in his flesh the dividing wall of hostility."
+        </p>
+        <span class="reference">— Ephesians 2:14</span>
+    </div>
+
+    <div class="mercy-card">
+        <h3>4. The Measure You Use Will Be Measured to You</h3>
+        <p style="line-height: 1.8;">
+            This is not divine vindictiveness but spiritual law. When we judge harshly, we close ourselves to receiving mercy. When we condemn others, we cannot accept our own redemption. The measure we use <strong>becomes the measure of our own consciousness</strong>.
+        </p>
+        <p style="margin-top: var(--space-4); line-height: 1.8;">
+            Conversely, when we extend mercy, we open ourselves to receive it. When we refuse to judge, we create space for divine love to flow both outward and inward. This is why the merciful receive mercy (Matthew 5:7)—not as reward, but as spiritual reality.
+        </p>
+    </div>
+</div>
+
+<div class="glass-section">
+    <h2>Biblical Examples of Non-Judgment</h2>
+
+    <div class="parable-card">
+        <h4>Jesus and the Woman Caught in Adultery (John 8:1-11)</h4>
+        <p style="line-height: 1.8;">
+            The Pharisees brought a woman caught in adultery to Jesus, demanding judgment according to the Law of Moses (which prescribed stoning). Jesus responded with genius: "Let him who is without sin among you be the first to throw a stone at her."
+        </p>
+        <p style="margin-top: var(--space-3); line-height: 1.8;">
+            One by one, her accusers left, beginning with the oldest (who had accumulated the most awareness of their own sins). Finally, only Jesus remained—the only one actually <em>without</em> sin, the only one who <em>could</em> justly throw a stone.
+        </p>
+        <p style="margin-top: var(--space-3); font-weight: bold; color: var(--color-secondary);">
+            And what did he do? "Neither do I condemn you; go, and from now on sin no more."
+        </p>
+        <p style="margin-top: var(--space-3); line-height: 1.8;">
+            The only one with the right to judge chose not to. The one who could condemn chose mercy. This is the Monad's way revealed in flesh.
+        </p>
+    </div>
+
+    <div class="parable-card">
+        <h4>The Parable of the Prodigal Son (Luke 15:11-32)</h4>
+        <p style="line-height: 1.8;">
+            The prodigal son wasted his inheritance on sinful living, ending up in the pig pen. When he returned home, expecting to be judged and condemned, his father instead ran to meet him, embraced him, and threw a celebration.
+        </p>
+        <p style="margin-top: var(--space-3); line-height: 1.8;">
+            The older brother, however, <strong>judged both his brother and his father</strong>: "This son of yours who has devoured your property with prostitutes comes, and you kill the fattened calf for him!" He believed the prodigal deserved condemnation, not celebration.
+        </p>
+        <p style="margin-top: var(--space-3); font-weight: bold; color: var(--color-secondary);">
+            The father's response: "It was fitting to celebrate and be glad, for this your brother was dead, and is alive; he was lost, and is found."
+        </p>
+        <p style="margin-top: var(--space-3); line-height: 1.8;">
+            The Monad does not judge the returning soul—the Monad celebrates. Every homecoming is a victory, not an occasion for "I told you so."
+        </p>
+    </div>
+
+    <div class="parable-card">
+        <h4>Christ on the Cross (Luke 23:34)</h4>
+        <p style="line-height: 1.8;">
+            As Jesus hung on the cross—beaten, mocked, crucified by those he came to save—he prayed: "Father, forgive them, for they know not what they do."
+        </p>
+        <p style="margin-top: var(--space-3); line-height: 1.8;">
+            He didn't pray: "Father, judge them! Condemn them! Send them to hell for this crime!" He prayed for their <strong>forgiveness</strong>, recognizing their <strong>ignorance</strong>. They were acting as instruments of archonic powers, unaware of the cosmic significance of their actions.
+        </p>
+        <p style="margin-top: var(--space-3); font-weight: bold; color: var(--color-secondary);">
+            If Christ refused to judge even his murderers, what right do we have to judge anyone?
+        </p>
+    </div>
+</div>
+
+<div class="glass-section">
+    <h2>The Dangers of Judgment</h2>
+
+    <div class="warning-box">
+        <h4>Spiritual Pride - The Pharisee's Sin</h4>
+        <p style="line-height: 1.8;">
+            In Luke 18:9-14, Jesus tells of a Pharisee who prayed: "God, I thank you that I am not like other men, extortioners, unjust, adulterers, or even like this tax collector. I fast twice a week; I give tithes of all that I get."
+        </p>
+        <p style="margin-top: var(--space-3); line-height: 1.8;">
+            Meanwhile, the tax collector simply prayed: "God, be merciful to me, a sinner!"
+        </p>
+        <p style="margin-top: var(--space-3); font-weight: bold;">
+            Jesus concluded: "I tell you, this man went down to his house justified, rather than the other."
+        </p>
+        <p style="margin-top: var(--space-3); line-height: 1.8;">
+            Judgment breeds spiritual pride—the belief that we are superior to others because of our righteousness, our gnosis, our spiritual progress. This pride is antithetical to the humility required for true gnosis.
+        </p>
+    </div>
+
+    <div class="warning-box">
+        <h4>Closing the Heart to Mercy</h4>
+        <p style="line-height: 1.8;">
+            When we judge others harshly, we close our own hearts to receiving mercy. The unmerciful servant (Matthew 18:23-35) was forgiven an enormous debt, but when he refused to forgive his fellow servant a small debt, his forgiveness was revoked.
+        </p>
+        <p style="margin-top: var(--space-3); font-weight: bold;">
+            Not because God is vindictive, but because refusing mercy makes us incapable of receiving it.
+        </p>
+    </div>
+
+    <div class="warning-box">
+        <h4>Perpetuating Archonic Division</h4>
+        <p style="line-height: 1.8;">
+            The archons maintain control through division—us vs. them, righteous vs. wicked, saved vs. damned. When we judge, we participate in this archonic system. We become agents of separation rather than reconciliation, condemnation rather than redemption.
+        </p>
+        <p style="margin-top: var(--space-3); font-weight: bold;">
+            Gnosis awakens us to unity; judgment reinforces the illusion of separation.
+        </p>
+    </div>
+</div>
+
+<div class="wisdom-box">
+    <h3>Christ Came Not to Judge, But to Save</h3>
+    <div class="scripture-quote">
+        <p class="verse">
+            "For God did not send his Son into the world to condemn the world, but in order that the world might be saved through him."
+        </p>
+        <span class="reference">— John 3:17</span>
+    </div>
+    <p style="font-size: var(--text-lg); line-height: var(--leading-relaxed); margin: var(--space-4) 0;">
+        This is explicit: Christ's mission was <strong>NOT condemnation</strong>. The Demiurge condemns. The archons judge. The powers of ignorance separate and destroy. But Christ came to save, to redeem, to restore, to reunite—to bring all souls back to the Pleroma.
+    </p>
+    <div class="scripture-quote">
+        <p class="verse">
+            "If anyone hears my words and does not keep them, I do not judge him; for I did not come to judge the world but to save the world."
+        </p>
+        <span class="reference">— John 12:47</span>
+    </div>
+    <p style="font-size: var(--text-xl); font-weight: bold; color: #6366f1; margin-top: var(--space-6);">
+        If Christ—who is sinless, who possesses complete gnosis, who has every right to judge—refuses to judge, then we who are still awakening have absolutely no business judging anyone.
+    </p>
+</div>
+
+<div class="glass-section">
+    <h2>Discernment vs. Judgment</h2>
+
+    <p style="font-size: var(--text-lg); line-height: var(--leading-relaxed); margin-bottom: var(--space-6);">
+        A common objection: "But doesn't the Bible tell us to judge rightly? To test spirits? To discern between good and evil?" Yes—but there's a crucial difference between <strong>discernment</strong> and <strong>judgment</strong>.
+    </p>
+
+    <div class="mercy-card">
+        <h3>Discernment (διάκρισις - diakrisis)</h3>
+        <ul style="line-height: 1.8; margin-left: var(--space-6);">
+            <li><strong>Evaluates actions and teachings</strong> - "Test everything; hold fast what is good" (1 Thess 5:21)</li>
+            <li><strong>Recognizes truth from falsehood</strong> - Discerning spirits, testing doctrine</li>
+            <li><strong>Makes wise decisions</strong> - "Do not give dogs what is holy" (Matthew 7:6)</li>
+            <li><strong>Protects from deception</strong> - Seeing through archonic lies</li>
+            <li><strong>Focuses on present reality</strong> - What is happening now, what should I do?</li>
+        </ul>
+    </div>
+
+    <div class="warning-box">
+        <h4>Judgment (κρίνω - krino)</h4>
+        <ul style="line-height: 1.8; margin-left: var(--space-6);">
+            <li><strong>Condemns the person</strong> - "You are evil, worthless, damned"</li>
+            <li><strong>Pronounces eternal destiny</strong> - "You're going to hell"</li>
+            <li><strong>Claims moral superiority</strong> - "I am righteous, you are wicked"</li>
+            <li><strong>Separates into worthy/unworthy</strong> - Creating hierarchies of spiritual value</li>
+            <li><strong>Focuses on final outcomes</strong> - Determining who is saved or lost</li>
+        </ul>
+    </div>
+
+    <p style="margin-top: var(--space-6); font-size: var(--text-lg); line-height: var(--leading-relaxed);">
+        We can and should discern truth from falsehood, wisdom from folly, loving actions from harmful ones. But we must never presume to judge the eternal state of another soul. That belongs to God alone—and the God revealed by Christ chooses mercy over judgment, redemption over condemnation, love over wrath.
+    </p>
+</div>
+
+<div class="glass-section">
+    <h2>Living Without Judgment: Practical Applications</h2>
+
+    <div class="application-grid">
+        <div class="application-card">
+            <h4>Release Religious Judgment</h4>
+            <p style="line-height: 1.8;">
+                Stop mentally categorizing people as "saved" or "lost," "righteous" or "wicked," "enlightened" or "ignorant." Everyone is on a journey. Some are farther along, some are beginning, but all are going home.
+            </p>
+        </div>
+
+        <div class="application-card">
+            <h4>Practice Compassionate Understanding</h4>
+            <p style="line-height: 1.8;">
+                When you encounter behavior that seems wrong or harmful, ask: "What wounds drive this? What ignorance underlies it? What archonic deception might be at work?" Understanding breeds compassion.
+            </p>
+        </div>
+
+        <div class="application-card">
+            <h4>Focus on Your Own Log</h4>
+            <p style="line-height: 1.8;">
+                Before pointing out others' flaws, examine your own heart. "Let him who is without sin cast the first stone." Recognition of your own need for mercy eliminates the desire to judge others.
+            </p>
+        </div>
+
+        <div class="application-card">
+            <h4>Extend the Benefit of the Doubt</h4>
+            <p style="line-height: 1.8;">
+                When someone's motives are unclear, assume the best rather than the worst. "Love believes all things, hopes all things" (1 Cor 13:7). This doesn't mean being naive, but choosing charity.
+            </p>
+        </div>
+
+        <div class="application-card">
+            <h4>Speak Truth in Love</h4>
+            <p style="line-height: 1.8;">
+                You can disagree with someone's beliefs or actions without condemning their soul. Address the issue while affirming their inherent worth and divine nature. "Speaking the truth in love" (Eph 4:15).
+            </p>
+        </div>
+
+        <div class="application-card">
+            <h4>Remember Universal Destiny</h4>
+            <p style="line-height: 1.8;">
+                The person you're tempted to judge is destined for the same Pleroma as you. They will eventually awaken to gnosis, recognize their divine spark, and return home. How you treat them now matters.
+            </p>
+        </div>
+    </div>
+
+    <div class="scripture-quote" style="margin-top: var(--space-8);">
+        <p class="verse">
+            "Therefore you have no excuse, O man, every one of you who judges. For in passing judgment on another you condemn yourself, because you, the judge, practice the very same things."
+        </p>
+        <span class="reference">— Romans 2:1</span>
+    </div>
+</div>
+
+<div class="glass-section">
+    <h2>The Divine Standard: Mercy, Not Judgment</h2>
+
+    <div class="scripture-quote">
+        <p class="verse">
+            "Blessed are the merciful, for they shall receive mercy."
+        </p>
+        <span class="reference">— Matthew 5:7</span>
+    </div>
+
+    <div class="mercy-card">
+        <h3>Mercy Triumphs Over Judgment</h3>
+        <div class="scripture-quote">
+            <p class="verse">
+                "For judgment is without mercy to one who has shown no mercy. Mercy triumphs over judgment."
+            </p>
+            <span class="reference">— James 2:13</span>
+        </div>
+        <p style="margin-top: var(--space-4); line-height: 1.8;">
+            This is not just moral advice—it's a declaration of cosmic reality. In the end, <strong>mercy wins</strong>. The Monad's merciful love is more powerful than any judgment, any condemnation, any archonic separation. Mercy triumphs because mercy is the true nature of God.
+        </p>
+    </div>
+
+    <div class="mercy-card">
+        <h3>God Desires Mercy, Not Sacrifice</h3>
+        <div class="scripture-quote">
+            <p class="verse">
+                "For I desire steadfast love and not sacrifice, the knowledge of God rather than burnt offerings."
+            </p>
+            <span class="reference">— Hosea 6:6</span>
+        </div>
+        <p style="margin-top: var(--space-4); line-height: 1.8;">
+            Jesus quoted this passage twice (Matthew 9:13, 12:7) to the Pharisees who were judging people. The Demiurge demands sacrifice and judgment. The Monad desires mercy and gnosis (knowledge of God). These are incompatible systems.
+        </p>
+    </div>
+
+    <div class="scripture-quote">
+        <p class="verse">
+            "Be merciful, even as your Father is merciful. Judge not, and you will not be judged; condemn not, and you will not be condemned; forgive, and you will be forgiven; give, and it will be given to you."
+        </p>
+        <span class="reference">— Luke 6:36-38</span>
+    </div>
+
+    <p style="margin-top: var(--space-6); font-size: var(--text-xl); font-weight: bold; color: #6366f1;">
+        The divine standard is crystal clear: Mercy. Forgiveness. Non-judgment. Love. These are the characteristics of those who know the true God and are becoming like Him.
+    </p>
+</div>
+
+<div class="wisdom-box" style="margin-top: var(--space-10);">
+    <h3>The Final Word: No Condemnation</h3>
+    <div class="scripture-quote">
+        <p class="verse">
+            "There is therefore now no condemnation for those who are in Christ Jesus."
+        </p>
+        <span class="reference">— Romans 8:1</span>
+    </div>
+    <p style="font-size: var(--text-lg); line-height: var(--leading-relaxed); margin: var(--space-4) 0;">
+        "Those in Christ Jesus" ultimately means all humanity—for Christ is the divine Logos in whom all things were created and through whom all things are reconciled (Colossians 1:16-20). The cosmic Christ encompasses all.
+    </p>
+    <p style="font-size: var(--text-xl); line-height: var(--leading-relaxed); margin: var(--space-4) 0;">
+        <strong>No condemnation.</strong> Not "some condemnation for the really bad ones." Not "condemnation until you get it right." <strong>NO condemnation.</strong>
+    </p>
+    <p style="font-size: var(--text-2xl); font-weight: bold; color: #6366f1; margin-top: var(--space-6);">
+        This is the gospel—the overwhelmingly good news that the God revealed by Christ does not condemn, but saves.
+    </p>
+</div>
+
+<section class="related-concepts" style="margin-top: var(--space-10);">
+    <h2 style="color: #6366f1; font-size: var(--text-3xl); margin-bottom: var(--space-6);">Related Teachings</h2>
+    <div class="contrast-grid">
+        <div class="contrast-card mercy">
+            <h3 style="color: #6366f1;">Sermon on the Mount</h3>
+            <ul style="list-style: none; padding: 0;">
+                <li style="padding: var(--space-2) 0;"><a href="sermon-on-mount.html">Full Sermon Overview</a></li>
+                <li style="padding: var(--space-2) 0;"><a href="beatitudes-gnosis.html">The Beatitudes</a></li>
+                <li style="padding: var(--space-2) 0;"><a href="love-enemies.html">Love Your Enemies</a></li>
+                <li style="padding: var(--space-2) 0;"><a href="kingdom-within.html">Kingdom Within</a></li>
+            </ul>
+        </div>
+
+        <div class="contrast-card mercy">
+            <h3 style="color: #6366f1;">Divine Mercy</h3>
+            <ul style="list-style: none; padding: 0;">
+                <li style="padding: var(--space-2) 0;"><a href="gods-infinite-love.html">God's Infinite Love</a></li>
+                <li style="padding: var(--space-2) 0;"><a href="redemption-all.html">Universal Redemption</a></li>
+                <li style="padding: var(--space-2) 0;"><a href="monad.html">The Monad</a> - Beyond judgment</li>
+                <li style="padding: var(--space-2) 0;"><a href="christ-savior.html">Christ the Savior</a></li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<footer>
+    <p>
+        <strong>Judge Not - Divine Mercy Over Condemnation</strong><br/>
+        <a href="../../../mythos/index.html">World Mythos Home</a> |
+        <a href="../../index.html">Christian Tradition</a> |
+        <a href="../index.html">Gnostic Thought</a> |
+        <a href="sermon-on-mount.html">Sermon on the Mount</a>
+    </p>
+    <p style="margin-top: var(--space-4); font-style: italic;">
+        "Judge not, and you will not be judged; condemn not, and you will not be condemned; forgive, and you will be forgiven." - Luke 6:37
+    </p>
+</footer>
+
+</body>
+</html>

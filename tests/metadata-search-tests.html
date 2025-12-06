@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metadata Search Tests - Eyes of Azrael</title>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #9333ea;
+            margin-bottom: 2rem;
+        }
+
+        .test-suite {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .test-suite h2 {
+            color: #c084fc;
+            margin-top: 0;
+        }
+
+        .test-case {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 4px solid #666;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .test-case.pass {
+            border-left-color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .test-case.fail {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .test-case.running {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .test-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .test-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-pass {
+            background: #22c55e;
+            color: white;
+        }
+
+        .status-fail {
+            background: #ef4444;
+            color: white;
+        }
+
+        .status-running {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .test-details {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
+        .test-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #fca5a5;
+        }
+
+        .test-data {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), rgba(79, 70, 229, 0.2));
+            border: 2px solid rgba(147, 51, 234, 0.5);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .summary h2 {
+            margin-top: 0;
+            color: #c084fc;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .run-tests-btn {
+            background: linear-gradient(135deg, #9333ea, #4f46e5);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto 2rem;
+        }
+
+        .run-tests-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(147, 51, 234, 0.4);
+        }
+
+        .run-tests-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Metadata Search Unit Tests</h1>
+
+        <div class="summary" id="summary">
+            <h2>Test Summary</h2>
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-tests">0</div>
+                    <div class="stat-label">Total Tests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #22c55e;" id="passed-tests">0</div>
+                    <div class="stat-label">Passed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #ef4444;" id="failed-tests">0</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #f59e0b;" id="duration">0ms</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="run-tests-btn" id="run-tests-btn" onclick="runAllTests()">
+            Run All Tests
+        </button>
+
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // Mock metadata for testing
+        const mockMetadata = {
+            entities: {
+                zeus: {
+                    id: 'zeus',
+                    type: 'deity',
+                    name: 'Zeus',
+                    icon: '⚡',
+                    mythologies: ['greek'],
+                    primaryMythology: 'greek',
+                    shortDescription: 'King of the Olympian gods and god of the sky, thunder, and lightning',
+                    fullDescription: 'Zeus is the supreme ruler of Mount Olympus and king of all the gods. He overthrew his father Chronos and the Titans to establish the rule of the Olympians. As god of the sky and thunder, Zeus wields the thunderbolt as his primary weapon.',
+                    category: 'major-deity',
+                    subCategory: 'sky-god',
+                    tags: ['zeus', 'king-of-gods', 'thunder', 'olympian', 'sky', 'lightning', 'justice'],
+                    relatedEntities: {
+                        deities: [
+                            { id: 'hera', name: 'Hera', type: 'deity', mythology: 'greek' },
+                            { id: 'athena', name: 'Athena', type: 'deity', mythology: 'greek' },
+                            { id: 'apollo', name: 'Apollo', type: 'deity', mythology: 'greek' }
+                        ],
+                        places: [
+                            { id: 'mount-olympus', name: 'Mount Olympus', type: 'place', mythology: 'greek' }
+                        ],
+                        items: [
+                            { id: 'thunderbolt', name: 'Thunderbolt', type: 'item', mythology: 'greek' }
+                        ]
+                    },
+                    metaphysicalProperties: {
+                        element: 'air',
+                        energyType: 'divine',
+                        planet: 'jupiter'
+                    }
+                },
+                athena: {
+                    id: 'athena',
+                    type: 'deity',
+                    name: 'Athena',
+                    icon: '🦉',
+                    mythologies: ['greek'],
+                    primaryMythology: 'greek',
+                    shortDescription: 'Goddess of wisdom, warfare, and crafts',
+                    fullDescription: 'Athena was born fully armed from the head of Zeus. She is the goddess of wisdom, strategic warfare, and various crafts. Patron deity of Athens.',
+                    category: 'major-deity',
+                    subCategory: 'wisdom-deity',
+                    tags: ['athena', 'wisdom', 'warfare', 'owl', 'olive', 'aegis', 'virgin-goddess'],
+                    relatedEntities: {
+                        deities: [
+                            { id: 'zeus', name: 'Zeus', type: 'deity', mythology: 'greek' }
+                        ],
+                        items: [
+                            { id: 'aegis', name: 'Aegis', type: 'item', mythology: 'greek' }
+                        ]
+                    },
+                    metaphysicalProperties: {
+                        element: 'air',
+                        energyType: 'intellectual',
+                        planet: 'mercury'
+                    }
+                },
+                brahma: {
+                    id: 'brahma',
+                    type: 'deity',
+                    name: 'Brahma',
+                    icon: '🪷',
+                    mythologies: ['hindu'],
+                    primaryMythology: 'hindu',
+                    shortDescription: 'The creator god of the Hindu Trimurti',
+                    fullDescription: 'Brahma is the creator deity within the Hindu Trimurti, alongside Vishnu and Shiva. He has four heads and four arms.',
+                    category: 'major-deity',
+                    subCategory: 'creator-god',
+                    tags: ['brahma', 'creator', 'trimurti', 'four-heads', 'vedas', 'hindu'],
+                    relatedEntities: {
+                        deities: [
+                            { id: 'vishnu', name: 'Vishnu', type: 'deity', mythology: 'hindu' },
+                            { id: 'shiva', name: 'Shiva', type: 'deity', mythology: 'hindu' }
+                        ]
+                    },
+                    metaphysicalProperties: {
+                        element: 'ether',
+                        energyType: 'creative',
+                        planet: 'jupiter'
+                    }
+                },
+                'mount-olympus': {
+                    id: 'mount-olympus',
+                    type: 'place',
+                    name: 'Mount Olympus',
+                    icon: '⛰️',
+                    mythologies: ['greek'],
+                    primaryMythology: 'greek',
+                    shortDescription: 'Home of the twelve Olympian gods',
+                    fullDescription: 'Mount Olympus is the legendary home of the twelve Olympian gods and the seat of Zeus\'s throne.',
+                    category: 'mountain',
+                    subCategory: 'divine-realm',
+                    tags: ['mount-olympus', 'olympian-gods', 'zeus', 'divine-realm', 'heaven', 'sacred-mountain'],
+                    relatedEntities: {
+                        deities: [
+                            { id: 'zeus', name: 'Zeus', type: 'deity', mythology: 'greek' }
+                        ]
+                    },
+                    metaphysicalProperties: {
+                        element: 'aether',
+                        energyType: 'divine',
+                        planet: 'jupiter'
+                    }
+                },
+                aegis: {
+                    id: 'aegis',
+                    type: 'item',
+                    name: 'Aegis',
+                    icon: '🛡️',
+                    mythologies: ['greek'],
+                    primaryMythology: 'greek',
+                    shortDescription: 'Divine shield bearing Medusa\'s head',
+                    fullDescription: 'The Aegis is the legendary shield of Zeus, often depicted bearing the head of the Gorgon Medusa.',
+                    category: 'artifact',
+                    subCategory: 'divine-armor',
+                    tags: ['divine-artifact', 'shield', 'protection', 'zeus', 'athena', 'medusa', 'aegis-bearer'],
+                    relatedEntities: {
+                        deities: [
+                            { id: 'zeus', name: 'Zeus', type: 'deity', mythology: 'greek' },
+                            { id: 'athena', name: 'Athena', type: 'deity', mythology: 'greek' }
+                        ],
+                        creatures: [
+                            { id: 'medusa', name: 'Medusa', type: 'creature', mythology: 'greek' }
+                        ]
+                    },
+                    metaphysicalProperties: {
+                        element: 'air',
+                        energyType: 'divine',
+                        planet: 'jupiter'
+                    }
+                },
+                hubris: {
+                    id: 'hubris',
+                    type: 'concept',
+                    name: 'Hubris',
+                    icon: '⚠️',
+                    mythologies: ['greek'],
+                    primaryMythology: 'greek',
+                    shortDescription: 'Excessive pride or arrogance that leads to downfall',
+                    fullDescription: 'Hubris is the excessive pride or self-confidence that leads mortals to challenge the gods and brings about their downfall.',
+                    category: 'moral-concept',
+                    subCategory: 'vice',
+                    tags: ['hubris', 'pride', 'arrogance', 'downfall', 'nemesis', 'greek-virtue'],
+                    relatedEntities: {
+                        concepts: [
+                            { id: 'nemesis', name: 'Nemesis', type: 'concept', mythology: 'greek' }
+                        ]
+                    },
+                    metaphysicalProperties: {
+                        element: 'fire',
+                        energyType: 'destructive'
+                    }
+                },
+                odin: {
+                    id: 'odin',
+                    type: 'deity',
+                    name: 'Odin',
+                    icon: '👁️',
+                    mythologies: ['norse'],
+                    primaryMythology: 'norse',
+                    shortDescription: 'All-Father, god of wisdom, war, and death',
+                    fullDescription: 'Odin is the chief god in Norse mythology, known as the All-Father. He sacrificed his eye for wisdom and hung on Yggdrasil for nine nights.',
+                    category: 'major-deity',
+                    subCategory: 'chief-god',
+                    tags: ['odin', 'all-father', 'wisdom', 'war', 'death', 'ravens', 'spear', 'yggdrasil'],
+                    relatedEntities: {
+                        deities: [
+                            { id: 'thor', name: 'Thor', type: 'deity', mythology: 'norse' },
+                            { id: 'frigg', name: 'Frigg', type: 'deity', mythology: 'norse' }
+                        ]
+                    },
+                    metaphysicalProperties: {
+                        element: 'air',
+                        energyType: 'divine',
+                        planet: 'mercury'
+                    }
+                },
+                ra: {
+                    id: 'ra',
+                    type: 'deity',
+                    name: 'Ra',
+                    icon: '☀️',
+                    mythologies: ['egyptian'],
+                    primaryMythology: 'egyptian',
+                    shortDescription: 'Sun god and creator deity',
+                    fullDescription: 'Ra is the ancient Egyptian sun god who travels across the sky in his solar barque.',
+                    category: 'major-deity',
+                    subCategory: 'sun-god',
+                    tags: ['ra', 'sun', 'creator', 'solar-barque', 'pharaoh', 'egyptian'],
+                    relatedEntities: {
+                        deities: [
+                            { id: 'osiris', name: 'Osiris', type: 'deity', mythology: 'egyptian' }
+                        ]
+                    },
+                    metaphysicalProperties: {
+                        element: 'fire',
+                        energyType: 'solar',
+                        planet: 'sun'
+                    }
+                }
+            }
+        };
+
+        // Test framework
+        class TestSuite {
+            constructor(name) {
+                this.name = name;
+                this.tests = [];
+                this.passed = 0;
+                this.failed = 0;
+            }
+
+            addTest(name, testFn) {
+                this.tests.push({ name, testFn });
+            }
+
+            async run() {
+                const startTime = performance.now();
+                const resultsHtml = [];
+
+                resultsHtml.push(`<div class="test-suite"><h2>${this.name}</h2>`);
+
+                for (const test of this.tests) {
+                    const result = await this.runTest(test);
+                    resultsHtml.push(this.renderTestResult(result));
+                }
+
+                resultsHtml.push(`</div>`);
+
+                const duration = performance.now() - startTime;
+                return {
+                    html: resultsHtml.join(''),
+                    passed: this.passed,
+                    failed: this.failed,
+                    total: this.tests.length,
+                    duration
+                };
+            }
+
+            async runTest(test) {
+                try {
+                    const startTime = performance.now();
+                    await test.testFn();
+                    const duration = performance.now() - startTime;
+                    this.passed++;
+                    return {
+                        name: test.name,
+                        status: 'pass',
+                        duration,
+                        error: null
+                    };
+                } catch (error) {
+                    this.failed++;
+                    return {
+                        name: test.name,
+                        status: 'fail',
+                        duration: 0,
+                        error: error.message,
+                        stack: error.stack
+                    };
+                }
+            }
+
+            renderTestResult(result) {
+                const statusClass = result.status === 'pass' ? 'status-pass' : 'status-fail';
+                const testClass = result.status === 'pass' ? 'pass' : 'fail';
+
+                let html = `
+                    <div class="test-case ${testClass}">
+                        <div class="test-header">
+                            <div class="test-name">${result.name}</div>
+                            <div class="test-status ${statusClass}">
+                                ${result.status === 'pass' ? '✓ PASS' : '✗ FAIL'}
+                            </div>
+                        </div>
+                `;
+
+                if (result.status === 'pass') {
+                    html += `<div class="test-details">Completed in ${result.duration.toFixed(2)}ms</div>`;
+                } else {
+                    html += `
+                        <div class="test-error">
+                            <strong>Error:</strong> ${result.error}
+                        </div>
+                    `;
+                }
+
+                html += `</div>`;
+                return html;
+            }
+        }
+
+        // Assertion helpers
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        function assertEquals(actual, expected, message) {
+            if (actual !== expected) {
+                throw new Error(message || `Expected ${expected}, but got ${actual}`);
+            }
+        }
+
+        function assertArrayEquals(actual, expected, message) {
+            if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+                throw new Error(message || `Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(actual)}`);
+            }
+        }
+
+        function assertContains(array, item, message) {
+            if (!array.includes(item)) {
+                throw new Error(message || `Array does not contain ${item}`);
+            }
+        }
+
+        function assertGreaterThan(actual, expected, message) {
+            if (actual <= expected) {
+                throw new Error(message || `Expected ${actual} to be greater than ${expected}`);
+            }
+        }
+
+        function assertLessThan(actual, expected, message) {
+            if (actual >= expected) {
+                throw new Error(message || `Expected ${actual} to be less than ${expected}`);
+            }
+        }
+
+        // Metadata Search Implementation
+        class MetadataSearch {
+            constructor(metadata) {
+                this.metadata = metadata;
+                this.entities = metadata.entities || {};
+            }
+
+            // Basic entity search by name
+            searchByName(query, options = {}) {
+                const { caseSensitive = false, exactMatch = false } = options;
+                const results = [];
+
+                const normalizedQuery = caseSensitive ? query : query.toLowerCase();
+
+                for (const [id, entity] of Object.entries(this.entities)) {
+                    const name = caseSensitive ? entity.name : entity.name.toLowerCase();
+
+                    if (exactMatch) {
+                        if (name === normalizedQuery) {
+                            results.push(this.createSearchResult(entity, 'name', 100));
+                        }
+                    } else {
+                        if (name.includes(normalizedQuery)) {
+                            const relevance = this.calculateRelevance(name, normalizedQuery);
+                            results.push(this.createSearchResult(entity, 'name', relevance));
+                        }
+                    }
+                }
+
+                return this.sortByRelevance(results);
+            }
+
+            // Search by category
+            searchByCategory(category) {
+                const results = [];
+                const normalizedCategory = category.toLowerCase();
+
+                for (const [id, entity] of Object.entries(this.entities)) {
+                    if (entity.category && entity.category.toLowerCase() === normalizedCategory) {
+                        results.push(this.createSearchResult(entity, 'category', 90));
+                    }
+                }
+
+                return results;
+            }
+
+            // Search by mythology
+            searchByMythology(mythology) {
+                const results = [];
+                const normalizedMythology = mythology.toLowerCase();
+
+                for (const [id, entity] of Object.entries(this.entities)) {
+                    if (entity.mythologies && entity.mythologies.some(m => m.toLowerCase() === normalizedMythology)) {
+                        results.push(this.createSearchResult(entity, 'mythology', 85));
+                    }
+                }
+
+                return results;
+            }
+
+            // Search by type (deity, place, item, concept, etc.)
+            searchByType(type) {
+                const results = [];
+                const normalizedType = type.toLowerCase();
+
+                for (const [id, entity] of Object.entries(this.entities)) {
+                    if (entity.type && entity.type.toLowerCase() === normalizedType) {
+                        results.push(this.createSearchResult(entity, 'type', 95));
+                    }
+                }
+
+                return results;
+            }
+
+            // Search by tags
+            searchByTag(tag) {
+                const results = [];
+                const normalizedTag = tag.toLowerCase();
+
+                for (const [id, entity] of Object.entries(this.entities)) {
+                    if (entity.tags && entity.tags.some(t => t.toLowerCase().includes(normalizedTag))) {
+                        const relevance = entity.tags.some(t => t.toLowerCase() === normalizedTag) ? 80 : 60;
+                        results.push(this.createSearchResult(entity, 'tag', relevance));
+                    }
+                }
+
+                return this.sortByRelevance(results);
+            }
+
+            // Search in specific field
+            searchInField(field, query, options = {}) {
+                const { caseSensitive = false } = options;
+                const results = [];
+                const normalizedQuery = caseSensitive ? query : query.toLowerCase();
+
+                for (const [id, entity] of Object.entries(this.entities)) {
+                    const fieldValue = entity[field];
+                    if (!fieldValue) continue;
+
+                    const normalizedValue = caseSensitive ? fieldValue : fieldValue.toLowerCase();
+
+                    if (typeof normalizedValue === 'string' && normalizedValue.includes(normalizedQuery)) {
+                        const relevance = this.calculateRelevance(normalizedValue, normalizedQuery);
+                        results.push(this.createSearchResult(entity, field, relevance));
+                    }
+                }
+
+                return this.sortByRelevance(results);
+            }
+
+            // Search by relationships
+            searchByRelationship(relationType, targetId) {
+                const results = [];
+
+                for (const [id, entity] of Object.entries(this.entities)) {
+                    if (!entity.relatedEntities || !entity.relatedEntities[relationType]) continue;
+
+                    const hasRelationship = entity.relatedEntities[relationType].some(
+                        rel => rel.id === targetId
+                    );
+
+                    if (hasRelationship) {
+                        results.push(this.createSearchResult(entity, 'relationship', 75));
+                    }
+                }
+
+                return results;
+            }
+
+            // Combined search with multiple filters
+            searchWithFilters(filters = {}) {
+                let results = Object.values(this.entities).map(entity =>
+                    this.createSearchResult(entity, 'initial', 50)
+                );
+
+                if (filters.name) {
+                    results = results.filter(r =>
+                        r.entity.name.toLowerCase().includes(filters.name.toLowerCase())
+                    );
+                    results.forEach(r => r.relevance += 20);
+                }
+
+                if (filters.type) {
+                    results = results.filter(r =>
+                        r.entity.type === filters.type
+                    );
+                    results.forEach(r => r.relevance += 15);
+                }
+
+                if (filters.mythology) {
+                    results = results.filter(r =>
+                        r.entity.mythologies && r.entity.mythologies.includes(filters.mythology)
+                    );
+                    results.forEach(r => r.relevance += 15);
+                }
+
+                if (filters.category) {
+                    results = results.filter(r =>
+                        r.entity.category === filters.category
+                    );
+                    results.forEach(r => r.relevance += 10);
+                }
+
+                if (filters.tag) {
+                    results = results.filter(r =>
+                        r.entity.tags && r.entity.tags.some(t => t.includes(filters.tag))
+                    );
+                    results.forEach(r => r.relevance += 10);
+                }
+
+                if (filters.element) {
+                    results = results.filter(r =>
+                        r.entity.metaphysicalProperties &&
+                        r.entity.metaphysicalProperties.element === filters.element
+                    );
+                    results.forEach(r => r.relevance += 5);
+                }
+
+                return this.sortByRelevance(results);
+            }
+
+            // Fuzzy search with typo tolerance
+            fuzzySearch(query, threshold = 0.6) {
+                const results = [];
+
+                for (const [id, entity] of Object.entries(this.entities)) {
+                    const similarity = this.calculateSimilarity(query.toLowerCase(), entity.name.toLowerCase());
+
+                    if (similarity >= threshold) {
+                        const relevance = Math.floor(similarity * 100);
+                        results.push(this.createSearchResult(entity, 'fuzzy', relevance));
+                    }
+                }
+
+                return this.sortByRelevance(results);
+            }
+
+            // Search by metaphysical properties
+            searchByMetaphysicalProperty(property, value) {
+                const results = [];
+
+                for (const [id, entity] of Object.entries(this.entities)) {
+                    if (entity.metaphysicalProperties &&
+                        entity.metaphysicalProperties[property] === value) {
+                        results.push(this.createSearchResult(entity, 'metaphysical', 70));
+                    }
+                }
+
+                return results;
+            }
+
+            // Get all entities of a specific type
+            getEntitiesByType(type) {
+                return Object.values(this.entities)
+                    .filter(entity => entity.type === type)
+                    .map(entity => this.createSearchResult(entity, 'type-filter', 100));
+            }
+
+            // Calculate relevance score
+            calculateRelevance(text, query) {
+                if (text === query) return 100;
+                if (text.startsWith(query)) return 90;
+                if (text.endsWith(query)) return 70;
+
+                const position = text.indexOf(query);
+                const ratio = query.length / text.length;
+
+                return Math.floor(50 + (ratio * 50));
+            }
+
+            // Calculate string similarity (Levenshtein-based)
+            calculateSimilarity(str1, str2) {
+                const longer = str1.length > str2.length ? str1 : str2;
+                const shorter = str1.length > str2.length ? str2 : str1;
+
+                if (longer.length === 0) return 1.0;
+
+                const distance = this.levenshteinDistance(longer, shorter);
+                return (longer.length - distance) / longer.length;
+            }
+
+            // Levenshtein distance algorithm
+            levenshteinDistance(str1, str2) {
+                const matrix = [];
+
+                for (let i = 0; i <= str2.length; i++) {
+                    matrix[i] = [i];
+                }
+
+                for (let j = 0; j <= str1.length; j++) {
+                    matrix[0][j] = j;
+                }
+
+                for (let i = 1; i <= str2.length; i++) {
+                    for (let j = 1; j <= str1.length; j++) {
+                        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                            matrix[i][j] = matrix[i - 1][j - 1];
+                        } else {
+                            matrix[i][j] = Math.min(
+                                matrix[i - 1][j - 1] + 1,
+                                matrix[i][j - 1] + 1,
+                                matrix[i - 1][j] + 1
+                            );
+                        }
+                    }
+                }
+
+                return matrix[str2.length][str1.length];
+            }
+
+            // Create search result object
+            createSearchResult(entity, matchField, relevance) {
+                return {
+                    entity,
+                    matchField,
+                    relevance,
+                    id: entity.id,
+                    name: entity.name,
+                    type: entity.type
+                };
+            }
+
+            // Sort results by relevance
+            sortByRelevance(results) {
+                return results.sort((a, b) => b.relevance - a.relevance);
+            }
+        }
+
+        // Initialize metadata search
+        const metadataSearch = new MetadataSearch(mockMetadata);
+
+        // Define test suites
+        async function runAllTests() {
+            const btn = document.getElementById('run-tests-btn');
+            btn.disabled = true;
+            btn.textContent = 'Running Tests...';
+
+            const resultsContainer = document.getElementById('test-results');
+            resultsContainer.innerHTML = '';
+
+            let totalPassed = 0;
+            let totalFailed = 0;
+            let totalTests = 0;
+            let totalDuration = 0;
+
+            const testStartTime = performance.now();
+
+            // Test Suite 1: Basic Entity Search
+            const basicSearchTests = new TestSuite('1. Basic Entity Metadata Search');
+
+            basicSearchTests.addTest('Should find entity by exact name', async () => {
+                const results = metadataSearch.searchByName('Zeus');
+                assert(results.length > 0, 'Should find Zeus');
+                assertEquals(results[0].entity.name, 'Zeus', 'First result should be Zeus');
+            });
+
+            basicSearchTests.addTest('Should find entity by partial name', async () => {
+                const results = metadataSearch.searchByName('Ath');
+                assert(results.length > 0, 'Should find entities starting with Ath');
+                assert(results.some(r => r.entity.name === 'Athena'), 'Should include Athena');
+            });
+
+            basicSearchTests.addTest('Should be case-insensitive by default', async () => {
+                const results = metadataSearch.searchByName('zeus');
+                assert(results.length > 0, 'Should find zeus (lowercase)');
+                assertEquals(results[0].entity.name, 'Zeus', 'Should match Zeus');
+            });
+
+            basicSearchTests.addTest('Should support exact match option', async () => {
+                const results = metadataSearch.searchByName('Zeus', { exactMatch: true });
+                assert(results.length === 1, 'Should find exactly one result');
+                assertEquals(results[0].entity.name, 'Zeus', 'Should be Zeus');
+            });
+
+            basicSearchTests.addTest('Should return empty array for no matches', async () => {
+                const results = metadataSearch.searchByName('NonexistentDeity123');
+                assertEquals(results.length, 0, 'Should return empty array');
+            });
+
+            const result1 = await basicSearchTests.run();
+            resultsContainer.innerHTML += result1.html;
+            totalPassed += result1.passed;
+            totalFailed += result1.failed;
+            totalTests += result1.total;
+            totalDuration += result1.duration;
+
+            // Test Suite 2: Field-Specific Search
+            const fieldSearchTests = new TestSuite('2. Field-Specific Search');
+
+            fieldSearchTests.addTest('Should search in shortDescription field', async () => {
+                const results = metadataSearch.searchInField('shortDescription', 'King');
+                assert(results.length > 0, 'Should find entities with King in description');
+                assert(results.some(r => r.entity.id === 'zeus'), 'Should include Zeus');
+            });
+
+            fieldSearchTests.addTest('Should search in fullDescription field', async () => {
+                const results = metadataSearch.searchInField('fullDescription', 'thunderbolt');
+                assert(results.length > 0, 'Should find entities mentioning thunderbolt');
+            });
+
+            fieldSearchTests.addTest('Should handle non-existent fields gracefully', async () => {
+                const results = metadataSearch.searchInField('nonExistentField', 'test');
+                assertEquals(results.length, 0, 'Should return empty for non-existent field');
+            });
+
+            const result2 = await fieldSearchTests.run();
+            resultsContainer.innerHTML += result2.html;
+            totalPassed += result2.passed;
+            totalFailed += result2.failed;
+            totalTests += result2.total;
+            totalDuration += result2.duration;
+
+            // Test Suite 3: Category and Type Filtering
+            const categoryFilterTests = new TestSuite('3. Category and Type Filtering');
+
+            categoryFilterTests.addTest('Should filter by entity type', async () => {
+                const results = metadataSearch.searchByType('deity');
+                assert(results.length > 0, 'Should find deities');
+                assert(results.every(r => r.entity.type === 'deity'), 'All results should be deities');
+            });
+
+            categoryFilterTests.addTest('Should filter by category', async () => {
+                const results = metadataSearch.searchByCategory('major-deity');
+                assert(results.length > 0, 'Should find major deities');
+                assert(results.every(r => r.entity.category === 'major-deity'), 'All should be major deities');
+            });
+
+            categoryFilterTests.addTest('Should find places', async () => {
+                const results = metadataSearch.searchByType('place');
+                assert(results.length > 0, 'Should find places');
+                assert(results.some(r => r.entity.id === 'mount-olympus'), 'Should include Mount Olympus');
+            });
+
+            categoryFilterTests.addTest('Should find items', async () => {
+                const results = metadataSearch.searchByType('item');
+                assert(results.length > 0, 'Should find items');
+                assert(results.some(r => r.entity.id === 'aegis'), 'Should include Aegis');
+            });
+
+            categoryFilterTests.addTest('Should find concepts', async () => {
+                const results = metadataSearch.searchByType('concept');
+                assert(results.length > 0, 'Should find concepts');
+                assert(results.some(r => r.entity.id === 'hubris'), 'Should include Hubris');
+            });
+
+            const result3 = await categoryFilterTests.run();
+            resultsContainer.innerHTML += result3.html;
+            totalPassed += result3.passed;
+            totalFailed += result3.failed;
+            totalTests += result3.total;
+            totalDuration += result3.duration;
+
+            // Test Suite 4: Mythology Filtering
+            const mythologyFilterTests = new TestSuite('4. Mythology Filtering');
+
+            mythologyFilterTests.addTest('Should filter by Greek mythology', async () => {
+                const results = metadataSearch.searchByMythology('greek');
+                assert(results.length > 0, 'Should find Greek entities');
+                assert(results.every(r => r.entity.mythologies.includes('greek')), 'All should be Greek');
+            });
+
+            mythologyFilterTests.addTest('Should filter by Hindu mythology', async () => {
+                const results = metadataSearch.searchByMythology('hindu');
+                assert(results.length > 0, 'Should find Hindu entities');
+                assert(results.some(r => r.entity.id === 'brahma'), 'Should include Brahma');
+            });
+
+            mythologyFilterTests.addTest('Should filter by Norse mythology', async () => {
+                const results = metadataSearch.searchByMythology('norse');
+                assert(results.length > 0, 'Should find Norse entities');
+                assert(results.some(r => r.entity.id === 'odin'), 'Should include Odin');
+            });
+
+            mythologyFilterTests.addTest('Should filter by Egyptian mythology', async () => {
+                const results = metadataSearch.searchByMythology('egyptian');
+                assert(results.length > 0, 'Should find Egyptian entities');
+                assert(results.some(r => r.entity.id === 'ra'), 'Should include Ra');
+            });
+
+            const result4 = await mythologyFilterTests.run();
+            resultsContainer.innerHTML += result4.html;
+            totalPassed += result4.passed;
+            totalFailed += result4.failed;
+            totalTests += result4.total;
+            totalDuration += result4.duration;
+
+            // Test Suite 5: Tag Search
+            const tagSearchTests = new TestSuite('5. Tag Search');
+
+            tagSearchTests.addTest('Should search by exact tag', async () => {
+                const results = metadataSearch.searchByTag('wisdom');
+                assert(results.length > 0, 'Should find entities tagged with wisdom');
+                assert(results.some(r => r.entity.id === 'athena'), 'Should include Athena');
+            });
+
+            tagSearchTests.addTest('Should search by partial tag', async () => {
+                const results = metadataSearch.searchByTag('olym');
+                assert(results.length > 0, 'Should find entities with olymp* tags');
+            });
+
+            tagSearchTests.addTest('Should handle tags case-insensitively', async () => {
+                const results = metadataSearch.searchByTag('ZEUS');
+                assert(results.length > 0, 'Should find Zeus tags regardless of case');
+            });
+
+            const result5 = await tagSearchTests.run();
+            resultsContainer.innerHTML += result5.html;
+            totalPassed += result5.passed;
+            totalFailed += result5.failed;
+            totalTests += result5.total;
+            totalDuration += result5.duration;
+
+            // Test Suite 6: Relationship Search
+            const relationshipSearchTests = new TestSuite('6. Relationship Search');
+
+            relationshipSearchTests.addTest('Should find entities related to Zeus via deities', async () => {
+                const results = metadataSearch.searchByRelationship('deities', 'zeus');
+                assert(results.length > 0, 'Should find entities related to Zeus');
+                assert(results.some(r => r.entity.id === 'athena'), 'Should include Athena');
+            });
+
+            relationshipSearchTests.addTest('Should find entities related via places', async () => {
+                const results = metadataSearch.searchByRelationship('places', 'mount-olympus');
+                assert(results.length > 0, 'Should find entities related to Mount Olympus');
+            });
+
+            relationshipSearchTests.addTest('Should find entities related via items', async () => {
+                const results = metadataSearch.searchByRelationship('items', 'aegis');
+                assert(results.length > 0, 'Should find entities related to Aegis');
+            });
+
+            relationshipSearchTests.addTest('Should return empty for non-existent relationships', async () => {
+                const results = metadataSearch.searchByRelationship('deities', 'nonexistent-deity');
+                assertEquals(results.length, 0, 'Should return empty for non-existent target');
+            });
+
+            const result6 = await relationshipSearchTests.run();
+            resultsContainer.innerHTML += result6.html;
+            totalPassed += result6.passed;
+            totalFailed += result6.failed;
+            totalTests += result6.total;
+            totalDuration += result6.duration;
+
+            // Test Suite 7: Combined Filters
+            const combinedFilterTests = new TestSuite('7. Combined Filter Search');
+
+            combinedFilterTests.addTest('Should filter by type and mythology', async () => {
+                const results = metadataSearch.searchWithFilters({
+                    type: 'deity',
+                    mythology: 'greek'
+                });
+                assert(results.length > 0, 'Should find Greek deities');
+                assert(results.every(r => r.entity.type === 'deity'), 'All should be deities');
+                assert(results.every(r => r.entity.mythologies.includes('greek')), 'All should be Greek');
+            });
+
+            combinedFilterTests.addTest('Should filter by name, type, and category', async () => {
+                const results = metadataSearch.searchWithFilters({
+                    name: 'Zeus',
+                    type: 'deity',
+                    category: 'major-deity'
+                });
+                assert(results.length > 0, 'Should find matching entities');
+                assertEquals(results[0].entity.id, 'zeus', 'Should find Zeus');
+            });
+
+            combinedFilterTests.addTest('Should filter by mythology and tag', async () => {
+                const results = metadataSearch.searchWithFilters({
+                    mythology: 'greek',
+                    tag: 'wisdom'
+                });
+                assert(results.length > 0, 'Should find Greek wisdom entities');
+            });
+
+            combinedFilterTests.addTest('Should filter by element', async () => {
+                const results = metadataSearch.searchWithFilters({
+                    element: 'air'
+                });
+                assert(results.length > 0, 'Should find air element entities');
+                assert(results.every(r =>
+                    r.entity.metaphysicalProperties &&
+                    r.entity.metaphysicalProperties.element === 'air'
+                ), 'All should have air element');
+            });
+
+            combinedFilterTests.addTest('Should return all entities with no filters', async () => {
+                const results = metadataSearch.searchWithFilters({});
+                assertGreaterThan(results.length, 5, 'Should return multiple entities');
+            });
+
+            const result7 = await combinedFilterTests.run();
+            resultsContainer.innerHTML += result7.html;
+            totalPassed += result7.passed;
+            totalFailed += result7.failed;
+            totalTests += result7.total;
+            totalDuration += result7.duration;
+
+            // Test Suite 8: Fuzzy Matching
+            const fuzzyMatchTests = new TestSuite('8. Fuzzy Matching and Typo Tolerance');
+
+            fuzzyMatchTests.addTest('Should find Zeus with typo Zues', async () => {
+                const results = metadataSearch.fuzzySearch('Zues', 0.6);
+                assert(results.length > 0, 'Should find Zeus despite typo');
+                assert(results.some(r => r.entity.id === 'zeus'), 'Should include Zeus');
+            });
+
+            fuzzyMatchTests.addTest('Should find Athena with typo Athina', async () => {
+                const results = metadataSearch.fuzzySearch('Athina', 0.6);
+                assert(results.length > 0, 'Should find Athena despite typo');
+            });
+
+            fuzzyMatchTests.addTest('Should handle severe typos with lower threshold', async () => {
+                const results = metadataSearch.fuzzySearch('Zuess', 0.5);
+                assert(results.length > 0, 'Should find results with lower threshold');
+            });
+
+            fuzzyMatchTests.addTest('Should not match completely different words', async () => {
+                const results = metadataSearch.fuzzySearch('CompletelyDifferent', 0.8);
+                assertEquals(results.length, 0, 'Should not match unrelated words');
+            });
+
+            const result8 = await fuzzyMatchTests.run();
+            resultsContainer.innerHTML += result8.html;
+            totalPassed += result8.passed;
+            totalFailed += result8.failed;
+            totalTests += result8.total;
+            totalDuration += result8.duration;
+
+            // Test Suite 9: Result Ranking and Sorting
+            const rankingTests = new TestSuite('9. Result Ranking and Sorting');
+
+            rankingTests.addTest('Should rank exact matches higher than partial', async () => {
+                const results = metadataSearch.searchByName('Zeus');
+                assert(results.length > 0, 'Should have results');
+                assertGreaterThan(results[0].relevance, 90, 'Exact match should have high relevance');
+            });
+
+            rankingTests.addTest('Should sort results by relevance descending', async () => {
+                const results = metadataSearch.searchByTag('greek');
+                if (results.length > 1) {
+                    for (let i = 0; i < results.length - 1; i++) {
+                        assert(
+                            results[i].relevance >= results[i + 1].relevance,
+                            'Results should be sorted by relevance descending'
+                        );
+                    }
+                }
+            });
+
+            rankingTests.addTest('Should calculate relevance for partial matches', async () => {
+                const results = metadataSearch.searchByName('Ath');
+                assert(results.length > 0, 'Should have results');
+                assert(results.every(r => r.relevance > 0 && r.relevance <= 100),
+                    'Relevance should be between 0 and 100');
+            });
+
+            const result9 = await rankingTests.run();
+            resultsContainer.innerHTML += result9.html;
+            totalPassed += result9.passed;
+            totalFailed += result9.failed;
+            totalTests += result9.total;
+            totalDuration += result9.duration;
+
+            // Test Suite 10: Metaphysical Properties
+            const metaphysicalTests = new TestSuite('10. Metaphysical Property Search');
+
+            metaphysicalTests.addTest('Should search by element property', async () => {
+                const results = metadataSearch.searchByMetaphysicalProperty('element', 'air');
+                assert(results.length > 0, 'Should find air element entities');
+                assert(results.every(r =>
+                    r.entity.metaphysicalProperties.element === 'air'
+                ), 'All should have air element');
+            });
+
+            metaphysicalTests.addTest('Should search by energyType property', async () => {
+                const results = metadataSearch.searchByMetaphysicalProperty('energyType', 'divine');
+                assert(results.length > 0, 'Should find divine energy entities');
+            });
+
+            metaphysicalTests.addTest('Should search by planet property', async () => {
+                const results = metadataSearch.searchByMetaphysicalProperty('planet', 'jupiter');
+                assert(results.length > 0, 'Should find Jupiter planet entities');
+                assert(results.some(r => r.entity.id === 'zeus'), 'Should include Zeus');
+            });
+
+            metaphysicalTests.addTest('Should return empty for non-matching properties', async () => {
+                const results = metadataSearch.searchByMetaphysicalProperty('element', 'nonexistent');
+                assertEquals(results.length, 0, 'Should return empty for non-existent values');
+            });
+
+            const result10 = await metaphysicalTests.run();
+            resultsContainer.innerHTML += result10.html;
+            totalPassed += result10.passed;
+            totalFailed += result10.failed;
+            totalTests += result10.total;
+            totalDuration += result10.duration;
+
+            // Test Suite 11: Performance and Edge Cases
+            const edgeCaseTests = new TestSuite('11. Performance and Edge Cases');
+
+            edgeCaseTests.addTest('Should handle empty query strings', async () => {
+                const results = metadataSearch.searchByName('');
+                assert(Array.isArray(results), 'Should return an array');
+            });
+
+            edgeCaseTests.addTest('Should handle special characters in search', async () => {
+                const results = metadataSearch.searchByName('Zeus!@#$');
+                assertEquals(results.length, 0, 'Should handle special characters gracefully');
+            });
+
+            edgeCaseTests.addTest('Should handle very long search queries', async () => {
+                const longQuery = 'A'.repeat(1000);
+                const results = metadataSearch.searchByName(longQuery);
+                assert(Array.isArray(results), 'Should handle long queries');
+            });
+
+            edgeCaseTests.addTest('Should handle null/undefined in filters', async () => {
+                const results = metadataSearch.searchWithFilters({
+                    type: null,
+                    mythology: undefined
+                });
+                assert(Array.isArray(results), 'Should handle null/undefined gracefully');
+            });
+
+            edgeCaseTests.addTest('Should complete searches quickly', async () => {
+                const start = performance.now();
+                metadataSearch.searchByName('Zeus');
+                metadataSearch.searchByType('deity');
+                metadataSearch.searchByMythology('greek');
+                const duration = performance.now() - start;
+                assertLessThan(duration, 100, 'Multiple searches should complete in <100ms');
+            });
+
+            const result11 = await edgeCaseTests.run();
+            resultsContainer.innerHTML += result11.html;
+            totalPassed += result11.passed;
+            totalFailed += result11.failed;
+            totalTests += result11.total;
+            totalDuration += result11.duration;
+
+            // Update summary
+            const finalDuration = performance.now() - testStartTime;
+            document.getElementById('total-tests').textContent = totalTests;
+            document.getElementById('passed-tests').textContent = totalPassed;
+            document.getElementById('failed-tests').textContent = totalFailed;
+            document.getElementById('duration').textContent = finalDuration.toFixed(0) + 'ms';
+
+            btn.disabled = false;
+            btn.textContent = totalFailed === 0 ? '✅ All Tests Passed! Run Again?' : '❌ Some Tests Failed - Run Again?';
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            runAllTests();
+        });
+    </script>
+</body>
+</html>
