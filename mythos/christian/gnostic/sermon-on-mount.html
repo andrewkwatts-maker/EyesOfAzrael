@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>The Sermon on the Mount - Gnostic Reading of Christ's Radical Teaching</title>
+    <link rel="stylesheet" href="../../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../../themes/smart-links.css">
+    <script defer src="../../../themes/smart-links.js"></script>
+    <script defer src="../../../themes/theme-animations.js"></script>
+    <script defer src="../../../themes/theme-picker.js"></script>
+    <style>
+        .sermon-hero {
+            background: linear-gradient(135deg,
+                rgba(147, 112, 219, 0.4),
+                rgba(255, 215, 0, 0.3),
+                rgba(99, 102, 241, 0.3));
+            backdrop-filter: blur(10px);
+            border: 3px solid var(--color-primary);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-10);
+            margin: var(--space-8) 0;
+            box-shadow: var(--shadow-2xl);
+            text-align: center;
+        }
+
+        .sermon-hero h1 {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-6);
+            background: linear-gradient(135deg, #9370DB, #FFD700, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+        }
+
+        .glass-section {
+            background: var(--color-card-bg);
+            backdrop-filter: blur(10px);
+            padding: var(--space-8);
+            border-radius: var(--radius-xl);
+            margin: var(--space-8) 0;
+            border: 2px solid var(--color-border);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .glass-section h2 {
+            color: var(--color-primary);
+            font-size: var(--text-3xl);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-3);
+            border-bottom: 3px solid var(--color-primary);
+        }
+
+        .scripture-quote {
+            background: linear-gradient(135deg, rgba(147, 112, 219, 0.15), rgba(255, 215, 0, 0.15));
+            backdrop-filter: blur(10px);
+            border-left: 5px solid var(--color-primary);
+            padding: var(--space-6);
+            border-radius: var(--radius-lg);
+            margin: var(--space-5) 0;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-base);
+        }
+
+        .scripture-quote:hover {
+            border-left-width: 8px;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(4px);
+        }
+
+        .scripture-quote .verse {
+            font-size: var(--text-lg);
+            line-height: var(--leading-relaxed);
+            font-style: italic;
+            margin-bottom: var(--space-3);
+            color: var(--color-text);
+        }
+
+        .scripture-quote .reference {
+            display: block;
+            font-weight: 700;
+            color: var(--color-primary);
+            font-size: var(--text-base);
+            font-style: normal;
+        }
+
+        .teaching-card {
+            background: linear-gradient(135deg, rgba(147, 112, 219, 0.1), rgba(255, 215, 0, 0.1));
+            border: 2px solid var(--color-primary);
+            padding: var(--space-6);
+            margin: var(--space-6) 0;
+            border-radius: var(--radius-xl);
+            transition: all var(--transition-base);
+        }
+
+        .teaching-card:hover {
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-4px);
+            border-color: var(--color-secondary);
+        }
+
+        .teaching-card h3 {
+            color: var(--color-primary);
+            margin-top: 0;
+            margin-bottom: var(--space-4);
+        }
+
+        .contrast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .contrast-card {
+            background: var(--color-card-bg);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-md);
+        }
+
+        .contrast-card.demiurge {
+            border-color: rgba(220, 38, 38, 0.4);
+        }
+
+        .contrast-card.monad {
+            border-color: rgba(147, 112, 219, 0.6);
+        }
+
+        .contrast-card:hover {
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-4px);
+        }
+
+        .contrast-card h4 {
+            font-size: var(--text-xl);
+            margin-bottom: var(--space-4);
+        }
+
+        .contrast-card.demiurge h4 {
+            color: #dc2626;
+        }
+
+        .contrast-card.monad h4 {
+            color: var(--color-primary);
+        }
+
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .topic-card {
+            background: var(--color-card-bg);
+            border: 2px solid rgba(var(--color-primary-rgb, 147, 112, 219), 0.3);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            transition: all var(--transition-base);
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+
+        .topic-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-5px);
+            text-decoration: none;
+        }
+
+        .topic-card h3 {
+            color: var(--color-primary);
+            margin-bottom: var(--space-3);
+        }
+
+        .topic-icon {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: var(--space-4);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(147, 112, 219, 0.2));
+            border: 3px solid var(--color-secondary);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin: var(--space-8) 0;
+            text-align: center;
+        }
+
+        .highlight-box h3 {
+            color: var(--color-secondary);
+            margin-top: 0;
+        }
+
+        @media (max-width: 768px) {
+            .contrast-grid, .topic-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sermon-hero h1 {
+                font-size: var(--text-3xl);
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="theme-picker-container"></div>
+<header>
+    <div class="header-content">
+        <h1>The Sermon on the Mount - Gnostic Interpretation</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../../mythos/index.html">Home</a> →
+    <a href="../../index.html">Christian</a> →
+    <a href="../index.html">Gnostic</a> →
+    <span>Sermon on the Mount</span>
+</nav>
+<main>
+
+<div class="sermon-hero">
+    <h1>Christ's Mountain Teaching</h1>
+    <p style="font-size: var(--text-2xl); color: var(--color-primary); font-weight: 600; margin-bottom: var(--space-4);">
+        The Revelation of the True God
+    </p>
+    <div style="font-size: var(--text-xl); line-height: var(--leading-relaxed); max-width: 900px; margin: 0 auto;">
+        "Seeing the crowds, he went up on the mountain, and when he sat down, his disciples came to him. And he opened his mouth and taught them..."
+        <div style="margin-top: var(--space-3); font-weight: 600;">— Matthew 5:1-2</div>
+    </div>
+</div>
+
+<div class="glass-section">
+    <h2>The Sermon's Gnostic Significance</h2>
+    <p style="font-size: var(--text-lg); line-height: var(--leading-relaxed); margin-bottom: var(--space-6);">
+        The Sermon on the Mount (Matthew 5-7) stands as the most revolutionary spiritual teaching in human history. In Gnostic understanding, this sermon is not merely ethical instruction—it is <strong>Christ's revelation of the true nature of the Monad</strong>, the supreme God beyond the Demiurge. Here, Jesus systematically contrasts the law-giving, judgmental creator god (Yaldabaoth) with the God who is pure love, mercy, and light.
+    </p>
+
+    <div class="teaching-card">
+        <h3>Why the Mountain?</h3>
+        <p>
+            Mountains in ancient cosmology represent the boundary between heaven and earth, the meeting place of the divine and material realms. Moses received the Law on Mount Sinai from the Demiurge—the god of commandments, sacrifice, and judgment. Now Christ ascends a mountain to reveal a <strong>higher Law</strong>, one that transcends mere obedience and awakens gnosis—the direct knowledge of divine reality.
+        </p>
+        <p style="margin-top: var(--space-4);">
+            This is the Revealer's mountain. Here, the divine Logos speaks not commands from thunder and lightning, but truth from compassion and wisdom. The very setting announces: "A new revelation begins."
+        </p>
+    </div>
+</div>
+
+<div class="glass-section">
+    <h2>The Central Contrast: Two Gods Revealed</h2>
+    <p style="font-size: var(--text-lg); line-height: var(--leading-relaxed); margin-bottom: var(--space-6);">
+        Throughout the Sermon, Jesus repeatedly uses the formula: "You have heard it said... but I say to you." This is not mere moral improvement—it is the revelation of two fundamentally different divine natures.
+    </p>
+
+    <div class="contrast-grid">
+        <div class="contrast-card demiurge">
+            <h4>⚖️ The Demiurge's Way (Old Covenant)</h4>
+            <ul style="line-height: 1.8; margin-left: var(--space-4);">
+                <li><strong>External Law:</strong> "You shall not murder"</li>
+                <li><strong>Retribution:</strong> "Eye for eye, tooth for tooth"</li>
+                <li><strong>Limited Love:</strong> "Love your neighbor, hate your enemy"</li>
+                <li><strong>Public Religion:</strong> Pray in synagogues to be seen</li>
+                <li><strong>Sacrifice Required:</strong> Ritual offerings and fasting</li>
+                <li><strong>Judgment:</strong> Separating sheep from goats</li>
+                <li><strong>Exclusivity:</strong> Chosen people vs. Gentiles</li>
+            </ul>
+        </div>
+
+        <div class="contrast-card monad">
+            <h4>💫 The Monad's Way (Christ's Revelation)</h4>
+            <ul style="line-height: 1.8; margin-left: var(--space-4);">
+                <li><strong>Internal Heart:</strong> "Don't even harbor anger"</li>
+                <li><strong>Mercy:</strong> "Turn the other cheek"</li>
+                <li><strong>Universal Love:</strong> "Love your enemies"</li>
+                <li><strong>Secret Prayer:</strong> "Go into your room and shut the door"</li>
+                <li><strong>Grace Freely Given:</strong> God knows what you need</li>
+                <li><strong>Non-Judgment:</strong> "Judge not, that you be not judged"</li>
+                <li><strong>Universality:</strong> God makes sun rise on evil and good</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="scripture-quote">
+        <p class="verse">
+            "You have heard that it was said, 'You shall love your neighbor and hate your enemy.' But I say to you, Love your enemies and pray for those who persecute you, so that you may be sons of your Father who is in heaven. For he makes his sun rise on the evil and on the good, and sends rain on the just and on the unjust."
+        </p>
+        <span class="reference">— Matthew 5:43-45</span>
+    </div>
+
+    <p style="margin-top: var(--space-6); font-size: var(--text-lg); line-height: var(--leading-relaxed);">
+        This is the clearest revelation: the true God does not play favorites. The Monad's love is <strong>indiscriminate, universal, unconditional</strong>. Sun and rain fall on all alike—there is no divine favoritism, no chosen people vs. rejected nations. This God bears no resemblance to the tribal deity of conquest and genocide described in the Old Testament.
+    </p>
+</div>
+
+<div class="glass-section">
+    <h2>Major Themes of the Sermon</h2>
+
+    <div class="teaching-card">
+        <h3>1. The Beatitudes - Blessings of Gnosis</h3>
+        <p>
+            The opening beatitudes describe those who will inherit the Kingdom—not through earthly power or legalistic righteousness, but through spiritual poverty, mourning, meekness, and mercy. These are the qualities of the soul awakening to gnosis, recognizing its separation from the Pleroma and yearning for return.
+        </p>
+        <p style="margin-top: var(--space-4);">
+            <a href="beatitudes-gnosis.html" style="color: var(--color-primary); font-weight: bold;">→ Explore the Beatitudes in depth</a>
+        </p>
+    </div>
+
+    <div class="teaching-card">
+        <h3>2. Love Your Enemies - Radical Divine Love</h3>
+        <div class="scripture-quote">
+            <p class="verse">
+                "But I say to you, Love your enemies and pray for those who persecute you..."
+            </p>
+            <span class="reference">— Matthew 5:44</span>
+        </div>
+        <p>
+            This is perhaps the most revolutionary command in all religious literature. Enemy-love reveals the nature of the Monad: a God who loves unconditionally, even those who oppose the divine will. If we can love enemies—even the archons who imprison us in matter—they can be transformed by that love.
+        </p>
+        <p style="margin-top: var(--space-4);">
+            <a href="love-enemies.html" style="color: var(--color-primary); font-weight: bold;">→ Explore enemy love in depth</a>
+        </p>
+    </div>
+
+    <div class="teaching-card">
+        <h3>3. Judge Not - Divine Mercy Over Condemnation</h3>
+        <div class="scripture-quote">
+            <p class="verse">
+                "Judge not, that you be not judged. For with the judgment you pronounce you will be judged, and with the measure you use it will be measured to you."
+            </p>
+            <span class="reference">— Matthew 7:1-2</span>
+        </div>
+        <p>
+            The Demiurge judges, separates, condemns. The Monad loves, includes, redeems. Christ's teaching on non-judgment reveals that all souls are on a journey back to the Pleroma—some farther along than others, but all destined for the same home. Who are we to judge another's path?
+        </p>
+        <p style="margin-top: var(--space-4);">
+            <a href="judge-not.html" style="color: var(--color-primary); font-weight: bold;">→ Explore non-judgment in depth</a>
+        </p>
+    </div>
+
+    <div class="teaching-card">
+        <h3>4. The Kingdom Within - Internal Gnosis</h3>
+        <div class="scripture-quote">
+            <p class="verse">
+                "But when you pray, go into your room and shut the door and pray to your Father who is in secret. And your Father who sees in secret will reward you."
+            </p>
+            <span class="reference">— Matthew 6:6</span>
+        </div>
+        <p>
+            External religion—temples, rituals, public displays—belongs to the Demiurge's system. True connection with the Monad happens internally, in the secret chamber of the heart. This is the essence of gnostic spirituality: direct, unmediated access to the divine within.
+        </p>
+        <p style="margin-top: var(--space-4);">
+            <a href="kingdom-within.html" style="color: var(--color-primary); font-weight: bold;">→ Explore the kingdom within in depth</a>
+        </p>
+    </div>
+</div>
+
+<div class="glass-section">
+    <h2>Be Perfect as Your Father is Perfect</h2>
+
+    <div class="scripture-quote">
+        <p class="verse">
+            "You therefore must be perfect, as your heavenly Father is perfect."
+        </p>
+        <span class="reference">— Matthew 5:48</span>
+    </div>
+
+    <p style="font-size: var(--text-lg); line-height: var(--leading-relaxed); margin-bottom: var(--space-6);">
+        This command has terrified Christians for centuries when interpreted as moral perfection—an impossible standard that condemns all. But the Gnostic understanding reveals its true meaning.
+    </p>
+
+    <div class="teaching-card">
+        <h3>τέλειος (teleios) - Complete, Whole, Mature</h3>
+        <p>
+            The Greek word translated "perfect" is <strong>τέλειος (teleios)</strong>, which means "complete," "whole," "mature," or "having reached its intended end." This is not about moral flawlessness—it's about <strong>spiritual completion</strong>, the restoration to the original divine wholeness.
+        </p>
+        <p style="margin-top: var(--space-4);">
+            Before the fall, Sophia was whole within the Pleroma. Her passion caused fragmentation, and divine sparks scattered into matter. "Be perfect" means: <strong>Return to your original completeness. Become whole again. Reunite with the divine source.</strong>
+        </p>
+        <p style="margin-top: var(--space-4); font-weight: bold; color: var(--color-primary);">
+            We are not commanded to achieve an impossible moral standard. We are invited to remember our divine origin and return to the Pleroma's fullness.
+        </p>
+    </div>
+
+    <div class="scripture-quote">
+        <p class="verse">
+            "I came that they may have life and have it abundantly... I and the Father are one."
+        </p>
+        <span class="reference">— John 10:10, 30</span>
+    </div>
+
+    <p style="margin-top: var(--space-6);">
+        Christ shows us what divine perfection/completeness looks like incarnate: radical love, non-judgment, mercy without limit, unity with the divine source. This is the teleios—the complete human fully awakened to gnosis.
+    </p>
+</div>
+
+<div class="glass-section">
+    <h2>The Narrow Gate - Gnosis vs. Religion</h2>
+
+    <div class="scripture-quote">
+        <p class="verse">
+            "Enter by the narrow gate. For the gate is wide and the way is easy that leads to destruction, and those who enter by it are many. For the gate is narrow and the way is hard that leads to life, and those who find it are few."
+        </p>
+        <span class="reference">— Matthew 7:13-14</span>
+    </div>
+
+    <div class="teaching-card">
+        <h3>Gnostic Interpretation</h3>
+        <p>
+            The <strong>wide gate</strong> is the path of conventional religion—external observance, ritual without understanding, adherence to the Demiurge's law. Many follow this path because it requires no inner transformation, no awakening, no gnosis. It is religion as social conformity.
+        </p>
+        <p style="margin-top: var(--space-4);">
+            The <strong>narrow gate</strong> is the path of gnosis—direct spiritual knowledge, inner transformation, the arduous journey of awakening. "Few find it" because most remain asleep, content with external religion, unaware of their divine spark.
+        </p>
+        <p style="margin-top: var(--space-4); font-weight: bold; color: var(--color-primary);">
+            BUT: "Few find it" speaks to the current age, not the ultimate destiny. Eventually, all souls will find the narrow gate. Some in this life, some in lives to come, some in ages beyond ages—but all will awaken. The question is not IF but WHEN.
+        </p>
+    </div>
+
+    <div class="scripture-quote">
+        <p class="verse">
+            "The kingdom of heaven is like a grain of mustard seed that a man took and sowed in his field. It is the smallest of all seeds, but when it has grown it is larger than all the garden plants and becomes a tree, so that the birds of the air come and make nests in its branches."
+        </p>
+        <span class="reference">— Matthew 13:31-32</span>
+    </div>
+
+    <p style="margin-top: var(--space-6);">
+        The narrow way may start with few travelers, but the divine spark—once planted—grows inexorably. What begins as the smallest seed eventually becomes a tree that shelters all. This is the promise of universal return.
+    </p>
+</div>
+
+<div class="highlight-box">
+    <h3>The Heart of the Sermon's Message</h3>
+    <p style="font-size: var(--text-xl); line-height: var(--leading-relaxed); margin: var(--space-4) 0;">
+        The Sermon on the Mount reveals that the God Jesus came to announce is <strong>nothing like the Demiurge</strong> of the Old Testament. This God doesn't demand sacrifice, doesn't choose some over others, doesn't condemn enemies, doesn't require external religiosity.
+    </p>
+    <p style="font-size: var(--text-xl); line-height: var(--leading-relaxed); margin: var(--space-4) 0;">
+        Instead, this God is pure love, unconditional mercy, universal compassion—the very qualities the Demiurge lacks. This God is found within, not in temples. This God is known through gnosis, not law. This God saves all, not just the elect.
+    </p>
+    <p style="font-size: var(--text-2xl); font-weight: bold; color: var(--color-secondary); margin-top: var(--space-6);">
+        This is the Monad revealed.
+    </p>
+</div>
+
+<div class="glass-section">
+    <h2>Modern Application - Living the Sermon Today</h2>
+
+    <div class="teaching-card">
+        <h3>Practical Gnosis in Daily Life</h3>
+        <ul style="line-height: 1.8; margin-left: var(--space-6);">
+            <li><strong>Internal Over External:</strong> Prioritize inner transformation over religious performance</li>
+            <li><strong>Love Without Condition:</strong> Practice enemy love, even toward archonic systems and institutions</li>
+            <li><strong>Release Judgment:</strong> Recognize all souls as fellow travelers on the journey home</li>
+            <li><strong>Seek the Kingdom Within:</strong> Cultivate contemplative practices, meditation, inner listening</li>
+            <li><strong>Trust Divine Providence:</strong> "Do not be anxious" - the Monad knows what you need</li>
+            <li><strong>Mercy Over Sacrifice:</strong> Choose compassion over religious correctness</li>
+        </ul>
+    </div>
+
+    <div class="teaching-card">
+        <h3>Transformative Love</h3>
+        <p>
+            The Sermon teaches that love is not merely feeling—it is transformative power. When we love enemies, we participate in divine love's work of redeeming even the archons. When we refuse to judge, we mirror the Monad's universal acceptance. When we pray in secret, we discover the kingdom within.
+        </p>
+        <p style="margin-top: var(--space-4); font-weight: bold; color: var(--color-primary);">
+            This is how gnosis becomes lived reality, not just theoretical knowledge. The Sermon on the Mount is both revelation and practice, both doctrine and life.
+        </p>
+    </div>
+</div>
+
+<section style="margin-top: var(--space-10);">
+    <h2 style="color: var(--color-primary); font-size: var(--text-3xl); margin-bottom: var(--space-6);">Explore the Sermon's Teachings</h2>
+
+    <div class="topic-grid">
+        <a class="topic-card" href="beatitudes-gnosis.html">
+            <div class="topic-icon">🙏</div>
+            <h3>The Beatitudes</h3>
+            <p>The eight blessings as gnostic spiritual teachings. Poor in spirit, pure in heart, peacemakers—these are descriptions of souls awakening to gnosis.</p>
+        </a>
+
+        <a class="topic-card" href="love-enemies.html">
+            <div class="topic-icon">💝</div>
+            <h3>Love Your Enemies</h3>
+            <p>The most revolutionary teaching in history. How enemy love reveals the Monad's nature and transforms both lover and beloved.</p>
+        </a>
+
+        <a class="topic-card" href="judge-not.html">
+            <div class="topic-icon">⚖️</div>
+            <h3>Judge Not</h3>
+            <p>Divine mercy over condemnation. Why non-judgment is essential to gnostic spirituality and universal salvation.</p>
+        </a>
+
+        <a class="topic-card" href="kingdom-within.html">
+            <div class="topic-icon">👁️</div>
+            <h3>Kingdom Within</h3>
+            <p>The internal nature of divine reality. How the Pleroma is accessed not through external religion but inner gnosis.</p>
+        </a>
+
+        <a class="topic-card" href="gods-infinite-love.html">
+            <div class="topic-icon">❤️</div>
+            <h3>God's Infinite Love</h3>
+            <p>The foundation of the Sermon: God IS love. Understanding the Monad's eternal, unconditional, never-failing nature.</p>
+        </a>
+
+        <a class="topic-card" href="redemption-all.html">
+            <div class="topic-icon">✨</div>
+            <h3>Universal Redemption</h3>
+            <p>How the Sermon's teachings support universal salvation—the return of all souls to the Pleroma through divine love.</p>
+        </a>
+    </div>
+</section>
+
+<div class="scripture-quote" style="margin-top: var(--space-10); font-size: var(--text-xl);">
+    <p class="verse">
+        "Not everyone who says to me, 'Lord, Lord,' will enter the kingdom of heaven, but the one who does the will of my Father who is in heaven."
+    </p>
+    <span class="reference">— Matthew 7:21</span>
+    <p style="margin-top: var(--space-4); font-style: normal; line-height: var(--leading-relaxed);">
+        The will of the Father? Love enemies. Judge not. Be merciful. Seek the kingdom within. These are not mere suggestions—this is the path of return to the Pleroma. Not through religious words ("Lord, Lord"), but through embodied divine love.
+    </p>
+</div>
+
+</main>
+
+<footer>
+    <p>
+        <strong>The Sermon on the Mount - Gnostic Interpretation</strong><br/>
+        <a href="../../../mythos/index.html">World Mythos Home</a> |
+        <a href="../../index.html">Christian Tradition</a> |
+        <a href="../index.html">Gnostic Thought</a> |
+        <a href="index.html">Gnostic Christianity Overview</a>
+    </p>
+    <p style="margin-top: var(--space-4); font-style: italic;">
+        "Blessed are the pure in heart, for they shall see God." - Matthew 5:8
+    </p>
+</footer>
+
+</body>
+</html>
