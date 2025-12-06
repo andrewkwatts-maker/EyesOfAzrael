@@ -5,44 +5,66 @@
 A complete user authentication and theory submission system for Eyes of Azrael. Users can:
 
 - **Create accounts** and login
-- **Submit theories** about mythology, deities, places, and concepts
-- **Vote** on theories (upvote/downvote)
+- **Submit rich theories** with panels, images, links, and corpus references
+- **Organize theories** by topic and subtopic taxonomy (12 topics, 100+ subtopics)
+- **Browse and filter** theories by topic, subtopic, author, or search
+- **View theories** with full rich content display
+- **Vote** on theories (upvote)
 - **Comment** on theories
 - **Edit and delete** their own theories
-- **Browse** theories by page, category, or author
+- **Embed theory widgets** on any page
 
 ## 📁 Files Created
 
 ### JavaScript Core
 - `js/user-auth.js` - Authentication system (login, signup, session management)
-- `js/user-theories.js` - Theory management (CRUD operations, voting, comments)
+- `js/user-theories.js` - Theory management (CRUD operations, voting, comments, rich content)
+- `js/theory-taxonomy.js` - Topic/subtopic taxonomy system (12 topics, 100+ subtopics)
 - `js/components/theory-widget.js` - Universal theory widget component
+- `js/components/theory-editor.js` - Rich content editor (panels, images, links, corpus)
 
 ### Styles
-- `css/user-auth.css` - Complete styling for auth and theory system
+- `css/user-auth.css` - Complete styling for auth, theories, and rich editor
+
+### Pages
+- `theories/user-submissions/submit.html` - **NEW** Theory submission page with rich editor
+- `theories/user-submissions/browse.html` - **NEW** Browse theories with filtering and grouping
+- `theories/user-submissions/view.html` - **NEW** View theory with voting and comments
+- `test-user-theories.html` - Complete demo and testing page
 
 ### Templates & Tools
 - `auth-modal-template.html` - Reusable template for auth modal
-- `test-user-theories.html` - **TEST THIS PAGE FIRST** - Complete demo
 - `scripts/add-theory-widgets.js` - Auto-deploy script for all pages
+- `USER_THEORY_TESTING_CHECKLIST.md` - Comprehensive testing guide
 
 ## 🚀 Quick Start
 
-### 1. Test the System
+### 1. Test the Complete Workflow
 
-**Open this file in your browser:**
+**Open the main test page:**
 ```
 test-user-theories.html
 ```
 
-**Then:**
-1. Click "Sign Up" (top right)
-2. Create an account (username: test, password: test123)
-3. Click "Add Theory" button
-4. Fill out the form and submit
-5. Vote on your theory
-6. View the full theory
-7. Add a comment
+**Complete workflow test:**
+1. **Sign Up**: Click "Login / Sign Up" (top right) → Create account (username: test, password: test123)
+2. **Submit Theory**: Click "✨ Submit Theory" button
+3. **Fill Rich Editor**:
+   - Enter theory title
+   - Select topic (e.g., "Mythologies") and subtopic (e.g., "Greek Mythology")
+   - Add panels with content
+   - Add images, links, corpus searches (optional)
+4. **Submit**: Click "🚀 Submit Theory" → Redirects to browse page
+5. **Browse**: Your theory appears highlighted → Filter, sort, group by topic/subtopic/author
+6. **View**: Click on theory → See full rich content display
+7. **Vote**: Click 👍 Upvote button
+8. **Comment**: Add a comment at the bottom
+9. **Navigate**: Use breadcrumbs or "Back to Browse" button
+
+**Alternative: Use direct page URLs:**
+- Submit: `theories/user-submissions/submit.html`
+- Browse: `theories/user-submissions/browse.html`
+- View: `theories/user-submissions/view.html?id={theory_id}`
 
 ### 2. Manual Integration (Single Page)
 
