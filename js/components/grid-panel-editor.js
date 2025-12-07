@@ -102,9 +102,6 @@ class GridPanelEditor {
             <div class="panel-item simple-panel" data-index="${index}" data-type="panel">
                 <!-- Options bar ABOVE panel -->
                 <div class="panel-options-bar">
-                    <div class="panel-options-left">
-                        <span class="panel-label">#${index + 1} Panel</span>
-                    </div>
                     <div class="panel-options-right">
                         <button type="button"
                                 class="btn-option"
@@ -169,7 +166,6 @@ class GridPanelEditor {
                 <!-- Options bar ABOVE panel -->
                 <div class="panel-options-bar">
                     <div class="panel-options-left">
-                        <span class="panel-label">#${index + 1} Grid</span>
                         <button type="button" class="btn-option-add" data-action="add-child-panel" data-parent="${index}" title="Add Sub-Panel">
                             <span class="btn-icon-text">📄</span> Panel
                         </button>
