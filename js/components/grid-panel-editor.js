@@ -69,6 +69,65 @@ class GridPanelEditor {
     }
 
     /**
+     * Render unified panel options bar
+     * @param {Object} config - Configuration for options bar
+     * @param {number} config.index - Panel index
+     * @param {string} config.type - Panel type ('panel', 'grid', 'svg')
+     * @param {boolean} config.isFirst - Is first panel
+     * @param {boolean} config.isLast - Is last panel
+     * @param {Array} config.addButtons - Array of add button configs (for grid panels)
+     * @param {Object} config.extraControls - Extra controls HTML (for grid columns, etc.)
+     */
+    renderPanelOptionsBar(config) {
+        const { index, type, isFirst, isLast, addButtons = [], extraControls = null } = config;
+
+        const leftSection = addButtons.length > 0 ? `
+            <div class="panel-options-left">
+                ${addButtons.map(btn => `
+                    <button type="button"
+                            class="btn-option-add"
+                            data-action="${btn.action}"
+                            data-parent="${index}"
+                            title="${btn.title}"
+                            ${btn.disabled ? 'disabled' : ''}>
+                        <span class="btn-icon-text">${btn.icon}</span> ${btn.label}
+                    </button>
+                `).join('')}
+            </div>
+        ` : '';
+
+        const rightSection = `
+            <div class="panel-options-right">
+                ${extraControls || ''}
+                <button type="button"
+                        class="btn-option"
+                        data-action="move-up"
+                        data-index="${index}"
+                        ${isFirst ? 'disabled' : ''}
+                        title="Move Up">↑</button>
+                <button type="button"
+                        class="btn-option"
+                        data-action="move-down"
+                        data-index="${index}"
+                        ${isLast ? 'disabled' : ''}
+                        title="Move Down">↓</button>
+                <button type="button"
+                        class="btn-option btn-delete"
+                        data-action="delete-panel"
+                        data-index="${index}"
+                        title="Delete">🗑️</button>
+            </div>
+        `;
+
+        return `
+            <div class="panel-options-bar">
+                ${leftSection}
+                ${rightSection}
+            </div>
+        `;
+    }
+
+    /**
      * Render root-level panels (sequential order)
      */
     renderRootPanels() {
@@ -100,28 +159,12 @@ class GridPanelEditor {
 
         return `
             <div class="panel-item simple-panel" data-index="${index}" data-type="panel">
-                <!-- Options bar ABOVE panel -->
-                <div class="panel-options-bar">
-                    <div class="panel-options-right">
-                        <button type="button"
-                                class="btn-option"
-                                data-action="move-up"
-                                data-index="${index}"
-                                ${isFirst ? 'disabled' : ''}
-                                title="Move Up">↑</button>
-                        <button type="button"
-                                class="btn-option"
-                                data-action="move-down"
-                                data-index="${index}"
-                                ${isLast ? 'disabled' : ''}
-                                title="Move Down">↓</button>
-                        <button type="button"
-                                class="btn-option btn-delete"
-                                data-action="delete-panel"
-                                data-index="${index}"
-                                title="Delete">🗑️</button>
-                    </div>
-                </div>
+                ${this.renderPanelOptionsBar({
+                    index,
+                    type: 'panel',
+                    isFirst,
+                    isLast
+                })}
 
                 <!-- Main panel content with title INSIDE -->
                 <div class="panel-content-box">
@@ -161,57 +204,39 @@ class GridPanelEditor {
         const gridWidth = panel.gridWidth || 4;
         const titleIcon = panel.titleIcon || '';
 
+        // Grid-specific add buttons
+        const addButtons = [
+            { action: 'add-child-panel', icon: '📄', label: 'Panel', title: 'Add Sub-Panel' },
+            { action: 'add-child-link', icon: '🔗', label: 'Link', title: 'Add Link' },
+            { action: 'add-child-search', icon: '🔍', label: 'Search', title: 'Add Search' },
+            { action: 'add-child-image', icon: '🖼️', label: 'Image', title: 'Add Image' },
+            { action: 'add-child-svg', icon: '🎨', label: 'SVG', title: 'Add SVG', disabled: !this.svgEditor }
+        ];
+
+        // Grid columns control
+        const extraControls = `
+            <label class="grid-columns-label">
+                Columns:
+                <input type="number"
+                       class="grid-columns-input"
+                       min="1"
+                       max="12"
+                       value="${gridWidth}"
+                       data-field="gridWidth"
+                       data-index="${index}">
+            </label>
+        `;
+
         return `
             <div class="panel-item grid-panel" data-index="${index}" data-type="grid">
-                <!-- Options bar ABOVE panel -->
-                <div class="panel-options-bar">
-                    <div class="panel-options-left">
-                        <button type="button" class="btn-option-add" data-action="add-child-panel" data-parent="${index}" title="Add Sub-Panel">
-                            <span class="btn-icon-text">📄</span> Panel
-                        </button>
-                        <button type="button" class="btn-option-add" data-action="add-child-link" data-parent="${index}" title="Add Link">
-                            <span class="btn-icon-text">🔗</span> Link
-                        </button>
-                        <button type="button" class="btn-option-add" data-action="add-child-search" data-parent="${index}" title="Add Search">
-                            <span class="btn-icon-text">🔍</span> Search
-                        </button>
-                        <button type="button" class="btn-option-add" data-action="add-child-image" data-parent="${index}" title="Add Image">
-                            <span class="btn-icon-text">🖼️</span> Image
-                        </button>
-                        <button type="button" class="btn-option-add" data-action="add-child-svg" data-parent="${index}" title="Add SVG" ${!this.svgEditor ? 'disabled' : ''}>
-                            <span class="btn-icon-text">🎨</span> SVG
-                        </button>
-                    </div>
-                    <div class="panel-options-right">
-                        <label class="grid-columns-label">
-                            Columns:
-                            <input type="number"
-                                   class="grid-columns-input"
-                                   min="1"
-                                   max="12"
-                                   value="${gridWidth}"
-                                   data-field="gridWidth"
-                                   data-index="${index}">
-                        </label>
-                        <button type="button"
-                                class="btn-option"
-                                data-action="move-up"
-                                data-index="${index}"
-                                ${isFirst ? 'disabled' : ''}
-                                title="Move Up">↑</button>
-                        <button type="button"
-                                class="btn-option"
-                                data-action="move-down"
-                                data-index="${index}"
-                                ${isLast ? 'disabled' : ''}
-                                title="Move Down">↓</button>
-                        <button type="button"
-                                class="btn-option btn-delete"
-                                data-action="delete-panel"
-                                data-index="${index}"
-                                title="Delete">🗑️</button>
-                    </div>
-                </div>
+                ${this.renderPanelOptionsBar({
+                    index,
+                    type: 'grid',
+                    isFirst,
+                    isLast,
+                    addButtons,
+                    extraControls
+                })}
 
                 <!-- Main panel content with title INSIDE -->
                 <div class="panel-content-box">
@@ -252,35 +277,31 @@ class GridPanelEditor {
         const svgPrompt = panel.svgPrompt || '';
         const svgGeneratedBy = panel.svgGeneratedBy || '';
 
+        // SVG-specific extra controls (edit button in the options bar)
+        const extraControls = `
+            <button type="button"
+                    class="btn-option-add"
+                    data-action="edit-svg"
+                    data-index="${index}"
+                    ${!this.svgEditor ? 'disabled' : ''}
+                    title="Edit SVG">
+                <span class="btn-icon-text">🎨</span> Edit SVG
+            </button>
+        `;
+
         return `
             <div class="panel-item svg-panel" data-index="${index}" data-type="svg">
-                <!-- Slim control panel -->
-                <div class="panel-controls-top">
-                    <div class="panel-move-controls">
-                        <button type="button"
-                                class="btn-icon"
-                                data-action="move-up"
-                                data-index="${index}"
-                                ${isFirst ? 'disabled' : ''}
-                                title="Move Up">↑</button>
-                        <button type="button"
-                                class="btn-icon"
-                                data-action="move-down"
-                                data-index="${index}"
-                                ${isLast ? 'disabled' : ''}
-                                title="Move Down">↓</button>
-                        <button type="button"
-                                class="btn-icon btn-delete"
-                                data-action="delete-panel"
-                                data-index="${index}"
-                                title="Delete">🗑️</button>
-                    </div>
-                </div>
+                ${this.renderPanelOptionsBar({
+                    index,
+                    type: 'svg',
+                    isFirst,
+                    isLast,
+                    extraControls
+                })}
 
-                <!-- Main panel content -->
-                <div class="panel-content-wrapper">
-                    <div class="panel-header">
-                        <span class="panel-number">#${index + 1} SVG</span>
+                <!-- Main panel content with title INSIDE -->
+                <div class="panel-content-box">
+                    <div class="panel-title-section">
                         ${titleIcon ? `<span class="panel-title-icon">${titleIcon}</span>` : ''}
                         <input type="text"
                                class="panel-title-input"
@@ -294,12 +315,6 @@ class GridPanelEditor {
                                 data-index="${index}"
                                 ${!this.iconPicker ? 'disabled' : ''}
                                 title="${titleIcon ? 'Change/Clear Icon' : 'Add Icon'}">📌</button>
-                        <button type="button"
-                                class="btn-edit-svg"
-                                data-action="edit-svg"
-                                data-index="${index}"
-                                ${!this.svgEditor ? 'disabled' : ''}
-                                title="Edit SVG">🎨 Edit SVG</button>
                     </div>
 
                     <div class="svg-preview-container">
