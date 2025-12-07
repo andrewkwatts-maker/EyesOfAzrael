@@ -46,7 +46,7 @@ class TheoryWidget {
 
     renderInline() {
         const theories = this.getPageTheories();
-        const isLoggedIn = window.userAuth && window.userAuth.isLoggedIn();
+        const isLoggedIn = window.authGuard && window.authGuard.isAuthenticated();
 
         this.element.innerHTML = `
             <div class="theory-widget-inline">
@@ -61,8 +61,9 @@ class TheoryWidget {
                             <span>+</span> Add Theory
                         </button>
                     ` : `
-                        <button class="theory-login-btn" data-theory-login>
-                            <span>🔒</span> Login to Add
+                        <button class="theory-login-btn auth-required" data-theory-login
+                                title="Sign in to add theories">
+                            <span>🔒</span> Sign in to Add
                         </button>
                     `}
                 </div>
@@ -83,8 +84,8 @@ class TheoryWidget {
     }
 
     renderTheoryCard(theory) {
-        const isLoggedIn = window.userAuth && window.userAuth.isLoggedIn();
-        const currentUser = isLoggedIn ? window.userAuth.getCurrentUser() : null;
+        const isLoggedIn = window.authGuard && window.authGuard.isAuthenticated();
+        const currentUser = isLoggedIn ? window.authGuard.getCurrentUser() : null;
         const isAuthor = currentUser && currentUser.username === theory.author;
         const userVote = theory.voters.find(v => currentUser && v.username === currentUser.username);
 
@@ -135,7 +136,9 @@ class TheoryWidget {
                                 <span>👎</span>
                             </button>
                         ` : `
-                            <span class="vote-display">
+                            <span class="vote-display auth-required"
+                                  onclick="window.authGuard?.showLoginPrompt('Sign in to vote on theories', 'vote')"
+                                  title="Sign in to vote">
                                 <span>👍</span> ${theory.votes}
                             </span>
                         `}
@@ -156,7 +159,7 @@ class TheoryWidget {
     }
 
     renderEmpty() {
-        const isLoggedIn = window.userAuth && window.userAuth.isLoggedIn();
+        const isLoggedIn = window.authGuard && window.authGuard.isAuthenticated();
 
         return `
             <div class="theory-empty">
@@ -168,7 +171,8 @@ class TheoryWidget {
                     </button>
                 ` : `
                     <p class="theory-empty-subtext">
-                        <button class="theory-login-link" data-theory-login>Login</button>
+                        <button class="theory-login-link auth-required" data-theory-login
+                                title="Sign in to contribute">Sign in</button>
                         to share your insights
                     </p>
                 `}
@@ -190,7 +194,7 @@ class TheoryWidget {
 
             // Login
             if (e.target.closest('[data-theory-login]')) {
-                window.userAuth?.showLoginModal();
+                window.authGuard?.showLoginPrompt('Sign in to share your theories and insights', 'submit');
             }
 
             // Vote
@@ -260,7 +264,7 @@ class TheoryWidget {
         const body = modal.querySelector('.theory-modal-body');
 
         const theories = this.getPageTheories();
-        const isLoggedIn = window.userAuth && window.userAuth.isLoggedIn();
+        const isLoggedIn = window.authGuard && window.authGuard.isAuthenticated();
 
         body.innerHTML = `
             <div class="theory-modal-header">
@@ -272,7 +276,12 @@ class TheoryWidget {
                     <button class="theory-add-btn" data-theory-add>
                         <span>+</span> Add Theory
                     </button>
-                ` : ''}
+                ` : `
+                    <button class="theory-login-btn auth-required" data-theory-login
+                            title="Sign in to add theories">
+                        <span>🔒</span> Sign in to Add
+                    </button>
+                `}
             </div>
 
             <div class="theory-modal-content-area">
@@ -434,8 +443,8 @@ class TheoryWidget {
         const modal = this.getOrCreateModal();
         const body = modal.querySelector('.theory-modal-body');
 
-        const isLoggedIn = window.userAuth && window.userAuth.isLoggedIn();
-        const currentUser = isLoggedIn ? window.userAuth.getCurrentUser() : null;
+        const isLoggedIn = window.authGuard && window.authGuard.isAuthenticated();
+        const currentUser = isLoggedIn ? window.authGuard.getCurrentUser() : null;
         const isAuthor = currentUser && currentUser.username === theory.author;
         const userVote = theory.voters.find(v => currentUser && v.username === currentUser.username);
 
@@ -492,7 +501,14 @@ class TheoryWidget {
                                 data-theory-vote="${theory.id}" data-direction="-1">
                             <span>👎</span> Downvote
                         </button>
-                    ` : ''}
+                    ` : `
+                        <div class="vote-btn-disabled auth-required"
+                             onclick="window.authGuard?.showLoginPrompt('Sign in to vote on theories', 'vote')"
+                             title="Sign in to vote">
+                            <span>👍</span> Upvote (${theory.votes > 0 ? theory.votes : 0})
+                            <span class="signin-required-badge" style="margin-left: 0.5rem;">🔒 Sign in</span>
+                        </div>
+                    `}
 
                     ${isAuthor ? `
                         <button class="btn-edit" data-theory-edit="${theory.id}">
@@ -514,7 +530,8 @@ class TheoryWidget {
                         </form>
                     ` : `
                         <p class="comments-login-prompt">
-                            <button class="theory-login-link" data-theory-login>Login</button> to comment
+                            <button class="theory-login-link auth-required" data-theory-login
+                                    title="Sign in to comment">Sign in</button> to comment
                         </p>
                     `}
 

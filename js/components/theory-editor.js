@@ -4,7 +4,7 @@
  */
 
 class TheoryEditor {
-    constructor(container, initialData = null) {
+    constructor(container, initialData = null, options = {}) {
         this.container = container;
         this.data = initialData || {
             title: '',
@@ -13,12 +13,19 @@ class TheoryEditor {
             links: [],
             corpusSearches: []
         };
+        this.options = {
+            userId: options.userId || null,
+            theoryId: options.theoryId || null,
+            useImageUploader: options.useImageUploader !== false // Default true
+        };
+        this.imageUploader = null;
         this.init();
     }
 
     init() {
         this.render();
         this.attachEventListeners();
+        this.initializeImageUploader();
     }
 
     render() {
@@ -51,12 +58,10 @@ class TheoryEditor {
                 <div class="editor-section">
                     <div class="editor-section-header">
                         <label class="editor-label">Images</label>
-                        <button type="button" class="editor-add-btn" data-add="image">
-                            + Add Image
-                        </button>
+                        ${!this.options.useImageUploader ? '<button type="button" class="editor-add-btn" data-add="image">+ Add Image</button>' : ''}
                     </div>
                     <div class="editor-images-container">
-                        ${this.renderImages()}
+                        ${this.options.useImageUploader ? '<div id="theory-image-uploader"></div>' : this.renderImages()}
                     </div>
                 </div>
 
@@ -233,6 +238,37 @@ class TheoryEditor {
         `).join('');
     }
 
+    initializeImageUploader() {
+        if (!this.options.useImageUploader) {
+            return;
+        }
+
+        const uploaderContainer = this.container.querySelector('#theory-image-uploader');
+        if (!uploaderContainer || !window.ImageUploader) {
+            return;
+        }
+
+        // Initialize image uploader
+        this.imageUploader = new ImageUploader(uploaderContainer, {
+            userId: this.options.userId,
+            theoryId: this.options.theoryId,
+            multiple: true,
+            maxFiles: 10,
+            compress: true,
+            onUploadComplete: (imageData) => {
+                console.log('Image uploaded:', imageData);
+            },
+            onUploadError: (error) => {
+                console.error('Upload error:', error);
+            }
+        });
+
+        // Load existing images if any
+        if (this.data.images && this.data.images.length > 0) {
+            this.imageUploader.loadExistingImages(this.data.images);
+        }
+    }
+
     attachEventListeners() {
         // Title input
         this.container.querySelector('.editor-title-input')?.addEventListener('input', (e) => {
@@ -255,14 +291,14 @@ class TheoryEditor {
             }
         });
 
-        // Input changes
+        // Input changes (only for non-image fields when using uploader)
         this.container.addEventListener('input', (e) => {
             const field = e.target.dataset.field;
             const index = parseInt(e.target.dataset.index);
             const type = e.target.dataset.type;
 
             if (field && !isNaN(index)) {
-                if (type === 'image') {
+                if (type === 'image' && !this.options.useImageUploader) {
                     this.data.images[index][field] = e.target.value;
                     if (field === 'url') {
                         this.render(); // Re-render to show image preview
@@ -324,13 +360,43 @@ class TheoryEditor {
     }
 
     getData() {
+        // Get images from uploader if using it
+        let images;
+        if (this.options.useImageUploader && this.imageUploader) {
+            images = this.imageUploader.getImages();
+        } else {
+            images = this.data.images.filter(i => i.url.trim());
+        }
+
         return {
             title: this.data.title,
             panels: this.data.panels.filter(p => p.content.trim()),
-            images: this.data.images.filter(i => i.url.trim()),
+            images: images,
             links: this.data.links.filter(l => l.url.trim() && l.title.trim()),
             corpusSearches: this.data.corpusSearches.filter(c => c.query.trim())
         };
+    }
+
+    /**
+     * Check if there are any pending image uploads
+     * @returns {boolean}
+     */
+    hasPendingUploads() {
+        if (this.options.useImageUploader && this.imageUploader) {
+            return this.imageUploader.hasPendingUploads();
+        }
+        return false;
+    }
+
+    /**
+     * Wait for all pending uploads to complete
+     * @returns {Promise}
+     */
+    async waitForUploads() {
+        if (this.options.useImageUploader && this.imageUploader) {
+            return await this.imageUploader.waitForUploads();
+        }
+        return Promise.resolve();
     }
 
     validate() {

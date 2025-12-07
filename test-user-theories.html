@@ -9,9 +9,16 @@
     <link rel="stylesheet" href="themes/theme-base.css">
     <script defer src="themes/theme-picker.js"></script>
 
-    <!-- User Auth & Theory System -->
+    <!-- Firebase SDK (compat mode) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Config & Auth System -->
     <link rel="stylesheet" href="css/user-auth.css">
-    <script defer src="js/user-auth.js"></script>
+    <script defer src="js/firebase-config.js"></script>
+    <script defer src="js/firebase-auth.js"></script>
+    <script defer src="js/components/google-signin-button.js"></script>
     <script defer src="js/user-theories.js"></script>
     <script defer src="js/components/theory-widget.js"></script>
 
@@ -350,20 +357,30 @@
 
         <!-- Data Persistence Note -->
         <div class="demo-section">
-            <h2>💾 Data Storage</h2>
+            <h2>💾 Data Storage - Firebase Integration</h2>
             <p>
-                <strong>Current:</strong> All data is stored in browser localStorage (client-side only)
+                <strong>Updated:</strong> This page now uses Firebase Authentication with Google OAuth!
             </p>
+            <div style="background: rgba(34, 197, 94, 0.1); border: 2px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
+                <h3 style="color: #86efac; margin: 0 0 1rem 0;">Firebase Features Enabled</h3>
+                <ul>
+                    <li><strong>Google OAuth:</strong> Sign in with your Google account</li>
+                    <li><strong>Cloud Storage:</strong> User profiles stored in Firestore</li>
+                    <li><strong>Session Persistence:</strong> Stay logged in across browser restarts</li>
+                    <li><strong>Multi-tab Sync:</strong> Auth state synced across all tabs</li>
+                    <li><strong>Profile Photos:</strong> Use your Google profile picture</li>
+                </ul>
+            </div>
+            <div style="background: rgba(234, 179, 8, 0.1); border: 2px solid rgba(234, 179, 8, 0.3); border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
+                <h3 style="color: #fbbf24; margin: 0 0 1rem 0;">⚠️ Setup Required</h3>
+                <p style="margin: 0;">
+                    Before testing Firebase auth, you need to create <code>js/firebase-config.js</code> with your Firebase project credentials.
+                    See <code>BACKEND_MIGRATION_PLAN.md</code> for setup instructions.
+                </p>
+            </div>
             <p>
-                <strong>Future:</strong> This will be upgraded to a proper backend database for:
+                <strong>Note:</strong> Theory data still uses localStorage. That will be migrated to Firestore in Phase 4.
             </p>
-            <ul>
-                <li>Cross-device synchronization</li>
-                <li>Permanent storage</li>
-                <li>Better security (proper password hashing)</li>
-                <li>Moderation tools</li>
-                <li>Search and filtering</li>
-            </ul>
         </div>
 
         <!-- Footer -->
@@ -375,10 +392,10 @@
         </div>
     </div>
 
-    <!-- Include Auth Modal Template -->
+    <!-- Include Firebase Auth Modal Template -->
     <script>
-        // Load the auth modal template
-        fetch('auth-modal-template.html')
+        // Load the Firebase auth modal template
+        fetch('auth-modal-firebase.html')
             .then(response => response.text())
             .then(html => {
                 // Extract just the template content (remove comments)
@@ -387,119 +404,9 @@
                 document.body.insertAdjacentHTML('beforeend', tempDiv.innerHTML);
             })
             .catch(err => {
-                console.warn('Could not load auth modal template. Including it directly...');
-                // If fetch fails, include template directly
-                document.body.insertAdjacentHTML('beforeend', `
-                    ${document.querySelector('script[type="auth-template"]')?.textContent || ''}
-                `);
+                console.warn('Could not load Firebase auth modal template:', err);
+                console.warn('Please ensure auth-modal-firebase.html exists in the root directory.');
             });
-    </script>
-
-    <!-- Inline auth template as fallback -->
-    <script type="auth-template">
-        <!-- Authentication Modal -->
-        <div id="auth-modal" class="auth-modal">
-            <div class="auth-modal-content">
-                <button class="auth-modal-close" onclick="window.userAuth.hideAuthModal()">&times;</button>
-                <h2 id="auth-modal-title" class="auth-modal-title">Login to Your Account</h2>
-                <div id="auth-message" class="auth-message"></div>
-
-                <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
-                    <div class="auth-form-group">
-                        <label for="login-username">Username</label>
-                        <input type="text" id="login-username" name="username" required autocomplete="username">
-                    </div>
-                    <div class="auth-form-group">
-                        <label for="login-password">Password</label>
-                        <input type="password" id="login-password" name="password" required autocomplete="current-password">
-                    </div>
-                    <button type="submit" class="auth-submit-btn">Login</button>
-                    <div class="auth-switch">
-                        Don't have an account?
-                        <a class="auth-switch-link" onclick="window.userAuth.switchAuthMode('signup')">Sign up</a>
-                    </div>
-                </form>
-
-                <form id="signup-form" class="auth-form" style="display: none;" onsubmit="handleSignup(event)">
-                    <div class="auth-form-group">
-                        <label for="signup-username">Username</label>
-                        <input type="text" id="signup-username" name="username" required minlength="3" autocomplete="username">
-                    </div>
-                    <div class="auth-form-group">
-                        <label for="signup-email">Email</label>
-                        <input type="email" id="signup-email" name="email" required autocomplete="email">
-                    </div>
-                    <div class="auth-form-group">
-                        <label for="signup-password">Password</label>
-                        <input type="password" id="signup-password" name="password" required minlength="6" autocomplete="new-password">
-                    </div>
-                    <button type="submit" class="auth-submit-btn">Create Account</button>
-                    <div class="auth-switch">
-                        Already have an account?
-                        <a class="auth-switch-link" onclick="window.userAuth.switchAuthMode('login')">Login</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div id="user-nav" style="position: fixed; top: 1rem; right: 1rem; z-index: 1000;">
-            <div data-auth-show="loggedOut" style="display: flex; gap: 0.5rem;">
-                <button class="auth-submit-btn" onclick="window.userAuth.showLoginModal()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Login</button>
-                <button class="auth-submit-btn" onclick="window.userAuth.showSignupModal()" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: linear-gradient(135deg, #22c55e, #16a34a);">Sign Up</button>
-            </div>
-            <div data-auth-show="loggedIn" style="display: none;">
-                <div class="user-display" onclick="toggleUserDropdown()">
-                    <img data-auth-avatar src="" alt="User Avatar" class="user-avatar">
-                    <span data-auth-username class="user-username"></span>
-                    <span>▼</span>
-                </div>
-                <div id="user-dropdown" class="user-dropdown">
-                    <a href="/theories/user-submissions/index.html" class="user-dropdown-item">My Theories</a>
-                    <a href="/profile.html" class="user-dropdown-item">Profile Settings</a>
-                    <div style="border-top: 1px solid rgba(147, 51, 234, 0.3); margin: 0.5rem 0;"></div>
-                    <button class="user-logout-btn" onclick="window.userAuth.logout()">Logout</button>
-                </div>
-            </div>
-        </div>
-
-        <script>
-        function handleLogin(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const result = window.userAuth.login(formData.get('username'), formData.get('password'));
-            if (result.success) {
-                window.userAuth.showAuthMessage(result.message, 'success');
-                setTimeout(() => window.userAuth.hideAuthModal(), 1000);
-            } else {
-                window.userAuth.showAuthMessage(result.error, 'error');
-            }
-        }
-
-        function handleSignup(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const result = window.userAuth.signup(formData.get('username'), formData.get('email'), formData.get('password'));
-            if (result.success) {
-                window.userAuth.showAuthMessage(result.message + ' You can now login.', 'success');
-                setTimeout(() => {
-                    window.userAuth.switchAuthMode('login');
-                    window.userAuth.clearAuthMessages();
-                }, 2000);
-            } else {
-                window.userAuth.showAuthMessage(result.error, 'error');
-            }
-        }
-
-        function toggleUserDropdown() {
-            document.getElementById('user-dropdown')?.classList.toggle('show');
-        }
-
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.user-display') && !e.target.closest('#user-dropdown')) {
-                document.getElementById('user-dropdown')?.classList.remove('show');
-            }
-        });
-        </script>
     </script>
 </body>
 </html>

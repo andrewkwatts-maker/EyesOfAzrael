@@ -1,0 +1,702 @@
+/**
+ * Grid Panel Editor V2 - Frosted Glass Modern UI
+ * Matches Eyes of Azrael design system with glass morphism
+ */
+
+/* === Editor Container === */
+.grid-panel-editor {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* === Top Level Controls === */
+.editor-controls {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: var(--radius-xl);
+    border: 2px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-add-panel,
+.btn-add-grid,
+.btn-add-svg {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: var(--color-background);
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-add-panel:hover,
+.btn-add-grid:hover,
+.btn-add-svg:hover {
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    transform: translateY(-2px);
+}
+
+.btn-add-svg:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* === Panels Root Container === */
+.panels-root-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+.editor-empty {
+    padding: var(--spacing-3xl);
+    text-align: center;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-xl);
+}
+
+/* === Panel Items (Simple and Grid) === */
+.panel-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+/* === Slim Control Panel Above Each Panel === */
+.panel-controls-top {
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-md);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+}
+
+.panel-controls-top:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 20px rgba(139, 127, 255, 0.3);
+}
+
+.panel-add-controls {
+    display: flex;
+    gap: var(--spacing-xs);
+    flex-wrap: wrap;
+}
+
+.panel-move-controls {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+/* === Main Panel Content === */
+.panel-content-wrapper {
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-base);
+}
+
+.panel-content-wrapper:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 25px rgba(139, 127, 255, 0.4);
+}
+
+/* Simple Panel */
+.simple-panel .panel-content-wrapper {
+    background: linear-gradient(135deg,
+        var(--color-surface) 0%,
+        rgba(245, 158, 11, 0.05) 100%);
+}
+
+/* Grid Panel */
+.grid-panel .panel-content-wrapper {
+    background: linear-gradient(135deg,
+        var(--color-surface) 0%,
+        rgba(139, 127, 255, 0.05) 100%);
+}
+
+/* === Panel Header === */
+.panel-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-border);
+    flex-wrap: wrap;
+}
+
+.panel-number {
+    font-weight: var(--font-bold);
+    color: var(--color-primary);
+    font-size: var(--font-size-lg);
+    min-width: 5rem;
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+.panel-title-input {
+    flex: 1;
+    min-width: 200px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(10, 14, 39, 0.6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+    transition: all var(--transition-fast);
+}
+
+.panel-title-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(139, 127, 255, 0.3);
+    background: rgba(10, 14, 39, 0.8);
+}
+
+/* === Grid Width Control === */
+.grid-width-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: rgba(139, 127, 255, 0.1);
+    border-radius: var(--radius-md);
+}
+
+.grid-width-input {
+    width: 60px;
+    padding: var(--spacing-xs);
+    background: rgba(10, 14, 39, 0.6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    text-align: center;
+    color: var(--color-text-primary);
+    font-weight: var(--font-semibold);
+}
+
+/* === Button Styles === */
+.btn-icon {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: rgba(26, 31, 58, 0.8);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+    transition: all var(--transition-fast);
+    backdrop-filter: blur(5px);
+}
+
+.btn-icon:hover:not(:disabled) {
+    background: var(--color-surface-hover);
+    border-color: var(--color-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 0 10px rgba(139, 127, 255, 0.5);
+}
+
+.btn-icon:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.btn-icon.btn-delete {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.3), rgba(239, 68, 68, 0.3));
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
+}
+
+.btn-icon.btn-delete:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.5), rgba(239, 68, 68, 0.5));
+    border-color: #ef4444;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+}
+
+/* === Add Content Buttons === */
+.btn-add-small {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: var(--color-background);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-add-small:hover {
+    box-shadow: var(--shadow-md), 0 0 15px rgba(245, 158, 11, 0.6);
+    transform: translateY(-1px);
+}
+
+.btn-icon-text {
+    font-size: var(--font-size-sm);
+}
+
+/* === Panel Content === */
+.panel-content-input {
+    width: 100%;
+    padding: var(--spacing-md);
+    background: rgba(10, 14, 39, 0.6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    font-family: var(--font-primary);
+    line-height: var(--leading-relaxed);
+    resize: vertical;
+    color: var(--color-text-primary);
+    transition: all var(--transition-fast);
+}
+
+.panel-content-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(139, 127, 255, 0.3);
+    background: rgba(10, 14, 39, 0.8);
+}
+
+/* === Grid Children Container === */
+.grid-children-container {
+    padding: var(--spacing-lg);
+    background: rgba(10, 14, 39, 0.4);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(139, 127, 255, 0.2);
+    min-height: 100px;
+}
+
+/* === Grid Layout === */
+.grid-layout {
+    display: grid;
+    gap: var(--spacing-md);
+    grid-auto-rows: minmax(140px, auto);
+    width: 100%;
+}
+
+/* === Grid Items === */
+.grid-item {
+    background: var(--color-surface);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    transition: all var(--transition-base);
+    min-width: 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.grid-item:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 20px rgba(139, 127, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+/* === Grid Item Type Variants === */
+.grid-item-panel {
+    background: linear-gradient(135deg,
+        var(--color-surface) 0%,
+        rgba(245, 158, 11, 0.08) 100%);
+    border-color: var(--color-primary);
+}
+
+.grid-item-link {
+    background: linear-gradient(135deg,
+        var(--color-surface) 0%,
+        rgba(96, 165, 250, 0.08) 100%);
+    border-color: rgba(96, 165, 250, 0.5);
+}
+
+.grid-item-link:hover {
+    border-color: #60a5fa;
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
+}
+
+.grid-item-search {
+    background: linear-gradient(135deg,
+        var(--color-surface) 0%,
+        rgba(52, 211, 153, 0.08) 100%);
+    border-color: rgba(52, 211, 153, 0.5);
+}
+
+.grid-item-search:hover {
+    border-color: #34d399;
+    box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
+}
+
+.grid-item-image {
+    background: linear-gradient(135deg,
+        var(--color-surface) 0%,
+        rgba(251, 191, 36, 0.08) 100%);
+    border-color: rgba(251, 191, 36, 0.5);
+}
+
+.grid-item-image:hover {
+    border-color: #fbbf24;
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+}
+
+/* === Grid Item Header === */
+.grid-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+}
+
+.grid-item-type {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-bold);
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.grid-item-title {
+    flex: 1;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: rgba(10, 14, 39, 0.6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+    transition: all var(--transition-fast);
+}
+
+.grid-item-title:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px rgba(139, 127, 255, 0.3);
+}
+
+.grid-item-controls {
+    display: flex;
+    gap: 3px;
+}
+
+.btn-icon-sm {
+    padding: 3px 7px;
+    background: rgba(26, 31, 58, 0.8);
+    backdrop-filter: blur(5px);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-primary);
+    transition: all var(--transition-fast);
+    line-height: 1;
+}
+
+.btn-icon-sm:hover:not(:disabled) {
+    background: var(--color-surface-hover);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 8px rgba(139, 127, 255, 0.4);
+}
+
+.btn-icon-sm:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.btn-icon-sm.btn-delete {
+    background: rgba(220, 53, 69, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
+}
+
+.btn-icon-sm.btn-delete:hover:not(:disabled) {
+    background: rgba(220, 53, 69, 0.5);
+    border-color: #ef4444;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+/* === Grid Item Form Inputs === */
+.grid-item-content,
+.grid-item-input,
+.grid-item-select {
+    width: 100%;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: rgba(10, 14, 39, 0.6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    transition: all var(--transition-fast);
+}
+
+.grid-item-content {
+    resize: vertical;
+    font-family: var(--font-primary);
+    line-height: var(--leading-normal);
+}
+
+.grid-item-select {
+    background: rgba(26, 31, 58, 0.8);
+    cursor: pointer;
+}
+
+.grid-item-input:focus,
+.grid-item-content:focus,
+.grid-item-select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px rgba(139, 127, 255, 0.3);
+    background: rgba(10, 14, 39, 0.8);
+}
+
+/* === Grid Item Image Preview === */
+.grid-item-preview {
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+}
+
+/* === Panel Title Icon === */
+.panel-title-icon {
+    font-size: var(--font-size-lg);
+    margin: 0 var(--spacing-xs);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+/* === Icon Picker Button === */
+.btn-icon-picker {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: rgba(139, 127, 255, 0.2);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    color: var(--color-accent);
+    transition: all var(--transition-fast);
+    min-width: 2.5rem;
+}
+
+.btn-icon-picker:hover:not(:disabled) {
+    background: rgba(139, 127, 255, 0.4);
+    box-shadow: 0 0 12px rgba(139, 127, 255, 0.6);
+    transform: scale(1.05);
+}
+
+.btn-icon-picker:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* === SVG Panel Styles === */
+.svg-panel .panel-content-wrapper {
+    background: linear-gradient(135deg,
+        var(--color-surface) 0%,
+        rgba(139, 127, 255, 0.08) 100%);
+}
+
+.btn-edit-svg {
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: linear-gradient(135deg, rgba(139, 127, 255, 0.3), rgba(99, 102, 241, 0.3));
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.btn-edit-svg:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(139, 127, 255, 0.5), rgba(99, 102, 241, 0.5));
+    box-shadow: 0 0 15px rgba(139, 127, 255, 0.6);
+    transform: translateY(-1px);
+}
+
+.btn-edit-svg:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.svg-preview-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    max-height: 400px;
+    padding: var(--spacing-lg);
+    background: rgba(10, 14, 39, 0.4);
+    border: 1px solid rgba(139, 127, 255, 0.3);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.svg-preview-container svg {
+    max-width: 400px;
+    max-height: 400px;
+    width: auto;
+    height: auto;
+    display: block;
+}
+
+.svg-empty-state {
+    text-align: center;
+    color: var(--color-text-secondary);
+    opacity: 0.6;
+    font-style: italic;
+    padding: var(--spacing-xl);
+}
+
+.svg-prompt {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(139, 127, 255, 0.1);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-relaxed);
+}
+
+.svg-prompt strong {
+    color: var(--color-accent);
+}
+
+.svg-metadata {
+    margin-top: var(--spacing-sm);
+    text-align: right;
+    color: var(--color-text-secondary);
+    opacity: 0.7;
+    font-size: var(--font-size-xs);
+}
+
+/* === Grid Item SVG Styles === */
+.grid-item-svg {
+    background: linear-gradient(135deg,
+        var(--color-surface) 0%,
+        rgba(139, 127, 255, 0.08) 100%);
+    border-color: rgba(139, 127, 255, 0.5);
+}
+
+.grid-item-svg:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 20px rgba(139, 127, 255, 0.4);
+}
+
+.grid-item-svg-preview {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    max-height: 200px;
+    padding: var(--spacing-sm);
+    background: rgba(10, 14, 39, 0.3);
+    border: 1px solid rgba(139, 127, 255, 0.2);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-bottom: var(--spacing-sm);
+}
+
+.grid-item-svg-preview svg {
+    max-width: 100%;
+    max-height: 180px;
+    width: auto;
+    height: auto;
+    display: block;
+}
+
+.grid-item-svg-preview .svg-empty-state {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-md);
+}
+
+.grid-item-svg-prompt {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    opacity: 0.8;
+    margin: 0;
+    padding: var(--spacing-xs);
+    background: rgba(139, 127, 255, 0.1);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* === Responsive Design === */
+@media (max-width: 768px) {
+    .editor-controls {
+        flex-direction: column;
+    }
+
+    .panel-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .grid-layout {
+        grid-template-columns: 1fr !important;
+    }
+
+    .panel-controls-top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-sm);
+    }
+
+    .panel-add-controls,
+    .panel-move-controls {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .svg-preview-container {
+        max-height: 300px;
+    }
+
+    .svg-preview-container svg {
+        max-width: 100%;
+        max-height: 300px;
+    }
+}

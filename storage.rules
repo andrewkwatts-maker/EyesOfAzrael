@@ -1,0 +1,180 @@
+rules_version = '2';
+
+/**
+ * Firebase Storage Security Rules
+ * Eyes of Azrael Theory System
+ *
+ * SECURITY MODEL:
+ * - Public read access for all images (anyone can view theory images)
+ * - Authenticated write access (must be logged in to upload)
+ * - User folder isolation (users can only upload to their own folder)
+ * - File size limit: 5MB per image
+ * - File type restriction: Images only (JPEG, PNG, GIF, WebP)
+ *
+ * STORAGE STRUCTURE:
+ * /theory-images/{userId}/{theoryId}/{filename}
+ *   - userId: Firebase Auth UID
+ *   - theoryId: Firestore document ID
+ *   - filename: Original filename with timestamp
+ *
+ * DEPLOYMENT:
+ * Deploy these rules using Firebase CLI:
+ *   firebase deploy --only storage
+ *
+ * Or deploy via Firebase Console:
+ *   Console > Storage > Rules tab > Paste and Publish
+ */
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    /**
+     * HELPER FUNCTIONS
+     */
+
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if user owns this folder
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Check if file is an image
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    // Check if file size is within limit (5MB)
+    function isWithinSizeLimit() {
+      return request.resource.size < 5 * 1024 * 1024; // 5MB in bytes
+    }
+
+    // Validate image content type (specific formats)
+    function isValidImageType() {
+      return request.resource.contentType in [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/svg+xml'
+      ];
+    }
+
+    /**
+     * THEORY IMAGES
+     * Path: /theory-images/{userId}/{theoryId}/{filename}
+     *
+     * Anyone can read (public viewing)
+     * Only authenticated user can upload to their own folder
+     * Only owner can delete their own images
+     */
+    match /theory-images/{userId}/{theoryId}/{filename} {
+
+      // Public read access for all images
+      // This allows anyone to view theory images without login
+      allow read: if true;
+
+      // Authenticated users can upload to their own folder
+      // Restrictions:
+      //   - Must be the owner (userId matches auth.uid)
+      //   - Must be an image file
+      //   - Must be under 5MB
+      //   - Must be a valid image format
+      allow create: if isOwner(userId)
+                    && isImage()
+                    && isWithinSizeLimit()
+                    && isValidImageType();
+
+      // Users can update (overwrite) their own images
+      // Same restrictions as create
+      allow update: if isOwner(userId)
+                    && isImage()
+                    && isWithinSizeLimit()
+                    && isValidImageType();
+
+      // Only owner can delete their own images
+      allow delete: if isOwner(userId);
+    }
+
+    /**
+     * USER AVATARS (optional, for future use)
+     * Path: /user-avatars/{userId}/{filename}
+     *
+     * Users can upload custom avatars (beyond Google profile picture)
+     */
+    match /user-avatars/{userId}/{filename} {
+      // Anyone can read user avatars
+      allow read: if true;
+
+      // Users can upload their own avatar
+      // Limit to 2MB for avatars (smaller than theory images)
+      allow create, update: if isOwner(userId)
+                            && isImage()
+                            && isValidImageType()
+                            && request.resource.size < 2 * 1024 * 1024;
+
+      // Only owner can delete their avatar
+      allow delete: if isOwner(userId);
+    }
+
+    /**
+     * DENY ALL OTHER PATHS
+     * Any path not explicitly matched above is denied
+     */
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+/**
+ * USAGE EXAMPLES:
+ *
+ * 1. Upload theory image:
+ *    Path: /theory-images/user123/theory456/image1.jpg
+ *    User: user123 (authenticated)
+ *    Result: Allowed (owner, valid image, under 5MB)
+ *
+ * 2. Try to upload to another user's folder:
+ *    Path: /theory-images/user456/theory789/hack.jpg
+ *    User: user123 (authenticated)
+ *    Result: Denied (not the owner)
+ *
+ * 3. Try to upload a large file:
+ *    Path: /theory-images/user123/theory456/huge.jpg (6MB)
+ *    User: user123 (authenticated)
+ *    Result: Denied (exceeds 5MB limit)
+ *
+ * 4. Try to upload a non-image:
+ *    Path: /theory-images/user123/theory456/script.js
+ *    User: user123 (authenticated)
+ *    Result: Denied (not an image file)
+ *
+ * 5. View any image (no auth):
+ *    Path: /theory-images/user456/theory789/image.jpg
+ *    User: Not authenticated
+ *    Result: Allowed (public read)
+ */
+
+/**
+ * MONITORING & LIMITS:
+ *
+ * Free Tier Limits:
+ *   - 5GB total storage
+ *   - 1GB/day downloads
+ *   - 20,000 uploads/day
+ *
+ * Monitor usage:
+ *   - Firebase Console > Storage > Usage tab
+ *   - Set up quota alerts
+ *
+ * If you exceed limits:
+ *   - Upgrade to Blaze plan (pay-as-you-go)
+ *   - Optimize image sizes (compress before upload)
+ *   - Implement image thumbnails
+ *   - Add CDN caching
+ */

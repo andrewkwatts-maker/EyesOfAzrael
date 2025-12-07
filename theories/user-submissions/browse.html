@@ -11,7 +11,10 @@
 
     <!-- User System -->
     <link rel="stylesheet" href="../../css/user-auth.css">
-    <script defer src="../../js/user-auth.js"></script>
+    <link rel="stylesheet" href="../../css/public-view.css">
+    <script src="../../js/firebase-auth.js"></script>
+    <script src="../../js/firebase-db.js"></script>
+    <script src="../../js/components/google-signin-button.js"></script>
     <script defer src="../../js/user-theories.js"></script>
     <script defer src="../../js/theory-taxonomy.js"></script>
 
@@ -338,8 +341,8 @@
     <div class="container">
         <header class="page-header">
             <h1>📚 Browse User Theories</h1>
-            <div class="page-header-actions">
-                <a href="submit.html" class="btn-submit-theory">✨ Submit Your Theory</a>
+            <div class="page-header-actions" id="header-actions">
+                <!-- Dynamically populated based on auth state -->
             </div>
             <p>Explore theories organized by topic, subtopic, and author</p>
         </header>
@@ -438,6 +441,12 @@
                     author: '',
                     sortBy: 'newest'
                 };
+                this.pagination = {
+                    lastDoc: null,
+                    hasMore: false,
+                    isLoading: false,
+                    loadedTheories: []
+                };
                 this.init();
             }
 
@@ -483,9 +492,11 @@
                 this.updateAuthorFilter();
             }
 
-            updateAuthorFilter() {
+            async updateAuthorFilter() {
                 const authorFilter = document.getElementById('author-filter');
-                const theories = window.userTheories.getAllTheories({ status: null });
+                const result = window.userTheories ? await window.userTheories.getAllTheories({ status: 'published' }) : [];
+                // Handle both array and paginated response
+                const theories = Array.isArray(result) ? result : (result.theories || []);
                 const authors = [...new Set(theories.map(t => t.author))].sort();
 
                 authorFilter.innerHTML = '<option value="">All Authors</option>';
@@ -556,41 +567,124 @@
                 });
             }
 
-            loadAndDisplay() {
-                const theories = window.userTheories.getAllTheories({
-                    ...this.filters,
-                    status: null // Show all statuses in browse view
-                });
-
-                this.updateStats(theories);
-
-                const container = document.getElementById('results-container');
-
-                if (theories.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📭</div>
-                            <p class="empty-state-text">No theories found matching your filters</p>
-                        </div>
-                    `;
+            async loadAndDisplay(loadMore = false) {
+                // Public viewing: load theories without authentication check
+                if (!window.userTheories) {
                     return;
                 }
 
-                if (this.groupBy === 'none') {
-                    container.innerHTML = this.renderUngrouped(theories);
-                } else {
-                    container.innerHTML = this.renderGrouped(theories, this.groupBy);
+                const container = document.getElementById('results-container');
+
+                // Show loading state
+                if (!loadMore) {
+                    this.pagination.loadedTheories = [];
+                    this.pagination.lastDoc = null;
+                    container.innerHTML = `
+                        <div class="loading">
+                            <div class="loading-spinner">⏳</div>
+                            <p>Loading theories...</p>
+                        </div>
+                    `;
                 }
 
-                this.attachResultEventListeners();
+                this.pagination.isLoading = true;
+
+                try {
+                    const theories = await window.userTheories.getAllTheories({
+                        ...this.filters,
+                        status: 'published', // Only show published theories in public browse
+                        limit: 20,
+                        startAfter: loadMore ? this.pagination.lastDoc : null
+                    });
+
+                    // If using Firestore, theories will be a paginated result
+                    if (theories.theories) {
+                        this.pagination.loadedTheories = loadMore ?
+                            [...this.pagination.loadedTheories, ...theories.theories] :
+                            theories.theories;
+                        this.pagination.hasMore = theories.hasMore || false;
+                        this.pagination.lastDoc = theories.lastDoc;
+                    } else {
+                        // localStorage mode - no pagination
+                        this.pagination.loadedTheories = theories;
+                        this.pagination.hasMore = false;
+                    }
+
+                    await this.updateStats(this.pagination.loadedTheories);
+
+                    if (this.pagination.loadedTheories.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📭</div>
+                                <p class="empty-state-text">No theories found matching your filters</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    if (this.groupBy === 'none') {
+                        container.innerHTML = this.renderUngrouped(this.pagination.loadedTheories);
+                    } else {
+                        container.innerHTML = this.renderGrouped(this.pagination.loadedTheories, this.groupBy);
+                    }
+
+                    // Add load more button if there are more results
+                    if (this.pagination.hasMore) {
+                        container.innerHTML += this.renderLoadMoreButton();
+                    }
+
+                    this.attachResultEventListeners();
+                } catch (error) {
+                    console.error('Error loading theories:', error);
+                    container.innerHTML = `
+                        <div class="error-message">
+                            Error loading theories. Please try again.
+                        </div>
+                    `;
+                } finally {
+                    this.pagination.isLoading = false;
+                }
             }
 
-            updateStats(theories) {
-                const all Theories = window.userTheories.getAllTheories({ status: null });
-                const topics = new Set(allTheories.filter(t => t.topic).map(t => t.topic));
-                const authors = new Set(allTheories.map(t => t.author));
+            renderLoadMoreButton() {
+                return `
+                    <div style="text-align: center; margin-top: 2rem; padding: 2rem;">
+                        <button class="btn-submit-theory" onclick="window.theoryBrowser.loadMoreTheories()" id="load-more-btn">
+                            Load More Theories
+                        </button>
+                        <div class="loading" id="load-more-spinner" style="display: none;">
+                            <div class="loading-spinner">⏳</div>
+                            <p>Loading more theories...</p>
+                        </div>
+                    </div>
+                `;
+            }
 
-                document.getElementById('total-theories').textContent = allTheories.length;
+            async loadMoreTheories() {
+                if (this.pagination.isLoading || !this.pagination.hasMore) {
+                    return;
+                }
+
+                const btn = document.getElementById('load-more-btn');
+                const spinner = document.getElementById('load-more-spinner');
+
+                if (btn) btn.style.display = 'none';
+                if (spinner) spinner.style.display = 'block';
+
+                await this.loadAndDisplay(true);
+            }
+
+            async updateStats(theories) {
+                // Public viewing: show published theories only
+                const result = window.userTheories ? await window.userTheories.getAllTheories({ status: 'published' }) : [];
+
+                // Handle both array and paginated response
+                const theoriesList = Array.isArray(result) ? result : (result.theories || []);
+
+                const topics = new Set(theoriesList.filter(t => t.topic).map(t => t.topic));
+                const authors = new Set(theoriesList.map(t => t.author));
+
+                document.getElementById('total-theories').textContent = theoriesList.length;
                 document.getElementById('total-topics').textContent = topics.size;
                 document.getElementById('total-authors').textContent = authors.size;
                 document.getElementById('filtered-count').textContent = theories.length;
@@ -694,7 +788,30 @@
         // Initialize browser when page loads
         document.addEventListener('DOMContentLoaded', () => {
             window.theoryBrowser = new TheoryBrowser();
+            updateHeaderActions();
         });
+
+        // Update header actions based on auth state
+        function updateHeaderActions() {
+            const headerActions = document.getElementById('header-actions');
+            const isLoggedIn = window.authGuard && window.authGuard.isAuthenticated();
+
+            if (isLoggedIn) {
+                headerActions.innerHTML = `
+                    <a href="submit.html" class="btn-submit-theory">✨ Submit Your Theory</a>
+                `;
+            } else {
+                headerActions.innerHTML = `
+                    <button class="btn-submit-theory" onclick="window.authGuard.showLoginPrompt('Sign in to submit your own theories', 'submit')">
+                        🔒 Sign in to Submit
+                    </button>
+                `;
+            }
+        }
+
+        // Listen for auth state changes
+        window.addEventListener('userLogin', updateHeaderActions);
+        window.addEventListener('userLogout', updateHeaderActions);
     </script>
 
     <!-- Auth Modal Template -->
@@ -759,6 +876,14 @@
             </div>
         </div>
     </div>
+
+    <!-- Firebase SDK (CDN) - No Storage needed for URL-only images -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../../firebase-config.js"></script>
+    <script src="../../js/auth-guard.js"></script>
+    <script src="../../js/user-theories.js"></script>
 
     <script>
         function handleLogin(event) {

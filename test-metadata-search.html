@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metadata-Enhanced Corpus Search - Demo & Test</title>
+    <link rel="stylesheet" href="themes/style.css">
+    <style>
+        body {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .demo-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .demo-section h2 {
+            color: #00d4ff;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .demo-card {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .demo-card:hover {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .demo-card h3 {
+            margin-top: 0;
+            color: #00d4ff;
+            font-size: 1.2rem;
+        }
+
+        .demo-card p {
+            margin: 0.5rem 0;
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .demo-card .example {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            font-family: monospace;
+            color: #00ff00;
+        }
+
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .comparison-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .comparison-box h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+        }
+
+        .comparison-box.without {
+            border-color: rgba(255, 100, 100, 0.3);
+        }
+
+        .comparison-box.with {
+            border-color: rgba(100, 255, 100, 0.3);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+        }
+
+        .status-indicator.success {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 1px solid rgba(0, 255, 0, 0.5);
+        }
+
+        .status-indicator.error {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff5555;
+            border: 1px solid rgba(255, 0, 0, 0.5);
+        }
+
+        .status-indicator.pending {
+            background: rgba(255, 200, 0, 0.2);
+            color: #ffcc00;
+            border: 1px solid rgba(255, 200, 0, 0.5);
+        }
+
+        .test-results {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .test-result-item {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-left: 3px solid #444;
+        }
+
+        .test-result-item.pass {
+            border-left-color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .test-result-item.fail {
+            border-left-color: #ff0000;
+            background: rgba(255, 0, 0, 0.1);
+        }
+
+        .expanded-terms {
+            color: #00d4ff;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        .metadata-badge {
+            background: rgba(123, 44, 191, 0.3);
+            color: #bb86fc;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+        }
+
+        .metadata-entity {
+            background: rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+        }
+
+        .suggestions-box {
+            background: rgba(255, 200, 0, 0.1);
+            border: 1px solid rgba(255, 200, 0, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .suggestions-box h4 {
+            margin-top: 0;
+            color: #ffcc00;
+        }
+
+        .suggestions-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .suggestions-box li {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .suggestions-box a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+
+        .suggestions-box a:hover {
+            text-decoration: underline;
+        }
+
+        button {
+            background: linear-gradient(45deg, #00d4ff, #7b2cbf);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <h1>Metadata-Enhanced Corpus Search</h1>
+        <p>Test and demonstration of alternate name expansion and cross-cultural search</p>
+        <div id="initialization-status">
+            <span class="status-indicator pending">Initializing...</span>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>How It Works</h2>
+        <p>The metadata integration system enhances corpus search in three ways:</p>
+        <ol>
+            <li><strong>Alternate Name Expansion:</strong> Searches for "Enki" also find "Ea" and "Nudimmud"</li>
+            <li><strong>Cross-Cultural Equivalents:</strong> Searches for "Zeus" also find "Jupiter" references</li>
+            <li><strong>Entity Metadata Enrichment:</strong> Results show entity information, mythology, and related names</li>
+        </ol>
+    </div>
+
+    <div class="demo-section">
+        <h2>Example Test Cases</h2>
+        <p>Click any card to run that test (requires loaded corpus texts):</p>
+
+        <div class="demo-grid">
+            <div class="demo-card" onclick="runTest('enki')">
+                <h3>Test 1: Sumerian/Akkadian Names</h3>
+                <p><strong>Search:</strong> "Enki"</p>
+                <p><strong>Should also find:</strong> "Ea", "Nudimmud"</p>
+                <div class="example">Sumerian: Enki → Akkadian: Ea</div>
+            </div>
+
+            <div class="demo-card" onclick="runTest('zeus')">
+                <h3>Test 2: Greek/Roman Equivalents</h3>
+                <p><strong>Search:</strong> "Zeus"</p>
+                <p><strong>Should also find:</strong> "Jupiter", "Jove"</p>
+                <div class="example">Greek: Zeus → Roman: Jupiter</div>
+            </div>
+
+            <div class="demo-card" onclick="runTest('marduk')">
+                <h3>Test 3: Epithets & Titles</h3>
+                <p><strong>Search:</strong> "Marduk"</p>
+                <p><strong>Should also find:</strong> "Bel", "Bēl"</p>
+                <div class="example">Babylonian: Marduk = "Bel" (Lord)</div>
+            </div>
+
+            <div class="demo-card" onclick="runTest('brahma')">
+                <h3>Test 4: Sanskrit Variations</h3>
+                <p><strong>Search:</strong> "Brahma"</p>
+                <p><strong>Should also find:</strong> "Pitamaha", "Svayambhu"</p>
+                <div class="example">Multiple epithets from mythology</div>
+            </div>
+
+            <div class="demo-card" onclick="runTest('ishtar')">
+                <h3>Test 5: Multi-Cultural Goddess</h3>
+                <p><strong>Search:</strong> "Ishtar"</p>
+                <p><strong>Should also find:</strong> "Inanna", "Astarte"</p>
+                <div class="example">Sumerian → Akkadian → Phoenician</div>
+            </div>
+
+            <div class="demo-card" onclick="runTest('odin')">
+                <h3>Test 6: Germanic Variations</h3>
+                <p><strong>Search:</strong> "Odin"</p>
+                <p><strong>Should also find:</strong> "Wotan", "Woden"</p>
+                <div class="example">Norse: Óðinn → Germanic: Wotan</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>Before/After Comparison</h2>
+        <p>See the difference between standard and metadata-enhanced search:</p>
+
+        <div class="comparison-container">
+            <div class="comparison-box without">
+                <h3>Without Metadata Integration</h3>
+                <p>Standard search for "Enki"</p>
+                <ul>
+                    <li>Only finds exact matches for "Enki"</li>
+                    <li>Misses references using "Ea"</li>
+                    <li>No alternate name suggestions</li>
+                    <li>No cross-cultural connections</li>
+                </ul>
+            </div>
+
+            <div class="comparison-box with">
+                <h3>With Metadata Integration</h3>
+                <p>Enhanced search for "Enki"</p>
+                <ul>
+                    <li>Finds "Enki" AND "Ea" AND "Nudimmud"</li>
+                    <li>Shows which alternate name matched</li>
+                    <li>Displays entity metadata (mythology, type)</li>
+                    <li>Suggests related search terms</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>Live Test Results</h2>
+        <p>Select a test above or enter your own:</p>
+
+        <div style="margin-top: 1rem;">
+            <input type="text" id="custom-test-term" placeholder="Enter entity name (e.g., Zeus, Enki, Brahma)"
+                   style="padding: 0.75rem; width: 300px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px;">
+            <button onclick="runCustomTest()" style="margin-left: 1rem;">Test Custom Term</button>
+            <button onclick="runAllTests()" style="margin-left: 1rem;">Run All Tests</button>
+        </div>
+
+        <div id="test-results" class="test-results">
+            <p style="color: #888;">Test results will appear here...</p>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>System Status</h2>
+        <div id="system-status">
+            <p>Loading system information...</p>
+        </div>
+    </div>
+
+    <!-- Include required libraries -->
+    <script src="corpus-search-core.js"></script>
+    <script src="js/alternate-name-index.js"></script>
+    <script src="js/corpus-metadata-integration.js"></script>
+
+    <script>
+        let corpusSearch;
+        let metadataIntegration;
+        let testEntities = [];
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializeSystem();
+        });
+
+        async function initializeSystem() {
+            const statusEl = document.getElementById('initialization-status');
+            const systemStatusEl = document.getElementById('system-status');
+
+            try {
+                statusEl.innerHTML = '<span class="status-indicator pending">Loading corpus search...</span>';
+
+                // Initialize with sample entity data (normally would load from files)
+                const sampleEntities = getSampleEntities();
+                testEntities = sampleEntities;
+
+                // Create index directly from sample data
+                const nameIndex = new AlternateNameIndex();
+                const stats = nameIndex.loadFromArray(sampleEntities);
+
+                statusEl.innerHTML = '<span class="status-indicator success">System Ready</span>';
+
+                // Create a mock corpus search for testing
+                corpusSearch = createMockCorpusSearch();
+
+                // Create metadata integration
+                metadataIntegration = new CorpusMetadataIntegration(corpusSearch);
+                await metadataIntegration.init({
+                    nameIndexInstance: nameIndex,
+                    crossCulturalMapPath: '/data/cross-cultural-mapping.json',
+                    loadCrossCulturalMap: true
+                });
+
+                const integrationStats = metadataIntegration.getStats();
+
+                systemStatusEl.innerHTML = `
+                    <h3>Metadata Integration Status</h3>
+                    <ul>
+                        <li>Status: <span class="status-indicator success">Active</span></li>
+                        <li>Entities Indexed: ${stats.totalEntities}</li>
+                        <li>Name Variants: ${stats.totalNames}</li>
+                        <li>Cross-Cultural Groups: ${integrationStats.crossCulturalGroups?.deities || 0} deity groups, ${integrationStats.crossCulturalGroups?.concepts || 0} concept groups</li>
+                        <li>Average Names per Entity: ${stats.averageNamesPerEntity}</li>
+                    </ul>
+                `;
+
+                addTestResult('System initialized successfully', 'pass');
+
+            } catch (error) {
+                statusEl.innerHTML = '<span class="status-indicator error">Initialization Failed</span>';
+                systemStatusEl.innerHTML = `<p style="color: #ff5555;">Error: ${error.message}</p>`;
+                addTestResult(`Initialization failed: ${error.message}`, 'fail');
+            }
+        }
+
+        function getSampleEntities() {
+            return [
+                {
+                    id: 'enki',
+                    type: 'deity',
+                    name: 'Enki',
+                    mythologies: ['sumerian', 'akkadian', 'babylonian'],
+                    primaryMythology: 'sumerian',
+                    linguistic: {
+                        originalName: '𒀭𒂗𒆠',
+                        alternativeNames: [
+                            { name: 'Ea', language: 'akkadian', context: 'Akkadian equivalent' },
+                            { name: 'Nudimmud', language: 'sumerian', context: 'Epithet meaning "creator"' }
+                        ]
+                    },
+                    mythologyContexts: [
+                        {
+                            mythology: 'sumerian',
+                            names: ['Enki', 'Nudimmud']
+                        },
+                        {
+                            mythology: 'akkadian',
+                            names: ['Ea']
+                        }
+                    ]
+                },
+                {
+                    id: 'zeus',
+                    type: 'deity',
+                    name: 'Zeus',
+                    mythologies: ['greek'],
+                    primaryMythology: 'greek',
+                    linguistic: {
+                        originalName: 'Ζεύς',
+                        alternativeNames: [
+                            { name: 'Jupiter', language: 'latin', context: 'Roman equivalent' },
+                            { name: 'Jove', language: 'latin', context: 'Roman poetic form' }
+                        ]
+                    }
+                },
+                {
+                    id: 'brahma',
+                    type: 'deity',
+                    name: 'Brahma',
+                    mythologies: ['hindu'],
+                    primaryMythology: 'hindu',
+                    linguistic: {
+                        originalName: 'ब्रह्मा',
+                        alternativeNames: [
+                            { name: 'Pitamaha', language: 'sanskrit', context: 'Grandfather' },
+                            { name: 'Svayambhu', language: 'sanskrit', context: 'Self-Manifested' }
+                        ]
+                    },
+                    mythologyContexts: [
+                        {
+                            mythology: 'hindu',
+                            names: ['Brahma', 'Pitamaha', 'Svayambhu', 'Chaturmukha']
+                        }
+                    ]
+                }
+            ];
+        }
+
+        function createMockCorpusSearch() {
+            // Create a simple mock that returns sample results
+            return {
+                search: async (term, options) => {
+                    // Simulate search results
+                    const results = [];
+                    const terms = options.terms || [term];
+
+                    for (const searchTerm of terms) {
+                        results.push({
+                            corpus_name: 'Sample Corpus',
+                            text_id: `sample_${searchTerm}`,
+                            text_name: `Reference to ${searchTerm}`,
+                            matched_term: searchTerm,
+                            context: `...and ${searchTerm} created the heavens and earth...`,
+                            full_verse: `In the beginning, ${searchTerm} created the heavens and the earth, and all the creatures therein.`,
+                            metadata: {}
+                        });
+                    }
+
+                    return results;
+                }
+            };
+        }
+
+        async function runTest(entityName) {
+            const testResultsEl = document.getElementById('test-results');
+            addTestResult(`Testing: "${entityName}"`, 'info');
+
+            try {
+                // Get alternate names
+                const suggestions = metadataIntegration.getAlternateSuggestions(entityName, { limit: 10 });
+                addTestResult(`Found ${suggestions.length} alternate names/equivalents`, 'pass');
+
+                if (suggestions.length > 0) {
+                    suggestions.forEach(sug => {
+                        addTestResult(`  → ${sug.term} (${sug.type})`, 'info');
+                    });
+                }
+
+                // Perform enhanced search
+                const results = await metadataIntegration.searchWithMetadata(entityName);
+                addTestResult(`Search returned ${results.length} results`, 'pass');
+
+                // Check if results contain expanded terms
+                if (results.length > 0 && results[0].metadata?.entityAnnotation) {
+                    const annotation = results[0].metadata.entityAnnotation;
+                    if (annotation.expandedTerms && annotation.expandedTerms.length > 1) {
+                        addTestResult(`Searched for: ${annotation.expandedTerms.join(', ')}`, 'pass');
+                    }
+                }
+
+            } catch (error) {
+                addTestResult(`Test failed: ${error.message}`, 'fail');
+            }
+        }
+
+        async function runCustomTest() {
+            const term = document.getElementById('custom-test-term').value.trim();
+            if (!term) {
+                addTestResult('Please enter a term to test', 'fail');
+                return;
+            }
+            await runTest(term);
+        }
+
+        async function runAllTests() {
+            const tests = ['enki', 'zeus', 'marduk', 'brahma', 'ishtar', 'odin'];
+            document.getElementById('test-results').innerHTML = '';
+
+            for (const test of tests) {
+                await runTest(test);
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            addTestResult('All tests completed', 'pass');
+        }
+
+        function addTestResult(message, type) {
+            const testResultsEl = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result-item ${type}`;
+            resultDiv.textContent = message;
+            testResultsEl.appendChild(resultDiv);
+            testResultsEl.scrollTop = testResultsEl.scrollHeight;
+        }
+    </script>
+</body>
+</html>
