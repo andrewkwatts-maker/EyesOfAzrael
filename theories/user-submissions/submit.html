@@ -878,6 +878,25 @@
         });
 
         /**
+         * Load page taxonomy data for internal link selector
+         */
+        async function loadPageTaxonomy() {
+            try {
+                const response = await fetch('../../data/page-taxonomy.json');
+                if (response.ok) {
+                    window.pageTaxonomy = await response.json();
+                    console.log('Page taxonomy loaded:', Object.keys(window.pageTaxonomy).length, 'categories');
+                } else {
+                    console.warn('Could not load page taxonomy');
+                    window.pageTaxonomy = {};
+                }
+            } catch (error) {
+                console.error('Error loading page taxonomy:', error);
+                window.pageTaxonomy = {};
+            }
+        }
+
+        /**
          * Check authentication and initialize form
          */
         function checkAuthAndInitialize() {
@@ -898,6 +917,9 @@
             // Get current user ID
             const currentUser = window.userAuth?.getCurrentUser();
             const userId = currentUser?.username || null;
+
+            // Load page taxonomy for internal link selector
+            await loadPageTaxonomy();
 
             // Initialize Grid Panel Editor
             const editorContainer = document.getElementById('editor-container');
