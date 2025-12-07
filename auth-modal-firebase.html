@@ -1,0 +1,176 @@
+<!--
+    Firebase Authentication Modal Template
+
+    USAGE: Copy this entire block to any page that needs Firebase authentication.
+    Place it at the end of <body>, just before </body>
+
+    Required Firebase scripts (add to <head>):
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    Required custom scripts (add to <head> after Firebase scripts):
+    <link rel="stylesheet" href="/css/user-auth.css">
+    <script defer src="/js/firebase-config.js"></script>
+    <script defer src="/js/firebase-auth.js"></script>
+    <script defer src="/js/components/google-signin-button.js"></script>
+
+    Optional - for theory system:
+    <script defer src="/js/user-theories.js"></script>
+    <script defer src="/js/components/theory-widget.js"></script>
+
+    To add a theory widget anywhere on the page:
+    <div data-theory-widget
+         data-page="deity/zeus"
+         data-title="Zeus - King of the Gods"
+         data-mode="button"></div>
+-->
+
+<!-- Authentication Modal -->
+<div id="auth-modal" class="auth-modal">
+    <div class="auth-modal-content">
+        <button class="auth-modal-close" onclick="window.firebaseAuth.hideAuthModal()">&times;</button>
+
+        <h2 id="auth-modal-title" class="auth-modal-title">Sign in to Eyes of Azrael</h2>
+
+        <div id="auth-message" class="auth-message"></div>
+
+        <!-- User Profile (shown when logged in) -->
+        <div id="user-profile-display" data-auth-show="loggedIn" style="display: none;">
+            <div style="text-align: center; padding: 2rem;">
+                <img data-auth-avatar src="" alt="Profile"
+                     style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 1rem; border: 3px solid var(--mythos-primary, #9333ea);">
+                <h3 data-auth-username style="margin: 0 0 0.5rem 0; color: var(--color-text-primary, #fff);"></h3>
+                <p data-auth-email style="color: var(--color-text-secondary, #999); margin: 0 0 1.5rem 0;"></p>
+                <button class="auth-submit-btn" onclick="handleSignOut()"
+                        style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+                    Sign Out
+                </button>
+            </div>
+        </div>
+
+        <!-- Google Sign-In Button (shown when logged out) -->
+        <div data-auth-show="loggedOut">
+            <div style="padding: 1.5rem 0;">
+                <div data-google-signin data-button-text="Sign in with Google" data-button-size="large"></div>
+            </div>
+
+            <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(147, 51, 234, 0.1); border-radius: 8px; border: 1px solid rgba(147, 51, 234, 0.3);">
+                <p style="margin: 0; color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; text-align: center;">
+                    <strong>Why sign in?</strong><br>
+                    Submit your own theories, vote on content, and join the discussion about mythology and ancient wisdom.
+                </p>
+            </div>
+
+            <div style="margin-top: 1rem; text-align: center; color: rgba(255, 255, 255, 0.6); font-size: 0.85rem;">
+                By signing in, you agree to our terms of service and privacy policy.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Navigation (top right corner) -->
+<div id="user-nav" style="position: fixed; top: 1rem; right: 1rem; z-index: 1000;">
+    <!-- Login button (shown when logged out) -->
+    <div data-auth-show="loggedOut" style="display: flex; gap: 0.5rem;">
+        <button class="auth-submit-btn" onclick="window.firebaseAuth.showLoginModal()"
+                style="padding: 0.5rem 1rem; font-size: 0.9rem; background: linear-gradient(135deg, #9333ea, #7c3aed);">
+            Sign in with Google
+        </button>
+    </div>
+
+    <!-- User menu (shown when logged in) -->
+    <div data-auth-show="loggedIn" style="display: none;">
+        <div class="user-display" onclick="toggleUserDropdown()">
+            <img data-auth-avatar src="" alt="User Avatar" class="user-avatar">
+            <span data-auth-username class="user-username"></span>
+            <span>▼</span>
+        </div>
+
+        <div id="user-dropdown" class="user-dropdown">
+            <div class="user-dropdown-header">
+                <img data-auth-avatar src="" alt="User Avatar" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 12px;">
+                <div>
+                    <div data-auth-username style="font-weight: 600; color: var(--color-text-primary, #fff);"></div>
+                    <div data-auth-email style="font-size: 0.85rem; color: var(--color-text-secondary, #999);"></div>
+                </div>
+            </div>
+            <div style="border-top: 1px solid rgba(147, 51, 234, 0.3); margin: 0.75rem 0;"></div>
+            <a href="/theories/user-submissions/index.html" class="user-dropdown-item">My Theories</a>
+            <a href="/profile.html" class="user-dropdown-item">Profile Settings</a>
+            <div style="border-top: 1px solid rgba(147, 51, 234, 0.3); margin: 0.75rem 0;"></div>
+            <button class="user-logout-btn" onclick="handleSignOut()">Sign Out</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Additional styles for Firebase auth modal */
+.user-dropdown-header {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(147, 51, 234, 0.1);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.google-signin-wrapper {
+    margin: 1.5rem 0;
+}
+</style>
+
+<script>
+// Sign out handler
+async function handleSignOut() {
+    if (window.firebaseAuth) {
+        const result = await window.firebaseAuth.signOut();
+        if (result.success) {
+            // Close modal
+            window.firebaseAuth.hideAuthModal();
+            // Close dropdown if open
+            const dropdown = document.getElementById('user-dropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+        } else {
+            window.firebaseAuth.showAuthMessage(result.error, 'error');
+        }
+    }
+}
+
+// User dropdown toggle
+function toggleUserDropdown() {
+    const dropdown = document.getElementById('user-dropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.user-display') && !e.target.closest('#user-dropdown')) {
+        const dropdown = document.getElementById('user-dropdown');
+        if (dropdown) {
+            dropdown.classList.remove('show');
+        }
+    }
+});
+
+// Listen for successful sign-in to close modal
+document.addEventListener('google-signin-success', () => {
+    if (window.firebaseAuth) {
+        window.firebaseAuth.hideAuthModal();
+    }
+});
+
+// Update modal UI based on auth state
+if (window.firebaseAuth) {
+    window.firebaseAuth.onAuthStateChanged((user) => {
+        const profileDisplay = document.getElementById('user-profile-display');
+        if (profileDisplay) {
+            profileDisplay.style.display = user ? 'block' : 'none';
+        }
+    });
+}
+</script>

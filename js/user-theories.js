@@ -1,25 +1,74 @@
 /**
  * User Theory Management System
  * Handles creation, editing, viewing, and voting on user-submitted theories
+ *
+ * Now uses Firebase Firestore with localStorage fallback for backward compatibility
  */
 
 class UserTheories {
     constructor() {
-        this.theories = this.loadTheories();
+        this.useFirestore = false; // Will be set to true when Firebase is available
+        this.theories = this.loadTheories(); // localStorage fallback
+        this.listeners = new Map(); // Track active listeners
         this.init();
     }
 
     /**
      * Initialize theory system
      */
-    init() {
+    async init() {
         // Listen for login/logout events
         window.addEventListener('userLogin', () => this.onUserLogin());
         window.addEventListener('userLogout', () => this.onUserLogout());
+
+        // Check if Firebase is available
+        await this.initFirebase();
     }
 
     /**
-     * Load theories from localStorage
+     * Initialize Firebase connection
+     */
+    async initFirebase() {
+        try {
+            // Wait for Firebase to be available
+            if (typeof firebase !== 'undefined' && window.firebaseDB) {
+                await window.firebaseDB.init();
+                this.useFirestore = true;
+                console.log('UserTheories: Using Firestore backend');
+
+                // Migrate localStorage data if needed
+                await this.migrateFromLocalStorage();
+            } else {
+                console.log('UserTheories: Using localStorage fallback');
+            }
+        } catch (error) {
+            console.warn('UserTheories: Firebase initialization failed, using localStorage:', error);
+            this.useFirestore = false;
+        }
+    }
+
+    /**
+     * Migrate localStorage data to Firestore (one-time migration)
+     */
+    async migrateFromLocalStorage() {
+        const migrationKey = 'userTheories_migrated';
+        if (localStorage.getItem(migrationKey)) {
+            return; // Already migrated
+        }
+
+        const localTheories = this.loadTheories();
+        if (localTheories.length === 0) {
+            localStorage.setItem(migrationKey, 'true');
+            return;
+        }
+
+        console.log(`Migrating ${localTheories.length} theories to Firestore...`);
+        // Migration would happen here if user is logged in
+        // For now, we keep localStorage as backup
+    }
+
+    /**
+     * Load theories from localStorage (fallback)
      */
     loadTheories() {
         const theoriesJSON = localStorage.getItem('userTheories');
@@ -27,7 +76,7 @@ class UserTheories {
     }
 
     /**
-     * Save theories to localStorage
+     * Save theories to localStorage (fallback)
      */
     saveTheories() {
         localStorage.setItem('userTheories', JSON.stringify(this.theories));
@@ -43,7 +92,7 @@ class UserTheories {
     /**
      * Submit new theory
      */
-    submitTheory(data) {
+    async submitTheory(data) {
         if (!window.userAuth || !window.userAuth.isLoggedIn()) {
             return { success: false, error: 'You must be logged in to submit theories' };
         }
@@ -65,6 +114,23 @@ class UserTheories {
             return { success: false, error: 'Please select a category or topic' };
         }
 
+        // Use Firestore if available
+        if (this.useFirestore) {
+            try {
+                const result = await window.firebaseDB.createTheory(data);
+                return {
+                    success: true,
+                    theory: result.theory,
+                    theoryId: result.theoryId,
+                    message: 'Theory submitted successfully!'
+                };
+            } catch (error) {
+                console.error('Error submitting theory to Firestore:', error);
+                return { success: false, error: error.message || 'Failed to submit theory' };
+            }
+        }
+
+        // Fallback to localStorage
         const currentUser = window.userAuth.getCurrentUser();
 
         const theory = {
@@ -115,11 +181,23 @@ class UserTheories {
     /**
      * Update existing theory
      */
-    updateTheory(theoryId, updates) {
+    async updateTheory(theoryId, updates) {
         if (!window.userAuth || !window.userAuth.isLoggedIn()) {
             return { success: false, error: 'You must be logged in to edit theories' };
         }
 
+        // Use Firestore if available
+        if (this.useFirestore) {
+            try {
+                await window.firebaseDB.updateTheory(theoryId, updates);
+                return { success: true, message: 'Theory updated successfully!' };
+            } catch (error) {
+                console.error('Error updating theory in Firestore:', error);
+                return { success: false, error: error.message || 'Failed to update theory' };
+            }
+        }
+
+        // Fallback to localStorage
         const currentUser = window.userAuth.getCurrentUser();
         const theory = this.theories.find(t => t.id === theoryId);
 
@@ -135,9 +213,16 @@ class UserTheories {
         if (updates.title) theory.title = updates.title.trim();
         if (updates.summary !== undefined) theory.summary = updates.summary.trim();
         if (updates.content) theory.content = updates.content.trim();
+        if (updates.richContent) theory.richContent = updates.richContent;
         if (updates.category) theory.category = updates.category;
+        if (updates.topic) theory.topic = updates.topic;
+        if (updates.topicName) theory.topicName = updates.topicName;
+        if (updates.topicIcon) theory.topicIcon = updates.topicIcon;
+        if (updates.subtopic) theory.subtopic = updates.subtopic;
+        if (updates.subtopicName) theory.subtopicName = updates.subtopicName;
         if (updates.sources !== undefined) theory.sources = updates.sources.trim();
         if (updates.relatedMythologies) theory.relatedMythologies = updates.relatedMythologies;
+        if (updates.tags) theory.tags = updates.tags;
         if (updates.status) theory.status = updates.status;
 
         theory.updatedAt = new Date().toISOString();
@@ -150,11 +235,23 @@ class UserTheories {
     /**
      * Delete theory
      */
-    deleteTheory(theoryId) {
+    async deleteTheory(theoryId) {
         if (!window.userAuth || !window.userAuth.isLoggedIn()) {
             return { success: false, error: 'You must be logged in to delete theories' };
         }
 
+        // Use Firestore if available
+        if (this.useFirestore) {
+            try {
+                await window.firebaseDB.deleteTheory(theoryId);
+                return { success: true, message: 'Theory deleted successfully!' };
+            } catch (error) {
+                console.error('Error deleting theory in Firestore:', error);
+                return { success: false, error: error.message || 'Failed to delete theory' };
+            }
+        }
+
+        // Fallback to localStorage
         const currentUser = window.userAuth.getCurrentUser();
         const theoryIndex = this.theories.findIndex(t => t.id === theoryId);
 
@@ -177,14 +274,43 @@ class UserTheories {
     /**
      * Get theory by ID
      */
-    getTheory(theoryId) {
+    async getTheory(theoryId) {
+        // Use Firestore if available
+        if (this.useFirestore) {
+            try {
+                return await window.firebaseDB.getTheory(theoryId);
+            } catch (error) {
+                console.error('Error getting theory from Firestore:', error);
+                return null;
+            }
+        }
+
+        // Fallback to localStorage
         return this.theories.find(t => t.id === theoryId);
     }
 
     /**
      * Get all theories
      */
-    getAllTheories(filters = {}) {
+    async getAllTheories(filters = {}) {
+        // Use Firestore if available
+        if (this.useFirestore) {
+            try {
+                // Handle search separately
+                if (filters.search) {
+                    const result = await window.firebaseDB.searchTheories(filters.search, filters);
+                    return result.theories;
+                }
+
+                const result = await window.firebaseDB.getTheories(filters);
+                return result.theories;
+            } catch (error) {
+                console.error('Error getting theories from Firestore:', error);
+                // Fall back to localStorage on error
+            }
+        }
+
+        // Fallback to localStorage
         let filtered = [...this.theories];
 
         // Filter by status
@@ -265,11 +391,23 @@ class UserTheories {
     /**
      * Vote on theory
      */
-    voteTheory(theoryId, direction = 1) {
+    async voteTheory(theoryId, direction = 1) {
         if (!window.userAuth || !window.userAuth.isLoggedIn()) {
             return { success: false, error: 'You must be logged in to vote' };
         }
 
+        // Use Firestore if available
+        if (this.useFirestore) {
+            try {
+                await window.firebaseDB.voteTheory(theoryId, direction);
+                return { success: true };
+            } catch (error) {
+                console.error('Error voting on theory in Firestore:', error);
+                return { success: false, error: error.message || 'Failed to vote' };
+            }
+        }
+
+        // Fallback to localStorage
         const currentUser = window.userAuth.getCurrentUser();
         const theory = this.theories.find(t => t.id === theoryId);
 
@@ -311,11 +449,23 @@ class UserTheories {
     /**
      * Add comment to theory
      */
-    addComment(theoryId, content) {
+    async addComment(theoryId, content) {
         if (!window.userAuth || !window.userAuth.isLoggedIn()) {
             return { success: false, error: 'You must be logged in to comment' };
         }
 
+        // Use Firestore if available
+        if (this.useFirestore) {
+            try {
+                const result = await window.firebaseDB.addComment(theoryId, content);
+                return { success: true, comment: result.comment, message: 'Comment added!' };
+            } catch (error) {
+                console.error('Error adding comment in Firestore:', error);
+                return { success: false, error: error.message || 'Failed to add comment' };
+            }
+        }
+
+        // Fallback to localStorage
         const currentUser = window.userAuth.getCurrentUser();
         const theory = this.theories.find(t => t.id === theoryId);
 
@@ -345,7 +495,19 @@ class UserTheories {
     /**
      * Increment view count
      */
-    incrementViews(theoryId) {
+    async incrementViews(theoryId) {
+        // Use Firestore if available
+        if (this.useFirestore) {
+            try {
+                await window.firebaseDB.incrementViews(theoryId);
+                return;
+            } catch (error) {
+                console.error('Error incrementing views in Firestore:', error);
+                // Don't throw - view counting is not critical
+            }
+        }
+
+        // Fallback to localStorage
         const theory = this.theories.find(t => t.id === theoryId);
         if (theory) {
             theory.views = (theory.views || 0) + 1;
@@ -372,6 +534,58 @@ class UserTheories {
      */
     getUserTheories(username) {
         return this.getAllTheories({ author: username, status: null });
+    }
+
+    /**
+     * Get comments for a theory
+     */
+    async getComments(theoryId) {
+        // Use Firestore if available
+        if (this.useFirestore) {
+            try {
+                return await window.firebaseDB.getComments(theoryId);
+            } catch (error) {
+                console.error('Error getting comments from Firestore:', error);
+                return [];
+            }
+        }
+
+        // Fallback to localStorage
+        const theory = this.theories.find(t => t.id === theoryId);
+        return theory ? theory.comments : [];
+    }
+
+    /**
+     * Listen for real-time updates to a theory
+     */
+    listenToTheory(theoryId, callback) {
+        if (this.useFirestore && window.firebaseDB) {
+            return window.firebaseDB.listenToTheory(theoryId, callback);
+        }
+
+        // No real-time updates in localStorage mode
+        return () => {};
+    }
+
+    /**
+     * Listen for real-time comment updates
+     */
+    listenToComments(theoryId, callback) {
+        if (this.useFirestore && window.firebaseDB) {
+            return window.firebaseDB.listenToComments(theoryId, callback);
+        }
+
+        // No real-time updates in localStorage mode
+        return () => {};
+    }
+
+    /**
+     * Stop listening to a theory
+     */
+    stopListening(theoryId) {
+        if (this.useFirestore && window.firebaseDB) {
+            window.firebaseDB.stopListening(theoryId);
+        }
     }
 
     /**

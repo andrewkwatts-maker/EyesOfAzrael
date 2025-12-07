@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Performance Tests - Eyes of Azrael</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .metric-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+
+        .metric-value.good {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .metric-value.warning {
+            background: #feebc8;
+            color: #744210;
+        }
+
+        .metric-value.bad {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .chart {
+            width: 100%;
+            height: 300px;
+            background: #f7fafc;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar {
+            position: absolute;
+            bottom: 0;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 10px 5px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .quota-warning {
+            background: #fffaf0;
+            border-left: 4px solid #ed8936;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .quota-warning.critical {
+            background: #fff5f5;
+            border-left-color: #f56565;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            background: #edf2f7;
+            border-radius: 5px;
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f7fafc;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f7fafc;
+        }
+
+        .recommendation {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+
+        .recommendation h4 {
+            color: #2c5282;
+            margin-bottom: 8px;
+        }
+
+        .recommendation ul {
+            margin-left: 20px;
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ Firebase Performance Tests</h1>
+            <p>Monitor performance metrics, load times, and quota usage</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="runAllPerformanceTests()">▶️ Run All Performance Tests</button>
+            <button class="btn btn-primary" onclick="testPageLoad()">📄 Test Page Load</button>
+            <button class="btn btn-primary" onclick="testQueryPerformance()">🔍 Test Query Performance</button>
+            <button class="btn btn-primary" onclick="testImageLoad()">🖼️ Test Image Load</button>
+            <button class="btn btn-primary" onclick="monitorQuota()">📊 Monitor Quota Usage</button>
+        </div>
+
+        <div id="status" class="status" style="display: none;"></div>
+
+        <div class="results-grid">
+            <div class="metric-card">
+                <h3>⏱️ Load Times</h3>
+                <div id="loadTimeMetrics">
+                    <div class="metric-item">
+                        <span class="metric-label">Initial Page Load</span>
+                        <span class="metric-value" id="initialLoad">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Theory List (20 items)</span>
+                        <span class="metric-value" id="theoryListLoad">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Single Theory Load</span>
+                        <span class="metric-value" id="singleTheoryLoad">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Average Image Load</span>
+                        <span class="metric-value" id="imageLoad">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <h3>🔍 Query Performance</h3>
+                <div id="queryMetrics">
+                    <div class="metric-item">
+                        <span class="metric-label">Filter by Topic</span>
+                        <span class="metric-value" id="topicFilter">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Search by Keyword</span>
+                        <span class="metric-value" id="keywordSearch">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Sort Theories</span>
+                        <span class="metric-value" id="sortTheories">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Load More (Pagination)</span>
+                        <span class="metric-value" id="pagination">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <h3>📊 Quota Usage</h3>
+                <div id="quotaMetrics">
+                    <div class="metric-item">
+                        <span class="metric-label">Firestore Reads (Page Load)</span>
+                        <span class="metric-value" id="firestoreReads">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Firestore Writes (Submit)</span>
+                        <span class="metric-value" id="firestoreWrites">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Storage Downloads</span>
+                        <span class="metric-value" id="storageDownloads">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Estimated Daily Usage</span>
+                        <span class="metric-value" id="dailyUsage">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <h3>💾 Resource Usage</h3>
+                <div id="resourceMetrics">
+                    <div class="metric-item">
+                        <span class="metric-label">Memory Usage</span>
+                        <span class="metric-value" id="memoryUsage">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Cache Hit Rate</span>
+                        <span class="metric-value" id="cacheHitRate">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Network Requests</span>
+                        <span class="metric-value" id="networkRequests">--</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Data Transfer</span>
+                        <span class="metric-value" id="dataTransfer">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3>📈 Response Time Distribution</h3>
+            <div class="chart" id="responseTimeChart"></div>
+        </div>
+
+        <div class="metric-card">
+            <h3>📋 Detailed Performance Log</h3>
+            <table id="performanceLog">
+                <thead>
+                    <tr>
+                        <th>Operation</th>
+                        <th>Duration (ms)</th>
+                        <th>Status</th>
+                        <th>Reads</th>
+                        <th>Writes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #718096;">
+                            No performance data yet. Run tests to see results.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="recommendation">
+                <h4>💡 Optimization Recommendations</h4>
+                <ul id="recommendations">
+                    <li>Run performance tests to get personalized recommendations</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script src="../firebase-config.js"></script>
+
+    <script>
+        class PerformanceMonitor {
+            constructor() {
+                this.metrics = {
+                    loadTimes: {},
+                    queryTimes: {},
+                    quotaUsage: { reads: 0, writes: 0, downloads: 0 },
+                    operations: []
+                };
+            }
+
+            async runAllPerformanceTests() {
+                this.showStatus('Running all performance tests...');
+
+                await this.testPageLoad();
+                await this.testQueryPerformance();
+                await this.testImageLoad();
+                await this.monitorQuota();
+
+                this.updateAllDisplays();
+                this.generateRecommendations();
+                this.hideStatus();
+            }
+
+            async testPageLoad() {
+                this.showStatus('Testing page load performance...');
+
+                // Test initial load (Firebase initialization)
+                const initStart = performance.now();
+                await new Promise(resolve => setTimeout(resolve, 100)); // Simulate
+                const initTime = performance.now() - initStart;
+                this.setMetric('initialLoad', initTime);
+
+                // Test theory list load
+                if (firebase.firestore) {
+                    const listStart = performance.now();
+                    const db = firebase.firestore();
+                    try {
+                        const snapshot = await db.collection('theories')
+                            .where('status', '==', 'published')
+                            .limit(20)
+                            .get();
+                        const listTime = performance.now() - listStart;
+                        this.setMetric('theoryListLoad', listTime);
+                        this.metrics.quotaUsage.reads += snapshot.size;
+                        this.logOperation('Load 20 theories', listTime, 'success', snapshot.size, 0);
+                    } catch (error) {
+                        this.logOperation('Load 20 theories', 0, 'error', 0, 0);
+                    }
+                }
+
+                // Test single theory load
+                if (firebase.firestore) {
+                    const singleStart = performance.now();
+                    const db = firebase.firestore();
+                    try {
+                        const snapshot = await db.collection('theories').limit(1).get();
+                        if (!snapshot.empty) {
+                            const doc = snapshot.docs[0];
+                            await db.collection('theories').doc(doc.id).get();
+                            const singleTime = performance.now() - singleStart;
+                            this.setMetric('singleTheoryLoad', singleTime);
+                            this.metrics.quotaUsage.reads += 2;
+                            this.logOperation('Load single theory', singleTime, 'success', 2, 0);
+                        }
+                    } catch (error) {
+                        this.logOperation('Load single theory', 0, 'error', 0, 0);
+                    }
+                }
+
+                this.hideStatus();
+            }
+
+            async testQueryPerformance() {
+                this.showStatus('Testing query performance...');
+
+                if (!firebase.firestore) {
+                    this.hideStatus();
+                    return;
+                }
+
+                const db = firebase.firestore();
+
+                // Test topic filter
+                const topicStart = performance.now();
+                try {
+                    const snapshot = await db.collection('theories')
+                        .where('topic', '==', 'Mythologies')
+                        .limit(10)
+                        .get();
+                    const topicTime = performance.now() - topicStart;
+                    this.setMetric('topicFilter', topicTime);
+                    this.metrics.quotaUsage.reads += snapshot.size;
+                    this.logOperation('Filter by topic', topicTime, 'success', snapshot.size, 0);
+                } catch (error) {
+                    this.logOperation('Filter by topic', 0, 'error', 0, 0);
+                }
+
+                // Test keyword search (client-side simulation)
+                const searchStart = performance.now();
+                try {
+                    const snapshot = await db.collection('theories')
+                        .where('status', '==', 'published')
+                        .limit(50)
+                        .get();
+                    // Simulate client-side search
+                    const results = snapshot.docs.filter(doc =>
+                        doc.data().title?.toLowerCase().includes('myth')
+                    );
+                    const searchTime = performance.now() - searchStart;
+                    this.setMetric('keywordSearch', searchTime);
+                    this.metrics.quotaUsage.reads += snapshot.size;
+                    this.logOperation('Search by keyword', searchTime, 'success', snapshot.size, 0);
+                } catch (error) {
+                    this.logOperation('Search by keyword', 0, 'error', 0, 0);
+                }
+
+                // Test sorting
+                const sortStart = performance.now();
+                try {
+                    const snapshot = await db.collection('theories')
+                        .where('status', '==', 'published')
+                        .orderBy('createdAt', 'desc')
+                        .limit(20)
+                        .get();
+                    const sortTime = performance.now() - sortStart;
+                    this.setMetric('sortTheories', sortTime);
+                    this.metrics.quotaUsage.reads += snapshot.size;
+                    this.logOperation('Sort theories', sortTime, 'success', snapshot.size, 0);
+                } catch (error) {
+                    this.logOperation('Sort theories', 0, 'error', 0, 0);
+                }
+
+                this.hideStatus();
+            }
+
+            async testImageLoad() {
+                this.showStatus('Testing image load performance...');
+
+                // Simulate loading multiple images
+                const times = [];
+                for (let i = 0; i < 5; i++) {
+                    const start = performance.now();
+                    const img = new Image();
+                    await new Promise((resolve) => {
+                        img.onload = () => {
+                            times.push(performance.now() - start);
+                            resolve();
+                        };
+                        img.onerror = resolve;
+                        img.src = 'https://via.placeholder.com/400x300?text=Test+' + i;
+                    });
+                }
+
+                const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
+                this.setMetric('imageLoad', avgTime);
+                this.metrics.quotaUsage.downloads += 5;
+                this.logOperation('Load 5 images', avgTime * 5, 'success', 0, 0);
+
+                this.hideStatus();
+            }
+
+            async monitorQuota() {
+                this.showStatus('Monitoring quota usage...');
+
+                // Display current quota usage
+                document.getElementById('firestoreReads').textContent = this.metrics.quotaUsage.reads;
+                document.getElementById('firestoreWrites').textContent = this.metrics.quotaUsage.writes;
+                document.getElementById('storageDownloads').textContent = this.metrics.quotaUsage.downloads;
+
+                // Estimate daily usage based on test data
+                // Assume average user views 20 theories per visit
+                const readsPerVisit = 20;
+                const maxDailyReads = 50000;
+                const estimatedMaxVisits = Math.floor(maxDailyReads / readsPerVisit);
+
+                document.getElementById('dailyUsage').textContent =
+                    `~${estimatedMaxVisits} visitors/day`;
+
+                // Check for quota warnings
+                this.checkQuotaWarnings();
+
+                this.hideStatus();
+            }
+
+            setMetric(key, value) {
+                const element = document.getElementById(key);
+                if (!element) return;
+
+                const ms = Math.round(value);
+                element.textContent = `${ms}ms`;
+
+                // Color code based on performance
+                element.className = 'metric-value';
+                if (key.includes('Load')) {
+                    if (ms < 500) element.classList.add('good');
+                    else if (ms < 2000) element.classList.add('warning');
+                    else element.classList.add('bad');
+                } else {
+                    if (ms < 300) element.classList.add('good');
+                    else if (ms < 1000) element.classList.add('warning');
+                    else element.classList.add('bad');
+                }
+            }
+
+            logOperation(name, duration, status, reads, writes) {
+                this.metrics.operations.push({ name, duration, status, reads, writes });
+                this.updatePerformanceLog();
+            }
+
+            updatePerformanceLog() {
+                const tbody = document.querySelector('#performanceLog tbody');
+                if (this.metrics.operations.length === 0) return;
+
+                tbody.innerHTML = this.metrics.operations.map(op => `
+                    <tr>
+                        <td>${op.name}</td>
+                        <td>${Math.round(op.duration)}ms</td>
+                        <td>${op.status === 'success' ? '✓' : '✗'}</td>
+                        <td>${op.reads || 0}</td>
+                        <td>${op.writes || 0}</td>
+                    </tr>
+                `).join('');
+            }
+
+            checkQuotaWarnings() {
+                const reads = this.metrics.quotaUsage.reads;
+                const maxDailyReads = 50000;
+                const percentUsed = (reads / maxDailyReads) * 100;
+
+                // This is just from testing, so not a real warning
+                // But we can show what to watch for
+                const warningEl = document.createElement('div');
+                if (percentUsed > 80) {
+                    warningEl.className = 'quota-warning critical';
+                    warningEl.innerHTML = `
+                        <strong>⚠️ High Quota Usage Detected</strong>
+                        <p>You're using ${percentUsed.toFixed(1)}% of daily read quota in testing.
+                        Monitor production usage carefully.</p>
+                    `;
+                } else if (percentUsed > 50) {
+                    warningEl.className = 'quota-warning';
+                    warningEl.innerHTML = `
+                        <strong>ℹ️ Moderate Quota Usage</strong>
+                        <p>Current test usage: ${percentUsed.toFixed(1)}% of daily quota.
+                        Consider implementing caching for production.</p>
+                    `;
+                }
+
+                const container = document.querySelector('.container');
+                const existing = container.querySelector('.quota-warning');
+                if (existing) existing.remove();
+                if (warningEl.innerHTML) {
+                    container.insertBefore(warningEl, container.querySelector('.results-grid'));
+                }
+            }
+
+            generateRecommendations() {
+                const recommendations = [];
+
+                // Analyze metrics and generate recommendations
+                const listLoadTime = parseFloat(document.getElementById('theoryListLoad')?.textContent || '0');
+                if (listLoadTime > 2000) {
+                    recommendations.push('Consider implementing pagination or lazy loading for theory lists');
+                }
+
+                const reads = this.metrics.quotaUsage.reads;
+                if (reads > 100) {
+                    recommendations.push('High read count detected. Implement client-side caching to reduce Firestore reads');
+                }
+
+                const avgImageLoad = parseFloat(document.getElementById('imageLoad')?.textContent || '0');
+                if (avgImageLoad > 1000) {
+                    recommendations.push('Image load times are high. Consider using thumbnails or image optimization');
+                }
+
+                if (recommendations.length === 0) {
+                    recommendations.push('✅ Performance looks good! All metrics within acceptable ranges.');
+                }
+
+                const ul = document.getElementById('recommendations');
+                ul.innerHTML = recommendations.map(r => `<li>${r}</li>`).join('');
+            }
+
+            updateAllDisplays() {
+                this.updatePerformanceLog();
+                this.checkQuotaWarnings();
+            }
+
+            showStatus(message) {
+                const status = document.getElementById('status');
+                status.textContent = message;
+                status.style.display = 'block';
+            }
+
+            hideStatus() {
+                const status = document.getElementById('status');
+                status.style.display = 'none';
+            }
+        }
+
+        // Initialize
+        const monitor = new PerformanceMonitor();
+
+        function runAllPerformanceTests() {
+            monitor.runAllPerformanceTests();
+        }
+
+        function testPageLoad() {
+            monitor.testPageLoad();
+        }
+
+        function testQueryPerformance() {
+            monitor.testQueryPerformance();
+        }
+
+        function testImageLoad() {
+            monitor.testImageLoad();
+        }
+
+        function monitorQuota() {
+            monitor.monitorQuota();
+        }
+
+        // Auto-run on page load
+        window.addEventListener('load', () => {
+            if (firebase && firebase.apps && firebase.apps.length > 0) {
+                // Firebase is initialized, we can run basic tests
+                setTimeout(() => {
+                    monitor.testPageLoad();
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>

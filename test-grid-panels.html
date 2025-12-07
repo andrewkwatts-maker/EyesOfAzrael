@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Panel Editor Test - Eyes of Azrael</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/grid-panel-editor.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 2rem;
+            background: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .test-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-header h1 {
+            margin: 0 0 0.5rem 0;
+            color: #212529;
+        }
+
+        .test-header p {
+            margin: 0;
+            color: #6c757d;
+        }
+
+        .test-controls {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-controls button {
+            padding: 0.75rem 1.5rem;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+
+        .test-controls button:hover {
+            background: #218838;
+        }
+
+        .editor-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .output-container {
+            background: #1e1e1e;
+            color: #e9ecef;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .output-container h3 {
+            margin-top: 0;
+            color: #28a745;
+        }
+
+        .output-container pre {
+            background: #2d2d2d;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🎛️ Grid Panel Editor Test</h1>
+            <p>Test the new hierarchical grid panel system with nested panels, links, searches, and images</p>
+        </div>
+
+        <div class="test-controls">
+            <button onclick="showData()">📊 Show Data</button>
+            <button onclick="loadSampleData()">📥 Load Sample</button>
+            <button onclick="clearData()">🗑️ Clear All</button>
+        </div>
+
+        <div class="editor-container">
+            <div id="grid-panel-editor-container"></div>
+        </div>
+
+        <div class="output-container">
+            <h3>📄 JSON Output</h3>
+            <pre id="json-output">No data yet. Create some panels!</pre>
+        </div>
+    </div>
+
+    <script src="js/components/grid-panel-editor.js"></script>
+    <script>
+        let editor;
+
+        // Initialize editor
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('grid-panel-editor-container');
+            editor = new GridPanelEditor(container);
+            console.log('Grid Panel Editor initialized');
+        });
+
+        // Show current data
+        function showData() {
+            const data = editor.getData();
+            const output = document.getElementById('json-output');
+            output.textContent = JSON.stringify(data, null, 2);
+            console.log('Current data:', data);
+        }
+
+        // Load sample data
+        function loadSampleData() {
+            const sampleData = {
+                panels: [
+                    {
+                        type: 'panel',
+                        title: 'Introduction',
+                        content: 'This is a simple panel with text content. It demonstrates basic panel functionality.',
+                        order: 0,
+                        children: []
+                    },
+                    {
+                        type: 'grid',
+                        title: 'Greek Pantheon Overview',
+                        gridWidth: 7,
+                        order: 1,
+                        children: [
+                            {
+                                type: 'panel',
+                                title: 'Zeus',
+                                content: 'King of the gods, ruler of Mount Olympus',
+                                order: 0
+                            },
+                            {
+                                type: 'link',
+                                text: 'Zeus Official Page',
+                                url: '/mythos/greek/deities/zeus.html',
+                                order: 1
+                            },
+                            {
+                                type: 'search',
+                                term: 'Zeus',
+                                searchType: 'corpus',
+                                order: 2
+                            },
+                            {
+                                type: 'panel',
+                                title: 'Hera',
+                                content: 'Queen of the gods, goddess of marriage',
+                                order: 3
+                            },
+                            {
+                                type: 'link',
+                                text: 'Hera Official Page',
+                                url: '/mythos/greek/deities/hera.html',
+                                order: 4
+                            },
+                            {
+                                type: 'search',
+                                term: 'Hera',
+                                searchType: 'corpus',
+                                order: 5
+                            },
+                            {
+                                type: 'panel',
+                                title: 'Poseidon',
+                                content: 'God of the sea, earthquakes, and horses',
+                                order: 6
+                            }
+                        ]
+                    },
+                    {
+                        type: 'grid',
+                        title: 'Visual References',
+                        gridWidth: 3,
+                        order: 2,
+                        children: [
+                            {
+                                type: 'image',
+                                url: 'https://via.placeholder.com/300x200?text=Zeus',
+                                caption: 'Zeus with thunderbolt',
+                                alt: 'Statue of Zeus holding a thunderbolt',
+                                order: 0
+                            },
+                            {
+                                type: 'image',
+                                url: 'https://via.placeholder.com/300x200?text=Hera',
+                                caption: 'Hera enthroned',
+                                alt: 'Statue of Hera on her throne',
+                                order: 1
+                            },
+                            {
+                                type: 'image',
+                                url: 'https://via.placeholder.com/300x200?text=Poseidon',
+                                caption: 'Poseidon with trident',
+                                alt: 'Statue of Poseidon with his trident',
+                                order: 2
+                            }
+                        ]
+                    },
+                    {
+                        type: 'panel',
+                        title: 'Conclusion',
+                        content: 'This demonstrates the hierarchical panel system with multiple grid layouts and nested content types.',
+                        order: 3,
+                        children: []
+                    }
+                ]
+            };
+
+            const container = document.getElementById('grid-panel-editor-container');
+            editor = new GridPanelEditor(container, sampleData);
+            showData();
+        }
+
+        // Clear all data
+        function clearData() {
+            if (!confirm('Clear all panels?')) return;
+            const container = document.getElementById('grid-panel-editor-container');
+            editor = new GridPanelEditor(container);
+            document.getElementById('json-output').textContent = 'No data yet. Create some panels!';
+        }
+    </script>
+</body>
+</html>
