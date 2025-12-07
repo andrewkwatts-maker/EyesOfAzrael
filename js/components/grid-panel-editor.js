@@ -389,6 +389,9 @@ class GridPanelEditor {
     }
 
     renderGridChildLink(child, parentIndex, childIndex, isFirst, isLast) {
+        const linkType = child.linkType || 'external';
+        const showPageSelector = linkType === 'internal';
+
         return `
             <div class="grid-item grid-item-link" data-parent="${parentIndex}" data-child="${childIndex}">
                 <!-- Options bar ABOVE link -->
@@ -402,6 +405,15 @@ class GridPanelEditor {
                 </div>
                 <!-- Content box -->
                 <div class="child-content-box">
+                    <select class="child-select"
+                            data-field="linkType"
+                            data-parent="${parentIndex}"
+                            data-child="${childIndex}"
+                            data-action="change-link-type">
+                        <option value="external" ${linkType === 'external' ? 'selected' : ''}>External URL</option>
+                        <option value="internal" ${linkType === 'internal' ? 'selected' : ''}>Internal Page</option>
+                    </select>
+
                     <input type="text"
                            class="child-input"
                            placeholder="Link Text"
@@ -409,15 +421,89 @@ class GridPanelEditor {
                            data-field="text"
                            data-parent="${parentIndex}"
                            data-child="${childIndex}">
-                    <input type="text"
-                           class="child-input"
-                           placeholder="URL"
-                           value="${this.escapeHtml(child.url || '')}"
-                           data-field="url"
-                           data-parent="${parentIndex}"
-                           data-child="${childIndex}">
+
+                    ${showPageSelector ? this.renderPageSelector(child, parentIndex, childIndex) : `
+                        <input type="text"
+                               class="child-input"
+                               placeholder="URL (e.g., https://example.com)"
+                               value="${this.escapeHtml(child.url || '')}"
+                               data-field="url"
+                               data-parent="${parentIndex}"
+                               data-child="${childIndex}">
+                    `}
                 </div>
             </div>
+        `;
+    }
+
+    renderPageSelector(child, parentIndex, childIndex) {
+        // Load taxonomy data if available
+        const taxonomy = window.pageTaxonomy || {};
+        const pages = [];
+
+        // Flatten taxonomy into page list
+        Object.keys(taxonomy).forEach(categoryKey => {
+            const category = taxonomy[categoryKey];
+
+            // Add category index
+            if (category.path) {
+                pages.push({
+                    label: `📚 ${category.name}`,
+                    value: category.path + 'index.html',
+                    category: category.name
+                });
+            }
+
+            // Add sections
+            if (category.sections) {
+                Object.keys(category.sections).forEach(sectionKey => {
+                    const section = category.sections[sectionKey];
+                    if (section.path) {
+                        pages.push({
+                            label: `  📖 ${category.name} → ${section.name}`,
+                            value: section.path + 'index.html',
+                            category: category.name
+                        });
+                    }
+                });
+            }
+
+            // Add topics
+            if (category.topics) {
+                Object.keys(category.topics).forEach(topicKey => {
+                    const topic = category.topics[topicKey];
+                    if (topic.path) {
+                        pages.push({
+                            label: `    📄 ${category.name} → ${topic.name}`,
+                            value: topic.path,
+                            category: category.name
+                        });
+                    }
+                });
+            }
+        });
+
+        // Sort by category and label
+        pages.sort((a, b) => {
+            if (a.category !== b.category) {
+                return a.category.localeCompare(b.category);
+            }
+            return a.label.localeCompare(b.label);
+        });
+
+        return `
+            <select class="child-select"
+                    data-field="url"
+                    data-parent="${parentIndex}"
+                    data-child="${childIndex}">
+                <option value="">-- Select a page --</option>
+                ${pages.map(page => `
+                    <option value="${this.escapeHtml(page.value)}" ${child.url === page.value ? 'selected' : ''}>
+                        ${this.escapeHtml(page.label)}
+                    </option>
+                `).join('')}
+            </select>
+            <small class="form-hint">Selected: ${this.escapeHtml(child.url || 'none')}</small>
         `;
     }
 
@@ -585,6 +671,10 @@ class GridPanelEditor {
                     break;
                 case 'delete-child':
                     this.deleteChild(parent, child);
+                    break;
+                case 'change-link-type':
+                    // When link type changes, re-render to show/hide appropriate inputs
+                    this.render();
                     break;
             }
         });
