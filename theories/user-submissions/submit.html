@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="../../css/grid-panel-editor-v2.css">
     <link rel="stylesheet" href="../../css/icon-picker.css">
     <link rel="stylesheet" href="../../css/svg-editor.css">
+    <link rel="stylesheet" href="../../css/smart-fields.css">
 
     <!-- Theme System -->
     <script defer src="../../themes/theme-picker.js"></script>
@@ -656,12 +657,12 @@
                     <div id="deity-fields" class="asset-fields" style="display: none;">
                         <div class="form-group">
                             <label for="deity-pantheon">Pantheon</label>
-                            <input type="text" id="deity-pantheon" name="pantheon" placeholder="e.g., Greek Olympians, Norse Aesir">
+                            <div id="deity-pantheon-container"></div>
                             <small class="form-hint">Which pantheon or group does this deity belong to?</small>
                         </div>
                         <div class="form-group">
                             <label for="deity-domain">Domain/Sphere</label>
-                            <input type="text" id="deity-domain" name="domain" placeholder="e.g., Sky, Thunder, War, Love">
+                            <div id="deity-domain-container"></div>
                             <small class="form-hint">What is this deity's primary domain or area of influence?</small>
                         </div>
                         <div class="form-group">
@@ -740,21 +741,19 @@
                             <label for="place-type">Location Type</label>
                             <select id="place-type" name="placeType">
                                 <option value="">-- Select Type --</option>
-                                <option value="sacred-site">Sacred Site / Temple</option>
-                                <option value="mythical-realm">Mythical Realm</option>
-                                <option value="underworld">Underworld / Afterlife</option>
-                                <option value="heavenly">Heavenly Realm</option>
-                                <option value="mountain">Sacred Mountain</option>
-                                <option value="city">Holy City</option>
-                                <option value="garden">Sacred Garden</option>
-                                <option value="portal">Portal / Gateway</option>
+                                <option value="earth">Earth Location (Physical)</option>
+                                <option value="mythical">Mythical Realm</option>
+                                <option value="celestial">Celestial / Heavenly</option>
+                                <option value="abstract">Abstract / Spiritual</option>
                             </select>
                             <small class="form-hint">What kind of place is this?</small>
                         </div>
-                        <div class="form-group">
-                            <label for="place-location">Geographic Location</label>
-                            <input type="text" id="place-location" name="location" placeholder="e.g., Mount Olympus, Garden of Eden, Mesopotamia">
-                            <small class="form-hint">Where is this place located (physical or mythical)?</small>
+                        <div class="form-group" id="place-location-group">
+                            <label for="place-location">Location</label>
+                            <div id="place-location-container">
+                                <input type="text" id="place-location" name="location" placeholder="Select location type first">
+                            </div>
+                            <small class="form-hint">Location details will adapt based on type selected</small>
                         </div>
                         <div class="form-group">
                             <label for="place-significance">Spiritual Significance</label>
@@ -926,6 +925,7 @@
     <script src="../../js/components/svg-editor-modal.js"></script>
     <script src="../../js/components/grid-panel-editor.js"></script>
     <script src="../../js/components/theory-editor.js"></script>
+    <script src="../../js/components/smart-fields.js"></script>
     <script src="../../js/form-config.js"></script>
 
     <script>
@@ -1112,8 +1112,93 @@
             // Initialize form field listeners for progressive disclosure
             initializeFormListeners();
 
+            // Initialize smart fields
+            initializeSmartFields();
+
             // Initialize progressive disclosure state
             updateProgressiveDisclosure();
+        }
+
+        /**
+         * Initialize smart fields for asset metadata
+         */
+        async function initializeSmartFields() {
+            if (!window.smartFields || !window.formConfig) {
+                console.warn('Smart fields or form config not loaded');
+                return;
+            }
+
+            // Initialize deity pantheon field
+            const pantheonConfig = window.formConfig.smartFields.pantheon;
+            if (pantheonConfig) {
+                const pantheonHTML = await window.smartFields.renderSmartField(
+                    pantheonConfig,
+                    'deity-pantheon',
+                    ''
+                );
+                const pantheonContainer = document.getElementById('deity-pantheon-container');
+                if (pantheonContainer) {
+                    pantheonContainer.innerHTML = pantheonHTML;
+                }
+            }
+
+            // Initialize deity domain field
+            const domainConfig = window.formConfig.smartFields.domain;
+            if (domainConfig) {
+                const domainHTML = await window.smartFields.renderSmartField(
+                    domainConfig,
+                    'deity-domain',
+                    []
+                );
+                const domainContainer = document.getElementById('deity-domain-container');
+                if (domainContainer) {
+                    domainContainer.innerHTML = domainHTML;
+                }
+            }
+
+            // Initialize place location type change handler
+            const placeTypeSelect = document.getElementById('place-type');
+            if (placeTypeSelect) {
+                placeTypeSelect.addEventListener('change', async (e) => {
+                    const placeType = e.target.value;
+                    const locationContainer = document.getElementById('place-location-container');
+
+                    if (!placeType || !locationContainer) return;
+
+                    // Get location type config from formConfig
+                    const locationConfig = window.formConfig.locationTypes[placeType];
+
+                    if (!locationConfig) {
+                        locationContainer.innerHTML = '<input type="text" id="place-location" name="location" placeholder="Enter location">';
+                        return;
+                    }
+
+                    let locationHTML = '';
+
+                    if (locationConfig.fieldType === 'coordinates') {
+                        // Render coordinate input for Earth locations
+                        locationHTML = window.smartFields.renderCoordinateInput('place-location', {});
+                    } else if (locationConfig.fieldType === 'hierarchical') {
+                        // Render hierarchical select for mythical/celestial
+                        const hierarchicalConfig = {
+                            type: 'hierarchical',
+                            label: locationConfig.label,
+                            options: locationConfig.options,
+                            allowCustom: true
+                        };
+                        locationHTML = await window.smartFields.renderSmartField(
+                            hierarchicalConfig,
+                            'place-location',
+                            ''
+                        );
+                    } else {
+                        // Fallback to text input
+                        locationHTML = '<input type="text" id="place-location" name="location" placeholder="Enter location" class="smart-field">';
+                    }
+
+                    locationContainer.innerHTML = locationHTML;
+                });
+            }
         }
 
         /**
