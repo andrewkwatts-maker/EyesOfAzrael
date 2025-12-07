@@ -100,33 +100,35 @@ class GridPanelEditor {
 
         return `
             <div class="panel-item simple-panel" data-index="${index}" data-type="panel">
-                <!-- Slim control panel -->
-                <div class="panel-controls-top">
-                    <div class="panel-move-controls">
+                <!-- Options bar ABOVE panel -->
+                <div class="panel-options-bar">
+                    <div class="panel-options-left">
+                        <span class="panel-label">#${index + 1} Panel</span>
+                    </div>
+                    <div class="panel-options-right">
                         <button type="button"
-                                class="btn-icon"
+                                class="btn-option"
                                 data-action="move-up"
                                 data-index="${index}"
                                 ${isFirst ? 'disabled' : ''}
                                 title="Move Up">↑</button>
                         <button type="button"
-                                class="btn-icon"
+                                class="btn-option"
                                 data-action="move-down"
                                 data-index="${index}"
                                 ${isLast ? 'disabled' : ''}
                                 title="Move Down">↓</button>
                         <button type="button"
-                                class="btn-icon btn-delete"
+                                class="btn-option btn-delete"
                                 data-action="delete-panel"
                                 data-index="${index}"
                                 title="Delete">🗑️</button>
                     </div>
                 </div>
 
-                <!-- Main panel content -->
-                <div class="panel-content-wrapper">
-                    <div class="panel-header">
-                        <span class="panel-number">#${index + 1} Panel</span>
+                <!-- Main panel content with title INSIDE -->
+                <div class="panel-content-box">
+                    <div class="panel-title-section">
                         ${titleIcon ? `<span class="panel-title-icon">${titleIcon}</span>` : ''}
                         <input type="text"
                                class="panel-title-input"
@@ -164,50 +166,60 @@ class GridPanelEditor {
 
         return `
             <div class="panel-item grid-panel" data-index="${index}" data-type="grid">
-                <!-- Slim control panel -->
-                <div class="panel-controls-top">
-                    <div class="panel-add-controls">
-                        <button type="button" class="btn-add-small" data-action="add-child-panel" data-parent="${index}" title="Add Sub-Panel">
+                <!-- Options bar ABOVE panel -->
+                <div class="panel-options-bar">
+                    <div class="panel-options-left">
+                        <span class="panel-label">#${index + 1} Grid</span>
+                        <button type="button" class="btn-option-add" data-action="add-child-panel" data-parent="${index}" title="Add Sub-Panel">
                             <span class="btn-icon-text">📄</span> Panel
                         </button>
-                        <button type="button" class="btn-add-small" data-action="add-child-link" data-parent="${index}" title="Add Link">
+                        <button type="button" class="btn-option-add" data-action="add-child-link" data-parent="${index}" title="Add Link">
                             <span class="btn-icon-text">🔗</span> Link
                         </button>
-                        <button type="button" class="btn-add-small" data-action="add-child-search" data-parent="${index}" title="Add Search">
+                        <button type="button" class="btn-option-add" data-action="add-child-search" data-parent="${index}" title="Add Search">
                             <span class="btn-icon-text">🔍</span> Search
                         </button>
-                        <button type="button" class="btn-add-small" data-action="add-child-image" data-parent="${index}" title="Add Image">
+                        <button type="button" class="btn-option-add" data-action="add-child-image" data-parent="${index}" title="Add Image">
                             <span class="btn-icon-text">🖼️</span> Image
                         </button>
-                        <button type="button" class="btn-add-small" data-action="add-child-svg" data-parent="${index}" title="Add SVG" ${!this.svgEditor ? 'disabled' : ''}>
+                        <button type="button" class="btn-option-add" data-action="add-child-svg" data-parent="${index}" title="Add SVG" ${!this.svgEditor ? 'disabled' : ''}>
                             <span class="btn-icon-text">🎨</span> SVG
                         </button>
                     </div>
-                    <div class="panel-move-controls">
+                    <div class="panel-options-right">
+                        <label class="grid-columns-label">
+                            Columns:
+                            <input type="number"
+                                   class="grid-columns-input"
+                                   min="1"
+                                   max="12"
+                                   value="${gridWidth}"
+                                   data-field="gridWidth"
+                                   data-index="${index}">
+                        </label>
                         <button type="button"
-                                class="btn-icon"
+                                class="btn-option"
                                 data-action="move-up"
                                 data-index="${index}"
                                 ${isFirst ? 'disabled' : ''}
                                 title="Move Up">↑</button>
                         <button type="button"
-                                class="btn-icon"
+                                class="btn-option"
                                 data-action="move-down"
                                 data-index="${index}"
                                 ${isLast ? 'disabled' : ''}
                                 title="Move Down">↓</button>
                         <button type="button"
-                                class="btn-icon btn-delete"
+                                class="btn-option btn-delete"
                                 data-action="delete-panel"
                                 data-index="${index}"
                                 title="Delete">🗑️</button>
                     </div>
                 </div>
 
-                <!-- Main panel content -->
-                <div class="panel-content-wrapper">
-                    <div class="panel-header">
-                        <span class="panel-number">#${index + 1} Grid</span>
+                <!-- Main panel content with title INSIDE -->
+                <div class="panel-content-box">
+                    <div class="panel-title-section">
                         ${titleIcon ? `<span class="panel-title-icon">${titleIcon}</span>` : ''}
                         <input type="text"
                                class="panel-title-input"
@@ -221,17 +233,6 @@ class GridPanelEditor {
                                 data-index="${index}"
                                 ${!this.iconPicker ? 'disabled' : ''}
                                 title="${titleIcon ? 'Change/Clear Icon' : 'Add Icon'}">📌</button>
-
-                        <label class="grid-width-label">
-                            Columns:
-                            <input type="number"
-                                   class="grid-width-input"
-                                   min="1"
-                                   max="12"
-                                   value="${gridWidth}"
-                                   data-field="gridWidth"
-                                   data-index="${index}">
-                        </label>
                     </div>
 
                     <!-- Grid content -->
@@ -358,26 +359,31 @@ class GridPanelEditor {
     renderGridChildPanel(child, parentIndex, childIndex, isFirst, isLast) {
         return `
             <div class="grid-item grid-item-panel" data-parent="${parentIndex}" data-child="${childIndex}">
-                <div class="grid-item-header">
+                <!-- Options bar ABOVE child panel -->
+                <div class="child-options-bar">
+                    <span class="child-label">Panel</span>
+                    <div class="child-options-right">
+                        <button type="button" class="btn-child-option" data-action="move-left" data-parent="${parentIndex}" data-child="${childIndex}" ${isFirst ? 'disabled' : ''} title="Move Left">←</button>
+                        <button type="button" class="btn-child-option" data-action="move-right" data-parent="${parentIndex}" data-child="${childIndex}" ${isLast ? 'disabled' : ''} title="Move Right">→</button>
+                        <button type="button" class="btn-child-option btn-delete" data-action="delete-child" data-parent="${parentIndex}" data-child="${childIndex}" title="Delete">×</button>
+                    </div>
+                </div>
+                <!-- Content box with title INSIDE -->
+                <div class="child-content-box">
                     <input type="text"
-                           class="grid-item-title"
+                           class="child-title-input"
                            placeholder="Sub-Panel Title"
                            value="${this.escapeHtml(child.title || '')}"
                            data-field="title"
                            data-parent="${parentIndex}"
                            data-child="${childIndex}">
-                    <div class="grid-item-controls">
-                        <button type="button" class="btn-icon-sm" data-action="move-left" data-parent="${parentIndex}" data-child="${childIndex}" ${isFirst ? 'disabled' : ''}>←</button>
-                        <button type="button" class="btn-icon-sm" data-action="move-right" data-parent="${parentIndex}" data-child="${childIndex}" ${isLast ? 'disabled' : ''}>→</button>
-                        <button type="button" class="btn-icon-sm btn-delete" data-action="delete-child" data-parent="${parentIndex}" data-child="${childIndex}">×</button>
-                    </div>
+                    <textarea class="child-content-textarea"
+                              placeholder="Content..."
+                              rows="4"
+                              data-field="content"
+                              data-parent="${parentIndex}"
+                              data-child="${childIndex}">${this.escapeHtml(child.content || '')}</textarea>
                 </div>
-                <textarea class="grid-item-content"
-                          placeholder="Content..."
-                          rows="4"
-                          data-field="content"
-                          data-parent="${parentIndex}"
-                          data-child="${childIndex}">${this.escapeHtml(child.content || '')}</textarea>
             </div>
         `;
     }
@@ -385,28 +391,32 @@ class GridPanelEditor {
     renderGridChildLink(child, parentIndex, childIndex, isFirst, isLast) {
         return `
             <div class="grid-item grid-item-link" data-parent="${parentIndex}" data-child="${childIndex}">
-                <div class="grid-item-header">
-                    <span class="grid-item-type">🔗 Link</span>
-                    <div class="grid-item-controls">
-                        <button type="button" class="btn-icon-sm" data-action="move-left" data-parent="${parentIndex}" data-child="${childIndex}" ${isFirst ? 'disabled' : ''}>←</button>
-                        <button type="button" class="btn-icon-sm" data-action="move-right" data-parent="${parentIndex}" data-child="${childIndex}" ${isLast ? 'disabled' : ''}>→</button>
-                        <button type="button" class="btn-icon-sm btn-delete" data-action="delete-child" data-parent="${parentIndex}" data-child="${childIndex}">×</button>
+                <!-- Options bar ABOVE link -->
+                <div class="child-options-bar">
+                    <span class="child-label">🔗 Link</span>
+                    <div class="child-options-right">
+                        <button type="button" class="btn-child-option" data-action="move-left" data-parent="${parentIndex}" data-child="${childIndex}" ${isFirst ? 'disabled' : ''}>←</button>
+                        <button type="button" class="btn-child-option" data-action="move-right" data-parent="${parentIndex}" data-child="${childIndex}" ${isLast ? 'disabled' : ''}>→</button>
+                        <button type="button" class="btn-child-option btn-delete" data-action="delete-child" data-parent="${parentIndex}" data-child="${childIndex}">×</button>
                     </div>
                 </div>
-                <input type="text"
-                       class="grid-item-input"
-                       placeholder="Link Text"
-                       value="${this.escapeHtml(child.text || '')}"
-                       data-field="text"
-                       data-parent="${parentIndex}"
-                       data-child="${childIndex}">
-                <input type="text"
-                       class="grid-item-input"
-                       placeholder="URL"
-                       value="${this.escapeHtml(child.url || '')}"
-                       data-field="url"
-                       data-parent="${parentIndex}"
-                       data-child="${childIndex}">
+                <!-- Content box -->
+                <div class="child-content-box">
+                    <input type="text"
+                           class="child-input"
+                           placeholder="Link Text"
+                           value="${this.escapeHtml(child.text || '')}"
+                           data-field="text"
+                           data-parent="${parentIndex}"
+                           data-child="${childIndex}">
+                    <input type="text"
+                           class="child-input"
+                           placeholder="URL"
+                           value="${this.escapeHtml(child.url || '')}"
+                           data-field="url"
+                           data-parent="${parentIndex}"
+                           data-child="${childIndex}">
+                </div>
             </div>
         `;
     }
@@ -414,28 +424,32 @@ class GridPanelEditor {
     renderGridChildSearch(child, parentIndex, childIndex, isFirst, isLast) {
         return `
             <div class="grid-item grid-item-search" data-parent="${parentIndex}" data-child="${childIndex}">
-                <div class="grid-item-header">
-                    <span class="grid-item-type">🔍 Search</span>
-                    <div class="grid-item-controls">
-                        <button type="button" class="btn-icon-sm" data-action="move-left" data-parent="${parentIndex}" data-child="${childIndex}" ${isFirst ? 'disabled' : ''}>←</button>
-                        <button type="button" class="btn-icon-sm" data-action="move-right" data-parent="${parentIndex}" data-child="${childIndex}" ${isLast ? 'disabled' : ''}>→</button>
-                        <button type="button" class="btn-icon-sm btn-delete" data-action="delete-child" data-parent="${parentIndex}" data-child="${childIndex}">×</button>
+                <!-- Options bar ABOVE search -->
+                <div class="child-options-bar">
+                    <span class="child-label">🔍 Search</span>
+                    <div class="child-options-right">
+                        <button type="button" class="btn-child-option" data-action="move-left" data-parent="${parentIndex}" data-child="${childIndex}" ${isFirst ? 'disabled' : ''}>←</button>
+                        <button type="button" class="btn-child-option" data-action="move-right" data-parent="${parentIndex}" data-child="${childIndex}" ${isLast ? 'disabled' : ''}>→</button>
+                        <button type="button" class="btn-child-option btn-delete" data-action="delete-child" data-parent="${parentIndex}" data-child="${childIndex}">×</button>
                     </div>
                 </div>
-                <input type="text"
-                       class="grid-item-input"
-                       placeholder="Search Term"
-                       value="${this.escapeHtml(child.term || '')}"
-                       data-field="term"
-                       data-parent="${parentIndex}"
-                       data-child="${childIndex}">
-                <select class="grid-item-select"
-                        data-field="searchType"
-                        data-parent="${parentIndex}"
-                        data-child="${childIndex}">
-                    <option value="corpus" ${child.searchType === 'corpus' ? 'selected' : ''}>Corpus Search</option>
-                    <option value="page" ${child.searchType === 'page' ? 'selected' : ''}>Page Search</option>
-                </select>
+                <!-- Content box -->
+                <div class="child-content-box">
+                    <input type="text"
+                           class="child-input"
+                           placeholder="Search Term"
+                           value="${this.escapeHtml(child.term || '')}"
+                           data-field="term"
+                           data-parent="${parentIndex}"
+                           data-child="${childIndex}">
+                    <select class="child-select"
+                            data-field="searchType"
+                            data-parent="${parentIndex}"
+                            data-child="${childIndex}">
+                        <option value="corpus" ${child.searchType === 'corpus' ? 'selected' : ''}>Corpus Search</option>
+                        <option value="page" ${child.searchType === 'page' ? 'selected' : ''}>Page Search</option>
+                    </select>
+                </div>
             </div>
         `;
     }
@@ -443,36 +457,40 @@ class GridPanelEditor {
     renderGridChildImage(child, parentIndex, childIndex, isFirst, isLast) {
         return `
             <div class="grid-item grid-item-image" data-parent="${parentIndex}" data-child="${childIndex}">
-                <div class="grid-item-header">
-                    <span class="grid-item-type">🖼️ Image</span>
-                    <div class="grid-item-controls">
-                        <button type="button" class="btn-icon-sm" data-action="move-left" data-parent="${parentIndex}" data-child="${childIndex}" ${isFirst ? 'disabled' : ''}>←</button>
-                        <button type="button" class="btn-icon-sm" data-action="move-right" data-parent="${parentIndex}" data-child="${childIndex}" ${isLast ? 'disabled' : ''}>→</button>
-                        <button type="button" class="btn-icon-sm btn-delete" data-action="delete-child" data-parent="${parentIndex}" data-child="${childIndex}">×</button>
+                <!-- Options bar ABOVE image -->
+                <div class="child-options-bar">
+                    <span class="child-label">🖼️ Image</span>
+                    <div class="child-options-right">
+                        <button type="button" class="btn-child-option" data-action="move-left" data-parent="${parentIndex}" data-child="${childIndex}" ${isFirst ? 'disabled' : ''}>←</button>
+                        <button type="button" class="btn-child-option" data-action="move-right" data-parent="${parentIndex}" data-child="${childIndex}" ${isLast ? 'disabled' : ''}>→</button>
+                        <button type="button" class="btn-child-option btn-delete" data-action="delete-child" data-parent="${parentIndex}" data-child="${childIndex}">×</button>
                     </div>
                 </div>
-                ${child.url ? `<img src="${this.escapeHtml(child.url)}" alt="${this.escapeHtml(child.alt || '')}" class="grid-item-preview">` : ''}
-                <input type="text"
-                       class="grid-item-input"
-                       placeholder="Image URL"
-                       value="${this.escapeHtml(child.url || '')}"
-                       data-field="url"
-                       data-parent="${parentIndex}"
-                       data-child="${childIndex}">
-                <input type="text"
-                       class="grid-item-input"
-                       placeholder="Caption"
-                       value="${this.escapeHtml(child.caption || '')}"
-                       data-field="caption"
-                       data-parent="${parentIndex}"
-                       data-child="${childIndex}">
-                <input type="text"
-                       class="grid-item-input"
-                       placeholder="Alt Text"
-                       value="${this.escapeHtml(child.alt || '')}"
-                       data-field="alt"
-                       data-parent="${parentIndex}"
-                       data-child="${childIndex}">
+                <!-- Content box -->
+                <div class="child-content-box">
+                    ${child.url ? `<img src="${this.escapeHtml(child.url)}" alt="${this.escapeHtml(child.alt || '')}" class="child-image-preview">` : ''}
+                    <input type="text"
+                           class="child-input"
+                           placeholder="Image URL"
+                           value="${this.escapeHtml(child.url || '')}"
+                           data-field="url"
+                           data-parent="${parentIndex}"
+                           data-child="${childIndex}">
+                    <input type="text"
+                           class="child-input"
+                           placeholder="Caption"
+                           value="${this.escapeHtml(child.caption || '')}"
+                           data-field="caption"
+                           data-parent="${parentIndex}"
+                           data-child="${childIndex}">
+                    <input type="text"
+                           class="child-input"
+                           placeholder="Alt Text"
+                           value="${this.escapeHtml(child.alt || '')}"
+                           data-field="alt"
+                           data-parent="${parentIndex}"
+                           data-child="${childIndex}">
+                </div>
             </div>
         `;
     }
@@ -483,19 +501,23 @@ class GridPanelEditor {
 
         return `
             <div class="grid-item grid-item-svg" data-parent="${parentIndex}" data-child="${childIndex}">
-                <div class="grid-item-header">
-                    <span class="grid-item-type">🎨 SVG</span>
-                    <div class="grid-item-controls">
-                        <button type="button" class="btn-icon-sm" data-action="edit-child-svg" data-parent="${parentIndex}" data-child="${childIndex}" ${!this.svgEditor ? 'disabled' : ''} title="Edit SVG">✏️</button>
-                        <button type="button" class="btn-icon-sm" data-action="move-left" data-parent="${parentIndex}" data-child="${childIndex}" ${isFirst ? 'disabled' : ''}>←</button>
-                        <button type="button" class="btn-icon-sm" data-action="move-right" data-parent="${parentIndex}" data-child="${childIndex}" ${isLast ? 'disabled' : ''}>→</button>
-                        <button type="button" class="btn-icon-sm btn-delete" data-action="delete-child" data-parent="${parentIndex}" data-child="${childIndex}">×</button>
+                <!-- Options bar ABOVE SVG -->
+                <div class="child-options-bar">
+                    <span class="child-label">🎨 SVG</span>
+                    <div class="child-options-right">
+                        <button type="button" class="btn-child-option" data-action="edit-child-svg" data-parent="${parentIndex}" data-child="${childIndex}" ${!this.svgEditor ? 'disabled' : ''} title="Edit SVG">✏️</button>
+                        <button type="button" class="btn-child-option" data-action="move-left" data-parent="${parentIndex}" data-child="${childIndex}" ${isFirst ? 'disabled' : ''}>←</button>
+                        <button type="button" class="btn-child-option" data-action="move-right" data-parent="${parentIndex}" data-child="${childIndex}" ${isLast ? 'disabled' : ''}>→</button>
+                        <button type="button" class="btn-child-option btn-delete" data-action="delete-child" data-parent="${parentIndex}" data-child="${childIndex}">×</button>
                     </div>
                 </div>
-                <div class="grid-item-svg-preview">
-                    ${svgCode ? svgCode : '<p class="svg-empty-state">No SVG</p>'}
+                <!-- Content box -->
+                <div class="child-content-box">
+                    <div class="child-svg-preview">
+                        ${svgCode ? svgCode : '<p class="svg-empty-state">No SVG</p>'}
+                    </div>
+                    ${svgPrompt ? `<p class="child-svg-prompt">${this.escapeHtml(svgPrompt)}</p>` : ''}
                 </div>
-                ${svgPrompt ? `<p class="grid-item-svg-prompt">${this.escapeHtml(svgPrompt)}</p>` : ''}
             </div>
         `;
     }
