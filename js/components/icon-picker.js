@@ -41,8 +41,41 @@ class IconPicker {
         // Track recent selections (from localStorage)
         this.recentEmojis = this.loadRecentEmojis();
 
+        // Firebase auth and Firestore references
+        this.auth = null;
+        this.db = null;
+        this.initializeFirebase();
+
+        // Gemini generator for AI icons
+        this.geminiGenerator = null;
+        this.initializeGemini();
+
+        // User's custom icons (loaded from Firestore)
+        this.userIcons = [];
+
         // Create modal
         this.createModal();
+    }
+
+    /**
+     * Initialize Firebase references
+     */
+    initializeFirebase() {
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            this.auth = firebase.auth();
+        }
+        if (typeof firebase !== 'undefined' && firebase.firestore) {
+            this.db = firebase.firestore();
+        }
+    }
+
+    /**
+     * Initialize Gemini generator
+     */
+    initializeGemini() {
+        if (window.GeminiSVGGenerator) {
+            this.geminiGenerator = new window.GeminiSVGGenerator();
+        }
     }
 
     /**
@@ -72,6 +105,8 @@ class IconPicker {
                         const isActive = this.recentEmojis.length === 0 && index === 0;
                         return `<button type="button" class="icon-picker-tab ${isActive ? 'active' : ''}" data-category="${key}">${this.categories[key].name}</button>`;
                     }).join('')}
+                    <button type="button" class="icon-picker-tab" data-category="my-icons">✨ My Icons</button>
+                    <button type="button" class="icon-picker-tab" data-category="ai-generate">🤖 AI Generate</button>
                     ${this.allowCustomClass ? '<button type="button" class="icon-picker-tab" data-category="custom">Custom Class</button>' : ''}
                 </div>
 
@@ -130,6 +165,24 @@ class IconPicker {
             `;
         });
 
+        // My Icons category
+        content += `
+            <div class="icon-picker-category" data-category="my-icons">
+                <div class="icon-picker-my-icons" id="icon-picker-my-icons-content">
+                    <p class="icon-picker-loading">Loading your icons...</p>
+                </div>
+            </div>
+        `;
+
+        // AI Generate category
+        content += `
+            <div class="icon-picker-category" data-category="ai-generate">
+                <div class="icon-picker-ai-generate" id="icon-picker-ai-content">
+                    ${this.renderAIGenerateContent()}
+                </div>
+            </div>
+        `;
+
         // Custom class category
         if (this.allowCustomClass) {
             content += `
@@ -151,6 +204,149 @@ class IconPicker {
         }
 
         return content;
+    }
+
+    /**
+     * Render AI Generate content
+     */
+    renderAIGenerateContent() {
+        const isSignedIn = this.auth && this.auth.currentUser;
+
+        if (!isSignedIn) {
+            return `
+                <div class="icon-picker-signin-required">
+                    <h4>Sign In Required</h4>
+                    <p>Sign in with Google to generate custom icons using AI.</p>
+                    <p class="icon-picker-hint">Your Google OAuth token will be used to access the Gemini API for icon generation.</p>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="icon-picker-ai-form">
+                <div class="icon-form-group">
+                    <label>Describe the icon you want:</label>
+                    <input type="text"
+                           class="icon-prompt-input"
+                           id="icon-prompt-input"
+                           placeholder="e.g., golden trident of Poseidon, eye of Horus, Celtic knot">
+                    <small class="icon-form-hint">Describe a symbol, object, or concept for your icon</small>
+                </div>
+
+                <div class="icon-form-row">
+                    <div class="icon-form-group">
+                        <label>Style:</label>
+                        <select class="icon-select" id="icon-style-select">
+                            <option value="emoji">Emoji Style</option>
+                            <option value="simple">Simple Icon</option>
+                            <option value="detailed">Detailed Symbol</option>
+                        </select>
+                    </div>
+
+                    <div class="icon-form-group">
+                        <label>Colors:</label>
+                        <select class="icon-select" id="icon-color-select">
+                            <option value="colorful">Colorful</option>
+                            <option value="monochrome">Monochrome</option>
+                            <option value="gold">Gold</option>
+                            <option value="purple">Purple</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="button" class="icon-generate-btn" id="icon-generate-btn">
+                    <span id="icon-generate-text">✨ Generate Icon</span>
+                    <span id="icon-generate-spinner" class="icon-loading-spinner" style="display: none;"></span>
+                </button>
+
+                <div id="icon-ai-messages"></div>
+
+                <div class="icon-preview-area" id="icon-generated-preview" style="display: none;">
+                    <h4>Generated Icon:</h4>
+                    <div class="icon-generated-display" id="icon-generated-display"></div>
+                    <button type="button" class="icon-use-btn" id="icon-use-generated">Use This Icon</button>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Load user's custom icons from Firestore
+     */
+    async loadUserIcons() {
+        if (!this.db || !this.auth || !this.auth.currentUser) {
+            const container = document.getElementById('icon-picker-my-icons-content');
+            if (container) {
+                container.innerHTML = `
+                    <div class="icon-picker-signin-required">
+                        <p>Sign in to view your custom icons</p>
+                    </div>
+                `;
+            }
+            return;
+        }
+
+        try {
+            const userId = this.auth.currentUser.uid;
+            const iconsRef = this.db.collection('userIcons')
+                .where('userId', '==', userId)
+                .orderBy('createdAt', 'desc')
+                .limit(50);
+
+            const snapshot = await iconsRef.get();
+            this.userIcons = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            this.renderUserIcons();
+        } catch (error) {
+            console.error('Error loading user icons:', error);
+            const container = document.getElementById('icon-picker-my-icons-content');
+            if (container) {
+                container.innerHTML = `<p class="icon-picker-error">Error loading icons: ${error.message}</p>`;
+            }
+        }
+    }
+
+    /**
+     * Render user's custom icons
+     */
+    renderUserIcons() {
+        const container = document.getElementById('icon-picker-my-icons-content');
+        if (!container) return;
+
+        if (this.userIcons.length === 0) {
+            container.innerHTML = `
+                <div class="icon-picker-empty">
+                    <p>You haven't generated any custom icons yet.</p>
+                    <p>Try the <strong>AI Generate</strong> tab to create your first custom icon!</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="icon-picker-grid">
+                ${this.userIcons.map(icon => `
+                    <button type="button"
+                            class="icon-picker-emoji icon-picker-svg-icon ${icon.svgCode === this.currentIcon ? 'selected' : ''}"
+                            data-icon-id="${icon.id}"
+                            data-svg="${this.escapeHtml(icon.svgCode)}"
+                            title="${this.escapeHtml(icon.prompt)}">
+                        ${icon.svgCode}
+                    </button>
+                `).join('')}
+            </div>
+        `;
+
+        // Attach click handlers to user icons
+        container.querySelectorAll('.icon-picker-svg-icon').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const svgCode = e.currentTarget.dataset.svg;
+                this.selectEmoji(svgCode);
+            });
+        });
     }
 
     /**
@@ -219,6 +415,144 @@ class IconPicker {
         this.modal.querySelectorAll('.icon-picker-category').forEach(cat => {
             cat.classList.toggle('active', cat.dataset.category === category);
         });
+
+        // Load user icons when switching to My Icons tab
+        if (category === 'my-icons') {
+            this.loadUserIcons();
+        }
+
+        // Attach AI generation handlers when switching to AI tab
+        if (category === 'ai-generate') {
+            this.attachAIGenerationHandlers();
+        }
+    }
+
+    /**
+     * Attach event handlers for AI generation
+     */
+    attachAIGenerationHandlers() {
+        const generateBtn = document.getElementById('icon-generate-btn');
+        if (generateBtn && !generateBtn.dataset.handlerAttached) {
+            generateBtn.dataset.handlerAttached = 'true';
+            generateBtn.addEventListener('click', () => this.generateAIIcon());
+        }
+
+        const useBtn = document.getElementById('icon-use-generated');
+        if (useBtn && !useBtn.dataset.handlerAttached) {
+            useBtn.dataset.handlerAttached = 'true';
+            useBtn.addEventListener('click', () => {
+                const display = document.getElementById('icon-generated-display');
+                if (display && display.dataset.svgCode) {
+                    this.selectEmoji(display.dataset.svgCode);
+                }
+            });
+        }
+    }
+
+    /**
+     * Generate AI icon using Gemini
+     */
+    async generateAIIcon() {
+        const promptInput = document.getElementById('icon-prompt-input');
+        const styleSelect = document.getElementById('icon-style-select');
+        const colorSelect = document.getElementById('icon-color-select');
+        const generateBtn = document.getElementById('icon-generate-btn');
+        const generateText = document.getElementById('icon-generate-text');
+        const generateSpinner = document.getElementById('icon-generate-spinner');
+        const messagesDiv = document.getElementById('icon-ai-messages');
+        const previewArea = document.getElementById('icon-generated-preview');
+        const displayDiv = document.getElementById('icon-generated-display');
+
+        const prompt = promptInput.value.trim();
+        if (!prompt) {
+            this.showAIMessage('Please describe the icon you want to generate', 'error');
+            return;
+        }
+
+        // Disable button and show loading
+        generateBtn.disabled = true;
+        generateText.style.display = 'none';
+        generateSpinner.style.display = 'inline-block';
+        messagesDiv.innerHTML = '';
+        previewArea.style.display = 'none';
+
+        try {
+            // Use Gemini to generate small SVG icon
+            const style = styleSelect.value;
+            const color = colorSelect.value;
+
+            const fullPrompt = `Create a small icon (32x32 or 64x64) in SVG format for: ${prompt}.
+Style: ${style}. Colors: ${color}.
+Requirements:
+- Very simple and clean design suitable for use as an icon
+- ViewBox should be 0 0 64 64 or similar small size
+- Use inline styles only
+- ${color === 'monochrome' ? 'Single color design' : 'Use vibrant colors'}
+- No text unless absolutely necessary
+- Optimized for small size display
+- Return ONLY the SVG code`;
+
+            const result = await this.geminiGenerator.generateSVG(fullPrompt, {});
+
+            if (result.success) {
+                displayDiv.innerHTML = result.svgCode;
+                displayDiv.dataset.svgCode = result.svgCode;
+                previewArea.style.display = 'block';
+
+                // Save to Firestore
+                await this.saveUserIcon(prompt, result.svgCode, { style, color });
+
+                this.showAIMessage('Icon generated successfully!', 'success');
+            } else {
+                this.showAIMessage(`Error: ${result.error}`, 'error');
+            }
+        } catch (error) {
+            console.error('Icon generation error:', error);
+            this.showAIMessage(`Error generating icon: ${error.message}`, 'error');
+        } finally {
+            generateBtn.disabled = false;
+            generateText.style.display = 'inline';
+            generateSpinner.style.display = 'none';
+        }
+    }
+
+    /**
+     * Save user icon to Firestore
+     */
+    async saveUserIcon(prompt, svgCode, options) {
+        if (!this.db || !this.auth || !this.auth.currentUser) {
+            return;
+        }
+
+        try {
+            const userId = this.auth.currentUser.uid;
+            await this.db.collection('userIcons').add({
+                userId,
+                prompt,
+                svgCode,
+                style: options.style || 'simple',
+                color: options.color || 'colorful',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                usageCount: 0
+            });
+            console.log('User icon saved to Firestore');
+        } catch (error) {
+            console.error('Error saving user icon:', error);
+        }
+    }
+
+    /**
+     * Show AI generation message
+     */
+    showAIMessage(message, type = 'info') {
+        const messagesDiv = document.getElementById('icon-ai-messages');
+        if (!messagesDiv) return;
+
+        const className = type === 'error' ? 'icon-message-error' :
+                         type === 'success' ? 'icon-message-success' :
+                         'icon-message-info';
+
+        messagesDiv.innerHTML = `<div class="${className}">${this.escapeHtml(message)}</div>`;
     }
 
     /**
