@@ -11,8 +11,12 @@
 
     <!-- User System -->
     <link rel="stylesheet" href="../../css/user-auth.css">
-    <script defer src="../../js/user-auth.js"></script>
+    <script defer src="../../js/firebase-auth.js"></script>
+    <script defer src="../../js/components/google-signin-button.js"></script>
+    <script defer src="../../js/auth-guard.js"></script>
     <script defer src="../../js/user-theories.js"></script>
+    <script defer src="../../js/theory-ownership.js"></script>
+    <script defer src="../../js/components/delete-confirmation-modal.js"></script>
 
     <style>
         body {
@@ -307,6 +311,56 @@
             margin: 1rem 0;
             color: #fca5a5;
         }
+
+        .ownership-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid rgba(147, 51, 234, 0.2);
+        }
+
+        .btn-edit {
+            background: rgba(147, 51, 234, 0.2);
+            color: white;
+            border: 2px solid rgba(147, 51, 234, 0.4);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-edit:hover {
+            background: rgba(147, 51, 234, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(147, 51, 234, 0.3);
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 2px solid rgba(239, 68, 68, 0.4);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -330,8 +384,16 @@
     <!-- Auth Modal -->
     <div id="auth-modal-container"></div>
 
+    <!-- Firebase SDK (CDN) - No Storage needed for URL-only images -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../../firebase-config.js"></script>
+
     <script>
         let currentTheory = null;
+        let unsubscribeTheory = null;
+        let unsubscribeComments = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             loadTheory();
@@ -342,9 +404,28 @@
                 .then(html => {
                     document.getElementById('auth-modal-container').innerHTML = html;
                 });
+
+            // Clean up listeners when leaving page
+            window.addEventListener('beforeunload', () => {
+                cleanupListeners();
+            });
         });
 
-        function loadTheory() {
+        function cleanupListeners() {
+            if (unsubscribeTheory) {
+                unsubscribeTheory();
+                unsubscribeTheory = null;
+            }
+            if (unsubscribeComments) {
+                unsubscribeComments();
+                unsubscribeComments = null;
+            }
+            if (currentTheory && window.userTheories) {
+                window.userTheories.stopListening(currentTheory.id);
+            }
+        }
+
+        async function loadTheory() {
             const urlParams = new URLSearchParams(window.location.search);
             const theoryId = urlParams.get('id');
 
@@ -353,23 +434,98 @@
                 return;
             }
 
-            const theory = window.userTheories.getTheory(theoryId);
+            // Clean up any existing listeners
+            cleanupListeners();
 
-            if (!theory) {
-                showError('Theory not found');
-                return;
+            try {
+                const theory = await window.userTheories.getTheory(theoryId);
+
+                if (!theory) {
+                    showError('Theory not found');
+                    return;
+                }
+
+                currentTheory = theory;
+
+                // Increment view count
+                await window.userTheories.incrementViews(theoryId);
+
+                // Update breadcrumb
+                document.getElementById('breadcrumb-title').textContent = theory.title;
+
+                // Render theory
+                renderTheory(theory);
+
+                // Set up real-time listeners for Firestore
+                if (window.userTheories && window.userTheories.useFirestore) {
+                    setupRealtimeListeners(theoryId);
+                }
+            } catch (error) {
+                console.error('Error loading theory:', error);
+                showError('Failed to load theory');
+            }
+        }
+
+        function setupRealtimeListeners(theoryId) {
+            // Listen for theory updates (votes, etc.)
+            unsubscribeTheory = window.userTheories.listenToTheory(theoryId, (updatedTheory) => {
+                if (updatedTheory) {
+                    currentTheory = updatedTheory;
+                    updateTheoryStats(updatedTheory);
+                }
+            });
+
+            // Listen for comment updates
+            unsubscribeComments = window.userTheories.listenToComments(theoryId, (comments) => {
+                updateComments(comments);
+            });
+        }
+
+        function updateTheoryStats(theory) {
+            // Update vote count
+            const voteButton = document.querySelector('.btn-vote');
+            if (voteButton) {
+                const voteCountText = voteButton.textContent.match(/\d+/);
+                if (voteCountText) {
+                    voteButton.innerHTML = voteButton.innerHTML.replace(/\d+/, theory.votes || 0);
+                }
             }
 
-            currentTheory = theory;
+            // Update stats bar
+            const statsDiv = document.querySelector('.theory-stats');
+            if (statsDiv) {
+                statsDiv.innerHTML = `
+                    <span>👁️ ${theory.views || 0} views</span>
+                    <span>👍 ${theory.votes || 0} votes</span>
+                    <span>💬 ${(theory.comments?.length || 0)} comments</span>
+                `;
+            }
+        }
 
-            // Increment view count
-            window.userTheories.incrementViews(theoryId);
+        function updateComments(comments) {
+            const commentsContainer = document.querySelector('.comments-section');
+            if (!commentsContainer) return;
 
-            // Update breadcrumb
-            document.getElementById('breadcrumb-title').textContent = theory.title;
+            const commentsHtml = renderComments(comments);
+            const titleElement = commentsContainer.querySelector('.section-title');
+            if (titleElement) {
+                titleElement.innerHTML = `💬 Comments (${comments.length})`;
+            }
 
-            // Render theory
-            renderTheory(theory);
+            // Find the comments list area and update it
+            const existingComments = commentsContainer.querySelectorAll('.comment');
+            const commentsParent = existingComments[0]?.parentElement;
+            if (commentsParent) {
+                // Update only if comment count changed
+                if (existingComments.length !== comments.length) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = commentsHtml;
+                    commentsParent.innerHTML = '';
+                    Array.from(tempDiv.children).forEach(child => {
+                        commentsParent.appendChild(child);
+                    });
+                }
+            }
         }
 
         function renderTheory(theory) {
@@ -424,6 +580,8 @@
                         ${renderVoteButtons(theory)}
                         <button class="btn" onclick="window.location.href='browse.html'">← Back to Browse</button>
                     </div>
+
+                    ${renderOwnershipActions(theory)}
 
                     <div class="comments-section">
                         <h2 class="section-title">💬 Comments (${theory.comments.length})</h2>
@@ -500,16 +658,57 @@
         }
 
         function renderVoteButtons(theory) {
-            const isLoggedIn = window.userAuth && window.userAuth.isLoggedIn();
-            const currentUser = isLoggedIn ? window.userAuth.getCurrentUser() : null;
+            const isLoggedIn = window.authGuard && window.authGuard.isAuthenticated();
+            const currentUser = isLoggedIn ? window.authGuard.getCurrentUser() : null;
             const userVote = currentUser ? theory.voters.find(v => v.username === currentUser.username) : null;
+
+            if (!isLoggedIn) {
+                return `
+                    <div class="vote-btn-disabled auth-required"
+                         onclick="window.authGuard.showLoginPrompt('Sign in to vote on theories', 'vote')"
+                         title="Sign in to vote">
+                        👍 Upvote (${theory.votes >= 0 ? theory.votes : 0})
+                        <span class="signin-required-badge" style="margin-left: 0.5rem;">🔒 Sign in</span>
+                    </div>
+                `;
+            }
 
             return `
                 <button class="btn btn-vote ${userVote?.direction === 1 ? 'voted' : ''}"
-                        onclick="handleVote(1)"
-                        ${!isLoggedIn ? 'disabled title="Login to vote"' : ''}>
+                        onclick="handleVote(1)">
                     👍 Upvote (${theory.votes >= 0 ? theory.votes : 0})
                 </button>
+            `;
+        }
+
+        function renderOwnershipActions(theory) {
+            // Check if current user can edit/delete this theory
+            if (!window.theoryOwnership) {
+                return '';
+            }
+
+            const canEdit = window.theoryOwnership.canEdit(theory.id);
+            const canDelete = window.theoryOwnership.canDelete(theory.id);
+
+            if (!canEdit && !canDelete) {
+                return '';
+            }
+
+            return `
+                <div class="ownership-actions">
+                    ${canEdit ? `
+                        <button class="btn btn-edit" onclick="window.location.href='edit.html?id=${theory.id}'">
+                            <span>✏️</span>
+                            <span>Edit Theory</span>
+                        </button>
+                    ` : ''}
+                    ${canDelete ? `
+                        <button class="btn btn-delete" onclick="handleDelete()">
+                            <span>🗑️</span>
+                            <span>Delete Theory</span>
+                        </button>
+                    ` : ''}
+                </div>
             `;
         }
 
@@ -531,15 +730,26 @@
         }
 
         function renderAddComment() {
-            const isLoggedIn = window.userAuth && window.userAuth.isLoggedIn();
+            const isLoggedIn = window.authGuard && window.authGuard.isAuthenticated();
 
             if (!isLoggedIn) {
                 return `
-                    <div class="add-comment">
-                        <p style="opacity: 0.6;">
-                            <button class="btn" onclick="window.userAuth?.openAuthModal('login')">Login</button>
-                            to add a comment
-                        </p>
+                    <div class="login-prompt">
+                        <div class="login-prompt-icon">💬</div>
+                        <h3 class="login-prompt-title">Join the Conversation</h3>
+                        <p class="login-prompt-text">Sign in to share your thoughts and engage with other theorists</p>
+                        <div class="login-prompt-actions">
+                            <button class="google-signin-btn google-signin-medium google-signin-dark"
+                                    onclick="window.authGuard.showLoginPrompt('Sign in to comment on theories', 'comment')">
+                                <svg class="google-icon" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                </svg>
+                                <span class="google-signin-text">Sign in with Google</span>
+                            </button>
+                        </div>
                     </div>
                 `;
             }
@@ -554,23 +764,31 @@
             `;
         }
 
-        function handleVote(direction) {
-            if (!window.userAuth || !window.userAuth.isLoggedIn()) {
-                window.userAuth?.openAuthModal('login');
+        async function handleVote(direction) {
+            if (!window.authGuard || !window.authGuard.isAuthenticated()) {
+                window.authGuard.showLoginPrompt('Sign in to vote on theories', 'vote');
                 return;
             }
 
-            const result = window.userTheories.voteTheory(currentTheory.id, direction);
+            try {
+                const result = await window.userTheories.voteTheory(currentTheory.id, direction);
 
-            if (result.success) {
-                // Reload theory to show updated votes
-                loadTheory();
-            } else {
-                alert(result.error);
+                if (result.success) {
+                    // With real-time listeners, the UI will update automatically
+                    // No need to reload if using Firestore
+                    if (!window.userTheories.useFirestore) {
+                        loadTheory();
+                    }
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                console.error('Error voting:', error);
+                alert('Failed to vote. Please try again.');
             }
         }
 
-        function handleAddComment() {
+        async function handleAddComment() {
             const input = document.getElementById('comment-input');
             const errorDiv = document.getElementById('comment-error');
             const content = input.value.trim();
@@ -580,15 +798,37 @@
                 return;
             }
 
-            const result = window.userTheories.addComment(currentTheory.id, content);
+            try {
+                const result = await window.userTheories.addComment(currentTheory.id, content);
 
-            if (result.success) {
-                input.value = '';
-                errorDiv.innerHTML = '';
-                loadTheory(); // Reload to show new comment
-            } else {
-                errorDiv.innerHTML = `<div class="error-message">${result.error}</div>`;
+                if (result.success) {
+                    input.value = '';
+                    errorDiv.innerHTML = '';
+                    // With real-time listeners, comments will update automatically
+                    // No need to reload if using Firestore
+                    if (!window.userTheories.useFirestore) {
+                        loadTheory();
+                    }
+                } else {
+                    errorDiv.innerHTML = `<div class="error-message">${result.error}</div>`;
+                }
+            } catch (error) {
+                console.error('Error adding comment:', error);
+                errorDiv.innerHTML = '<div class="error-message">Failed to add comment. Please try again.</div>';
             }
+        }
+
+        function handleDelete() {
+            if (!window.deleteConfirmationModal) {
+                // Fallback to browser confirm
+                if (confirm('Are you sure you want to delete this theory? This cannot be undone.')) {
+                    window.theoryOwnership.executeDelete(currentTheory.id);
+                }
+                return;
+            }
+
+            // Show delete confirmation modal
+            window.deleteConfirmationModal.show(currentTheory.id);
         }
 
         function showError(message) {

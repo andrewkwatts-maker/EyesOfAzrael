@@ -202,43 +202,121 @@ Override these in your page's CSS to customize appearance.
 
 ## 💾 Data Storage
 
-**Current: localStorage (Client-side)**
-- Stored in browser only
-- Survives page reloads
-- Not synced across devices
-- Data persists until browser cache cleared
+### Firebase Cloud Backend
 
-**Collections:**
-- `users` - User accounts
-- `userTheories` - All theories
-- `currentUser` - Active session
+**Current: Firebase (Cloud-based)**
+- **Authentication:** Google OAuth (Firebase Auth)
+- **Database:** Cloud Firestore (NoSQL)
+- **Storage:** Firebase Storage (Images)
+- **Sync:** Real-time across all devices
+- **Backup:** Automatic cloud backups
+- **Security:** Server-side security rules
 
-**Future: Backend Database**
-The system is designed to be easily upgraded to use a backend API:
-- Replace localStorage calls with fetch() API calls
-- Add proper password hashing (bcrypt)
-- Enable cross-device sync
-- Add moderation tools
-- Implement search indexing
+**Data Collections:**
 
-## 🔒 Security Notes
+**Firestore Structure:**
+```
+/users/{userId}
+  - uid (Firebase user ID)
+  - email (Google account)
+  - displayName (Google name)
+  - photoURL (Google photo)
+  - bio (optional)
+  - createdAt, updatedAt
 
-**Current Implementation:**
-- Password "hashing" is simple (demonstration only)
-- All data stored client-side
-- No server-side validation
+/theories/{theoryId}
+  - title, summary, content
+  - topic, subtopic
+  - richContent (panels, images, links)
+  - authorId, authorName, authorAvatar
+  - votes, views, commentCount
+  - status (published/draft/deleted)
+  - createdAt, updatedAt
 
-**⚠️ NOT PRODUCTION READY for sensitive data**
+/theories/{theoryId}/comments/{commentId}
+  - content
+  - authorId, authorName, authorAvatar
+  - createdAt
 
-**For Production:**
-- Implement proper server-side authentication
-- Use bcrypt or argon2 for password hashing
-- Add HTTPS
-- Implement rate limiting
-- Add email verification
-- Add password reset
-- Add CSRF protection
-- Add XSS sanitization
+/theories/{theoryId}/votes/{userId}
+  - direction (1 or -1)
+  - createdAt
+```
+
+**Firebase Storage Structure:**
+```
+/theory-images/{userId}/{theoryId}/{filename}
+  - Max 5MB per image
+  - Allowed types: image/*
+  - Public read, owner write/delete
+```
+
+**Free Tier Limits:**
+- Firestore: 50K reads/day, 20K writes/day, 1GB storage
+- Storage: 5GB total, 1GB/day downloads
+- Authentication: Unlimited
+- **Sufficient for most websites**
+
+**Migration from localStorage:**
+See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for automatic migration process
+
+## 🔒 Security
+
+**Firebase Security Features:**
+
+1. **Authentication:**
+   - Google OAuth (industry standard)
+   - No password management needed
+   - Secure session handling
+   - Automatic token refresh
+
+2. **Firestore Security Rules:**
+   - Server-side access control
+   - User can only edit own theories
+   - Public read for published theories
+   - Prevent unauthorized writes
+
+3. **Storage Security Rules:**
+   - User can only upload to own folder
+   - File size limits (5MB max)
+   - File type restrictions (images only)
+   - Public read for hosted images
+
+4. **Data Validation:**
+   - Client-side input validation
+   - Server-side rule validation
+   - XSS prevention (Firestore auto-escapes)
+   - Rate limiting via security rules
+
+**Security Rules Examples:**
+
+**Firestore (theories):**
+```javascript
+// Anyone can read published theories
+allow read: if resource.data.status == 'published';
+
+// Only author can update their own theory
+allow update: if request.auth != null
+              && resource.data.authorId == request.auth.uid;
+```
+
+**Storage (images):**
+```javascript
+// Only authenticated user can upload to their folder
+allow create: if request.auth != null
+              && request.auth.uid == userId
+              && request.resource.size < 5 * 1024 * 1024;
+```
+
+**Production Ready:**
+- ✅ HTTPS enforced (Firebase Hosting)
+- ✅ Secure authentication (Google OAuth)
+- ✅ Server-side validation (Security Rules)
+- ✅ XSS protection (Firestore)
+- ✅ Rate limiting (configurable)
+- ✅ Data encryption (Firebase default)
+
+**See:** [FIREBASE_SETUP_GUIDE.md](./FIREBASE_SETUP_GUIDE.md) for security rule deployment
 
 ## 📱 Responsive Design
 
@@ -333,89 +411,180 @@ Media queries at:
 
 ## 📖 API Reference
 
-### window.userAuth
+### Firebase Authentication API
+
+**Global namespace:** `window.firebaseAuth`
 
 ```javascript
-// Signup
-window.userAuth.signup(username, email, password)
-// Returns: { success: boolean, message/error: string }
+// Sign in with Google
+await window.firebaseAuth.signInWithGoogle()
+// Returns: { success: boolean, user?: Object, error?: string }
 
-// Login
-window.userAuth.login(username, password)
-// Returns: { success: boolean, message/error: string }
-
-// Logout
-window.userAuth.logout()
-
-// Check if logged in
-window.userAuth.isLoggedIn()
-// Returns: boolean
+// Sign out
+await window.firebaseAuth.signOut()
+// Returns: { success: boolean, error?: string }
 
 // Get current user
-window.userAuth.getCurrentUser()
-// Returns: { username, email, avatar, bio, createdAt } | null
+window.firebaseAuth.getCurrentUser()
+// Returns: { uid, email, displayName, photoURL, emailVerified } | null
 
-// Show modals
-window.userAuth.showLoginModal()
-window.userAuth.showSignupModal()
-window.userAuth.hideAuthModal()
+// Check if logged in
+window.firebaseAuth.isLoggedIn()
+// Returns: boolean
+
+// Listen for auth state changes
+window.firebaseAuth.onAuthStateChanged(callback)
+// callback: (user) => void
+// Returns: unsubscribe function
 ```
 
-### window.userTheories
+### Firebase Database API
+
+**Global namespace:** `window.firebaseDB`
 
 ```javascript
-// Submit theory
-window.userTheories.submitTheory({
+// Create theory
+await window.firebaseDB.createTheory({
     title: string,
     summary: string,
     content: string,
-    category: string,
-    sources: string,
-    relatedMythologies: string[],
-    relatedPage: string
+    topic: string,
+    subtopic: string,
+    richContent?: {
+        panels: Array,
+        images: Array,
+        links: Array,
+        corpusSearches: Array
+    },
+    relatedPage?: string,
+    sources?: string,
+    relatedMythologies?: Array
 })
-// Returns: { success: boolean, theory/error: object/string }
+// Returns: { success: boolean, theory?: Theory, error?: string }
 
-// Get all theories
-window.userTheories.getAllTheories({
-    status: 'published' | 'draft',
-    category: string,
-    author: string,
-    mythology: string,
-    relatedPage: string,
-    sortBy: 'newest' | 'oldest' | 'popular' | 'views'
+// Get all theories (with filters)
+await window.firebaseDB.getAllTheories({
+    status?: 'published' | 'draft' | 'deleted',
+    topic?: string,
+    subtopic?: string,
+    authorId?: string,
+    relatedPage?: string,
+    sortBy?: 'newest' | 'oldest' | 'popular' | 'views',
+    limit?: number,
+    startAfter?: DocumentSnapshot
 })
-// Returns: Theory[]
+// Returns: { success: boolean, theories?: Array, lastDoc?: DocumentSnapshot, error?: string }
 
 // Get single theory
-window.userTheories.getTheory(theoryId)
-// Returns: Theory | undefined
+await window.firebaseDB.getTheory(theoryId)
+// Returns: { success: boolean, theory?: Theory, error?: string }
 
 // Update theory
-window.userTheories.updateTheory(theoryId, updates)
-// Returns: { success: boolean, theory/error: object/string }
+await window.firebaseDB.updateTheory(theoryId, updates)
+// Returns: { success: boolean, theory?: Theory, error?: string }
 
-// Delete theory
-window.userTheories.deleteTheory(theoryId)
-// Returns: { success: boolean, message/error: string }
+// Delete theory (soft delete)
+await window.firebaseDB.deleteTheory(theoryId)
+// Returns: { success: boolean, message?: string, error?: string }
 
-// Vote
-window.userTheories.voteTheory(theoryId, direction)
-// direction: 1 for upvote, -1 for downvote
-// Returns: { success: boolean, votes/error: number/string }
+// Vote on theory
+await window.firebaseDB.voteTheory(theoryId, direction)
+// direction: 1 for upvote, -1 for downvote, 0 to remove vote
+// Returns: { success: boolean, votes?: number, userVote?: number, error?: string }
 
 // Add comment
-window.userTheories.addComment(theoryId, content)
-// Returns: { success: boolean, comment/error: object/string }
+await window.firebaseDB.addComment(theoryId, content)
+// Returns: { success: boolean, comment?: Comment, error?: string }
+
+// Get comments
+await window.firebaseDB.getComments(theoryId)
+// Returns: { success: boolean, comments?: Array, error?: string }
+
+// Increment view count
+await window.firebaseDB.incrementViewCount(theoryId)
+// Returns: { success: boolean, views?: number, error?: string }
 ```
+
+### Firebase Storage API
+
+**Global namespace:** `window.firebaseStorage`
+
+```javascript
+// Upload image
+await window.firebaseStorage.uploadImage(
+    file,              // File object
+    theoryId,          // Theory ID
+    onProgress         // Optional: (progress) => void
+)
+// Returns: { success: boolean, url?: string, path?: string, error?: string }
+
+// Delete image
+await window.firebaseStorage.deleteImage(path)
+// Returns: { success: boolean, message?: string, error?: string }
+
+// Get download URL
+await window.firebaseStorage.getDownloadURL(path)
+// Returns: { success: boolean, url?: string, error?: string }
+```
+
+**Detailed API Documentation:** See [API_REFERENCE.md](./API_REFERENCE.md)
 
 ## 🎯 Next Steps
 
-1. **Test the demo page** (`test-user-theories.html`)
-2. **Review the implementation** on a real mythology page
-3. **Deploy to all pages** using the automated script
-4. **Gather feedback** from users
-5. **Plan backend integration** for production use
+### For New Deployments
+
+1. **Set up Firebase:**
+   - Follow [FIREBASE_SETUP_GUIDE.md](./FIREBASE_SETUP_GUIDE.md)
+   - Create Firebase project
+   - Enable Authentication, Firestore, Storage
+   - Deploy security rules
+
+2. **Configure Application:**
+   - Copy Firebase config to `firebase-config.js`
+   - Update `.firebaserc` with project ID
+   - Test locally
+
+3. **Deploy:**
+   - See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+   - Deploy to Firebase Hosting (recommended)
+   - Or use GitHub Pages, Netlify, Vercel
+
+4. **Monitor:**
+   - See [MONITORING_GUIDE.md](./MONITORING_GUIDE.md)
+   - Set up quota alerts
+   - Implement caching for optimization
+
+### For Existing Users
+
+1. **Migration:**
+   - See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)
+   - Sign in with Google
+   - Automatic migration of localStorage data
+   - Verify all theories migrated
+
+2. **New Features:**
+   - Upload images directly
+   - Access from any device
+   - Real-time updates
+   - Cloud backup
+
+### For Developers
+
+1. **Read Documentation:**
+   - [API_REFERENCE.md](./API_REFERENCE.md) - Complete API docs
+   - [BACKEND_MIGRATION_PLAN.md](./BACKEND_MIGRATION_PLAN.md) - Architecture
+
+2. **Integrate Firebase:**
+   - Replace localStorage calls with Firebase API
+   - Add image upload functionality
+   - Implement real-time listeners
+
+3. **Test Thoroughly:**
+   - Use [USER_THEORY_TESTING_CHECKLIST.md](./USER_THEORY_TESTING_CHECKLIST.md)
+   - Test auth flow
+   - Test CRUD operations
+   - Test image uploads
+   - Test public viewing
 
 ## 📝 License
 

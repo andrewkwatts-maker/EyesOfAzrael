@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Integration Tests - Eyes of Azrael</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .auth-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .auth-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .user-info {
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .user-info.logged-out {
+            background: #ffe0e0;
+        }
+
+        .user-info.logged-in {
+            background: #e0ffe0;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-secondary {
+            background: #718096;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4a5568;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .test-results {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .test-results h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .test-category {
+            margin-bottom: 30px;
+        }
+
+        .test-category h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .test-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #cbd5e0;
+            background: #f7fafc;
+            transition: all 0.3s ease;
+        }
+
+        .test-item.running {
+            border-left-color: #667eea;
+            background: #edf2f7;
+            animation: pulse 1.5s infinite;
+        }
+
+        .test-item.pass {
+            border-left-color: #48bb78;
+            background: #f0fff4;
+        }
+
+        .test-item.fail {
+            border-left-color: #f56565;
+            background: #fff5f5;
+        }
+
+        .test-item.skip {
+            border-left-color: #ed8936;
+            background: #fffaf0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .test-name {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .test-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .test-status.pass {
+            background: #48bb78;
+            color: white;
+        }
+
+        .test-status.fail {
+            background: #f56565;
+            color: white;
+        }
+
+        .test-status.running {
+            background: #667eea;
+            color: white;
+        }
+
+        .test-status.skip {
+            background: #ed8936;
+            color: white;
+        }
+
+        .test-message {
+            color: #4a5568;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .test-error {
+            color: #c53030;
+            font-size: 13px;
+            margin-top: 5px;
+            padding: 10px;
+            background: #fed7d7;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .test-duration {
+            color: #718096;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-card.total {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .summary-card.passed {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .summary-card.failed {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+        }
+
+        .summary-card.skipped {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+        }
+
+        .summary-number {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .summary-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .test-data-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .test-data-section pre {
+            background: #2d3748;
+            color: #48bb78;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .note {
+            background: #fef5e7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .note strong {
+            color: #d68910;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Firebase Integration Tests</h1>
+            <p>Comprehensive automated testing for Eyes of Azrael Firebase integration</p>
+        </div>
+
+        <div class="auth-section">
+            <h2>Authentication Status</h2>
+            <div id="authStatus" class="user-info logged-out">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Checking Firebase authentication...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="note">
+            <strong>Note:</strong> Some tests require manual interaction (e.g., Google Sign-In).
+            The test runner will pause and prompt you when manual action is needed.
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="runAllTests()">
+                ▶️ Run All Tests
+            </button>
+            <button class="btn btn-success" onclick="runCoreTests()">
+                🔥 Run Core Tests Only
+            </button>
+            <button class="btn btn-secondary" onclick="runSecurityTests()">
+                🔒 Run Security Tests
+            </button>
+            <button class="btn btn-secondary" onclick="clearTestData()">
+                🗑️ Clear Test Data
+            </button>
+            <button class="btn btn-danger" onclick="resetTests()">
+                🔄 Reset Tests
+            </button>
+        </div>
+
+        <div class="test-results">
+            <h2>Test Results</h2>
+
+            <div class="summary" id="summary">
+                <div class="summary-card total">
+                    <div class="summary-number" id="totalTests">0</div>
+                    <div class="summary-label">Total Tests</div>
+                </div>
+                <div class="summary-card passed">
+                    <div class="summary-number" id="passedTests">0</div>
+                    <div class="summary-label">Passed</div>
+                </div>
+                <div class="summary-card failed">
+                    <div class="summary-number" id="failedTests">0</div>
+                    <div class="summary-label">Failed</div>
+                </div>
+                <div class="summary-card skipped">
+                    <div class="summary-number" id="skippedTests">0</div>
+                    <div class="summary-label">Skipped</div>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+
+            <div id="testCategories">
+                <!-- Test categories will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Configuration (load this from parent directory) -->
+    <script src="../firebase-config.js"></script>
+
+    <!-- Test Suite -->
+    <script src="firebase-test-suite.js"></script>
+
+    <script>
+        // Initialize test UI
+        let testRunner = null;
+
+        window.addEventListener('load', async () => {
+            // Initialize test runner
+            testRunner = new FirebaseTestRunner();
+
+            // Update auth status display
+            updateAuthStatus();
+
+            // Listen for auth state changes
+            if (window.firebase && firebase.auth) {
+                firebase.auth().onAuthStateChanged((user) => {
+                    updateAuthStatus(user);
+                });
+            }
+        });
+
+        function updateAuthStatus(user) {
+            const authStatusEl = document.getElementById('authStatus');
+
+            if (!window.firebase || !firebase.auth) {
+                authStatusEl.className = 'user-info logged-out';
+                authStatusEl.innerHTML = `
+                    <p><strong>❌ Firebase Not Initialized</strong></p>
+                    <p>Firebase SDK is not loaded or configured. Please check firebase-config.js</p>
+                `;
+                return;
+            }
+
+            if (user === undefined) {
+                // Still checking
+                return;
+            }
+
+            if (user) {
+                authStatusEl.className = 'user-info logged-in';
+                authStatusEl.innerHTML = `
+                    <p><strong>✅ Logged In</strong></p>
+                    <p><strong>User:</strong> ${user.displayName || 'No name'}</p>
+                    <p><strong>Email:</strong> ${user.email}</p>
+                    <p><strong>UID:</strong> ${user.uid}</p>
+                    <button class="btn btn-danger" onclick="firebase.auth().signOut()">Sign Out</button>
+                `;
+            } else {
+                authStatusEl.className = 'user-info logged-out';
+                authStatusEl.innerHTML = `
+                    <p><strong>⚠️ Not Logged In</strong></p>
+                    <p>Some tests require authentication. Please sign in to run all tests.</p>
+                    <button class="btn btn-primary" onclick="signInForTests()">Sign In with Google</button>
+                `;
+            }
+        }
+
+        async function signInForTests() {
+            if (!firebase.auth) {
+                alert('Firebase Auth is not initialized!');
+                return;
+            }
+
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                await firebase.auth().signInWithPopup(provider);
+                alert('Signed in successfully! You can now run all tests.');
+            } catch (error) {
+                alert('Sign in failed: ' + error.message);
+            }
+        }
+
+        async function runAllTests() {
+            if (!testRunner) {
+                alert('Test runner not initialized!');
+                return;
+            }
+            await testRunner.runAllTests();
+        }
+
+        async function runCoreTests() {
+            if (!testRunner) {
+                alert('Test runner not initialized!');
+                return;
+            }
+            await testRunner.runCoreTests();
+        }
+
+        async function runSecurityTests() {
+            if (!testRunner) {
+                alert('Test runner not initialized!');
+                return;
+            }
+            await testRunner.runSecurityTests();
+        }
+
+        function resetTests() {
+            if (!testRunner) {
+                alert('Test runner not initialized!');
+                return;
+            }
+            testRunner.resetTests();
+            document.getElementById('testCategories').innerHTML = '';
+            document.getElementById('totalTests').textContent = '0';
+            document.getElementById('passedTests').textContent = '0';
+            document.getElementById('failedTests').textContent = '0';
+            document.getElementById('skippedTests').textContent = '0';
+            document.getElementById('progressFill').style.width = '0%';
+        }
+
+        async function clearTestData() {
+            if (!confirm('This will delete all test theories and data. Are you sure?')) {
+                return;
+            }
+
+            if (!testRunner) {
+                alert('Test runner not initialized!');
+                return;
+            }
+
+            try {
+                await testRunner.clearTestData();
+                alert('Test data cleared successfully!');
+            } catch (error) {
+                alert('Error clearing test data: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

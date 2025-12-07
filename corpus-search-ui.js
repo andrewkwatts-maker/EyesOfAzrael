@@ -4,6 +4,7 @@
  */
 
 let corpusSearch;
+let metadataIntegration;
 const CONFIG_PATH = 'corpus-config.json';
 
 // Check for URL parameters (deep linking)
@@ -14,6 +15,9 @@ const autoRepo = urlParams.get('repo');
 // Allow custom parsers to be set before initialization
 window.CUSTOM_CORPUS_PARSERS = window.CUSTOM_CORPUS_PARSERS || {};
 
+// Metadata integration settings
+window.ENABLE_METADATA_SEARCH = window.ENABLE_METADATA_SEARCH !== false; // Default enabled
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -21,6 +25,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         const customParsers = window.CUSTOM_CORPUS_PARSERS || {};
         corpusSearch = new CorpusSearch(CONFIG_PATH, customParsers);
         await corpusSearch.init();
+
+        // Initialize metadata integration if enabled and available
+        if (window.ENABLE_METADATA_SEARCH &&
+            typeof CorpusMetadataIntegration !== 'undefined' &&
+            typeof AlternateNameIndex !== 'undefined') {
+            try {
+                metadataIntegration = await corpusSearch.enableMetadataIntegration({
+                    loadCrossCulturalMap: true
+                });
+                if (metadataIntegration) {
+                    console.log('Metadata integration enabled:', metadataIntegration.getStats());
+                    showMetadataToggle();
+                }
+            } catch (e) {
+                console.warn('Metadata integration failed:', e);
+            }
+        }
+
         renderRepositories();
         setupEventListeners();
 
@@ -229,6 +251,7 @@ async function performSearch() {
 
     const caseSensitive = document.getElementById('case-sensitive').checked;
     const maxResults = parseInt(document.getElementById('max-results').value) || 100;
+    const useMetadata = document.getElementById('use-metadata')?.checked || false;
     const searchBtn = document.getElementById('search-btn');
     const resultsContainer = document.getElementById('search-results');
     const resultsSummary = document.getElementById('results-summary');
@@ -240,22 +263,54 @@ async function performSearch() {
     try {
         const results = await corpusSearch.search(searchTerm, {
             caseSensitive,
-            maxResults
+            maxResults,
+            useMetadata
         });
 
         resultsContainer.innerHTML = '';
         resultsSummary.classList.remove('hidden');
-        resultsSummary.textContent = `Found ${results.length} result${results.length !== 1 ? 's' : ''} for "${searchTerm}"`;
+
+        // Show expanded terms if metadata was used
+        let summaryText = `Found ${results.length} result${results.length !== 1 ? 's' : ''} for "${searchTerm}"`;
+        if (useMetadata && metadataIntegration && results.length > 0) {
+            const annotation = results[0].metadata?.entityAnnotation;
+            if (annotation && annotation.expandedTerms && annotation.expandedTerms.length > 1) {
+                const otherTerms = annotation.expandedTerms.filter(t => t !== searchTerm);
+                if (otherTerms.length > 0) {
+                    summaryText += ` <span class="expanded-terms">(including: ${otherTerms.join(', ')})</span>`;
+                }
+            }
+        }
+        resultsSummary.innerHTML = summaryText;
 
         if (results.length === 0) {
-            resultsContainer.innerHTML = `
+            let noResultsHtml = `
                 <p style="text-align: center; color: var(--color-text-secondary); padding: 2rem;">
                     No results found. Try a different search term or load more texts.
                 </p>
             `;
+
+            // Show alternate suggestions if metadata is available
+            if (useMetadata && metadataIntegration) {
+                const suggestions = metadataIntegration.getAlternateSuggestions(searchTerm, { limit: 5 });
+                if (suggestions.length > 0) {
+                    noResultsHtml += '<div class="suggestions-box">';
+                    noResultsHtml += '<h4>Try searching for:</h4><ul>';
+                    suggestions.forEach(sug => {
+                        noResultsHtml += `<li><a href="#" onclick="searchSuggestion('${sug.term.replace(/'/g, "\\'")}'); return false;">${sug.term}</a>`;
+                        if (sug.entity) {
+                            noResultsHtml += ` <span class="suggestion-context">(${sug.type}: ${sug.entity})</span>`;
+                        }
+                        noResultsHtml += '</li>';
+                    });
+                    noResultsHtml += '</ul></div>';
+                }
+            }
+
+            resultsContainer.innerHTML = noResultsHtml;
         } else {
             results.forEach(result => {
-                const resultEl = createResultElement(result, searchTerm);
+                const resultEl = createResultElement(result, searchTerm, useMetadata);
                 resultsContainer.appendChild(resultEl);
             });
         }
@@ -272,12 +327,61 @@ async function performSearch() {
     }
 }
 
+// Search for a suggested term
+function searchSuggestion(term) {
+    document.getElementById('search-term').value = term;
+    performSearch();
+}
+
 // Create result element
-function createResultElement(result, searchTerm) {
+function createResultElement(result, searchTerm, useMetadata = false) {
     const div = document.createElement('div');
     div.className = 'search-result-item';
 
-    const highlightedText = highlightTerm(result.full_verse, searchTerm);
+    const highlightedText = highlightTerm(result.full_verse, result.matched_term);
+
+    let metadataHtml = '';
+
+    // Add metadata annotation if available
+    if (useMetadata && result.metadata?.entityAnnotation) {
+        const annotation = result.metadata.entityAnnotation;
+
+        // Show if matched via alternate name
+        if (annotation.matchedViaAlternate) {
+            metadataHtml += `<div class="result-metadata">
+                <span class="metadata-badge">Matched: "${result.matched_term}"</span>`;
+
+            if (annotation.entityMetadata) {
+                const entity = annotation.entityMetadata;
+                metadataHtml += ` <span class="metadata-entity">Entity: ${entity.primaryName}</span>`;
+
+                if (entity.mythology) {
+                    metadataHtml += ` <span class="metadata-mythology">${entity.mythology}</span>`;
+                }
+
+                // Show alternate names
+                if (entity.matchedVariants && entity.matchedVariants.length > 0) {
+                    const altNames = entity.matchedVariants
+                        .filter(v => v.name !== entity.primaryName)
+                        .map(v => v.name)
+                        .slice(0, 3);
+                    if (altNames.length > 0) {
+                        metadataHtml += ` <span class="metadata-alternates">Also: ${altNames.join(', ')}</span>`;
+                    }
+                }
+            }
+
+            metadataHtml += '</div>';
+        }
+
+        // Show cross-cultural equivalents
+        if (annotation.crossCulturalEquivalents && annotation.crossCulturalEquivalents.length > 0) {
+            metadataHtml += `<div class="result-cross-cultural">
+                <span class="cross-cultural-label">Cross-cultural equivalents:</span>
+                ${annotation.crossCulturalEquivalents.map(eq => `<span class="cross-cultural-name">${eq}</span>`).join(' ')}
+            </div>`;
+        }
+    }
 
     div.innerHTML = `
         <div class="result-header">
@@ -285,6 +389,7 @@ function createResultElement(result, searchTerm) {
             <span class="result-corpus">[${result.corpus_name}]</span>
         </div>
         <div class="result-text">${highlightedText}</div>
+        ${metadataHtml}
         ${result.url ? `<div class="result-link"><a href="${result.url}" target="_blank" rel="noopener">View source →</a></div>` : ''}
     `;
 
@@ -364,4 +469,28 @@ function showSuccess(message) {
     `;
     errorContainer.appendChild(successDiv);
     setTimeout(() => successDiv.remove(), 5000);
+}
+
+// Show metadata toggle if available
+function showMetadataToggle() {
+    const searchInterface = document.getElementById('search-interface');
+    if (!searchInterface) return;
+
+    const optionsArea = searchInterface.querySelector('.search-options') ||
+                       searchInterface.querySelector('.search-controls');
+    if (!optionsArea) return;
+
+    // Check if toggle already exists
+    if (document.getElementById('use-metadata')) return;
+
+    const toggleHtml = `
+        <label class="metadata-toggle">
+            <input type="checkbox" id="use-metadata" checked>
+            <span>Enhanced search (alternate names & cross-cultural)</span>
+        </label>
+    `;
+
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = toggleHtml;
+    optionsArea.appendChild(tempDiv.firstElementChild);
 }

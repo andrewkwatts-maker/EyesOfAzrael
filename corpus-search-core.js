@@ -15,6 +15,7 @@ class CorpusSearch {
     this.configPath = configPath;
     this.customParsers = customParsers; // Repo-specific parsers
     this.loadingCallbacks = {};
+    this.metadataIntegration = null; // Optional metadata integration
   }
 
   async init() {
@@ -248,8 +249,14 @@ class CorpusSearch {
       maxResults = 100,
       contextWords = 10,
       matchAll = false,
-      terms = null
+      terms = null,
+      useMetadata = false // New option for metadata-enhanced search
     } = options;
+
+    // If metadata integration is enabled and requested, delegate to it
+    if (useMetadata && this.metadataIntegration && this.metadataIntegration.isMetadataAvailable()) {
+      return await this.metadataIntegration.searchWithMetadata(term, options);
+    }
 
     const searchTerms = terms || [term];
     const results = [];
@@ -381,6 +388,45 @@ class CorpusSearch {
 
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Enable metadata integration
+   * @param {Object} options - Integration options
+   * @returns {Promise<CorpusMetadataIntegration>} The integration instance
+   */
+  async enableMetadataIntegration(options = {}) {
+    if (typeof CorpusMetadataIntegration === 'undefined') {
+      console.warn('CorpusMetadataIntegration not loaded. Include corpus-metadata-integration.js');
+      return null;
+    }
+
+    if (typeof AlternateNameIndex === 'undefined') {
+      console.warn('AlternateNameIndex not loaded. Include alternate-name-index.js');
+      return null;
+    }
+
+    this.metadataIntegration = new CorpusMetadataIntegration(this, options);
+    await this.metadataIntegration.init(options);
+
+    return this.metadataIntegration;
+  }
+
+  /**
+   * Get metadata integration instance
+   * @returns {CorpusMetadataIntegration|null}
+   */
+  getMetadataIntegration() {
+    return this.metadataIntegration;
+  }
+
+  /**
+   * Check if metadata integration is available
+   * @returns {boolean}
+   */
+  hasMetadataIntegration() {
+    return this.metadataIntegration !== null &&
+           this.metadataIntegration.isMetadataAvailable();
   }
 }
 

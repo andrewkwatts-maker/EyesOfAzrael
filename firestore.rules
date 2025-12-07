@@ -1,0 +1,317 @@
+rules_version = '2';
+
+/**
+ * Firestore Security Rules
+ * Eyes of Azrael - Complete System
+ *
+ * SECURITY MODEL:
+ * - Public read access for published content
+ * - Authenticated write access
+ * - Ownership enforcement
+ * - Moderation support (roles: user, moderator, admin)
+ *
+ * DEPLOYMENT:
+ *   firebase deploy --only firestore:rules
+ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===== HELPER FUNCTIONS =====
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserRole() {
+      return isAuthenticated() ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role : 'guest';
+    }
+
+    function isModerator() {
+      return getUserRole() in ['moderator', 'admin'];
+    }
+
+    function isAdmin() {
+      return getUserRole() == 'admin';
+    }
+
+    // ===== USERS COLLECTION =====
+    // Path: /users/{userId}
+
+    match /users/{userId} {
+      // Anyone can read user profiles
+      allow read: if true;
+
+      // Users can create their own profile
+      allow create: if isOwner(userId)
+                    && request.resource.data.keys().hasAll(['email', 'displayName', 'createdAt'])
+                    && request.resource.data.email is string
+                    && request.resource.data.displayName is string;
+
+      // Users can update their own profile (not email or role)
+      allow update: if isOwner(userId)
+                    && request.resource.data.email == resource.data.email
+                    && (!('role' in request.resource.data) || request.resource.data.role == resource.data.role);
+
+      // No deletions (prevents orphaned content)
+      allow delete: if false;
+    }
+
+    // ===== THEORIES COLLECTION =====
+    // Path: /theories/{theoryId}
+    // User submissions: theories and asset contributions
+
+    match /theories/{theoryId} {
+      function isValidTheory() {
+        return request.resource.data.keys().hasAll(['title', 'summary', 'content', 'authorId', 'status', 'page', 'contributionType'])
+               && request.resource.data.title is string
+               && request.resource.data.title.size() >= 3
+               && request.resource.data.title.size() <= 200
+               && request.resource.data.summary is string
+               && request.resource.data.status in ['draft', 'published', 'archived']
+               && request.resource.data.page is string
+               && request.resource.data.contributionType is string
+               && request.resource.data.authorId == request.auth.uid;
+      }
+
+      // Public read for published, owner read for drafts
+      allow read: if resource.data.status == 'published'
+                  || isOwner(resource.data.authorId)
+                  || isModerator();
+
+      // Authenticated users can create theories
+      allow create: if isAuthenticated() && isValidTheory();
+
+      // Owner can update (cannot change authorId)
+      allow update: if isOwner(resource.data.authorId)
+                    && request.resource.data.authorId == resource.data.authorId
+                    && isValidTheory();
+
+      // Owner or moderator can delete
+      allow delete: if isOwner(resource.data.authorId) || isModerator();
+
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isAuthenticated()
+                      && request.resource.data.authorId == request.auth.uid
+                      && request.resource.data.content is string
+                      && request.resource.data.content.size() <= 2000;
+        allow update: if isOwner(resource.data.authorId)
+                      && request.resource.data.authorId == resource.data.authorId;
+        allow delete: if isOwner(resource.data.authorId) || isModerator();
+      }
+
+      // Votes subcollection
+      match /votes/{voteUserId} {
+        allow read: if true;
+        allow write: if isAuthenticated()
+                     && request.auth.uid == voteUserId
+                     && (request.resource.data.vote in [1, -1] || request.resource.data.size() == 0);
+      }
+    }
+
+    // ===== ASSETS COLLECTION =====
+    // Path: /assets/{assetId}
+    // Official content + approved user contributions
+
+    match /assets/{assetId} {
+      function isValidAsset() {
+        return request.resource.data.keys().hasAll(['name', 'assetType', 'mythology', 'status'])
+               && request.resource.data.name is string
+               && request.resource.data.name.size() >= 1
+               && request.resource.data.assetType in ['deity', 'hero', 'creature', 'place', 'item', 'herb', 'text', 'concept', 'event']
+               && request.resource.data.mythology is string
+               && request.resource.data.status in ['draft', 'published', 'approved'];
+      }
+
+      // Public read for published/approved
+      allow read: if resource.data.status in ['published', 'approved']
+                  || (isAuthenticated() && resource.data.contributedBy == request.auth.uid)
+                  || isModerator();
+
+      // Authenticated users can create asset proposals
+      allow create: if isAuthenticated()
+                    && isValidAsset()
+                    && (!('isOfficial' in request.resource.data) || request.resource.data.isOfficial == false);
+
+      // Owner or moderator can update
+      allow update: if (isAuthenticated() && resource.data.contributedBy == request.auth.uid)
+                    || isModerator()
+                    && isValidAsset();
+
+      // Only moderators can delete assets
+      allow delete: if isModerator();
+
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isAuthenticated()
+                      && request.resource.data.authorId == request.auth.uid;
+        allow update: if isOwner(resource.data.authorId);
+        allow delete: if isOwner(resource.data.authorId) || isModerator();
+      }
+
+      // Votes subcollection
+      match /votes/{voteUserId} {
+        allow read: if true;
+        allow write: if isAuthenticated() && request.auth.uid == voteUserId;
+      }
+
+      // Edits subcollection (edit history)
+      match /edits/{editId} {
+        allow read: if true;
+        allow create: if isAuthenticated();
+        allow update, delete: if isModerator();
+      }
+    }
+
+    // ===== PAGES COLLECTION =====
+    // Path: /pages/{pageId}
+    // Site structure for dynamic page generation
+
+    match /pages/{pageId} {
+      // Anyone can read published pages
+      allow read: if resource.data.status == 'published' || isModerator();
+
+      // Only admins can create/update/delete pages
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ===== TAXONOMIES COLLECTION =====
+    // Path: /taxonomies/{taxonomyId}
+
+    match /taxonomies/{taxonomyId} {
+      // Anyone can read taxonomies
+      allow read: if true;
+
+      // Only admins can modify
+      allow write: if isAdmin();
+    }
+
+    // ===== VOTES COLLECTION =====
+    // Path: /votes/{voteId}
+    // Global vote tracking
+
+    match /votes/{voteId} {
+      // Anyone can read aggregated vote data
+      allow read: if true;
+
+      // Users can only create/update/delete their own votes
+      allow create: if isAuthenticated()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.vote in [1, -1];
+
+      allow update: if isAuthenticated()
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == request.auth.uid;
+
+      allow delete: if isAuthenticated()
+                    && resource.data.userId == request.auth.uid;
+    }
+
+    // ===== BOOKMARKS COLLECTION =====
+    // Path: /bookmarks/{bookmarkId}
+
+    match /bookmarks/{bookmarkId} {
+      // Users can only read their own bookmarks
+      allow read: if isAuthenticated()
+                  && resource.data.userId == request.auth.uid;
+
+      // Users can create their own bookmarks
+      allow create: if isAuthenticated()
+                    && request.resource.data.userId == request.auth.uid;
+
+      // Users can update their own bookmarks
+      allow update: if isAuthenticated()
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == request.auth.uid;
+
+      // Users can delete their own bookmarks
+      allow delete: if isAuthenticated()
+                    && resource.data.userId == request.auth.uid;
+    }
+
+    // ===== COMMENTS COLLECTION =====
+    // Path: /comments/{commentId}
+    // Global comments (alternative to subcollections)
+
+    match /comments/{commentId} {
+      // Anyone can read published comments
+      allow read: if resource.data.status == 'published' || isModerator();
+
+      // Authenticated users can create comments
+      allow create: if isAuthenticated()
+                    && request.resource.data.authorId == request.auth.uid
+                    && request.resource.data.content is string
+                    && request.resource.data.content.size() <= 2000;
+
+      // Owner can update within 15 minutes
+      allow update: if isOwner(resource.data.authorId)
+                    && request.resource.data.authorId == resource.data.authorId
+                    && request.time < resource.data.createdAt + duration.value(15, 'm');
+
+      // Owner or moderator can delete
+      allow delete: if isOwner(resource.data.authorId) || isModerator();
+    }
+
+    // ===== NOTIFICATIONS COLLECTION =====
+    // Path: /notifications/{notificationId}
+
+    match /notifications/{notificationId} {
+      // Users can only read their own notifications
+      allow read: if isAuthenticated()
+                  && resource.data.userId == request.auth.uid;
+
+      // System can create notifications (via Cloud Functions)
+      // Users can't create their own
+      allow create: if false;
+
+      // Users can mark their notifications as read
+      allow update: if isAuthenticated()
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.keys().hasOnly(['read', 'readAt']);
+
+      // Users can delete their own notifications
+      allow delete: if isAuthenticated()
+                    && resource.data.userId == request.auth.uid;
+    }
+
+    // ===== SVG GENERATION COLLECTION =====
+    // Path: /svgGeneration/{svgId}
+    // Track AI-generated SVG graphics
+
+    match /svgGeneration/{svgId} {
+      // Anyone can read (for browsing generated SVGs)
+      allow read: if true;
+
+      // Authenticated users can create
+      allow create: if isAuthenticated()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.prompt is string
+                    && request.resource.data.svgCode is string;
+
+      // Owner can update (to track usage)
+      allow update: if isOwner(resource.data.userId);
+
+      // Owner can delete
+      allow delete: if isOwner(resource.data.userId);
+
+      // Vote subcollection for SVG quality
+      match /votes/{voteUserId} {
+        allow read: if true;
+        allow write: if isAuthenticated() && request.auth.uid == voteUserId;
+      }
+    }
+
+    // ===== DENY ALL OTHER PATHS =====
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

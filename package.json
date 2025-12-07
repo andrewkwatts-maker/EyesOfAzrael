@@ -5,7 +5,11 @@
   "scripts": {
     "generate-indices": "node scripts/generate-entity-indices.js",
     "test-indices": "node scripts/generate-entity-indices.js && echo 'Indices generated successfully'",
-    "watch-entities": "nodemon --watch data/entities --ext json --exec 'node scripts/generate-entity-indices.js'"
+    "watch-entities": "nodemon --watch data/entities --ext json --exec 'node scripts/generate-entity-indices.js'",
+    "migrate": "node scripts/migrate-to-firebase-assets.js --all",
+    "migrate:dry-run": "node scripts/migrate-to-firebase-assets.js --all --dry-run",
+    "migrate:test": "node scripts/migrate-to-firebase-assets.js --page mythos/greek/deities/zeus.html --dry-run",
+    "migrate:verify": "node scripts/verify-migration-setup.js"
   },
   "repository": {
     "type": "git",
@@ -23,5 +27,11 @@
   "license": "MIT",
   "devDependencies": {
     "nodemon": "^3.0.0"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "cli-progress": "^3.12.0",
+    "firebase-admin": "^12.0.0",
+    "glob": "^10.3.10"
   }
 }
