@@ -28,9 +28,10 @@ class SVGEditorModal {
      */
     setupAuthListener() {
         if (typeof firebase !== 'undefined' && firebase.auth) {
-            firebase.auth().onAuthStateChanged((user) => {
+            this.authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
+                console.log('SVG Editor: Auth state changed, user:', user ? user.email : 'none');
                 // If modal is open, refresh the AI tab when auth state changes
-                if (this.isOpen && this.generator) {
+                if (this.isOpen) {
                     this.refreshAITab();
                 }
             });
@@ -90,6 +91,16 @@ class SVGEditorModal {
             const firstInput = this.overlay.querySelector('.svg-code-textarea, .svg-prompt-input');
             if (firstInput) firstInput.focus();
         }, 100);
+    }
+
+    /**
+     * Cleanup method
+     */
+    destroy() {
+        if (this.authUnsubscribe) {
+            this.authUnsubscribe();
+            this.authUnsubscribe = null;
+        }
     }
 
     /**
@@ -201,9 +212,12 @@ class SVGEditorModal {
      * Get AI generator HTML
      */
     getAIGeneratorHTML() {
-        const isConfigured = this.generator && this.generator.isConfigured();
+        // Check if user is signed in with Firebase
+        const isSignedIn = typeof firebase !== 'undefined' &&
+                          firebase.auth &&
+                          firebase.auth().currentUser !== null;
 
-        if (!isConfigured) {
+        if (!isSignedIn) {
             return this.getConfigInstructionsHTML();
         }
 
