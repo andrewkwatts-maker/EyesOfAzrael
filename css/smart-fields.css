@@ -1,0 +1,260 @@
+/**
+ * Smart Fields CSS
+ * Styling for intelligent form fields (hierarchical selects, multi-selects, coordinates)
+ */
+
+/* === Base Smart Field Styling === */
+.smart-field {
+    width: 100%;
+    padding: var(--spacing-md, 1rem);
+    background: rgba(26, 31, 58, 0.6);
+    border: 2px solid var(--color-border, rgba(139, 127, 255, 0.3));
+    border-radius: var(--radius-md, 0.5rem);
+    color: var(--color-text-primary, #e5e7eb);
+    font-family: var(--font-primary, system-ui);
+    font-size: var(--font-size-base, 1rem);
+    transition: all var(--transition-base, 0.2s ease);
+    backdrop-filter: blur(5px);
+}
+
+.smart-field:focus {
+    outline: none;
+    border-color: var(--color-accent, #ff7ce6);
+    background: rgba(26, 31, 58, 0.95);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+}
+
+.smart-field:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* === Hierarchical Select === */
+.hierarchical-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b7fff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--spacing-md, 1rem) center;
+    padding-right: calc(var(--spacing-md, 1rem) * 3);
+}
+
+.hierarchical-select option {
+    padding: var(--spacing-sm, 0.5rem);
+    background: rgba(10, 14, 39, 0.95);
+    color: var(--color-text-primary, #e5e7eb);
+}
+
+.hierarchical-select option[disabled] {
+    color: var(--color-text-secondary, #9ca3af);
+    font-weight: var(--font-semibold, 600);
+    font-style: italic;
+}
+
+.custom-input {
+    margin-top: var(--spacing-sm, 0.5rem);
+}
+
+/* === Multi-Select Container === */
+.multi-select-container {
+    background: var(--color-surface, rgba(26, 31, 58, 0.4));
+    border: 2px solid var(--color-border, rgba(139, 127, 255, 0.3));
+    border-radius: var(--radius-lg, 0.75rem);
+    padding: var(--spacing-lg, 1.5rem);
+    backdrop-filter: blur(10px);
+}
+
+.multi-select-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg, 1.5rem);
+}
+
+.multi-select-category {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md, 1rem);
+}
+
+.category-label {
+    font-size: var(--font-size-sm, 0.875rem);
+    font-weight: var(--font-semibold, 600);
+    color: var(--color-primary, #8b7fff);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-bottom: var(--spacing-xs, 0.25rem);
+    border-bottom: 1px solid var(--color-border, rgba(139, 127, 255, 0.3));
+}
+
+.category-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-sm, 0.5rem);
+}
+
+/* === Multi-Select Option === */
+.multi-select-option {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm, 0.5rem);
+    padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+    background: rgba(26, 31, 58, 0.4);
+    border: 1px solid var(--color-border, rgba(139, 127, 255, 0.3));
+    border-radius: var(--radius-md, 0.5rem);
+    cursor: pointer;
+    transition: all var(--transition-fast, 0.15s ease);
+}
+
+.multi-select-option:hover {
+    background: rgba(26, 31, 58, 0.6);
+    border-color: var(--color-accent, #ff7ce6);
+    transform: translateY(-1px);
+}
+
+.multi-select-option input[type="checkbox"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary, #8b7fff);
+}
+
+.multi-select-option input[type="checkbox"]:checked + .option-label {
+    color: var(--color-primary, #8b7fff);
+    font-weight: var(--font-semibold, 600);
+}
+
+.option-label {
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-text-primary, #e5e7eb);
+    transition: all var(--transition-fast, 0.15s ease);
+}
+
+/* === Multi-Select Custom Input === */
+.multi-select-custom {
+    margin-top: var(--spacing-md, 1rem);
+    padding-top: var(--spacing-md, 1rem);
+    border-top: 1px solid var(--color-border, rgba(139, 127, 255, 0.3));
+    display: flex;
+    gap: var(--spacing-sm, 0.5rem);
+}
+
+.multi-select-custom .custom-input {
+    flex: 1;
+    margin-top: 0;
+}
+
+.btn-add-custom {
+    padding: var(--spacing-sm, 0.5rem) var(--spacing-lg, 1.5rem);
+    background: linear-gradient(135deg, var(--color-primary, #8b7fff), var(--color-secondary, #ff7cb6));
+    color: var(--color-background, #0a0e27);
+    border: none;
+    border-radius: var(--radius-md, 0.5rem);
+    font-weight: var(--font-semibold, 600);
+    cursor: pointer;
+    transition: all var(--transition-base, 0.2s ease);
+}
+
+.btn-add-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 127, 255, 0.4);
+}
+
+/* === Coordinate Input === */
+.coordinate-input {
+    background: var(--color-surface, rgba(26, 31, 58, 0.4));
+    border: 2px solid var(--color-border, rgba(139, 127, 255, 0.3));
+    border-radius: var(--radius-lg, 0.75rem);
+    padding: var(--spacing-lg, 1.5rem);
+    backdrop-filter: blur(10px);
+}
+
+.coordinate-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg, 1.5rem);
+}
+
+.coordinate-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm, 0.5rem);
+}
+
+.coordinate-field label {
+    font-size: var(--font-size-sm, 0.875rem);
+    font-weight: var(--font-semibold, 600);
+    color: var(--color-primary, #8b7fff);
+}
+
+.coordinate-field input {
+    padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+    background: rgba(10, 14, 39, 0.6);
+    border: 1px solid var(--color-border, rgba(139, 127, 255, 0.3));
+    border-radius: var(--radius-md, 0.5rem);
+    color: var(--color-text-primary, #e5e7eb);
+    font-size: var(--font-size-base, 1rem);
+    transition: all var(--transition-base, 0.2s ease);
+}
+
+.coordinate-field input:focus {
+    outline: none;
+    border-color: var(--color-accent, #ff7ce6);
+    background: rgba(10, 14, 39, 0.8);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+}
+
+.field-hint {
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-text-secondary, #9ca3af);
+    font-style: italic;
+}
+
+.coordinate-preview {
+    margin-top: var(--spacing-md, 1rem);
+    padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+    border-radius: var(--radius-md, 0.5rem);
+    text-align: center;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.coordinate-preview small {
+    color: var(--color-primary, #8b7fff);
+    font-weight: var(--font-semibold, 600);
+}
+
+/* === Responsive Design === */
+@media (max-width: 768px) {
+    .category-options {
+        grid-template-columns: 1fr;
+    }
+
+    .coordinate-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .multi-select-custom {
+        flex-direction: column;
+    }
+
+    .btn-add-custom {
+        width: 100%;
+    }
+}
+
+/* === Custom Values Category Styling === */
+.custom-values-category .category-label {
+    color: var(--color-accent, #ff7ce6);
+}
+
+.custom-values-category .multi-select-option {
+    background: rgba(255, 124, 230, 0.05);
+    border-color: rgba(255, 124, 230, 0.3);
+}
+
+.custom-values-category .multi-select-option:hover {
+    background: rgba(255, 124, 230, 0.1);
+    border-color: var(--color-accent, #ff7ce6);
+}
