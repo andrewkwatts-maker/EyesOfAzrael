@@ -149,6 +149,7 @@ class SVGEditorModal {
                     <button class="svg-tab ${!hasGenerator ? 'disabled' : ''}" data-tab="ai" ${!hasGenerator ? 'disabled title="Gemini API not available"' : ''}>
                         AI Generator ${!isConfigured ? '(Sign In Required)' : ''}
                     </button>
+                    <button class="svg-tab" data-tab="browse">Browse My SVGs</button>
                 </div>
 
                 <!-- Body -->
@@ -170,6 +171,13 @@ class SVGEditorModal {
                         </div>
                         <div class="svg-editor-right">
                             ${this.getPreviewHTML()}
+                        </div>
+                    </div>
+
+                    <!-- Browse SVGs Tab -->
+                    <div class="svg-tab-content" data-content="browse">
+                        <div class="svg-browse-container" id="svg-browse-container">
+                            <p class="svg-browse-loading">Loading your SVGs...</p>
                         </div>
                     </div>
                 </div>
@@ -431,6 +439,162 @@ class SVGEditorModal {
         });
 
         this.currentMode = tabName;
+
+        // Load user SVGs when switching to browse tab
+        if (tabName === 'browse') {
+            this.loadUserSVGs();
+        }
+    }
+
+    /**
+     * Load user's SVGs from Firestore
+     */
+    async loadUserSVGs() {
+        const container = document.getElementById('svg-browse-container');
+        if (!container) return;
+
+        // Check if user is signed in
+        if (!firebase || !firebase.auth || !firebase.auth().currentUser) {
+            container.innerHTML = `
+                <div class="svg-browse-signin">
+                    <h3>Sign In Required</h3>
+                    <p>Sign in with Google to browse your saved SVGs.</p>
+                </div>
+            `;
+            return;
+        }
+
+        try {
+            const userId = firebase.auth().currentUser.uid;
+            const db = firebase.firestore();
+
+            // Query user's SVGs from svgGeneration collection
+            const svgsRef = db.collection('svgGeneration')
+                .where('userId', '==', userId)
+                .orderBy('createdAt', 'desc')
+                .limit(50);
+
+            const snapshot = await svgsRef.get();
+
+            if (snapshot.empty) {
+                container.innerHTML = `
+                    <div class="svg-browse-empty">
+                        <h3>No SVGs Yet</h3>
+                        <p>You haven't generated any SVGs yet.</p>
+                        <p>Try the <strong>AI Generator</strong> tab to create your first SVG!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const svgs = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            this.renderUserSVGs(svgs, container);
+        } catch (error) {
+            console.error('Error loading user SVGs:', error);
+            container.innerHTML = `
+                <div class="svg-browse-error">
+                    <p>Error loading SVGs: ${this.escapeHtml(error.message)}</p>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Render user SVGs in browse tab
+     */
+    renderUserSVGs(svgs, container) {
+        container.innerHTML = `
+            <div class="svg-browse-header">
+                <h3>My SVGs (${svgs.length})</h3>
+                <p>Click an SVG to load it into the editor</p>
+            </div>
+            <div class="svg-browse-grid">
+                ${svgs.map(svg => `
+                    <div class="svg-browse-item" data-svg-id="${svg.id}">
+                        <div class="svg-browse-preview">
+                            ${svg.svgCode || '<p class="svg-no-preview">No preview</p>'}
+                        </div>
+                        <div class="svg-browse-info">
+                            <p class="svg-browse-prompt" title="${this.escapeHtml(svg.prompt || 'No prompt')}">${this.escapeHtml(this.truncate(svg.prompt || 'Untitled', 50))}</p>
+                            <p class="svg-browse-date">${this.formatDate(svg.createdAt)}</p>
+                        </div>
+                        <button class="svg-browse-use-btn" data-svg-id="${svg.id}" title="Use this SVG">
+                            Use
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        // Attach click handlers
+        container.querySelectorAll('.svg-browse-use-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const svgId = e.target.dataset.svgId;
+                const svg = svgs.find(s => s.id === svgId);
+                if (svg) {
+                    this.loadSVGIntoEditor(svg);
+                }
+            });
+        });
+
+        // Also allow clicking the whole card
+        container.querySelectorAll('.svg-browse-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (e.target.classList.contains('svg-browse-use-btn')) return;
+                const svgId = item.dataset.svgId;
+                const svg = svgs.find(s => s.id === svgId);
+                if (svg) {
+                    this.loadSVGIntoEditor(svg);
+                }
+            });
+        });
+    }
+
+    /**
+     * Load selected SVG into editor
+     */
+    loadSVGIntoEditor(svg) {
+        this.currentSvg = svg.svgCode || '';
+        this.currentPrompt = svg.prompt || '';
+
+        // Switch to code editor tab and populate
+        this.switchTab('code');
+
+        const codeInput = this.overlay.querySelector('#svg-code-input');
+        if (codeInput) {
+            codeInput.value = this.currentSvg;
+        }
+
+        this.updatePreview();
+    }
+
+    /**
+     * Truncate text to max length
+     */
+    truncate(text, maxLength) {
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength - 3) + '...';
+    }
+
+    /**
+     * Format Firestore timestamp
+     */
+    formatDate(timestamp) {
+        if (!timestamp) return 'Unknown date';
+        try {
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        } catch (error) {
+            return 'Unknown date';
+        }
     }
 
     /**
