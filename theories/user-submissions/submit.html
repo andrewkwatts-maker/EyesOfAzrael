@@ -301,6 +301,57 @@
         #taxonomy-container {
             margin-top: var(--spacing-lg);
         }
+
+        /* Progressive Disclosure Styles */
+        .form-section {
+            position: relative;
+            transition: all var(--transition-base);
+        }
+
+        .form-section.section-locked {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: grayscale(0.8);
+        }
+
+        .form-section.section-locked::before {
+            content: '🔒';
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            font-size: 1.5rem;
+            z-index: 10;
+        }
+
+        .form-section.section-completed .form-section-title::after {
+            content: ' ✅';
+            color: var(--color-success, #22c55e);
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .form-section.section-active {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg), 0 0 20px rgba(var(--color-primary-rgb), 0.25);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .section-requirement-hint {
+            background: rgba(var(--color-accent-rgb, 255, 124, 230), 0.1);
+            border-left: 3px solid var(--color-accent);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .section-requirement-hint strong {
+            color: var(--color-accent);
+        }
     </style>
 </head>
 <body>
@@ -363,7 +414,7 @@
         <div id="submission-form" class="submit-form-container" style="display: none;">
             <form id="theory-form">
                 <!-- Contribution Type -->
-                <div class="form-section glass-card">
+                <div class="form-section glass-card section-active" data-section="contribution-type">
                     <h2 class="form-section-title">🎯 Contribution Type</h2>
 
                     <div class="form-group">
@@ -386,7 +437,10 @@
                 </div>
 
                 <!-- Basic Information -->
-                <div class="form-section glass-card">
+                <div class="form-section glass-card section-locked" data-section="basic">
+                    <div class="section-requirement-hint">
+                        <strong>📋 Complete the Contribution Type first</strong> to unlock this section
+                    </div>
                     <h2 class="form-section-title">📝 Basic Information</h2>
 
                     <div class="form-group">
@@ -466,7 +520,10 @@
                 </div>
 
                 <!-- Taxonomy Classification -->
-                <div class="form-section glass-card">
+                <div class="form-section glass-card section-locked" data-section="classification">
+                    <div class="section-requirement-hint">
+                        <strong>📝 Complete Basic Information first</strong> (Title and Summary required)
+                    </div>
                     <h2 class="form-section-title">🗂️ Classification</h2>
                     <p style="margin-bottom: 1rem; opacity: 0.8; font-size: 0.95rem;">
                         📌 <strong>Note:</strong> Classification options adapt based on your contribution type.
@@ -511,14 +568,20 @@
                 </div>
 
                 <!-- Rich Content Editor -->
-                <div class="form-section glass-card">
+                <div class="form-section glass-card section-locked" data-section="content">
+                    <div class="section-requirement-hint">
+                        <strong>🗂️ Complete Classification first</strong> (Select mythology/tradition)
+                    </div>
                     <h2 class="form-section-title">📖 Content</h2>
                     <div id="editor-container"></div>
                     <small class="form-hint">Use panels to organize your theory, add images for visual support, link to external sources, and reference texts from our corpus</small>
                 </div>
 
                 <!-- Related Information -->
-                <div class="form-section glass-card">
+                <div class="form-section glass-card section-locked" data-section="metadata">
+                    <div class="section-requirement-hint">
+                        <strong>📖 Add at least one content panel first</strong>
+                    </div>
                     <h2 class="form-section-title">🔗 Related Information</h2>
 
                     <div class="form-group">
@@ -583,7 +646,10 @@
                 </div>
 
                 <!-- Asset-Specific Metadata (shown conditionally based on contribution type) -->
-                <div id="asset-metadata" class="form-section glass-card" style="display: none;">
+                <div id="asset-metadata" class="form-section glass-card section-locked" data-section="asset-details" style="display: none;">
+                    <div class="section-requirement-hint">
+                        <strong>📝 Complete Basic Information first</strong> to add asset-specific details
+                    </div>
                     <h2 class="form-section-title">📊 Asset Details</h2>
 
                     <!-- Deity/God Fields -->
@@ -860,10 +926,20 @@
     <script src="../../js/components/svg-editor-modal.js"></script>
     <script src="../../js/components/grid-panel-editor.js"></script>
     <script src="../../js/components/theory-editor.js"></script>
+    <script src="../../js/form-config.js"></script>
 
     <script>
         let editor = null;
         let taxonomy = null;
+        let formState = {
+            contributionType: '',
+            title: '',
+            summary: '',
+            page: '',
+            section: '',
+            topic: '',
+            richContent: null
+        };
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
@@ -911,6 +987,98 @@
         }
 
         /**
+         * Update form state and trigger progressive disclosure
+         */
+        function updateFormState(field, value) {
+            formState[field] = value;
+            updateProgressiveDisclosure();
+        }
+
+        /**
+         * Update progressive disclosure based on current form state
+         */
+        function updateProgressiveDisclosure() {
+            if (!window.formConfig) return;
+
+            const visibleSections = window.formConfig.getVisibleSections(formState);
+            const allSections = document.querySelectorAll('[data-section]');
+
+            allSections.forEach(sectionEl => {
+                const sectionKey = sectionEl.getAttribute('data-section');
+
+                // Skip the contribution-type section - always visible
+                if (sectionKey === 'contribution-type') return;
+
+                const isVisible = visibleSections.includes(sectionKey);
+                const isCompleted = window.formConfig.isSectionCompleted(sectionKey, formState);
+                const hintEl = sectionEl.querySelector('.section-requirement-hint');
+
+                if (isVisible) {
+                    sectionEl.classList.remove('section-locked');
+                    sectionEl.classList.add('section-active');
+                    if (hintEl) hintEl.style.display = 'none';
+
+                    if (isCompleted) {
+                        sectionEl.classList.add('section-completed');
+                        sectionEl.classList.remove('section-active');
+                    } else {
+                        sectionEl.classList.remove('section-completed');
+                    }
+                } else {
+                    sectionEl.classList.add('section-locked');
+                    sectionEl.classList.remove('section-active', 'section-completed');
+                    if (hintEl) hintEl.style.display = 'block';
+                }
+            });
+        }
+
+        /**
+         * Initialize form field listeners for progressive disclosure
+         */
+        function initializeFormListeners() {
+            // Contribution Type
+            document.getElementById('contribution-type')?.addEventListener('change', (e) => {
+                updateFormState('contributionType', e.target.value);
+            });
+
+            // Title
+            document.getElementById('theory-title')?.addEventListener('input', (e) => {
+                updateFormState('title', e.target.value.trim());
+            });
+
+            // Summary
+            document.getElementById('theory-summary')?.addEventListener('input', (e) => {
+                updateFormState('summary', e.target.value.trim());
+            });
+
+            // Page
+            document.getElementById('taxonomy-page')?.addEventListener('change', (e) => {
+                updateFormState('page', e.target.value);
+            });
+
+            // Section
+            document.getElementById('taxonomy-section')?.addEventListener('change', (e) => {
+                updateFormState('section', e.target.value);
+            });
+
+            // Topic
+            document.getElementById('taxonomy-topic')?.addEventListener('change', (e) => {
+                updateFormState('topic', e.target.value);
+            });
+
+            // Monitor grid panel editor changes
+            if (editor) {
+                // Monkey patch the editor's data update to track state
+                const originalOnChange = editor.onChange;
+                editor.onChange = function() {
+                    if (originalOnChange) originalOnChange.call(this);
+                    const data = editor.getData();
+                    updateFormState('richContent', data);
+                };
+            }
+        }
+
+        /**
          * Initialize the form components
          */
         async function initializeForm() {
@@ -940,6 +1108,12 @@
 
             // Initialize contribution type handler
             initializeContributionTypeHandler();
+
+            // Initialize form field listeners for progressive disclosure
+            initializeFormListeners();
+
+            // Initialize progressive disclosure state
+            updateProgressiveDisclosure();
         }
 
         /**
@@ -989,6 +1163,10 @@
                     div.style.display = 'none';
                 });
 
+                // Update asset metadata visibility
+                const assetTypes = ['deity', 'hero', 'creature', 'place', 'item', 'herb', 'text', 'concept', 'mythology'];
+                const showAssetMetadata = assetTypes.includes(selectedType);
+
                 // Update classification section based on type
                 if (selectedType === 'theory' || selectedType === '') {
                     // Theory: Full taxonomy (Page → Section → Topic)
@@ -1013,7 +1191,8 @@
                     taxonomyTopic.value = '';
                 } else {
                     // Other Assets: Page (mythology) + filtered Section (asset type appropriate)
-                    assetMetadataSection.style.display = 'block';
+                    // Don't directly show - let progressive disclosure handle it
+                    assetMetadataSection.style.display = showAssetMetadata ? 'block' : 'none';
                     taxonomyPage.parentElement.querySelector('.form-hint').textContent =
                         `Which mythology does this ${selectedType} belong to?`;
                     taxonomySection.parentElement.style.display = 'block';
