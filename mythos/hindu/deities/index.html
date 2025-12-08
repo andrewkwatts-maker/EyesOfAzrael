@@ -11,12 +11,18 @@
 <script defer src="../../../themes/smart-links.js"></script>
     <script defer src="../../../themes/theme-animations.js"></script>
 <script defer src="../../../themes/theme-picker.js"></script>
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../../css/user-auth.css">
+    <script src="../../../js/firebase-auth.js"></script>
+    <script src="../../../js/auth-guard.js"></script>
+    <script src="../../../js/components/google-signin-button.js"></script>
 </head>
 <body>
 <div id="theme-picker-container"></div>
 <header>
     <div class="header-content">
         <h1>🕉️ Hindu <a data-term="Deities" data-tradition="hindu" class="corpus-link" href="../../../mythos/hindu/corpus-search.html?term=deities" title="View deities in ancient texts">Deities</a></h1>
+        <div id="user-auth-nav"></div>
     </div>
 </header>
 <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -234,5 +240,28 @@
             <a href="../cosmology/index.html">Hindu Cosmology</a>
 </p>
 </footer>
+
+    <!-- Firebase SDK (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../../../firebase-config.js"></script>
+
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>
