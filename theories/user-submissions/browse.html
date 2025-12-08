@@ -18,6 +18,13 @@
     <script defer src="../../js/user-theories.js"></script>
     <script defer src="../../js/theory-taxonomy.js"></script>
 
+    <!-- Content Filter System -->
+    <link rel="stylesheet" href="../../css/filter-settings.css">
+    <script src="../../js/content-filter.js"></script>
+    <script src="../../js/components/filter-settings-modal.js"></script>
+    <script src="../../js/components/filter-header-button.js"></script>
+    <script src="../../js/content-filter-ui.js"></script>
+
     <style>
         :root {
             --theory-primary: #9333ea;
@@ -458,6 +465,9 @@
                 // Listen for theory updates
                 window.addEventListener('theoriesUpdated', () => this.loadAndDisplay());
 
+                // Listen for content filter changes
+                window.addEventListener('contentFilterChanged', () => this.loadAndDisplay());
+
                 // Check for highlight parameter
                 this.checkHighlight();
             }
@@ -610,10 +620,19 @@
                         this.pagination.hasMore = false;
                     }
 
-                    await this.updateStats(this.pagination.loadedTheories);
+                    // Apply content filter
+                    const filteredTheories = this.pagination.loadedTheories.filter(theory => {
+                        return !window.contentFilter || window.contentFilter.shouldShow(theory);
+                    });
 
-                    if (this.pagination.loadedTheories.length === 0) {
-                        container.innerHTML = `
+                    await this.updateStats(this.pagination.loadedTheories, filteredTheories);
+
+                    // Show filter summary if items are hidden
+                    const filterSummary = window.contentFilterUI ?
+                        window.contentFilterUI.getFilterSummary(this.pagination.loadedTheories.length, filteredTheories.length) : '';
+
+                    if (filteredTheories.length === 0) {
+                        container.innerHTML = filterSummary + `
                             <div class="empty-state">
                                 <div class="empty-state-icon">📭</div>
                                 <p class="empty-state-text">No theories found matching your filters</p>
@@ -623,9 +642,9 @@
                     }
 
                     if (this.groupBy === 'none') {
-                        container.innerHTML = this.renderUngrouped(this.pagination.loadedTheories);
+                        container.innerHTML = filterSummary + this.renderUngrouped(filteredTheories);
                     } else {
-                        container.innerHTML = this.renderGrouped(this.pagination.loadedTheories, this.groupBy);
+                        container.innerHTML = filterSummary + this.renderGrouped(filteredTheories, this.groupBy);
                     }
 
                     // Add load more button if there are more results
@@ -634,6 +653,16 @@
                     }
 
                     this.attachResultEventListeners();
+
+                    // Add filter controls to each theory card
+                    if (window.contentFilterUI) {
+                        filteredTheories.forEach(theory => {
+                            const card = document.querySelector(`[data-theory-id="${theory.id}"]`);
+                            if (card) {
+                                window.contentFilterUI.addFilterControls(card, theory);
+                            }
+                        });
+                    }
                 } catch (error) {
                     console.error('Error loading theories:', error);
                     container.innerHTML = `
@@ -674,7 +703,7 @@
                 await this.loadAndDisplay(true);
             }
 
-            async updateStats(theories) {
+            async updateStats(theories, filteredTheories) {
                 // Public viewing: show published theories only
                 const result = window.userTheories ? await window.userTheories.getAllTheories({ status: 'published' }) : [];
 
@@ -687,7 +716,7 @@
                 document.getElementById('total-theories').textContent = theoriesList.length;
                 document.getElementById('total-topics').textContent = topics.size;
                 document.getElementById('total-authors').textContent = authors.size;
-                document.getElementById('filtered-count').textContent = theories.length;
+                document.getElementById('filtered-count').textContent = filteredTheories ? filteredTheories.length : theories.length;
             }
 
             renderGrouped(theories, groupBy) {
@@ -743,7 +772,7 @@
 
             renderTheoryCard(theory) {
                 return `
-                    <div class="theory-card-compact" data-theory-id="${theory.id}" onclick="viewTheory('${theory.id}')">
+                    <div class="theory-card-compact" data-theory-id="${theory.id}" onclick="viewTheory('${theory.id}')" style="position: relative;">
                         <h3 class="theory-title">${this.escapeHtml(theory.title)}</h3>
                         <div class="theory-author">by ${theory.author}</div>
                         <div class="theory-meta">

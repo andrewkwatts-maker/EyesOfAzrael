@@ -10,6 +10,16 @@
     <script defer src="../../themes/theme-animations.js"></script>
     <link rel="stylesheet" href="../../themes/smart-links.css">
     <script defer src="../../themes/smart-links.js"></script>
+    <!-- Submission Link System -->
+    <script src="../../js/submission-context.js"></script>
+    <script src="../../js/components/submission-link.js"></script>
+    <link rel="stylesheet" href="../../css/submission-link.css">
+
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../css/user-auth.css">
+    <script src="../../js/firebase-auth.js"></script>
+    <script src="../../js/auth-guard.js"></script>
+    <script src="../../js/components/google-signin-button.js"></script>
 <style>
         /* ============================================
            MODERN GLASS UI TEMPLATE - Greek Mythos
@@ -258,6 +268,7 @@
 <header>
     <div class="header-content">
         <h1>⚡ Greek Mythology</h1>
+        <div id="user-auth-nav"></div>
     </div>
 </header>
 <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -579,5 +590,35 @@
             <a href="http://www.perseus.tufts.edu/hopper/" rel="noopener noreferrer" target="_blank">Perseus Digital Library</a>
 </p>
 </footer>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
+<!-- Firebase SDK (CDN) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../../firebase-config.js"></script>
+
+<!-- Initialize Auth UI -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize Google Sign-In button in header
+        if (window.GoogleSignInButton) {
+            const authNav = document.getElementById('user-auth-nav');
+            if (authNav) {
+                window.GoogleSignInButton.injectIntoElement(authNav, {
+                    showUserInfo: true,
+                    showAvatar: true,
+                    compact: true
+                });
+            }
+        }
+    });
+</script>
 </body>
 </html>

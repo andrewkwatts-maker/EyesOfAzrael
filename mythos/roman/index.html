@@ -11,6 +11,17 @@
 <script defer src="../../themes/smart-links.js"></script>
 <script defer src="../../themes/theme-picker.js"></script>
     <script defer src="../../themes/theme-animations.js"></script>
+
+    <!-- Submission Link System -->
+    <script src="../../js/submission-context.js"></script>
+    <script src="../../js/components/submission-link.js"></script>
+    <link rel="stylesheet" href="../../css/submission-link.css">
+
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../css/user-auth.css">
+    <script src="../../js/firebase-auth.js"></script>
+    <script src="../../js/auth-guard.js"></script>
+    <script src="../../js/components/google-signin-button.js"></script>
 <style>
         /* ============================================
            MODERN GLASS UI TEMPLATE - Roman Mythos
@@ -231,6 +242,7 @@
 <header>
     <div class="header-content">
         <h1>🏛️ Roman <a class="corpus-link" href="../index.html" title="View mythology in ancient texts">Mythology</a></h1>
+        <div id="user-auth-nav"></div>
     </div>
 </header>
 <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -500,5 +512,35 @@ Fasti Antiates (calendar), archaeological evidence from temples and shrines
 <a href="../../mythos/index.html">Return to Mythology Index</a>
 </p>
 </footer>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
+<!-- Firebase SDK (CDN) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../../firebase-config.js"></script>
+
+<!-- Initialize Auth UI -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize Google Sign-In button in header
+        if (window.GoogleSignInButton) {
+            const authNav = document.getElementById('user-auth-nav');
+            if (authNav) {
+                window.GoogleSignInButton.injectIntoElement(authNav, {
+                    showUserInfo: true,
+                    showAvatar: true,
+                    compact: true
+                });
+            }
+        }
+    });
+</script>
 </body>
 </html>
