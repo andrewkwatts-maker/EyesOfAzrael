@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Migration Tool - Eyes of Azrael</title>
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        body {
+            font-family: var(--font-primary, 'Segoe UI', system-ui, -apple-system, sans-serif);
+            background: var(--color-bg-primary, #f5f5f5);
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: var(--color-primary, #9333ea);
+            margin: 0 0 1rem 0;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #856404;
+        }
+
+        .section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: var(--color-bg-secondary, #fafafa);
+            border-radius: 8px;
+        }
+
+        .section h2 {
+            margin-top: 0;
+            color: var(--color-text-primary, #333);
+        }
+
+        .file-input-wrapper {
+            margin: 1rem 0;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            display: block;
+            padding: 0.75rem;
+            width: 100%;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .file-input-wrapper input[type="file"]:hover {
+            border-color: var(--color-primary, #9333ea);
+        }
+
+        button {
+            background: var(--color-primary, #9333ea);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: var(--color-primary-dark, #7e22ce);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        button.secondary {
+            background: #6b7280;
+        }
+
+        button.secondary:hover {
+            background: #4b5563;
+        }
+
+        button.danger {
+            background: #dc2626;
+        }
+
+        button.danger:hover {
+            background: #b91c1c;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--color-primary, #9333ea);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        #progressContainer {
+            display: none;
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary, #9333ea), var(--color-primary-dark, #7e22ce));
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        #previewContainer {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .preview-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .preview-item h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--color-text-primary, #333);
+        }
+
+        .preview-meta {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0.25rem 0;
+        }
+
+        .preview-summary {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary, #555);
+        }
+
+        #logContainer {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .log-entry {
+            margin: 0.25rem 0;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #374151;
+        }
+
+        .log-success {
+            color: #34d399;
+        }
+
+        .log-error {
+            color: #f87171;
+        }
+
+        .log-warning {
+            color: #fbbf24;
+        }
+
+        .validation-results {
+            margin-top: 1rem;
+        }
+
+        .validation-item {
+            background: #fff;
+            border-left: 4px solid #fbbf24;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+        }
+
+        .validation-item.error {
+            border-color: #dc2626;
+        }
+
+        .validation-item h5 {
+            margin: 0 0 0.5rem 0;
+            color: var(--color-text-primary, #333);
+        }
+
+        .validation-issues {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Content Migration Tool</h1>
+        <p>Migrate HTML mythology content to Firebase Firestore</p>
+
+        <div class="warning">
+            <strong>Warning:</strong> This tool will upload content to your Firestore database.
+            Make sure you have proper Firebase authentication and that indexes are deployed before running migration.
+            Always test with a few files first before doing a full migration.
+        </div>
+
+        <!-- Step 1: File Selection -->
+        <div class="section">
+            <h2>Step 1: Select HTML Files</h2>
+            <p>Choose HTML files from the mythos directory (e.g., mythos/greek/deities/*.html)</p>
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" multiple accept=".html" webkitdirectory directory>
+            </div>
+            <p class="preview-meta" id="fileCount">No files selected</p>
+        </div>
+
+        <!-- Step 2: Extract & Preview -->
+        <div class="section">
+            <h2>Step 2: Extract & Preview Content</h2>
+            <button id="extractBtn" disabled>Extract Content</button>
+            <button id="validateBtn" class="secondary" disabled>Validate Extracted Content</button>
+
+            <div id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;">0%</div>
+                </div>
+                <p id="progressText" style="margin-top: 0.5rem; color: #6b7280;"></p>
+            </div>
+
+            <div class="stats" id="extractStats" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-value" id="statTotal">0</div>
+                    <div class="stat-label">Total Files</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statSuccess">0</div>
+                    <div class="stat-label">Successful</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statFailed">0</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+            </div>
+
+            <div id="previewContainer">
+                <h3>Preview (First 5 Items)</h3>
+                <div id="previewList"></div>
+            </div>
+
+            <div id="validationContainer" class="hidden">
+                <h3>Validation Results</h3>
+                <div class="validation-results" id="validationResults"></div>
+            </div>
+        </div>
+
+        <!-- Step 3: Upload to Firestore -->
+        <div class="section">
+            <h2>Step 3: Upload to Firestore</h2>
+            <p>Upload extracted content as default content (isDefault: true)</p>
+            <button id="uploadBtn" class="danger" disabled>Upload to Firestore</button>
+            <button id="downloadJsonBtn" class="secondary" disabled>Download as JSON</button>
+
+            <div class="stats" id="uploadStats" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-value" id="uploadSuccess">0</div>
+                    <div class="stat-label">Uploaded</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="uploadFailed">0</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Output -->
+        <div class="section">
+            <h2>Log Output</h2>
+            <div id="logContainer"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../firebase-config.js"></script>
+
+    <!-- Migration Scripts -->
+    <script src="../js/firebase-content-db.js"></script>
+    <script src="../js/content-migration-tool.js"></script>
+
+    <script>
+        let selectedFiles = [];
+        let extractedData = null;
+
+        // UI Elements
+        const fileInput = document.getElementById('fileInput');
+        const fileCount = document.getElementById('fileCount');
+        const extractBtn = document.getElementById('extractBtn');
+        const validateBtn = document.getElementById('validateBtn');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const downloadJsonBtn = document.getElementById('downloadJsonBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const logContainer = document.getElementById('logContainer');
+
+        // Initialize Firebase
+        window.addEventListener('load', async () => {
+            try {
+                await window.firebaseContentDB.init();
+                logMessage('Firebase initialized successfully', 'success');
+            } catch (error) {
+                logMessage('Firebase initialization failed: ' + error.message, 'error');
+            }
+        });
+
+        // File selection handler
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            selectedFiles = files.filter(f => f.name.endsWith('.html'));
+
+            fileCount.textContent = `${selectedFiles.length} HTML files selected`;
+            extractBtn.disabled = selectedFiles.length === 0;
+
+            logMessage(`Selected ${selectedFiles.length} HTML files`, 'success');
+        });
+
+        // Extract content
+        extractBtn.addEventListener('click', async () => {
+            logMessage('Starting content extraction...', 'info');
+            progressContainer.style.display = 'block';
+            extractBtn.disabled = true;
+
+            try {
+                const fileDataArray = await Promise.all(selectedFiles.map(async file => {
+                    const text = await file.text();
+                    return {
+                        path: file.webkitRelativePath || file.name,
+                        html: text
+                    };
+                }));
+
+                updateProgress(0, 'Processing files...');
+
+                const result = await window.contentMigrationTool.processFiles(fileDataArray);
+                extractedData = result;
+
+                // Update stats
+                document.getElementById('extractStats').style.display = 'grid';
+                document.getElementById('statTotal').textContent = result.stats.totalFiles;
+                document.getElementById('statSuccess').textContent = result.stats.successful;
+                document.getElementById('statFailed').textContent = result.stats.failed;
+
+                // Show preview
+                displayPreview(result.extracted.slice(0, 5));
+
+                // Enable next steps
+                validateBtn.disabled = false;
+                uploadBtn.disabled = false;
+                downloadJsonBtn.disabled = false;
+
+                updateProgress(100, 'Extraction complete!');
+                logMessage(`Extraction complete: ${result.stats.successful} successful, ${result.stats.failed} failed`, 'success');
+
+                // Log failures
+                if (result.failed.length > 0) {
+                    logMessage(`Failed extractions: ${result.failed.length}`, 'warning');
+                    result.failed.forEach(f => {
+                        logMessage(`  - ${f.filePath}: ${f.error}`, 'error');
+                    });
+                }
+            } catch (error) {
+                logMessage('Extraction failed: ' + error.message, 'error');
+                extractBtn.disabled = false;
+            }
+        });
+
+        // Validate extracted content
+        validateBtn.addEventListener('click', () => {
+            logMessage('Validating extracted content...', 'info');
+
+            const validationResults = window.contentMigrationTool.validateExtracted();
+
+            // Display validation results
+            const validationContainer = document.getElementById('validationContainer');
+            const resultsDiv = document.getElementById('validationResults');
+            validationContainer.classList.remove('hidden');
+            resultsDiv.innerHTML = '';
+
+            if (validationResults.warnings.length === 0) {
+                resultsDiv.innerHTML = '<p style="color: #34d399;">All content validated successfully!</p>';
+            } else {
+                validationResults.warnings.forEach(warning => {
+                    const item = document.createElement('div');
+                    item.className = 'validation-item';
+                    item.innerHTML = `
+                        <h5>${warning.title}</h5>
+                        <div class="validation-issues">${warning.issues.join(', ')}</div>
+                        <div class="preview-meta">${warning.filePath}</div>
+                    `;
+                    resultsDiv.appendChild(item);
+                });
+            }
+
+            logMessage(`Validation complete: ${validationResults.valid.length} valid, ${validationResults.warnings.length} warnings`, 'success');
+        });
+
+        // Upload to Firestore
+        uploadBtn.addEventListener('click', async () => {
+            if (!confirm(`Are you sure you want to upload ${extractedData.extracted.length} items to Firestore? This cannot be easily undone.`)) {
+                return;
+            }
+
+            logMessage('Starting Firestore upload...', 'info');
+            progressContainer.style.display = 'block';
+            uploadBtn.disabled = true;
+            updateProgress(0, 'Uploading to Firestore...');
+
+            try {
+                const uploadResults = await window.contentMigrationTool.uploadToFirestore();
+
+                // Update stats
+                document.getElementById('uploadStats').style.display = 'grid';
+                document.getElementById('uploadSuccess').textContent = uploadResults.successful.length;
+                document.getElementById('uploadFailed').textContent = uploadResults.failed.length;
+
+                updateProgress(100, 'Upload complete!');
+                logMessage(`Upload complete: ${uploadResults.successful.length} successful, ${uploadResults.failed.length} failed`, 'success');
+
+                // Log failures
+                if (uploadResults.failed.length > 0) {
+                    logMessage(`Upload failures: ${uploadResults.failed.length}`, 'warning');
+                    uploadResults.failed.forEach(f => {
+                        logMessage(`  - ${f.content?.title || 'Unknown'}: ${f.error}`, 'error');
+                    });
+                }
+
+                // Generate report
+                const report = window.contentMigrationTool.generateMigrationReport(uploadResults);
+                downloadReport(report);
+            } catch (error) {
+                logMessage('Upload failed: ' + error.message, 'error');
+                uploadBtn.disabled = false;
+            }
+        });
+
+        // Download as JSON
+        downloadJsonBtn.addEventListener('click', () => {
+            if (!extractedData) return;
+
+            const dataStr = JSON.stringify(extractedData.extracted, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `content-extraction-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            logMessage('Downloaded extracted content as JSON', 'success');
+        });
+
+        // Helper functions
+        function displayPreview(items) {
+            const container = document.getElementById('previewContainer');
+            const list = document.getElementById('previewList');
+            container.style.display = 'block';
+            list.innerHTML = '';
+
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.innerHTML = `
+                    <h4>${item.icon} ${item.title}</h4>
+                    <div class="preview-meta">
+                        <strong>Type:</strong> ${item.contentType} |
+                        <strong>Mythology:</strong> ${item.mythology} |
+                        <strong>Section:</strong> ${item.section}
+                    </div>
+                    <div class="preview-summary">${item.summary.substring(0, 200)}${item.summary.length > 200 ? '...' : ''}</div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function updateProgress(percent, text) {
+            progressFill.style.width = percent + '%';
+            progressFill.textContent = Math.round(percent) + '%';
+            if (text) progressText.textContent = text;
+        }
+
+        function logMessage(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            if (type === 'success') entry.classList.add('log-success');
+            if (type === 'error') entry.classList.add('log-error');
+            if (type === 'warning') entry.classList.add('log-warning');
+
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            // Also log to console
+            console.log(message);
+        }
+
+        function downloadReport(report) {
+            const dataStr = JSON.stringify(report, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `migration-report-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            logMessage('Downloaded migration report', 'success');
+        }
+    </script>
+</body>
+</html>
