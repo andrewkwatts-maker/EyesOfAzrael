@@ -3,250 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="themes/theme-base.css">
-    <link rel="stylesheet" href="themes/corpus-links.css">
-    <script defer src="themes/theme-picker.js"></script>
-    <script defer src="themes/theme-animations.js"></script>
-    <title>World Mythos Explorer - Home</title>
-    <link rel="stylesheet" href="styles.css">
-
-    <!-- Firebase Auth System -->
-    <link rel="stylesheet" href="css/user-auth.css">
-    <script src="js/firebase-auth.js"></script>
-    <script src="js/auth-guard.js"></script>
-    <script src="js/components/google-signin-button.js"></script>
+    <title>Eyes of Azrael - Temporarily Offline</title>
     <style>
-        .hero {
-            text-align: center;
-            padding: 4rem 2rem;
-            background: linear-gradient(135deg, rgba(var(--color-primary-rgb, 139, 127, 255), 0.2), rgba(var(--color-secondary-rgb, 255, 126, 182), 0.2));
-            border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
-            border-radius: var(--radius-xl, 20px);
-            margin: 2rem 0;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .hero h1 {
-            font-size: 3.5rem;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1rem;
-        }
-
-        .hero p {
-            font-size: 1.3rem;
-            color: var(--text-secondary);
-            max-width: 800px;
-            margin: 1rem auto;
-            line-height: 1.6;
-        }
-
-        .main-nav {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 2rem;
-            margin: 3rem 0;
-        }
-
-        @media (max-width: 1200px) {
-            .main-nav {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .main-nav {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .nav-card {
-            background: linear-gradient(135deg, rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8), rgba(var(--color-bg-primary-rgb, 10, 14, 39), 0.9));
-            border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
-            border-radius: var(--radius-lg, 15px);
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             padding: 2rem;
-            cursor: pointer;
-            transition: all var(--transition-base, 0.3s ease);
-            position: relative;
-            overflow: hidden;
         }
 
-        .nav-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        .container {
+            max-width: 800px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         }
 
-        .nav-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 40px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
-            border-color: var(--accent-primary);
-        }
-
-        .nav-icon {
+        h1 {
             font-size: 3rem;
             margin-bottom: 1rem;
+            color: #9370DB;
+            text-shadow: 0 0 20px rgba(147, 112, 219, 0.5);
         }
 
-        .nav-title {
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
+        .subtitle {
+            font-size: 1.5rem;
+            color: #DAA520;
+            margin-bottom: 2rem;
+            opacity: 0.9;
         }
 
-        .nav-description {
-            color: var(--text-secondary);
+        .message {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            color: #c0c0c0;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background: linear-gradient(135deg, rgba(255, 69, 0, 0.3), rgba(255, 140, 0, 0.2));
+            border: 2px solid #ff6347;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            color: #ff6347;
+            font-weight: bold;
+        }
+
+        .info {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background: rgba(147, 51, 234, 0.1);
+            border-left: 4px solid #9370DB;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .info h2 {
+            color: #9370DB;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .info ul {
+            list-style: none;
+            padding-left: 1rem;
+        }
+
+        .info li {
+            margin: 0.75rem 0;
             line-height: 1.6;
-            font-size: 1rem;
+        }
+
+        .info li::before {
+            content: "▸ ";
+            color: #DAA520;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .footer {
+            margin-top: 3rem;
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+
+        .github-link {
+            color: #9370DB;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(147, 112, 219, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .github-link:hover {
+            color: #DAA520;
+            border-bottom-color: rgba(218, 165, 32, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
         }
     </style>
 </head>
 <body>
-    <div id="theme-picker-container"></div>
-    <header>
-    <div class="header-content">
-        <h1>🌍 World Mythos Explorer</h1>
-        <div id="user-auth-nav"></div>
+    <div class="container">
+        <h1>👁️ Eyes of Azrael</h1>
+        <div class="subtitle">Mythology, Physics & Esoteric Knowledge</div>
+
+        <div class="status pulse">
+            ⚠️ SITE TEMPORARILY OFFLINE
+        </div>
+
+        <div class="message">
+            <p>The Eyes of Azrael website is currently offline for maintenance and content review.</p>
+        </div>
+
+        <div class="info">
+            <h2>📋 What's Happening</h2>
+            <ul>
+                <li>All theory pages have been enhanced with comprehensive intellectual honesty warnings</li>
+                <li>Content is being reviewed for accuracy and proper framing</li>
+                <li>Speculative material is being clearly labeled as thought experiments, not factual claims</li>
+                <li>The site will return with improved critical thinking frameworks</li>
+            </ul>
+        </div>
+
+        <div class="info" style="margin-top: 2rem;">
+            <h2>🔍 Recent Updates</h2>
+            <ul>
+                <li>Added "Reality Check" warnings to all correlation claims</li>
+                <li>Implemented correlation rating system (⭐⭐⭐ Strong to ⭐ Weak)</li>
+                <li>Removed weakest correlations (e.g., Wu Xing 5-forces mapping)</li>
+                <li>Emphasized parsimonious explanations (mathematical universality, confirmation bias)</li>
+                <li>Positioned content as "intellectual entertainment" and "pattern exploration"</li>
+            </ul>
+        </div>
+
+        <div class="info" style="margin-top: 2rem;">
+            <h2>⏱️ Expected Return</h2>
+            <ul>
+                <li>Timeline: To be determined pending final content review</li>
+                <li>GitHub Repository: <a href="https://github.com/andrewkwatts-maker/EyesOfAzrael" class="github-link" target="_blank">github.com/andrewkwatts-maker/EyesOfAzrael</a></li>
+                <li>All code and content remains publicly accessible on GitHub</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>Thank you for your patience and understanding.</p>
+            <p style="margin-top: 0.5rem;">— Eyes of Azrael Team</p>
+        </div>
     </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="mythos/index.html">Home</a>
-</nav>
-
-    <main>
-        <div class="hero">
-            <h1>Explore the Sacred Stories of Humanity</h1>
-            <p>
-                Journey through 15+ mythological traditions spanning 6,000 years of spiritual imagination.
-                From the Sefirot of Jewish Kabbalah to the Nine Realms of Norse cosmology, discover the gods,
-                heroes, rituals, sacred plants, and mystical paths that shape our world's traditions.
-            </p>
-        </div>
-
-        <div class="main-nav">
-            <div class="nav-card" onclick="window.location.href='mythos/index.html'">
-                <div class="nav-icon">🗺️</div>
-                <div class="nav-title">Mythology Browser</div>
-                <div class="nav-description">
-                    Explore all 15 mythological traditions. Search, filter, and discover connections
-                    across cultures. Browse by tradition, concept, or universal patterns.
-                </div>
-            </div>
-
-            <div class="nav-card" onclick="window.location.href='herbalism/index.html'">
-                <div class="nav-icon">🌿</div>
-                <div class="nav-title">Universal Herbalism</div>
-                <div class="nav-description">
-                    Sacred and medicinal plants across all traditions. 9 universal plants,
-                    40+ tradition-specific herbs, preparation methods, and ritual uses.
-                </div>
-            </div>
-
-            <div class="nav-card" onclick="window.location.href='archetypes/index.html'">
-                <div class="nav-icon">🎭</div>
-                <div class="nav-title">Universal Archetypes</div>
-                <div class="nav-description">
-                    Explore archetypal patterns across mythological traditions. Discover the Hero,
-                    Trickster, Mother, Sage, and other universal figures that shape our stories.
-                </div>
-            </div>
-
-            <div class="nav-card" onclick="window.location.href='magic/index.html'">
-                <div class="nav-icon">✨</div>
-                <div class="nav-title">Magical Systems</div>
-                <div class="nav-description">
-                    Comparative magical practices, ritual structures, divination methods, and
-                    mystical techniques from traditions around the world.
-                </div>
-            </div>
-
-            <div class="nav-card" onclick="window.location.href='spiritual-places/index.html'">
-                <div class="nav-icon">🏛️</div>
-                <div class="nav-title">Sacred Places</div>
-                <div class="nav-description">
-                    Holy mountains, mystical realms, sacred groves, ancient temples, and
-                    pilgrimage sites from mythological traditions worldwide.
-                </div>
-            </div>
-
-            <div class="nav-card" onclick="window.location.href='spiritual-items/index.html'">
-                <div class="nav-icon">⚔️</div>
-                <div class="nav-title">Sacred Objects</div>
-                <div class="nav-description">
-                    Legendary weapons, divine relics, ritual implements, and powerful artifacts
-                    that shaped the mythologies of every culture.
-                </div>
-            </div>
-
-            <div class="nav-card" onclick="window.location.href='theories/index.html'">
-                <div class="nav-icon">🔬</div>
-                <div class="nav-title">AI Analysis & Theories</div>
-                <div class="nav-description">
-                    Computational analysis of mythological patterns, AI-generated insights,
-                    and user-submitted theories exploring connections across traditions.
-                </div>
-            </div>
-        </div>
-
-        <section style="margin-top: 3rem; padding: 2rem; background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6); border-radius: var(--radius-lg, 15px); border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);">
-            <h2 style="text-align: center; margin-bottom: 1.5rem;">About This Project</h2>
-            <p style="max-width: 900px; margin: 0 auto; line-height: 1.8; color: var(--text-secondary);">
-                World Mythos Explorer is a comprehensive, interconnected encyclopedia of world mythological traditions.
-                Unlike traditional mythological references, this system reveals universal patterns across cultures
-                by linking similar concepts—creation myths, afterlife journeys, spiritual paths, sacred plants, and
-                divine hierarchies—allowing you to discover how different cultures approached the same eternal questions.
-            </p>
-            <p style="max-width: 900px; margin: 1rem auto; line-height: 1.8; color: var(--text-secondary);">
-                Each tradition is organized into standardized categories (deities, cosmology, rituals, herbs, magic,
-                spiritual path), making cross-cultural comparison natural and insightful. Whether you're a scholar,
-                game designer, spiritual seeker, or curious explorer, you'll find rich, properly cited information
-                with practical applications.
-            </p>
-            <div style="text-align: center; margin-top: 2rem;">
-                <a href="about.html" style="color: var(--accent-primary); text-decoration: none; padding: 0.8rem 1.5rem; border: 2px solid var(--accent-primary); border-radius: var(--radius-full, 20px); display: inline-block; transition: all var(--transition-base, 0.3s ease);">
-                    📚 Learn More
-                </a>
-            </div>
-        </section>
-    </main>
-
-    <footer style="margin-top: 4rem; padding: 2rem; text-align: center; border-top: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);">
-        <p>
-            <strong>World Mythos Explorer</strong><br>
-            A modular, interconnected encyclopedia of world mythologies<br>
-            <span style="color: var(--text-secondary); font-size: 0.9rem;">
-                Created with research, reverence, and a deep appreciation for humanity's sacred stories
-            </span>
-        </p>
-    </footer>
-
-    <!-- Firebase SDK (CDN) -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
-
-    <!-- Initialize Auth UI -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize Google Sign-In button in header
-            if (window.GoogleSignInButton) {
-                const authNav = document.getElementById('user-auth-nav');
-                if (authNav) {
-                    window.GoogleSignInButton.injectIntoElement(authNav, {
-                        showUserInfo: true,
-                        showAvatar: true,
-                        compact: true
-                    });
-                }
-            }
-        });
-    </script>
 </body>
 </html>
