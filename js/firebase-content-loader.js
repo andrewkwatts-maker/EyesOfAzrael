@@ -296,6 +296,12 @@ class FirebaseContentLoader {
       grid.appendChild(card);
     });
 
+    // Add "+" card at the end for logged-in users to add new content
+    const addCard = this.createAddCard(contentType, config);
+    if (addCard) {
+      grid.appendChild(addCard);
+    }
+
     container.appendChild(grid);
 
     console.log(`[ContentLoader] Rendered ${this.filteredData.length} items`);
@@ -339,13 +345,7 @@ class FirebaseContentLoader {
 
     body.appendChild(description);
 
-    // Add additional fields
-    if (item.mythology) {
-      const mythology = document.createElement('p');
-      mythology.innerHTML = `<strong>Mythology:</strong> ${item.mythology}`;
-      mythology.style.marginTop = 'var(--spacing-sm)';
-      body.appendChild(mythology);
-    }
+    // Note: Mythology field removed as it's redundant on mythology-specific pages
 
     // Card Footer (Tags)
     const footer = document.createElement('div');
@@ -406,6 +406,68 @@ class FirebaseContentLoader {
     tag.className = 'card-tag';
     tag.textContent = text;
     return tag;
+  }
+
+  /**
+   * Create an "Add New" card for logged-in users
+   * @param {string} contentType - Type of content
+   * @param {Object} config - Content type configuration
+   * @returns {HTMLElement|null} Add card element or null if user not logged in
+   */
+  createAddCard(contentType, config) {
+    // Check if user is logged in via Firebase Auth
+    const user = firebase.auth().currentUser;
+    if (!user) {
+      return null; // Don't show add card if not logged in
+    }
+
+    const card = document.createElement('div');
+    card.className = 'content-card add-content-card';
+    card.setAttribute('data-type', 'add-new');
+
+    card.innerHTML = `
+      <div class="add-card-content">
+        <div class="add-card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </div>
+        <div class="add-card-title">Add New ${config.title.slice(0, -1)}</div>
+        <div class="add-card-description">Submit your own ${contentType.slice(0, -1)} to the collection</div>
+      </div>
+    `;
+
+    // Add click handler to open submission form
+    card.addEventListener('click', () => {
+      this.onAddCardClick(contentType, config);
+    });
+
+    return card;
+  }
+
+  /**
+   * Handle add card click event
+   * @param {string} contentType - Type of content
+   * @param {Object} config - Content type configuration
+   */
+  onAddCardClick(contentType, config) {
+    console.log('[ContentLoader] Add card clicked for:', contentType);
+
+    // Dispatch custom event that editable-panel-system can listen to
+    const event = new CustomEvent('addContentClicked', {
+      detail: { contentType, config }
+    });
+    document.dispatchEvent(event);
+
+    // If editable system is available, use it
+    if (window.editableSystem) {
+      const dummyPanel = document.createElement('div');
+      window.editableSystem.openSubmissionModal(dummyPanel, {
+        contentType: contentType.slice(0, -1), // Remove plural 's'
+        collection: config.collection
+      });
+    }
   }
 
   /**
