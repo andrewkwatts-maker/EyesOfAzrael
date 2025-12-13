@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse User Theories - Eyes of Azrael</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+
+    <!-- User System -->
+    <link rel="stylesheet" href="../../css/user-auth.css">
+    <link rel="stylesheet" href="../../css/public-view.css">
+    <script src="../../js/firebase-auth.js"></script>
+    <script src="../../js/firebase-db.js"></script>
+    <script src="../../js/components/google-signin-button.js"></script>
+    <script defer src="../../js/user-theories.js"></script>
+    <script defer src="../../js/theory-taxonomy.js"></script>
+
+    <!-- Content Filter System -->
+    <link rel="stylesheet" href="../../css/filter-settings.css">
+    <script src="../../js/content-filter.js"></script>
+    <script src="../../js/components/filter-settings-modal.js"></script>
+    <script src="../../js/components/filter-header-button.js"></script>
+    <script src="../../js/content-filter-ui.js"></script>
+
+    <style>
+        :root {
+            --theory-primary: #9333ea;
+            --theory-secondary: #c084fc;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: #0a0a1a;
+            background-image:
+                radial-gradient(ellipse at 20% 30%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(192, 132, 252, 0.1) 0%, transparent 50%);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 4rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, rgba(74, 94, 168, 0.3), rgba(147, 51, 234, 0.3));
+            border: 3px solid var(--theory-primary);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            margin: 0 0 1rem 0;
+            background: linear-gradient(135deg, #c084fc, #f0abfc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-submit-theory {
+            padding: 0.75rem 2rem;
+            background: linear-gradient(135deg, #9333ea 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-submit-theory:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(147, 51, 234, 0.4);
+        }
+
+        /* Browse Controls */
+        .browse-controls {
+            background: var(--color-surface);
+            border: 2px solid rgba(147, 51, 234, 0.4);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .control-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            color: var(--color-text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .control-group select,
+        .control-group input {
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: 8px;
+            color: var(--color-text-primary);
+            font-size: 1rem;
+        }
+
+        .control-group select:focus,
+        .control-group input:focus {
+            outline: none;
+            border-color: var(--theory-primary);
+        }
+
+        .view-mode-selector {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(147, 51, 234, 0.1);
+            border-radius: 8px;
+        }
+
+        .view-mode-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-mode-btn.active {
+            background: var(--theory-primary);
+            color: white;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            padding: 1rem;
+            background: rgba(147, 51, 234, 0.1);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--theory-secondary);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Results Container */
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Grouped View */
+        .group-container {
+            background: var(--color-surface);
+            border: 2px solid rgba(147, 51, 234, 0.4);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .group-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), rgba(168, 85, 247, 0.2));
+            border-bottom: 2px solid rgba(147, 51, 234, 0.4);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .group-header:hover {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(168, 85, 247, 0.3));
+        }
+
+        .group-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            color: var(--color-text-primary);
+            margin: 0;
+        }
+
+        .group-icon {
+            font-size: 2rem;
+        }
+
+        .group-count {
+            background: var(--theory-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .group-toggle {
+            font-size: 1.5rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.3s;
+        }
+
+        .group-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .group-content {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .group-content.collapsed {
+            display: none;
+        }
+
+        /* Theory Card Compact */
+        .theory-card-compact {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(147, 51, 234, 0.3);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .theory-card-compact:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(147, 51, 234, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .theory-card-compact .theory-title {
+            font-size: 1.1rem;
+            color: var(--color-text-primary);
+            margin: 0 0 0.5rem 0;
+        }
+
+        .theory-card-compact .theory-author {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .theory-card-compact .theory-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            color: var(--color-text-secondary);
+            font-size: 1.125rem;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .loading-spinner {
+            font-size: 3rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes highlight-pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(147, 51, 234, 0);
+                border-color: rgba(147, 51, 234, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px 10px rgba(147, 51, 234, 0.6);
+                border-color: rgba(147, 51, 234, 1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>📚 Browse User Theories</h1>
+            <div class="page-header-actions" id="header-actions">
+                <!-- Dynamically populated based on auth state -->
+            </div>
+            <p>Explore theories organized by topic, subtopic, and author</p>
+        </header>
+
+        <!-- Browse Controls -->
+        <div class="browse-controls">
+            <div class="control-row">
+                <div class="control-group">
+                    <label>🔍 Search</label>
+                    <input type="text" id="search-input" placeholder="Search in titles and content...">
+                </div>
+
+                <div class="control-group">
+                    <label>📂 Topic</label>
+                    <select id="topic-filter">
+                        <option value="">All Topics</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>📋 Subtopic</label>
+                    <select id="subtopic-filter">
+                        <option value="">All Subtopics</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>👤 Author</label>
+                    <select id="author-filter">
+                        <option value="">All Authors</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-row">
+                <div class="control-group">
+                    <label>🗂️ Group By</label>
+                    <div class="view-mode-selector">
+                        <button class="view-mode-btn active" data-group="topic">Topic</button>
+                        <button class="view-mode-btn" data-group="subtopic">Subtopic</button>
+                        <button class="view-mode-btn" data-group="author">Author</button>
+                        <button class="view-mode-btn" data-group="none">No Grouping</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>⚡ Sort By</label>
+                    <select id="sort-filter">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="popular">Most Popular</option>
+                        <option value="views">Most Viewed</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-bar" id="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="total-theories">0</div>
+                <div class="stat-label">Total Theories</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="total-topics">0</div>
+                <div class="stat-label">Topics</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="total-authors">0</div>
+                <div class="stat-label">Authors</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="filtered-count">0</div>
+                <div class="stat-label">Showing</div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results-container" class="results-container">
+            <div class="loading">
+                <div class="loading-spinner">⏳</div>
+                <p>Loading theories...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Browse Page Controller
+        class TheoryBrowser {
+            constructor() {
+                this.groupBy = 'topic';
+                this.filters = {
+                    search: '',
+                    topic: '',
+                    subtopic: '',
+                    author: '',
+                    sortBy: 'newest'
+                };
+                this.pagination = {
+                    lastDoc: null,
+                    hasMore: false,
+                    isLoading: false,
+                    loadedTheories: []
+                };
+                this.init();
+            }
+
+            init() {
+                this.populateFilters();
+                this.attachEventListeners();
+                this.loadAndDisplay();
+
+                // Listen for theory updates
+                window.addEventListener('theoriesUpdated', () => this.loadAndDisplay());
+
+                // Listen for content filter changes
+                window.addEventListener('contentFilterChanged', () => this.loadAndDisplay());
+
+                // Check for highlight parameter
+                this.checkHighlight();
+            }
+
+            checkHighlight() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const highlightId = urlParams.get('highlight');
+                if (highlightId) {
+                    setTimeout(() => {
+                        const theoryCard = document.querySelector(`[data-theory-id="${highlightId}"]`);
+                        if (theoryCard) {
+                            theoryCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            theoryCard.style.animation = 'highlight-pulse 2s ease-in-out';
+                        }
+                    }, 500);
+                }
+            }
+
+            populateFilters() {
+                // Topics
+                const topicFilter = document.getElementById('topic-filter');
+                const topics = window.theoryTaxonomy.getAllTopics();
+
+                Object.entries(topics).forEach(([id, topic]) => {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = `${topic.icon} ${topic.name}`;
+                    topicFilter.appendChild(option);
+                });
+
+                // Authors (will be populated from theories)
+                this.updateAuthorFilter();
+            }
+
+            async updateAuthorFilter() {
+                const authorFilter = document.getElementById('author-filter');
+                const result = window.userTheories ? await window.userTheories.getAllTheories({ status: 'published' }) : [];
+                // Handle both array and paginated response
+                const theories = Array.isArray(result) ? result : (result.theories || []);
+                const authors = [...new Set(theories.map(t => t.author))].sort();
+
+                authorFilter.innerHTML = '<option value="">All Authors</option>';
+                authors.forEach(author => {
+                    const option = document.createElement('option');
+                    option.value = author;
+                    option.textContent = author;
+                    authorFilter.appendChild(option);
+                });
+            }
+
+            updateSubtopicFilter() {
+                const subtopicFilter = document.getElementById('subtopic-filter');
+                subtopicFilter.innerHTML = '<option value="">All Subtopics</option>';
+
+                if (this.filters.topic) {
+                    const subtopics = window.theoryTaxonomy.getSubtopics(this.filters.topic);
+                    Object.entries(subtopics).forEach(([id, name]) => {
+                        const option = document.createElement('option');
+                        option.value = id;
+                        option.textContent = name;
+                        subtopicFilter.appendChild(option);
+                    });
+                }
+            }
+
+            attachEventListeners() {
+                // Search
+                document.getElementById('search-input').addEventListener('input', (e) => {
+                    this.filters.search = e.target.value;
+                    this.loadAndDisplay();
+                });
+
+                // Topic filter
+                document.getElementById('topic-filter').addEventListener('change', (e) => {
+                    this.filters.topic = e.target.value;
+                    this.filters.subtopic = ''; // Reset subtopic
+                    this.updateSubtopicFilter();
+                    this.loadAndDisplay();
+                });
+
+                // Subtopic filter
+                document.getElementById('subtopic-filter').addEventListener('change', (e) => {
+                    this.filters.subtopic = e.target.value;
+                    this.loadAndDisplay();
+                });
+
+                // Author filter
+                document.getElementById('author-filter').addEventListener('change', (e) => {
+                    this.filters.author = e.target.value;
+                    this.loadAndDisplay();
+                });
+
+                // Sort filter
+                document.getElementById('sort-filter').addEventListener('change', (e) => {
+                    this.filters.sortBy = e.target.value;
+                    this.loadAndDisplay();
+                });
+
+                // Group buttons
+                document.querySelectorAll('[data-group]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('[data-group]').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.groupBy = e.target.dataset.group;
+                        this.loadAndDisplay();
+                    });
+                });
+            }
+
+            async loadAndDisplay(loadMore = false) {
+                // Public viewing: load theories without authentication check
+                if (!window.userTheories) {
+                    return;
+                }
+
+                const container = document.getElementById('results-container');
+
+                // Show loading state
+                if (!loadMore) {
+                    this.pagination.loadedTheories = [];
+                    this.pagination.lastDoc = null;
+                    container.innerHTML = `
+                        <div class="loading">
+                            <div class="loading-spinner">⏳</div>
+                            <p>Loading theories...</p>
+                        </div>
+                    `;
+                }
+
+                this.pagination.isLoading = true;
+
+                try {
+                    const theories = await window.userTheories.getAllTheories({
+                        ...this.filters,
+                        status: 'published', // Only show published theories in public browse
+                        limit: 20,
+                        startAfter: loadMore ? this.pagination.lastDoc : null
+                    });
+
+                    // If using Firestore, theories will be a paginated result
+                    if (theories.theories) {
+                        this.pagination.loadedTheories = loadMore ?
+                            [...this.pagination.loadedTheories, ...theories.theories] :
+                            theories.theories;
+                        this.pagination.hasMore = theories.hasMore || false;
+                        this.pagination.lastDoc = theories.lastDoc;
+                    } else {
+                        // localStorage mode - no pagination
+                        this.pagination.loadedTheories = theories;
+                        this.pagination.hasMore = false;
+                    }
+
+                    // Apply content filter
+                    const filteredTheories = this.pagination.loadedTheories.filter(theory => {
+                        return !window.contentFilter || window.contentFilter.shouldShow(theory);
+                    });
+
+                    await this.updateStats(this.pagination.loadedTheories, filteredTheories);
+
+                    // Show filter summary if items are hidden
+                    const filterSummary = window.contentFilterUI ?
+                        window.contentFilterUI.getFilterSummary(this.pagination.loadedTheories.length, filteredTheories.length) : '';
+
+                    if (filteredTheories.length === 0) {
+                        container.innerHTML = filterSummary + `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📭</div>
+                                <p class="empty-state-text">No theories found matching your filters</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    if (this.groupBy === 'none') {
+                        container.innerHTML = filterSummary + this.renderUngrouped(filteredTheories);
+                    } else {
+                        container.innerHTML = filterSummary + this.renderGrouped(filteredTheories, this.groupBy);
+                    }
+
+                    // Add load more button if there are more results
+                    if (this.pagination.hasMore) {
+                        container.innerHTML += this.renderLoadMoreButton();
+                    }
+
+                    this.attachResultEventListeners();
+
+                    // Add filter controls to each theory card
+                    if (window.contentFilterUI) {
+                        filteredTheories.forEach(theory => {
+                            const card = document.querySelector(`[data-theory-id="${theory.id}"]`);
+                            if (card) {
+                                window.contentFilterUI.addFilterControls(card, theory);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error loading theories:', error);
+                    container.innerHTML = `
+                        <div class="error-message">
+                            Error loading theories. Please try again.
+                        </div>
+                    `;
+                } finally {
+                    this.pagination.isLoading = false;
+                }
+            }
+
+            renderLoadMoreButton() {
+                return `
+                    <div style="text-align: center; margin-top: 2rem; padding: 2rem;">
+                        <button class="btn-submit-theory" onclick="window.theoryBrowser.loadMoreTheories()" id="load-more-btn">
+                            Load More Theories
+                        </button>
+                        <div class="loading" id="load-more-spinner" style="display: none;">
+                            <div class="loading-spinner">⏳</div>
+                            <p>Loading more theories...</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            async loadMoreTheories() {
+                if (this.pagination.isLoading || !this.pagination.hasMore) {
+                    return;
+                }
+
+                const btn = document.getElementById('load-more-btn');
+                const spinner = document.getElementById('load-more-spinner');
+
+                if (btn) btn.style.display = 'none';
+                if (spinner) spinner.style.display = 'block';
+
+                await this.loadAndDisplay(true);
+            }
+
+            async updateStats(theories, filteredTheories) {
+                // Public viewing: show published theories only
+                const result = window.userTheories ? await window.userTheories.getAllTheories({ status: 'published' }) : [];
+
+                // Handle both array and paginated response
+                const theoriesList = Array.isArray(result) ? result : (result.theories || []);
+
+                const topics = new Set(theoriesList.filter(t => t.topic).map(t => t.topic));
+                const authors = new Set(theoriesList.map(t => t.author));
+
+                document.getElementById('total-theories').textContent = theoriesList.length;
+                document.getElementById('total-topics').textContent = topics.size;
+                document.getElementById('total-authors').textContent = authors.size;
+                document.getElementById('filtered-count').textContent = filteredTheories ? filteredTheories.length : theories.length;
+            }
+
+            renderGrouped(theories, groupBy) {
+                const groups = {};
+
+                theories.forEach(theory => {
+                    let key, name, icon;
+
+                    if (groupBy === 'topic') {
+                        key = theory.topic || 'uncategorized';
+                        name = theory.topicName || 'Uncategorized';
+                        icon = theory.topicIcon || '📌';
+                    } else if (groupBy === 'subtopic') {
+                        key = theory.subtopic || 'unspecified';
+                        name = theory.subtopicName || 'Unspecified';
+                        icon = theory.topicIcon || '📋';
+                    } else if (groupBy === 'author') {
+                        key = theory.author;
+                        name = theory.author;
+                        icon = '👤';
+                    }
+
+                    if (!groups[key]) {
+                        groups[key] = { name, icon, theories: [] };
+                    }
+                    groups[key].theories.push(theory);
+                });
+
+                return Object.entries(groups).map(([key, group]) => `
+                    <div class="group-container">
+                        <div class="group-header" onclick="toggleGroup('${key}')">
+                            <h2 class="group-title">
+                                <span class="group-icon">${group.icon}</span>
+                                <span>${group.name}</span>
+                                <span class="group-count">${group.theories.length}</span>
+                            </h2>
+                            <span class="group-toggle" id="toggle-${key}">▼</span>
+                        </div>
+                        <div class="group-content" id="group-${key}">
+                            ${group.theories.map(t => this.renderTheoryCard(t)).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderUngrouped(theories) {
+                return `
+                    <div class="group-content">
+                        ${theories.map(t => this.renderTheoryCard(t)).join('')}
+                    </div>
+                `;
+            }
+
+            renderTheoryCard(theory) {
+                return `
+                    <div class="theory-card-compact" data-theory-id="${theory.id}" onclick="viewTheory('${theory.id}')" style="position: relative;">
+                        <h3 class="theory-title">${this.escapeHtml(theory.title)}</h3>
+                        <div class="theory-author">by ${theory.author}</div>
+                        <div class="theory-meta">
+                            <span>👁️ ${theory.views || 0}</span>
+                            <span>👍 ${theory.votes}</span>
+                            <span>💬 ${theory.comments.length}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            attachResultEventListeners() {
+                // Event listeners for dynamic content
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Global functions
+        function toggleGroup(key) {
+            const content = document.getElementById(`group-${key}`);
+            const toggle = document.getElementById(`toggle-${key}`);
+
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                toggle.classList.remove('collapsed');
+            } else {
+                content.classList.add('collapsed');
+                toggle.classList.add('collapsed');
+            }
+        }
+
+        function viewTheory(theoryId) {
+            // Navigate to theory detail view
+            window.location.href = `view.html?id=${theoryId}`;
+        }
+
+        // Initialize browser when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.theoryBrowser = new TheoryBrowser();
+            updateHeaderActions();
+        });
+
+        // Update header actions based on auth state
+        function updateHeaderActions() {
+            const headerActions = document.getElementById('header-actions');
+            const isLoggedIn = window.authGuard && window.authGuard.isAuthenticated();
+
+            if (isLoggedIn) {
+                headerActions.innerHTML = `
+                    <a href="submit.html" class="btn-submit-theory">✨ Submit Your Theory</a>
+                `;
+            } else {
+                headerActions.innerHTML = `
+                    <button class="btn-submit-theory" onclick="window.authGuard.showLoginPrompt('Sign in to submit your own theories', 'submit')">
+                        🔒 Sign in to Submit
+                    </button>
+                `;
+            }
+        }
+
+        // Listen for auth state changes
+        window.addEventListener('userLogin', updateHeaderActions);
+        window.addEventListener('userLogout', updateHeaderActions);
+    </script>
+
+    <!-- Auth Modal Template -->
+    <div id="auth-modal" class="auth-modal">
+        <div class="auth-modal-content">
+            <button class="auth-modal-close" onclick="window.userAuth?.hideAuthModal()">&times;</button>
+            <h2 id="auth-modal-title" class="auth-modal-title">Login to Your Account</h2>
+            <div id="auth-message" class="auth-message"></div>
+            <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+                <div class="auth-form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" name="username" required autocomplete="username">
+                </div>
+                <div class="auth-form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="auth-submit-btn">Login</button>
+                <div class="auth-switch">
+                    Don't have an account?
+                    <a class="auth-switch-link" onclick="window.userAuth?.switchAuthMode('signup')">Sign up</a>
+                </div>
+            </form>
+            <form id="signup-form" class="auth-form" style="display: none;" onsubmit="handleSignup(event)">
+                <div class="auth-form-group">
+                    <label for="signup-username">Username</label>
+                    <input type="text" id="signup-username" name="username" required minlength="3" autocomplete="username">
+                </div>
+                <div class="auth-form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" name="email" required autocomplete="email">
+                </div>
+                <div class="auth-form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" name="password" required minlength="6" autocomplete="new-password">
+                </div>
+                <button type="submit" class="auth-submit-btn">Create Account</button>
+                <div class="auth-switch">
+                    Already have an account?
+                    <a class="auth-switch-link" onclick="window.userAuth?.switchAuthMode('login')">Login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="user-nav" style="position: fixed; top: 1rem; right: 1rem; z-index: 1000;">
+        <div data-auth-show="loggedOut" style="display: flex; gap: 0.5rem;">
+            <button class="auth-submit-btn" onclick="window.userAuth?.showLoginModal()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Login</button>
+            <button class="auth-submit-btn" onclick="window.userAuth?.showSignupModal()" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: linear-gradient(135deg, #22c55e, #16a34a);">Sign Up</button>
+        </div>
+        <div data-auth-show="loggedIn" style="display: none;">
+            <div class="user-display" onclick="toggleUserDropdown()">
+                <img data-auth-avatar src="" alt="User Avatar" class="user-avatar">
+                <span data-auth-username class="user-username"></span>
+                <span>▼</span>
+            </div>
+            <div id="user-dropdown" class="user-dropdown">
+                <a href="index.html" class="user-dropdown-item">Submit Theory</a>
+                <a href="browse.html" class="user-dropdown-item">Browse All</a>
+                <div style="border-top: 1px solid rgba(147, 51, 234, 0.3); margin: 0.5rem 0;"></div>
+                <button class="user-logout-btn" onclick="window.userAuth?.logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (CDN) - No Storage needed for URL-only images -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../../firebase-config.js"></script>
+    <script src="../../js/auth-guard.js"></script>
+    <script src="../../js/user-theories.js"></script>
+
+    <script>
+        function handleLogin(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const result = window.userAuth.login(formData.get('username'), formData.get('password'));
+            if (result.success) {
+                window.userAuth.showAuthMessage(result.message, 'success');
+                setTimeout(() => window.userAuth.hideAuthModal(), 1000);
+            } else {
+                window.userAuth.showAuthMessage(result.error, 'error');
+            }
+        }
+
+        function handleSignup(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const result = window.userAuth.signup(formData.get('username'), formData.get('email'), formData.get('password'));
+            if (result.success) {
+                window.userAuth.showAuthMessage(result.message + ' You can now login.', 'success');
+                setTimeout(() => {
+                    window.userAuth.switchAuthMode('login');
+                    window.userAuth.clearAuthMessages();
+                }, 2000);
+            } else {
+                window.userAuth.showAuthMessage(result.error, 'error');
+            }
+        }
+
+        function toggleUserDropdown() {
+            document.getElementById('user-dropdown')?.classList.toggle('show');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-display') && !e.target.closest('#user-dropdown')) {
+                document.getElementById('user-dropdown')?.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

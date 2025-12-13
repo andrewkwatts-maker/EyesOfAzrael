@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freemasonry - World Mythos Explorer</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+<link rel="stylesheet" href="../../themes/smart-links.css">
+<script defer src="../../themes/smart-links.js"></script>
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <style>
+        /* ============================================
+           MODERN GLASS UI TEMPLATE - Freemasonry
+           Based on styling compliance guide
+           NO hardcoded colors - uses CSS variables only
+           ============================================ */
+
+        /* Breadcrumb - Full-width bar attached below header */
+        .breadcrumb {
+            position: sticky;
+            top: 60px; /* Below the sticky header */
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(var(--color-surface-rgb), 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: var(--spacing-xs) var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
+        }
+
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        /* Hero Section - Modern Glass Styling */
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-section p {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .quote-card {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-left: 4px solid var(--color-primary);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem 2rem;
+            margin: 1.5rem 0;
+            font-size: 1.4rem;
+            font-style: italic;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+        }
+
+        .quote-card:hover {
+            background: var(--color-surface-hover);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .reference-image {
+            max-width: 350px;
+            margin: 3rem auto;
+            display: block;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            transition: transform 0.3s ease;
+        }
+
+        .reference-image:hover {
+            transform: scale(1.02);
+        }
+
+        .scripture-card {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            margin: 2rem 0;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scripture-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+        }
+
+        .scripture-card:hover {
+            background: var(--color-surface-hover);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .scripture-reference {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .scripture-reference::before {
+            content: '📖';
+            font-size: 1.3rem;
+        }
+
+        .scripture-text {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        /* Glass Card - With Hover Animation */
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+            border-color: rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        /* Deity Cards - Modern Glass Pattern with Glow Hover */
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .deity-card {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-base, 0.3s ease);
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+            overflow: hidden;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .deity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg), 0 0 15px rgba(var(--color-primary-rgb), 0.2);
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            text-decoration: none;
+        }
+
+        .deity-card h3 {
+            color: var(--color-primary);
+            margin-top: 0.5rem;
+        }
+
+        .deity-icon {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        /* Subsection Card - Hover Effects */
+        .subsection-card {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .subsection-card:hover {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            transform: translateX(5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .deity-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .breadcrumb {
+                font-size: var(--font-size-xs);
+                padding: var(--spacing-xs) var(--spacing-md);
+                top: 50px; /* Smaller header on mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+    <header>
+    <div class="header-content">
+        <h1>⬛ Freemasonry</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../mythos/index.html">Home</a> →
+                <span>Freemasonry</span>
+</nav>
+
+    <main>
+        <div class="hero-section">
+            <p>
+                Unfortunately due to spiritual hubris, the freemasons blotted out all their windows to the wider world and as a result have nothing of spiritual value to contribute to those around them, they hold to beliefs that wider humanity is not their brothers or sisters. the best analogy to understand this is that of plato's cave. controlling a 2D projection for the masses, they hold 3D Forms. however you can just go outside the cave and see the true creation, 4D forms of the divine.
+            </p>
+        </div>
+
+        <div class="quote-card">
+            "Looks on the level to me"
+        </div>
+
+        <section style="margin-top: 3rem;">
+            <div class="scripture-card">
+                <div class="scripture-reference">John 3:19-20</div>
+                <div class="scripture-text">
+                    "This is the verdict: Light has come into the world, but people loved darkness instead of light because their deeds were evil. Everyone who does evil hates the light, and will not come into the light for fear that their deeds will be exposed."
+                </div>
+            </div>
+
+            <div class="scripture-card">
+                <div class="scripture-reference">Hebrews 10:24-25</div>
+                <div class="scripture-text">
+                    "And let us consider how we may spur one another on toward love and good deeds, not giving up meeting together, as some are in the habit of doing, but encouraging one another—and all the more as you see the Day approaching."
+                </div>
+            </div>
+
+            <div class="scripture-card">
+                <div class="scripture-reference">Matthew 15:14</div>
+                <div class="scripture-text">
+                    "Leave them; they are blind guides. If the blind lead the blind, both will fall into a pit."
+                </div>
+            </div>
+        </section>
+        <!-- Interlink Panel Section -->
+        <section class="interlink-panel" style="margin-top: 3rem;">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Related Across the Mythos
+            </h3>
+
+            <div class="interlink-grid">
+                <!-- Temple Symbolism Section -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Temple Symbolism</div>
+                    <a href="../jewish/cosmology/index.html" class="archetype-link-card">
+                        <div class="archetype-badge">🏛️ SOLOMON'S TEMPLE</div>
+                        <p class="archetype-context">The legendary temple built by King Solomon - source of Masonic ritual and symbolism including the two pillars, Jachin and Boaz.</p>
+                        <span class="see-parallels">Explore temple mysteries →</span>
+                    </a>
+                </div>
+
+                <!-- Kabbalah Section -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Kabbalistic Connections</div>
+                    <a href="../jewish/kabbalah/index.html" class="archetype-link-card">
+                        <div class="archetype-badge">✡️ KABBALAH</div>
+                        <p class="archetype-context">Jewish mystical tradition sharing concepts of divine emanation, hidden wisdom, and the Tree of Life symbolism found in esoteric Masonry.</p>
+                        <span class="see-parallels">Explore Kabbalistic wisdom →</span>
+                    </a>
+                </div>
+
+                <!-- Apocryphal Texts Section -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Apocryphal Sources</div>
+                    <a href="../apocryphal/index.html" class="archetype-link-card">
+                        <div class="archetype-badge">📜 APOCRYPHA</div>
+                        <p class="archetype-context">Hidden texts and pseudepigrapha containing esoteric knowledge about Enoch, Solomon, and angelic hierarchies referenced in Masonic degrees.</p>
+                        <span class="see-parallels">Explore hidden scriptures →</span>
+                    </a>
+                </div>
+
+                <!-- Sacred Geometry Section -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Sacred Geometry</div>
+                    <a href="../../index.html" class="archetype-link-card">
+                        <div class="archetype-badge">📐 GEOMETRY</div>
+                        <p class="archetype-context">The square, compass, and geometric principles underlying Masonic philosophy - tools of the divine architect building the cosmos.</p>
+                        <span class="see-parallels">Explore sacred mathematics →</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Cross-Cultural Parallels -->
+            <div class="parallel-traditions glass-card" style="margin-top: var(--spacing-lg);">
+                <h4>🌍 Cross-Cultural Parallels</h4>
+                <div class="parallel-grid">
+                    <a href="../egyptian/index.html" class="parallel-card">
+                        <span class="tradition-flag">🏺</span>
+                        <span class="parallel-name">Egyptian Mysteries</span>
+                        <span class="tradition-label">Osirian Rites</span>
+                    </a>
+                    <a href="../../index.html" class="parallel-card">
+                        <span class="tradition-flag">🏛️</span>
+                        <span class="parallel-name">Eleusinian Mysteries</span>
+                        <span class="tradition-label">Greek</span>
+                    </a>
+                    <a href="../../archetypes/celestial/index.html" class="parallel-card">
+                        <span class="tradition-flag">☿️</span>
+                        <span class="parallel-name">Hermeticism</span>
+                        <span class="tradition-label">Western Esoteric</span>
+                    </a>
+                    <a href="../../archetypes/celestial/index.html" class="parallel-card">
+                        <span class="tradition-flag">🌹</span>
+                        <span class="parallel-name">Rosicrucianism</span>
+                        <span class="tradition-label">Western Mystery</span>
+                    </a>
+                    <a href="../../archetypes/celestial/index.html" class="parallel-card">
+                        <span class="tradition-flag">⚔️</span>
+                        <span class="parallel-name">Knights Templar</span>
+                        <span class="tradition-label">Medieval Orders</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- See Also Section -->
+        <div class="see-also-section">
+            <h4>📚 See Also</h4>
+            <div class="see-also-links">
+                <a href="../jewish/index.html" class="see-also-link">
+                    <span>✡️</span> Jewish Tradition
+                </a>
+                <a href="../christian/index.html" class="see-also-link">
+                    <span>✝️</span> Christian Tradition
+                </a>
+                <a href="../egyptian/index.html" class="see-also-link">
+                    <span>🏺</span> Egyptian Mysteries
+                </a>
+                <a href="../../archetypes/celestial/index.html" class="see-also-link">
+                    <span>☿️</span> Hermeticism
+                </a>
+                <a href="../babylonian/symbols/index.html" class="see-also-link">
+                    <span>🔯</span> Sacred Symbols
+                </a>
+                <a href="../apocryphal/index.html" class="see-also-link">
+                    <span>📜</span> Apocryphal Texts
+                </a>
+                <a href="../jewish/kabbalah/index.html" class="see-also-link">
+                    <span>🌳</span> Kabbalah
+                </a>
+                <a href="../../archetypes/celestial/index.html" class="see-also-link">
+                    <span>🏗️</span> Builder Archetype
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <strong>Freemasonry</strong> - World Mythos Explorer<br>
+            <a href="../../mythos/index.html">World Mythos Home</a> |
+            <a href="../../index.html">Home</a>
+        </p>
+    </footer>
+</body>
+</html>

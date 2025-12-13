@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archetype Explorer - World Mythos Explorer</title>
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../themes/smart-links.css">
+    <script defer src="../themes/smart-links.js"></script>
+    <script defer src="../themes/theme-animations.js"></script>
+    <script defer src="../themes/theme-picker.js"></script>
+
+    <!-- Entity System -->
+    <script defer src="../components/panels/entity-panel.js"></script>
+    <script defer src="../components/archetype-filter.js"></script>
+
+    <style>
+        /* Archetype Filter Styles */
+        .archetype-filter-system {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 1024px) {
+            .archetype-filter-system {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .archetype-filters {
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .archetype-filters h3 {
+            margin-top: 0;
+            color: var(--color-primary);
+            border-bottom: 2px solid rgba(var(--color-primary-rgb), 0.3);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .filter-input,
+        .filter-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-md);
+            background: rgba(var(--color-surface-rgb), 0.6);
+            color: var(--color-text-primary);
+            font-size: 0.95rem;
+            transition: all var(--transition-base);
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+        }
+
+        .filter-slider {
+            width: 100%;
+            margin: 0.5rem 0;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+        }
+
+        .score-value {
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .archetype-description {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(var(--color-primary-rgb), 0.08);
+            border-left: 3px solid var(--color-primary);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+
+        .archetype-info {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .archetype-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .archetype-text strong {
+            display: block;
+            color: var(--color-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .archetype-text p {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .archetype-results {
+            min-height: 400px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(var(--color-primary-rgb), 0.2);
+        }
+
+        .results-header h3 {
+            margin: 0;
+            color: var(--color-primary);
+        }
+
+        .results-count {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .entity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--color-text-secondary);
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .no-results-text {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .archetype-result-card {
+            position: relative;
+        }
+
+        .archetype-score-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            padding: 0.35rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-weight: bold;
+            font-size: 0.85rem;
+            box-shadow: var(--shadow-md);
+            z-index: 10;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-section h1 {
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
+        }
+
+        .hero-section p {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Picker -->
+    <div id="theme-picker"></div>
+    <div id="theme-picker-container"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>🌍 Archetype Explorer</h1>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../mythos/index.html">Home</a> →
+        <span>Archetype Explorer</span>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1>🌍 Universal Archetype Explorer</h1>
+            <p>
+                Discover the universal patterns that appear across all mythologies.
+                From the Hero's Journey to the Great Mother, these archetypes form
+                the foundation of human storytelling and spiritual understanding.
+                Filter by archetype, mythology, and more to explore connections
+                across cultures and traditions.
+            </p>
+        </div>
+
+        <!-- Archetype Filter System -->
+        <div id="archetype-filter-container"></div>
+
+        <!-- Instructions Section -->
+        <section style="margin-top: 3rem; padding: 2rem; background: rgba(var(--color-surface-rgb), 0.6); border-radius: var(--radius-lg);">
+            <h2 style="color: var(--color-primary); margin-top: 0;">How to Use the Archetype Explorer</h2>
+
+            <h3 style="color: var(--color-primary); font-size: 1.2rem; margin-top: 1.5rem;">Search & Filter</h3>
+            <ul style="line-height: 1.8;">
+                <li><strong>Search:</strong> Enter keywords to find entities by name, description, or tags</li>
+                <li><strong>Archetype:</strong> Select a universal archetype to see all entities that embody it</li>
+                <li><strong>Score Threshold:</strong> Adjust the minimum archetype match percentage (0-100%)</li>
+                <li><strong>Mythology:</strong> Filter to a specific cultural tradition</li>
+                <li><strong>Type:</strong> Filter by entity type (items, places, deities, etc.)</li>
+                <li><strong>Element:</strong> Filter by elemental correspondence</li>
+            </ul>
+
+            <h3 style="color: var(--color-primary); font-size: 1.2rem; margin-top: 1.5rem;">Understanding Archetype Scores</h3>
+            <p style="line-height: 1.8;">
+                Each entity receives an archetype score (0-100%) indicating how strongly it embodies that pattern:
+            </p>
+            <ul style="line-height: 1.8;">
+                <li><strong>90-100%:</strong> Perfect archetype exemplar</li>
+                <li><strong>70-89%:</strong> Strong archetype alignment</li>
+                <li><strong>50-69%:</strong> Moderate archetype presence</li>
+                <li><strong>Below 50%:</strong> Weak archetype connection</li>
+            </ul>
+
+            <h3 style="color: var(--color-primary); font-size: 1.2rem; margin-top: 1.5rem;">Examples to Try</h3>
+            <ul style="line-height: 1.8;">
+                <li>Select <strong>Hero's Journey</strong> to see all hero myths across cultures</li>
+                <li>Choose <strong>Sacred Mountain</strong> + <strong>Fire</strong> element to find fiery peaks</li>
+                <li>Filter by <strong>Trickster</strong> archetype with score 70+ for classic trickster figures</li>
+                <li>Search "dragon" across all mythologies to see different dragon traditions</li>
+            </ul>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>
+            <strong>Archetype Explorer</strong> - World Mythos Explorer<br>
+            Discover universal patterns across mythologies<br>
+            <a href="../mythos/index.html">World Mythos Home</a>
+        </p>
+    </footer>
+
+    <script>
+        // Initialize archetype filter on page load
+        window.archetypeFilter = new ArchetypeFilter('archetype-filter-container');
+        window.archetypeFilter.init();
+    </script>
+</body>
+</html>

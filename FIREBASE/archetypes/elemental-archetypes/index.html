@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elemental Archetypes - Universal Patterns</title>
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        /* Elemental Archetypes Theme Colors */
+        :root {
+            --archetype-primary: #9333ea;
+            --archetype-primary-light: #c084fc;
+            --archetype-primary-dark: #6b21a8;
+            --archetype-primary-darker: #4c1d95;
+            --archetype-accent: #f59e0b;
+            --archetype-surface: rgba(147, 51, 234, 0.05);
+            --archetype-border: rgba(147, 51, 234, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Breadcrumb Navigation */
+        .nav-breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-md);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-md);
+            flex-wrap: wrap;
+            font-size: var(--font-size-sm);
+        }
+
+        .nav-breadcrumb a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-breadcrumb a:hover {
+            color: var(--archetype-primary-light);
+        }
+
+        /* Hero Section */
+        header {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            background: var(--archetype-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-2xl);
+            border: 2px solid var(--archetype-border);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            font-family: var(--font-heading);
+            margin-bottom: var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary), var(--archetype-primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .archetype-definition {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            margin: var(--spacing-lg) 0;
+            padding: var(--spacing-lg);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--archetype-primary);
+        }
+
+        /* Glass Card Sections */
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 2px solid var(--color-border);
+            transition: all var(--transition-base);
+        }
+
+        section:hover {
+            background: var(--color-surface-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        h2 {
+            color: var(--archetype-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-3xl);
+            font-family: var(--font-heading);
+            border-bottom: 2px solid var(--archetype-border);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        /* Elemental Cards Grid */
+        .elemental-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+        }
+
+        .elemental-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            border: 2px solid var(--color-border);
+            transition: all var(--transition-base);
+            text-decoration: none;
+            display: block;
+        }
+
+        .elemental-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .elemental-card.fire {
+            border-color: rgba(239, 68, 68, 0.5);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(249, 115, 22, 0.05));
+        }
+
+        .elemental-card.fire:hover {
+            border-color: rgba(239, 68, 68, 0.8);
+            box-shadow: 0 20px 50px rgba(239, 68, 68, 0.3);
+        }
+
+        .elemental-card.earth {
+            border-color: rgba(34, 197, 94, 0.5);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(132, 204, 22, 0.05));
+        }
+
+        .elemental-card.earth:hover {
+            border-color: rgba(34, 197, 94, 0.8);
+            box-shadow: 0 20px 50px rgba(34, 197, 94, 0.3);
+        }
+
+        .elemental-card.water {
+            border-color: rgba(59, 130, 246, 0.5);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(14, 165, 233, 0.05));
+        }
+
+        .elemental-card.water:hover {
+            border-color: rgba(59, 130, 246, 0.8);
+            box-shadow: 0 20px 50px rgba(59, 130, 246, 0.3);
+        }
+
+        .elemental-card.air {
+            border-color: rgba(168, 85, 247, 0.5);
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.05), rgba(236, 72, 153, 0.05));
+        }
+
+        .elemental-card.air:hover {
+            border-color: rgba(168, 85, 247, 0.8);
+            box-shadow: 0 20px 50px rgba(168, 85, 247, 0.3);
+        }
+
+        .elemental-card.chaos {
+            border-color: rgba(88, 28, 135, 0.5);
+            background: linear-gradient(135deg, rgba(88, 28, 135, 0.05), rgba(17, 24, 39, 0.05));
+        }
+
+        .elemental-card.chaos:hover {
+            border-color: rgba(88, 28, 135, 0.8);
+            box-shadow: 0 20px 50px rgba(88, 28, 135, 0.3);
+        }
+
+        .elemental-card.divine {
+            border-color: rgba(251, 191, 36, 0.5);
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(252, 211, 77, 0.05));
+        }
+
+        .elemental-card.divine:hover {
+            border-color: rgba(251, 191, 36, 0.8);
+            box-shadow: 0 20px 50px rgba(251, 191, 36, 0.3);
+        }
+
+        .elemental-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+            display: block;
+        }
+
+        .elemental-card h3 {
+            font-size: var(--font-size-2xl);
+            font-family: var(--font-heading);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .elemental-card.fire h3 { color: #ef4444; }
+        .elemental-card.earth h3 { color: #22c55e; }
+        .elemental-card.water h3 { color: #3b82f6; }
+        .elemental-card.air h3 { color: #a855f7; }
+        .elemental-card.chaos h3 { color: #581c87; }
+        .elemental-card.divine h3 { color: var(--color-accent); }
+
+        .elemental-card p {
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        .status-notice {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 3px solid var(--color-accent);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-md);
+            color: var(--color-text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+    <div class="container">
+        <div class="nav-breadcrumb">
+            <a href="../../index.html">Home</a>
+            <span>→</span>
+            <a href="../index.html">Universal Archetypes</a>
+            <span>→</span>
+            <span>Elemental Archetypes</span>
+        </div>
+
+        <header>
+    <div class="header-content">
+        <h1>Elemental Archetypes</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> → <a href="../index.html">Archetypes</a> → <a href="index.html">Elemental Archetypes</a>
+</nav>
+
+        <section>
+            <h2>The Six Primal Forces</h2>
+            <p>
+                Elemental archetypes transcend individual deities, representing the fundamental forces
+                that shape existence across all mythological traditions. These are not merely natural
+                phenomena, but cosmic principles embodied in divine form.
+            </p>
+
+            <div class="elemental-grid">
+                <a href="fire/index.html" class="elemental-card fire">
+                    <span class="elemental-icon">🔥</span>
+                    <h3>Fire</h3>
+                    <p>
+                        Passion, destruction, purification, and transformation. Fire consumes and
+                        renews, destroys and illuminates. The sacred flame of sacrifice, the forge
+                        of creation, the fury of divine wrath.
+                    </p>
+                    <span class="status-notice">Under Development</span>
+                </a>
+
+                <a href="earth/index.html" class="elemental-card earth">
+                    <span class="elemental-icon">🌍</span>
+                    <h3>Earth</h3>
+                    <p>
+                        Stability, fertility, grounding, and endurance. The solid foundation of
+                        existence, the nurturing womb of life, the patient strength of stone and
+                        soil. Mother of all that grows.
+                    </p>
+                    <span class="status-notice">Under Development</span>
+                </a>
+
+                <a href="water/index.html" class="elemental-card water">
+                    <span class="elemental-icon">💧</span>
+                    <h3>Water</h3>
+                    <p>
+                        Flow, emotion, life, and purification. The primordial ocean from which all
+                        emerged, the cleansing rain, the tears of gods. Adaptable, formless,
+                        essential to all existence.
+                    </p>
+                    <span class="status-notice">Under Development</span>
+                </a>
+
+                <a href="air/index.html" class="elemental-card air">
+                    <span class="elemental-icon">💨</span>
+                    <h3>Air</h3>
+                    <p>
+                        Intellect, freedom, communication, and breath. The invisible force that
+                        carries words and spirits, the wind of change, the breath of life itself.
+                        Mind over matter.
+                    </p>
+                    <span class="status-notice">Under Development</span>
+                </a>
+
+                <a href="chaos-void/index.html" class="elemental-card chaos">
+                    <span class="elemental-icon">🌀</span>
+                    <h3>Chaos / Void</h3>
+                    <p>
+                        The primordial formlessness before creation, the endless potential of the
+                        abyss. Not absence but infinite possibility. The dark womb from which
+                        order emerges and to which it returns.
+                    </p>
+                    <span class="status-notice">Under Development</span>
+                </a>
+
+                <a href="divine-light/index.html" class="elemental-card divine">
+                    <span class="elemental-icon">✨</span>
+                    <h3>Divine Light</h3>
+                    <p>
+                        Order, consciousness, creation, and revelation. The first light breaking
+                        the darkness, the illuminating power of awareness, the golden radiance
+                        of divine presence and cosmic law.
+                    </p>
+                    <span class="status-notice">Under Development</span>
+                </a>
+            </div>
+        </section>
+
+        <section>
+            <h2>Cross-Cultural Patterns</h2>
+            <p>
+                While individual traditions may emphasize different elements, these archetypal forces
+                appear universally:
+            </p>
+            <ul style="list-style: none; padding-left: 0;">
+                <li style="padding: var(--spacing-sm) var(--spacing-md); margin: var(--spacing-sm) 0; background: var(--archetype-surface); border-left: 3px solid var(--archetype-primary); border-radius: var(--radius-md);">
+                    <strong>Greek:</strong> Ouranos (sky), Gaia (earth), Pontos (sea), Tartaros (abyss), Erebos (darkness)
+                </li>
+                <li style="padding: var(--spacing-sm) var(--spacing-md); margin: var(--spacing-sm) 0; background: var(--archetype-surface); border-left: 3px solid var(--archetype-primary); border-radius: var(--radius-md);">
+                    <strong>Norse:</strong> Muspelheim (fire), Niflheim (ice/mist), Midgard (earth), Ginnungagap (void)
+                </li>
+                <li style="padding: var(--spacing-sm) var(--spacing-md); margin: var(--spacing-sm) 0; background: var(--archetype-surface); border-left: 3px solid var(--archetype-primary); border-radius: var(--radius-md);">
+                    <strong>Hindu:</strong> Agni (fire), Vayu (wind), Prithvi (earth), Varuna (waters), Akasha (ether)
+                </li>
+                <li style="padding: var(--spacing-sm) var(--spacing-md); margin: var(--spacing-sm) 0; background: var(--archetype-surface); border-left: 3px solid var(--archetype-primary); border-radius: var(--radius-md);">
+                    <strong>Chinese:</strong> Wu Xing - Fire, Earth, Metal, Water, Wood
+                </li>
+                <li style="padding: var(--spacing-sm) var(--spacing-md); margin: var(--spacing-sm) 0; background: var(--archetype-surface); border-left: 3px solid var(--archetype-primary); border-radius: var(--radius-md);">
+                    <strong>Egyptian:</strong> Atum (primordial), Shu (air), Tefnut (moisture), Geb (earth), Nut (sky)
+                </li>
+            </ul>
+        </section>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel">
+            <h3 class="interlink-title">Related Content</h3>
+            <div class="interlink-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-xl);">
+                <div class="archetype-link-card" style="background: var(--archetype-surface); padding: var(--spacing-lg); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border);">
+                    <h4 style="color: var(--archetype-primary); margin-bottom: var(--spacing-md);">Mythological Examples</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../../mythos/hindu/deities/index.html" style="color: var(--color-text-primary);">Agni</a> - Hindu god of sacred fire</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../../mythos/greek/deities/poseidon.html" style="color: var(--color-text-primary);">Poseidon</a> - Greek lord of waters</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../../mythos/hindu/deities/index.html" style="color: var(--color-text-primary);">Vayu</a> - Hindu wind god</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../../mythos/egyptian/cosmology/nun.html" style="color: var(--color-text-primary);">Nun</a> - Egyptian primordial waters</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../../mythos/norse/places/index.html" style="color: var(--color-text-primary);">Ginnungagap</a> - Norse primordial void</li>
+                    </ul>
+                </div>
+                <div class="archetype-link-card" style="background: var(--archetype-surface); padding: var(--spacing-lg); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border);">
+                    <h4 style="color: var(--archetype-primary); margin-bottom: var(--spacing-md);">Related Archetypes</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../cosmic-creator/index.html" style="color: var(--color-text-primary);">Cosmic Creator</a> - Origin of elements</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../earth-mother/index.html" style="color: var(--color-text-primary);">Earth Mother</a> - Earth element</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../sky-father/index.html" style="color: var(--color-text-primary);">Sky Father</a> - Air and storm</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../place-archetypes/index.html" style="color: var(--color-text-primary);">Place Archetypes</a> - Elemental realms</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="see-also-section" style="background: var(--color-surface); padding: var(--spacing-lg); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+                <h4 style="color: var(--archetype-primary); margin-bottom: var(--spacing-md);">See Also</h4>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--spacing-md);">
+                    <li><a href="../sun-god/index.html" style="color: var(--color-text-secondary);">Sun God (Fire/Light)</a></li>
+                    <li><a href="../moon-deity/index.html" style="color: var(--color-text-secondary);">Moon Deity (Water/Night)</a></li>
+                    <li><a href="../divine-smith/index.html" style="color: var(--color-text-secondary);">Divine Smith (Fire/Metal)</a></li>
+                    <li><a href="../story-archetypes/index.html" style="color: var(--color-text-secondary);">Story Archetypes</a></li>
+                    <li><a href="../cross-reference-matrix.html" style="color: var(--color-text-secondary);">Cross-Reference Matrix</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <div style="margin-top: 50px; text-align: center; padding: 30px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+            <h3>Explore Related Archetypes</h3>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <a href="../sky-father/index.html" style="color: var(--archetype-primary); text-decoration: none;">Sky Father</a>
+                <a href="../earth-mother/index.html" style="color: var(--archetype-primary); text-decoration: none;">Earth Mother</a>
+                <a href="../war/index.html" style="color: var(--archetype-primary); text-decoration: none;">War God</a>
+                <a href="../index.html" style="color: var(--archetype-primary); text-decoration: none;">All Archetypes</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

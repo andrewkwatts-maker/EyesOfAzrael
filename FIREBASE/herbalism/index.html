@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../themes/corpus-links.css">
+    <script defer src="../themes/theme-picker.js"></script>
+    <script defer src="../themes/theme-animations.js"></script>
+    <link rel="stylesheet" href="../themes/smart-links.css">
+    <script defer src="../themes/smart-links.js"></script>
+    <title>Universal Herbalism - Mythos Explorer</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        :root {
+            --herb-primary: var(--color-primary);
+            --herb-secondary: var(--color-secondary);
+        }
+
+        .herb-hero {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-4xl) var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .herb-hero h1, .herb-hero p {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .tradition-section {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-left: 4px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .herb-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-md);
+        }
+
+        .herb-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-base);
+        }
+
+        .herb-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.4);
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.1);
+        }
+
+        .universal-herb {
+            border-color: var(--color-secondary);
+            background: linear-gradient(135deg, rgba(var(--color-secondary-rgb), 0.1), rgba(var(--color-surface-rgb), 0.6));
+        }
+
+        .prep-method {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin: var(--spacing-sm) 0;
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .tradition-badge {
+            display: inline-block;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+            margin: 0.2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 100, 50, 0.1), rgba(200, 50, 50, 0.1));
+            border: 2px solid var(--color-error, #ff4500);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-md) 0;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+            box-shadow: var(--shadow-lg);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+    <header>
+        <div class="header-content">
+            <h1>Universal Herbalism</h1>
+        </div>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Home</a> →
+        <span>Herbalism</span>
+    </nav>
+
+    <main>
+        <div class="herb-hero">
+            <h1>🌿 The Universal Herbalism Compendium</h1>
+            <p style="font-size: 1.2rem;">
+                Throughout human history, plants have served as medicine, magic, and spiritual allies. This comprehensive
+                guide explores sacred and medicinal herbs across 15+ world traditions, revealing both unique applications
+                and universal patterns in humanity's relationship with the green world.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                <span style="background: rgba(46, 139, 87, 0.3); padding: 0.5rem 1rem; border-radius: var(--radius-lg, 15px);">🌍 15 Traditions</span>
+                <span style="background: rgba(46, 139, 87, 0.3); padding: 0.5rem 1rem; border-radius: var(--radius-lg, 15px);">🌿 100+ Plants</span>
+                <span style="background: rgba(46, 139, 87, 0.3); padding: 0.5rem 1rem; border-radius: var(--radius-lg, 15px);">💊 Ancient Medicine</span>
+                <span style="background: rgba(46, 139, 87, 0.3); padding: 0.5rem 1rem; border-radius: var(--radius-lg, 15px);">✨ Sacred Magic</span>
+            </div>
+        </div>
+
+        <div class="warning-box">
+            <h3>⚠️ Safety & Legal Notice</h3>
+            <p>
+                <strong>IMPORTANT:</strong> This is an educational and historical resource. Many plants listed are:
+            </p>
+            <ul>
+                <li><strong>Toxic or Dangerous:</strong> Some plants (belladonna, aconite, fly agaric, etc.) are POISONOUS and potentially fatal</li>
+                <li><strong>Illegal:</strong> Some plants are controlled substances in many jurisdictions</li>
+                <li><strong>Regulated:</strong> Some plants require permits or licenses to possess</li>
+                <li><strong>Medical Concerns:</strong> Many plants interact dangerously with medications</li>
+            </ul>
+            <p>
+                <strong>Do NOT:</strong> Ingest, smoke, or apply any plant without expert guidance from a qualified herbalist or physician.
+                <strong>This document is for academic, historical, and game design purposes ONLY.</strong>
+            </p>
+        </div>
+
+        <div class="tradition-section" id="universal">
+            <h2>🌟 Universal Sacred Plants</h2>
+            <p>These plants appear across multiple traditions with similar spiritual and medicinal applications.</p>
+
+            <div class="herb-grid">
+                <div class="herb-card universal-herb">
+                    <h3>🌿 Sage (Salvia spp.)</h3>
+                    <p><strong>Found in:</strong> <span class="tradition-badge">Native American</span> <span class="tradition-badge">European</span> <span class="tradition-badge">Mediterranean</span></p>
+                    <p>Purification, wisdom, protection, clearing negative energy. Burned as smoke offering.</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li><strong>White Sage:</strong> Native American smudging</li>
+                        <li><strong>Garden Sage:</strong> European/Mediterranean medicine & magic</li>
+                        <li><strong>Properties:</strong> Antimicrobial, memory enhancement, spiritual cleansing</li>
+                    </ul>
+                </div>
+
+                <div class="herb-card universal-herb">
+                    <h3>🌿 Mugwort (Artemisia vulgaris)</h3>
+                    <p><strong>Found in:</strong> <span class="tradition-badge">Norse</span> <span class="tradition-badge">Chinese</span> <span class="tradition-badge">European</span> <span class="tradition-badge">Celtic</span></p>
+                    <p>Prophetic dreams, protection during travel, divination, women's health.</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li><strong>Norse:</strong> Protection, vision quests</li>
+                        <li><strong>Chinese (Ài Yè):</strong> Moxibustion, warming meridians</li>
+                        <li><strong>European:</strong> Dream pillows, astral travel</li>
+                        <li><strong>Properties:</strong> Digestive, menstrual regulation, lucid dreaming</li>
+                    </ul>
+                </div>
+
+                <div class="herb-card universal-herb">
+                    <h3>🌿 Cedar (Cedrus/Thuja spp.)</h3>
+                    <p><strong>Found in:</strong> <span class="tradition-badge">Native American</span> <span class="tradition-badge">Jewish</span> <span class="tradition-badge">Ancient Near East</span></p>
+                    <p>Purification, protection, sacred spaces, temple building.</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li><strong>Biblical:</strong> Solomon's Temple, purification rites</li>
+                        <li><strong>Native American:</strong> Smudging, medicine, ceremonial</li>
+                        <li><strong>Properties:</strong> Antimicrobial, insect repellent, respiratory</li>
+                    </ul>
+                </div>
+
+                <div class="herb-card universal-herb">
+                    <h3>🌿 Frankincense (Boswellia spp.)</h3>
+                    <p><strong>Found in:</strong> <span class="tradition-badge">Christian</span> <span class="tradition-badge">Jewish</span> <span class="tradition-badge">Islamic</span> <span class="tradition-badge">Egyptian</span></p>
+                    <p>Sacred incense, temple offerings, meditation, spiritual elevation.</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li><strong>Temple Incense:</strong> Ancient Near East, Solomon's Temple</li>
+                        <li><strong>Christian:</strong> Mass, holy anointing oil</li>
+                        <li><strong>Properties:</strong> Anti-inflammatory, meditation aid, sacred atmosphere</li>
+                    </ul>
+                </div>
+
+                <div class="herb-card universal-herb">
+                    <h3>🌿 Myrrh (Commiphora myrrha)</h3>
+                    <p><strong>Found in:</strong> <span class="tradition-badge">Egyptian</span> <span class="tradition-badge">Jewish</span> <span class="tradition-badge">Christian</span> <span class="tradition-badge">Islamic</span></p>
+                    <p>Embalming, anointing, death rites, purification, healing wounds.</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li><strong>Egyptian:</strong> Mummification, temple offerings</li>
+                        <li><strong>Biblical:</strong> Holy anointing oil, burial of Christ</li>
+                        <li><strong>Properties:</strong> Antiseptic, astringent, spiritual protection</li>
+                    </ul>
+                </div>
+
+                <div class="herb-card universal-herb">
+                    <h3>🌿 Yarrow (Achillea millefolium)</h3>
+                    <p><strong>Found in:</strong> <span class="tradition-badge">Norse</span> <span class="tradition-badge">Chinese</span> <span class="tradition-badge">Celtic</span> <span class="tradition-badge">Greek</span></p>
+                    <p>Wound healing, divination, courage in battle, protection.</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li><strong>Greek:</strong> Achilles used it for wounds (hence the name)</li>
+                        <li><strong>Chinese (Shī):</strong> I Ching divination stalks</li>
+                        <li><strong>Norse:</strong> Battle protection, healing goddess Eir</li>
+                        <li><strong>Properties:</strong> Hemostatic, anti-inflammatory, fever reduction</li>
+                    </ul>
+                </div>
+
+                <div class="herb-card universal-herb">
+                    <h3>🌲 Pine (Pinus spp.)</h3>
+                    <p><strong>Found in:</strong> <span class="tradition-badge">Norse</span> <span class="tradition-badge">Celtic</span> <span class="tradition-badge">Native American</span> <span class="tradition-badge">Japanese</span></p>
+                    <p>Purification, longevity, cleansing, respiratory health.</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li><strong>Japanese:</strong> Longevity symbol, New Year decorations</li>
+                        <li><strong>European:</strong> Yule decorations, winter solstice</li>
+                        <li><strong>Properties:</strong> Expectorant, antiseptic, aromatic cleansing</li>
+                    </ul>
+                </div>
+
+                <div class="herb-card universal-herb">
+                    <h3>🌿 Lavender (Lavandula spp.)</h3>
+                    <p><strong>Found in:</strong> <span class="tradition-badge">European</span> <span class="tradition-badge">Mediterranean</span> <span class="tradition-badge">Islamic</span></p>
+                    <p>Purification, peace, love, healing, spiritual cleansing.</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li><strong>Roman:</strong> Bath additive (lavāre = to wash)</li>
+                        <li><strong>Medieval:</strong> Protection from plague, love charms</li>
+                        <li><strong>Properties:</strong> Anxiolytic, sleep aid, antiseptic</li>
+                    </ul>
+                </div>
+
+                <div class="herb-card universal-herb">
+                    <h3>🌳 Acacia (Acacia spp.)</h3>
+                    <p><strong>Found in:</strong> <span class="tradition-badge">Sumerian</span> <span class="tradition-badge">Egyptian</span> <span class="tradition-badge">Jewish</span> <span class="tradition-badge">Christian</span></p>
+                    <p>Immortality, resurrection, sacred wood, eternal life. "Sprig of Acacia" symbolizes everlasting life.</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li><strong>Epic of Gilgamesh:</strong> Sprig of acacia represents quest for immortality and eternal life</li>
+                        <li><strong>Egyptian:</strong> Sacred to sun gods, "Tree of Life", temple wood, boats for afterlife journey</li>
+                        <li><strong>Biblical:</strong> Shittim wood (acacia) used for Ark of Covenant, Tabernacle (Exodus 25-27)</li>
+                        <li><strong>Sumerian:</strong> Associated with Inanna's descent, rebirth mysteries</li>
+                        <li><strong>Masonic:</strong> Sprig of acacia symbolizes resurrection, master mason degree</li>
+                        <li><strong>Properties:</strong> Gum arabic (binding), medicinal (astringent), sacred architecture</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="tradition-section" id="by-tradition">
+            <h2>🌍 Herbalism by Tradition</h2>
+
+            <h3>🔨 Norse Herbalism</h3>
+            <div class="herb-grid">
+                <div class="herb-card">
+                    <h4>🌲 Yew - Sacred to Ullr & Odin</h4>
+                    <p>Rune wands, protection, death/rebirth. HIGHLY TOXIC.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌳 Ash - Yggdrasil</h4>
+                    <p>Healing, strength, connection to World Tree.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌺 Elder - Sacred to Freyja</h4>
+                    <p>Protection, banishment, healing.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌾 Barley/Hops - Sacred to Aegir</h4>
+                    <p>Ritual brewing, offerings, communion.</p>
+                </div>
+            </div>
+            <p><a href="traditions/norse/index.html">→ Full Norse Herbalism Guide</a></p>
+
+            <h3>✡️ Jewish/Kabbalistic Herbalism</h3>
+            <div class="herb-grid">
+                <div class="herb-card">
+                    <h4>🌿 Hyssop (Ezov) - Purification</h4>
+                    <p>Temple purification, cleansing rituals, Passover.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌲 Cedar - Sacred Wood</h4>
+                    <p>Temple incense, purification, protection.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🔥 Frankincense - Temple Incense</h4>
+                    <p>Ketoret (incense offering), prayer, sacred space.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌿 Mandrake (Dudaim) - Fertility</h4>
+                    <p>Biblical fertility herb, love magic. TOXIC.</p>
+                </div>
+            </div>
+            <p><a href="traditions/jewish/index.html">→ Full Jewish Herbalism Guide</a></p>
+
+            <h3>☸️ Buddhist Herbalism</h3>
+            <div class="herb-grid">
+                <div class="herb-card">
+                    <h4>🌳 Bodhi Tree (Ficus religiosa)</h4>
+                    <p>Buddha's enlightenment tree, meditation, wisdom.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌸 Lotus (Nelumbo nucifera)</h4>
+                    <p>Spiritual purity, enlightenment, rising from mud.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌿 Sandalwood - Sacred Incense</h4>
+                    <p>Meditation, offerings, calming mind.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🍵 Tea (Camellia sinensis)</h4>
+                    <p>Zen meditation, mindfulness, alertness.</p>
+                </div>
+            </div>
+
+            <h3>🕉️ Hindu/Ayurvedic Herbalism</h3>
+            <div class="herb-grid">
+                <div class="herb-card">
+                    <h4>🌿 Tulsi (Holy Basil) - Sacred to Lakshmi</h4>
+                    <p>Spiritual purification, adaptogen, Vishnu's consort.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌳 Banyan Tree - Brahma's Tree</h4>
+                    <p>Immortality, meditation, sacred gatherings.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌿 Neem - Divine Healer</h4>
+                    <p>Purification, skin healing, pesticide.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌿 Ashwagandha - Rasayana</h4>
+                    <p>Strength, vitality, longevity, stress.</p>
+                </div>
+            </div>
+
+            <h3>☯️ Chinese Herbalism (Traditional Chinese Medicine)</h3>
+            <div class="herb-grid">
+                <div class="herb-card">
+                    <h4>🍄 Reishi (Língzhī) - Mushroom of Immortality</h4>
+                    <p>Longevity, spiritual potency, immune system.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌿 Ginseng (Rénshēn) - Root of Heaven</h4>
+                    <p>Qi cultivation, vitality, longevity.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌿 Mugwort (Ài Yè) - Moxibustion</h4>
+                    <p>Warming meridians, dispelling cold, women's health.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🏵️ Chrysanthemum (Jú Huā)</h4>
+                    <p>Clear heat, vision, longevity, liver.</p>
+                </div>
+            </div>
+
+            <h3>🍀 Celtic Herbalism</h3>
+            <div class="herb-grid">
+                <div class="herb-card">
+                    <h4>🌳 Oak - King of Trees</h4>
+                    <p>Druids, strength, doorways, sacred groves.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌿 Vervain - Druid's Herb</h4>
+                    <p>Sacred ceremonies, purification, love.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>☘️ Shamrock/Clover - Sacred Triad</h4>
+                    <p>Trinity, protection, luck (later Christianized).</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌿 Mistletoe - All-Heal</h4>
+                    <p>Sacred to Druids, cut with golden sickle. TOXIC.</p>
+                </div>
+            </div>
+
+            <h3>𓂀 Egyptian Herbalism</h3>
+            <div class="herb-grid">
+                <div class="herb-card">
+                    <h4>🌸 Blue Lotus (Nymphaea caerulea)</h4>
+                    <p>Sacred to Ra, spiritual opening, ritual intoxicant.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌿 Frankincense & Myrrh</h4>
+                    <p>Temple incense, mummification, offerings.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🧄 Garlic - Worker's Strength</h4>
+                    <p>Pyramid builders' rations, protection, healing.</p>
+                </div>
+                <div class="herb-card">
+                    <h4>🌴 Date Palm - Tree of Life</h4>
+                    <p>Sustenance, fertility, eternal life symbolism.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tradition-section" id="preparations">
+            <h2>🔬 Universal Preparation Methods</h2>
+            <p>Common herbal preparation techniques across traditions:</p>
+
+            <div class="prep-method">
+                <h3>1. Infusion (Tea)</h3>
+                <p><strong>Method:</strong> Pour boiling water over herbs, steep 5-15 minutes, strain.</p>
+                <p><strong>Used for:</strong> Leaves, flowers, delicate plant parts.</p>
+                <p><strong>Traditions:</strong> Universal - Chinese, Ayurvedic, Western herbalism</p>
+            </div>
+
+            <div class="prep-method">
+                <h3>2. Decoction</h3>
+                <p><strong>Method:</strong> Simmer herbs in water 20-45 minutes, strain.</p>
+                <p><strong>Used for:</strong> Roots, bark, tough plant material.</p>
+                <p><strong>Traditions:</strong> Chinese medicine, Ayurveda, European folk medicine</p>
+            </div>
+
+            <div class="prep-method">
+                <h3>3. Tincture (Alcohol Extract)</h3>
+                <p><strong>Method:</strong> Steep herbs in alcohol (vodka, brandy) for 2-6 weeks, strain.</p>
+                <p><strong>Used for:</strong> Long-term storage, concentrated extracts.</p>
+                <p><strong>Traditions:</strong> Western herbalism, Eclectic physicians</p>
+            </div>
+
+            <div class="prep-method">
+                <h3>4. Smoke/Incense</h3>
+                <p><strong>Method:</strong> Burn dried herbs, inhale or use for space clearing.</p>
+                <p><strong>Used for:</strong> Purification, offerings, meditation.</p>
+                <p><strong>Traditions:</strong> Native American smudging, Catholic incense, Buddhist offerings</p>
+            </div>
+
+            <div class="prep-method">
+                <h3>5. Salve/Ointment</h3>
+                <p><strong>Method:</strong> Infuse herbs in oil, add beeswax, cool into solid.</p>
+                <p><strong>Used for:</strong> Skin conditions, wounds, muscle pain.</p>
+                <p><strong>Traditions:</strong> Universal - Norse, Greek, Chinese, Native American</p>
+            </div>
+
+            <div class="prep-method">
+                <h3>6. Poultice</h3>
+                <p><strong>Method:</strong> Mash fresh or dried herbs with water, apply directly to skin.</p>
+                <p><strong>Used for:</strong> Acute injuries, draws out infection, pain relief.</p>
+                <p><strong>Traditions:</strong> Universal emergency medicine</p>
+            </div>
+
+            <div class="prep-method">
+                <h3>7. Oil Infusion</h3>
+                <p><strong>Method:</strong> Steep herbs in carrier oil (olive, sesame) for weeks or heat gently.</p>
+                <p><strong>Used for:</strong> Massage oils, cooking, anointing.</p>
+                <p><strong>Traditions:</strong> Ayurveda, Mediterranean, Chinese</p>
+            </div>
+
+            <div class="prep-method">
+                <h3>8. Powder</h3>
+                <p><strong>Method:</strong> Dry herbs completely, grind to fine powder.</p>
+                <p><strong>Used for:</strong> Capsules, mixing in food/drink, external application.</p>
+                <p><strong>Traditions:</strong> Ayurveda, Chinese pills, Western supplements</p>
+            </div>
+        </div>
+
+        <div class="tradition-section" id="safety">
+            <h2>⚠️ Safety, Ethics & Sustainability</h2>
+
+            <h3>Medical Safety</h3>
+            <ul>
+                <li><strong>Consult Professionals:</strong> Always consult qualified herbalist, naturopath, or physician</li>
+                <li><strong>Drug Interactions:</strong> Many herbs interact dangerously with medications</li>
+                <li><strong>Pregnancy/Nursing:</strong> Many herbs are contraindicated</li>
+                <li><strong>Allergies:</strong> Start with small amounts to test for reactions</li>
+                <li><strong>Identification:</strong> NEVER consume a plant unless 100% certain of identity</li>
+                <li><strong>Toxic Plants:</strong> Many traditional herbs are poisonous (belladonna, aconite, yew, etc.)</li>
+            </ul>
+
+            <h3>Ethical Harvesting</h3>
+            <ul>
+                <li><strong>Permission:</strong> Only harvest from your own land or with explicit permission</li>
+                <li><strong>Sustainable:</strong> Take no more than 1/3 of a plant population</li>
+                <li><strong>Endangered Species:</strong> Never harvest rare or protected plants</li>
+                <li><strong>Sacred Sites:</strong> Respect sacred groves, ceremonial grounds</li>
+                <li><strong>Give Thanks:</strong> Traditional practice - leave an offering, express gratitude</li>
+                <li><strong>Seasonal Timing:</strong> Harvest when plants are most vital and least vulnerable</li>
+            </ul>
+
+            <h3>Cultural Appropriation Concerns</h3>
+            <ul>
+                <li><strong>Sacred Plants:</strong> Some plants (peyote, ayahuasca, white sage) are sacred to specific cultures</li>
+                <li><strong>Respect Traditions:</strong> Don't claim authority in traditions not your own</li>
+                <li><strong>Support Indigenous:</strong> Buy from indigenous suppliers when possible</li>
+                <li><strong>Learn Respectfully:</strong> Study with proper teachers, not just from books</li>
+                <li><strong>Closed Practices:</strong> Some traditions are not open to outsiders</li>
+            </ul>
+
+            <h3>Legal Considerations</h3>
+            <ul>
+                <li><strong>Controlled Substances:</strong> Many traditional plants are illegal (cannabis, peyote, ayahuasca, etc.)</li>
+                <li><strong>Endangered Species Act:</strong> Federal protection for rare plants</li>
+                <li><strong>Local Regulations:</strong> State/provincial laws vary widely</li>
+                <li><strong>International Trade:</strong> CITES regulates international plant trade</li>
+            </ul>
+        </div>
+
+
+        <!-- ============================================
+             INTERLINK PANELS - Quick Navigation by Tradition
+             ============================================ -->
+        <section class="interlink-panel">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Quick Links by Tradition
+            </h3>
+
+            <div class="interlink-grid">
+                <!-- Universal Sacred Plants -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">🌟 Universal Sacred Plants</div>
+                    <a href="universal/frankincense.html" class="herb-link-card" data-smart data-mythos="universal">
+                        <div class="herb-icon">🌿</div>
+                        <div class="herb-info">
+                            <h4>Frankincense</h4>
+                            <p class="herb-uses">Purification • Consecration • Divine Connection</p>
+                            <div class="herb-traditions">Egyptian, Christian, Jewish, Islamic, Hindu, Buddhist</div>
+                        </div>
+                    </a>
+                    <a href="universal/myrrh.html" class="herb-link-card">
+                        <div class="herb-icon">🌿</div>
+                        <div class="herb-info">
+                            <h4>Myrrh</h4>
+                            <p class="herb-uses">Embalming • Anointing • Death Rites</p>
+                            <div class="herb-traditions">Egyptian, Jewish, Christian, Islamic</div>
+                        </div>
+                    </a>
+                    <a href="universal/sage.html" class="herb-link-card" data-smart>
+                        <div class="herb-icon">🍃</div>
+                        <div class="herb-info">
+                            <h4>Sage</h4>
+                            <p class="herb-uses">Cleansing • Wisdom • Protection</p>
+                            <div class="herb-traditions">Native American, Celtic, Greek, European</div>
+                        </div>
+                    </a>
+                    <a href="universal/cedar.html" class="herb-link-card" data-smart>
+                        <div class="herb-icon">🌲</div>
+                        <div class="herb-info">
+                            <h4>Cedar</h4>
+                            <p class="herb-uses">Sacred Spaces • Temple Building • Purification</p>
+                            <div class="herb-traditions">Native American, Jewish, Ancient Near East</div>
+                        </div>
+                    </a>
+                    <a href="universal/mugwort.html" class="herb-link-card">
+                        <div class="herb-icon">🌿</div>
+                        <div class="herb-info">
+                            <h4>Mugwort</h4>
+                            <p class="herb-uses">Prophetic Dreams • Protection • Divination</p>
+                            <div class="herb-traditions">Norse, Chinese, European, Celtic</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Buddhist Tradition -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">☸️ Buddhist Herbalism</div>
+                    <a href="traditions/buddhist/lotus.html" class="herb-link-card" data-smart data-mythos="buddhist">
+                        <div class="herb-icon">🪷</div>
+                        <div class="herb-info">
+                            <h4>Lotus</h4>
+                            <p class="herb-uses">Enlightenment • Purity • Spiritual Rebirth</p>
+                            <div class="herb-traditions">Sacred to: Buddha, Avalokiteshvara, Tara</div>
+                        </div>
+                    </a>
+                    <a href="traditions/buddhist/bodhi-tree.html" class="herb-link-card">
+                        <div class="herb-icon">🌳</div>
+                        <div class="herb-info">
+                            <h4>Bodhi Tree</h4>
+                            <p class="herb-uses">Enlightenment • Meditation • Wisdom</p>
+                            <div class="herb-traditions">Sacred to: Buddha Shakyamuni</div>
+                        </div>
+                    </a>
+                    <a href="traditions/buddhist/sandalwood.html" class="herb-link-card">
+                        <div class="herb-icon">🪵</div>
+                        <div class="herb-info">
+                            <h4>Sandalwood</h4>
+                            <p class="herb-uses">Meditation • Offerings • Calming Mind</p>
+                            <div class="herb-traditions">Buddhist, Hindu temple incense</div>
+                        </div>
+                    </a>
+                    <a href="traditions/buddhist/tea.html" class="herb-link-card">
+                        <div class="herb-icon">🍵</div>
+                        <div class="herb-info">
+                            <h4>Tea</h4>
+                            <p class="herb-uses">Zen Meditation • Mindfulness • Alertness</p>
+                            <div class="herb-traditions">Zen Buddhism, Chinese traditions</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Hindu Tradition -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">🕉️ Hindu/Ayurvedic Herbalism</div>
+                    <a href="traditions/hindu/tulsi.html" class="herb-link-card" data-smart data-mythos="hindu">
+                        <div class="herb-icon">🌿</div>
+                        <div class="herb-info">
+                            <h4>Tulsi (Holy Basil)</h4>
+                            <p class="herb-uses">Spiritual Purification • Adaptogen • Devotion</p>
+                            <div class="herb-traditions">Sacred to: Vishnu, Krishna, Lakshmi</div>
+                        </div>
+                    </a>
+                    <a href="traditions/buddhist/lotus.html" class="herb-link-card">
+                        <div class="herb-icon">🪷</div>
+                        <div class="herb-info">
+                            <h4>Lotus</h4>
+                            <p class="herb-uses">Creation • Divine Birth • Purity</p>
+                            <div class="herb-traditions">Sacred to: Brahma, Lakshmi, Vishnu</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Norse Tradition -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">🔨 Norse Herbalism</div>
+                    <a href="traditions/norse/yew.html" class="herb-link-card">
+                        <div class="herb-icon">🌲</div>
+                        <div class="herb-info">
+                            <h4>Yew</h4>
+                            <p class="herb-uses">Rune Wands • Death/Rebirth • Protection</p>
+                            <div class="herb-traditions">Sacred to: Ullr, Odin (TOXIC)</div>
+                        </div>
+                    </a>
+                    <a href="traditions/norse/ash.html" class="herb-link-card" data-smart data-mythos="norse">
+                        <div class="herb-icon">🌳</div>
+                        <div class="herb-info">
+                            <h4>Ash (Yggdrasil)</h4>
+                            <p class="herb-uses">World Tree • Cosmic Connection • Healing</p>
+                            <div class="herb-traditions">Sacred to: Odin, All Nine Worlds</div>
+                        </div>
+                    </a>
+                    <a href="traditions/norse/elder.html" class="herb-link-card">
+                        <div class="herb-icon">🌺</div>
+                        <div class="herb-info">
+                            <h4>Elder</h4>
+                            <p class="herb-uses">Protection • Banishment • Healing</p>
+                            <div class="herb-traditions">Sacred to: Freyja, Hulda</div>
+                        </div>
+                    </a>
+                    <a href="traditions/norse/barley-hops.html" class="herb-link-card">
+                        <div class="herb-icon">🌾</div>
+                        <div class="herb-info">
+                            <h4>Barley & Hops</h4>
+                            <p class="herb-uses">Ritual Brewing • Offerings • Communion</p>
+                            <div class="herb-traditions">Sacred to: Aegir, Thor</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Jewish Tradition -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">✡️ Jewish/Kabbalistic Herbalism</div>
+                    <a href="traditions/jewish/hyssop.html" class="herb-link-card" data-smart data-mythos="jewish">
+                        <div class="herb-icon">🌿</div>
+                        <div class="herb-info">
+                            <h4>Hyssop (Ezov)</h4>
+                            <p class="herb-uses">Temple Purification • Cleansing • Passover</p>
+                            <div class="herb-traditions">Biblical rites, Temple worship</div>
+                        </div>
+                    </a>
+                    <a href="traditions/jewish/mandrake.html" class="herb-link-card" data-smart>
+                        <div class="herb-icon">🌱</div>
+                        <div class="herb-info">
+                            <h4>Mandrake (Dudaim)</h4>
+                            <p class="herb-uses">Fertility • Love Magic • Biblical Herb</p>
+                            <div class="herb-traditions">Genesis, Rachel and Leah (TOXIC)</div>
+                        </div>
+                    </a>
+                    <a href="universal/frankincense.html" class="herb-link-card">
+                        <div class="herb-icon">🔥</div>
+                        <div class="herb-info">
+                            <h4>Frankincense</h4>
+                            <p class="herb-uses">Ketoret (Temple Incense) • Prayer • Sacred Space</p>
+                            <div class="herb-traditions">Solomon's Temple, Tabernacle</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cross-Cultural Deity-Herb Connections -->
+        <section class="interlink-panel" style="margin-top: var(--spacing-xl);">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🌍</span>
+                Herbs by Associated Deities
+            </h3>
+
+            <div class="parallel-traditions">
+                <h4>Solar Deities - Sacred Incense Plants</h4>
+                <div class="parallel-grid">
+                    <a href="universal/frankincense.html" class="parallel-card" data-smart>
+                        <span class="tradition-flag">☀️</span>
+                        <span class="parallel-name">Frankincense</span>
+                        <span class="tradition-label">Ra, Apollo, YHWH</span>
+                    </a>
+                    <a href="universal/myrrh.html" class="parallel-card" data-smart>
+                        <span class="tradition-flag">🌅</span>
+                        <span class="parallel-name">Myrrh</span>
+                        <span class="tradition-label">Isis, Marduk</span>
+                    </a>
+                    <a href="universal/cedar.html" class="parallel-card" data-smart>
+                        <span class="tradition-flag">🌲</span>
+                        <span class="parallel-name">Cedar</span>
+                        <span class="tradition-label">Solomon, Gilgamesh</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="parallel-traditions" style="margin-top: var(--spacing-lg);">
+                <h4>Wisdom & Sky Deities - Purification Herbs</h4>
+                <div class="parallel-grid">
+                    <a href="universal/sage.html" class="parallel-card" data-smart>
+                        <span class="tradition-flag">🦉</span>
+                        <span class="parallel-name">Sage</span>
+                        <span class="tradition-label">Athena, Zeus, Jupiter</span>
+                    </a>
+                    <a href="traditions/norse/ash.html" class="parallel-card">
+                        <span class="tradition-flag">⚡</span>
+                        <span class="parallel-name">Ash (Yggdrasil)</span>
+                        <span class="tradition-label">Odin, All-Father</span>
+                    </a>
+                    <a href="traditions/buddhist/bodhi-tree.html" class="parallel-card">
+                        <span class="tradition-flag">☸️</span>
+                        <span class="parallel-name">Bodhi Tree</span>
+                        <span class="tradition-label">Buddha</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="parallel-traditions" style="margin-top: var(--spacing-lg);">
+                <h4>Love & Fertility Deities - Sacred Plants</h4>
+                <div class="parallel-grid">
+                    <a href="traditions/buddhist/lotus.html" class="parallel-card">
+                        <span class="tradition-flag">🪷</span>
+                        <span class="parallel-name">Lotus</span>
+                        <span class="tradition-label">Lakshmi, Vishnu, Brahma</span>
+                    </a>
+                    <a href="traditions/hindu/tulsi.html" class="parallel-card">
+                        <span class="tradition-flag">💚</span>
+                        <span class="parallel-name">Tulsi</span>
+                        <span class="tradition-label">Krishna, Lakshmi</span>
+                    </a>
+                    <a href="traditions/norse/elder.html" class="parallel-card">
+                        <span class="tradition-flag">💜</span>
+                        <span class="parallel-name">Elder</span>
+                        <span class="tradition-label">Freyja, Hulda</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="parallel-traditions" style="margin-top: var(--spacing-lg);">
+                <h4>Death & Underworld Deities - Transition Plants</h4>
+                <div class="parallel-grid">
+                    <a href="traditions/norse/yew.html" class="parallel-card">
+                        <span class="tradition-flag">💀</span>
+                        <span class="parallel-name">Yew</span>
+                        <span class="tradition-label">Hel, Ullr</span>
+                    </a>
+                    <a href="universal/myrrh.html" class="parallel-card" data-smart>
+                        <span class="tradition-flag">⚰️</span>
+                        <span class="parallel-name">Myrrh</span>
+                        <span class="tradition-label">Osiris, Anubis</span>
+                    </a>
+                    <a href="universal/mugwort.html" class="parallel-card" data-smart>
+                        <span class="tradition-flag">🌙</span>
+                        <span class="parallel-name">Mugwort</span>
+                        <span class="tradition-label">Artemis, Hecate</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- See Also Section -->
+        <div class="see-also-section" style="margin-top: var(--spacing-xl);">
+            <h4>📚 See Also</h4>
+            <div class="see-also-links">
+                <a href="../mythos/index.html" class="see-also-link">
+                    <span>🏛️</span> All Mythologies
+                </a>
+                <a href="../magic/index.html" class="see-also-link">
+                    <span>✨</span> Magical Practices
+                </a>
+                <a href="../archetypes/index.html" class="see-also-link">
+                    <span>🎭</span> Archetypes
+                </a>
+                <a href="../spiritual-places/index.html" class="see-also-link">
+                    <span>🏔️</span> Sacred Places
+                </a>
+                <a href="../spiritual-items/index.html" class="see-also-link">
+                    <span>⚡</span> Sacred Items
+                </a>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h2>📚 Resources & Further Study</h2>
+            <h3>Books:</h3>
+            <ul>
+                <li><strong>"The Herbal Medicine-Maker's Handbook"</strong> - James Green (Preparation methods)</li>
+                <li><strong>"Chinese Herbal Medicine: Materia Medica"</strong> - Bensky & Gamble</li>
+                <li><strong>"The Yoga of Herbs"</strong> - Frawley & Lad (Ayurveda)</li>
+                <li><strong>"Cunningham's Encyclopedia of Magical Herbs"</strong> - Scott Cunningham (Western magic)</li>
+                <li><strong>"Sacred Plant Medicine"</strong> - Stephen Harrod Buhner</li>
+            </ul>
+
+            <h3>Databases:</h3>
+            <ul>
+                <li><strong>PubMed</strong> - Scientific research on medicinal plants</li>
+                <li><strong>Plants For A Future</strong> - Comprehensive plant database</li>
+                <li><strong>American Botanical Council</strong> - Monographs and research</li>
+            </ul>
+        </div>
+    </main>
+
+    <!-- Cross-Section Navigation -->
+    <div class="glass-card" style="text-align: center;">
+        <h2 style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">Explore More Sections</h2>
+        <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+            <a href="../mythos/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">World Mythologies</a>
+            <a href="../archetypes/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Universal Archetypes</a>
+            <a href="../magic/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Magical Systems</a>
+            <a href="../spiritual-items/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Sacred Items</a>
+            <a href="../spiritual-places/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Sacred Places</a>
+            <a href="../index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Home</a>
+        </div>
+    </div>
+
+    <footer style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-secondary); border-top: 1px solid var(--color-border); margin-top: var(--spacing-xl);">
+        <p>World Mythos Explorer - Universal Herbalism</p>
+        <p style="margin-top: var(--spacing-sm);">
+            <a href="../index.html" style="color: var(--color-primary); text-decoration: none;">Home</a> |
+            <a href="../mythos/index.html" style="color: var(--color-primary); text-decoration: none;">Mythologies</a> |
+            <a href="../archetypes/index.html" style="color: var(--color-primary); text-decoration: none;">Archetypes</a> |
+            <a href="../magic/index.html" style="color: var(--color-primary); text-decoration: none;">Magic</a> |
+            <a href="../spiritual-items/index.html" style="color: var(--color-primary); text-decoration: none;">Items</a> |
+            <a href="../spiritual-places/index.html" style="color: var(--color-primary); text-decoration: none;">Places</a>
+        </p>
+    </footer>
+
+    <script src="../mythos_data.js"></script>
+</body>
+</html>

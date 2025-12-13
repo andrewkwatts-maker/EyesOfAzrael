@@ -1,583 +1,511 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Persian/Zoroastrian Mythology - World Mythos Explorer</title>
-<link href="../../themes/theme-base.css" rel="stylesheet"/>
-<link href="../../styles.css" rel="stylesheet"/>
-<link href="../../themes/corpus-links.css" rel="stylesheet"/>
-<link rel="stylesheet" href="../../themes/smart-links.css">
-<script defer src="../../themes/smart-links.js"></script>
-<script defer src="../../themes/theme-picker.js"></script>
-<script defer src="../../themes/theme-animations.js"></script>
-<style>
-    /* ============================================
-       MODERN GLASS UI TEMPLATE - Persian Mythos
-       Based on Christian reference with full theme support
-       ============================================ */
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persian Mythology - World Mythos Explorer</title>
 
-    /* Breadcrumb - Full-width bar attached below header */
-    .breadcrumb {
-        position: sticky;
-        top: 60px; /* Below the sticky header */
-        left: 0;
-        width: 100%;
-        z-index: 999;
-        background: rgba(var(--color-surface-rgb), 0.9);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        padding: var(--spacing-xs) var(--spacing-lg);
-        font-size: var(--font-size-sm);
-        color: var(--color-text-secondary);
-        border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
-    }
+    <!-- Base Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../themes/smart-links.css">
 
-    .breadcrumb a {
-        color: var(--color-primary);
-        text-decoration: none;
-        transition: all var(--transition-fast);
-    }
+    <!-- Firebase Theme System -->
+    <link rel="stylesheet" href="../../FIREBASE/css/firebase-themes.css">
 
-    .breadcrumb a:hover {
-        color: var(--color-secondary);
-        text-decoration: underline;
-    }
+    <!-- Theme Scripts -->
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script defer src="../../themes/smart-links.js"></script>
 
-    /* Hero Section - Modern Glass Styling */
-    .hero-section {
-        background: linear-gradient(135deg,
-            rgba(var(--color-primary-rgb), 0.8),
-            rgba(var(--color-secondary-rgb), 0.8));
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 2px solid var(--color-primary);
-        color: var(--color-text-primary);
-        padding: 3rem 2rem;
-        text-align: center;
-        border-radius: var(--radius-xl);
-        margin-bottom: 2rem;
-        box-shadow: var(--shadow-xl);
-    }
+    <!-- Submission Link System -->
+    <script src="../../js/submission-context.js"></script>
+    <script src="../../js/components/submission-link.js"></script>
+    <link rel="stylesheet" href="../../css/submission-link.css">
 
-    .hero-icon-display {
-        font-size: 5rem;
-        margin-bottom: var(--spacing-md);
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-    }
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../css/user-auth.css">
+    <script src="../../js/firebase-auth.js"></script>
+    <script src="../../js/auth-guard.js"></script>
+    <script src="../../js/components/google-signin-button.js"></script>
 
-    .hero-description {
-        font-size: 1.2rem;
-        max-width: 800px;
-        margin: 1rem auto;
-        line-height: 1.7;
-    }
+    <style>
+        /* ============================================
+           FIREBASE-ENHANCED MYTHOLOGY INDEX TEMPLATE
+           Combines existing styles with Firebase integration
+           ============================================ */
 
-    /* Glass Card - With Hover Animation */
-    .glass-card {
-        background: rgba(var(--color-surface-rgb), 0.6);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-xl);
-        margin: 2rem 0;
-        box-shadow: var(--shadow-lg);
-        transition: all var(--transition-base, 0.3s ease);
-    }
-
-    .glass-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
-        border-color: rgba(var(--color-primary-rgb), 0.4);
-    }
-
-    /* Subsection Card - Hover Effects */
-    .subsection-card {
-        background: rgba(var(--color-primary-rgb), 0.05);
-        border-left: 4px solid var(--color-primary);
-        padding: var(--spacing-lg);
-        margin: var(--spacing-lg) 0;
-        border-radius: var(--radius-md);
-        transition: all var(--transition-base, 0.3s ease);
-    }
-
-    .subsection-card:hover {
-        background: rgba(var(--color-primary-rgb), 0.1);
-        transform: translateX(5px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .subsection-card h3 {
-        color: var(--color-primary);
-        margin-top: 0;
-    }
-
-    .subsection-card p {
-        line-height: 1.7;
-    }
-
-    /* Grid Layouts */
-    .deity-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: var(--spacing-lg);
-        margin: var(--spacing-lg) 0;
-    }
-
-    .grid-2col {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: var(--spacing-lg);
-    }
-
-    /* Deity Cards - Modern Glass Pattern with Hover */
-    .deity-card {
-        background: rgba(var(--color-primary-rgb), 0.05);
-        border: 2px solid rgba(var(--color-primary-rgb), 0.2);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-lg);
-        transition: all var(--transition-base, 0.3s ease);
-        cursor: pointer;
-        text-decoration: none;
-        display: block;
-        color: inherit;
-        overflow: hidden;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-    }
-
-    .deity-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-lg), 0 0 15px rgba(var(--color-primary-rgb), 0.2);
-        border-color: var(--color-primary);
-        background: rgba(var(--color-primary-rgb), 0.1);
-        text-decoration: none;
-    }
-
-    .deity-card h3 {
-        color: var(--color-primary);
-        margin-top: 0.5rem;
-    }
-
-    .deity-card p {
-        line-height: 1.7;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .deity-icon {
-        font-size: 2.5rem;
-        text-align: center;
-    }
-
-    /* Section Headers */
-    .section-header {
-        color: var(--color-primary);
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .card-title {
-        color: var(--color-primary);
-        margin-top: 0;
-    }
-
-    /* Heading Color Contrast - Ensure visibility against all backgrounds */
-    h1, h2, h3, h4 {
-        color: var(--color-text-primary);
-    }
-
-    h1 a, h2 a, h3 a, h4 a {
-        color: inherit;
-    }
-
-    .section-header,
-    .glass-card h3,
-    .deity-card h3,
-    .subsection-card h3 {
-        color: var(--color-primary);
-    }
-
-    /* Ensure hero section headings are visible */
-    .hero-section h2 {
-        color: var(--color-text-primary);
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Styled List */
-    .styled-list {
-        line-height: 1.8;
-        padding-left: var(--spacing-lg);
-    }
-
-    .styled-list li {
-        margin-bottom: var(--spacing-sm);
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .grid-2col {
-            grid-template-columns: 1fr;
+        /* Breadcrumb - Full-width bar attached below header */
+        .breadcrumb {
+            position: sticky;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(var(--color-surface-rgb), 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: var(--spacing-xs) var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
         }
 
-        .deity-grid {
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
         }
 
+        .breadcrumb a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        /* Hero Section - Modern Glass Styling */
         .hero-section {
-            padding: 2rem 1rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
         }
 
         .hero-icon-display {
-            font-size: 3rem;
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
         }
 
-        .breadcrumb {
-            font-size: var(--font-size-xs);
-            padding: var(--spacing-xs) var(--spacing-md);
-            top: 50px; /* Smaller header on mobile */
+        .hero-description {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 1rem auto;
+            line-height: 1.7;
         }
-    }
-</style>
+
+        /* Glass Card - With Hover Animation */
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+            border-color: rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        /* Firebase Content Sections */
+        .firebase-section {
+            margin: 3rem 0;
+        }
+
+        .section-header {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        /* Grid Layouts */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        /* Loading States */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            gap: var(--spacing-md);
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--theme-primary, var(--color-primary));
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        /* Static Content (preserved from original) */
+        .static-content {
+            margin: 2rem 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .deity-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .hero-icon-display {
+                font-size: 3rem;
+            }
+
+            .breadcrumb {
+                font-size: var(--font-size-xs);
+                padding: var(--spacing-xs) var(--spacing-md);
+                top: 50px;
+            }
+        }
+    </style>
 </head>
-<body>
-<!-- Theme Picker Container -->
-<div id="theme-picker"></div>
-<div id="theme-picker-container"></div>
+<body data-theme="persian">
+    <!-- Theme Picker Container -->
+    <div id="theme-picker"></div>
+    <div id="theme-picker-container"></div>
 
-<header>
-    <div class="header-content">
-        <h1>🔥 Persian/Zoroastrian Mythology</h1>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../mythos/index.html">Home</a> →
-    <span>Persian/Zoroastrian Tradition</span>
-</nav>
-<main>
-<div class="hero-section">
-<div class="hero-icon-display">🔥</div>
-<h2>The Eternal Struggle Between Light and Darkness</h2>
-<p class="hero-description">
-                Explore one of humanity's oldest monotheistic faiths, founded by <a class="corpus-link" data-term="The Prophet" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'The Prophet'">the prophet</a> <a href="heroes/zoroaster.html">Zarathustra (Zoroaster)</a>.
-                Zoroastrianism centers on the eternal <a data-term="Cosmic" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View cosmic in ancient texts">cosmic</a> struggle between <a href="deities/ahura-mazda.html">Ahura Mazda</a> (<a class="corpus-link" data-term="Wise Lord" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'Wise Lord'">Wise Lord</a>) and <a href="deities/angra-mainyu.html">Angra Mainyu</a>
-                (<a class="corpus-link" data-term="Destructive Spirit" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'Destructive Spirit'">Destructive Spirit</a>), emphasizing the <a data-term="Sacred" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View sacred in ancient texts">sacred</a> fire, ethical dualism, and the path of good thoughts,
-                good words, and good deeds.
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>🔥 Persian Mythology</h1>
+            <div id="user-auth-nav"></div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../mythos/index.html">Home</a> →
+        <span aria-current="page">Persian Mythology</span>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="hero-icon-display">🔥</div>
+            <h2>Persian Mythology</h2>
+            <p class="hero-description">
+                Journey through Zoroastrian cosmic dualism, where light and darkness wage eternal war. From Ahura Mazda to the fire temples, explore the ancient wisdom that shaped empires and influenced world religions.
             </p>
-</div>
+        </div>
 
-<div class="glass-card" style="background: rgba(var(--color-primary-rgb), 0.1); border: 2px solid var(--color-primary); margin-bottom: var(--spacing-xl);">
-<h3 style="color: var(--color-primary); margin-top: 0;">🙏 Living <a data-term="Tradition" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View tradition in ancient texts">Tradition</a></h3>
-<p style="line-height: var(--leading-relaxed);">
-<strong>Important:</strong> Zoroastrianism is a living <a class="corpus-link" data-term="Religion" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'Religion'">religion</a> with active practitioners worldwide,
-                particularly in Iran and India (Parsis). This content is presented with deep respect for the faith
-                and its adherents. Descriptions are based on <a data-term="Historical" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View historical in ancient texts">historical</a> texts (<a href="texts/index.html">Avesta</a>, Gathas) and scholarly <a data-term="Sources" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View sources in ancient texts">sources</a>,
-                not as definitive religious doctrine.
+        <!-- ============================================
+             FIREBASE-LOADED DYNAMIC CONTENT SECTIONS
+             These sections load from Firestore
+             ============================================ -->
+
+        <!-- Deities Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">⚡ Deities</h2>
+            <div id="deities-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading deities from Firebase...</p>
+            </div>
+            <div id="deities-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Heroes Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🦸 Heroes & Legendary Mortals</h2>
+            <div id="heroes-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading heroes from Firebase...</p>
+            </div>
+            <div id="heroes-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Creatures Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🐉 Creatures & Monsters</h2>
+            <div id="creatures-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading creatures from Firebase...</p>
+            </div>
+            <div id="creatures-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Cosmology Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🌌 Cosmology & Sacred Places</h2>
+            <div id="cosmology-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading cosmology from Firebase...</p>
+            </div>
+            <div id="cosmology-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Texts Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">📚 Sacred Texts</h2>
+            <div id="texts-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading texts from Firebase...</p>
+            </div>
+            <div id="texts-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Herbs Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🌿 Sacred Plants & Herbalism</h2>
+            <div id="herbs-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading herbs from Firebase...</p>
+            </div>
+            <div id="herbs-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Rituals Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🔮 Rituals & Practices</h2>
+            <div id="rituals-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading rituals from Firebase...</p>
+            </div>
+            <div id="rituals-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Symbols Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🔱 Sacred Symbols</h2>
+            <div id="symbols-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading symbols from Firebase...</p>
+            </div>
+            <div id="symbols-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Concepts Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">💭 Mystical Concepts</h2>
+            <div id="concepts-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading concepts from Firebase...</p>
+            </div>
+            <div id="concepts-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Myths Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">📖 Myths & Legends</h2>
+            <div id="myths-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading myths from Firebase...</p>
+            </div>
+            <div id="myths-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- ============================================
+             STATIC CUSTOM CONTENT (PRESERVED)
+             Add any mythology-specific static content here
+             ============================================ -->
+        <div class="static-content">
+            <!-- Add custom static content here -->
+        </div>
+
+        <!-- Cross-Cultural Parallels Section -->
+        <section class="interlink-panel" style="margin-top: var(--spacing-xl, 3rem);">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🌍</span>
+                Cross-Cultural Parallels
+            </h3>
+            <p style="margin-bottom: var(--spacing-lg); color: var(--color-text-secondary);">
+                Explore how Persian mythology connects with other world traditions through shared themes and archetypes.
             </p>
-</div>
+            <div class="parallel-grid">
+                <!-- Parallel mythology links will be added here -->
+            </div>
+        </section>
 
-<section style="margin-top: var(--spacing-xl);">
-<h2 class="section-header">🔥 Core <a data-term="Concepts" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View concepts in ancient texts">Concepts</a></h2>
-<div class="deity-grid">
-<div class="glass-card">
-<div class="deity-icon">⚖️</div>
-<h3><a href="cosmology/index.html">Cosmic Dualism</a></h3>
-<p>The fundamental struggle between <a href="cosmology/asha.html">Asha</a> (<a class="corpus-link" data-term="Truth" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'Truth'">Truth</a>/Order) and <a href="cosmology/druj.html">Druj</a> (Lie/<a class="corpus-link" data-term="Chaos" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'Chaos'">Chaos</a>), personified by <a href="deities/ahura-mazda.html">Ahura Mazda</a>
-                   and <a href="deities/angra-mainyu.html">Angra Mainyu</a>.</p>
-<div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin-top: var(--spacing-md);">
-<a class="btn btn-secondary" href="cosmology/creation.html">Creation Myth</a>
-<a class="btn btn-secondary" href="cosmology/afterlife.html">Afterlife Journey</a>
-<a class="btn btn-secondary" href="cosmology/asha.html">Asha (Truth)</a>
-<a class="btn btn-secondary" href="cosmology/druj.html">Druj (Lie)</a>
-</div>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🔥</div>
-<h3><a data-term="Sacred" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View sacred in ancient texts">Sacred</a> Fire</h3>
-<p>Fire (<a href="deities/atar.html">Atar</a>) is the supreme symbol of <a href="deities/ahura-mazda.html">Ahura Mazda's</a> <a data-term="Divine" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View divine in ancient texts">divine</a> light and wisdom. <a href="rituals/fire-worship.html">Fire temples</a> house the
-                   eternal flame, which must never be extinguished. Fire represents purity, <a class="corpus-link" data-term="Truth" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'Truth'">truth</a>, and the presence of
-                   the <a data-term="Divine" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View divine in ancient texts">divine</a> in the physical world.</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">💭</div>
-<h3>Ethical Path</h3>
-<p>The <a href="cosmology/threefold-path.html">threefold ethical foundation</a> of Zoroastrianism: Good Thoughts, Good Words, Good Deeds (Humata, Hukhta, Huvarshta). Every individual has
-                   free will to choose between good and evil, and their choices directly impact the <a data-term="Cosmic" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View cosmic in ancient texts">cosmic</a> struggle.</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">✨</div>
-<h3><a href="deities/amesha-spentas.html">Amesha Spentas</a></h3>
-<p>The "Bounteous Immortals" - seven <a data-term="Divine" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View divine in ancient texts">divine</a> emanations of <a href="deities/ahura-mazda.html">Ahura Mazda</a>, each representing a virtue and
-                   protecting an aspect of <a data-term="Creation" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View creation in ancient texts">creation</a>.</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🌉</div>
-<h3><a href="cosmology/chinvat-bridge.html">Chinvat Bridge</a></h3>
-<p>The bridge of judgment that souls must cross after death. The righteous pass safely to paradise, while the wicked fall into the abyss. The soul's deeds determine the bridge's width.</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🌟</div>
-<h3><a href="cosmology/frashokereti.html">Frashokereti</a></h3>
-<p>The final renovation of the universe when good triumphs over evil. All souls will be resurrected, the world purified by molten metal, and paradise established on earth.</p>
-</div>
-</div>
-</section>
-
-<section style="margin-top: var(--spacing-xl);">
-<h2 class="section-header">👤 <a data-term="Deities" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View deities in ancient texts">Deities</a> &amp; Divine Beings</h2>
-
-<div class="glass-card" style="margin-bottom: var(--spacing-lg);">
-<h3 style="color: var(--color-primary);">⚡ <a href="deities/ahura-mazda.html">Ahura Mazda</a> - The Wise Lord</h3>
-<p style="line-height: var(--leading-relaxed);">The supreme creator deity, source of all goodness, light, and <a class="corpus-link" data-term="Truth" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'Truth'">truth</a>. Ahura Mazda created the universe and all that is good, and eternally opposes the forces of darkness and chaos.</p>
-<div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin-top: var(--spacing-md);">
-<a class="btn btn-secondary" href="deities/ahura-mazda.html">Learn More</a>
-<a class="btn btn-secondary" href="deities/amesha-spentas.html">The Amesha Spentas</a>
-</div>
-</div>
-
-<div class="glass-card" style="margin-bottom: var(--spacing-lg);">
-<h3 style="color: var(--color-primary);">😈 <a href="deities/angra-mainyu.html">Angra Mainyu</a> &amp; the <a data-term="Daevas" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View daevas in ancient texts">Daevas</a></h3>
-<p style="line-height: var(--leading-relaxed);">The <a class="corpus-link" data-term="Destructive Spirit" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'Destructive Spirit'">Destructive Spirit</a> and his evil minions who oppose <a href="deities/ahura-mazda.html">Ahura Mazda</a>. The <a data-term="Daevas" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View daevas in ancient texts">daevas</a> are malevolent spirits who have always existed in opposition to <a class="corpus-link" data-term="Truth" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'Truth'">truth</a> and order.</p>
-</div>
-
-<div class="glass-card" style="margin-bottom: var(--spacing-lg);">
-<h3 style="color: var(--color-primary);">🌟 Major Yazatas (Divine Beings)</h3>
-<p style="line-height: var(--leading-relaxed); margin-bottom: var(--spacing-md);">The Yazatas are <a data-term="Divine" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View divine in ancient texts">divine</a> beings worthy of <a data-term="Worship" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View worship in ancient texts">worship</a>, assisting Ahura Mazda in maintaining <a class="corpus-link" data-term="Cosmic Order" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'Cosmic Order'">cosmic order</a>:</p>
-<div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm);">
-<a class="btn btn-secondary" href="deities/mithra.html" data-smart>Mithra (Covenant &amp; Light)</a>
-<a class="btn btn-secondary" href="deities/anahita.html" data-smart>Anahita (Waters &amp; Fertility)</a>
-<a class="btn btn-secondary" href="deities/atar.html">Atar (Sacred Fire)</a>
-<a class="btn btn-secondary" href="deities/sraosha.html">Sraosha (Obedience)</a>
-<a class="btn btn-secondary" href="deities/rashnu.html">Rashnu (Justice)</a>
-<a class="btn btn-secondary" href="deities/index.html">View All Yazatas</a>
-</div>
-</div>
-</section>
-
-<section style="margin-top: var(--spacing-xl);">
-<h2 class="section-header">📚 Explore Persian Mythology</h2>
-<div class="deity-grid">
-<a class="deity-card" href="deities/index.html" style="text-decoration: none;">
-<div class="deity-icon">⚡</div>
-<h3>Deities &amp; Yazatas</h3>
-<p>Ahura Mazda, Mithra, Anahita, the Amesha Spentas, and other divine beings worthy of worship.</p>
-</a>
-
-<a class="deity-card" href="cosmology/index.html" style="text-decoration: none;">
-<div class="deity-icon">🌌</div>
-<h3>Cosmology</h3>
-<p>Creation story, cosmic dualism, the Chinvat Bridge, and eschatology (end times).</p>
-</a>
-
-<a class="deity-card" href="heroes/index.html" style="text-decoration: none;">
-<div class="deity-icon">🗡️</div>
-<h3>Heroes &amp; Prophets</h3>
-<p>Zarathustra (Zoroaster), mythical kings, and heroes from the Shahnameh.</p>
-</a>
-
-<a class="deity-card" href="herbs/index.html" style="text-decoration: none;">
-<div class="deity-icon">🌿</div>
-<h3>Sacred Plants</h3>
-<p>Haoma (sacred drink), rose, pomegranate, cypress, and plants used in rituals.</p>
-</a>
-
-<a class="deity-card" href="rituals/index.html" style="text-decoration: none;">
-<div class="deity-icon">🕯️</div>
-<h3>Rituals &amp; Practices</h3>
-<p>Fire worship, purification rites, festivals (Nowruz, Mehregan), and daily prayers.</p>
-</a>
-
-<a class="deity-card" href="magic/index.html" style="text-decoration: none;">
-<div class="deity-icon">✨</div>
-<h3>Mystical Practices</h3>
-<p>Divine invocations, protective mantras, and esoteric Zoroastrian wisdom.</p>
-</a>
-
-<a class="deity-card" href="texts/index.html" style="text-decoration: none;">
-<div class="deity-icon">📜</div>
-<h3>Sacred Texts</h3>
-<p>Avesta, Gathas, Yasna, Bundahishn, and other foundational Zoroastrian scriptures.</p>
-</a>
-
-<a class="deity-card" href="symbols/index.html" style="text-decoration: none;">
-<div class="deity-icon">🦅</div>
-<h3>Sacred Symbols</h3>
-<p>Faravahar (winged disk), Sacred Fire, and other symbolic representations.</p>
-</a>
-</div>
-</section>
-
-<section style="margin-top: var(--spacing-xl);">
-<h2 class="section-header">📖 <a data-term="Primary Sources" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View primary sources in ancient texts">Primary Sources</a></h2>
-<ul class="styled-list">
-<li><strong><a href="texts/index.html">Avesta</a>:</strong> The <a data-term="Sacred" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View sacred in ancient texts">sacred</a> scriptures of Zoroastrianism</li>
-<li><strong>Gathas:</strong> Hymns attributed to <a href="heroes/zoroaster.html">Zarathustra</a> himself, the oldest part of the <a data-term="Avesta" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View avesta in ancient texts">Avesta</a></li>
-<li><strong>Yasna:</strong> Liturgical texts including the Gathas, used in <a data-term="Worship" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View worship in ancient texts">worship</a> ceremonies</li>
-<li><strong>Bundahishn:</strong> "<a data-term="Creation" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View creation in ancient texts">Creation</a>" - Zoroastrian <a href="cosmology/creation.html">cosmology</a> and cosmogony</li>
-<li><strong>Denkard:</strong> Encyclopedia of Zoroastrian beliefs and customs</li>
-<li><strong>Shahnameh:</strong> Epic of the Kings by Ferdowsi, preserving pre-Islamic Persian <a data-term="Mythology" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View mythology in ancient texts">mythology</a></li>
-</ul>
-</section>
-
-<section style="margin-top: var(--spacing-xl);">
-<h2 class="section-header">🔗 Related <a data-term="Traditions" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View traditions in ancient texts">Traditions</a></h2>
-<p style="line-height: var(--leading-relaxed); margin-bottom: var(--spacing-lg);">Zoroastrianism has profoundly influenced and shares <a data-term="Concepts" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View concepts in ancient texts">concepts</a> with many world religions:</p>
-<div class="grid-2col">
-<div class="glass-card">
-<h3 style="color: var(--color-primary);">Jewish Mysticism</h3>
-<p style="line-height: var(--leading-relaxed);">Angelology, eschatology, monotheism, <a data-term="Cosmic" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View cosmic in ancient texts">cosmic</a> struggle (influenced during Babylonian exile)</p>
-<a class="btn btn-primary" href="../jewish/index.html" style="margin-top: var(--spacing-md); display: inline-block;">Explore Jewish →</a>
-</div>
-<div class="glass-card">
-<h3 style="color: var(--color-primary);">Christian Theology</h3>
-<p style="line-height: var(--leading-relaxed);">Heaven/Hell, Satan as adversary, final judgment, resurrection <a data-term="Concepts" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View concepts in ancient texts">concepts</a></p>
-<a class="btn btn-primary" href="../christian/index.html" style="margin-top: var(--spacing-md); display: inline-block;">Explore Christian →</a>
-</div>
-<div class="glass-card">
-<h3 style="color: var(--color-primary);">Islamic <a data-term="Tradition" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View tradition in ancient texts">Tradition</a></h3>
-<p style="line-height: var(--leading-relaxed);">Angels vs demons, final judgment, paradise/hell, ethical monotheism</p>
-<a class="btn btn-primary" href="../islamic/index.html" style="margin-top: var(--spacing-md); display: inline-block;">Explore Islamic →</a>
-</div>
-<div class="glass-card">
-<h3 style="color: var(--color-primary);">Hindu Vedic <a class="corpus-link" data-term="Religion" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'Religion'">Religion</a></h3>
-<p style="line-height: var(--leading-relaxed);">Shared Indo-Iranian heritage, fire <a data-term="Worship" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View worship in ancient texts">worship</a>, <a class="corpus-link" data-term="Soma" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'Soma'">soma</a>/<a class="corpus-link" data-term="Haoma" data-tradition="persian" href="../../mythos/persian/index.html" title="Search corpus for 'Haoma'">haoma</a>, ancient linguistic connections</p>
-<a class="btn btn-primary" href="../hindu/index.html" style="margin-top: var(--spacing-md); display: inline-block;">Explore Hindu →</a>
-</div>
-</div>
-</section>
-
-<!-- Interlink Panel Section -->
-<section class="interlink-panel" style="margin-top: 3rem;">
-    <h3 class="interlink-header">
-        <span class="interlink-icon">🔗</span>
-        Related Across the Mythos
-    </h3>
-
-    <div class="interlink-grid">
-        <!-- Archetype Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Core Archetypes</div>
-            <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
-                <div class="archetype-badge">⚔️ COSMIC DUALISM</div>
-                <p class="archetype-context">Zoroastrianism presents the archetypal struggle between Light (Ahura Mazda) and Darkness (Angra Mainyu).</p>
-                <span class="see-parallels">See parallels: Order vs Chaos, Good vs Evil →</span>
-            </a>
-        </div>
-
-        <!-- Sacred Items Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Sacred Elements</div>
-            <a href="symbols/sacred-fire.html" class="item-link-card">
-                <div class="item-icon">🔥</div>
-                <div class="item-info">
-                    <h4>Sacred Fire (Atar)</h4>
-                    <p class="item-type">Divine Element</p>
-                    <p class="item-context">Symbol of Ahura Mazda's light</p>
+        <!-- Related Traditions -->
+        <section style="margin-top: var(--spacing-xl, 3rem);">
+            <h2 class="section-header">🔗 Related Traditions</h2>
+            <div class="glass-card">
+                <h3>Explore Other Mythologies</h3>
+                <div class="button-grid" style="display: flex; flex-wrap: wrap; gap: var(--spacing-md);">
+                    <a class="btn btn-secondary" href="../greek/index.html">Greek</a>
+                    <a class="btn btn-secondary" href="../roman/index.html">Roman</a>
+                    <a class="btn btn-secondary" href="../norse/index.html">Norse</a>
+                    <a class="btn btn-secondary" href="../egyptian/index.html">Egyptian</a>
+                    <a class="btn btn-secondary" href="../hindu/index.html">Hindu</a>
+                    <a class="btn btn-secondary" href="../buddhist/index.html">Buddhist</a>
+                    <a class="btn btn-secondary" href="../celtic/index.html">Celtic</a>
+                    <a class="btn btn-secondary" href="../christian/index.html">Christian</a>
+                    <a class="btn btn-secondary" href="../islamic/index.html">Islamic</a>
+                    <a class="btn btn-secondary" href="../jewish/index.html">Jewish</a>
                 </div>
-            </a>
-        </div>
+            </div>
+        </section>
+    </main>
 
-        <!-- Sacred Places Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Sacred Places</div>
-            <a href="../../index.html" class="place-link-card">
-                <div class="place-visual">
-                    <span class="place-icon">🏛️</span>
-                    <span class="place-type">Temple</span>
-                </div>
-                <div class="place-info">
-                    <h4>Fire Temples</h4>
-                    <p>Houses of eternal flame</p>
-                </div>
-            </a>
-        </div>
+    <!-- Footer -->
+    <footer>
+        <p>
+            <strong>Persian Mythology</strong> - World Mythos Explorer<br>
+            <a href="../../mythos/index.html">Back to World Mythos Home</a> |
+            <a href="../../index.html">Main Site</a>
+        </p>
+    </footer>
 
-        <!-- Associated Practices Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Associated Practices</div>
-            <a href="rituals/fire-worship.html" class="magic-link-card">
-                <div class="magic-icon">🕯️</div>
-                <div class="magic-info">
-                    <h4>Fire Worship</h4>
-                    <p class="magic-type">Sacred Ritual</p>
-                </div>
-                <span class="tradition-badge persian">Persian</span>
-            </a>
-        </div>
-    </div>
+    <!-- Auto-inject submission button -->
+    <script>
+        if (window.SubmissionLink) {
+            window.SubmissionLink.autoInject();
+        }
+    </script>
 
-    <!-- Cross-Cultural Parallels -->
-    <div class="parallel-traditions glass-card" style="margin-top: var(--spacing-lg);">
-        <h4>🌍 Cross-Cultural Parallels</h4>
-        <div class="parallel-grid">
-            <a href="../hindu/index.html" class="parallel-card">
-                <span class="tradition-flag">🕉️</span>
-                <span class="parallel-name">Vedic Tradition</span>
-                <span class="tradition-label">Hindu</span>
-            </a>
-            <a href="../../archetypes/celestial/index.html" class="parallel-card">
-                <span class="tradition-flag">🏛️</span>
-                <span class="parallel-name">Mesopotamian</span>
-                <span class="tradition-label">Ancient Near East</span>
-            </a>
-            <a href="../christian/gnostic/christ-redeemer/index.html" class="parallel-card">
-                <span class="tradition-flag">✨</span>
-                <span class="parallel-name">Gnostic</span>
-                <span class="tradition-label">Dualist Traditions</span>
-            </a>
-            <a href="../../archetypes/celestial/index.html" class="parallel-card">
-                <span class="tradition-flag">☯️</span>
-                <span class="parallel-name">Manichaeism</span>
-                <span class="tradition-label">Syncretic</span>
-            </a>
-        </div>
-    </div>
-</section>
+    <!-- Firebase SDK (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-<!-- See Also Section -->
-<div class="see-also-section">
-    <h4>📚 See Also</h4>
-    <div class="see-also-links">
-        <a href="deities/ahura-mazda.html" class="see-also-link" data-smart>
-            <span>☀️</span> Ahura Mazda
-        </a>
-        <a href="deities/angra-mainyu.html" class="see-also-link" data-smart>
-            <span>🔥</span> Angra Mainyu
-        </a>
-        <a href="deities/mithra.html" class="see-also-link" data-smart>
-            <span>☀️</span> Mithra
-        </a>
-        <a href="deities/anahita.html" class="see-also-link" data-smart>
-            <span>💧</span> Anahita
-        </a>
-        <a href="deities/amesha-spentas.html" class="see-also-link" data-smart>
-            <span>✨</span> Amesha Spentas
-        </a>
-        <a href="cosmology/frashokereti.html" class="see-also-link">
-            <span>🌟</span> Frashokereti
-        </a>
-        <a href="texts/index.html" class="see-also-link">
-            <span>📜</span> Sacred Texts
-        </a>
-        <a href="rituals/fire-worship.html" class="see-also-link">
-            <span>🔥</span> Fire Worship
-        </a>
-    </div>
-</div>
-</main>
+    <!-- Firebase Configuration -->
+    <script src="../../firebase-config.js"></script>
 
-<footer>
-<p>
-<strong>Persian/Zoroastrian <a data-term="Mythology" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View mythology in ancient texts">Mythology</a></strong> - World Mythos Explorer<br/>
-            Based on the Avesta, Gathas, Bundahishn, and classical Zoroastrian <a data-term="Sources" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View sources in ancient texts">sources</a><br/>
-            Presented with respect for this ancient living <a data-term="Tradition" data-tradition="persian" class="corpus-link" href="../../mythos/persian/index.html" title="View tradition in ancient texts">tradition</a><br/>
-<a href="../../mythos/index.html">Back to World Mythos Home</a>
-</p>
-</footer>
+    <!-- Firebase Content Loader (Module) -->
+    <script type="module">
+        import { FirebaseContentLoader } from '../../FIREBASE/js/firebase-content-loader.js';
+
+        // Wait for Firebase to initialize
+        window.addEventListener('load', async () => {
+            try {
+                // Check if Firebase is initialized
+                if (!window.firebaseApp || !window.firebaseDb) {
+                    console.error('[Index] Firebase not initialized');
+                    showGlobalError('Firebase is not configured. Please check firebase-config.js');
+                    return;
+                }
+
+                console.log('[Index] Initializing Firebase Content Loader for persian');
+
+                // Create content loader instance
+                const loader = new FirebaseContentLoader(window.firebaseApp);
+                const mythology = 'persian'; // e.g., 'greek', 'norse', 'egyptian'
+
+                // Content types to load
+                const contentTypes = [
+                    { type: 'deities', container: 'deities-container', loading: 'deities-loading' },
+                    { type: 'heroes', container: 'heroes-container', loading: 'heroes-loading' },
+                    { type: 'creatures', container: 'creatures-container', loading: 'creatures-loading' },
+                    { type: 'cosmology', container: 'cosmology-container', loading: 'cosmology-loading' },
+                    { type: 'texts', container: 'texts-container', loading: 'texts-loading' },
+                    { type: 'herbs', container: 'herbs-container', loading: 'herbs-loading' },
+                    { type: 'rituals', container: 'rituals-container', loading: 'rituals-loading' },
+                    { type: 'symbols', container: 'symbols-container', loading: 'symbols-loading' },
+                    { type: 'concepts', container: 'concepts-container', loading: 'concepts-loading' },
+                    { type: 'myths', container: 'myths-container', loading: 'myths-loading' }
+                ];
+
+                // Load each content type
+                for (const { type, container, loading } of contentTypes) {
+                    try {
+                        console.log(`[Index] Loading ${type} for ${mythology}...`);
+
+                        // Load content filtered by mythology
+                        await loader.loadContent(type, { mythology: mythology });
+
+                        // Hide loading, show container
+                        const loadingEl = document.getElementById(loading);
+                        const containerEl = document.getElementById(container);
+
+                        if (loadingEl) loadingEl.style.display = 'none';
+                        if (containerEl) containerEl.style.display = 'grid';
+
+                        // Render content
+                        loader.renderContent(container, type);
+
+                        console.log(`[Index] ✓ ${type} loaded successfully`);
+
+                    } catch (error) {
+                        console.error(`[Index] Error loading ${type}:`, error);
+
+                        // Hide loading, show error
+                        const loadingEl = document.getElementById(loading);
+                        const containerEl = document.getElementById(container);
+
+                        if (loadingEl) {
+                            loadingEl.innerHTML = `
+                                <div class="error-container">
+                                    <div class="error-title">Failed to load ${type}</div>
+                                    <div class="error-message">${error.message}</div>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+
+                console.log('[Index] All content loaded successfully');
+
+            } catch (error) {
+                console.error('[Index] Fatal error:', error);
+                showGlobalError('Failed to load content: ' + error.message);
+            }
+        });
+
+        function showGlobalError(message) {
+            document.querySelectorAll('.loading-container').forEach(el => {
+                el.innerHTML = `
+                    <div class="error-container">
+                        <div class="error-title">Error</div>
+                        <div class="error-message">${message}</div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>

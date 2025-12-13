@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Content Viewer - Eyes of Azrael</title>
+    <link rel="stylesheet" href="css/firebase-themes.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <!-- Theme Manager -->
+    <script src="js/theme-manager.js"></script>
+
+    <!-- Firebase Config & Services -->
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJa8uGmLMFLr8qOQOLqZVrJ6eqRwJ5aWk",
+            authDomain: "eyesofazrael.firebaseapp.com",
+            projectId: "eyesofazrael",
+            storageBucket: "eyesofazrael.firebasestorage.app",
+            messagingSenderId: "872653886694",
+            appId: "1:872653886694:web:a8f8d8e8f8e8e8e8e8e8e8"
+        };
+
+        // Initialize Firebase
+        let firebaseApp, firebaseAuth, firebaseDb;
+        try {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            firebaseAuth = firebase.auth();
+            firebaseDb = firebase.firestore();
+            console.log('Firebase initialized successfully');
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+        }
+
+        // Export to global scope
+        window.firebaseApp = firebaseApp;
+        window.firebaseAuth = firebaseAuth;
+        window.firebaseDb = firebaseDb;
+        window.auth = firebaseAuth;
+        window.db = firebaseDb;
+    </script>
+
+    <style>
+        /* Override and extend theme styles for content viewer */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
+        /* Header styling with theme system */
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: white;
+            margin: 0 0 var(--spacing-sm) 0;
+            font-family: var(--font-heading);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        /* Connection Status */
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            margin-top: var(--spacing-md);
+        }
+
+        .connection-status.loading {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid var(--color-warning);
+            color: var(--color-warning);
+        }
+
+        .connection-status.connected {
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid var(--color-success);
+            color: var(--color-success);
+        }
+
+        .connection-status.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--color-error);
+            color: var(--color-error);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            border: 2px solid var(--color-border);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #c0c0c0;
+            margin-top: var(--spacing-sm);
+        }
+
+        /* Search and Filter Bar */
+        .control-bar {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: var(--spacing-md) var(--spacing-lg);
+            padding-left: 3rem;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(147, 112, 219, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: var(--spacing-md);
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            font-size: 1.2rem;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: var(--spacing-xs);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .autocomplete-dropdown.active {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .autocomplete-item:hover {
+            background: rgba(147, 112, 219, 0.2);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Filters */
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .filter-label {
+            color: #c0c0c0;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-select {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: #fff;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .filter-select:hover {
+            border-color: var(--color-primary);
+        }
+
+        /* Tag Filters */
+        .tag-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+
+        .tag-chip {
+            padding: var(--spacing-xs) var(--spacing-md);
+            background: rgba(147, 112, 219, 0.2);
+            border: 1px solid var(--color-primary);
+            border-radius: var(--radius-md);
+            color: var(--color-primary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tag-chip:hover {
+            background: rgba(147, 112, 219, 0.4);
+        }
+
+        .tag-chip.active {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .content-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .content-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--card-accent-color, var(--color-primary));
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(147, 112, 219, 0.4);
+            border-color: var(--color-primary);
+        }
+
+        .content-type-badge {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: rgba(147, 112, 219, 0.3);
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .content-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: var(--spacing-sm) 0;
+            color: #fff;
+        }
+
+        .content-mythology {
+            color: var(--color-secondary);
+            font-size: 0.9rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .content-summary {
+            color: #c0c0c0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin: var(--spacing-md) 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .content-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xs);
+            margin: var(--spacing-md) 0;
+        }
+
+        .content-tag {
+            padding: 2px var(--spacing-sm);
+            background: rgba(218, 165, 32, 0.2);
+            border: 1px solid var(--color-secondary);
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            color: var(--color-secondary);
+        }
+
+        .content-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--spacing-md);
+            padding-top: var(--spacing-md);
+            border-top: 1px solid var(--color-border);
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        /* Loading State */
+        .loading-container {
+            text-align: center;
+            padding: var(--spacing-2xl);
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(147, 112, 219, 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto var(--spacing-lg);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #c0c0c0;
+            font-size: 1.1rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-2xl);
+            color: #888;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .empty-state-text {
+            font-size: 1.2rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .empty-state-subtext {
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: var(--spacing-xl);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: var(--spacing-xl);
+            border-bottom: 2px solid var(--color-border);
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: var(--spacing-lg);
+            right: var(--spacing-lg);
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--color-error);
+        }
+
+        .modal-body {
+            padding: var(--spacing-xl);
+        }
+
+        .detail-section {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .detail-label {
+            color: var(--color-primary);
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .related-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+        }
+
+        .related-item {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(147, 112, 219, 0.2);
+            border: 1px solid var(--color-primary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .related-item:hover {
+            background: rgba(147, 112, 219, 0.4);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-xl);
+        }
+
+        .pagination-button {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: rgba(147, 112, 219, 0.2);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-md);
+            color: var(--color-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .pagination-button:hover:not(:disabled) {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+        .pagination-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            color: #c0c0c0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--spacing-md);
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header page-header">
+            <h1 class="page-title">Firebase Content Viewer</h1>
+            <p class="page-subtitle">Centralized visualization of all mythology content from Firestore</p>
+            <div class="connection-status loading" id="connectionStatus">
+                <div class="status-dot"></div>
+                <span id="connectionText">Connecting to Firebase...</span>
+            </div>
+
+            <!-- Theme Selector -->
+            <div class="theme-selector">
+                <button class="theme-btn active" data-theme="greek" title="Greek Mythology"></button>
+                <button class="theme-btn" data-theme="egyptian" title="Egyptian Mythology"></button>
+                <button class="theme-btn" data-theme="norse" title="Norse Mythology"></button>
+                <button class="theme-btn" data-theme="hindu" title="Hindu Mythology"></button>
+                <button class="theme-btn" data-theme="buddhist" title="Buddhist Mythology"></button>
+                <button class="theme-btn" data-theme="christian" title="Christian Mythology"></button>
+                <button class="theme-btn" data-theme="islamic" title="Islamic Mythology"></button>
+                <button class="theme-btn" data-theme="celtic" title="Celtic Mythology"></button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCount">-</div>
+                <div class="stat-label">Total Items</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="deityCount">-</div>
+                <div class="stat-label">Deities</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="heroCount">-</div>
+                <div class="stat-label">Heroes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="creatureCount">-</div>
+                <div class="stat-label">Creatures</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="cosmologyCount">-</div>
+                <div class="stat-label">Cosmology</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="mythologyCount">-</div>
+                <div class="stat-label">Mythologies</div>
+            </div>
+        </div>
+
+        <!-- Control Bar -->
+        <div class="control-bar">
+            <!-- Search -->
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input
+                    type="text"
+                    class="search-input"
+                    id="searchInput"
+                    placeholder="Search across all content (title, summary, tags)..."
+                    autocomplete="off"
+                >
+                <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Content Type</label>
+                    <select class="filter-select" id="contentTypeFilter">
+                        <option value="">All Types</option>
+                        <option value="deity">Deities</option>
+                        <option value="hero">Heroes</option>
+                        <option value="creature">Creatures</option>
+                        <option value="cosmology">Cosmology</option>
+                        <option value="herb">Herbs</option>
+                        <option value="ritual">Rituals</option>
+                        <option value="archetype">Archetypes</option>
+                        <option value="symbol">Symbols</option>
+                        <option value="place">Places</option>
+                        <option value="concept">Concepts</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Mythology</label>
+                    <select class="filter-select" id="mythologyFilter">
+                        <option value="">All Mythologies</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Sort By</label>
+                    <select class="filter-select" id="sortFilter">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="alphabetical">A-Z</option>
+                        <option value="popular">Most Popular</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Items Per Page</label>
+                    <select class="filter-select" id="limitFilter">
+                        <option value="12">12</option>
+                        <option value="24" selected>24</option>
+                        <option value="48">48</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tag Filters -->
+            <div class="tag-filters" id="tagFilters"></div>
+        </div>
+
+        <!-- Content Grid -->
+        <div id="contentContainer">
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <div class="loading-text">Loading content from Firebase...</div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination" style="display: none;">
+            <button class="pagination-button" id="prevButton" disabled>Previous</button>
+            <div class="pagination-info" id="paginationInfo">Page 1</div>
+            <button class="pagination-button" id="nextButton">Next</button>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-close" id="modalClose">&times;</button>
+                <h2 id="modalTitle"></h2>
+                <p id="modalSubtitle" style="color: #888; margin-top: 0.5rem;"></p>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Main Application Script -->
+    <script>
+        // Wait for Firebase to load
+        window.addEventListener('load', async () => {
+            console.log('Page loaded, initializing app...');
+            await initializeApp();
+        });
+
+        // Global state
+        const appState = {
+            allContent: [],
+            filteredContent: [],
+            currentPage: 1,
+            itemsPerPage: 24,
+            filters: {
+                search: '',
+                contentType: '',
+                mythology: '',
+                sortBy: 'newest',
+                selectedTags: []
+            },
+            stats: {
+                total: 0,
+                byType: {},
+                byMythology: {}
+            },
+            allTags: new Set(),
+            lastDoc: null
+        };
+
+        // Initialize application
+        async function initializeApp() {
+            try {
+                updateConnectionStatus('loading', 'Connecting to Firebase...');
+
+                // Wait for Firebase to be ready
+                if (!window.db) {
+                    throw new Error('Firebase not initialized');
+                }
+
+                // Test connection
+                await window.db.collection('content').limit(1).get();
+
+                updateConnectionStatus('connected', 'Connected to Firebase');
+
+                // Load initial data
+                await loadAllContent();
+
+                // Set up event listeners
+                setupEventListeners();
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                updateConnectionStatus('error', `Connection failed: ${error.message}`);
+                showError('Failed to connect to Firebase. Please refresh the page.');
+            }
+        }
+
+        // Update connection status
+        function updateConnectionStatus(status, text) {
+            const statusEl = document.getElementById('connectionStatus');
+            const textEl = document.getElementById('connectionText');
+
+            statusEl.className = `connection-status ${status}`;
+            textEl.textContent = text;
+        }
+
+        // Load all content from Firebase
+        async function loadAllContent() {
+            try {
+                console.log('Loading content from Firestore...');
+
+                const snapshot = await window.db.collection('content')
+                    .where('status', '==', 'published')
+                    .limit(1000)
+                    .get();
+
+                appState.allContent = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                console.log(`Loaded ${appState.allContent.length} items`);
+
+                // Calculate statistics
+                calculateStats();
+
+                // Extract all tags
+                extractTags();
+
+                // Populate mythology filter
+                populateMythologyFilter();
+
+                // Initial render
+                applyFilters();
+
+            } catch (error) {
+                console.error('Error loading content:', error);
+                showError('Failed to load content from Firebase');
+                throw error;
+            }
+        }
+
+        // Calculate statistics
+        function calculateStats() {
+            const stats = {
+                total: appState.allContent.length,
+                byType: {},
+                byMythology: {}
+            };
+
+            appState.allContent.forEach(item => {
+                // Count by type
+                stats.byType[item.contentType] = (stats.byType[item.contentType] || 0) + 1;
+
+                // Count by mythology
+                if (item.mythology) {
+                    stats.byMythology[item.mythology] = (stats.byMythology[item.mythology] || 0) + 1;
+                }
+            });
+
+            appState.stats = stats;
+
+            // Update UI
+            document.getElementById('totalCount').textContent = stats.total;
+            document.getElementById('deityCount').textContent = stats.byType.deity || 0;
+            document.getElementById('heroCount').textContent = stats.byType.hero || 0;
+            document.getElementById('creatureCount').textContent = stats.byType.creature || 0;
+            document.getElementById('cosmologyCount').textContent = stats.byType.cosmology || 0;
+            document.getElementById('mythologyCount').textContent = Object.keys(stats.byMythology).length;
+        }
+
+        // Extract all unique tags
+        function extractTags() {
+            appState.allTags.clear();
+
+            appState.allContent.forEach(item => {
+                if (item.tags && Array.isArray(item.tags)) {
+                    item.tags.forEach(tag => appState.allTags.add(tag));
+                }
+            });
+
+            renderTagFilters();
+        }
+
+        // Render tag filters
+        function renderTagFilters() {
+            const container = document.getElementById('tagFilters');
+            const tags = Array.from(appState.allTags).sort();
+
+            if (tags.length === 0) {
+                container.innerHTML = '<div style="color: #888; font-size: 0.9rem;">No tags available</div>';
+                return;
+            }
+
+            // Show top 20 most common tags
+            container.innerHTML = tags.slice(0, 20).map(tag => `
+                <div class="tag-chip" data-tag="${tag}">${tag}</div>
+            `).join('');
+
+            // Add click handlers
+            container.querySelectorAll('.tag-chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    const tag = chip.dataset.tag;
+                    toggleTag(tag);
+                    chip.classList.toggle('active');
+                    applyFilters();
+                });
+            });
+        }
+
+        // Toggle tag selection
+        function toggleTag(tag) {
+            const index = appState.filters.selectedTags.indexOf(tag);
+            if (index > -1) {
+                appState.filters.selectedTags.splice(index, 1);
+            } else {
+                appState.filters.selectedTags.push(tag);
+            }
+        }
+
+        // Populate mythology filter dropdown
+        function populateMythologyFilter() {
+            const select = document.getElementById('mythologyFilter');
+            const mythologies = Object.keys(appState.stats.byMythology).sort();
+
+            mythologies.forEach(mythology => {
+                const option = document.createElement('option');
+                option.value = mythology;
+                option.textContent = getMythologyDisplayName(mythology);
+                select.appendChild(option);
+            });
+        }
+
+        // Get mythology display name
+        function getMythologyDisplayName(mythology) {
+            const names = {
+                greek: 'Greek', roman: 'Roman', norse: 'Norse', egyptian: 'Egyptian',
+                hindu: 'Hindu', chinese: 'Chinese', japanese: 'Japanese', celtic: 'Celtic',
+                aztec: 'Aztec', mayan: 'Mayan', sumerian: 'Sumerian', babylonian: 'Babylonian',
+                christian: 'Christian', jewish: 'Jewish', islamic: 'Islamic', buddhist: 'Buddhist',
+                slavic: 'Slavic', persian: 'Persian', african: 'African', native: 'Native American'
+            };
+            return names[mythology] || mythology.charAt(0).toUpperCase() + mythology.slice(1);
+        }
+
+        // Apply filters and search
+        function applyFilters() {
+            let filtered = [...appState.allContent];
+
+            // Search filter
+            if (appState.filters.search) {
+                const search = appState.filters.search.toLowerCase();
+                filtered = filtered.filter(item => {
+                    return (
+                        item.title?.toLowerCase().includes(search) ||
+                        item.summary?.toLowerCase().includes(search) ||
+                        item.tags?.some(tag => tag.toLowerCase().includes(search))
+                    );
+                });
+            }
+
+            // Content type filter
+            if (appState.filters.contentType) {
+                filtered = filtered.filter(item => item.contentType === appState.filters.contentType);
+            }
+
+            // Mythology filter
+            if (appState.filters.mythology) {
+                filtered = filtered.filter(item => item.mythology === appState.filters.mythology);
+            }
+
+            // Tag filters
+            if (appState.filters.selectedTags.length > 0) {
+                filtered = filtered.filter(item => {
+                    return appState.filters.selectedTags.some(tag =>
+                        item.tags?.includes(tag)
+                    );
+                });
+            }
+
+            // Sort
+            filtered = sortContent(filtered, appState.filters.sortBy);
+
+            appState.filteredContent = filtered;
+            appState.currentPage = 1;
+
+            renderContent();
+        }
+
+        // Sort content
+        function sortContent(content, sortBy) {
+            const sorted = [...content];
+
+            switch (sortBy) {
+                case 'newest':
+                    sorted.sort((a, b) => {
+                        const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+                        const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+                        return dateB - dateA;
+                    });
+                    break;
+                case 'oldest':
+                    sorted.sort((a, b) => {
+                        const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+                        const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+                        return dateA - dateB;
+                    });
+                    break;
+                case 'alphabetical':
+                    sorted.sort((a, b) => a.title.localeCompare(b.title));
+                    break;
+                case 'popular':
+                    sorted.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+                    break;
+            }
+
+            return sorted;
+        }
+
+        // Render content grid
+        function renderContent() {
+            const container = document.getElementById('contentContainer');
+            const itemsPerPage = parseInt(document.getElementById('limitFilter').value);
+
+            const startIndex = (appState.currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageContent = appState.filteredContent.slice(startIndex, endIndex);
+
+            if (pageContent.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-text">No content found</div>
+                        <div class="empty-state-subtext">Try adjusting your filters or search terms</div>
+                    </div>
+                `;
+                document.getElementById('pagination').style.display = 'none';
+                return;
+            }
+
+            const html = `
+                <div class="content-grid">
+                    ${pageContent.map(item => createContentCard(item)).join('')}
+                </div>
+            `;
+
+            container.innerHTML = html;
+
+            // Update pagination
+            updatePagination(itemsPerPage);
+
+            // Add click handlers
+            document.querySelectorAll('.content-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const id = card.dataset.id;
+                    const item = appState.allContent.find(i => i.id === id);
+                    if (item) showDetailModal(item);
+                });
+            });
+        }
+
+        // Create content card HTML
+        function createContentCard(item) {
+            const accentColors = {
+                deity: '#9370DB',
+                hero: '#DAA520',
+                creature: '#DC143C',
+                cosmology: '#4169E1',
+                herb: '#228B22',
+                ritual: '#8B4513',
+                archetype: '#FF69B4',
+                symbol: '#FFD700',
+                place: '#20B2AA',
+                concept: '#9370DB'
+            };
+
+            const accentColor = accentColors[item.contentType] || '#9370DB';
+
+            return `
+                <div class="content-card" data-id="${item.id}" style="--card-accent-color: ${accentColor}">
+                    <div class="content-type-badge">${item.contentType}</div>
+                    <h3 class="content-title">${item.title}</h3>
+                    <div class="content-mythology">${getMythologyDisplayName(item.mythology)}</div>
+                    <p class="content-summary">${item.summary || 'No summary available'}</p>
+                    ${item.tags && item.tags.length > 0 ? `
+                        <div class="content-tags">
+                            ${item.tags.slice(0, 3).map(tag => `
+                                <span class="content-tag">${tag}</span>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    <div class="content-footer">
+                        <span>${formatDate(item.createdAt)}</span>
+                        <span>${item.votes || 0} votes</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Format date
+        function formatDate(date) {
+            if (!date) return 'Unknown';
+            const d = date.toDate ? date.toDate() : new Date(date);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // Update pagination
+        function updatePagination(itemsPerPage) {
+            const totalPages = Math.ceil(appState.filteredContent.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            const prevButton = document.getElementById('prevButton');
+            const nextButton = document.getElementById('nextButton');
+            const paginationInfo = document.getElementById('paginationInfo');
+
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+
+            pagination.style.display = 'flex';
+            paginationInfo.textContent = `Page ${appState.currentPage} of ${totalPages}`;
+
+            prevButton.disabled = appState.currentPage === 1;
+            nextButton.disabled = appState.currentPage >= totalPages;
+        }
+
+        // Show detail modal
+        function showDetailModal(item) {
+            const modal = document.getElementById('detailModal');
+            const title = document.getElementById('modalTitle');
+            const subtitle = document.getElementById('modalSubtitle');
+            const body = document.getElementById('modalBody');
+
+            title.textContent = item.title;
+            subtitle.textContent = `${item.contentType.charAt(0).toUpperCase() + item.contentType.slice(1)} • ${getMythologyDisplayName(item.mythology)}`;
+
+            let html = `
+                <div class="detail-section">
+                    <div class="detail-label">Summary</div>
+                    <div class="detail-value">${item.summary || 'No summary available'}</div>
+                </div>
+            `;
+
+            // Content-specific attributes
+            if (item.attributes && Object.keys(item.attributes).length > 0) {
+                html += `<div class="detail-section">
+                    <div class="detail-label">Attributes</div>
+                    <div class="detail-value">`;
+
+                for (const [key, value] of Object.entries(item.attributes)) {
+                    if (Array.isArray(value)) {
+                        html += `<div><strong>${key}:</strong> ${value.join(', ')}</div>`;
+                    } else if (value) {
+                        html += `<div><strong>${key}:</strong> ${value}</div>`;
+                    }
+                }
+
+                html += `</div></div>`;
+            }
+
+            // Tags
+            if (item.tags && item.tags.length > 0) {
+                html += `
+                    <div class="detail-section">
+                        <div class="detail-label">Tags</div>
+                        <div class="related-items">
+                            ${item.tags.map(tag => `<div class="related-item">${tag}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Related content
+            if (item.relatedContent && item.relatedContent.length > 0) {
+                html += `
+                    <div class="detail-section">
+                        <div class="detail-label">Related Content</div>
+                        <div class="related-items">
+                            ${item.relatedContent.map(rel => `<div class="related-item">${rel}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Metadata
+            html += `
+                <div class="detail-section">
+                    <div class="detail-label">Metadata</div>
+                    <div class="detail-value">
+                        <div><strong>ID:</strong> ${item.id}</div>
+                        <div><strong>Created:</strong> ${formatDate(item.createdAt)}</div>
+                        <div><strong>Type:</strong> ${item.isDefault ? 'Default Content' : 'User Submission'}</div>
+                        ${item.sources ? `<div><strong>Sources:</strong> ${item.sources}</div>` : ''}
+                    </div>
+                </div>
+            `;
+
+            body.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Search input
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', debounce((e) => {
+                appState.filters.search = e.target.value;
+                applyFilters();
+                updateAutocomplete(e.target.value);
+            }, 300));
+
+            // Filters
+            document.getElementById('contentTypeFilter').addEventListener('change', (e) => {
+                appState.filters.contentType = e.target.value;
+                applyFilters();
+            });
+
+            document.getElementById('mythologyFilter').addEventListener('change', (e) => {
+                appState.filters.mythology = e.target.value;
+                applyFilters();
+            });
+
+            document.getElementById('sortFilter').addEventListener('change', (e) => {
+                appState.filters.sortBy = e.target.value;
+                applyFilters();
+            });
+
+            document.getElementById('limitFilter').addEventListener('change', () => {
+                renderContent();
+            });
+
+            // Pagination
+            document.getElementById('prevButton').addEventListener('click', () => {
+                if (appState.currentPage > 1) {
+                    appState.currentPage--;
+                    renderContent();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+
+            document.getElementById('nextButton').addEventListener('click', () => {
+                const itemsPerPage = parseInt(document.getElementById('limitFilter').value);
+                const totalPages = Math.ceil(appState.filteredContent.length / itemsPerPage);
+                if (appState.currentPage < totalPages) {
+                    appState.currentPage++;
+                    renderContent();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+
+            // Modal close
+            document.getElementById('modalClose').addEventListener('click', () => {
+                document.getElementById('detailModal').classList.remove('active');
+            });
+
+            document.getElementById('detailModal').addEventListener('click', (e) => {
+                if (e.target.id === 'detailModal') {
+                    document.getElementById('detailModal').classList.remove('active');
+                }
+            });
+
+            // Close modal on escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    document.getElementById('detailModal').classList.remove('active');
+                }
+            });
+        }
+
+        // Update autocomplete suggestions
+        function updateAutocomplete(searchTerm) {
+            const dropdown = document.getElementById('autocompleteDropdown');
+
+            if (!searchTerm || searchTerm.length < 2) {
+                dropdown.classList.remove('active');
+                return;
+            }
+
+            const matches = appState.allContent
+                .filter(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()))
+                .slice(0, 5);
+
+            if (matches.length === 0) {
+                dropdown.classList.remove('active');
+                return;
+            }
+
+            dropdown.innerHTML = matches.map(item => `
+                <div class="autocomplete-item" data-id="${item.id}">
+                    <strong>${item.title}</strong>
+                    <div style="font-size: 0.85rem; color: #888; margin-top: 0.25rem;">
+                        ${item.contentType} • ${getMythologyDisplayName(item.mythology)}
+                    </div>
+                </div>
+            `).join('');
+
+            dropdown.classList.add('active');
+
+            // Add click handlers
+            dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const id = item.dataset.id;
+                    const content = appState.allContent.find(i => i.id === id);
+                    if (content) {
+                        showDetailModal(content);
+                        dropdown.classList.remove('active');
+                    }
+                });
+            });
+        }
+
+        // Utility: debounce
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Utility: show error
+        function showError(message) {
+            const container = document.getElementById('contentContainer');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon" style="color: var(--color-error);">⚠️</div>
+                    <div class="empty-state-text" style="color: var(--color-error);">Error</div>
+                    <div class="empty-state-subtext">${message}</div>
+                </div>
+            `;
+        }
+
+        // Close autocomplete when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('autocompleteDropdown');
+            const searchInput = document.getElementById('searchInput');
+
+            if (!dropdown.contains(e.target) && e.target !== searchInput) {
+                dropdown.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

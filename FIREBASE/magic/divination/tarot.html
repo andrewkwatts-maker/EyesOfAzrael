@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarot - Divination Systems</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--space-5);
+        }
+
+        .container {
+            max-width: var(--container-lg);
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--space-16) var(--space-5);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-10);
+            border: 2px solid var(--color-border);
+        }
+
+        .header-icon {
+            font-size: 5rem;
+            margin-bottom: var(--space-4);
+        }
+
+        h1 {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-5);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: var(--text-xl);
+            color: var(--color-text-secondary);
+            margin: var(--space-3) 0;
+            font-style: italic;
+        }
+
+        .section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+        }
+
+        h2 {
+            font-size: var(--text-3xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-3);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        h3 {
+            font-size: var(--text-2xl);
+            color: var(--color-secondary);
+            margin-top: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+
+        h4 {
+            font-size: var(--text-xl);
+            color: var(--color-primary);
+            margin-top: var(--space-4);
+            margin-bottom: var(--space-3);
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-4);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin-left: var(--space-6);
+            margin-bottom: var(--space-4);
+            color: var(--color-text-secondary);
+        }
+
+        li {
+            margin-bottom: var(--space-2);
+            line-height: var(--leading-relaxed);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-6) 0;
+        }
+
+        .card-item {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+        }
+
+        .card-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .card-description {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .source-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .source-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 3px solid var(--color-primary);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+            border-radius: var(--radius-md);
+        }
+
+        .cross-ref {
+            display: inline-block;
+            padding: var(--space-2) var(--space-4);
+            background: rgba(var(--color-secondary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            margin: var(--space-2);
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+        }
+
+        .cross-ref:hover {
+            background: rgba(var(--color-secondary-rgb), 0.4);
+            transform: translateY(-2px);
+        }
+
+        .nav-section {
+            text-align: center;
+            margin-top: var(--space-10);
+            padding: var(--space-6);
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: var(--space-4) var(--space-8);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+            margin: var(--space-2);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-accent-rgb), 0.1);
+            border-left: 4px solid var(--color-accent);
+            padding: var(--space-4);
+            margin: var(--space-4) 0;
+            border-radius: var(--radius-md);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-4) 0;
+        }
+
+        th, td {
+            padding: var(--space-3);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            color: var(--color-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        .symbol {
+            font-size: var(--text-2xl);
+            text-align: center;
+        }
+
+        /* Interlink Panel Styles */
+        .interlink-panel {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin: var(--space-10) 0;
+        }
+
+        .interlink-panel h3 {
+            color: var(--color-primary);
+            font-size: var(--text-2xl);
+            margin-bottom: var(--space-6);
+        }
+
+        .interlink-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .archetype-link-card, .parallel-card {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            padding: var(--space-4);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            transition: all var(--transition-base);
+        }
+
+        .archetype-link-card:hover, .parallel-card:hover {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            transform: translateY(-2px);
+        }
+
+        .card-icon {
+            font-size: var(--text-2xl);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+        }
+
+        .card-content h4 {
+            color: var(--color-text-primary);
+            font-size: var(--text-base);
+            margin-bottom: var(--space-1);
+        }
+
+        .card-content span {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="theme-picker-container"></div>
+<div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Tarot</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> → <a href="../index.html">Magic</a> → <a href="index.html">Divination</a> → <span>Tarot</span>
+</nav>
+
+        <!-- OVERVIEW -->
+        <section class="section">
+            <h2>Overview & Historical Origins</h2>
+
+            <p>
+                The Tarot is a complex symbolic system consisting of 78 cards divided into the Major Arcana (22 cards)
+                and Minor Arcana (56 cards). While playing card games using tarot-like decks emerged in 15th-century
+                Italy, the use of Tarot for divination and esoteric purposes developed primarily in the late 18th and
+                19th centuries, particularly through French occultists and the Hermetic Order of the Golden Dawn.
+            </p>
+
+            <p>
+                The name "Tarot" likely derives from Italian "tarocchi," though its exact etymology remains debated.
+                Early decks like the Visconti-Sforza (c. 1440s) were commissioned as luxury items for Italian nobility.
+                The transformation of Tarot from a game into a mystical tool began with Antoine Court de Gébelin's
+                1781 work claiming Egyptian origins for the cards, though this theory has been historically debunked.
+            </p>
+
+            <div class="highlight-box">
+                <h4>Cultural Synthesis</h4>
+                <p>
+                    Modern Tarot represents a unique synthesis of multiple esoteric traditions: Medieval Christian
+                    iconography, Renaissance Neoplatonism, Jewish Kabbalah (particularly the Tree of Life),
+                    Hermetic alchemy, and astrological correspondences. This fusion occurred primarily through
+                    19th-century occultists including Éliphas Lévi, who associated the 22 Major Arcana with the
+                    22 letters of the Hebrew alphabet.
+                </p>
+            </div>
+
+            <h3>Purpose and Applications</h3>
+            <p>
+                Tarot serves multiple functions in contemporary spiritual practice:
+            </p>
+            <ul>
+                <li><strong>Divination:</strong> Gaining insight into past, present, and potential future situations</li>
+                <li><strong>Meditation:</strong> Contemplating archetypal energies and universal patterns</li>
+                <li><strong>Psychological Tool:</strong> Exploring the unconscious mind and facilitating self-reflection</li>
+                <li><strong>Magical Practice:</strong> Serving as focal points for ritual work and intention-setting</li>
+                <li><strong>Spiritual Development:</strong> Mapping the journey of the soul through the Major Arcana</li>
+            </ul>
+        </section>
+
+        <!-- KEY COMPONENTS -->
+        <section class="section">
+            <h2>Key Components & Structure</h2>
+
+            <h3>The Major Arcana (22 Cards)</h3>
+            <p>
+                The Major Arcana represents significant life themes, spiritual lessons, and archetypal forces.
+                Often called the "Greater Secrets," these cards depict the Fool's Journey—a symbolic narrative
+                of spiritual evolution from innocence to enlightenment.
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Number</th>
+                        <th>Card</th>
+                        <th>Key Themes</th>
+                        <th>Correspondence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0</td>
+                        <td>The Fool</td>
+                        <td>New beginnings, innocence, leap of faith</td>
+                        <td>Air/Uranus</td>
+                    </tr>
+                    <tr>
+                        <td>I</td>
+                        <td>The Magician</td>
+                        <td>Manifestation, skill, power, action</td>
+                        <td>Mercury</td>
+                    </tr>
+                    <tr>
+                        <td>II</td>
+                        <td>The High Priestess</td>
+                        <td>Intuition, mystery, the unconscious</td>
+                        <td>Moon</td>
+                    </tr>
+                    <tr>
+                        <td>III</td>
+                        <td>The Empress</td>
+                        <td>Fertility, abundance, nature, nurturing</td>
+                        <td>Venus</td>
+                    </tr>
+                    <tr>
+                        <td>IV</td>
+                        <td>The Emperor</td>
+                        <td>Authority, structure, control, leadership</td>
+                        <td>Aries</td>
+                    </tr>
+                    <tr>
+                        <td>V</td>
+                        <td>The Hierophant</td>
+                        <td>Tradition, spiritual authority, conformity</td>
+                        <td>Taurus</td>
+                    </tr>
+                    <tr>
+                        <td>VI</td>
+                        <td>The Lovers</td>
+                        <td>Choice, union, relationships, values</td>
+                        <td>Gemini</td>
+                    </tr>
+                    <tr>
+                        <td>VII</td>
+                        <td>The Chariot</td>
+                        <td>Willpower, determination, control</td>
+                        <td>Cancer</td>
+                    </tr>
+                    <tr>
+                        <td>VIII/XI</td>
+                        <td>Strength</td>
+                        <td>Courage, patience, inner power</td>
+                        <td>Leo</td>
+                    </tr>
+                    <tr>
+                        <td>IX</td>
+                        <td>The Hermit</td>
+                        <td>Solitude, introspection, wisdom</td>
+                        <td>Virgo</td>
+                    </tr>
+                    <tr>
+                        <td>X</td>
+                        <td>Wheel of Fortune</td>
+                        <td>Cycles, destiny, change, luck</td>
+                        <td>Jupiter</td>
+                    </tr>
+                    <tr>
+                        <td>XI/VIII</td>
+                        <td>Justice</td>
+                        <td>Fairness, truth, cause and effect</td>
+                        <td>Libra</td>
+                    </tr>
+                    <tr>
+                        <td>XII</td>
+                        <td>The Hanged Man</td>
+                        <td>Surrender, new perspective, sacrifice</td>
+                        <td>Neptune</td>
+                    </tr>
+                    <tr>
+                        <td>XIII</td>
+                        <td>Death</td>
+                        <td>Transformation, endings, renewal</td>
+                        <td>Scorpio</td>
+                    </tr>
+                    <tr>
+                        <td>XIV</td>
+                        <td>Temperance</td>
+                        <td>Balance, moderation, patience</td>
+                        <td>Sagittarius</td>
+                    </tr>
+                    <tr>
+                        <td>XV</td>
+                        <td>The Devil</td>
+                        <td>Bondage, materialism, illusion</td>
+                        <td>Capricorn</td>
+                    </tr>
+                    <tr>
+                        <td>XVI</td>
+                        <td>The Tower</td>
+                        <td>Sudden change, upheaval, revelation</td>
+                        <td>Mars</td>
+                    </tr>
+                    <tr>
+                        <td>XVII</td>
+                        <td>The Star</td>
+                        <td>Hope, inspiration, healing, renewal</td>
+                        <td>Aquarius</td>
+                    </tr>
+                    <tr>
+                        <td>XVIII</td>
+                        <td>The Moon</td>
+                        <td>Illusion, fear, subconscious, dreams</td>
+                        <td>Pisces</td>
+                    </tr>
+                    <tr>
+                        <td>XIX</td>
+                        <td>The Sun</td>
+                        <td>Joy, success, vitality, clarity</td>
+                        <td>Sun</td>
+                    </tr>
+                    <tr>
+                        <td>XX</td>
+                        <td>Judgement</td>
+                        <td>Rebirth, inner calling, absolution</td>
+                        <td>Pluto</td>
+                    </tr>
+                    <tr>
+                        <td>XXI</td>
+                        <td>The World</td>
+                        <td>Completion, achievement, fulfillment</td>
+                        <td>Saturn</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>The Minor Arcana (56 Cards)</h3>
+            <p>
+                The Minor Arcana consists of four suits, each containing 14 cards (Ace through 10, plus four court cards).
+                These cards represent everyday situations, practical matters, and the progression of elemental energies
+                through various stages.
+            </p>
+
+            <div class="card-grid">
+                <div class="card-item">
+                    <div class="card-title">Wands (Clubs)</div>
+                    <div class="symbol">🔥</div>
+                    <div class="card-description">
+                        Element: Fire<br>
+                        Themes: Creativity, passion, action, enterprise, ambition<br>
+                        Represents: Career, energy, spiritual pursuits
+                    </div>
+                </div>
+                <div class="card-item">
+                    <div class="card-title">Cups (Hearts)</div>
+                    <div class="symbol">💧</div>
+                    <div class="card-description">
+                        Element: Water<br>
+                        Themes: Emotions, relationships, intuition, creativity<br>
+                        Represents: Love, feelings, connections, dreams
+                    </div>
+                </div>
+                <div class="card-item">
+                    <div class="card-title">Swords (Spades)</div>
+                    <div class="symbol">💨</div>
+                    <div class="card-description">
+                        Element: Air<br>
+                        Themes: Intellect, conflict, decisions, truth, struggle<br>
+                        Represents: Thoughts, communication, challenges
+                    </div>
+                </div>
+                <div class="card-item">
+                    <div class="card-title">Pentacles/Coins (Diamonds)</div>
+                    <div class="symbol">🌍</div>
+                    <div class="card-description">
+                        Element: Earth<br>
+                        Themes: Material world, finances, health, manifestation<br>
+                        Represents: Money, career, physical reality
+                    </div>
+                </div>
+            </div>
+
+            <h3>Court Cards</h3>
+            <p>
+                Each suit contains four court cards representing different aspects of personality, maturity levels,
+                or people in one's life:
+            </p>
+            <ul>
+                <li><strong>Page:</strong> Youth, messenger, new beginnings in the suit's element</li>
+                <li><strong>Knight:</strong> Action, movement, extreme expression of the suit's qualities</li>
+                <li><strong>Queen:</strong> Receptive mastery, nurturing expression of the element</li>
+                <li><strong>King:</strong> Active mastery, authoritative expression of the element</li>
+            </ul>
+        </section>
+
+        <!-- PRACTICE & METHODS -->
+        <section class="section">
+            <h2>Practice & Methods</h2>
+
+            <h3>Preparing for a Reading</h3>
+            <p>
+                Traditional Tarot practice emphasizes creating sacred space and proper intention-setting:
+            </p>
+            <ul>
+                <li><strong>Cleansing:</strong> Clear the deck of previous energies using smoke, crystals, or intention</li>
+                <li><strong>Grounding:</strong> Center yourself through meditation, breathwork, or visualization</li>
+                <li><strong>Question Formation:</strong> Frame clear, open-ended questions rather than yes/no queries</li>
+                <li><strong>Shuffling:</strong> Mix the cards while focusing on the question or situation</li>
+                <li><strong>Sacred Space:</strong> Some practitioners create ritual space with candles, cloth, or crystals</li>
+            </ul>
+
+            <h3>Common Spreads</h3>
+
+            <h4>Three-Card Spread</h4>
+            <p>
+                The most versatile spread, adaptable to numerous question types:
+            </p>
+            <ul>
+                <li>Past / Present / Future</li>
+                <li>Situation / Action / Outcome</li>
+                <li>Mind / Body / Spirit</li>
+                <li>Option A / Option B / Best Course</li>
+            </ul>
+
+            <h4>Celtic Cross (10 Cards)</h4>
+            <p>
+                The most popular comprehensive spread, providing detailed insight into a situation:
+            </p>
+            <ol>
+                <li>Present situation / Heart of the matter</li>
+                <li>Challenge / Crossing energy</li>
+                <li>Conscious awareness / Crown</li>
+                <li>Subconscious / Foundation</li>
+                <li>Recent past</li>
+                <li>Near future / Approaching energy</li>
+                <li>Self-perception / Attitude</li>
+                <li>External influences / Environment</li>
+                <li>Hopes and fears</li>
+                <li>Outcome / Final result</li>
+            </ol>
+
+            <h4>Horseshoe Spread (7 Cards)</h4>
+            <p>
+                Excellent for examining situations from multiple angles: Past, Present, Hidden Influences,
+                Obstacles, External Attitudes, Advice, Outcome.
+            </p>
+
+            <h3>Reading Techniques</h3>
+
+            <div class="highlight-box">
+                <h4>Reversed Cards</h4>
+                <p>
+                    When a card appears upside-down, readers may interpret it as: blocked energy, internalized
+                    qualities, opposite meaning, delayed manifestation, or simply a weakened expression of the
+                    upright meaning. Some readers don't use reversals at all, considering all orientations as
+                    containing both positive and challenging aspects.
+                </p>
+            </div>
+
+            <p><strong>Intuitive Reading:</strong> Beyond memorized meanings, skilled readers develop intuitive
+            connections to imagery, noticing which symbols draw attention, emotional responses to cards, and
+            narrative threads through spreads.</p>
+
+            <p><strong>Elemental Dignities:</strong> Advanced technique considering how adjacent cards interact
+            based on their elemental associations (Fire strengthens Air, Water weakens Fire, etc.).</p>
+
+            <p><strong>Numerology:</strong> Number patterns across spreads provide additional layers of meaning,
+            following Pythagorean and Kabbalistic number symbolism.</p>
+        </section>
+
+        <!-- TRADITIONS & VARIATIONS -->
+        <section class="section">
+            <h2>Traditions & Variations</h2>
+
+            <h3>Major Tarot Systems</h3>
+
+            <h4>Rider-Waite-Smith (1909)</h4>
+            <p>
+                Created by A.E. Waite and artist Pamela Colman Smith under the auspices of the Golden Dawn tradition.
+                Revolutionary for depicting scenes on all Minor Arcana cards rather than just pip symbols. This deck
+                established the standard for most modern English-language Tarot decks. The imagery draws heavily on
+                Kabbalistic, Christian, and Hermetic symbolism.
+            </p>
+
+            <h4>Thoth Tarot (1969)</h4>
+            <p>
+                Designed by Aleister Crowley and painted by Lady Frieda Harris. Based on Crowley's Thelemic philosophy
+                and incorporating Egyptian, Kabbalistic, astrological, and alchemical symbolism. Features renamed
+                cards (Lust for Strength, Adjustment for Justice, The Aeon for Judgement) and reordered Major Arcana
+                (switching Justice and Strength positions).
+            </p>
+
+            <h4>Marseille Tarot (Historical)</h4>
+            <p>
+                Traditional European pattern dating to the 17th-18th centuries, featuring simple pip cards and
+                distinctive Medieval imagery. Preserved the original structure before Golden Dawn innovations.
+                Favored by some practitioners for its direct symbolic language and historical authenticity.
+            </p>
+
+            <h3>Cultural Adaptations</h3>
+
+            <div class="card-grid">
+                <div class="card-item">
+                    <div class="card-title">Oracle Cards</div>
+                    <div class="card-description">
+                        Decks that vary from traditional Tarot structure, often themed around specific traditions
+                        (angels, goddesses, animals, chakras) with variable card numbers and unique interpretations.
+                    </div>
+                </div>
+                <div class="card-item">
+                    <div class="card-title">Lenormand</div>
+                    <div class="card-description">
+                        36-card French divination system with concrete, literal meanings. Cards often read in
+                        combinations rather than individually, creating narrative sentences.
+                    </div>
+                </div>
+                <div class="card-item">
+                    <div class="card-title">Kipper Cards</div>
+                    <div class="card-description">
+                        German fortune-telling system featuring 36 cards depicting everyday 19th-century scenes
+                        and people, emphasizing practical, mundane matters.
+                    </div>
+                </div>
+                <div class="card-item">
+                    <div class="card-title">African Diaspora</div>
+                    <div class="card-description">
+                        Tarot integrated into Hoodoo, Vodou, and Santería practices, often combined with other
+                        divination tools and spiritual work.
+                    </div>
+                </div>
+            </div>
+
+            <h3>Psychological Approaches</h3>
+            <p>
+                Carl Jung's concept of archetypes significantly influenced modern Tarot interpretation. Many
+                contemporary readers view the Major Arcana as representing universal patterns in the collective
+                unconscious. Jungian analysts including Robert Wang and Sallie Nichols have written extensively
+                on Tarot as a tool for individuation and psychological integration.
+            </p>
+
+            <p>
+                The therapeutic use of Tarot has grown, with counselors using cards as conversation prompts,
+                helping clients externalize internal conflicts and access intuitive wisdom without necessarily
+                claiming predictive power.
+            </p>
+        </section>
+
+        <!-- PRIMARY SOURCES -->
+        <section class="section">
+            <h2>Primary Sources & Further Reading</h2>
+
+            <h3>Foundational Texts</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Waite, Arthur Edward. <em>The Pictorial Key to the Tarot</em> (1910)</strong><br>
+                    Original companion to the Rider-Waite-Smith deck, containing Waite's explanations of symbolism,
+                    divinatory meanings, and the Kabbalistic framework underlying the deck. Essential primary source
+                    for understanding the most influential modern Tarot system.
+                </li>
+                <li class="source-item">
+                    <strong>Crowley, Aleister. <em>The Book of Thoth</em> (1944)</strong><br>
+                    Comprehensive explanation of Crowley's Thoth Tarot, integrating Thelemic philosophy, Egyptian
+                    mythology, Kabbalah, astrology, and alchemy. Dense with esoteric correspondences and magical theory.
+                </li>
+                <li class="source-item">
+                    <strong>Lévi, Éliphas. <em>Transcendental Magic: Its Doctrine and Ritual</em> (1855-56)</strong><br>
+                    Influential work establishing connections between Tarot trumps and the Hebrew alphabet,
+                    foundational to all subsequent Western esoteric Tarot interpretation. Translated by A.E. Waite.
+                </li>
+                <li class="source-item">
+                    <strong>Case, Paul Foster. <em>The Tarot: A Key to the Wisdom of the Ages</em> (1947)</strong><br>
+                    Golden Dawn perspective on Tarot symbolism with detailed color symbolism, Kabbalistic Tree of Life
+                    correspondences, and meditative practices. Founder of Builders of the Adytum (BOTA).
+                </li>
+            </ul>
+
+            <h3>Historical & Academic Studies</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Decker, Ronald, Thierry Depaulis, and Michael Dummett. <em>A Wicked Pack of Cards:
+                    The Origins of the Occult Tarot</em> (1996)</strong><br>
+                    Scholarly examination of Tarot's historical development from Italian playing cards to occult
+                    tool, debunking many myths while documenting the actual evolution of esoteric associations.
+                </li>
+                <li class="source-item">
+                    <strong>Kaplan, Stuart R. <em>The Encyclopedia of Tarot</em> (4 volumes, 1978-2005)</strong><br>
+                    Comprehensive reference documenting thousands of decks, historical development, and variations
+                    across cultures. Invaluable resource for understanding Tarot's diversity.
+                </li>
+                <li class="source-item">
+                    <strong>Place, Robert M. <em>The Tarot: History, Symbolism, and Divination</em> (2005)</strong><br>
+                    Accessible scholarly work tracing Tarot from Renaissance Italy through its occult transformation,
+                    examining historical context and symbolic development.
+                </li>
+            </ul>
+
+            <h3>Interpretive & Practical Guides</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Nichols, Sallie. <em>Jung and Tarot: An Archetypal Journey</em> (1980)</strong><br>
+                    Jungian analysis of Major Arcana as representing stages of psychological individuation,
+                    connecting Tarot symbolism to depth psychology and universal archetypes.
+                </li>
+                <li class="source-item">
+                    <strong>Pollack, Rachel. <em>Seventy-Eight Degrees of Wisdom</em> (1980, revised 1997)</strong><br>
+                    Influential modern interpretation combining historical symbolism, Kabbalistic correspondences,
+                    and intuitive reading techniques. Widely considered one of the best comprehensive guides.
+                </li>
+                <li class="source-item">
+                    <strong>Greer, Mary K. <em>Tarot for Your Self: A Workbook for Personal Transformation</em> (1984)</strong><br>
+                    Pioneering work on using Tarot for self-exploration and personal growth rather than
+                    fortune-telling, with exercises and journaling techniques.
+                </li>
+            </ul>
+        </section>
+
+        <!-- CROSS-REFERENCES -->
+        <section class="section">
+            <h2>Cross-References & Related Practices</h2>
+
+            <h3>Related Divination Systems</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="astrology.html" class="cross-ref">Astrology - Planetary & Zodiacal Correspondences</a>
+                <a href="i-ching.html" class="cross-ref">I Ching - Hexagram Divination</a>
+                <a href="runes.html" class="cross-ref">Runes - Germanic Symbol System</a>
+                <a href="geomancy.html" class="cross-ref">Geomancy - Earth Divination</a>
+            </div>
+
+            <h3>Associated Magical Traditions</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../ritual/ceremonial-magic.html" class="cross-ref">Ceremonial Magic</a>
+                <a href="../texts/sefer-yetzirah.html" class="cross-ref">Kabbalah & Tree of Life</a>
+                <a href="../ritual/alchemy.html" class="cross-ref">Alchemy - Hermetic Philosophy</a>
+                <a href="../energy/middle-pillar.html" class="cross-ref">Middle Pillar Ritual</a>
+            </div>
+
+            <h3>Archetypal Connections</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../../archetypes/index.html" class="cross-ref">The Hero's Journey</a>
+                <a href="../../archetypes/index.html" class="cross-ref">The Sage/Hermit</a>
+                <a href="../../archetypes/index.html" class="cross-ref">The Magician/Wizard</a>
+                <a href="../../archetypes/index.html" class="cross-ref">The Shadow</a>
+            </div>
+
+            <h3>Mythological Correspondences</h3>
+            <p>
+                Major Arcana cards connect to deities and mythological figures across traditions:
+            </p>
+            <ul>
+                <li><strong>The Fool:</strong> Dionysus (Greek), Loki (Norse), Holy Fool (Christian)</li>
+                <li><strong>The Magician:</strong> Hermes/Mercury, Thoth, Odin</li>
+                <li><strong>The High Priestess:</strong> Isis, Artemis, Persephone</li>
+                <li><strong>The Empress:</strong> Venus/Aphrodite, Demeter, Freya</li>
+                <li><strong>The Emperor:</strong> Zeus/Jupiter, Horus, Thor</li>
+                <li><strong>Death:</strong> Hades, Anubis, Yama, the Morrigan</li>
+                <li><strong>The Star:</strong> Ishtar, Inanna, Nut</li>
+            </ul>
+        </section>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel">
+            <h3>Explore Related Content</h3>
+
+            <h4 style="color: var(--color-secondary); margin: var(--space-4) 0;">Archetype Connections</h4>
+            <div class="interlink-grid">
+                <a href="../../archetypes/index.html" class="archetype-link-card" data-smart>
+                    <div class="card-icon">&#9876;</div>
+                    <div class="card-content">
+                        <h4>The Hero's Journey</h4>
+                        <span>The Fool's path through the Major Arcana</span>
+                    </div>
+                </a>
+                <a href="../../archetypes/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128302;</div>
+                    <div class="card-content">
+                        <h4>The Magician Archetype</h4>
+                        <span>Will and transformation</span>
+                    </div>
+                </a>
+                <a href="../../archetypes/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128218;</div>
+                    <div class="card-content">
+                        <h4>The Sage / Hermit</h4>
+                        <span>Inner wisdom and guidance</span>
+                    </div>
+                </a>
+                <a href="../../archetypes/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#127761;</div>
+                    <div class="card-content">
+                        <h4>The Shadow</h4>
+                        <span>The Devil and Tower cards</span>
+                    </div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--space-6) 0 var(--space-4) 0;">Cross-Cultural Parallels</h4>
+            <div class="interlink-grid">
+                <a href="../../mythos/jewish/index.html" class="parallel-card" data-smart>
+                    <div class="card-icon">&#10017;</div>
+                    <div class="card-content">
+                        <h4>Kabbalah & Tree of Life</h4>
+                        <span>Hebrew letter correspondences</span>
+                    </div>
+                </a>
+                <a href="../../mythos/egyptian/index.html" class="parallel-card" data-smart>
+                    <div class="card-icon">&#128737;</div>
+                    <div class="card-content">
+                        <h4>Egyptian Mysteries</h4>
+                        <span>Thoth and Book of Thoth</span>
+                    </div>
+                </a>
+                <a href="../../mythos/greek/index.html" class="parallel-card">
+                    <div class="card-icon">&#127981;</div>
+                    <div class="card-content">
+                        <h4>Greek Mythology</h4>
+                        <span>Archetypal deity correspondences</span>
+                    </div>
+                </a>
+                <a href="../../mythos/hindu/index.html" class="parallel-card">
+                    <div class="card-icon">&#128744;</div>
+                    <div class="card-content">
+                        <h4>Hindu Symbolism</h4>
+                        <span>Chakra and card connections</span>
+                    </div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--space-6) 0 var(--space-4) 0;">See Also</h4>
+            <div class="interlink-grid">
+                <a href="astrology.html" class="parallel-card">
+                    <div class="card-icon">&#9788;</div>
+                    <div class="card-content">
+                        <h4>Astrological Correspondences</h4>
+                        <span>Zodiac and planetary cards</span>
+                    </div>
+                </a>
+                <a href="../texts/sefer-yetzirah.html" class="parallel-card">
+                    <div class="card-icon">&#128220;</div>
+                    <div class="card-content">
+                        <h4>Sefer Yetzirah</h4>
+                        <span>Hebrew letter mysticism</span>
+                    </div>
+                </a>
+                <a href="../ritual/ceremonial-magic.html" class="parallel-card">
+                    <div class="card-icon">&#10030;</div>
+                    <div class="card-content">
+                        <h4>Ceremonial Magic</h4>
+                        <span>Golden Dawn Tarot system</span>
+                    </div>
+                </a>
+                <a href="../energy/middle-pillar.html" class="parallel-card">
+                    <div class="card-icon">&#127793;</div>
+                    <div class="card-content">
+                        <h4>Middle Pillar Ritual</h4>
+                        <span>Tree of Life practice</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- NAVIGATION -->
+        <div class="nav-section">
+            <h3 style="color: var(--color-primary); margin-bottom: var(--space-5);">Continue Exploring</h3>
+            <a href="../index.html" class="nav-button">Magical Systems Index</a>
+            <a href="i-ching.html" class="nav-button">I Ching</a>
+            <a href="runes.html" class="nav-button">Runes</a>
+            <a href="../../index.html" class="nav-button">Home</a>
+        </div>
+    </div>
+
+    <!-- Theme Picker UI -->
+</body>
+</html>

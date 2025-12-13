@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kabbalah & Modern Physics - Pneuma Field Integration</title>
+<link href="../../../themes/theme-base.css" rel="stylesheet"/>
+<link href="../../../themes/corpus-links.css" rel="stylesheet"/>
+<link rel="stylesheet" href="../../../themes/smart-links.css">
+<script defer src="../../../themes/smart-links.js"></script>
+<script defer src="../../../themes/theme-animations.js"></script>
+<script defer src="../../../themes/theme-picker.js"></script>
+<style>
+    .theory-banner {
+        background: linear-gradient(135deg, rgba(var(--color-primary-rgb, 139, 127, 255), 0.2), rgba(var(--color-secondary-rgb, 255, 126, 182), 0.2));
+        border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+        border-radius: var(--radius-xl, 20px);
+        padding: 2rem;
+        margin: 2rem 0;
+        text-align: center;
+    }
+
+    .theory-banner h2 {
+        color: var(--accent-primary);
+        margin-top: 0;
+        font-size: 2rem;
+    }
+
+    .user-theory-badge {
+        display: inline-block;
+        background: rgba(255, 193, 7, 0.2);
+        border: 1px solid rgba(255, 193, 7, 0.6);
+        color: #ffc107;
+        padding: 0.5rem 1.5rem;
+        border-radius: var(--radius-xl, 20px);
+        font-weight: 600;
+        margin: 1rem 0;
+        font-size: 0.9rem;
+    }
+
+    .mapping-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .mapping-card {
+        background: linear-gradient(135deg, rgba(var(--color-primary-rgb, 139, 127, 255), 0.1), rgba(var(--color-secondary-rgb, 255, 126, 182), 0.05));
+        border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+        border-radius: var(--radius-lg, 15px);
+        padding: 2rem;
+        backdrop-filter: blur(10px);
+        transition: all var(--transition-base, 0.3s ease);
+    }
+
+    .mapping-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.6);
+        box-shadow: 0 8px 30px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+    }
+
+    .mapping-card h3 {
+        color: var(--accent-primary);
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .mapping-arrow {
+        font-size: 2rem;
+        color: var(--accent-secondary);
+        text-align: center;
+        margin: 1rem 0;
+    }
+
+    .kabbalistic-term {
+        background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+        padding: 1rem;
+        border-radius: var(--radius-md, 10px);
+        border-left: 4px solid var(--color-primary);
+        margin-bottom: 1rem;
+    }
+
+    .kabbalistic-term h4 {
+        color: var(--accent-primary);
+        margin: 0 0 0.5rem 0;
+        font-size: 1.2rem;
+    }
+
+    .kabbalistic-term .hebrew {
+        font-size: 1.3rem;
+        color: var(--accent-secondary);
+        direction: rtl;
+        margin-bottom: 0.5rem;
+    }
+
+    .physics-term {
+        background: rgba(var(--color-secondary-rgb, 255, 126, 182), 0.15);
+        padding: 1rem;
+        border-radius: var(--radius-md, 10px);
+        border-left: 4px solid var(--color-secondary);
+    }
+
+    .physics-term h4 {
+        color: var(--accent-secondary);
+        margin: 0 0 0.5rem 0;
+        font-size: 1.2rem;
+    }
+
+    .diagram-container {
+        background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+        border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+        border-radius: var(--radius-lg, 15px);
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+
+    .diagram-container h3 {
+        color: var(--accent-primary);
+        text-align: center;
+        margin-top: 0;
+    }
+
+    .emanation-diagram {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .dimension-level {
+        background: linear-gradient(135deg, rgba(var(--color-primary-rgb, 139, 127, 255), 0.3), rgba(var(--color-secondary-rgb, 255, 126, 182), 0.2));
+        border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.5);
+        border-radius: var(--radius-lg, 15px);
+        padding: 1.5rem;
+        width: 100%;
+        max-width: 600px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .dimension-level:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+    }
+
+    .dimension-level h4 {
+        color: var(--accent-primary);
+        margin: 0 0 0.5rem 0;
+        font-size: 1.3rem;
+    }
+
+    .dimension-number {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-xl, 20px);
+        font-weight: 700;
+        color: var(--accent-primary);
+    }
+
+    .flow-arrow {
+        font-size: 2.5rem;
+        color: var(--accent-secondary);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    .sefirot-vessel {
+        background: linear-gradient(135deg, rgba(var(--color-primary-rgb, 139, 127, 255), 0.2), transparent);
+        border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+        border-radius: var(--radius-lg, 15px);
+        padding: 1rem;
+        margin: 0.5rem 0;
+        transition: all 0.3s ease;
+    }
+
+    .sefirot-vessel:hover {
+        border-color: var(--color-primary);
+        background: linear-gradient(135deg, rgba(var(--color-primary-rgb, 139, 127, 255), 0.3), transparent);
+    }
+
+    .sefirot-vessel h5 {
+        color: var(--accent-primary);
+        margin: 0 0 0.3rem 0;
+    }
+
+    .formula {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 1rem;
+        border-radius: var(--radius-md, 10px);
+        font-family: 'Courier New', monospace;
+        color: #64ffda;
+        margin: 1rem 0;
+        overflow-x: auto;
+        border: 1px solid rgba(100, 255, 218, 0.3);
+    }
+
+    .thermal-time-section {
+        background: linear-gradient(135deg, rgba(var(--color-secondary-rgb, 255, 126, 182), 0.1), rgba(var(--color-primary-rgb, 139, 127, 255), 0.1));
+        border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+        border-radius: var(--radius-lg, 15px);
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+
+    .thermal-time-section h3 {
+        color: var(--accent-secondary);
+        margin-top: 0;
+    }
+
+    .consciousness-box {
+        background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+        border-left: 4px solid var(--color-primary);
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border-radius: var(--radius-md, 10px);
+    }
+
+    .consciousness-box h4 {
+        color: var(--accent-primary);
+        margin-top: 0;
+    }
+
+    .reference-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+        padding: 0.8rem 1.5rem;
+        border-radius: var(--radius-lg, 15px);
+        text-decoration: none;
+        color: var(--accent-primary);
+        border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+        transition: all 0.3s ease;
+        margin: 0.5rem;
+    }
+
+    .reference-link:hover {
+        background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+        border-color: var(--color-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+    }
+
+    .reference-section {
+        margin: 3rem 0;
+    }
+
+    .key-insight {
+        background: linear-gradient(135deg, rgba(100, 255, 218, 0.1), rgba(139, 127, 255, 0.1));
+        border: 2px solid rgba(100, 255, 218, 0.3);
+        border-radius: var(--radius-lg, 15px);
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .key-insight h4 {
+        color: #64ffda;
+        margin-top: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .integration-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .integration-card {
+        background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+        border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+        border-radius: var(--radius-lg, 15px);
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .integration-card:hover {
+        border-color: var(--color-primary);
+        transform: translateY(-3px);
+    }
+
+    .integration-card h4 {
+        color: var(--accent-primary);
+        margin-top: 0;
+    }
+
+    .section-divider {
+        border: none;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+        margin: 3rem 0;
+    }
+
+    /* Emanation Diagram Enhancements */
+    .dimension-level {
+        transition: all 0.4s ease;
+    }
+
+    .dimension-level:hover {
+        transform: scale(1.03);
+        box-shadow: 0 8px 30px rgba(var(--color-primary-rgb, 139, 127, 255), 0.5);
+    }
+
+    .dimension-level rect {
+        transition: all 0.3s ease;
+    }
+
+    .dimension-level:hover rect {
+        stroke-width: 3px;
+        filter: drop-shadow(0 0 10px currentColor);
+    }
+</style>
+</head>
+<body>
+<div id="theme-picker-container"></div>
+<header>
+    <div class="header-content">
+        <h1>Kabbalah & Modern Physics</h1>
+        <p>Pneuma Field Integration with Kabbalistic Cosmology</p>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../../index.html">Home</a> &rarr; <a href="../../index.html">Mythos</a> &rarr; <a href="../index.html">Jewish</a> &rarr; <a href="index.html">Kabbalah</a> &rarr; <span>Physics Integration</span>
+</nav>
+<main>
+
+
+
+<!-- Interlink Panel Section -->
+<section class="interlink-panel" style="margin-top: 3rem;">
+    <h3 class="interlink-header">
+        <span class="interlink-icon">🔗</span>
+        Related Topics
+    </h3>
+
+    <div class="interlink-grid">
+        <div class="interlink-section">
+            <div class="interlink-section-title">Kabbalistic Foundations</div>
+            <a href="concepts.html" class="item-link-card">
+                <div class="item-icon">📚</div>
+                <div class="item-info">
+                    <h4>Core Concepts</h4>
+                    <p class="item-type">Ein Sof, Tzimtzum, Ohr</p>
+                </div>
+            </a>
+            <a href="sefirot/index.html" class="item-link-card" style="margin-top: 0.5rem;">
+                <div class="item-icon">🌳</div>
+                <div class="item-info">
+                    <h4>The Sefirot</h4>
+                    <p class="item-type">Ten Divine Emanations</p>
+                </div>
+            </a>
+            <a href="worlds/index.html" class="item-link-card" style="margin-top: 0.5rem;">
+                <div class="item-icon">🌐</div>
+                <div class="item-info">
+                    <h4>Four Worlds</h4>
+                    <p class="item-type">Levels of Reality</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="interlink-section">
+            <div class="interlink-section-title">Practice & Application</div>
+            <a href="names/index.html" class="item-link-card">
+                <div class="item-icon">🔤</div>
+                <div class="item-info">
+                    <h4>72 Names of God</h4>
+                    <p class="item-type">Sacred formulas</p>
+                </div>
+            </a>
+            <a href="sparks/index.html" class="item-link-card" style="margin-top: 0.5rem;">
+                <div class="item-icon">⚡</div>
+                <div class="item-info">
+                    <h4>288 Sparks</h4>
+                    <p class="item-type">Complete system</p>
+                </div>
+            </a>
+            <a href="ascension.html" class="item-link-card" style="margin-top: 0.5rem;">
+                <div class="item-icon">🪜</div>
+                <div class="item-info">
+                    <h4>Ascension Path</h4>
+                    <p class="item-type">Spiritual journey</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="interlink-section">
+            <div class="interlink-section-title">Cross-Tradition Physics</div>
+            <a href="../../../index.html" class="magic-link-card">
+                <div class="magic-icon">🕉️</div>
+                <div class="magic-info">
+                    <h4>Hindu Cosmology</h4>
+                    <p class="magic-type">Brahman & Maya</p>
+                </div>
+                <span class="tradition-badge">Hindu</span>
+            </a>
+            <a href="../../islamic/cosmology/index.html" class="magic-link-card" style="margin-top: 0.5rem;">
+                <div class="magic-icon">☪️</div>
+                <div class="magic-info">
+                    <h4>Sufi Cosmology</h4>
+                    <p class="magic-type">Divine emanation</p>
+                </div>
+                <span class="tradition-badge">Islamic</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<div class="see-also-section">
+    <h4>📚 See Also</h4>
+    <div class="see-also-links">
+        <a href="index.html" class="see-also-link"><span>🏠</span> Kabbalah Home</a>
+        <a href="concepts.html" class="see-also-link"><span>📖</span> Core Concepts</a>
+        <a href="sefirot/index.html" class="see-also-link"><span>🌳</span> Sefirot</a>
+        <a href="worlds/index.html" class="see-also-link"><span>🌐</span> Four Worlds</a>
+        <a href="../index.html" class="see-also-link"><span>✡️</span> Jewish Mythology</a>
+    </div>
+</div>
+
+</main>
+<footer>
+<p>
+    <strong>Kabbalah & Physics Integration</strong> - User Theory<br/>
+    Exploring connections between ancient mysticism and modern physics<br/>
+    <a href="https://www.xn--metaphysic-m6a.com/" target="_blank">Visit Metaphysica</a> |
+    <a href="https://www.sefaria.org/texts/Kabbalah" target="_blank">Study Kabbalah at Sefaria</a>
+</p>
+</footer>
+</body>
+</html>
+
+<!-- Author's Theory Section -->
+<section style="margin-top: 2rem; padding: 0 2rem;">
+    <details style="background: rgba(147, 51, 234, 0.1); border: 2px solid var(--color-primary); border-radius: var(--radius-lg); padding: 1.5rem; margin: 1rem 0;">
+        <summary style="cursor: pointer; font-size: 1.2rem; font-weight: bold; color: var(--color-primary);">
+            💡 Author's Theories: Kabbalah-Physics Integration
+        </summary>
+        <div style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: var(--radius-md);">
+            <p style="line-height: 1.8;">
+                The author has developed theories connecting Kabbalistic concepts to modern theoretical physics,
+                including <strong>string theory, M-theory, Calabi-Yau manifolds, and dimensional hierarchies</strong>.
+                These interpretations explore potential structural correspondences between ancient mystical frameworks
+                and contemporary scientific models.
+            </p>
+            <p style="margin-top: 1rem; line-height: 1.8;">
+                <strong>⚠️ Please Note:</strong> These are <em>speculative personal theories</em>, not established physics
+                or Kabbalistic scholarship. The physics models referenced (string theory, M-theory) are themselves
+                highly speculative and unproven.
+            </p>
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <a href="../../../../theories/user-submissions/kabbalah-physics-integration.html"
+                   style="display: inline-block; background: linear-gradient(135deg, var(--color-primary), #FFD700);
+                          color: white; padding: 0.75rem 2rem; border-radius: var(--radius-md); text-decoration: none;
+                          font-weight: bold; transition: transform 0.2s;">
+                    📖 Read Full Theory & Analysis →
+                </a>
+            </div>
+        </div>
+    </details>
+</section>
+

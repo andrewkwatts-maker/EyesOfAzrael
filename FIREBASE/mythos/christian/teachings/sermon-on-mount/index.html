@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sermon on the Mount - Christian Teachings</title>
+<link href="../../../../themes/theme-base.css" rel="stylesheet"/>
+<link href="../../../../styles.css" rel="stylesheet"/>
+<link href="../../../../themes/corpus-links.css" rel="stylesheet"/>
+<link rel="stylesheet" href="../../../../themes/smart-links.css">
+<script defer src="../../../../themes/smart-links.js"></script>
+<script defer src="../../../../themes/theme-animations.js"></script>
+<script defer src="../../../../themes/theme-picker.js"></script>
+<style>
+    /* Modern Glass UI - Sermon on the Mount */
+
+    h1, h2, h3, h4 {
+        color: var(--color-primary);
+    }
+
+    h1 a, h2 a, h3 a, h4 a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover {
+        color: var(--color-secondary);
+        text-decoration: underline;
+    }
+
+    .breadcrumb {
+        position: sticky;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        z-index: 999;
+        background: rgba(var(--color-surface-rgb), 0.9);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: var(--spacing-xs) var(--spacing-lg);
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+        border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
+    }
+
+    .breadcrumb a {
+        color: var(--color-primary);
+        text-decoration: none;
+        transition: all var(--transition-fast);
+    }
+
+    .breadcrumb a:hover {
+        color: var(--color-secondary);
+        text-decoration: underline;
+    }
+
+    .hero-section {
+        background: linear-gradient(135deg,
+            rgba(var(--color-primary-rgb), 0.8),
+            rgba(var(--color-secondary-rgb), 0.8));
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 2px solid var(--color-primary);
+        color: var(--color-text-primary);
+        padding: 3rem 2rem;
+        text-align: center;
+        border-radius: var(--radius-xl);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-xl);
+    }
+
+    .hero-section .hero-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .scripture-card {
+        background: rgba(var(--color-surface-rgb), 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-left: 4px solid var(--color-primary);
+        padding: var(--spacing-xl);
+        margin: var(--spacing-lg) 0;
+        border-radius: var(--radius-md);
+        font-style: italic;
+        line-height: 1.8;
+    }
+
+    .structure-diagram {
+        background: rgba(var(--color-primary-rgb), 0.05);
+        border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin: 2rem 0;
+        text-align: center;
+    }
+
+    .structure-tree {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .structure-level {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .structure-node {
+        background: linear-gradient(135deg,
+            rgba(var(--color-primary-rgb), 0.15),
+            rgba(var(--color-secondary-rgb), 0.15));
+        border: 2px solid var(--color-primary);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.5rem;
+        min-width: 150px;
+        transition: all var(--transition-base);
+    }
+
+    .structure-node:hover {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .structure-connector {
+        color: var(--color-primary);
+        font-size: 2rem;
+    }
+
+    .teaching-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--spacing-lg);
+        margin: var(--spacing-xl) 0;
+    }
+
+    .teaching-card {
+        background: rgba(var(--color-surface-rgb), 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        transition: all var(--transition-base);
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+    }
+
+    .teaching-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+        border-color: var(--color-primary);
+    }
+
+    .teaching-card.beatitudes {
+        border-left: 4px solid gold;
+    }
+
+    .teaching-card.piety {
+        border-left: 4px solid #4169E1;
+    }
+
+    .teaching-card.wisdom {
+        border-left: 4px solid #32CD32;
+    }
+
+    .teaching-icon {
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .teaching-card h3 {
+        color: var(--color-primary);
+        margin: 0.5rem 0;
+    }
+
+    .teaching-card p {
+        color: var(--color-text-secondary);
+        line-height: 1.6;
+        margin: 0.5rem 0;
+    }
+
+    .verse-ref {
+        font-size: 0.85rem;
+        color: var(--color-text-secondary);
+        font-style: italic;
+    }
+
+    .section-divider {
+        text-align: center;
+        margin: 3rem 0 2rem 0;
+        color: var(--color-primary);
+        font-size: 2rem;
+    }
+
+    .context-box {
+        background: linear-gradient(135deg,
+            rgba(gold, 0.1),
+            rgba(var(--color-primary-rgb), 0.1));
+        border: 2px solid gold;
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+
+    .context-box h3 {
+        color: gold;
+        margin-top: 0;
+    }
+
+    @media (max-width: 768px) {
+        .teaching-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .hero-section {
+            padding: 2rem 1rem;
+        }
+    }
+</style>
+</head>
+<body>
+<div id="theme-picker"></div>
+
+<header>
+    <div class="header-content">
+        <h1>✝️ <a class="corpus-link" data-term="Christian" data-tradition="christian" href="../../corpus-search.html?term=christian">Christian Teachings</a></h1>
+    </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../../../mythos/index.html">Home</a> →
+    <a href="../../index.html">Christian</a> →
+    <a href="../index.html">Teachings</a> →
+    <span>Sermon on the Mount</span>
+</nav>
+
+<main>
+<div class="hero-section">
+    <div class="hero-icon">⛰️</div>
+    <h2>The Sermon on the Mount</h2>
+    <p style="font-size: 1.3rem; max-width: 900px; margin: 1rem auto;">
+        <strong>Matthew 5-7</strong>: Jesus as the New Moses, delivering the manifesto of God's Kingdom from the mountain.
+        The greatest sermon ever preached - revealing both the impossible standard of righteousness
+        and pointing to Christ himself as the only fulfillment.
+    </p>
+</div>
+
+<section>
+    <h2>📖 The Full Text</h2>
+    <div class="scripture-card">
+        <p><strong>Matthew 5:1-2</strong> - "Now when Jesus saw the crowds, he went up on a mountainside and sat down. His disciples came to him, and he began to teach them."</p>
+    </div>
+
+    <div class="context-box">
+        <h3>⛰️ Jesus as the New Moses</h3>
+        <p>Just as Moses ascended Mount Sinai to receive the Law (Exodus 19-20), Jesus ascends the mountain to deliver the new covenant. Where Moses gave the Ten Commandments inscribed on stone tablets, Jesus gives the Beatitudes and kingdom ethics written on the heart. The Sermon on the Mount is not just moral teaching - it is the authoritative word of God incarnate, fulfilling and transcending the old law.</p>
+        <ul>
+            <li><strong>Moses on Sinai</strong> (Exodus 19-20) → <strong>Jesus on the Mount</strong> (Matthew 5-7)</li>
+            <li><strong>Old Covenant</strong> → <strong>New Covenant</strong></li>
+            <li><strong>External Law</strong> → <strong>Internal Transformation</strong></li>
+            <li><strong>10 Commandments</strong> → <strong>Beatitudes & Kingdom Ethics</strong></li>
+        </ul>
+    </div>
+</section>
+
+<section>
+    <h2>🏛️ Three-Part Structure</h2>
+    <div class="structure-diagram">
+        <div class="structure-tree">
+            <div class="structure-level">
+                <div class="structure-node">
+                    <strong>SERMON ON THE MOUNT</strong>
+                    <div class="verse-ref">Matthew 5-7</div>
+                </div>
+            </div>
+            <div class="structure-connector">↓ ↓ ↓</div>
+            <div class="structure-level">
+                <div class="structure-node beatitudes">
+                    <strong>BEATITUDES</strong>
+                    <div class="verse-ref">Matthew 5:3-12</div>
+                    <div>Kingdom Character</div>
+                </div>
+                <div class="structure-node piety">
+                    <strong>RIGHTEOUSNESS</strong>
+                    <div class="verse-ref">Matthew 5:13-6:34</div>
+                    <div>Kingdom Ethics</div>
+                </div>
+                <div class="structure-node wisdom">
+                    <strong>WISDOM</strong>
+                    <div class="verse-ref">Matthew 7:1-27</div>
+                    <div>Kingdom Wisdom</div>
+                </div>
+            </div>
+        </div>
+        <p style="margin-top: 2rem; color: var(--color-text-secondary); font-style: italic;">
+            The Sermon progresses from character (who we are) to conduct (how we live) to wisdom (how we discern).
+        </p>
+    </div>
+</section>
+
+<div class="section-divider">💎 THE BEATITUDES 💎</div>
+
+<section>
+    <h2>The Eight Blessings (Matthew 5:3-12)</h2>
+    <p>The Beatitudes (from Latin <em>beatus</em>, "blessed"; Greek <em>μακάριος</em>, <em>makarios</em>) are the opening salvos of Jesus' sermon - revolutionary declarations of who is truly blessed in God's kingdom. They turn worldly values upside down and paint a portrait of Jesus himself.</p>
+
+    <div class="teaching-grid">
+        <a href="blessed-poor-in-spirit.html" class="teaching-card beatitudes">
+            <div class="teaching-icon">💎</div>
+            <h3>Blessed are the Poor in Spirit</h3>
+            <p>"For theirs is the kingdom of heaven"</p>
+            <div class="verse-ref">Matthew 5:3</div>
+        </a>
+
+        <a href="blessed-mourn.html" class="teaching-card beatitudes">
+            <div class="teaching-icon">😢</div>
+            <h3>Blessed are Those Who Mourn</h3>
+            <p>"For they will be comforted"</p>
+            <div class="verse-ref">Matthew 5:4</div>
+        </a>
+
+        <a href="blessed-meek.html" class="teaching-card beatitudes">
+            <div class="teaching-icon">🕊️</div>
+            <h3>Blessed are the Meek</h3>
+            <p>"For they will inherit the earth"</p>
+            <div class="verse-ref">Matthew 5:5</div>
+        </a>
+
+        <a href="blessed-hunger-righteousness.html" class="teaching-card beatitudes">
+            <div class="teaching-icon">🍞</div>
+            <h3>Blessed are Those Who Hunger and Thirst</h3>
+            <p>"For they will be filled"</p>
+            <div class="verse-ref">Matthew 5:6</div>
+        </a>
+
+        <a href="blessed-merciful.html" class="teaching-card beatitudes">
+            <div class="teaching-icon">❤️</div>
+            <h3>Blessed are the Merciful</h3>
+            <p>"For they will be shown mercy"</p>
+            <div class="verse-ref">Matthew 5:7</div>
+        </a>
+
+        <a href="blessed-pure-heart.html" class="teaching-card beatitudes">
+            <div class="teaching-icon">✨</div>
+            <h3>Blessed are the Pure in Heart</h3>
+            <p>"For they will see God"</p>
+            <div class="verse-ref">Matthew 5:8</div>
+        </a>
+
+        <a href="blessed-peacemakers.html" class="teaching-card beatitudes">
+            <div class="teaching-icon">🕊️</div>
+            <h3>Blessed are the Peacemakers</h3>
+            <p>"For they will be called children of God"</p>
+            <div class="verse-ref">Matthew 5:9</div>
+        </a>
+
+        <a href="blessed-persecuted.html" class="teaching-card beatitudes">
+            <div class="teaching-icon">👑</div>
+            <h3>Blessed are the Persecuted</h3>
+            <p>"For theirs is the kingdom of heaven"</p>
+            <div class="verse-ref">Matthew 5:10-12</div>
+        </a>
+    </div>
+
+    <div style="text-align: center; margin: 2rem 0;">
+        <a href="beatitudes-overview.html" style="display: inline-block; background: linear-gradient(135deg, gold, var(--color-secondary)); color: #000; padding: 1rem 2rem; border-radius: var(--radius-full); text-decoration: none; font-weight: bold; transition: all var(--transition-base);">
+            View Complete Beatitudes Overview →
+        </a>
+    </div>
+</section>
+
+<div class="section-divider">⚖️ RIGHTEOUSNESS TEACHINGS ⚖️</div>
+
+<section>
+    <h2>Kingdom Ethics (Matthew 5:13-6:34)</h2>
+
+    <h3 style="color: var(--color-primary); margin-top: 2rem;">Identity & Law (5:13-20)</h3>
+    <div class="teaching-grid">
+        <a href="salt-and-light.html" class="teaching-card piety">
+            <div class="teaching-icon">🧂💡</div>
+            <h3>Salt and Light</h3>
+            <p>Disciples as preserving salt and illuminating light in the world</p>
+            <div class="verse-ref">Matthew 5:13-16</div>
+        </a>
+
+        <a href="fulfillment-of-law.html" class="teaching-card piety">
+            <div class="teaching-icon">📜</div>
+            <h3>Fulfillment of the Law</h3>
+            <p>"I have not come to abolish but to fulfill"</p>
+            <div class="verse-ref">Matthew 5:17-20</div>
+        </a>
+    </div>
+
+    <h3 style="color: var(--color-primary); margin-top: 2rem;">The Six Antitheses (5:21-48)</h3>
+    <p>"You have heard it said... but I say to you" - Jesus radicalizes the Law by addressing the heart, not just external behavior.</p>
+
+    <div class="teaching-grid">
+        <a href="anger-and-reconciliation.html" class="teaching-card piety">
+            <div class="teaching-icon">🔥</div>
+            <h3>Anger & Reconciliation</h3>
+            <p>Anger is murder in the heart</p>
+            <div class="verse-ref">Matthew 5:21-26</div>
+        </a>
+
+        <a href="adultery-and-lust.html" class="teaching-card piety">
+            <div class="teaching-icon">👁️</div>
+            <h3>Adultery & Lust</h3>
+            <p>Lust is adultery in the heart</p>
+            <div class="verse-ref">Matthew 5:27-30</div>
+        </a>
+
+        <a href="divorce.html" class="teaching-card piety">
+            <div class="teaching-icon">💔</div>
+            <h3>Divorce</h3>
+            <p>God's original intent for marriage</p>
+            <div class="verse-ref">Matthew 5:31-32</div>
+        </a>
+
+        <a href="oaths.html" class="teaching-card piety">
+            <div class="teaching-icon">🤝</div>
+            <h3>Oaths</h3>
+            <p>Let your yes be yes, your no be no</p>
+            <div class="verse-ref">Matthew 5:33-37</div>
+        </a>
+
+        <a href="non-retaliation.html" class="teaching-card piety">
+            <div class="teaching-icon">🔄</div>
+            <h3>Non-Retaliation</h3>
+            <p>Turn the other cheek, go the extra mile</p>
+            <div class="verse-ref">Matthew 5:38-42</div>
+        </a>
+
+        <a href="love-enemies.html" class="teaching-card piety">
+            <div class="teaching-icon">💚</div>
+            <h3>Love Your Enemies</h3>
+            <p>"Be perfect as your heavenly Father is perfect"</p>
+            <div class="verse-ref">Matthew 5:43-48</div>
+        </a>
+    </div>
+
+    <h3 style="color: var(--color-primary); margin-top: 2rem;">True Piety (Matthew 6)</h3>
+    <div class="teaching-grid">
+        <a href="giving-to-needy.html" class="teaching-card piety">
+            <div class="teaching-icon">💰</div>
+            <h3>Giving to the Needy</h3>
+            <p>Don't announce your charity</p>
+            <div class="verse-ref">Matthew 6:1-4</div>
+        </a>
+
+        <a href="lords-prayer.html" class="teaching-card piety">
+            <div class="teaching-icon">🙏</div>
+            <h3>The Lord's Prayer</h3>
+            <p>"Our Father in heaven, hallowed be your name..."</p>
+            <div class="verse-ref">Matthew 6:5-15</div>
+        </a>
+
+        <a href="fasting.html" class="teaching-card piety">
+            <div class="teaching-icon">🍽️</div>
+            <h3>Fasting</h3>
+            <p>Don't show you're fasting</p>
+            <div class="verse-ref">Matthew 6:16-18</div>
+        </a>
+
+        <a href="treasures-in-heaven.html" class="teaching-card piety">
+            <div class="teaching-icon">💎</div>
+            <h3>Treasures in Heaven</h3>
+            <p>Where your treasure is, there your heart will be</p>
+            <div class="verse-ref">Matthew 6:19-21</div>
+        </a>
+
+        <a href="eye-is-lamp.html" class="teaching-card piety">
+            <div class="teaching-icon">👁️</div>
+            <h3>The Eye is the Lamp</h3>
+            <p>If your eye is healthy, your whole body is full of light</p>
+            <div class="verse-ref">Matthew 6:22-23</div>
+        </a>
+
+        <a href="god-and-money.html" class="teaching-card piety">
+            <div class="teaching-icon">⚖️</div>
+            <h3>God and Money</h3>
+            <p>You cannot serve both God and mammon</p>
+            <div class="verse-ref">Matthew 6:24</div>
+        </a>
+
+        <a href="do-not-worry.html" class="teaching-card piety">
+            <div class="teaching-icon">🌺</div>
+            <h3>Do Not Worry</h3>
+            <p>Consider the lilies, the birds of the air</p>
+            <div class="verse-ref">Matthew 6:25-34</div>
+        </a>
+    </div>
+</section>
+
+<div class="section-divider">🦉 WISDOM TEACHINGS 🦉</div>
+
+<section>
+    <h2>Kingdom Wisdom (Matthew 7)</h2>
+    <div class="teaching-grid">
+        <a href="judge-not.html" class="teaching-card wisdom">
+            <div class="teaching-icon">⚖️</div>
+            <h3>Judge Not</h3>
+            <p>The log in your own eye, pearls before swine</p>
+            <div class="verse-ref">Matthew 7:1-6</div>
+        </a>
+
+        <a href="ask-seek-knock.html" class="teaching-card wisdom">
+            <div class="teaching-icon">🚪</div>
+            <h3>Ask, Seek, Knock</h3>
+            <p>Ask and it will be given; the Golden Rule</p>
+            <div class="verse-ref">Matthew 7:7-12</div>
+        </a>
+
+        <a href="narrow-gate.html" class="teaching-card wisdom">
+            <div class="teaching-icon">🚪</div>
+            <h3>The Narrow Gate</h3>
+            <p>Wide road to destruction, narrow gate to life</p>
+            <div class="verse-ref">Matthew 7:13-14</div>
+        </a>
+
+        <a href="false-prophets.html" class="teaching-card wisdom">
+            <div class="teaching-icon">🐺</div>
+            <h3>False Prophets</h3>
+            <p>You will know them by their fruits</p>
+            <div class="verse-ref">Matthew 7:15-20</div>
+        </a>
+
+        <a href="true-disciples.html" class="teaching-card wisdom">
+            <div class="teaching-icon">👥</div>
+            <h3>True Disciples</h3>
+            <p>Not everyone who says "Lord, Lord"</p>
+            <div class="verse-ref">Matthew 7:21-23</div>
+        </a>
+
+        <a href="wise-and-foolish-builders.html" class="teaching-card wisdom">
+            <div class="teaching-icon">🏠</div>
+            <h3>Wise & Foolish Builders</h3>
+            <p>House on rock vs. house on sand</p>
+            <div class="verse-ref">Matthew 7:24-27</div>
+        </a>
+
+        <a href="response-to-teaching.html" class="teaching-card wisdom">
+            <div class="teaching-icon">📢</div>
+            <h3>Response to the Sermon</h3>
+            <p>"He taught as one who had authority"</p>
+            <div class="verse-ref">Matthew 7:28-29</div>
+        </a>
+    </div>
+</section>
+
+<div class="section-divider">📚 SPECIAL TOPICS 📚</div>
+
+<section>
+    <h2>Understanding the Sermon</h2>
+    <div class="teaching-grid">
+        <a href="context.html" class="teaching-card">
+            <div class="teaching-icon">⛰️</div>
+            <h3>Setting & Context</h3>
+            <p>The mountain, the audience, Jesus as new Moses</p>
+        </a>
+
+        <a href="structure.html" class="teaching-card">
+            <div class="teaching-icon">🏛️</div>
+            <h3>Three-Part Structure</h3>
+            <p>Character, conduct, wisdom - the sermon's architecture</p>
+        </a>
+
+        <a href="sermon-vs-old-testament.html" class="teaching-card">
+            <div class="teaching-icon">📜</div>
+            <h3>Sermon vs. Old Testament</h3>
+            <p>How Jesus fulfills and transcends the Law</p>
+        </a>
+
+        <a href="impossible-standard.html" class="teaching-card">
+            <div class="teaching-icon">⛰️</div>
+            <h3>The Impossible Standard</h3>
+            <p>Revealing our need for grace and Christ as fulfiller</p>
+        </a>
+
+        <a href="sermon-and-kingdom.html" class="teaching-card">
+            <div class="teaching-icon">👑</div>
+            <h3>Sermon & the Kingdom</h3>
+            <p>The manifesto of God's kingdom ethics</p>
+        </a>
+
+        <a href="luke-sermon-on-plain.html" class="teaching-card">
+            <div class="teaching-icon">📖</div>
+            <h3>Luke's Sermon on the Plain</h3>
+            <p>Comparison with Luke 6:20-49</p>
+        </a>
+    </div>
+</section>
+
+<section class="see-also-section">
+    <h4>📚 See Also</h4>
+    <div class="see-also-links">
+        <a href="../../deities/jesus-christ.html" class="see-also-link">
+            <span>✝️</span> Jesus Christ
+        </a>
+        <a href="../../texts/gospels/matthew.html" class="see-also-link">
+            <span>📖</span> Gospel of Matthew
+        </a>
+        <a href="lords-prayer.html" class="see-also-link">
+            <span>🙏</span> Lord's Prayer
+        </a>
+        <a href="../index.html" class="see-also-link">
+            <span>📚</span> All Teachings
+        </a>
+        <a href="../../cosmology/kingdom-of-god.html" class="see-also-link">
+            <span>👑</span> Kingdom of God
+        </a>
+        <a href="../../index.html" class="see-also-link">
+            <span>✝️</span> Christian Index
+        </a>
+    </div>
+</section>
+
+</main>
+
+<footer>
+    <p>
+        <strong>World Mythos Explorer</strong> - The Sermon on the Mount<br/>
+        Matthew 5-7: Jesus as New Moses, Kingdom Manifesto<br/>
+        <a href="https://www.biblegateway.com/passage/?search=Matthew+5-7&version=NIV" target="_blank">Read Matthew 5-7 at BibleGateway</a>
+    </p>
+</footer>
+</body>
+</html>

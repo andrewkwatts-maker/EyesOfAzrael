@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picatrix - Ghāyat al-Ḥakīm</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-relaxed);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--spacing-4xl) var(--spacing-xl);
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .text-icon {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            margin-bottom: var(--spacing-md);
+            color: white;
+        }
+
+        .subtitle {
+            font-size: var(--font-size-2xl);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: var(--spacing-lg);
+            font-weight: var(--font-light);
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-lg);
+        }
+
+        .tradition-tag {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+        }
+
+        .breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-lg);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .breadcrumb a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: white;
+        }
+
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        h2 {
+            color: var(--color-primary);
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-lg);
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: var(--spacing-md);
+        }
+
+        h3 {
+            color: var(--color-secondary);
+            font-size: var(--font-size-2xl);
+            margin: var(--spacing-xl) 0 var(--spacing-md);
+        }
+
+        h4 {
+            color: var(--color-accent);
+            font-size: var(--font-size-xl);
+            margin: var(--spacing-lg) 0 var(--spacing-sm);
+        }
+
+        p {
+            margin-bottom: var(--spacing-md);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin: var(--spacing-md) 0 var(--spacing-md) var(--spacing-2xl);
+            line-height: var(--leading-relaxed);
+        }
+
+        li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .quote-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-md);
+            font-style: italic;
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-secondary-rgb), 0.15);
+            border: 2px solid var(--color-secondary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .warning-box {
+            background: rgba(255, 140, 0, 0.15);
+            border: 2px solid rgba(255, 140, 0, 0.5);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .source-card {
+            background: rgba(var(--color-accent-rgb, 139, 127, 255), 0.1);
+            border: 1px solid var(--color-border);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-md) 0;
+            border-radius: var(--radius-md);
+        }
+
+        .source-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .cross-ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .cross-ref-card {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 2px solid var(--color-border);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .cross-ref-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--color-primary);
+            box-shadow: 0 5px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .cross-ref-icon {
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .cross-ref-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-3xl);
+        }
+
+        .nav-button {
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+            display: inline-block;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .planetary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .planet-card {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.2),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border: 2px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+
+        .planet-symbol {
+            font-size: var(--font-size-4xl);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .planet-name {
+            font-weight: var(--font-bold);
+            color: var(--color-primary);
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .talisman-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .talisman-card {
+            background: rgba(var(--color-accent-rgb, 139, 127, 255), 0.15);
+            border: 2px solid var(--color-accent);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+        }
+
+        .talisman-title {
+            font-weight: var(--font-bold);
+            color: var(--color-secondary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        strong {
+            color: var(--color-primary);
+        }
+
+        /* Interlink Panel Styles */
+        .interlink-panel { background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-2xl); margin: var(--spacing-3xl) 0; }
+        .interlink-panel h3 { color: var(--color-primary); font-size: var(--font-size-2xl); margin-bottom: var(--spacing-lg); }
+        .interlink-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-md); }
+        .archetype-link-card, .parallel-card { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); background: rgba(var(--color-primary-rgb), 0.1); border: 1px solid var(--color-border); border-radius: var(--radius-lg); text-decoration: none; transition: all var(--transition-base); }
+        .archetype-link-card:hover, .parallel-card:hover { background: rgba(var(--color-primary-rgb), 0.2); transform: translateY(-2px); }
+        .card-icon { font-size: var(--font-size-2xl); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-primary-rgb), 0.2); border-radius: var(--radius-lg); }
+        .card-content h4 { color: var(--color-text-primary); font-size: var(--font-size-base); margin-bottom: var(--spacing-xs); }
+        .card-content span { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+    </style>
+</head>
+<body>
+    
+    <div id="theme-picker-container"></div>
+<div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Picatrix</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Magical Systems</a> →
+                <a href="../index.html#texts">Sacred Texts</a> →
+                <span>Picatrix</span>
+</nav>
+
+        <section>
+            <h2>Overview</h2>
+            <p>
+                The <strong>Picatrix</strong> (Arabic: <em>Ghāyat al-Ḥakīm</em>, "The Goal of the Wise" or "The Aim of the Sage")
+                stands as the most comprehensive and influential encyclopedia of astrological magic to emerge from the medieval
+                Islamic world. This massive work synthesizes Hermetic philosophy, Neoplatonic cosmology, Sabian star worship,
+                Indian astrology, and practical magical techniques into a systematic guide for harnessing celestial powers
+                through talismans, invocations, suffumigations, and ritual timing.
+            </p>
+
+            <h3>Historical Context & Authorship</h3>
+            <p>
+                The Arabic original was composed in Islamic Spain (Al-Andalus) around <strong>1047-1051 CE</strong>, though
+                the exact author remains uncertain:
+            </p>
+
+            <ul>
+                <li><strong>Traditional Attribution:</strong> Pseudo-Maslama al-Majriti (d. 1007 CE), a mathematician and
+                    astronomer from Cordoba, though modern scholars agree he could not have written it</li>
+                <li><strong>Likely Author:</strong> An anonymous scholar working in Cordoba or Toledo in the mid-11th century,
+                    drawing on an extensive library of Greek, Persian, Nabataean, and Indian sources</li>
+                <li><strong>Compilation Character:</strong> The text is encyclopedic, synthesizing and translating earlier
+                    works rather than presenting original research</li>
+            </ul>
+
+            <p>
+                The work achieved its greatest influence after being translated into <strong>Castilian Spanish</strong> for
+                King Alfonso X "the Wise" of Castile (r. 1252-1284), who maintained a famous translation bureau at Toledo.
+                This Spanish version was then translated into <strong>Latin</strong> around 1256 under the title "Picatrix,"
+                possibly a corruption of Buqratis (Hippocrates) or another Greek name. The Latin Picatrix circulated widely
+                in Renaissance Europe, profoundly influencing Ficino, Agrippa, and other magical philosophers.
+            </p>
+
+            <h3>Structure of the Work</h3>
+            <p>
+                The Picatrix consists of <strong>four books</strong> divided into multiple chapters, totaling over 400 pages
+                in modern editions:
+            </p>
+
+            <ul>
+                <li><strong>Book I:</strong> Philosophical foundations - the nature of magic, the structure of the cosmos,
+                    the relationship between celestial and terrestrial realms, and the theoretical basis for astral magic</li>
+                <li><strong>Book II:</strong> The properties of planets, zodiacal signs, and their images; detailed descriptions
+                    of how to create talismans for each celestial power</li>
+                <li><strong>Book III:</strong> The mansions of the Moon (28 lunar mansions with their images, stones, and
+                    magical uses); practical instructions for elections and timing</li>
+                <li><strong>Book IV:</strong> Advanced magical operations including planetary prayers, suffumigations,
+                    the construction of planetary temples, and the drawing down of celestial spirits</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Key Teachings</h2>
+
+            <h3>Theoretical Foundations</h3>
+
+            <h4>Hermetic Cosmology</h4>
+            <p>
+                The Picatrix presents a thoroughly Neoplatonic-Hermetic universe based on the principle of
+                <strong>cosmic sympathy</strong>:
+            </p>
+
+            <div class="highlight-box">
+                <p>
+                    <strong>The Chain of Being:</strong> Reality flows from the One (God/First Principle) through a
+                    hierarchical chain of emanation:
+                </p>
+                <ol>
+                    <li><strong>The One/First Cause:</strong> The ultimate source beyond comprehension</li>
+                    <li><strong>The Intelligences:</strong> Angelic or divine intellects governing the spheres</li>
+                    <li><strong>The Celestial Spheres:</strong> The seven planets and fixed stars</li>
+                    <li><strong>The Elemental World:</strong> The sublunary realm of generation and corruption</li>
+                    <li><strong>Material Forms:</strong> Minerals, plants, animals, humans</li>
+                </ol>
+            </div>
+
+            <p>
+                Magic works because "all things in the world obey the celestials and are ruled by them," and skilled
+                magicians can manipulate these influences by understanding the correspondences that link all levels of reality.
+            </p>
+
+            <div class="quote-box">
+                "The science of the stars is the root and foundation of all sciences, and he who knows it knows all things,
+                and he who is ignorant of it is ignorant of all things."
+                <br><br><em>- Picatrix, Book I</em>
+            </div>
+
+            <h4>The Nature of Celestial Influence</h4>
+            <p>
+                The text explains that planets and stars exert their influence through:
+            </p>
+
+            <ul>
+                <li><strong>Light and Rays:</strong> Celestial bodies emit spiritual rays that carry their qualities to Earth</li>
+                <li><strong>Spiritus Mundi (World Spirit):</strong> A subtle, ethereal substance pervading the cosmos that
+                    transmits celestial influences</li>
+                <li><strong>Forms and Images:</strong> Each celestial power has characteristic forms (images) that can be
+                    impressed upon matter to capture its influence</li>
+                <li><strong>Numerical Harmonies:</strong> Specific numbers, proportions, and geometric forms resonate with
+                    particular planets</li>
+            </ul>
+
+            <h3>The Planetary Powers</h3>
+            <p>
+                The Picatrix provides exhaustive detail on the seven classical planets, their natures, and how to invoke them:
+            </p>
+
+            <div class="planetary-grid">
+                <div class="planet-card">
+                    <div class="planet-symbol">☉</div>
+                    <div class="planet-name">Sol (Sun)</div>
+                    <p><strong>Nature:</strong> Hot, dry, masculine<br>
+                    <strong>Metal:</strong> Gold<br>
+                    <strong>Day:</strong> Sunday<br>
+                    <strong>Virtues:</strong> Kingship, authority, health, success</p>
+                </div>
+
+                <div class="planet-card">
+                    <div class="planet-symbol">☽</div>
+                    <div class="planet-name">Luna (Moon)</div>
+                    <p><strong>Nature:</strong> Cold, moist, feminine<br>
+                    <strong>Metal:</strong> Silver<br>
+                    <strong>Day:</strong> Monday<br>
+                    <strong>Virtues:</strong> Travel, dreams, fertility, messages</p>
+                </div>
+
+                <div class="planet-card">
+                    <div class="planet-symbol">♂</div>
+                    <div class="planet-name">Mars</div>
+                    <p><strong>Nature:</strong> Hot, dry, masculine<br>
+                    <strong>Metal:</strong> Iron<br>
+                    <strong>Day:</strong> Tuesday<br>
+                    <strong>Virtues:</strong> Courage, war, destruction, protection</p>
+                </div>
+
+                <div class="planet-card">
+                    <div class="planet-symbol">☿</div>
+                    <div class="planet-name">Mercury</div>
+                    <p><strong>Nature:</strong> Convertible, neutral<br>
+                    <strong>Metal:</strong> Quicksilver<br>
+                    <strong>Day:</strong> Wednesday<br>
+                    <strong>Virtues:</strong> Eloquence, commerce, learning, theft</p>
+                </div>
+
+                <div class="planet-card">
+                    <div class="planet-symbol">♃</div>
+                    <div class="planet-name">Jupiter</div>
+                    <p><strong>Nature:</strong> Hot, moist, masculine<br>
+                    <strong>Metal:</strong> Tin<br>
+                    <strong>Day:</strong> Thursday<br>
+                    <strong>Virtues:</strong> Justice, wealth, honor, religion</p>
+                </div>
+
+                <div class="planet-card">
+                    <div class="planet-symbol">♀</div>
+                    <div class="planet-name">Venus</div>
+                    <p><strong>Nature:</strong> Cold, moist, feminine<br>
+                    <strong>Metal:</strong> Copper<br>
+                    <strong>Day:</strong> Friday<br>
+                    <strong>Virtues:</strong> Love, beauty, pleasure, art</p>
+                </div>
+
+                <div class="planet-card">
+                    <div class="planet-symbol">♄</div>
+                    <div class="planet-name">Saturn</div>
+                    <p><strong>Nature:</strong> Cold, dry, masculine<br>
+                    <strong>Metal:</strong> Lead<br>
+                    <strong>Day:</strong> Saturday<br>
+                    <strong>Virtues:</strong> Limitation, binding, agriculture, death</p>
+                </div>
+            </div>
+
+            <h3>Talismanic Magic</h3>
+            <p>
+                The core practice of the Picatrix is the creation of <strong>talismans</strong> (also called pentacles or
+                seals) - material objects inscribed with planetary images and consecrated at astrologically auspicious times
+                to capture and focus celestial influences.
+            </p>
+
+            <h4>Components of Talismanic Creation</h4>
+            <ul>
+                <li><strong>Material Correspondence:</strong> Using metals, stones, plants, or parchment corresponding
+                    to the desired planet</li>
+                <li><strong>Astrological Election:</strong> Choosing the optimal time when the planet is strong
+                    (in its domicile, exaltation, or favorable aspect)</li>
+                <li><strong>Planetary Images:</strong> Engraving or drawing specific figures associated with the planet's nature</li>
+                <li><strong>Divine Names:</strong> Inscribing the names of planetary spirits or intelligences</li>
+                <li><strong>Suffumigation:</strong> Consecrating through incense made from planetary herbs</li>
+                <li><strong>Invocation:</strong> Calling upon the planetary power through prayers and ritual</li>
+            </ul>
+
+            <h4>Example Talismans from the Picatrix</h4>
+
+            <div class="talisman-grid">
+                <div class="talisman-card">
+                    <div class="talisman-title">Talisman of Jupiter for Wealth</div>
+                    <p><strong>Material:</strong> Tin or lapis lazuli<br>
+                    <strong>Time:</strong> Thursday, Jupiter hour, Jupiter ascending<br>
+                    <strong>Image:</strong> Crowned king on throne holding scepter<br>
+                    <strong>Incense:</strong> Storax, aloes, nutmeg<br>
+                    <strong>Effect:</strong> Attracts wealth, honor, and favor from authorities</p>
+                </div>
+
+                <div class="talisman-card">
+                    <div class="talisman-title">Talisman of Venus for Love</div>
+                    <p><strong>Material:</strong> Copper or green stone<br>
+                    <strong>Time:</strong> Friday, Venus hour, Venus with Moon<br>
+                    <strong>Image:</strong> Beautiful woman with mirror and comb<br>
+                    <strong>Incense:</strong> Musk, ambergris, sandalwood<br>
+                    <strong>Effect:</strong> Attracts love, beauty, and harmonious relationships</p>
+                </div>
+
+                <div class="talisman-card">
+                    <div class="talisman-title">Talisman of Mars for Protection</div>
+                    <p><strong>Material:</strong> Iron or bloodstone<br>
+                    <strong>Time:</strong> Tuesday, Mars hour, Mars angular<br>
+                    <strong>Image:</strong> Armed warrior with sword and shield<br>
+                    <strong>Incense:</strong> Dragon's blood, tobacco, pepper<br>
+                    <strong>Effect:</strong> Provides courage, wards off enemies, strengthens will</p>
+                </div>
+
+                <div class="talisman-card">
+                    <div class="talisman-title">Talisman of Mercury for Learning</div>
+                    <p><strong>Material:</strong> Quicksilver, agate, or parchment<br>
+                    <strong>Time:</strong> Wednesday, Mercury hour, Mercury direct<br>
+                    <strong>Image:</strong> Winged youth with caduceus and book<br>
+                    <strong>Incense:</strong> Mastic, lavender, mint<br>
+                    <strong>Effect:</strong> Enhances eloquence, learning, and business success</p>
+                </div>
+            </div>
+
+            <h3>The Lunar Mansions</h3>
+            <p>
+                Book III presents the <strong>28 Mansions of the Moon</strong> (Manzil in Arabic), inherited from Arabic
+                and Indian astrology. Each mansion has specific magical applications:
+            </p>
+
+            <div class="highlight-box">
+                <p>
+                    Each lunar mansion has associated with it:
+                </p>
+                <ul>
+                    <li>Specific <strong>images</strong> to be engraved on talismans</li>
+                    <li>Particular <strong>stones and metals</strong> that resonate with its power</li>
+                    <li><strong>Magical purposes</strong> it is suited for (love, war, binding, releasing, etc.)</li>
+                    <li><strong>Incense and suffumigations</strong> appropriate to its nature</li>
+                </ul>
+                <p>
+                    For example, the <strong>Third Mansion (Al-Thurayya/Pleiades)</strong> is used for sea voyages,
+                    alchemy, and treasure hunting, with the image of a woman well-dressed looking at herself in a mirror.
+                </p>
+            </div>
+
+            <h3>Advanced Operations</h3>
+
+            <h4>Planetary Temples & Statues</h4>
+            <p>
+                Book IV describes the construction of entire <strong>planetary temples</strong> - architectural spaces
+                designed to concentrate planetary influence. These include:
+            </p>
+
+            <ul>
+                <li><strong>City of Adocentyn:</strong> A legendary city built according to Hermetic principles with
+                    temples to each planet</li>
+                <li><strong>Animated Statues:</strong> Instructions for creating statues that speak prophecies when
+                    properly consecrated at astrological elections</li>
+                <li><strong>Talismanic Architecture:</strong> Buildings oriented to planetary directions and constructed
+                    with materials corresponding to desired influences</li>
+            </ul>
+
+            <h4>Planetary Invocations & Prayers</h4>
+            <p>
+                The text provides elaborate prayers to each planet, combining Arabic, Hebrew, and invented "angelic"
+                languages. These invocations call upon planetary spirits by their divine names to infuse talismans
+                with power or to request specific benefits.
+            </p>
+
+            <div class="warning-box">
+                <h4>⚠️ Ethical & Practical Warnings</h4>
+                <p>
+                    The Picatrix contains operations for harmful magic including causing discord, injury, and death.
+                    Medieval and Renaissance readers debated the morality of such practices. The text itself sometimes
+                    warns that harmful magic rebounds upon the operator, and many later editors omitted the most
+                    dangerous operations. Modern practitioners should approach such material with extreme caution
+                    and ethical consideration.
+                </p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Structure & Contents</h2>
+
+            <h3>Book I: Theoretical Foundations</h3>
+            <p><strong>Chapters 1-5:</strong> The philosophical basis of magic</p>
+            <ul>
+                <li>Definition and nature of magic as natural philosophy</li>
+                <li>The structure of the cosmos and celestial hierarchies</li>
+                <li>How celestial influences descend to the material world</li>
+                <li>The role of the magician as mediator between heaven and earth</li>
+                <li>The importance of proper timing and astrological elections</li>
+            </ul>
+
+            <h3>Book II: Planetary Magic</h3>
+            <p><strong>Chapters 1-12:</strong> Comprehensive treatment of the seven planets</p>
+            <ul>
+                <li>The nature, qualities, and dignities of each planet</li>
+                <li>Zodiacal signs and their planetary rulers</li>
+                <li>Images of the planets in each sign (36 decans)</li>
+                <li>Planetary spirits, angels, and divine names</li>
+                <li>Materials, stones, plants, and animals corresponding to each planet</li>
+                <li>Talismanic images for various purposes under each planet</li>
+                <li>Suffumigations and offerings appropriate to each celestial power</li>
+            </ul>
+
+            <h3>Book III: The Moon & Lunar Magic</h3>
+            <p><strong>Chapters 1-9:</strong> The most practical and widely-used section</p>
+            <ul>
+                <li>The 28 Mansions of the Moon with detailed descriptions</li>
+                <li>Images, stones, and purposes for each mansion</li>
+                <li>How to determine which mansion the Moon occupies</li>
+                <li>Elections for various purposes based on lunar position</li>
+                <li>The powers of each mansion for talismanic magic</li>
+                <li>Incenses and suffumigations for lunar operations</li>
+                <li>How to combine lunar mansions with planetary hours</li>
+            </ul>
+
+            <h3>Book IV: Advanced Theurgy</h3>
+            <p><strong>Chapters 1-12:</strong> Complex operations and higher magic</p>
+            <ul>
+                <li>Planetary prayers and invocations in multiple languages</li>
+                <li>The construction of planetary temples and sacred spaces</li>
+                <li>Methods for animating statues and images</li>
+                <li>Operations for attracting planetary spirits</li>
+                <li>The creation of complex composite talismans</li>
+                <li>Advanced astrological elections for major works</li>
+                <li>Suffumigations and ritual procedures for consecration</li>
+                <li>Magical recipes including incenses, oils, and compounds</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Influence & Legacy</h2>
+
+            <h3>Renaissance Magic</h3>
+            <p>
+                The Latin Picatrix profoundly shaped Renaissance magical philosophy:
+            </p>
+
+            <ul>
+                <li><strong>Marsilio Ficino (1433-1499):</strong> His <em>De Vita Coelitus Comparanda</em> (On Obtaining
+                    Life from the Heavens) draws heavily on Picatrix for its system of attracting planetary influences
+                    through music, diet, talismans, and environment</li>
+                <li><strong>Heinrich Cornelius Agrippa (1486-1535):</strong> Book II of <em>De Occulta Philosophia</em>
+                    extensively quotes and systematizes Picatrix's talismanic magic and celestial correspondences</li>
+                <li><strong>Giordano Bruno (1548-1600):</strong> Used Picatrix's theory of celestial images in developing
+                    his art of memory and Hermetic magic</li>
+                <li><strong>Tommaso Campanella (1568-1639):</strong> Applied Picatrix's principles in designing his
+                    utopian <em>City of the Sun</em> and in constructing a papal horoscope-correcting ritual</li>
+            </ul>
+
+            <h3>Islamic Occultism</h3>
+            <p>
+                In the Islamic world, Ghāyat al-Ḥakīm influenced:
+            </p>
+
+            <ul>
+                <li><strong>Andalusian Magic:</strong> Became foundational text for Iberian Islamic magical practice</li>
+                <li><strong>Ottoman Occultism:</strong> Turkish translations and commentaries continued into the 19th century</li>
+                <li><strong>Sabian Studies:</strong> Preserved knowledge of pre-Islamic Mesopotamian star worship</li>
+                <li><strong>Arabic Astrology:</strong> Its system of lunar mansions became standard in Arabic astrological texts</li>
+            </ul>
+
+            <h3>Modern Occultism</h3>
+            <p>
+                Contemporary magical traditions have rediscovered the Picatrix:
+            </p>
+
+            <ul>
+                <li><strong>Ceremonial Magic:</strong> Modern grimoire practitioners use it for talismanic work and
+                    astrological magic</li>
+                <li><strong>Traditional Astrology Revival:</strong> The renaissance of medieval astrology has brought
+                    renewed interest in Picatrix's election methods</li>
+                <li><strong>Academic Study:</strong> Scholarly translations in English (2002) and other languages have
+                    made it accessible to researchers</li>
+                <li><strong>Practical Application:</strong> Contemporary magicians have tested and adapted its rituals,
+                    reporting varied results</li>
+            </ul>
+
+            <h3>Cultural Impact</h3>
+            <p>
+                Beyond occultism, the Picatrix influenced:
+            </p>
+
+            <ul>
+                <li><strong>Architecture:</strong> The concept of talismanic architecture influenced Renaissance building design</li>
+                <li><strong>Art:</strong> Planetary images and iconography from Picatrix appear in Renaissance art</li>
+                <li><strong>Literature:</strong> References appear in works by Dante, Chaucer, and later writers</li>
+                <li><strong>Philosophy:</strong> Contributed to debates about natural magic versus demonic magic</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Primary Sources & Editions</h2>
+
+            <div class="source-card">
+                <div class="source-title">Picatrix: A Medieval Treatise on Astral Magic - Dan Attrell & David Porreca (trans.) (2019)</div>
+                <p>
+                    The most recent and scholarly English translation from the Latin, with extensive introduction,
+                    notes, and commentary. Includes parallel Latin text and careful analysis of the work's structure
+                    and sources. The definitive edition for serious study.
+                </p>
+                <p><strong>Publisher:</strong> Penn State University Press | <strong>ISBN:</strong> 978-0271081403</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">Picatrix: The Latin Version of the Ghāyat Al-Ḥakīm - David Pingree (ed.) (1986)</div>
+                <p>
+                    Critical edition of the Latin text, essential for scholars. Contains no English translation but
+                    provides the authoritative Latin version with apparatus showing manuscript variations. The foundation
+                    for all subsequent scholarly work on the text.
+                </p>
+                <p><strong>Publisher:</strong> Warburg Institute | <strong>ISBN:</strong> 978-0854810949</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">Liber Picatrix: The Original Arabic Text - Hashem Atallah (trans.) (2002/unpublished)</div>
+                <p>
+                    English translation from the Arabic original, revealing differences from the Latin version.
+                    The Arabic is more explicit about certain operations and includes material omitted by Latin
+                    translators. Available in limited circulation among scholars and practitioners.
+                </p>
+                <p><strong>Format:</strong> Limited circulation manuscript</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">Between Magic and Religion: Syncretistic Perspectives on Ghāyat al-Ḥakīm - Sébastien Moureau (2014)</div>
+                <p>
+                    Scholarly analysis of the Arabic Picatrix's sources, examining how it synthesizes Hermetic,
+                    Sabian, Indian, and Islamic elements. Essential for understanding the text's compilation
+                    and historical context.
+                </p>
+                <p><strong>Publisher:</strong> PhD Dissertation, Université catholique de Louvain</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">Practical Planetary Magick: Working the Magick of the Classical Planets in the Western Mystery Tradition - David Rankine & Sorita d'Este (2007)</div>
+                <p>
+                    Modern practical guide applying Picatrix's planetary magic in contemporary practice. Includes
+                    tested rituals, talismanic designs, and timing tables. Bridges historical scholarship with
+                    operative magical work.
+                </p>
+                <p><strong>Publisher:</strong> Avalonia | <strong>ISBN:</strong> 978-1905297139</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Arabic Hermes: From Pagan Sage to Prophet of Science - Kevin van Bladel (2009)</div>
+                <p>
+                    Comprehensive study of the Hermetic tradition in the Arabic world, including detailed analysis
+                    of how Greek Hermetic texts were transmitted and transformed in Islamic contexts. Essential
+                    background for understanding Picatrix's intellectual milieu.
+                </p>
+                <p><strong>Publisher:</strong> Oxford University Press | <strong>ISBN:</strong> 978-0199796199</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Cross-References & Related Texts</h2>
+
+            <div class="cross-ref-grid">
+                <div class="cross-ref-card" onclick="location.href='emerald-tablet.html'">
+                    <div class="cross-ref-icon">💎</div>
+                    <div class="cross-ref-title">Emerald Tablet</div>
+                    <p>Hermetic foundation cited and expounded in Picatrix</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='corpus-hermeticum.html'">
+                    <div class="cross-ref-icon">☿</div>
+                    <div class="cross-ref-title">Corpus Hermeticum</div>
+                    <p>Hermetic philosophy underlying Picatrix's magical theory</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='key-of-solomon.html'">
+                    <div class="cross-ref-icon">🔑</div>
+                    <div class="cross-ref-title">Key of Solomon</div>
+                    <p>Medieval grimoire with complementary approach to spirit magic</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../divination/astrology.html'">
+                    <div class="cross-ref-icon">♈</div>
+                    <div class="cross-ref-title">Astrology</div>
+                    <p>Foundation of all Picatrix operations - celestial timing and correspondences</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../practical/talismans.html'">
+                    <div class="cross-ref-icon">🧿</div>
+                    <div class="cross-ref-title">Talismans & Amulets</div>
+                    <p>Practical application of Picatrix's talismanic methods</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../ritual/ceremonial-magic.html'">
+                    <div class="cross-ref-icon">🔯</div>
+                    <div class="cross-ref-title">Ceremonial Magic</div>
+                    <p>Western magical tradition influenced by Picatrix's ritual structure</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../../mythos/islamic/magic/index.html'">
+                    <div class="cross-ref-icon">☪️</div>
+                    <div class="cross-ref-title">Islamic Magic</div>
+                    <p>Context of Arabic magical practices in which Picatrix developed</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../../archetypes/index.html'">
+                    <div class="cross-ref-icon">🎭</div>
+                    <div class="cross-ref-title">Planetary Archetypes</div>
+                    <p>Seven classical planets as archetypal forces</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel">
+            <h3>Explore Related Content</h3>
+
+            <h4 style="color: var(--color-secondary); margin: var(--spacing-md) 0;">Archetype Connections</h4>
+            <div class="interlink-grid">
+                <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128302;</div>
+                    <div class="card-content"><h4>The Magician</h4><span>Drawing down celestial powers into matter</span></div>
+                </a>
+                <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128218;</div>
+                    <div class="card-content"><h4>The Sage</h4><span>Goal of the Wise - mastery of cosmic law</span></div>
+                </a>
+                <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#10024;</div>
+                    <div class="card-content"><h4>The Creator</h4><span>Making talismans as microcosmic creation</span></div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--spacing-lg) 0 var(--spacing-md) 0;">Cross-Cultural Parallels</h4>
+            <div class="interlink-grid">
+                <a href="emerald-tablet.html" class="parallel-card">
+                    <div class="card-icon">&#128142;</div>
+                    <div class="card-content"><h4>Emerald Tablet</h4><span>Hermetic foundation cited in Picatrix</span></div>
+                </a>
+                <a href="corpus-hermeticum.html" class="parallel-card">
+                    <div class="card-icon">&#9790;</div>
+                    <div class="card-content"><h4>Corpus Hermeticum</h4><span>Philosophical basis for astral magic</span></div>
+                </a>
+                <a href="../../mythos/islamic/magic/index.html" class="parallel-card">
+                    <div class="card-icon">&#9770;</div>
+                    <div class="card-content"><h4>Islamic Magic</h4><span>Arabic magical tradition of the Picatrix</span></div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--spacing-lg) 0 var(--spacing-md) 0;">See Also</h4>
+            <div class="interlink-grid">
+                <a href="../practical/talismans.html" class="parallel-card">
+                    <div class="card-icon">&#129535;</div>
+                    <div class="card-content"><h4>Talismans & Amulets</h4><span>Practical application of Picatrix methods</span></div>
+                </a>
+                <a href="../divination/astrology.html" class="parallel-card">
+                    <div class="card-icon">&#9800;</div>
+                    <div class="card-content"><h4>Astrology</h4><span>Foundation of all Picatrix operations</span></div>
+                </a>
+                <a href="../ritual/ceremonial-magic.html" class="parallel-card">
+                    <div class="card-icon">&#128303;</div>
+                    <div class="card-content"><h4>Ceremonial Magic</h4><span>Western tradition influenced by Picatrix</span></div>
+                </a>
+            </div>
+        </section>
+
+        <div class="nav-buttons">
+            <a href="emerald-tablet.html" class="nav-button">⬅ Previous: Emerald Tablet</a>
+            <a href="key-of-solomon.html" class="nav-button">Next: Key of Solomon ➡</a>
+            <a href="../index.html" class="nav-button">📚 Sacred Texts</a>
+            <a href="../../index.html" class="nav-button">🏠 Home</a>
+        </div>
+    </div>
+
+    <!-- Theme Picker UI -->
+</body>
+</html>

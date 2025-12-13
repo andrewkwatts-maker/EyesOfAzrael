@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Mustard Seed - Divine Spark Awakening | Eyes of Azrael</title>
+    <link rel="stylesheet" href="../../../../styles.css">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #228B22 0%, #90EE90 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            border-radius: 20px;
+            margin-bottom: 3rem;
+            box-shadow: 0 10px 40px rgba(34, 139, 34, 0.3);
+        }
+
+        .hero-icon {
+            font-size: 6rem;
+            margin-bottom: 1rem;
+            animation: grow 3s ease-in-out infinite;
+        }
+
+        @keyframes grow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .breadcrumb {
+            margin-bottom: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .breadcrumb a {
+            color: #90EE90;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .biblical-text {
+            background: rgba(139, 69, 19, 0.1);
+            border-left: 4px solid #8B4513;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 10px;
+        }
+
+        .version-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .version-tab {
+            background: rgba(139, 69, 19, 0.2);
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .version-tab.active {
+            background: rgba(139, 69, 19, 0.4);
+            border-color: #8B4513;
+        }
+
+        .version-content {
+            display: none;
+            font-style: italic;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .version-content.active {
+            display: block;
+        }
+
+        .scripture-reference {
+            text-align: right;
+            color: #D2691E;
+            font-weight: bold;
+            margin-top: 1rem;
+            font-style: normal;
+        }
+
+        .context-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(139, 69, 19, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .interpretation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .interpretation-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(139, 69, 19, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+        }
+
+        .interpretation-box.orthodox {
+            border-color: #8B4513;
+        }
+
+        .interpretation-box.gnostic {
+            border-color: #9370DB;
+            background: rgba(138, 43, 226, 0.05);
+        }
+
+        .interpretation-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid currentColor;
+        }
+
+        .interpretation-icon {
+            font-size: 2.5rem;
+        }
+
+        .interpretation-title {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        .orthodox .interpretation-title {
+            color: #D2691E;
+        }
+
+        .gnostic .interpretation-title {
+            color: #9370DB;
+        }
+
+        .key-points {
+            list-style: none;
+            padding: 0;
+        }
+
+        .key-points li {
+            padding: 0.8rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .key-points li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #90EE90;
+            font-weight: bold;
+        }
+
+        .cross-mythology {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 140, 0, 0.1) 100%);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 3rem 0;
+        }
+
+        .mythology-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .mythology-connection {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .mythology-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .mythology-icon {
+            font-size: 2rem;
+        }
+
+        .mythology-title {
+            font-size: 1.3rem;
+            color: #FFD700;
+            margin: 0;
+        }
+
+        .practical-section {
+            background: rgba(34, 139, 34, 0.1);
+            border: 2px solid rgba(34, 139, 34, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 3rem 0;
+        }
+
+        .key-verses {
+            background: rgba(139, 69, 19, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 3rem 0;
+        }
+
+        .verse-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .verse-card {
+            background: rgba(139, 69, 19, 0.1);
+            border-left: 4px solid #8B4513;
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+
+        .verse-text {
+            font-style: italic;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 0.8rem;
+        }
+
+        .verse-ref {
+            color: #D2691E;
+            font-weight: bold;
+        }
+
+        .see-also {
+            background: rgba(138, 43, 226, 0.05);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 3rem 0;
+        }
+
+        .link-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .related-link {
+            background: rgba(138, 43, 226, 0.1);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .related-link:hover {
+            background: rgba(138, 43, 226, 0.2);
+            transform: translateX(5px);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(34, 139, 34, 0.2) 0%, rgba(144, 238, 144, 0.2) 100%);
+            border: 2px solid rgba(34, 139, 34, 0.4);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .interpretation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../../../index.html">Christian Mythology</a> →
+            <a href="../../index.html">Teachings</a> →
+            <a href="index.html">Parables</a> →
+            The Mustard Seed
+        </div>
+
+        <div class="hero-section">
+            <div class="hero-icon">🌱</div>
+            <h1>The Parable of the Mustard Seed</h1>
+            <p style="font-size: 1.3rem; margin-top: 1rem;">From Smallest Seed to Greatest Tree - The Divine Spark Awakening</p>
+        </div>
+
+        <div class="biblical-text">
+            <h2>The Biblical Text</h2>
+            <div class="version-tabs">
+                <div class="version-tab active" onclick="showVersion('matthew')">Matthew 13:31-32</div>
+                <div class="version-tab" onclick="showVersion('mark')">Mark 4:30-32</div>
+                <div class="version-tab" onclick="showVersion('luke')">Luke 13:18-19</div>
+                <div class="version-tab" onclick="showVersion('thomas')">Gospel of Thomas 20</div>
+            </div>
+
+            <div id="matthew" class="version-content active">
+                He put before them another parable: "The kingdom of heaven is like a mustard seed that someone took and sowed in his field; it is the smallest of all the seeds, but when it has grown it is the greatest of shrubs and becomes a tree, so that the birds of the air come and make nests in its branches."
+                <div class="scripture-reference">— Matthew 13:31-32 (NRSV)</div>
+            </div>
+
+            <div id="mark" class="version-content">
+                He also said, "With what can we compare the kingdom of God, or what parable will we use for it? It is like a mustard seed, which, when sown upon the ground, is the smallest of all the seeds on earth; yet when it is sown it grows up and becomes the greatest of all shrubs, and puts forth large branches, so that the birds of the air can make nests in its shade."
+                <div class="scripture-reference">— Mark 4:30-32 (NRSV)</div>
+            </div>
+
+            <div id="luke" class="version-content">
+                He said therefore, "What is the kingdom of God like? And to what should I compare it? It is like a mustard seed that someone took and sowed in the garden; it grew and became a tree, and the birds of the air made nests in its branches."
+                <div class="scripture-reference">— Luke 13:18-19 (NRSV)</div>
+            </div>
+
+            <div id="thomas" class="version-content">
+                The disciples said to Jesus, "Tell us what the kingdom of heaven is like." He said to them, "It is like a mustard seed. It is the smallest of all seeds, but when it falls on prepared soil, it produces a large plant and becomes a shelter for birds of the sky."
+                <div class="scripture-reference">— Gospel of Thomas, Saying 20</div>
+            </div>
+        </div>
+
+        <div class="context-section">
+            <h2>Historical Context</h2>
+            <p><strong>Audience:</strong> The crowds by the Sea of Galilee (Matthew, Mark), or people traveling with Jesus toward Jerusalem (Luke)</p>
+            <p><strong>Setting:</strong> Part of Jesus's extended parable discourse, often called the "Parable Chapter" in Mark 4 and Matthew 13</p>
+            <p><strong>What Prompted It:</strong> Jesus was explaining the nature of the Kingdom of God/Heaven using familiar agricultural images. The mustard seed was proverbially the smallest seed known to his audience, yet it grew into a large shrub (sometimes reaching 10-12 feet).</p>
+            <p><strong>Cultural Background:</strong> Black mustard (Brassica nigra) was common in first-century Palestine. Its seeds were indeed tiny (1-2mm), yet the plant could grow surprisingly large, often becoming tree-like with birds nesting in its branches. This contrast between insignificant beginning and remarkable end would have been familiar to Jesus's agrarian audience.</p>
+
+            <div class="highlight-box">
+                <h3>Key Synoptic Differences:</h3>
+                <ul>
+                    <li><strong>Matthew:</strong> Seed sown in a "field" (Greek: <em>agros</em>)</li>
+                    <li><strong>Mark:</strong> Emphasizes the contrast—"smallest of all seeds" becomes "greatest of all shrubs"</li>
+                    <li><strong>Luke:</strong> Seed sown in a "garden" (Greek: <em>kepos</em>), more cultivated setting</li>
+                    <li><strong>Thomas:</strong> Adds "prepared soil"—suggesting receptivity is essential for growth</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="interpretation-grid">
+            <div class="interpretation-box orthodox">
+                <div class="interpretation-header">
+                    <div class="interpretation-icon">✝️</div>
+                    <h2 class="interpretation-title">Orthodox Christian Interpretation</h2>
+                </div>
+                <p>Traditional Christianity sees this parable as describing the remarkable growth of God's Kingdom from humble beginnings.</p>
+
+                <h3>Key Themes:</h3>
+                <ul class="key-points">
+                    <li><strong>The Church's Growth:</strong> From twelve disciples to a worldwide movement—small beginning, massive expansion</li>
+                    <li><strong>Surprising Reversal:</strong> What seems insignificant in the world's eyes becomes great in God's economy</li>
+                    <li><strong>Shelter for All Nations:</strong> The birds represent Gentiles finding refuge in the Church (echoes Ezekiel 17:23, Daniel 4:12)</li>
+                    <li><strong>Organic Development:</strong> The Kingdom grows naturally, not through human force or political power</li>
+                    <li><strong>Faith Like a Mustard Seed:</strong> Connected to Matthew 17:20—even tiny faith can move mountains</li>
+                </ul>
+
+                <h3>Patristic Interpretation:</h3>
+                <p><strong>Augustine:</strong> The mustard seed represents the humility of Christ—from manger to cosmic Lord. The Church starts small but becomes a tree sheltering all nations.</p>
+                <p><strong>Chrysostom:</strong> The parable demonstrates that Christianity would seem weak and contemptible at first, but would eventually encompass the whole world.</p>
+                <p><strong>Jerome:</strong> Saw the seed as the preaching of the gospel—small in its beginning but powerful in its effect, providing shelter (salvation) to the birds (souls).</p>
+            </div>
+
+            <div class="interpretation-box gnostic">
+                <div class="interpretation-header">
+                    <div class="interpretation-icon">🔮</div>
+                    <h2 class="interpretation-title">Gnostic Interpretation</h2>
+                </div>
+                <p>Gnostic Christians read this parable as an allegory of the <strong>divine spark</strong> (pneuma) within each person—tiny, nearly invisible, yet containing infinite potential for spiritual awakening.</p>
+
+                <h3>Esoteric Meaning:</h3>
+                <ul class="key-points">
+                    <li><strong>The Divine Spark:</strong> The mustard seed represents the pneuma (spirit) planted in each pneumatic (spiritual) human—the particle of divine light trapped in matter</li>
+                    <li><strong>From Potential to Realization:</strong> Though seemingly insignificant compared to the soul and body, the divine spark, when awakened through gnosis, grows to dominate the entire being</li>
+                    <li><strong>Prepared Soil:</strong> Thomas's version emphasizes receptivity—gnosis requires a prepared consciousness, not just any soil</li>
+                    <li><strong>The Cosmic Tree:</strong> The mature tree represents the fully realized pneumatic, who becomes a "cosmic tree" connecting earth and heaven (like the Kabbalistic Tree of Life)</li>
+                    <li><strong>Sheltering Birds:</strong> The awakened gnostic provides refuge and teaching to other seeking souls (birds = spirits/pneumatics)</li>
+                    <li><strong>Invisible Kingdom:</strong> The Kingdom is not external but within (Luke 17:21)—the seed grows in the inner garden of consciousness</li>
+                </ul>
+
+                <h3>Valentinian Reading:</h3>
+                <p>Valentinus, the great Gnostic teacher, likely understood the mustard seed as the seed of Sophia (Wisdom) planted in the pneumatic class. Though this divine seed appears tiny compared to the soul (psychic element) and body (hylic element), it contains the fullness of the Pleroma in potential form. When gnosis awakens this seed, it grows to fill the entire person with divine light, transforming the individual into a vehicle for the divine.</p>
+
+                <div class="highlight-box">
+                    <h4>Connection to Gospel of Truth:</h4>
+                    <p>"The Gospel of Truth is joy for those who have received from the Father of truth the gift of knowing him... This is the gospel of the one who is searched for, which was revealed to those who are perfect through the mercies of the Father—the hidden mystery, Jesus the Christ."</p>
+                    <p>The "hidden mystery" is like the hidden seed—small, concealed, yet containing the fullness of Christ-consciousness.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="cross-mythology">
+            <h2 style="color: #FFD700; display: flex; align-items: center; gap: 1rem;">
+                <span>🌍</span> Cross-Mythology Connections
+            </h2>
+            <p>The image of a tiny seed becoming a great tree appears across world wisdom traditions, symbolizing spiritual development, cosmic origins, and the microcosm containing the macrocosm.</p>
+
+            <div class="mythology-grid">
+                <div class="mythology-connection">
+                    <div class="mythology-header">
+                        <div class="mythology-icon">🕉️</div>
+                        <h3 class="mythology-title">Hindu: The Banyan Seed</h3>
+                    </div>
+                    <p><strong>Bhagavad Gita & Upanishads:</strong> The banyan tree (Ashvattha) grows from a tiny seed, yet becomes enormous with aerial roots creating a forest. It symbolizes Brahman—the infinite contained in the infinitesimal. The Chandogya Upanishad uses a banyan seed to teach that Atman (the Self) dwells in the heart as a tiny essence yet is identical with Brahman (cosmic consciousness).</p>
+                    <p><em>"Break open this fig seed. What do you see?" "Nothing, sir." "From that subtle essence which you cannot see, this mighty tree has grown."</em> — Chandogya Upanishad 6.12</p>
+                </div>
+
+                <div class="mythology-connection">
+                    <div class="mythology-header">
+                        <div class="mythology-icon">☸️</div>
+                        <h3 class="mythology-title">Buddhist: The Bodhi Seed</h3>
+                    </div>
+                    <p><strong>Buddha-Nature Within:</strong> Buddhism teaches that all beings possess Buddha-nature—the seed of enlightenment. This seed, though covered by ignorance, contains the potential for full awakening. Like the mustard seed, it seems insignificant compared to the mass of karma and conditioning, yet when cultivated through practice, it grows into the tree of enlightenment.</p>
+                    <p>The Bodhi Tree (Ficus religiosa) under which Buddha achieved enlightenment became a symbol of awakening. Seeds from the original tree were planted across Asia, spreading dharma like birds finding shelter in branches.</p>
+                </div>
+
+                <div class="mythology-connection">
+                    <div class="mythology-header">
+                        <div class="mythology-icon">✡️</div>
+                        <h3 class="mythology-title">Kabbalah: The Tree of Life</h3>
+                    </div>
+                    <p><strong>Seed of Adam Kadmon:</strong> In Kabbalistic cosmology, the entire Tree of Life (Etz Chaim) with its ten sefiroth exists as a seed within each human being. The point of Keter (Crown) is the "seed-point" from which the entire tree unfolds. Similarly, the divine spark (netzotz) within humanity contains the potential to become a fully realized tree connecting Malkuth (Kingdom/Earth) to Keter (Crown/Divine).</p>
+                    <p>The Zohar speaks of the "seed of Abraham" as containing infinite potential—from one seed, all nations are blessed.</p>
+                </div>
+
+                <div class="mythology-connection">
+                    <div class="mythology-header">
+                        <div class="mythology-icon">☯️</div>
+                        <h3 class="mythology-title">Taoism: The Acorn & Oak</h3>
+                    </div>
+                    <p><strong>The Dao in Miniature:</strong> Taoist philosophy teaches that the Tao (the Way) is present fully in even the smallest things. An acorn contains the entire pattern of the oak tree—not as a blueprint but as an inherent potential that unfolds naturally (wu wei). The sage cultivates the Tao-seed within through non-forcing action, allowing it to grow naturally into fullness.</p>
+                    <p><em>"A journey of a thousand miles begins with a single step."</em> Similarly, the cosmic tree begins with a tiny seed.</p>
+                </div>
+
+                <div class="mythology-connection">
+                    <div class="mythology-header">
+                        <div class="mythology-icon">𓂀</div>
+                        <h3 class="mythology-title">Egyptian: The Djed Pillar & Seed of Osiris</h3>
+                    </div>
+                    <p><strong>Resurrection Through Growth:</strong> Egyptian mythology contains the story of Osiris's body from which wheat sprouted, symbolizing resurrection and eternal life. The djed pillar, associated with Osiris's spine, represents stability and the axis mundi (world tree). Osiris-wheat beds were planted in tomb chambers—seeds that would sprout, symbolizing the deceased's resurrection.</p>
+                    <p>The concept of the seed containing life-force (ka/ba) that survives death and regenerates parallels the mustard seed's transformation.</p>
+                </div>
+
+                <div class="mythology-connection">
+                    <div class="mythology-header">
+                        <div class="mythology-icon">🌳</div>
+                        <h3 class="mythology-title">Norse: Yggdrasil & The Seed of Worlds</h3>
+                    </div>
+                    <p><strong>The World Tree:</strong> Yggdrasil, the cosmic ash tree in Norse mythology, connects all nine realms. Though we don't have explicit "seed" imagery, the concept of the world tree growing from primordial waters (or from Ymir's body) suggests a cosmic seed. The tree shelters all beings—gods, humans, giants, animals—just as the mustard tree shelters the birds.</p>
+                    <p>The squirrel Ratatoskr runs up and down the tree carrying messages, much like the birds in Jesus's parable finding shelter and movement within the branches.</p>
+                </div>
+
+                <div class="mythology-connection">
+                    <div class="mythology-header">
+                        <div class="mythology-icon">📿</div>
+                        <h3 class="mythology-title">Sufi: The Seed of Divine Love</h3>
+                    </div>
+                    <p><strong>Rumi's Garden:</strong> Sufi mystics frequently use seed imagery to describe the divine spark of love planted in the human heart. Rumi writes of the "seed of love" that, when watered with remembrance (dhikr) and devotion, grows into a tree of divine union. The heart becomes a garden where God plants seeds of wisdom.</p>
+                    <p><em>"Let the beauty we love be what we do. There are hundreds of ways to kneel and kiss the ground."</em> Each act of devotion waters the seed.</p>
+                </div>
+
+                <div class="mythology-connection">
+                    <div class="mythology-header">
+                        <div class="mythology-icon">🔬</div>
+                        <h3 class="mythology-title">Modern: Fractal Mathematics & Embryology</h3>
+                    </div>
+                    <p><strong>The Code in the Seed:</strong> Modern science reveals that seeds contain DNA—genetic information encoding the entire mature organism. A mustard seed's genome contains all the instructions to build the full plant. Similarly, a human embryo contains the entire blueprint for a mature adult.</p>
+                    <p>Fractal mathematics shows how simple iterative patterns generate complex structures—a "seed formula" produces infinite complexity. This echoes the mystical principle: the whole is contained in the part (holographic universe).</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="practical-section">
+            <h2 style="color: #228B22; display: flex; align-items: center; gap: 1rem;">
+                <span>🌱</span> Practical Application
+            </h2>
+
+            <h3>For Spiritual Seekers:</h3>
+            <ul class="key-points">
+                <li><strong>Don't Despise Small Beginnings:</strong> Your initial spiritual awakening may seem tiny—a moment of insight, a first meditation, a flicker of awareness. Don't judge its value by its size. That tiny seed contains infinite potential.</li>
+                <li><strong>Prepare the Soil:</strong> The Gospel of Thomas emphasizes "prepared soil." Cultivate receptivity through practices like meditation, study, contemplation, and moral development. The seed needs good soil to grow.</li>
+                <li><strong>Trust Organic Growth:</strong> You cannot force spiritual development. Like a seed, the divine spark unfolds according to its own inner nature. Your job is to provide the right conditions—water, sunlight, good soil—then trust the process.</li>
+                <li><strong>Become a Shelter:</strong> As your inner tree grows, you naturally become a refuge for others. Your developed consciousness provides wisdom, compassion, and guidance to other seekers (the birds).</li>
+                <li><strong>The Kingdom Within:</strong> The mustard seed grows in the garden of consciousness. The Kingdom of God is not external—it's the blossoming of the divine seed within you.</li>
+            </ul>
+
+            <h3>For Communities:</h3>
+            <ul class="key-points">
+                <li>Small spiritual communities should not feel inadequate compared to large institutions. A handful of sincere seekers can grow into a powerful force for transformation.</li>
+                <li>Great movements begin with tiny actions—a single act of compassion, a word of truth, a moment of genuine connection.</li>
+                <li>Quality over quantity: the size of the seed matters less than the vitality of the life within it.</li>
+            </ul>
+
+            <h3>Meditation Practice:</h3>
+            <p><strong>The Seed Meditation:</strong> Visualize a tiny point of light in your heart center. This is the divine spark, the mustard seed of consciousness. With each breath, the light grows slightly, sending roots down into the earth and branches up toward the heavens. Feel yourself becoming a tree of light, sheltering all beings. Rest in the awareness that the infinite is contained in the infinitesimal—God dwells fully in the spark.</p>
+        </div>
+
+        <div class="key-verses">
+            <h2>Related Key Verses</h2>
+            <div class="verse-grid">
+                <div class="verse-card">
+                    <div class="verse-text">"The kingdom of God is not coming with things that can be observed; nor will they say, 'Look, here it is!' or 'There it is!' For, in fact, the kingdom of God is within you."</div>
+                    <div class="verse-ref">Luke 17:20-21</div>
+                </div>
+                <div class="verse-card">
+                    <div class="verse-text">"For truly I tell you, if you have faith the size of a mustard seed, you will say to this mountain, 'Move from here to there,' and it will move; and nothing will be impossible for you."</div>
+                    <div class="verse-ref">Matthew 17:20</div>
+                </div>
+                <div class="verse-card">
+                    <div class="verse-text">"Unless a grain of wheat falls into the earth and dies, it remains just a single grain; but if it dies, it bears much fruit."</div>
+                    <div class="verse-ref">John 12:24</div>
+                </div>
+                <div class="verse-card">
+                    <div class="verse-text">"On the mountain height of Israel I will plant it, in order that it may produce boughs and bear fruit, and become a noble cedar. Under it every kind of bird will live; in the shade of its branches will nest winged creatures of every kind."</div>
+                    <div class="verse-ref">Ezekiel 17:23 (Old Testament parallel)</div>
+                </div>
+                <div class="verse-card">
+                    <div class="verse-text">"The leaves of the tree are for the healing of the nations."</div>
+                    <div class="verse-ref">Revelation 22:2 (Tree of Life imagery)</div>
+                </div>
+                <div class="verse-card">
+                    <div class="verse-text">"I planted, Apollos watered, but God gave the growth. So neither the one who plants nor the one who waters is anything, but only God who gives the growth."</div>
+                    <div class="verse-ref">1 Corinthians 3:6-7</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="see-also">
+            <h2>See Also</h2>
+            <div class="link-grid">
+                <a href="leaven.html" class="related-link">
+                    <span style="font-size: 1.5rem;">🍞</span>
+                    <span>The Leaven</span>
+                </a>
+                <a href="growing-seed.html" class="related-link">
+                    <span style="font-size: 1.5rem;">🌿</span>
+                    <span>The Growing Seed</span>
+                </a>
+                <a href="sower.html" class="related-link">
+                    <span style="font-size: 1.5rem;">👨‍🌾</span>
+                    <span>The Sower</span>
+                </a>
+                <a href="hidden-treasure.html" class="related-link">
+                    <span style="font-size: 1.5rem;">💎</span>
+                    <span>Hidden Treasure</span>
+                </a>
+                <a href="barren-fig-tree.html" class="related-link">
+                    <span style="font-size: 1.5rem;">🌴</span>
+                    <span>Barren Fig Tree</span>
+                </a>
+                <a href="parallels/sower-and-souls.html" class="related-link">
+                    <span style="font-size: 1.5rem;">🌱</span>
+                    <span>Sower & Soul Types</span>
+                </a>
+                <a href="gnostic-interpretations.html" class="related-link">
+                    <span style="font-size: 1.5rem;">🔮</span>
+                    <span>Gnostic Overview</span>
+                </a>
+                <a href="../../../kabbalah/tree-of-life.html" class="related-link">
+                    <span style="font-size: 1.5rem;">✡️</span>
+                    <span>Kabbalistic Tree of Life</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../../../script.js"></script>
+    <script>
+        function showVersion(version) {
+            // Hide all version contents
+            document.querySelectorAll('.version-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            // Remove active class from all tabs
+            document.querySelectorAll('.version-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Show selected version
+            document.getElementById(version).classList.add('active');
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

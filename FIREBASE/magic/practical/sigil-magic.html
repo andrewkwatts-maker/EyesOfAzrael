@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sigil Magic - Symbolic Encoding of Intent</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--spacing-4xl) var(--spacing-lg);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-3xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .icon {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-lg);
+            text-shadow: 0 0 20px var(--color-primary);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            margin-bottom: var(--spacing-lg);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: var(--font-heading);
+        }
+
+        .subtitle {
+            font-size: var(--font-size-xl);
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        .section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .section-icon {
+            font-size: var(--font-size-4xl);
+        }
+
+        h2 {
+            font-size: var(--font-size-3xl);
+            color: var(--color-primary);
+            font-family: var(--font-heading);
+        }
+
+        h3 {
+            font-size: var(--font-size-2xl);
+            color: var(--color-secondary);
+            margin: var(--spacing-xl) 0 var(--spacing-md);
+            font-family: var(--font-heading);
+        }
+
+        h4 {
+            font-size: var(--font-size-xl);
+            color: var(--color-accent);
+            margin: var(--spacing-lg) 0 var(--spacing-sm);
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-md);
+            line-height: var(--leading-relaxed);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-md);
+        }
+
+        .technique-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .technique-card {
+            background: rgba(var(--color-secondary-rgb), 0.05);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-base);
+        }
+
+        .technique-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .step-list {
+            list-style: none;
+            counter-reset: step-counter;
+            margin: var(--spacing-lg) 0;
+        }
+
+        .step-list li {
+            counter-increment: step-counter;
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            background: rgba(var(--color-accent-rgb, 139, 127, 255), 0.1);
+            border-left: 3px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            position: relative;
+            padding-left: var(--spacing-4xl);
+        }
+
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: var(--spacing-md);
+            top: var(--spacing-md);
+            background: var(--color-accent);
+            color: var(--color-background);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--font-bold);
+        }
+
+        .correspondence-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-lg) 0;
+        }
+
+        .correspondence-table th,
+        .correspondence-table td {
+            padding: var(--spacing-md);
+            border: 1px solid var(--color-border);
+            text-align: left;
+        }
+
+        .correspondence-table th {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            color: var(--color-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        .correspondence-table tr:hover {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+        }
+
+        .source-list {
+            list-style: none;
+            margin: var(--spacing-lg) 0;
+        }
+
+        .source-list li {
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--color-secondary);
+        }
+
+        .source-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            display: block;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .source-author {
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        .cross-ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .cross-ref-link {
+            display: block;
+            padding: var(--spacing-md);
+            background: rgba(var(--color-accent-rgb, 139, 127, 255), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+        }
+
+        .cross-ref-link:hover {
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.2);
+            transform: translateX(5px);
+        }
+
+        .nav-section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            text-align: center;
+            margin-top: var(--spacing-3xl);
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            margin: var(--spacing-sm);
+            transition: all var(--transition-base);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .example-box {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border: 2px dashed var(--color-secondary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .warning-box {
+            background: rgba(255, 100, 100, 0.1);
+            border-left: 4px solid #ff6464;
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-md);
+        }
+
+        ul, ol {
+            margin-left: var(--spacing-xl);
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text-secondary);
+        }
+
+        li {
+            margin-bottom: var(--spacing-sm);
+            line-height: var(--leading-relaxed);
+        }
+
+        .sigil-example {
+            text-align: center;
+            font-size: 3rem;
+            padding: var(--spacing-2xl);
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-radius: var(--radius-lg);
+            margin: var(--spacing-lg) 0;
+            font-family: var(--font-mono);
+        }
+
+        /* Interlink Panel Styles */
+        .interlink-panel { background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-8); margin: var(--space-10) 0; }
+        .interlink-panel h3 { color: var(--color-primary); font-size: var(--text-2xl); margin-bottom: var(--space-6); }
+        .interlink-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-4); }
+        .archetype-link-card, .parallel-card { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border: 1px solid var(--color-border); border-radius: var(--radius-lg); text-decoration: none; transition: all 0.3s; }
+        .archetype-link-card:hover, .parallel-card:hover { background: rgba(var(--color-primary-rgb), 0.2); transform: translateY(-2px); }
+        .card-icon { font-size: var(--text-2xl); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-primary-rgb), 0.2); border-radius: var(--radius-lg); }
+        .card-content h4 { color: var(--color-text-primary); font-size: var(--text-base); margin-bottom: var(--space-1); }
+        .card-content span { color: var(--color-text-secondary); font-size: var(--text-sm); }
+    </style>
+</head>
+<body>
+    
+    <div id="theme-picker-container"></div>
+<div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Sigil Magic</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> → <a href="../index.html">Magic</a> → <a href="index.html">Practical</a> → <span>Sigil Magic</span>
+</nav>
+
+        <!-- OVERVIEW SECTION -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-icon">📜</span>
+                <h2>Overview & Historical Context</h2>
+            </div>
+
+            <p>
+                Sigil magic represents one of the most accessible and practical forms of magical practice, involving the creation
+                and activation of symbolic glyphs designed to bypass the conscious mind and implant intention directly into the
+                subconscious. The term "sigil" derives from the Latin <em>sigillum</em>, meaning "seal," reflecting the ancient
+                practice of sealing spiritual entities into emblems or marks of power.
+            </p>
+
+            <h3>Historical Development</h3>
+            <p>
+                While the concept of magical symbols dates to prehistoric cave paintings and early hieroglyphics, modern sigil
+                magic was revolutionized by English artist and occultist Austin Osman Spare (1886-1956). Spare developed a
+                psychological approach to sigil creation that stripped away the complex ceremonial requirements of traditional
+                grimoire magic, making the practice accessible to anyone with imagination and willpower.
+            </p>
+
+            <div class="highlight-box">
+                <h4>Core Principle</h4>
+                <p>
+                    The fundamental theory behind sigil magic is that desire and conscious focus create psychological resistance.
+                    By encoding intention into a symbol and then forgetting the conscious meaning, the sigil bypasses the critical
+                    faculties of the conscious mind and plants itself directly into the subconscious, where it can manifest without
+                    interference from doubt, anxiety, or competing desires.
+                </p>
+            </div>
+
+            <h3>Philosophical Foundations</h3>
+            <p>
+                Sigil magic draws from several philosophical traditions:
+            </p>
+            <ul>
+                <li><strong>Hermetic Philosophy:</strong> The principle that symbols contain and transmit spiritual power</li>
+                <li><strong>Depth Psychology:</strong> Jung's concept of the collective unconscious and the power of archetypal symbols</li>
+                <li><strong>Chaos Magic:</strong> The pragmatic view that belief itself is a tool that can be manipulated</li>
+                <li><strong>Semiotics:</strong> The study of signs and symbols and their capacity to carry meaning</li>
+                <li><strong>Thelemic Magic:</strong> Crowley's emphasis on Will as the driving force of magical operation</li>
+            </ul>
+
+            <h3>Cultural Precedents</h3>
+            <div class="technique-grid">
+                <div class="technique-card">
+                    <h4>Medieval Grimoires</h4>
+                    <p>Complex sigils for angels, demons, and planetary spirits found in texts like the <em class="corpus-link">Key of Solomon</em>, <em>Lemegeton</em>, and <em>Three Books of Occult Philosophy</em>.</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Icelandic Galdrastafir</h4>
+                    <p>Nordic magical staves combining runes and geometric patterns for protection, love, and power, documented in grimoires like the <em>Galdrabók</em>.</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Tantric Yantras</h4>
+                    <p>Hindu and Buddhist geometric diagrams serving as visual mantras, encoding cosmic principles and deity energies into sacred geometry.</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Islamic Talismanic Magic</h4>
+                    <p>Arabic letter squares, number magic, and divine name configurations used for protection and blessing in texts like the <em class="corpus-link">Picatrix</em>.</p>
+                </div>
+                <div class="technique-card">
+                    <h4>West African Veves</h4>
+                    <p>Vodou symbols drawn to invoke specific loa (spirits), each geometric pattern serving as a spiritual signature and gateway.</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Rosicrucian Seals</h4>
+                    <p>Hermetic emblems combining alchemical, astrological, and Kabbalistic symbolism into complex sigils of transformation.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TECHNIQUES & METHODS -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-icon">🛠️</span>
+                <h2>Techniques & Methods</h2>
+            </div>
+
+            <h3>Method 1: The Austin Osman Spare Method (Word Method)</h3>
+            <p>
+                The most widely practiced contemporary technique, developed by Spare in the early 20th century.
+            </p>
+
+            <ol class="step-list">
+                <li>
+                    <strong>Formulate Your Statement of Intent:</strong> Write a clear, present-tense statement of your desire.
+                    Use "I am" or "This is my will" rather than "I want" or "I wish." For example: "I AM CONFIDENT IN SOCIAL
+                    SITUATIONS" or "THIS IS MY WILL TO OBTAIN A NEW JOB."
+                </li>
+                <li>
+                    <strong>Remove Repeated Letters:</strong> Cross out all duplicate letters, keeping only the first instance
+                    of each. From "I AM CONFIDENT" you would get: I, A, M, C, O, N, F, D, E, T.
+                </li>
+                <li>
+                    <strong>Artistic Recombination:</strong> Arrange the remaining letters into an aesthetically pleasing glyph.
+                    Overlap them, rotate them, stylize them, mirror them. The goal is to create a symbol that is unrecognizable
+                    as language but aesthetically compelling to you.
+                </li>
+                <li>
+                    <strong>Refinement:</strong> Redraw the sigil multiple times, simplifying and stylizing until you have a
+                    clean, powerful symbol that no longer obviously relates to the original letters.
+                </li>
+                <li>
+                    <strong>Charging:</strong> Enter a state of gnosis (see activation methods below) and focus intensely on the
+                    sigil while in that altered state, projecting your desire into the symbol.
+                </li>
+                <li>
+                    <strong>Banishing and Forgetting:</strong> Destroy or hide the sigil and actively forget about it. The magic
+                    works in the unconscious; conscious obsessing creates resistance.
+                </li>
+            </ol>
+
+            <div class="example-box">
+                <h4>Example: Creating a Sigil for Creative Inspiration</h4>
+                <p><strong>Statement:</strong> "I AM CREATIVELY INSPIRED"</p>
+                <p><strong>Unique Letters:</strong> I-A-M-C-R-E-T-V-L-Y-N-S-P-D</p>
+                <p><strong>Visual Result:</strong> [Letters would be artistically combined into an abstract glyph]</p>
+                <div class="sigil-example">⟐⟡⟢</div>
+                <p style="text-align: center; color: var(--color-text-secondary); font-style: italic;">
+                    (Stylized representation - actual sigil would be unique to practitioner)
+                </p>
+            </div>
+
+            <h3>Method 2: The Pictorial Method</h3>
+            <p>
+                Instead of using letters, create a symbolic picture representing your desire. This method draws from the symbolic
+                language of dreams and mythology.
+            </p>
+
+            <ol class="step-list">
+                <li>Identify key symbols representing your desire (e.g., dollar sign for wealth, heart for love, eye for awareness)</li>
+                <li>Combine these symbols into a single composite image</li>
+                <li>Abstract and stylize the image until it becomes a unified glyph</li>
+                <li>Charge and activate as with the word method</li>
+            </ol>
+
+            <h3>Method 3: The Mantra Method</h3>
+            <p>
+                Developed by chaos magician Peter Carroll, this method creates a phonetic sigil.
+            </p>
+
+            <ol class="step-list">
+                <li>Take your statement of intent and remove vowels and duplicate consonants</li>
+                <li>Rearrange the remaining consonants into a pronounceable "barbarous name"</li>
+                <li>Chant this mantra while visualizing the outcome during gnosis</li>
+                <li>The sound itself becomes the sigil, encoded in vibrational form</li>
+            </ol>
+
+            <h3>Method 4: The Automatic Drawing Method</h3>
+            <p>
+                A mediumistic approach allowing the subconscious to create the sigil directly.
+            </p>
+
+            <ol class="step-list">
+                <li>Enter a light trance state through meditation or rhythmic breathing</li>
+                <li>Hold your intention clearly in mind</li>
+                <li>Allow your hand to draw freely without conscious control</li>
+                <li>The resulting symbol is already subconsciously encoded</li>
+                <li>Trace over and refine the most powerful elements of the automatic drawing</li>
+            </ol>
+
+            <h3>Activation Methods (Achieving Gnosis)</h3>
+            <p>
+                Gnosis refers to altered states of consciousness that bypass the rational mind. Different approaches suit
+                different practitioners:
+            </p>
+
+            <div class="technique-grid">
+                <div class="technique-card">
+                    <h4>Inhibitory Gnosis</h4>
+                    <p><strong>Methods:</strong> Deep meditation, sensory deprivation, fasting, sleep deprivation, exhaustion</p>
+                    <p><strong>Effect:</strong> Quiets the conscious mind through reduction of stimuli</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Excitatory Gnosis</h4>
+                    <p><strong>Methods:</strong> Rhythmic dancing, drumming, hyperventilation, sexual arousal, intense physical exertion</p>
+                    <p><strong>Effect:</strong> Overwhelms the conscious mind through overstimulation</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Sexual Gnosis</h4>
+                    <p><strong>Method:</strong> Orgasm while focusing on the sigil</p>
+                    <p><strong>Effect:</strong> The moment of climax creates a neurological state ideal for implanting intent</p>
+                </div>
+                <div class="technique-card">
+                    <h4>The Death Posture</h4>
+                    <p><strong>Method:</strong> Spare's technique of holding breath and focusing eyes while standing on tiptoes</p>
+                    <p><strong>Effect:</strong> Brief oxygen deprivation creates altered state</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Hypnagogic State</h4>
+                    <p><strong>Method:</strong> Work with sigil in the twilight state between waking and sleeping</p>
+                    <p><strong>Effect:</strong> Natural trance state where subconscious is most accessible</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Emotional Intensity</h4>
+                    <p><strong>Method:</strong> Generate strong emotion (fear, laughter, anger, ecstasy) and redirect it into the sigil</p>
+                    <p><strong>Effect:</strong> Emotional energy charges the symbol with power</p>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>⚠️ Important Considerations</h4>
+                <ul>
+                    <li>Avoid creating sigils for others without their explicit consent</li>
+                    <li>Be specific but not restrictive in your statement (allow universe multiple paths to fulfillment)</li>
+                    <li>Don't create contradictory sigils simultaneously</li>
+                    <li>Some practitioners recommend against sigils for harmful intent due to karmic backlash</li>
+                    <li>The ethics of sigil magic remain debated; use discernment</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- MATERIALS & CORRESPONDENCES -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-icon">🎨</span>
+                <h2>Materials & Correspondences</h2>
+            </div>
+
+            <h3>Essential Materials</h3>
+            <p>Sigil magic is notable for requiring minimal materials, but traditional correspondences can enhance practice:</p>
+
+            <table class="correspondence-table">
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Purpose</th>
+                        <th>Traditional Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Paper/Parchment</td>
+                        <td>Primary medium for sigil creation</td>
+                        <td>Virgin parchment prepared during waxing moon for greatest receptivity</td>
+                    </tr>
+                    <tr>
+                        <td>Ink</td>
+                        <td>Drawing sigils</td>
+                        <td>Dragon's blood ink for power, dove's blood for love, lamp black for banishing</td>
+                    </tr>
+                    <tr>
+                        <td>Quill/Pen</td>
+                        <td>Inscribing tool</td>
+                        <td>Feather quills from birds corresponding to intent (crow for secrets, dove for peace)</td>
+                    </tr>
+                    <tr>
+                        <td>Wood/Clay</td>
+                        <td>Permanent sigil carriers</td>
+                        <td>Oak for strength, willow for intuition, rowan for protection</td>
+                    </tr>
+                    <tr>
+                        <td>Metal</td>
+                        <td>Talismanic sigils</td>
+                        <td>Gold for solar/success, silver for lunar/psychic, copper for Venus/love</td>
+                    </tr>
+                    <tr>
+                        <td>Candles</td>
+                        <td>Charging and destroying sigils</td>
+                        <td>Color-coded to intention (see candle magic correspondences)</td>
+                    </tr>
+                    <tr>
+                        <td>Incense</td>
+                        <td>Consecration and gnosis induction</td>
+                        <td>Frankincense for purification, sandalwood for meditation, jasmine for love</td>
+                    </tr>
+                    <tr>
+                        <td>Body Paint</td>
+                        <td>Temporary sigils on skin</td>
+                        <td>Henna for lasting protection, ochre for grounding, charcoal for banishing</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Color Correspondences for Sigil Work</h3>
+            <table class="correspondence-table">
+                <thead>
+                    <tr>
+                        <th>Color</th>
+                        <th>Intent</th>
+                        <th>Planetary Association</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Red</td>
+                        <td>Passion, courage, vitality, sexual energy, war</td>
+                        <td>Mars</td>
+                    </tr>
+                    <tr>
+                        <td>Orange</td>
+                        <td>Success, attraction, encouragement, adaptability</td>
+                        <td>Sun/Mercury</td>
+                    </tr>
+                    <tr>
+                        <td>Yellow</td>
+                        <td>Intellect, communication, creativity, confidence</td>
+                        <td>Mercury/Sun</td>
+                    </tr>
+                    <tr>
+                        <td>Green</td>
+                        <td>Prosperity, growth, healing, fertility, nature magic</td>
+                        <td>Venus</td>
+                    </tr>
+                    <tr>
+                        <td>Blue</td>
+                        <td>Peace, healing, truth, protection, spirituality</td>
+                        <td>Jupiter/Moon</td>
+                    </tr>
+                    <tr>
+                        <td>Purple</td>
+                        <td>Power, psychic ability, spiritual wisdom, ambition</td>
+                        <td>Jupiter</td>
+                    </tr>
+                    <tr>
+                        <td>Black</td>
+                        <td>Banishing, protection, absorbing negativity, binding</td>
+                        <td>Saturn</td>
+                    </tr>
+                    <tr>
+                        <td>White</td>
+                        <td>Purification, truth, clarity, all-purpose</td>
+                        <td>Moon</td>
+                    </tr>
+                    <tr>
+                        <td>Silver</td>
+                        <td>Psychic development, feminine mysteries, dreams</td>
+                        <td>Moon</td>
+                    </tr>
+                    <tr>
+                        <td>Gold</td>
+                        <td>Wealth, success, masculine power, confidence</td>
+                        <td>Sun</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Timing Correspondences</h3>
+            <p>
+                While not strictly necessary, many practitioners find enhanced results by timing sigil work to astrological and lunar cycles:
+            </p>
+            <ul>
+                <li><strong>New Moon:</strong> New beginnings, planting seeds of intention</li>
+                <li><strong>Waxing Moon:</strong> Growth, attraction, building energy</li>
+                <li><strong>Full Moon:</strong> Maximum power, charging, manifestation</li>
+                <li><strong>Waning Moon:</strong> Banishing, releasing, diminishing unwanted conditions</li>
+                <li><strong>Dark Moon:</strong> Deep magic, shadow work, binding</li>
+                <li><strong>Planetary Hours:</strong> Work during the hour ruled by the planet governing your intent</li>
+                <li><strong>Planetary Days:</strong> Sunday (Sun) for success, Monday (Moon) for psychic work, Tuesday (Mars) for courage, Wednesday (Mercury) for communication, Thursday (Jupiter) for expansion, Friday (Venus) for love, Saturday (Saturn) for banishing</li>
+            </ul>
+        </section>
+
+        <!-- TRADITIONS & APPLICATIONS -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-icon">🌍</span>
+                <h2>Traditions & Applications</h2>
+            </div>
+
+            <h3>Modern Chaos Magic Approach</h3>
+            <p>
+                The chaos magic tradition, pioneered by Peter Carroll, Phil Hine, and the Illuminates of Thanateros, treats
+                sigil magic as a core practice. Their approach emphasizes:
+            </p>
+            <ul>
+                <li>Pragmatic experimentation over dogma</li>
+                <li>Results-based validation (if it works, it's true)</li>
+                <li>Belief as a tool that can be adopted and discarded</li>
+                <li>Stripped-down, efficient techniques without elaborate ceremonial</li>
+                <li>Humor and play as valid magical states</li>
+            </ul>
+
+            <h3>Ceremonial Magic Integration</h3>
+            <p>
+                Traditional ceremonial magicians incorporate sigil work within larger ritual frameworks:
+            </p>
+            <ul>
+                <li>Creating sigils derived from magical squares (kameas) of planets</li>
+                <li>Drawing spirit signatures from grimoires like the <em class="corpus-link">Lemegeton</em></li>
+                <li>Consecrating sigils within properly cast circles with invocations</li>
+                <li>Combining sigils with divine names, archangelic seals, and planetary symbols</li>
+                <li>Using complex timing based on astrological elections</li>
+            </ul>
+
+            <h3>Wiccan & Neopagan Usage</h3>
+            <p>
+                Contemporary pagan traditions often employ sigils for:
+            </p>
+            <ul>
+                <li>Creating personal glyphs representing magical names or dedication</li>
+                <li>Marking ritual tools and sacred objects</li>
+                <li>Drawing sigils on candles for spellwork</li>
+                <li>Creating protective wards around homes and ritual spaces</li>
+                <li>Seasonal and sabbat-specific sigils (e.g., harvest abundance at Lughnasadh)</li>
+            </ul>
+
+            <h3>Modern Technological Applications</h3>
+            <p>
+                21st-century practitioners have adapted sigil magic to digital formats:
+            </p>
+            <ul>
+                <li><strong>Digital Sigils:</strong> Creating sigils in graphic design software and spreading them as memes</li>
+                <li><strong>Screen Savers:</strong> Displaying sigils as screen savers for passive charging</li>
+                <li><strong>Subliminal Placement:</strong> Embedding sigils in images, websites, or videos</li>
+                <li><strong>Hypersigils:</strong> Grant Morrison's concept of extended magical narratives (comics, novels, films) as elaborate multi-dimensional sigils</li>
+                <li><strong>AR/VR Magic:</strong> Placing sigils in augmented reality or virtual spaces</li>
+                <li><strong>Code-Based Sigils:</strong> Programming itself as sigil creation, encoding intent into software</li>
+            </ul>
+
+            <h3>Practical Applications by Intent Category</h3>
+
+            <div class="technique-grid">
+                <div class="technique-card">
+                    <h4>Prosperity & Abundance</h4>
+                    <p>Sigils for attracting wealth, job opportunities, business success, and financial stability. Often combined with Jupiter and Venus energies.</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Love & Relationships</h4>
+                    <p>Attracting romantic partners, healing relationships, enhancing attraction. Ethics of influencing specific individuals hotly debated.</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Protection</h4>
+                    <p>Creating shields against negative energy, psychic attack, or unwanted influences. Can be tattooed, carved, or painted on property.</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Healing</h4>
+                    <p>Supporting physical recovery, mental health, and emotional balance. Often used complementary to medical treatment, not as replacement.</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Personal Development</h4>
+                    <p>Building confidence, breaking bad habits, enhancing skills, supporting personal transformation and self-improvement.</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Spiritual Development</h4>
+                    <p>Enhancing psychic abilities, opening intuition, facilitating meditation, connecting with higher self or divine.</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h4>Cultural Note</h4>
+                <p>
+                    While modern sigil magic largely derives from Western esoteric traditions, respectful practitioners recognize
+                    parallel practices in cultures worldwide. When drawing from traditional cultures not your own (such as West
+                    African veves or Hindu yantras), approach with respect, proper attribution, and awareness of context. Simply
+                    copying sacred symbols from closed spiritual traditions without initiation or understanding constitutes
+                    appropriation rather than magical practice.
+                </p>
+            </div>
+        </section>
+
+        <!-- PRIMARY SOURCES -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-icon">📚</span>
+                <h2>Primary Sources & Recommended Reading</h2>
+            </div>
+
+            <ul class="source-list">
+                <li>
+                    <span class="source-title">The Book of Pleasure (Self-Love): The Psychology of Ecstasy</span>
+                    <span class="source-author">Austin Osman Spare (1913)</span>
+                    <p>
+                        The foundational text of modern sigil magic. Spare presents his revolutionary psychological approach
+                        to magic, introducing the method of creating sigils from statements of desire. Dense, cryptic, but
+                        essential reading for understanding the philosophical basis of contemporary practice.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">Liber Null & Psychonaut</span>
+                    <span class="source-author">Peter J. Carroll (1987)</span>
+                    <p>
+                        The chaos magic bible. Carroll systematizes and expands Spare's techniques, providing clear
+                        instructions for sigil creation, gnosis attainment, and results-focused magical practice. Includes
+                        the mantra method and detailed analysis of different states of consciousness for magical work.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">Condensed Chaos: An Introduction to Chaos Magic</span>
+                    <span class="source-author">Phil Hine (1995)</span>
+                    <p>
+                        Accessible, practical guide to chaos magic techniques with extensive coverage of sigil work. Hine
+                        presents sigil magic in clear, step-by-step terms with humor and pragmatism. Excellent starting
+                        point for beginners.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">Practical Sigil Magic: Creating Personal Symbols for Success</span>
+                    <span class="source-author">Frater U∴D∴ (1991)</span>
+                    <p>
+                        Comprehensive manual covering both traditional ceremonial approaches and modern chaos techniques.
+                        Includes planetary kamea construction, talismanic magic, and integration of sigils within broader
+                        magical systems. Bridges historical and contemporary practice.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">The Psyber-Magick Anthology</span>
+                    <span class="source-author">Various Authors (Web Archive)</span>
+                    <p>
+                        Collection of essays from the influential 1990s-2000s cybercultural chaos magic scene. Explores
+                        digital sigil work, hypersigils, memetic magic, and adaptation of traditional techniques to
+                        technological environments.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">The Book of Sacred Magic of Abramelin the Mage</span>
+                    <span class="source-author">Abraham von Worms (15th century, trans. S.L. MacGregor Mathers)</span>
+                    <p>
+                        While predating modern sigil magic, this grimoire contains extensive instructions for creating
+                        magical word squares and sigils for commanding spirits. Demonstrates the medieval ceremonial
+                        tradition from which contemporary practice evolved.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">The Picatrix: The Goal of the Wise</span>
+                    <span class="source-author">Anonymous (11th century Arabic, trans. various)</span>
+                    <p>
+                        Medieval grimoire of astrological magic containing elaborate instructions for creating planetary
+                        talismans, each bearing specific sigils and images. Foundational text for understanding talismanic
+                        sigil construction in the Hermetic tradition.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">Visual Magick: A Manual of Freestyle Shamanism</span>
+                    <span class="source-author">Jan Fries (1992)</span>
+                    <p>
+                        Explores sigil magic through the lens of shamanic practice and trance states. Emphasizes
+                        spontaneous, artistic approaches to sigil creation including automatic drawing and dance-based
+                        activation. Excellent for practitioners seeking less structured methods.
+                    </p>
+                </li>
+            </ul>
+
+            <h3>Historical Grimoire Sources</h3>
+            <p>For understanding the traditional ceremonial context of sigil magic:</p>
+            <ul>
+                <li><em class="corpus-link">The Key of Solomon</em> (Clavicula Salomonis) - Medieval grimoire with planetary and angelic sigils</li>
+                <li><em class="corpus-link">The Lesser Key of Solomon</em> (Lemegeton) - Demonic sigils and spirit signatures</li>
+                <li><em class="corpus-link">Three Books of Occult Philosophy</em> - Agrippa's comprehensive magical encyclopedia including sigil construction</li>
+                <li><em class="corpus-link">The Sworn Book of Honorius</em> (Liber Juratus) - Medieval text with angelic seals and consecration rites</li>
+                <li><em>The Arbatel of Magic</em> - Renaissance text on Olympic spirits and their seals</li>
+            </ul>
+        </section>
+
+        <!-- CROSS-REFERENCES -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-icon">🔗</span>
+                <h2>Related Practices & Cross-References</h2>
+            </div>
+
+            <h3>Related Magical Practices</h3>
+            <div class="cross-ref-grid">
+                <a href="candle-magic.html" class="cross-ref-link" data-smart>
+                    🕯️ Candle Magic<br>
+                    <small>Inscribing sigils on candles for focused spellwork</small>
+                </a>
+                <a href="talismans.html" class="cross-ref-link">
+                    🧿 Talismans & Amulets<br>
+                    <small>Permanent sigil carriers for ongoing effects</small>
+                </a>
+                <a href="../ritual/chaos-magic.html" class="cross-ref-link" data-smart>
+                    🌀 Chaos Magic<br>
+                    <small>The modern tradition that popularized sigil work</small>
+                </a>
+                <a href="../ritual/ceremonial-magic.html" class="cross-ref-link">
+                    🔯 Ceremonial Magic<br>
+                    <small>Traditional context for grimoire-based sigils</small>
+                </a>
+                <a href="../energy/breathwork.html" class="cross-ref-link">
+                    🧘 Meditation Practices<br>
+                    <small>Achieving gnosis for sigil activation</small>
+                </a>
+                <a href="../divination/tarot.html" class="cross-ref-link">
+                    🃏 Tarot<br>
+                    <small>Using cards to design pictorial sigils</small>
+                </a>
+            </div>
+
+            <h3>Mythological & Cultural Connections</h3>
+            <div class="cross-ref-grid">
+                <a href="../../mythos/norse/magic/index.html" class="cross-ref-link">
+                    ᚱ Norse Runes & Galdrastafir<br>
+                    <small>Nordic magical alphabets and staves</small>
+                </a>
+                <a href="../../mythos/egyptian/magic/index.html" class="cross-ref-link">
+                    𓁟 Egyptian Hieroglyphic Magic<br>
+                    <small>Sacred symbols as vessels of divine power</small>
+                </a>
+                <a href="../../mythos/hindu/magic/index.html" class="cross-ref-link">
+                    🕉️ Hindu Yantras & Mantras<br>
+                    <small>Geometric sigils encoding cosmic principles</small>
+                </a>
+                <a href="../../mythos/islamic/magic/index.html" class="cross-ref-link">
+                    ☪️ Islamic Talismanic Magic<br>
+                    <small>Arabic letter squares and divine name configurations</small>
+                </a>
+            </div>
+
+            <h3>Spiritual Items for Sigil Work</h3>
+            <div class="cross-ref-grid">
+                <a href="../../spiritual-items/parchment/index.html" class="cross-ref-link">
+                    📜 Parchment & Paper<br>
+                    <small>Traditional surfaces for sigil creation</small>
+                </a>
+                <a href="../../spiritual-items/ink/index.html" class="cross-ref-link">
+                    🖊️ Magical Inks<br>
+                    <small>Dragon's blood, dove's blood, and ritual inks</small>
+                </a>
+                <a href="../../spiritual-items/candles/index.html" class="cross-ref-link">
+                    🕯️ Candles<br>
+                    <small>Charging and destroying sigils with flame</small>
+                </a>
+                <a href="../../spiritual-items/crystals/index.html" class="cross-ref-link">
+                    💎 Crystals<br>
+                    <small>Engraving sigils on stones and crystal charging</small>
+                </a>
+            </div>
+
+            <h3>Patron Deities of Symbol Magic</h3>
+            <div class="cross-ref-grid">
+                <a href="../../mythos/egyptian/deities/thoth.html" class="cross-ref-link">
+                    𓁟 Thoth<br>
+                    <small>Egyptian god of writing, magic, and sacred symbols</small>
+                </a>
+                <a href="../../mythos/greek/deities/hermes.html" class="cross-ref-link">
+                    ☿ Hermes<br>
+                    <small>Greek god of communication and Hermetic wisdom</small>
+                </a>
+                <a href="../../mythos/norse/deities/odin.html" class="cross-ref-link">
+                    ᚱ Odin<br>
+                    <small>Norse all-father who discovered the runes</small>
+                </a>
+                <a href="../../mythos/hindu/deities/ganesha.html" class="cross-ref-link">
+                    🐘 Ganesha<br>
+                    <small>Remover of obstacles, patron of sacred writing</small>
+                </a>
+            </div>
+        </section>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel">
+            <h3>Explore Related Content</h3>
+            <h4 style="color: var(--color-secondary); margin: var(--space-4) 0;">Archetype Connections</h4>
+            <div class="interlink-grid">
+                <a href="../../archetypes/index.html" class="archetype-link-card"><div class="card-icon">&#128302;</div><div class="card-content"><h4>The Magician</h4><span>Will and intention manifest</span></div></a>
+                <a href="../../archetypes/index.html" class="archetype-link-card"><div class="card-icon">&#9997;</div><div class="card-content"><h4>The Creator</h4><span>Artistic magical expression</span></div></a>
+            </div>
+            <h4 style="color: var(--color-secondary); margin: var(--space-6) 0 var(--space-4) 0;">Cross-Cultural Parallels</h4>
+            <div class="interlink-grid">
+                <a href="../ritual/chaos-magic.html" class="parallel-card"><div class="card-icon">&#10034;</div><div class="card-content"><h4>Chaos Magic Origins</h4><span>Austin Osman Spare's system</span></div></a>
+                <a href="../divination/runes.html" class="parallel-card"><div class="card-icon">&#5765;</div><div class="card-content"><h4>Runic Sigils</h4><span>Bind-rune techniques</span></div></a>
+            </div>
+            <h4 style="color: var(--color-secondary); margin: var(--space-6) 0 var(--space-4) 0;">See Also</h4>
+            <div class="interlink-grid">
+                <a href="talismans.html" class="parallel-card"><div class="card-icon">&#128141;</div><div class="card-content"><h4>Talismanic Magic</h4><span>Charged objects</span></div></a>
+                <a href="../texts/key-of-solomon.html" class="parallel-card"><div class="card-icon">&#128220;</div><div class="card-content"><h4>Key of Solomon</h4><span>Traditional seal magic</span></div></a>
+            </div>
+        </section>
+
+        <!-- NAVIGATION -->
+        <nav class="nav-section">
+            <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">Continue Exploring</h3>
+            <a href="../index.html" class="nav-button">🪄 Magical Systems Index</a>
+            <a href="candle-magic.html" class="nav-button">🕯️ Next: Candle Magic</a>
+            <a href="../../index.html" class="nav-button">🏠 Return to Home</a>
+        </nav>
+    </div>
+
+    <!-- Theme Picker UI -->
+</body>
+</html>
