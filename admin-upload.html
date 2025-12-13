@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Upload Content to Firebase</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        h1 {
+            text-align: center;
+            color: #64ffda;
+            margin-bottom: 10px;
+        }
+
+        .auth-section {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .upload-section h3 {
+            color: #64ffda;
+            margin-top: 0;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .progress.active {
+            display: block;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            height: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .log-entry {
+            margin: 3px 0;
+            padding: 2px 5px;
+        }
+
+        .log-entry.success { color: #64ffda; }
+        .log-entry.error { color: #ff6b6b; }
+        .log-entry.info { color: #a0a0a0; }
+
+        .user-info {
+            padding: 10px;
+            background: rgba(100, 255, 218, 0.1);
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #64ffda;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #a0a0a0;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Firebase Content Upload Admin</h1>
+        <p style="text-align: center; color: #a0a0a0;">Upload migrated content to Firestore</p>
+
+        <!-- Authentication Section -->
+        <div class="auth-section">
+            <h3>Authentication</h3>
+            <div id="auth-status">
+                <p>Not signed in</p>
+                <button onclick="signIn()">Sign in with Google</button>
+            </div>
+            <div id="user-info" class="user-info" style="display: none;"></div>
+        </div>
+
+        <!-- Upload Sections -->
+        <div class="upload-section">
+            <h3>📿 Items & Artifacts (140 documents)</h3>
+            <p>Legendary weapons, sacred objects, divine artifacts</p>
+            <button id="upload-items-btn" onclick="uploadCollection('items', 'data/firebase-imports/items-import.json')" disabled>
+                Upload Items
+            </button>
+            <div id="progress-items" class="progress">
+                <div class="progress-bar">
+                    <div id="progress-fill-items" class="progress-fill" style="width: 0%">0%</div>
+                </div>
+                <div id="log-items" class="log"></div>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <h3>🏛️ Sacred Places (49 documents)</h3>
+            <p>Holy mountains, temples, mythological locations</p>
+            <button id="upload-places-btn" onclick="uploadCollection('places', 'data/firebase-imports/places-import.json')" disabled>
+                Upload Places
+            </button>
+            <div id="progress-places" class="progress">
+                <div class="progress-bar">
+                    <div id="progress-fill-places" class="progress-fill" style="width: 0%">0%</div>
+                </div>
+                <div id="log-places" class="log"></div>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <h3>✨ Magic Systems (22 documents)</h3>
+            <p>Divination, energy work, ritual practices</p>
+            <button id="upload-magic-btn" onclick="uploadCollection('magic', 'data/firebase-imports/magic-systems-import.json')" disabled>
+                Upload Magic Systems
+            </button>
+            <div id="progress-magic" class="progress">
+                <div class="progress-bar">
+                    <div id="progress-fill-magic" class="progress-fill" style="width: 0%">0%</div>
+                </div>
+                <div id="log-magic" class="log"></div>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <h3>🔬 Theories (5 documents)</h3>
+            <p>Physics correlations, philosophical analyses</p>
+            <button id="upload-theories-btn" onclick="uploadCollection('user_theories', 'data/theories-import.json')" disabled>
+                Upload Theories
+            </button>
+            <div id="progress-theories" class="progress">
+                <div class="progress-bar">
+                    <div id="progress-fill-theories" class="progress-fill" style="width: 0%">0%</div>
+                </div>
+                <div id="log-theories" class="log"></div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-uploaded">0</div>
+                <div class="stat-label">Documents Uploaded</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-failed">0</div>
+                <div class="stat-label">Failed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-total">216</div>
+                <div class="stat-label">Total Documents</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        let currentUser = null;
+        let db = null;
+        let totalUploaded = 0;
+        let totalFailed = 0;
+
+        // Initialize Firebase
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                db = firebase.firestore();
+                updateAuthStatus(user);
+                enableUploadButtons();
+            } else {
+                currentUser = null;
+                db = null;
+                updateAuthStatus(null);
+                disableUploadButtons();
+            }
+        });
+
+        function updateAuthStatus(user) {
+            const authStatus = document.getElementById('auth-status');
+            const userInfo = document.getElementById('user-info');
+
+            if (user) {
+                authStatus.style.display = 'none';
+                userInfo.style.display = 'block';
+                userInfo.innerHTML = `
+                    <p><strong>Signed in as:</strong> ${user.email}</p>
+                    <p><strong>UID:</strong> ${user.uid}</p>
+                    <button onclick="signOut()">Sign Out</button>
+                `;
+            } else {
+                authStatus.style.display = 'block';
+                userInfo.style.display = 'none';
+            }
+        }
+
+        function signIn() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider);
+        }
+
+        function signOut() {
+            firebase.auth().signOut();
+        }
+
+        function enableUploadButtons() {
+            document.getElementById('upload-items-btn').disabled = false;
+            document.getElementById('upload-places-btn').disabled = false;
+            document.getElementById('upload-magic-btn').disabled = false;
+            document.getElementById('upload-theories-btn').disabled = false;
+        }
+
+        function disableUploadButtons() {
+            document.getElementById('upload-items-btn').disabled = true;
+            document.getElementById('upload-places-btn').disabled = true;
+            document.getElementById('upload-magic-btn').disabled = true;
+            document.getElementById('upload-theories-btn').disabled = true;
+        }
+
+        function log(type, collectionId, message) {
+            const logElement = document.getElementById(`log-${collectionId}`);
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logElement.appendChild(entry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function updateProgress(collectionId, current, total) {
+            const percent = Math.round((current / total) * 100);
+            const progressFill = document.getElementById(`progress-fill-${collectionId}`);
+            progressFill.style.width = `${percent}%`;
+            progressFill.textContent = `${percent}%`;
+        }
+
+        function updateStats() {
+            document.getElementById('stat-uploaded').textContent = totalUploaded;
+            document.getElementById('stat-failed').textContent = totalFailed;
+        }
+
+        async function uploadCollection(collectionId, jsonPath) {
+            if (!currentUser) {
+                alert('Please sign in first');
+                return;
+            }
+
+            const button = document.getElementById(`upload-${collectionId}-btn`);
+            button.disabled = true;
+            button.textContent = 'Uploading...';
+
+            const progressDiv = document.getElementById(`progress-${collectionId}`);
+            progressDiv.classList.add('active');
+
+            log('info', collectionId, `Starting upload from ${jsonPath}`);
+
+            try {
+                // Fetch JSON file
+                const response = await fetch(jsonPath);
+                if (!response.ok) {
+                    throw new Error(`Failed to load ${jsonPath}: ${response.statusText}`);
+                }
+
+                const documents = await response.json();
+                log('info', collectionId, `Loaded ${documents.length} documents`);
+
+                let uploaded = 0;
+                let failed = 0;
+
+                // Upload in batches of 500 (Firestore limit)
+                const BATCH_SIZE = 500;
+                for (let i = 0; i < documents.length; i += BATCH_SIZE) {
+                    const batch = db.batch();
+                    const batchDocs = documents.slice(i, Math.min(i + BATCH_SIZE, documents.length));
+
+                    for (const doc of batchDocs) {
+                        const docRef = db.collection(collectionId).doc(doc.id);
+                        batch.set(docRef, doc);
+                    }
+
+                    try {
+                        await batch.commit();
+                        uploaded += batchDocs.length;
+                        totalUploaded += batchDocs.length;
+                        updateProgress(collectionId, uploaded, documents.length);
+                        log('success', collectionId, `Batch ${Math.floor(i / BATCH_SIZE) + 1} uploaded (${uploaded}/${documents.length})`);
+                    } catch (error) {
+                        failed += batchDocs.length;
+                        totalFailed += batchDocs.length;
+                        log('error', collectionId, `Batch ${Math.floor(i / BATCH_SIZE) + 1} failed: ${error.message}`);
+                    }
+
+                    updateStats();
+
+                    // Rate limiting pause
+                    if (i + BATCH_SIZE < documents.length) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                }
+
+                log('success', collectionId, `✅ Upload complete! ${uploaded} uploaded, ${failed} failed`);
+                button.textContent = '✅ Complete';
+                button.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+
+            } catch (error) {
+                log('error', collectionId, `❌ Upload failed: ${error.message}`);
+                button.disabled = false;
+                button.textContent = 'Retry Upload';
+            }
+        }
+    </script>
+</body>
+</html>
