@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarot Mythology - World Mythos Explorer</title>
+    <title>Greek Mythology - World Mythos Explorer</title>
 
     <!-- Base Theme System -->
     <link rel="stylesheet" href="../../themes/theme-base.css">
@@ -197,10 +197,8 @@
             }
         }
     </style>
-
-    <link rel="stylesheet" href="/css/editable-panels.css">
 </head>
-<body data-theme="tarot">
+<body data-theme="greek">
     <!-- Theme Picker Container -->
     <div id="theme-picker"></div>
     <div id="theme-picker-container"></div>
@@ -208,7 +206,7 @@
     <!-- Header -->
     <header>
         <div class="header-content">
-            <h1>🃏 Tarot Mythology</h1>
+            <h1>⚡ Greek Mythology</h1>
             <div id="user-auth-nav"></div>
         </div>
     </header>
@@ -216,16 +214,16 @@
     <!-- Breadcrumb -->
     <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="../../mythos/index.html">Home</a> →
-        <span aria-current="page">Tarot Mythology</span>
+        <span aria-current="page">Greek Mythology</span>
     </nav>
 
     <main>
         <!-- Hero Section -->
         <div class="hero-section">
-            <div class="hero-icon-display">🃏</div>
-            <h2>Tarot Mythology</h2>
+            <div class="hero-icon-display">⚡</div>
+            <h2>Greek Mythology</h2>
             <p class="hero-description">
-                Journey through the archetypal wisdom of the Tarot, from the Fool's journey to the World's completion. Explore the Major and Minor Arcana, symbolic systems, and the divinatory arts that reveal hidden truths.
+                Explore the rich tapestry of Greek mythology, from the heights of Mount Olympus to the depths of Tartarus. Discover the twelve Olympians, legendary heroes, fearsome creatures, and the mysteries that shaped Western civilization for over a millennium.
             </p>
         </div>
 
@@ -349,7 +347,7 @@
                 Cross-Cultural Parallels
             </h3>
             <p style="margin-bottom: var(--spacing-lg); color: var(--color-text-secondary);">
-                Explore how Tarot mythology connects with other world traditions through shared themes and archetypes.
+                Explore how Greek mythology connects with other world traditions through shared themes and archetypes.
             </p>
             <div class="parallel-grid">
                 <!-- Parallel mythology links will be added here -->
@@ -380,7 +378,7 @@
     <!-- Footer -->
     <footer>
         <p>
-            <strong>Tarot Mythology</strong> - World Mythos Explorer<br>
+            <strong>Greek Mythology</strong> - World Mythos Explorer<br>
             <a href="../../mythos/index.html">Back to World Mythos Home</a> |
             <a href="../../index.html">Main Site</a>
         </p>
@@ -415,11 +413,11 @@
                     return;
                 }
 
-                console.log('[Index] Initializing Firebase Content Loader for tarot');
+                console.log('[Index] Initializing Firebase Content Loader for greek');
 
                 // Create content loader instance
                 const loader = new FirebaseContentLoader(window.firebaseApp);
-                const mythology = 'tarot'; // e.g., 'greek', 'norse', 'egyptian'
+                const mythology = 'greek'; // e.g., 'greek', 'norse', 'egyptian'
 
                 // Content types to load
                 const contentTypes = [
@@ -507,68 +505,6 @@
                     });
                 }
             }
-        });
-    </script>
-
-    <script src="/js/editable-panel-system.js"></script>
-
-
-    <!-- Initialize Editable Panel System -->
-    <script>
-        // Wait for Firebase and content to load
-        window.addEventListener('load', () => {
-            // Give Firebase content loader time to render cards
-            setTimeout(() => {
-                if (typeof EditablePanelSystem === 'undefined') {
-                    console.warn('[EditablePanels] EditablePanelSystem not loaded');
-                    return;
-                }
-
-                if (!window.firebaseApp) {
-                    console.warn('[EditablePanels] Firebase not initialized');
-                    return;
-                }
-
-                console.log('[EditablePanels] Initializing editable panel system...');
-
-                // Initialize the system
-                const editableSystem = new EditablePanelSystem(window.firebaseApp);
-
-                // Store globally for access
-                window.editableSystem = editableSystem;
-
-                // Initialize all rendered content cards
-                const contentCards = document.querySelectorAll('.content-card[data-id]');
-
-                contentCards.forEach(card => {
-                    const documentId = card.getAttribute('data-id');
-
-                    // Determine collection type from parent section
-                    let collection = 'deities';
-                    let contentType = 'deity';
-
-                    const parentSection = card.closest('.firebase-section');
-                    if (parentSection) {
-                        const containerId = parentSection.querySelector('[id$="-container"]')?.id;
-                        if (containerId) {
-                            const type = containerId.replace('-container', '');
-                            collection = type;
-                            contentType = type.slice(0, -1); // Remove plural 's'
-                        }
-                    }
-
-                    // Initialize editable panel
-                    editableSystem.initEditablePanel(card, {
-                        contentType: contentType,
-                        documentId: documentId,
-                        collection: collection,
-                        canEdit: false, // Will be determined by checking user ownership
-                        canSubmitAppendment: true
-                    });
-                });
-
-                console.log(`[EditablePanels] Initialized ${contentCards.length} editable panels`);
-            }, 2000); // Wait 2 seconds for content to load
         });
     </script>
 </body>

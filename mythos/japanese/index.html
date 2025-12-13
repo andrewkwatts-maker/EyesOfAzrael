@@ -197,6 +197,8 @@
             }
         }
     </style>
+
+    <link rel="stylesheet" href="/css/editable-panels.css">
 </head>
 <body data-theme="japanese">
     <!-- Theme Picker Container -->
@@ -505,6 +507,68 @@
                     });
                 }
             }
+        });
+    </script>
+
+    <script src="/js/editable-panel-system.js"></script>
+
+
+    <!-- Initialize Editable Panel System -->
+    <script>
+        // Wait for Firebase and content to load
+        window.addEventListener('load', () => {
+            // Give Firebase content loader time to render cards
+            setTimeout(() => {
+                if (typeof EditablePanelSystem === 'undefined') {
+                    console.warn('[EditablePanels] EditablePanelSystem not loaded');
+                    return;
+                }
+
+                if (!window.firebaseApp) {
+                    console.warn('[EditablePanels] Firebase not initialized');
+                    return;
+                }
+
+                console.log('[EditablePanels] Initializing editable panel system...');
+
+                // Initialize the system
+                const editableSystem = new EditablePanelSystem(window.firebaseApp);
+
+                // Store globally for access
+                window.editableSystem = editableSystem;
+
+                // Initialize all rendered content cards
+                const contentCards = document.querySelectorAll('.content-card[data-id]');
+
+                contentCards.forEach(card => {
+                    const documentId = card.getAttribute('data-id');
+
+                    // Determine collection type from parent section
+                    let collection = 'deities';
+                    let contentType = 'deity';
+
+                    const parentSection = card.closest('.firebase-section');
+                    if (parentSection) {
+                        const containerId = parentSection.querySelector('[id$="-container"]')?.id;
+                        if (containerId) {
+                            const type = containerId.replace('-container', '');
+                            collection = type;
+                            contentType = type.slice(0, -1); // Remove plural 's'
+                        }
+                    }
+
+                    // Initialize editable panel
+                    editableSystem.initEditablePanel(card, {
+                        contentType: contentType,
+                        documentId: documentId,
+                        collection: collection,
+                        canEdit: false, // Will be determined by checking user ownership
+                        canSubmitAppendment: true
+                    });
+                });
+
+                console.log(`[EditablePanels] Initialized ${contentCards.length} editable panels`);
+            }, 2000); // Wait 2 seconds for content to load
         });
     </script>
 </body>
