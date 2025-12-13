@@ -30,10 +30,13 @@
     <script src="../../js/auth-guard.js"></script>
     <script src="../../js/components/google-signin-button.js"></script>
 
+    <!-- Chinese Character Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+
     <style>
         /* ============================================
-           FIREBASE-ENHANCED MYTHOLOGY INDEX TEMPLATE
-           Combines existing styles with Firebase integration
+           CHINESE MYTHOLOGY - ENHANCED TEMPLATE
+           With I Ching, Yin-Yang, Wu Xing integration
            ============================================ */
 
         /* Breadcrumb - Full-width bar attached below header */
@@ -170,6 +173,249 @@
         /* Static Content (preserved from original) */
         .static-content {
             margin: 2rem 0;
+        }
+
+        /* ============================================
+           CHINESE MYTHOLOGY CULTURAL ENHANCEMENTS
+           ============================================ */
+
+        /* Chinese Name Display */
+        .chinese-name {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-left: var(--spacing-xs);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .pinyin {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 0.85em;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+            margin-left: var(--spacing-xs);
+        }
+
+        /* Wu Xing (Five Elements) Diagram */
+        .wu-xing-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 2rem auto;
+        }
+
+        .wu-xing-element {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .wu-xing-element:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .wu-xing-wood {
+            background: radial-gradient(circle, #22c55e, #16a34a);
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .wu-xing-fire {
+            background: radial-gradient(circle, #ef4444, #dc2626);
+            top: 25%;
+            right: 10%;
+        }
+
+        .wu-xing-earth {
+            background: radial-gradient(circle, #f59e0b, #d97706);
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .wu-xing-metal {
+            background: radial-gradient(circle, #e5e7eb, #9ca3af);
+            top: 25%;
+            left: 10%;
+        }
+
+        .wu-xing-water {
+            background: radial-gradient(circle, #3b82f6, #2563eb);
+            bottom: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .element-char {
+            font-size: 2rem;
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .element-name {
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Yin-Yang Symbol */
+        .yin-yang-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem auto;
+        }
+
+        .yin-yang {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(to right, #000 50%, #fff 50%);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+
+        .yin-yang::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            height: 50%;
+            background: #fff;
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+
+        .yin-yang::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 50%;
+            height: 50%;
+            background: #000;
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* I Ching Hexagram Grid */
+        .hexagram-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: var(--spacing-md);
+            margin: 2rem 0;
+        }
+
+        .hexagram-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .hexagram-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(var(--color-primary-rgb), 0.6);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .hexagram-symbol {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .hexagram-number {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+        }
+
+        .hexagram-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: var(--spacing-xs);
+        }
+
+        .hexagram-chinese {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.1rem;
+            color: var(--color-primary);
+        }
+
+        /* Bagua (Eight Trigrams) */
+        .bagua-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-md);
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .trigram-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .trigram-card:hover {
+            transform: scale(1.05);
+            border-color: rgba(var(--color-primary-rgb), 0.6);
+        }
+
+        .trigram-symbol {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .trigram-name {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .trigram-meaning {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+
+        /* Physics Integration Section */
+        .physics-link {
+            background: linear-gradient(135deg,
+                rgba(139, 92, 246, 0.2),
+                rgba(59, 130, 246, 0.2));
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .physics-link:hover {
+            border-color: rgba(139, 92, 246, 0.8);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+
+        .physics-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: var(--spacing-md);
         }
 
         /* Responsive Design */
@@ -335,11 +581,200 @@
         </section>
 
         <!-- ============================================
-             STATIC CUSTOM CONTENT (PRESERVED)
-             Add any mythology-specific static content here
+             STATIC CUSTOM CONTENT (CHINESE MYTHOLOGY)
+             Cultural elements and physics integration
              ============================================ -->
         <div class="static-content">
-            <!-- Add custom static content here -->
+            <!-- Yin-Yang & Wu Xing Section -->
+            <section class="glass-card">
+                <h2 class="section-header">☯️ Yin-Yang & The Five Elements (Wu Xing 五行)</h2>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;">
+                    <!-- Yin-Yang -->
+                    <div>
+                        <h3 style="text-align: center; margin-bottom: 1rem;">
+                            Yin & Yang <span class="chinese-name">陰陽</span>
+                        </h3>
+                        <div class="yin-yang-container">
+                            <div class="yin-yang"></div>
+                        </div>
+                        <p style="text-align: center; color: var(--color-text-secondary); margin-top: 1rem;">
+                            The fundamental duality underlying all reality. Yin (feminine, dark, receptive) and Yang (masculine, light, active) represent complementary forces in perpetual balance and transformation.
+                        </p>
+                    </div>
+
+                    <!-- Wu Xing -->
+                    <div>
+                        <h3 style="text-align: center; margin-bottom: 1rem;">
+                            Five Elements <span class="chinese-name">五行</span>
+                        </h3>
+                        <div class="wu-xing-container" style="width: 300px; height: 300px;">
+                            <div class="wu-xing-element wu-xing-wood" style="top: 0; left: 50%; transform: translateX(-50%);">
+                                <div class="element-char">木</div>
+                                <div class="element-name">Wood</div>
+                            </div>
+                            <div class="wu-xing-element wu-xing-fire" style="top: 20%; right: 5%;">
+                                <div class="element-char">火</div>
+                                <div class="element-name">Fire</div>
+                            </div>
+                            <div class="wu-xing-element wu-xing-earth" style="bottom: 10%; left: 50%; transform: translateX(-50%);">
+                                <div class="element-char">土</div>
+                                <div class="element-name">Earth</div>
+                            </div>
+                            <div class="wu-xing-element wu-xing-metal" style="top: 20%; left: 5%;">
+                                <div class="element-char">金</div>
+                                <div class="element-name">Metal</div>
+                            </div>
+                            <div class="wu-xing-element wu-xing-water" style="top: 55%; left: 50%; transform: translateX(-50%);">
+                                <div class="element-char">水</div>
+                                <div class="element-name">Water</div>
+                            </div>
+                        </div>
+                        <p style="text-align: center; color: var(--color-text-secondary); margin-top: 0.5rem; font-size: 0.9rem;">
+                            Generative Cycle: Wood→Fire→Earth→Metal→Water<br>
+                            Destructive Cycle: Wood→Earth→Water→Fire→Metal
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bagua (Eight Trigrams) Section -->
+            <section class="glass-card">
+                <h2 class="section-header">☰ Bagua: The Eight Trigrams <span class="chinese-name">八卦</span></h2>
+                <p style="color: var(--color-text-secondary); margin-bottom: 1.5rem;">
+                    The eight fundamental symbols of the I Ching, representing all possible combinations of Yin (broken line ⚋) and Yang (solid line ⚊).
+                </p>
+
+                <div class="bagua-grid">
+                    <div class="trigram-card">
+                        <div class="trigram-symbol">☰</div>
+                        <div class="trigram-name">乾 Qián</div>
+                        <div class="trigram-meaning">Heaven / Creative</div>
+                    </div>
+                    <div class="trigram-card">
+                        <div class="trigram-symbol">☱</div>
+                        <div class="trigram-name">兌 Duì</div>
+                        <div class="trigram-meaning">Lake / Joyous</div>
+                    </div>
+                    <div class="trigram-card">
+                        <div class="trigram-symbol">☲</div>
+                        <div class="trigram-name">離 Lí</div>
+                        <div class="trigram-meaning">Fire / Clinging</div>
+                    </div>
+                    <div class="trigram-card">
+                        <div class="trigram-symbol">☳</div>
+                        <div class="trigram-name">震 Zhèn</div>
+                        <div class="trigram-meaning">Thunder / Arousing</div>
+                    </div>
+                    <div class="trigram-card">
+                        <div class="trigram-symbol">☴</div>
+                        <div class="trigram-name">巽 Xùn</div>
+                        <div class="trigram-meaning">Wind / Gentle</div>
+                    </div>
+                    <div class="trigram-card">
+                        <div class="trigram-symbol">☵</div>
+                        <div class="trigram-name">坎 Kǎn</div>
+                        <div class="trigram-meaning">Water / Abysmal</div>
+                    </div>
+                    <div class="trigram-card">
+                        <div class="trigram-symbol">☶</div>
+                        <div class="trigram-name">艮 Gèn</div>
+                        <div class="trigram-meaning">Mountain / Stillness</div>
+                    </div>
+                    <div class="trigram-card">
+                        <div class="trigram-symbol">☷</div>
+                        <div class="trigram-name">坤 Kūn</div>
+                        <div class="trigram-meaning">Earth / Receptive</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- I Ching & Modern Physics Integration -->
+            <section class="physics-link">
+                <div class="physics-icon">🔬⚛️</div>
+                <h2 class="section-header" style="text-align: center;">
+                    I Ching & Modern Theoretical Physics
+                </h2>
+                <p style="text-align: center; font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--color-text-secondary);">
+                    Explore remarkable correlations between ancient Chinese cosmology and cutting-edge physics
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                    <div style="background: rgba(0, 0, 0, 0.2); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(139, 92, 246, 0.3);">
+                        <h3 style="color: #a78bfa; margin-bottom: 0.5rem;">64 Hexagrams = 64 Codons</h3>
+                        <p style="font-size: 0.9rem; color: var(--color-text-secondary);">
+                            The 64 hexagrams of the I Ching exactly match the 64 codons in DNA (4³ = 64). Both encode information using 6 bits of data.
+                        </p>
+                        <div style="text-align: center; margin-top: 1rem; font-size: 1.5rem;">
+                            ䷀ ䷁ ䷂ ䷃ ䷄ ䷅
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(0, 0, 0, 0.2); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(139, 92, 246, 0.3);">
+                        <h3 style="color: #a78bfa; margin-bottom: 0.5rem;">72 = Euler Characteristic</h3>
+                        <p style="font-size: 0.9rem; color: var(--color-text-secondary);">
+                            The 72 transformations (七十二變) match the Euler characteristic (χ = 72) that predicts exactly 3 particle generations in physics.
+                        </p>
+                        <div style="text-align: center; margin-top: 1rem; font-family: monospace; color: #a78bfa;">
+                            n = |χ| / 24 = 72/24 = 3 ✓
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(0, 0, 0, 0.2); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(139, 92, 246, 0.3);">
+                        <h3 style="color: #a78bfa; margin-bottom: 0.5rem;">Three Realms = Three Generations</h3>
+                        <p style="font-size: 0.9rem; color: var(--color-text-secondary);">
+                            Heaven (天), Earth (地), Underworld (冥) correspond to the three generations of fundamental particles in the Standard Model.
+                        </p>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="./PHYSICS_README.md" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: white; padding: 1rem 2rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+                        📖 Read Full Physics Analysis (80+ pages)
+                    </a>
+                </div>
+
+                <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--color-text-secondary); font-style: italic;">
+                    Includes: I Ching-DNA correlations, String Theory connections, Calabi-Yau manifolds, Pneuma field theory, Two-Time Physics, testable predictions, and cross-cultural parallels with Jewish Kabbalah, Hindu cosmology, and Egyptian mythology.
+                </p>
+            </section>
+
+            <!-- Key Numbers Section -->
+            <section class="glass-card">
+                <h2 class="section-header">🔢 Sacred Numbers in Chinese Cosmology</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <div style="text-align: center; padding: 1rem;">
+                        <div style="font-size: 3rem; font-weight: bold; color: var(--color-primary);">64</div>
+                        <div style="font-weight: 600; margin-top: 0.5rem;">Hexagrams</div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-secondary); margin-top: 0.25rem;">2⁶ = Complete information</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem;">
+                        <div style="font-size: 3rem; font-weight: bold; color: var(--color-primary);">72</div>
+                        <div style="font-weight: 600; margin-top: 0.5rem;">Transformations</div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-secondary); margin-top: 0.25rem;">七十二變 (Sun Wukong)</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem;">
+                        <div style="font-size: 3rem; font-weight: bold; color: var(--color-primary);">108</div>
+                        <div style="font-weight: 600; margin-top: 0.5rem;">Stars of Destiny</div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-secondary); margin-top: 0.25rem;">36 Heavenly + 72 Earthly</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem;">
+                        <div style="font-size: 3rem; font-weight: bold; color: var(--color-primary);">5</div>
+                        <div style="font-weight: 600; margin-top: 0.5rem;">Elements</div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-secondary); margin-top: 0.25rem;">Wood, Fire, Earth, Metal, Water</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem;">
+                        <div style="font-size: 3rem; font-weight: bold; color: var(--color-primary);">8</div>
+                        <div style="font-weight: 600; margin-top: 0.5rem;">Trigrams</div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-secondary); margin-top: 0.25rem;">Bagua (八卦)</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem;">
+                        <div style="font-size: 3rem; font-weight: bold; color: var(--color-primary);">3</div>
+                        <div style="font-weight: 600; margin-top: 0.5rem;">Realms</div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-secondary); margin-top: 0.25rem;">Heaven, Earth, Underworld</div>
+                    </div>
+                </div>
+            </section>
         </div>
 
         <!-- Cross-Cultural Parallels Section -->
