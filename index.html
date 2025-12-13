@@ -50,6 +50,62 @@
             padding: var(--spacing-xl);
         }
 
+        /* Header Navigation */
+        .site-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md) 0;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .site-logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: center;
+        }
+
+        .sign-in-btn {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .sign-in-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(147, 112, 219, 0.4);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            color: var(--color-primary);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--color-primary);
+        }
+
         .hero-section {
             background: rgba(147, 51, 234, 0.2);
             backdrop-filter: blur(10px);
@@ -368,6 +424,22 @@
 </head>
 <body>
     <div class="container">
+        <!-- Header -->
+        <header class="site-header">
+            <a href="/" class="site-logo">👁️ Eyes of Azrael</a>
+            <div class="header-actions">
+                <a href="theories/user-submissions/browse.html" class="nav-link" style="padding: 0.5rem 1rem; margin: 0;">Browse Submissions</a>
+                <button id="signInBtn" class="sign-in-btn" style="display: none;">
+                    Sign in with Google
+                </button>
+                <div id="userInfo" class="user-info" style="display: none;">
+                    <img id="userAvatar" class="user-avatar" src="" alt="User">
+                    <span id="userName"></span>
+                    <button id="signOutBtn" class="sign-in-btn" style="padding: 0.5rem 1rem;">Sign Out</button>
+                </div>
+            </div>
+        </header>
+
         <!-- Hero Section -->
         <div class="hero-section">
             <h1>👁️ Eyes of Azrael</h1>
@@ -433,13 +505,37 @@
         <!-- Related Sections Widget -->
         <div class="widget">
             <h2 class="widget-header">Explore Related Sections</h2>
-            <div class="nav-links">
-                <a href="mythos/comparative/index.html" class="nav-link">🔗 Comparative Mythology</a>
-                <a href="archetypes/index.html" class="nav-link">⚡ Universal Archetypes</a>
-                <a href="magic/index.html" class="nav-link">✨ Magical Systems</a>
-                <a href="herbalism/index.html" class="nav-link">🌿 Sacred Herbalism</a>
-                <a href="theories/index.html" class="nav-link">🔬 Theories & Analysis</a>
-                <a href="about.html" class="nav-link">📚 About</a>
+            <div class="mythology-grid">
+                <div class="mythos-card" style="border-color: #9370DB; color: #9370DB;" onclick="window.location.href='mythos/comparative/index.html'">
+                    <div class="mythos-icon">🔗</div>
+                    <div class="mythos-name">Comparative Mythology</div>
+                    <div class="mythos-description">Cross-cultural parallels and universal mythic patterns across world traditions</div>
+                </div>
+                <div class="mythos-card" style="border-color: #DAA520; color: #DAA520;" onclick="window.location.href='archetypes/index.html'">
+                    <div class="mythos-icon">⚡</div>
+                    <div class="mythos-name">Universal Archetypes</div>
+                    <div class="mythos-description">Recurring symbols, characters, and patterns found across all human cultures</div>
+                </div>
+                <div class="mythos-card" style="border-color: #c084fc; color: #c084fc;" onclick="window.location.href='magic/index.html'">
+                    <div class="mythos-icon">✨</div>
+                    <div class="mythos-name">Magical Systems</div>
+                    <div class="mythos-description">Esoteric practices, ritual magic, and mystical traditions throughout history</div>
+                </div>
+                <div class="mythos-card" style="border-color: #4ade80; color: #4ade80;" onclick="window.location.href='herbalism/index.html'">
+                    <div class="mythos-icon">🌿</div>
+                    <div class="mythos-name">Sacred Herbalism</div>
+                    <div class="mythos-description">Plant wisdom, traditional medicine, and botanical spirituality across cultures</div>
+                </div>
+                <div class="mythos-card" style="border-color: #60a5fa; color: #60a5fa;" onclick="window.location.href='theories/index.html'">
+                    <div class="mythos-icon">🔬</div>
+                    <div class="mythos-name">Theories & Analysis</div>
+                    <div class="mythos-description">Academic research, comparative studies, and theoretical frameworks</div>
+                </div>
+                <div class="mythos-card" style="border-color: #f59e0b; color: #f59e0b;" onclick="window.location.href='theories/user-submissions/browse.html'">
+                    <div class="mythos-icon">📝</div>
+                    <div class="mythos-name">User Submissions</div>
+                    <div class="mythos-description">Community-contributed theories, insights, and research from scholars worldwide</div>
+                </div>
             </div>
         </div>
     </div>
@@ -698,6 +794,9 @@
                 const ui = new UIController(db);
                 await ui.init();
 
+                // Set up authentication UI
+                setupAuthUI();
+
                 console.log('✅ Firebase integration initialized successfully');
             } catch (error) {
                 console.error('❌ Failed to initialize:', error);
@@ -709,6 +808,50 @@
                 `;
             }
         });
+
+        // Authentication UI Setup
+        function setupAuthUI() {
+            const signInBtn = document.getElementById('signInBtn');
+            const signOutBtn = document.getElementById('signOutBtn');
+            const userInfo = document.getElementById('userInfo');
+            const userName = document.getElementById('userName');
+            const userAvatar = document.getElementById('userAvatar');
+
+            // Listen for auth state changes
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    // User is signed in
+                    signInBtn.style.display = 'none';
+                    userInfo.style.display = 'flex';
+                    userName.textContent = user.displayName || user.email;
+                    userAvatar.src = user.photoURL || 'https://via.placeholder.com/32';
+                } else {
+                    // User is signed out
+                    signInBtn.style.display = 'flex';
+                    userInfo.style.display = 'none';
+                }
+            });
+
+            // Sign in button click handler
+            signInBtn.addEventListener('click', async () => {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                try {
+                    await firebase.auth().signInWithPopup(provider);
+                } catch (error) {
+                    console.error('Sign in error:', error);
+                    alert('Failed to sign in: ' + error.message);
+                }
+            });
+
+            // Sign out button click handler
+            signOutBtn.addEventListener('click', async () => {
+                try {
+                    await firebase.auth().signOut();
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                }
+            });
+        }
     </script>
 </body>
 </html>

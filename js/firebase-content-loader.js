@@ -825,3 +825,10 @@ class FirebaseContentLoader {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = FirebaseContentLoader;
 }
+
+// ES6 export for use with import statements
+if (typeof window !== 'undefined') {
+  window.FirebaseContentLoader = FirebaseContentLoader;
+}
+
+export { FirebaseContentLoader };
