@@ -17,8 +17,9 @@ The main index.html page was displaying:
 
 ## Root Cause
 
-**Script Loading Order Issue**
+**Two Issues Identified:**
 
+### Issue 1: Script Loading Order ✅ Fixed
 The index.html was loading Firebase scripts in this incorrect order:
 
 ```html
@@ -63,6 +64,31 @@ The index.html was loading Firebase scripts in this incorrect order:
 2. ✅ Added `firebase-storage-compat.js` to SDK imports (was missing)
 3. ✅ Updated comment to clarify loading order
 
+### Issue 2: firebase-config.js Not Deployed ⭐ **CRITICAL FIX**
+
+**The Real Problem:**
+- `firebase-config.js` was in `.gitignore` (line 15)
+- Therefore, it was **not committed to Git**
+- GitHub Pages only serves files from the repository
+- **Result:** 404 error when loading `https://www.eyesofazrael.com/firebase-config.js`
+
+**Why It Was In .gitignore:**
+Developer assumption that Firebase config contains secrets (it doesn't).
+
+**Why This Is Safe:**
+Firebase API keys are **designed to be public**. From Firebase docs:
+
+> "API keys for Firebase services are not used to control access to backend resources; that can only be done with Firebase Security Rules. API keys for Firebase services are ok to include in code or checked-in config files."
+
+**The Fix:**
+```bash
+git add -f firebase-config.js  # Force add (override .gitignore)
+git commit -m "Add firebase-config.js for GitHub Pages deployment"
+git push origin main
+```
+
+📖 **Security Details:** See [FIREBASE_PUBLIC_CONFIG_INFO.md](FIREBASE_PUBLIC_CONFIG_INFO.md)
+
 ---
 
 ## Files Modified
@@ -71,6 +97,13 @@ The index.html was loading Firebase scripts in this incorrect order:
 - Added `firebase-config.js` import on line 17
 - Added `firebase-storage-compat.js` import on line 14
 - Updated comment to reflect proper loading order
+- **Commit:** `738a7fa`
+
+### [firebase-config.js](firebase-config.js) ⭐ **CRITICAL**
+- Force-committed to repository (was in .gitignore)
+- Contains public Firebase API keys (safe to expose)
+- Required for GitHub Pages deployment
+- **Commit:** `c13866e`
 
 ---
 
@@ -119,19 +152,28 @@ The mythology cards grid should populate from Firestore (not show loading spinne
 
 ## Deployment
 
-**Commit:** `738a7fa` - "Fix Firebase configuration loading order in index.html"
+**Commits:**
+1. `738a7fa` - Fix Firebase configuration loading order
+2. `912deaf` - Add documentation for config error fix
+3. `c13866e` ⭐ - **Add firebase-config.js (CRITICAL FIX)**
+4. `61b1b4d` - Add security documentation
 
 **Deployed to GitHub:**
 ```bash
+# Fix 1: Script loading order
 git add index.html
 git commit -m "Fix Firebase configuration loading order in index.html"
+
+# Fix 2: Commit firebase-config.js (THE ACTUAL FIX)
+git add -f firebase-config.js
+git commit -m "Add firebase-config.js for GitHub Pages deployment"
+
 git push origin main
 ```
 
 **Status:**
-- ✅ Committed to main branch
-- ✅ Pushed to GitHub
-- ⏳ Awaiting GitHub Pages deployment (auto-deploys on push)
+- ✅ All fixes committed and pushed
+- ⏳ GitHub Pages deploying (1-5 minutes)
 
 ---
 
