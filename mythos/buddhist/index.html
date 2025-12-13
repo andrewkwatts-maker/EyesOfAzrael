@@ -11,6 +11,11 @@
     <link rel="stylesheet" href="../../themes/corpus-links.css">
     <link rel="stylesheet" href="../../themes/smart-links.css">
 
+    <!-- Multilingual Font Support -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Serif+Tibetan:wght@400;600;700&family=Noto+Sans+TC:wght@400;600;700&family=Noto+Sans+JP:wght@400;600;700&family=Noto+Serif:wght@400;600&display=swap" rel="stylesheet">
+
     <!-- Firebase Theme System -->
     <link rel="stylesheet" href="/css/firebase-themes.css">
 
@@ -32,8 +37,8 @@
 
     <style>
         /* ============================================
-           FIREBASE-ENHANCED MYTHOLOGY INDEX TEMPLATE
-           Combines existing styles with Firebase integration
+           BUDDHIST MYTHOLOGY ENHANCED STYLES
+           Multilingual support, meditation integration, visualizations
            ============================================ */
 
         /* Breadcrumb - Full-width bar attached below header */
@@ -172,6 +177,450 @@
             margin: 2rem 0;
         }
 
+        /* ============================================
+           MULTILINGUAL NAME DISPLAY
+           ============================================ */
+        .multilingual-names {
+            margin: var(--spacing-md) 0;
+            padding: var(--spacing-md);
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .multilingual-names h4 {
+            font-size: 0.9rem;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .name-row {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-xs);
+            align-items: baseline;
+        }
+
+        .name-label {
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .name-value {
+            font-size: 1.1rem;
+            color: var(--color-text-primary);
+            font-family: 'Noto Serif', serif;
+        }
+
+        .name-value .phonetic {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            margin-left: var(--spacing-xs);
+            font-style: italic;
+        }
+
+        /* ============================================
+           THREE VEHICLES TABS
+           ============================================ */
+        .vehicle-tabs {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            border-bottom: 2px solid rgba(var(--color-primary-rgb), 0.2);
+            flex-wrap: wrap;
+        }
+
+        .vehicle-tab {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: transparent;
+            border: none;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all var(--transition-fast);
+            border-bottom: 3px solid transparent;
+            position: relative;
+            bottom: -2px;
+        }
+
+        .vehicle-tab:hover {
+            color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.05);
+        }
+
+        .vehicle-tab.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .vehicle-content {
+            display: none;
+        }
+
+        .vehicle-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============================================
+           SIX PERFECTIONS (PARAMITAS) DIAGRAM
+           ============================================ */
+        .paramitas-diagram {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .paramitas-circle {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(var(--color-primary-rgb), 0.1),
+                rgba(var(--color-primary-rgb), 0.05),
+                transparent);
+            border: 3px solid var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .paramita-center {
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            border-radius: 50%;
+            background: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            text-align: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 20px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .paramita-item {
+            position: absolute;
+            width: 100px;
+            text-align: center;
+            padding: var(--spacing-sm);
+            background: rgba(var(--color-surface-rgb), 0.9);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-base);
+        }
+
+        .paramita-item:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-xl);
+            z-index: 10;
+        }
+
+        .paramita-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .paramita-name {
+            font-weight: 700;
+            color: var(--color-primary);
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .paramita-sanskrit {
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        /* ============================================
+           TEN STAGES (BHUMIS) TIMELINE
+           ============================================ */
+        .bhumis-timeline {
+            position: relative;
+            padding: 2rem 0;
+            margin: 2rem 0;
+        }
+
+        .bhumis-path {
+            position: relative;
+            height: 6px;
+            background: linear-gradient(to right,
+                rgba(var(--color-primary-rgb), 0.3),
+                var(--color-primary));
+            border-radius: 3px;
+            margin: 2rem 0;
+        }
+
+        .bhumi-stages {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: var(--spacing-sm);
+            margin-top: 3rem;
+        }
+
+        .bhumi-stage {
+            text-align: center;
+            padding: var(--spacing-sm);
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.3);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .bhumi-stage:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .bhumi-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            color: white;
+            line-height: 30px;
+            font-weight: 700;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .bhumi-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 2px;
+        }
+
+        .bhumi-sanskrit {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        /* ============================================
+           CHAKRA INTEGRATION
+           ============================================ */
+        .chakra-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: 4px 10px;
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-top: var(--spacing-xs);
+        }
+
+        .chakra-icon {
+            font-size: 1.2rem;
+        }
+
+        .chakra-name {
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        /* ============================================
+           SACRED PLACES WITH GPS
+           ============================================ */
+        .place-card {
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            transition: all var(--transition-base);
+        }
+
+        .place-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--color-primary);
+        }
+
+        .place-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .place-icon {
+            font-size: 2.5rem;
+        }
+
+        .place-info h3 {
+            margin: 0;
+            color: var(--color-primary);
+        }
+
+        .place-location {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+
+        .place-coordinates {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-radius: var(--radius-sm);
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .coord-label {
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        /* ============================================
+           DHARMA WHEEL VISUALIZATION
+           ============================================ */
+        .dharma-wheel {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 2rem auto;
+            aspect-ratio: 1;
+        }
+
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            box-shadow: 0 4px 20px rgba(var(--color-primary-rgb), 0.4);
+            z-index: 10;
+        }
+
+        .wheel-spokes {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            transform: translate(-50%, -50%);
+        }
+
+        .spoke {
+            position: absolute;
+            width: 2px;
+            height: 50%;
+            background: var(--color-primary);
+            top: 0;
+            left: 50%;
+            transform-origin: bottom center;
+            opacity: 0.6;
+        }
+
+        .wheel-rim {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 4px solid var(--color-primary);
+            border-radius: 50%;
+        }
+
+        .noble-truth {
+            position: absolute;
+            width: 120px;
+            padding: var(--spacing-sm);
+            background: rgba(var(--color-surface-rgb), 0.95);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-md);
+            text-align: center;
+            font-size: 0.85rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .noble-truth strong {
+            display: block;
+            color: var(--color-primary);
+            margin-bottom: 4px;
+        }
+
+        /* ============================================
+           EIGHTFOLD PATH DIAGRAM
+           ============================================ */
+        .eightfold-path {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin: 2rem 0;
+        }
+
+        .path-item {
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.3);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .path-item:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .path-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .path-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .path-sanskrit {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .path-description {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .content-grid {
@@ -194,6 +643,28 @@
                 font-size: var(--font-size-xs);
                 padding: var(--spacing-xs) var(--spacing-md);
                 top: 50px;
+            }
+
+            .name-row {
+                grid-template-columns: 80px 1fr;
+            }
+
+            .vehicle-tab {
+                padding: var(--spacing-xs) var(--spacing-md);
+                font-size: 0.9rem;
+            }
+
+            .paramita-item {
+                width: 80px;
+                font-size: 0.8rem;
+            }
+
+            .bhumi-stages {
+                grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            }
+
+            .eightfold-path {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -335,12 +806,383 @@
         </section>
 
         <!-- ============================================
-             STATIC CUSTOM CONTENT (PRESERVED)
-             Add any mythology-specific static content here
+             BUDDHIST-SPECIFIC STATIC CONTENT
+             Visualizations, diagrams, and special features
              ============================================ -->
         <div class="static-content">
-            <!-- Add custom static content here -->
+
+            <!-- Example: Manjushri Multilingual Display -->
+            <section class="glass-card">
+                <h2 class="section-header">Example: Multilingual Names</h2>
+                <h3>Manjushri - Bodhisattva of Wisdom</h3>
+                <div class="multilingual-names">
+                    <h4>Names Across Traditions</h4>
+                    <div class="name-row">
+                        <span class="name-label">Sanskrit:</span>
+                        <span class="name-value" style="font-family: 'Noto Sans Devanagari', sans-serif;">मञ्जुश्री <span class="phonetic">(Manjushri)</span></span>
+                    </div>
+                    <div class="name-row">
+                        <span class="name-label">Tibetan:</span>
+                        <span class="name-value" style="font-family: 'Noto Serif Tibetan', serif;">འཇམ་དཔལ་དབྱངས། <span class="phonetic">(Jampal Yang)</span></span>
+                    </div>
+                    <div class="name-row">
+                        <span class="name-label">Chinese:</span>
+                        <span class="name-value" style="font-family: 'Noto Sans TC', sans-serif;">文殊師利 <span class="phonetic">(Wenshu Shili)</span></span>
+                    </div>
+                    <div class="name-row">
+                        <span class="name-label">Japanese:</span>
+                        <span class="name-value" style="font-family: 'Noto Sans JP', sans-serif;">文殊 <span class="phonetic">(Monju)</span></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Six Perfections (Paramitas) Diagram -->
+            <section class="glass-card">
+                <h2 class="section-header">Six Perfections (Paramitas)</h2>
+                <p style="text-align: center; margin-bottom: 2rem;">The six transcendent virtues cultivated on the path to enlightenment</p>
+                <div class="paramitas-diagram">
+                    <div class="paramitas-circle">
+                        <div class="paramita-center">Six Paramitas</div>
+
+                        <!-- Position paramitas around the circle -->
+                        <div class="paramita-item" style="top: -10%; left: 50%; transform: translateX(-50%);">
+                            <div class="paramita-icon">🎁</div>
+                            <div class="paramita-name">Generosity</div>
+                            <div class="paramita-sanskrit">Dana</div>
+                        </div>
+
+                        <div class="paramita-item" style="top: 15%; right: 0%; transform: translateX(25%);">
+                            <div class="paramita-icon">⚖️</div>
+                            <div class="paramita-name">Ethics</div>
+                            <div class="paramita-sanskrit">Shila</div>
+                        </div>
+
+                        <div class="paramita-item" style="bottom: 15%; right: 0%; transform: translateX(25%);">
+                            <div class="paramita-icon">🕊️</div>
+                            <div class="paramita-name">Patience</div>
+                            <div class="paramita-sanskrit">Kshanti</div>
+                        </div>
+
+                        <div class="paramita-item" style="bottom: -10%; left: 50%; transform: translateX(-50%);">
+                            <div class="paramita-icon">💪</div>
+                            <div class="paramita-name">Diligence</div>
+                            <div class="paramita-sanskrit">Virya</div>
+                        </div>
+
+                        <div class="paramita-item" style="bottom: 15%; left: 0%; transform: translateX(-25%);">
+                            <div class="paramita-icon">🧘</div>
+                            <div class="paramita-name">Meditation</div>
+                            <div class="paramita-sanskrit">Dhyana</div>
+                        </div>
+
+                        <div class="paramita-item" style="top: 15%; left: 0%; transform: translateX(-25%);">
+                            <div class="paramita-icon">💡</div>
+                            <div class="paramita-name">Wisdom</div>
+                            <div class="paramita-sanskrit">Prajna</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ten Stages (Bhumis) Timeline -->
+            <section class="glass-card">
+                <h2 class="section-header">Ten Stages of a Bodhisattva (Dashabhumika)</h2>
+                <p style="text-align: center; margin-bottom: 1rem;">The progressive stages of spiritual development from first awakening to full buddhahood</p>
+                <div class="bhumis-timeline">
+                    <div class="bhumis-path"></div>
+                    <div class="bhumi-stages">
+                        <div class="bhumi-stage">
+                            <div class="bhumi-number">1</div>
+                            <div class="bhumi-name">Joyful</div>
+                            <div class="bhumi-sanskrit">Pramudita</div>
+                        </div>
+                        <div class="bhumi-stage">
+                            <div class="bhumi-number">2</div>
+                            <div class="bhumi-name">Stainless</div>
+                            <div class="bhumi-sanskrit">Vimala</div>
+                        </div>
+                        <div class="bhumi-stage">
+                            <div class="bhumi-number">3</div>
+                            <div class="bhumi-name">Luminous</div>
+                            <div class="bhumi-sanskrit">Prabhakari</div>
+                        </div>
+                        <div class="bhumi-stage">
+                            <div class="bhumi-number">4</div>
+                            <div class="bhumi-name">Radiant</div>
+                            <div class="bhumi-sanskrit">Arcismati</div>
+                        </div>
+                        <div class="bhumi-stage">
+                            <div class="bhumi-number">5</div>
+                            <div class="bhumi-name">Difficult to Master</div>
+                            <div class="bhumi-sanskrit">Sudurjaya</div>
+                        </div>
+                        <div class="bhumi-stage">
+                            <div class="bhumi-number">6</div>
+                            <div class="bhumi-name">Manifest</div>
+                            <div class="bhumi-sanskrit">Abhimukhi</div>
+                        </div>
+                        <div class="bhumi-stage">
+                            <div class="bhumi-number">7</div>
+                            <div class="bhumi-name">Far-Going</div>
+                            <div class="bhumi-sanskrit">Durangama</div>
+                        </div>
+                        <div class="bhumi-stage">
+                            <div class="bhumi-number">8</div>
+                            <div class="bhumi-name">Immovable</div>
+                            <div class="bhumi-sanskrit">Acala</div>
+                        </div>
+                        <div class="bhumi-stage">
+                            <div class="bhumi-number">9</div>
+                            <div class="bhumi-name">Good Intelligence</div>
+                            <div class="bhumi-sanskrit">Sadhumati</div>
+                        </div>
+                        <div class="bhumi-stage">
+                            <div class="bhumi-number">10</div>
+                            <div class="bhumi-name">Cloud of Dharma</div>
+                            <div class="bhumi-sanskrit">Dharmamegha</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dharma Wheel & Four Noble Truths -->
+            <section class="glass-card">
+                <h2 class="section-header">The Dharma Wheel & Four Noble Truths</h2>
+                <p style="text-align: center; margin-bottom: 2rem;">The core teaching of Buddhism: understanding suffering and the path to liberation</p>
+                <div class="dharma-wheel">
+                    <div class="wheel-rim"></div>
+                    <div class="wheel-spokes">
+                        <div class="spoke" style="transform: rotate(0deg);"></div>
+                        <div class="spoke" style="transform: rotate(45deg);"></div>
+                        <div class="spoke" style="transform: rotate(90deg);"></div>
+                        <div class="spoke" style="transform: rotate(135deg);"></div>
+                        <div class="spoke" style="transform: rotate(180deg);"></div>
+                        <div class="spoke" style="transform: rotate(225deg);"></div>
+                        <div class="spoke" style="transform: rotate(270deg);"></div>
+                        <div class="spoke" style="transform: rotate(315deg);"></div>
+                    </div>
+                    <div class="wheel-center">☸️</div>
+
+                    <!-- Four Noble Truths positioned around wheel -->
+                    <div class="noble-truth" style="top: -5%; left: 50%; transform: translateX(-50%);">
+                        <strong>1st Truth</strong>
+                        Dukkha: There is suffering
+                    </div>
+                    <div class="noble-truth" style="top: 50%; right: -5%; transform: translateY(-50%);">
+                        <strong>2nd Truth</strong>
+                        Samudaya: Cause of suffering
+                    </div>
+                    <div class="noble-truth" style="bottom: -5%; left: 50%; transform: translateX(-50%);">
+                        <strong>3rd Truth</strong>
+                        Nirodha: End of suffering
+                    </div>
+                    <div class="noble-truth" style="top: 50%; left: -5%; transform: translateY(-50%);">
+                        <strong>4th Truth</strong>
+                        Magga: Path to end suffering
+                    </div>
+                </div>
+            </section>
+
+            <!-- Eightfold Path -->
+            <section class="glass-card">
+                <h2 class="section-header">The Noble Eightfold Path</h2>
+                <p style="text-align: center; margin-bottom: 2rem;">The practical path taught by Buddha to achieve liberation from suffering</p>
+                <div class="eightfold-path">
+                    <div class="path-item">
+                        <div class="path-icon">👁️</div>
+                        <div class="path-name">Right View</div>
+                        <div class="path-sanskrit">Samma Ditthi</div>
+                        <div class="path-description">Understanding the Four Noble Truths and the nature of reality</div>
+                        <div class="chakra-badge">
+                            <span class="chakra-icon">🟣</span>
+                            <span class="chakra-name">Ajna Chakra</span>
+                        </div>
+                    </div>
+                    <div class="path-item">
+                        <div class="path-icon">💭</div>
+                        <div class="path-name">Right Intention</div>
+                        <div class="path-sanskrit">Samma Sankappa</div>
+                        <div class="path-description">Cultivating thoughts of renunciation, goodwill, and harmlessness</div>
+                        <div class="chakra-badge">
+                            <span class="chakra-icon">🟣</span>
+                            <span class="chakra-name">Ajna Chakra</span>
+                        </div>
+                    </div>
+                    <div class="path-item">
+                        <div class="path-icon">💬</div>
+                        <div class="path-name">Right Speech</div>
+                        <div class="path-sanskrit">Samma Vaca</div>
+                        <div class="path-description">Speaking truthfully, avoiding gossip, harsh words, and lies</div>
+                        <div class="chakra-badge">
+                            <span class="chakra-icon">🔵</span>
+                            <span class="chakra-name">Vishuddha Chakra</span>
+                        </div>
+                    </div>
+                    <div class="path-item">
+                        <div class="path-icon">🙏</div>
+                        <div class="path-name">Right Action</div>
+                        <div class="path-sanskrit">Samma Kammanta</div>
+                        <div class="path-description">Acting ethically: no killing, stealing, or sexual misconduct</div>
+                        <div class="chakra-badge">
+                            <span class="chakra-icon">🟡</span>
+                            <span class="chakra-name">Manipura Chakra</span>
+                        </div>
+                    </div>
+                    <div class="path-item">
+                        <div class="path-icon">🍃</div>
+                        <div class="path-name">Right Livelihood</div>
+                        <div class="path-sanskrit">Samma Ajiva</div>
+                        <div class="path-description">Earning a living in ways that don't harm others</div>
+                        <div class="chakra-badge">
+                            <span class="chakra-icon">🟡</span>
+                            <span class="chakra-name">Manipura Chakra</span>
+                        </div>
+                    </div>
+                    <div class="path-item">
+                        <div class="path-icon">⚡</div>
+                        <div class="path-name">Right Effort</div>
+                        <div class="path-sanskrit">Samma Vayama</div>
+                        <div class="path-description">Preventing and abandoning unwholesome states; cultivating wholesome ones</div>
+                        <div class="chakra-badge">
+                            <span class="chakra-icon">💚</span>
+                            <span class="chakra-name">Anahata Chakra</span>
+                        </div>
+                    </div>
+                    <div class="path-item">
+                        <div class="path-icon">🧠</div>
+                        <div class="path-name">Right Mindfulness</div>
+                        <div class="path-sanskrit">Samma Sati</div>
+                        <div class="path-description">Maintaining awareness of body, feelings, mind, and mental phenomena</div>
+                        <div class="chakra-badge">
+                            <span class="chakra-icon">🟣</span>
+                            <span class="chakra-name">Ajna Chakra</span>
+                        </div>
+                    </div>
+                    <div class="path-item">
+                        <div class="path-icon">🧘</div>
+                        <div class="path-name">Right Concentration</div>
+                        <div class="path-sanskrit">Samma Samadhi</div>
+                        <div class="path-description">Developing deep meditative absorption and one-pointed focus</div>
+                        <div class="chakra-badge">
+                            <span class="chakra-icon">⚪</span>
+                            <span class="chakra-name">Sahasrara Chakra</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sacred Places with GPS Coordinates -->
+            <section class="glass-card">
+                <h2 class="section-header">Sacred Buddhist Sites</h2>
+                <p style="margin-bottom: 2rem;">The most important pilgrimage sites in Buddhism, marking key events in the Buddha's life</p>
+
+                <div class="place-card">
+                    <div class="place-header">
+                        <div class="place-icon">🛕</div>
+                        <div class="place-info">
+                            <h3>Bodh Gaya</h3>
+                            <div class="place-location">Bihar, India - Site of Enlightenment</div>
+                        </div>
+                    </div>
+                    <p>Where Siddhartha Gautama attained enlightenment under the Bodhi Tree, becoming the Buddha.</p>
+                    <div class="place-coordinates">
+                        <div><span class="coord-label">Lat:</span> 24.6960°N</div>
+                        <div><span class="coord-label">Long:</span> 84.9911°E</div>
+                    </div>
+                </div>
+
+                <div class="place-card">
+                    <div class="place-header">
+                        <div class="place-icon">🕉️</div>
+                        <div class="place-info">
+                            <h3>Sarnath</h3>
+                            <div class="place-location">Uttar Pradesh, India - First Teaching</div>
+                        </div>
+                    </div>
+                    <p>Where Buddha gave his first sermon, setting in motion the Wheel of Dharma (Dharmachakra).</p>
+                    <div class="place-coordinates">
+                        <div><span class="coord-label">Lat:</span> 25.3812°N</div>
+                        <div><span class="coord-label">Long:</span> 83.0222°E</div>
+                    </div>
+                </div>
+
+                <div class="place-card">
+                    <div class="place-header">
+                        <div class="place-icon">🏔️</div>
+                        <div class="place-info">
+                            <h3>Lumbini</h3>
+                            <div class="place-location">Nepal - Birthplace of Buddha</div>
+                        </div>
+                    </div>
+                    <p>The sacred garden where Queen Maya gave birth to Prince Siddhartha.</p>
+                    <div class="place-coordinates">
+                        <div><span class="coord-label">Lat:</span> 27.4833°N</div>
+                        <div><span class="coord-label">Long:</span> 83.2833°E</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Three Vehicles Explanation -->
+            <section class="glass-card">
+                <h2 class="section-header">Three Vehicles (Yanas)</h2>
+                <p style="margin-bottom: 1.5rem;">The three major traditions of Buddhism, each offering a path to enlightenment</p>
+
+                <div class="vehicle-tabs">
+                    <button class="vehicle-tab active" onclick="switchVehicle('theravada')">Theravada</button>
+                    <button class="vehicle-tab" onclick="switchVehicle('mahayana')">Mahayana</button>
+                    <button class="vehicle-tab" onclick="switchVehicle('vajrayana')">Vajrayana</button>
+                </div>
+
+                <div id="theravada-content" class="vehicle-content active">
+                    <h3>Theravada: The Way of the Elders</h3>
+                    <p><strong>Goal:</strong> Individual liberation through becoming an Arhat</p>
+                    <p><strong>Primary Text:</strong> Pali Canon (Tipitaka)</p>
+                    <p><strong>Geographic Spread:</strong> Sri Lanka, Thailand, Myanmar, Cambodia, Laos</p>
+                    <p><strong>Key Practice:</strong> Vipassana (insight) meditation, strict adherence to Vinaya (monastic code)</p>
+                    <p><strong>Ideal:</strong> The Arhat - one who has attained nirvana through personal effort</p>
+                </div>
+
+                <div id="mahayana-content" class="vehicle-content">
+                    <h3>Mahayana: The Great Vehicle</h3>
+                    <p><strong>Goal:</strong> Universal liberation through the Bodhisattva path</p>
+                    <p><strong>Primary Texts:</strong> Mahayana Sutras (Lotus, Heart, Diamond, etc.)</p>
+                    <p><strong>Geographic Spread:</strong> China, Japan, Korea, Vietnam, Taiwan</p>
+                    <p><strong>Key Practice:</strong> Cultivation of compassion (karuna) and wisdom (prajna); dedication of merit</p>
+                    <p><strong>Ideal:</strong> The Bodhisattva - one who vows to save all beings before entering nirvana</p>
+                </div>
+
+                <div id="vajrayana-content" class="vehicle-content">
+                    <h3>Vajrayana: The Diamond Vehicle</h3>
+                    <p><strong>Goal:</strong> Rapid enlightenment in one lifetime through tantric methods</p>
+                    <p><strong>Primary Texts:</strong> Tantras, Terma (treasure texts)</p>
+                    <p><strong>Geographic Spread:</strong> Tibet, Bhutan, Mongolia, Nepal</p>
+                    <p><strong>Key Practice:</strong> Deity yoga, mantra recitation, visualization, guru devotion</p>
+                    <p><strong>Ideal:</strong> The Siddha or Mahasiddha - one who has mastered the tantric path</p>
+                </div>
+            </section>
+
         </div>
+
+        <script>
+            // Three Vehicles tab switching
+            function switchVehicle(vehicle) {
+                // Hide all content
+                document.querySelectorAll('.vehicle-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                // Remove active from all tabs
+                document.querySelectorAll('.vehicle-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                // Show selected content
+                document.getElementById(vehicle + '-content').classList.add('active');
+
+                // Activate selected tab
+                event.target.classList.add('active');
+            }
+        </script>
 
         <!-- Cross-Cultural Parallels Section -->
         <section class="interlink-panel" style="margin-top: var(--spacing-xl, 3rem);">

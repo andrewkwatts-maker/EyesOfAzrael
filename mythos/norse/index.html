@@ -133,9 +133,34 @@
 
         .deity-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: var(--spacing-lg);
             margin: var(--spacing-lg) 0;
+        }
+
+        /* Responsive deity grid for 17+ entities */
+        @media (min-width: 1400px) {
+            .deity-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        @media (min-width: 1200px) and (max-width: 1399px) {
+            .deity-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .deity-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 991px) {
+            .deity-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
 
         /* Loading States */
@@ -222,10 +247,13 @@
     <main>
         <!-- Hero Section -->
         <div class="hero-section">
-            <div class="hero-icon-display">⚔️</div>
-            <h2>Norse Mythology</h2>
+            <div class="hero-icon-display">⚔️🌳</div>
+            <h2>Norse Mythology - The Sagas of Asgard</h2>
             <p class="hero-description">
-                Journey through the nine realms of Norse mythology, from Asgard to Midgard to Hel. Meet the Aesir and Vanir gods, brave heroes, and fearsome giants in tales of honor, fate, and the inevitable Ragnarök.
+                Journey through the nine realms of Norse mythology, from the golden halls of Asgard to the human realm of Midgard to the misty depths of Hel.
+                Meet the mighty Aesir gods led by Odin the Allfather and the fertile Vanir deities. Discover the wisdom won through sacrifice on Yggdrasil (ᛁᚴᛏᚱᛅᛋᛁᛚ),
+                the World Tree connecting all existence. Witness the power of Thor's hammer Mjolnir, the magic of the Elder Futhark runes (ᚠᚢᚦᚨᚱᚲ),
+                and the inevitable twilight of Ragnarök - the prophesied destruction and rebirth of the cosmos.
             </p>
         </div>
 
@@ -236,12 +264,29 @@
 
         <!-- Deities Section -->
         <section class="firebase-section">
-            <h2 class="section-header">⚡ Deities</h2>
+            <h2 class="section-header">⚡ The Norse Pantheon - Aesir & Vanir</h2>
+            <div class="glass-card" style="margin-bottom: var(--spacing-lg);">
+                <p style="line-height: 1.7; margin-bottom: var(--spacing-md);">
+                    The Norse gods are divided into two tribes: the <strong>Aesir</strong> (warrior gods of Asgard) and the <strong>Vanir</strong> (fertility and nature deities).
+                    After the Aesir-Vanir War, these divine families merged, creating a unified pantheon that ruled from the golden halls of Asgard.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md); margin-top: var(--spacing-md);">
+                    <div style="padding: var(--spacing-sm); background: rgba(var(--color-primary-rgb), 0.05); border-radius: var(--radius-sm);">
+                        <strong style="color: var(--color-primary);">Key Aesir:</strong> Odin, Thor, Frigg, Tyr, Baldr, Heimdall, Loki
+                    </div>
+                    <div style="padding: var(--spacing-sm); background: rgba(var(--color-secondary-rgb), 0.05); border-radius: var(--radius-sm);">
+                        <strong style="color: var(--color-secondary);">Key Vanir:</strong> Freya, Freyr, Njord
+                    </div>
+                    <div style="padding: var(--spacing-sm); background: rgba(var(--color-primary-rgb), 0.05); border-radius: var(--radius-sm);">
+                        <strong style="color: var(--color-primary);">Other Deities:</strong> Hel, Skadi, Eir, Idun, Forseti
+                    </div>
+                </div>
+            </div>
             <div id="deities-loading" class="loading-container">
                 <div class="loading-spinner"></div>
                 <p class="loading-text">Loading deities from Firebase...</p>
             </div>
-            <div id="deities-container" class="content-grid" style="display: none;"></div>
+            <div id="deities-container" class="deity-grid" style="display: none;"></div>
         </section>
 
         <!-- Heroes Section -->
@@ -262,6 +307,16 @@
                 <p class="loading-text">Loading creatures from Firebase...</p>
             </div>
             <div id="creatures-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Items Section (NEW) -->
+        <section class="firebase-section">
+            <h2 class="section-header">⚔️ Sacred Items & Artifacts</h2>
+            <div id="items-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading items from Firebase...</p>
+            </div>
+            <div id="items-container" class="content-grid" style="display: none;"></div>
         </section>
 
         <!-- Cosmology Section -->
@@ -339,7 +394,153 @@
              Add any mythology-specific static content here
              ============================================ -->
         <div class="static-content">
-            <!-- Add custom static content here -->
+            <!-- Yggdrasil & Nine Realms Diagram Section -->
+            <section class="glass-card" style="margin-top: var(--spacing-xl);">
+                <h2 style="color: var(--color-primary);">🌳 Yggdrasil & The Nine Realms</h2>
+                <p style="line-height: 1.7; margin-bottom: var(--spacing-lg);">
+                    Yggdrasil (Old Norse: ᛁᚴᛏᚱᛅᛋᛁᛚ), the cosmic ash tree, connects nine distinct worlds across three levels of reality.
+                    From the divine heights of Asgard to the icy depths of Niflheim, each realm houses unique beings and plays a crucial role in maintaining cosmic balance.
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-md); margin-top: var(--spacing-lg);">
+                    <!-- Upper Realms -->
+                    <div style="background: rgba(var(--color-primary-rgb), 0.05); padding: var(--spacing-md); border-radius: var(--radius-md); border-left: 4px solid var(--color-primary);">
+                        <h4 style="color: var(--color-primary); margin-top: 0;">Upper Realms</h4>
+                        <ul style="line-height: 1.8; margin: 0; padding-left: 1.5rem;">
+                            <li><strong>Asgard</strong> - Realm of the Aesir gods</li>
+                            <li><strong>Vanaheim</strong> - Realm of the Vanir gods</li>
+                            <li><strong>Alfheim</strong> - Realm of the light elves</li>
+                        </ul>
+                    </div>
+
+                    <!-- Middle Realms -->
+                    <div style="background: rgba(var(--color-primary-rgb), 0.05); padding: var(--spacing-md); border-radius: var(--radius-md); border-left: 4px solid var(--color-secondary);">
+                        <h4 style="color: var(--color-secondary); margin-top: 0;">Middle Realms</h4>
+                        <ul style="line-height: 1.8; margin: 0; padding-left: 1.5rem;">
+                            <li><strong>Midgard</strong> - Realm of humans</li>
+                            <li><strong>Jotunheim</strong> - Realm of the giants</li>
+                            <li><strong>Svartalfheim</strong> - Realm of dark elves/dwarves</li>
+                        </ul>
+                    </div>
+
+                    <!-- Lower Realms -->
+                    <div style="background: rgba(var(--color-primary-rgb), 0.05); padding: var(--spacing-md); border-radius: var(--radius-md); border-left: 4px solid var(--color-accent, var(--color-primary));">
+                        <h4 style="color: var(--color-accent, var(--color-primary)); margin-top: 0;">Lower Realms</h4>
+                        <ul style="line-height: 1.8; margin: 0; padding-left: 1.5rem;">
+                            <li><strong>Niflheim</strong> - Realm of ice and mist</li>
+                            <li><strong>Muspelheim</strong> - Realm of fire</li>
+                            <li><strong>Helheim</strong> - Realm of the dead</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="margin-top: var(--spacing-lg); padding: var(--spacing-lg); background: rgba(var(--color-primary-rgb), 0.03); border-radius: var(--radius-md);">
+                    <h4 style="color: var(--color-primary);">The World Tree's Inhabitants</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-sm); margin-top: var(--spacing-md);">
+                        <div><strong>Nidhogg:</strong> Dragon gnawing at the roots</div>
+                        <div><strong>Ratatoskr:</strong> Squirrel carrying messages</div>
+                        <div><strong>The Eagle:</strong> Sits at the top with great wisdom</div>
+                        <div><strong>Four Stags:</strong> Browse among the branches</div>
+                        <div><strong>The Norns:</strong> Three fate goddesses watering the tree</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sacred Items Quick Reference -->
+            <section class="glass-card" style="margin-top: var(--spacing-xl);">
+                <h2 style="color: var(--color-primary);">⚔️ Sacred Items of the Norse Gods</h2>
+                <p style="line-height: 1.7; margin-bottom: var(--spacing-lg);">
+                    Divine weapons and artifacts that define Norse mythology - forged by master dwarven smiths and wielded by gods and heroes.
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-lg);">
+                    <div style="background: rgba(var(--color-primary-rgb), 0.05); padding: var(--spacing-lg); border-radius: var(--radius-md); border: 2px solid rgba(var(--color-primary-rgb), 0.2);">
+                        <div style="font-size: 2.5rem; text-align: center; margin-bottom: var(--spacing-sm);">🔨</div>
+                        <h4 style="color: var(--color-primary); margin-top: 0;">Mjolnir</h4>
+                        <p style="margin: 0; line-height: 1.7;">Thor's legendary hammer. Creates thunder and lightning, returns when thrown, consecrates sacred rites. Forged by the dwarven brothers Sindri and Brokkr.</p>
+                    </div>
+
+                    <div style="background: rgba(var(--color-primary-rgb), 0.05); padding: var(--spacing-lg); border-radius: var(--radius-md); border: 2px solid rgba(var(--color-primary-rgb), 0.2);">
+                        <div style="font-size: 2.5rem; text-align: center; margin-bottom: var(--spacing-sm);">🗡️</div>
+                        <h4 style="color: var(--color-primary); margin-top: 0;">Gungnir</h4>
+                        <p style="margin: 0; line-height: 1.7;">Odin's spear that never misses its mark. Forged by the Sons of Ivaldi, carved with runes of power. Used to start wars and bind oaths.</p>
+                    </div>
+
+                    <div style="background: rgba(var(--color-primary-rgb), 0.05); padding: var(--spacing-lg); border-radius: var(--radius-md); border: 2px solid rgba(var(--color-primary-rgb), 0.2);">
+                        <div style="font-size: 2.5rem; text-align: center; margin-bottom: var(--spacing-sm);">💍</div>
+                        <h4 style="color: var(--color-primary); margin-top: 0;">Draupnir</h4>
+                        <p style="margin: 0; line-height: 1.7;">Odin's golden arm ring. Every ninth night, eight new rings of equal weight drip from it. Symbol of endless wealth and generosity.</p>
+                    </div>
+
+                    <div style="background: rgba(var(--color-primary-rgb), 0.05); padding: var(--spacing-lg); border-radius: var(--radius-md); border: 2px solid rgba(var(--color-primary-rgb), 0.2);">
+                        <div style="font-size: 2.5rem; text-align: center; margin-bottom: var(--spacing-sm);">🐴</div>
+                        <h4 style="color: var(--color-primary); margin-top: 0;">Sleipnir</h4>
+                        <p style="margin: 0; line-height: 1.7;">Odin's eight-legged horse, fastest of all steeds. Born from Loki, can travel between the nine realms and over the Bifrost bridge.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Runic Magic & Elder Futhark -->
+            <section class="glass-card" style="margin-top: var(--spacing-xl);">
+                <h2 style="color: var(--color-primary);">ᚱ Runic Magic & The Elder Futhark</h2>
+                <p style="line-height: 1.7; margin-bottom: var(--spacing-lg);">
+                    Norse magic encompasses the shamanic practices of seidr, the vocal power of galdr, and the mysteries of the runes - ancient symbols of power that Odin won through sacrifice on Yggdrasil.
+                </p>
+
+                <div style="background: rgba(var(--color-primary-rgb), 0.03); padding: var(--spacing-lg); border-radius: var(--radius-md); margin-bottom: var(--spacing-lg);">
+                    <h4 style="color: var(--color-primary); margin-top: 0;">The 24 Runes of Elder Futhark</h4>
+                    <div style="font-size: 1.5rem; text-align: center; letter-spacing: 0.3rem; margin: var(--spacing-md) 0; font-family: 'Times New Roman', serif;">
+                        ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛈ ᛇ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛜ ᛞ ᛟ
+                    </div>
+                    <p style="text-align: center; margin: 0; font-style: italic; color: var(--color-text-secondary);">
+                        Each rune carries deep meaning and practical magical applications
+                    </p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-md);">
+                    <div style="background: rgba(var(--color-primary-rgb), 0.05); padding: var(--spacing-md); border-radius: var(--radius-md); border-left: 4px solid var(--color-primary);">
+                        <h4 style="color: var(--color-primary); margin-top: 0;">✨ Seidr - Shamanic Magic</h4>
+                        <p style="margin: 0; line-height: 1.7;">Divination and fate-weaving practiced by volvas. Taught by Freyja to Odin, considered unmanly for men to practice in Viking society.</p>
+                    </div>
+
+                    <div style="background: rgba(var(--color-primary-rgb), 0.05); padding: var(--spacing-md); border-radius: var(--radius-md); border-left: 4px solid var(--color-secondary);">
+                        <h4 style="color: var(--color-secondary); margin-top: 0;">🎵 Galdr - Rune Chanting</h4>
+                        <p style="margin: 0; line-height: 1.7;">Vocal magic using rune songs and incantations. The power of spoken words combined with runic symbolism to invoke magical effects.</p>
+                    </div>
+
+                    <div style="background: rgba(var(--color-primary-rgb), 0.05); padding: var(--spacing-md); border-radius: var(--radius-md); border-left: 4px solid var(--color-accent, var(--color-primary));">
+                        <h4 style="color: var(--color-accent, var(--color-primary)); margin-top: 0;">🔮 Wyrd - Fate & Destiny</h4>
+                        <p style="margin: 0; line-height: 1.7;">The concept of fate as a web woven by the Norns. Not predetermined, but shaped by past actions and present choices.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ragnarok Timeline -->
+            <section class="glass-card" style="margin-top: var(--spacing-xl);">
+                <h2 style="color: var(--color-primary);">🔥 Ragnarök - The Twilight of the Gods</h2>
+                <p style="line-height: 1.7; margin-bottom: var(--spacing-lg);">
+                    The prophesied destruction and rebirth of the cosmos. A final battle between the gods and the forces of chaos, ending the current age and beginning a new one.
+                </p>
+
+                <div style="background: rgba(var(--color-primary-rgb), 0.03); padding: var(--spacing-lg); border-radius: var(--radius-md);">
+                    <h4 style="color: var(--color-primary); margin-top: 0;">The Signs & Events of Ragnarök</h4>
+                    <ol style="line-height: 2; margin: var(--spacing-md) 0; padding-left: 2rem;">
+                        <li><strong>Fimbulwinter:</strong> Three successive winters with no summer between</li>
+                        <li><strong>Breaking of Bonds:</strong> Fenrir and Loki break free from their chains</li>
+                        <li><strong>Heimdall's Horn:</strong> Gjallarhorn sounds, calling gods to battle</li>
+                        <li><strong>Yggdrasil Trembles:</strong> The World Tree shakes violently</li>
+                        <li><strong>The Final Battle:</strong> Gods fight giants, monsters, and chaos forces</li>
+                        <li><strong>Deaths of Gods:</strong> Odin, Thor, Freyr, Tyr, and others fall</li>
+                        <li><strong>World Consumed:</strong> Fire and flood destroy the nine realms</li>
+                        <li><strong>Rebirth:</strong> A new world rises, purified and renewed</li>
+                    </ol>
+
+                    <div style="margin-top: var(--spacing-lg); padding: var(--spacing-md); background: rgba(var(--color-secondary-rgb), 0.1); border-radius: var(--radius-sm);">
+                        <strong style="color: var(--color-secondary);">The New World:</strong> Two humans (Líf and Lífþrasir) survive by hiding in Yggdrasil,
+                        drinking morning dew. They emerge to repopulate a green and fertile earth where the surviving gods (Baldr, Hodr, Vidar, Vali) establish a new golden age.
+                    </div>
+                </div>
+            </section>
         </div>
 
         <!-- Cross-Cultural Parallels Section -->
@@ -426,6 +627,7 @@
                     { type: 'deities', container: 'deities-container', loading: 'deities-loading' },
                     { type: 'heroes', container: 'heroes-container', loading: 'heroes-loading' },
                     { type: 'creatures', container: 'creatures-container', loading: 'creatures-loading' },
+                    { type: 'items', container: 'items-container', loading: 'items-loading' },
                     { type: 'cosmology', container: 'cosmology-container', loading: 'cosmology-loading' },
                     { type: 'texts', container: 'texts-container', loading: 'texts-loading' },
                     { type: 'herbs', container: 'herbs-container', loading: 'herbs-loading' },

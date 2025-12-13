@@ -11,6 +11,11 @@
     <link rel="stylesheet" href="../../themes/corpus-links.css">
     <link rel="stylesheet" href="../../themes/smart-links.css">
 
+    <!-- Devanagari Font Support -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Tiro+Devanagari+Sanskrit:ital@0;1&display=swap" rel="stylesheet">
+
     <!-- Firebase Theme System -->
     <link rel="stylesheet" href="/css/firebase-themes.css">
 
@@ -196,6 +201,219 @@
                 top: 50px;
             }
         }
+
+        /* ============================================
+           DEVANAGARI & HINDU-SPECIFIC STYLING
+           ============================================ */
+
+        .devanagari {
+            font-family: 'Noto Sans Devanagari', 'Tiro Devanagari Sanskrit', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .sanskrit-name {
+            font-family: 'Tiro Devanagari Sanskrit', serif;
+            font-size: 1.3em;
+            color: var(--color-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        /* Trimurti Special Display */
+        .trimurti-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.15),
+                rgba(var(--color-secondary-rgb), 0.15));
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+        }
+
+        .trimurti-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+        }
+
+        .trimurti-card {
+            background: rgba(var(--color-surface-rgb), 0.9);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trimurti-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg,
+                var(--color-primary),
+                var(--color-secondary));
+        }
+
+        .trimurti-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl), 0 0 30px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .trimurti-icon {
+            font-size: 4rem;
+            margin: var(--spacing-md) 0;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .trimurti-role {
+            font-size: 0.9rem;
+            color: var(--color-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        /* Chakra Wheel Visualization */
+        .chakra-visualization {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+        }
+
+        .chakra-wheel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--spacing-lg);
+        }
+
+        .chakra-wheel {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+        }
+
+        .chakra-item {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chakra-item:hover {
+            filter: brightness(1.3);
+            transform: scale(1.1);
+        }
+
+        .chakra-item.active {
+            filter: brightness(1.4) drop-shadow(0 0 10px currentColor);
+        }
+
+        .chakra-legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            width: 100%;
+            margin-top: var(--spacing-lg);
+        }
+
+        .chakra-legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-md);
+            background: rgba(var(--color-surface-rgb), 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chakra-legend-item:hover {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            transform: translateX(4px);
+        }
+
+        .chakra-legend-item.active {
+            background: rgba(var(--color-primary-rgb), 0.3);
+            border: 1px solid var(--color-primary);
+        }
+
+        .chakra-color-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .chakra-info {
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+            display: none;
+        }
+
+        .chakra-info.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .deity-chakra-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+
+        /* Avatar System */
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+
+        .avatar-card {
+            background: rgba(var(--color-surface-rgb), 0.7);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .avatar-number {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            background: var(--color-primary);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
     </style>
 
     <link rel="stylesheet" href="/css/editable-panels.css">
@@ -228,6 +446,232 @@
                 Explore the vast cosmos of Hindu mythology, where gods have countless forms and avatars. From the Trimurti to the epic tales of Ramayana and Mahabharata, discover the eternal dance of creation, preservation, and destruction.
             </p>
         </div>
+
+        <!-- Trimurti - The Hindu Trinity -->
+        <section class="trimurti-section">
+            <h2 class="section-header" style="text-align: center; margin-bottom: 1rem;">
+                🕉️ The Trimurti - Sacred Trinity
+                <span class="devanagari" style="display: block; font-size: 1.5rem; margin-top: 0.5rem;">त्रिमूर्ति</span>
+            </h2>
+            <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: 2rem;">
+                The three supreme aspects of the divine: Creation, Preservation, and Destruction
+            </p>
+            <div class="trimurti-grid">
+                <a href="deities/brahma.html" class="trimurti-card" style="text-decoration: none; color: inherit;">
+                    <div class="trimurti-role">Creator</div>
+                    <div class="trimurti-icon">🪷</div>
+                    <h3 style="margin: 0.5rem 0;">Brahma</h3>
+                    <div class="sanskrit-name devanagari">ब्रह्मा</div>
+                    <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-top: 1rem;">
+                        Lord of Creation, born from the cosmic golden lotus, architect of the universe and all living beings.
+                    </p>
+                </a>
+                <a href="deities/vishnu.html" class="trimurti-card" style="text-decoration: none; color: inherit;">
+                    <div class="trimurti-role">Preserver</div>
+                    <div class="trimurti-icon">🦚</div>
+                    <h3 style="margin: 0.5rem 0;">Vishnu</h3>
+                    <div class="sanskrit-name devanagari">विष्णु</div>
+                    <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-top: 1rem;">
+                        Sustainer of dharma, descends in avatars to restore cosmic balance and protect righteousness.
+                    </p>
+                </a>
+                <a href="deities/shiva.html" class="trimurti-card" style="text-decoration: none; color: inherit;">
+                    <div class="trimurti-role">Destroyer</div>
+                    <div class="trimurti-icon">🔱</div>
+                    <h3 style="margin: 0.5rem 0;">Shiva</h3>
+                    <div class="sanskrit-name devanagari">शिव</div>
+                    <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-top: 1rem;">
+                        Lord of transformation, cosmic dancer who dissolves the universe to make way for new creation.
+                    </p>
+                </a>
+            </div>
+        </section>
+
+        <!-- 7 Chakras Visualization -->
+        <section class="chakra-visualization">
+            <h2 class="section-header" style="text-align: center;">
+                🌈 Seven Chakras - Energy Centers
+                <span class="devanagari" style="display: block; font-size: 1.2rem; margin-top: 0.5rem;">सप्त चक्र</span>
+            </h2>
+            <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: 2rem;">
+                Click on each chakra to explore associated deities and their spiritual significance
+            </p>
+
+            <div class="chakra-wheel-container">
+                <!-- SVG Chakra Wheel -->
+                <svg class="chakra-wheel" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Crown Chakra - Sahasrara (Violet) -->
+                    <g class="chakra-item" data-chakra="sahasrara" data-chakra-id="7">
+                        <circle cx="200" cy="40" r="25" fill="#9333EA" stroke="#fff" stroke-width="2" opacity="0.9"/>
+                        <text x="200" y="47" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">☸️</text>
+                    </g>
+
+                    <!-- Third Eye Chakra - Ajna (Indigo) -->
+                    <g class="chakra-item" data-chakra="ajna" data-chakra-id="6">
+                        <circle cx="200" cy="95" r="25" fill="#4F46E5" stroke="#fff" stroke-width="2" opacity="0.9"/>
+                        <text x="200" y="102" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">👁️</text>
+                    </g>
+
+                    <!-- Throat Chakra - Vishuddha (Blue) -->
+                    <g class="chakra-item" data-chakra="vishuddha" data-chakra-id="5">
+                        <circle cx="200" cy="150" r="25" fill="#0EA5E9" stroke="#fff" stroke-width="2" opacity="0.9"/>
+                        <text x="200" y="157" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">🗣️</text>
+                    </g>
+
+                    <!-- Heart Chakra - Anahata (Green) -->
+                    <g class="chakra-item" data-chakra="anahata" data-chakra-id="4">
+                        <circle cx="200" cy="205" r="25" fill="#10B981" stroke="#fff" stroke-width="2" opacity="0.9"/>
+                        <text x="200" y="212" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">💚</text>
+                    </g>
+
+                    <!-- Solar Plexus Chakra - Manipura (Yellow) -->
+                    <g class="chakra-item" data-chakra="manipura" data-chakra-id="3">
+                        <circle cx="200" cy="260" r="25" fill="#EAB308" stroke="#fff" stroke-width="2" opacity="0.9"/>
+                        <text x="200" y="267" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">☀️</text>
+                    </g>
+
+                    <!-- Sacral Chakra - Svadhisthana (Orange) -->
+                    <g class="chakra-item" data-chakra="svadhisthana" data-chakra-id="2">
+                        <circle cx="200" cy="315" r="25" fill="#F97316" stroke="#fff" stroke-width="2" opacity="0.9"/>
+                        <text x="200" y="322" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">🌊</text>
+                    </g>
+
+                    <!-- Root Chakra - Muladhara (Red) -->
+                    <g class="chakra-item" data-chakra="muladhara" data-chakra-id="1">
+                        <circle cx="200" cy="370" r="25" fill="#DC2626" stroke="#fff" stroke-width="2" opacity="0.9"/>
+                        <text x="200" y="377" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">🔴</text>
+                    </g>
+                </svg>
+
+                <!-- Chakra Legend -->
+                <div class="chakra-legend">
+                    <div class="chakra-legend-item" data-chakra="sahasrara">
+                        <div class="chakra-color-dot" style="background: #9333EA;"></div>
+                        <div>
+                            <strong>Sahasrara</strong>
+                            <div class="devanagari" style="font-size: 0.9rem;">सहस्रार</div>
+                            <small>Crown • Divine Connection</small>
+                        </div>
+                    </div>
+                    <div class="chakra-legend-item" data-chakra="ajna">
+                        <div class="chakra-color-dot" style="background: #4F46E5;"></div>
+                        <div>
+                            <strong>Ajna</strong>
+                            <div class="devanagari" style="font-size: 0.9rem;">आज्ञा</div>
+                            <small>Third Eye • Intuition</small>
+                        </div>
+                    </div>
+                    <div class="chakra-legend-item" data-chakra="vishuddha">
+                        <div class="chakra-color-dot" style="background: #0EA5E9;"></div>
+                        <div>
+                            <strong>Vishuddha</strong>
+                            <div class="devanagari" style="font-size: 0.9rem;">विशुद्ध</div>
+                            <small>Throat • Expression</small>
+                        </div>
+                    </div>
+                    <div class="chakra-legend-item" data-chakra="anahata">
+                        <div class="chakra-color-dot" style="background: #10B981;"></div>
+                        <div>
+                            <strong>Anahata</strong>
+                            <div class="devanagari" style="font-size: 0.9rem;">अनाहत</div>
+                            <small>Heart • Love</small>
+                        </div>
+                    </div>
+                    <div class="chakra-legend-item" data-chakra="manipura">
+                        <div class="chakra-color-dot" style="background: #EAB308;"></div>
+                        <div>
+                            <strong>Manipura</strong>
+                            <div class="devanagari" style="font-size: 0.9rem;">मणिपुर</div>
+                            <small>Solar Plexus • Power</small>
+                        </div>
+                    </div>
+                    <div class="chakra-legend-item" data-chakra="svadhisthana">
+                        <div class="chakra-color-dot" style="background: #F97316;"></div>
+                        <div>
+                            <strong>Svadhisthana</strong>
+                            <div class="devanagari" style="font-size: 0.9rem;">स्वाधिष्ठान</div>
+                            <small>Sacral • Creativity</small>
+                        </div>
+                    </div>
+                    <div class="chakra-legend-item" data-chakra="muladhara">
+                        <div class="chakra-color-dot" style="background: #DC2626;"></div>
+                        <div>
+                            <strong>Muladhara</strong>
+                            <div class="devanagari" style="font-size: 0.9rem;">मूलाधार</div>
+                            <small>Root • Grounding</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chakra Information Panels -->
+                <div id="chakra-info-sahasrara" class="chakra-info">
+                    <h3>Sahasrara Chakra - Crown <span class="devanagari">सहस्रार</span></h3>
+                    <p><strong>Location:</strong> Crown of head • <strong>Color:</strong> Violet/White • <strong>Element:</strong> Thought</p>
+                    <p><strong>Associated Deities:</strong></p>
+                    <div class="deity-chakra-badge" style="background: rgba(147, 51, 234, 0.2); color: #9333EA;">Shiva • शिव</div>
+                    <div class="deity-chakra-badge" style="background: rgba(147, 51, 234, 0.2); color: #9333EA;">Dyaus • द्यौस्</div>
+                    <p style="margin-top: 1rem;"><strong>Qualities:</strong> Unity consciousness, enlightenment, divine connection, transcendence</p>
+                </div>
+
+                <div id="chakra-info-ajna" class="chakra-info">
+                    <h3>Ajna Chakra - Third Eye <span class="devanagari">आज्ञा</span></h3>
+                    <p><strong>Location:</strong> Between eyebrows • <strong>Color:</strong> Indigo • <strong>Element:</strong> Light</p>
+                    <p><strong>Associated Deities:</strong></p>
+                    <div class="deity-chakra-badge" style="background: rgba(79, 70, 229, 0.2); color: #4F46E5;">Shiva • शिव</div>
+                    <div class="deity-chakra-badge" style="background: rgba(79, 70, 229, 0.2); color: #4F46E5;">Kali • काली</div>
+                    <div class="deity-chakra-badge" style="background: rgba(79, 70, 229, 0.2); color: #4F46E5;">Saraswati • सरस्वती</div>
+                    <p style="margin-top: 1rem;"><strong>Qualities:</strong> Intuition, wisdom, insight, psychic perception, inner vision</p>
+                </div>
+
+                <div id="chakra-info-vishuddha" class="chakra-info">
+                    <h3>Vishuddha Chakra - Throat <span class="devanagari">विशुद्ध</span></h3>
+                    <p><strong>Location:</strong> Throat • <strong>Color:</strong> Blue • <strong>Element:</strong> Ether/Space</p>
+                    <p><strong>Associated Deities:</strong></p>
+                    <div class="deity-chakra-badge" style="background: rgba(14, 165, 233, 0.2); color: #0EA5E9;">Saraswati • सरस्वती</div>
+                    <div class="deity-chakra-badge" style="background: rgba(14, 165, 233, 0.2); color: #0EA5E9;">Brahma • ब्रह्मा</div>
+                    <p style="margin-top: 1rem;"><strong>Qualities:</strong> Communication, truth, self-expression, purification, creativity</p>
+                </div>
+
+                <div id="chakra-info-anahata" class="chakra-info">
+                    <h3>Anahata Chakra - Heart <span class="devanagari">अनाहत</span></h3>
+                    <p><strong>Location:</strong> Heart center • <strong>Color:</strong> Green • <strong>Element:</strong> Air</p>
+                    <p><strong>Associated Deities:</strong></p>
+                    <div class="deity-chakra-badge" style="background: rgba(16, 185, 129, 0.2); color: #10B981;">Vishnu • विष्णु</div>
+                    <div class="deity-chakra-badge" style="background: rgba(16, 185, 129, 0.2); color: #10B981;">Lakshmi • लक्ष्मी</div>
+                    <div class="deity-chakra-badge" style="background: rgba(16, 185, 129, 0.2); color: #10B981;">Parvati • पार्वती</div>
+                    <p style="margin-top: 1rem;"><strong>Qualities:</strong> Love, compassion, balance, healing, harmony, devotion</p>
+                </div>
+
+                <div id="chakra-info-manipura" class="chakra-info">
+                    <h3>Manipura Chakra - Solar Plexus <span class="devanagari">मणिपुर</span></h3>
+                    <p><strong>Location:</strong> Above navel • <strong>Color:</strong> Yellow • <strong>Element:</strong> Fire</p>
+                    <p><strong>Associated Deities:</strong></p>
+                    <div class="deity-chakra-badge" style="background: rgba(234, 179, 8, 0.2); color: #A16207;">Durga • दुर्गा</div>
+                    <div class="deity-chakra-badge" style="background: rgba(234, 179, 8, 0.2); color: #A16207;">Indra • इन्द्र</div>
+                    <div class="deity-chakra-badge" style="background: rgba(234, 179, 8, 0.2); color: #A16207;">Hanuman • हनुमान</div>
+                    <p style="margin-top: 1rem;"><strong>Qualities:</strong> Personal power, will, transformation, confidence, vitality</p>
+                </div>
+
+                <div id="chakra-info-svadhisthana" class="chakra-info">
+                    <h3>Svadhisthana Chakra - Sacral <span class="devanagari">स्वाधिष्ठान</span></h3>
+                    <p><strong>Location:</strong> Below navel • <strong>Color:</strong> Orange • <strong>Element:</strong> Water</p>
+                    <p><strong>Associated Deities:</strong></p>
+                    <div class="deity-chakra-badge" style="background: rgba(249, 115, 22, 0.2); color: #C2410C;">Krishna • कृष्ण</div>
+                    <div class="deity-chakra-badge" style="background: rgba(249, 115, 22, 0.2); color: #C2410C;">Rati • रति</div>
+                    <p style="margin-top: 1rem;"><strong>Qualities:</strong> Creativity, emotions, pleasure, sexuality, flow, adaptability</p>
+                </div>
+
+                <div id="chakra-info-muladhara" class="chakra-info">
+                    <h3>Muladhara Chakra - Root <span class="devanagari">मूलाधार</span></h3>
+                    <p><strong>Location:</strong> Base of spine • <strong>Color:</strong> Red • <strong>Element:</strong> Earth</p>
+                    <p><strong>Associated Deities:</strong></p>
+                    <div class="deity-chakra-badge" style="background: rgba(220, 38, 38, 0.2); color: #991B1B;">Ganesha • गणेश</div>
+                    <div class="deity-chakra-badge" style="background: rgba(220, 38, 38, 0.2); color: #991B1B;">Brahma • ब्रह्मा</div>
+                    <div class="deity-chakra-badge" style="background: rgba(220, 38, 38, 0.2); color: #991B1B;">Prithvi • पृथ्वी</div>
+                    <p style="margin-top: 1rem;"><strong>Qualities:</strong> Grounding, stability, security, survival, physical vitality</p>
+                </div>
+            </div>
+        </section>
 
         <!-- ============================================
              FIREBASE-LOADED DYNAMIC CONTENT SECTIONS
@@ -512,6 +956,50 @@
 
     <script src="/js/editable-panel-system.js"></script>
 
+    <!-- Chakra Visualization Interactivity -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Chakra interaction system
+            const chakraItems = document.querySelectorAll('.chakra-item');
+            const chakraLegendItems = document.querySelectorAll('.chakra-legend-item');
+            const chakraInfoPanels = document.querySelectorAll('.chakra-info');
+
+            function activateChakra(chakraName) {
+                // Remove all active states
+                chakraItems.forEach(item => item.classList.remove('active'));
+                chakraLegendItems.forEach(item => item.classList.remove('active'));
+                chakraInfoPanels.forEach(panel => panel.classList.remove('active'));
+
+                // Add active states
+                const svgItem = document.querySelector(`.chakra-item[data-chakra="${chakraName}"]`);
+                const legendItem = document.querySelector(`.chakra-legend-item[data-chakra="${chakraName}"]`);
+                const infoPanel = document.getElementById(`chakra-info-${chakraName}`);
+
+                if (svgItem) svgItem.classList.add('active');
+                if (legendItem) legendItem.classList.add('active');
+                if (infoPanel) infoPanel.classList.add('active');
+            }
+
+            // Add click handlers to SVG chakra items
+            chakraItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const chakraName = item.getAttribute('data-chakra');
+                    activateChakra(chakraName);
+                });
+            });
+
+            // Add click handlers to legend items
+            chakraLegendItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const chakraName = item.getAttribute('data-chakra');
+                    activateChakra(chakraName);
+                });
+            });
+
+            // Activate root chakra by default
+            activateChakra('muladhara');
+        });
+    </script>
 
     <!-- Initialize Editable Panel System -->
     <script>

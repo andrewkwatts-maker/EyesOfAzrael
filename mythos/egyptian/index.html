@@ -133,9 +133,46 @@
 
         .deity-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: var(--spacing-lg);
             margin: var(--spacing-lg) 0;
+        }
+
+        /* Hieroglyphic Display */
+        .hieroglyph-display {
+            font-size: 3rem;
+            line-height: 1;
+            margin-bottom: var(--spacing-sm);
+            font-family: "Segoe UI Historic", "Noto Sans Egyptian Hieroglyphs", serif;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .deity-card-enhanced {
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .deity-card-enhanced:hover .transliteration {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .transliteration {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            color: var(--mythos-secondary);
+            padding: var(--spacing-xs);
+            font-size: 0.85rem;
+            font-style: italic;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-100%);
+            transition: all var(--transition-base, 0.3s ease);
+            z-index: 10;
         }
 
         /* Loading States */
@@ -222,11 +259,14 @@
     <main>
         <!-- Hero Section -->
         <div class="hero-section">
-            <div class="hero-icon-display">𓂀</div>
+            <div class="hero-icon-display" style="font-family: 'Segoe UI Historic', 'Noto Sans Egyptian Hieroglyphs', serif;">𓂀 𓊹 𓇳</div>
             <h2>Egyptian Mythology</h2>
             <p class="hero-description">
-                Uncover the mysteries of ancient Egypt, where gods walk as animals and the afterlife awaits all. From Ra's solar barque to Osiris' judgment, explore the divine magic and eternal wisdom of the Nile valley.
+                Uncover the mysteries of ancient Egypt, where gods walk as animals and the afterlife awaits all. From Ra's solar barque (𓇳) to Osiris' judgment, explore the divine magic and eternal wisdom of the Nile valley.
             </p>
+            <div style="margin-top: 1.5rem; font-size: 1rem; opacity: 0.9;">
+                <strong>71 Sacred Entities:</strong> 25 Deities • 16 Concepts • 9 Places • 12 Items • 7 Rituals • 2 Creatures
+            </div>
         </div>
 
         <!-- ============================================
@@ -401,6 +441,80 @@
     <!-- Firebase Configuration -->
     <script src="../../firebase-config.js"></script>
 
+    <!-- Egyptian Hieroglyphic Enhancement Script -->
+    <script>
+        // Hieroglyphic mappings for Egyptian deities and concepts
+        const EGYPTIAN_HIEROGLYPHS = {
+            // Deities
+            'Ra': { glyph: '𓇳𓏺', transliteration: 'rꜥ' },
+            'Isis': { glyph: '𓊨𓏏𓁐', transliteration: 'ꜣst' },
+            'Osiris': { glyph: '𓊨𓁹𓀭', transliteration: 'wsjr' },
+            'Horus': { glyph: '𓅃𓀭', transliteration: 'ḥrw' },
+            'Anubis': { glyph: '𓇋𓈖𓊪𓅱𓃣', transliteration: 'jnpw' },
+            'Thoth': { glyph: '𓅤𓀭', transliteration: 'ḏḥwtj' },
+            'Set': { glyph: '𓃩𓁣', transliteration: 'stẖ' },
+            'Bastet': { glyph: '𓎟𓏏𓏤', transliteration: 'bꜣstt' },
+            'Sekhmet': { glyph: '𓌂𓐍𓏏𓁐', transliteration: 'sḫmt' },
+            'Hathor': { glyph: '𓉡𓏏𓂋', transliteration: 'ḥwt-ḥr' },
+            'Ptah': { glyph: '𓊪𓏏𓎛', transliteration: 'ptḥ' },
+            'Amun': { glyph: '𓇋𓏠𓈖', transliteration: 'jmn' },
+            'Atum': { glyph: '𓇋𓏏𓐝𓏛', transliteration: 'jtm' },
+            'Maat': { glyph: '𓐙𓏏𓁐', transliteration: 'mꜣꜥt' },
+            'Nut': { glyph: '𓏌𓏏𓇯', transliteration: 'nwt' },
+            'Geb': { glyph: '𓎼𓃀𓃀𓀭', transliteration: 'gb' },
+            'Nephthys': { glyph: '𓎟𓏏𓂝𓏏𓁐', transliteration: 'nbt-ḥwt' },
+            'Sobek': { glyph: '𓋴𓃀𓎡', transliteration: 'sbk' },
+            'Neith': { glyph: '𓏏𓈖𓏏𓁐', transliteration: 'nt' },
+            'Khnum': { glyph: '𓏁𓈖𓏛𓀭', transliteration: 'ḫnmw' },
+            'Tefnut': { glyph: '𓏏𓈖𓏏', transliteration: 'tfnt' },
+
+            // Concepts
+            'Amduat': { glyph: '𓇋𓏶𓈖𓏏𓇳𓏺𓈖𓏏𓇼𓄿𓏏', transliteration: 'jmj dwꜣt' },
+            'Duat': { glyph: '𓇼𓄿𓏏', transliteration: 'dwꜣt' },
+            'Ka': { glyph: '𓂓', transliteration: 'kꜣ' },
+            'Ba': { glyph: '𓅡', transliteration: 'bꜣ' },
+            'Ankh': { glyph: '𓋹', transliteration: 'ꜥnḫ' },
+            'Djed': { glyph: '𓊽', transliteration: 'ḏd' },
+            'Was': { glyph: '𓌀', transliteration: 'wꜣs' },
+            'Scarab': { glyph: '𓆣', transliteration: 'ḫprr' },
+            'Khepri': { glyph: '𓆣𓂋𓀭', transliteration: 'ḫprj' }
+        };
+
+        // Function to enhance cards with hieroglyphs
+        function enhanceWithHieroglyphs(card) {
+            const titleElement = card.querySelector('h3, h2, .content-title');
+            if (!titleElement) return;
+
+            const deityName = titleElement.textContent.trim().split('(')[0].trim();
+            const hieroglyphData = EGYPTIAN_HIEROGLYPHS[deityName];
+
+            if (hieroglyphData) {
+                // Create hieroglyph display
+                const hieroglyphDiv = document.createElement('div');
+                hieroglyphDiv.className = 'hieroglyph-display';
+                hieroglyphDiv.textContent = hieroglyphData.glyph;
+                hieroglyphDiv.title = `Egyptian: ${hieroglyphData.transliteration}`;
+
+                // Create transliteration tooltip
+                const translitDiv = document.createElement('div');
+                translitDiv.className = 'transliteration';
+                translitDiv.textContent = hieroglyphData.transliteration;
+
+                // Add enhanced class
+                card.classList.add('deity-card-enhanced');
+
+                // Insert hieroglyph at the top of the card
+                card.insertBefore(hieroglyphDiv, card.firstChild);
+                card.insertBefore(translitDiv, card.firstChild);
+            }
+        }
+
+        // Expose globally for use after Firebase loads content
+        window.enhanceEgyptianContent = function() {
+            document.querySelectorAll('.content-card, .deity-card').forEach(enhanceWithHieroglyphs);
+        };
+    </script>
+
     <!-- Firebase Content Loader (Module) -->
     <script type="module">
         import { FirebaseContentLoader } from '/js/firebase-content-loader.js';
@@ -452,6 +566,14 @@
 
                         // Render content
                         loader.renderContent(container, type);
+
+                        // Enhance with hieroglyphs after content loads
+                        setTimeout(() => {
+                            if (window.enhanceEgyptianContent) {
+                                window.enhanceEgyptianContent();
+                                console.log(`[Index] ✓ ${type} enhanced with hieroglyphs`);
+                            }
+                        }, 100);
 
                         console.log(`[Index] ✓ ${type} loaded successfully`);
 
