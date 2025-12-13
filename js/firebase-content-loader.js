@@ -84,6 +84,18 @@ class FirebaseContentLoader {
         fields: ['name', 'mythology', 'realm', 'description', 'significance'],
         badge: 'realm'
       },
+      places: {
+        collection: 'places',
+        title: 'Sacred Places',
+        fields: ['name', 'mythology', 'type', 'description', 'significance'],
+        badge: 'type'
+      },
+      items: {
+        collection: 'items',
+        title: 'Sacred Items',
+        fields: ['name', 'mythology', 'type', 'description', 'powers'],
+        badge: 'type'
+      },
       herbs: {
         collection: 'herbs',
         title: 'Sacred Herbs',
@@ -487,6 +499,26 @@ class FirebaseContentLoader {
     // Auto-detect and apply theme if themeManager is available
     if (typeof themeManager !== 'undefined' && item.mythology) {
       themeManager.setThemeFromContent(item);
+    }
+
+    // Navigate to detail page if URL is available
+    // Expected format: item.detailUrl or construct from mythology/collection/slug
+    if (item.detailUrl) {
+      window.location.href = item.detailUrl;
+    } else if (item.slug && item.mythology) {
+      // Construct URL: /mythos/{mythology}/{collection}/{slug}.html
+      const collectionPath = config.collection;
+      const detailUrl = `/mythos/${item.mythology}/${collectionPath}/${item.slug}.html`;
+      console.log('[ContentLoader] Navigating to:', detailUrl);
+      window.location.href = detailUrl;
+    } else if (item.id) {
+      // Fallback: Use ID-based URL
+      const collectionPath = config.collection;
+      const detailUrl = `/mythos/${item.mythology || 'greek'}/${collectionPath}/${item.id}.html`;
+      console.log('[ContentLoader] Navigating to:', detailUrl);
+      window.location.href = detailUrl;
+    } else {
+      console.warn('[ContentLoader] No navigation URL available for item:', item);
     }
   }
 

@@ -444,7 +444,7 @@
         <div class="hero-section">
             <h1>👁️ Eyes of Azrael</h1>
             <p style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.95);">
-                World Mythos Explorer - Journey through 15+ mythological traditions spanning 6,000 years
+                A comprehensive encyclopedia of world mythologies, magical systems, sacred herbalism, and spiritual traditions
             </p>
         </div>
 
@@ -468,29 +468,11 @@
             </div>
         </div>
 
-        <!-- Search Widget -->
-        <div class="widget search-widget">
-            <h2 class="widget-header">🔍 Search Across All Mythologies</h2>
-            <input
-                type="text"
-                class="search-input"
-                id="globalSearch"
-                placeholder="Search for gods, concepts, practices... (e.g., 'creation', 'Zeus', 'Sefirot')"
-            >
-            <div class="filter-buttons">
-                <button class="filter-button active" data-filter="all">All Traditions</button>
-                <button class="filter-button" data-filter="completed">Completed Only</button>
-                <button class="filter-button" data-filter="ancient">Ancient (Pre-500 CE)</button>
-                <button class="filter-button" data-filter="eastern">Eastern</button>
-                <button class="filter-button" data-filter="western">Western</button>
-            </div>
-            <p id="searchResults" style="margin-top: 1rem; color: #c0c0c0;"></p>
-        </div>
 
-        <!-- Mythology Grid Widget -->
+        <!-- Main Content Type Panels -->
         <div class="widget">
-            <h2 class="widget-header">Mythological Traditions</h2>
-            <div id="mythologyGridContainer">
+            <h2 class="widget-header">Explore Content</h2>
+            <div id="contentGridContainer">
                 <div class="loading">
                     <div class="spinner-container">
                         <div class="spinner-ring"></div>
@@ -501,79 +483,71 @@
                 </div>
             </div>
         </div>
-
-        <!-- Related Sections Widget -->
-        <div class="widget">
-            <h2 class="widget-header">Explore Related Sections</h2>
-            <div class="mythology-grid">
-                <div class="mythos-card" style="border-color: #9370DB; color: #9370DB;" onclick="window.location.href='mythos/comparative/index.html'">
-                    <div class="mythos-icon">🔗</div>
-                    <div class="mythos-name">Comparative Mythology</div>
-                    <div class="mythos-description">Cross-cultural parallels and universal mythic patterns across world traditions</div>
-                </div>
-                <div class="mythos-card" style="border-color: #DAA520; color: #DAA520;" onclick="window.location.href='archetypes/index.html'">
-                    <div class="mythos-icon">⚡</div>
-                    <div class="mythos-name">Universal Archetypes</div>
-                    <div class="mythos-description">Recurring symbols, characters, and patterns found across all human cultures</div>
-                </div>
-                <div class="mythos-card" style="border-color: #c084fc; color: #c084fc;" onclick="window.location.href='magic/index.html'">
-                    <div class="mythos-icon">✨</div>
-                    <div class="mythos-name">Magical Systems</div>
-                    <div class="mythos-description">Esoteric practices, ritual magic, and mystical traditions throughout history</div>
-                </div>
-                <div class="mythos-card" style="border-color: #4ade80; color: #4ade80;" onclick="window.location.href='herbalism/index.html'">
-                    <div class="mythos-icon">🌿</div>
-                    <div class="mythos-name">Sacred Herbalism</div>
-                    <div class="mythos-description">Plant wisdom, traditional medicine, and botanical spirituality across cultures</div>
-                </div>
-                <div class="mythos-card" style="border-color: #60a5fa; color: #60a5fa;" onclick="window.location.href='theories/index.html'">
-                    <div class="mythos-icon">🔬</div>
-                    <div class="mythos-name">Theories & Analysis</div>
-                    <div class="mythos-description">Academic research, comparative studies, and theoretical frameworks</div>
-                </div>
-                <div class="mythos-card" style="border-color: #f59e0b; color: #f59e0b;" onclick="window.location.href='theories/user-submissions/browse.html'">
-                    <div class="mythos-icon">📝</div>
-                    <div class="mythos-name">User Submissions</div>
-                    <div class="mythos-description">Community-contributed theories, insights, and research from scholars worldwide</div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Firebase Data Layer -->
     <script>
         // Firebase Database Interface
-        class MythologyDatabase {
+        class ContentDatabase {
             constructor() {
                 this.db = firebase.firestore();
                 this.cache = new Map();
             }
 
-            // Get all mythologies
-            async getMythologies() {
-                if (this.cache.has('mythologies')) {
-                    return this.cache.get('mythologies');
+            // Get content type counts
+            async getContentCounts() {
+                if (this.cache.has('contentCounts')) {
+                    return this.cache.get('contentCounts');
                 }
 
                 try {
-                    const snapshot = await this.db.collection('mythologies')
-                        .orderBy('displayName')
-                        .get();
+                    const [
+                        mythologiesSnapshot,
+                        magicSnapshot,
+                        herbalismSnapshot,
+                        itemsSnapshot,
+                        placesSnapshot,
+                        theoriesSnapshot
+                    ] = await Promise.all([
+                        this.db.collection('mythologies').get(),
+                        this.db.collection('magic-systems').get(),
+                        this.db.collection('herbs').get(),
+                        this.db.collection('spiritual-items').get(),
+                        this.db.collection('spiritual-places').get(),
+                        this.db.collection('user-theories').get()
+                    ]);
 
-                    const mythologies = snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
+                    // Exclude special categories from mythology count
+                    const excludedCategories = ['comparative', 'herbalism', 'themes', 'freemasons', 'tarot'];
+                    const actualMythCount = mythologiesSnapshot.docs.filter(
+                        doc => !excludedCategories.includes(doc.id)
+                    ).length;
 
-                    this.cache.set('mythologies', mythologies);
-                    return mythologies;
+                    const counts = {
+                        mythologies: actualMythCount,
+                        magic: magicSnapshot.size,
+                        herbalism: herbalismSnapshot.size,
+                        items: itemsSnapshot.size,
+                        places: placesSnapshot.size,
+                        theories: theoriesSnapshot.size
+                    };
+
+                    this.cache.set('contentCounts', counts);
+                    return counts;
                 } catch (error) {
-                    console.error('Error fetching mythologies:', error);
-                    throw error;
+                    console.error('Error fetching content counts:', error);
+                    return {
+                        mythologies: 0,
+                        magic: 0,
+                        herbalism: 0,
+                        items: 0,
+                        places: 0,
+                        theories: 0
+                    };
                 }
             }
 
-            // Get statistics
+            // Get statistics for header
             async getStats() {
                 try {
                     const [mythCount, deityCount, archetypeCount] = await Promise.all([
@@ -582,8 +556,14 @@
                         this.db.collection('archetypes').get()
                     ]);
 
+                    // Exclude special categories
+                    const excludedCategories = ['comparative', 'herbalism', 'themes', 'freemasons', 'tarot'];
+                    const actualMythCount = mythCount.docs.filter(
+                        doc => !excludedCategories.includes(doc.id)
+                    ).length;
+
                     return {
-                        mythologies: mythCount.size,
+                        mythologies: actualMythCount,
                         deities: deityCount.size,
                         archetypes: archetypeCount.size
                     };
@@ -592,57 +572,36 @@
                     return { mythologies: 0, deities: 0, archetypes: 0 };
                 }
             }
-
-            // Real-time listener for mythologies
-            subscribeMythologies(callback) {
-                return this.db.collection('mythologies')
-                    .orderBy('displayName')
-                    .onSnapshot(snapshot => {
-                        const mythologies = snapshot.docs.map(doc => ({
-                            id: doc.id,
-                            ...doc.data()
-                        }));
-                        this.cache.set('mythologies', mythologies);
-                        callback(mythologies);
-                    });
-            }
         }
 
         // UI Controller
         class UIController {
             constructor(db) {
                 this.db = db;
-                this.currentFilter = 'all';
-                this.searchTerm = '';
             }
 
             async init() {
                 await this.loadStats();
-                await this.loadMythologies();
-                this.setupEventListeners();
+                await this.loadContentPanels();
             }
 
             async loadStats() {
                 const stats = await this.db.getStats();
-                // Exclude special categories from mythology count
-                const excludedCategories = ['comparative', 'herbalism', 'themes', 'freemasons', 'tarot'];
-                const actualMythCount = stats.mythologies - excludedCategories.length;
-
-                document.getElementById('stat-mythologies').textContent = actualMythCount;
+                document.getElementById('stat-mythologies').textContent = stats.mythologies;
                 document.getElementById('stat-deities').textContent = stats.deities;
                 document.getElementById('stat-archetypes').textContent = stats.archetypes;
             }
 
-            async loadMythologies() {
-                const container = document.getElementById('mythologyGridContainer');
+            async loadContentPanels() {
+                const container = document.getElementById('contentGridContainer');
 
                 try {
-                    const mythologies = await this.db.getMythologies();
-                    this.renderMythologies(mythologies);
+                    const counts = await this.db.getContentCounts();
+                    this.renderContentPanels(counts);
                 } catch (error) {
                     container.innerHTML = `
                         <div class="error">
-                            <strong>Error loading mythologies:</strong> ${error.message}
+                            <strong>Error loading content:</strong> ${error.message}
                             <br><br>
                             <em>Note: Firebase configuration required. See FIREBASE_MIGRATION_SCHEMA.md for setup instructions.</em>
                         </div>
@@ -650,20 +609,77 @@
                 }
             }
 
-            renderMythologies(mythologies) {
-                const container = document.getElementById('mythologyGridContainer');
-                const filtered = this.filterMythologies(mythologies);
+            renderContentPanels(counts) {
+                const container = document.getElementById('contentGridContainer');
 
-                if (filtered.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #c0c0c0;">No mythologies match your filters.</p>';
-                    return;
-                }
+                const contentTypes = [
+                    {
+                        id: 'mythologies',
+                        icon: '📚',
+                        title: 'Mythologies',
+                        description: 'Explore world mythological traditions, deities, and cosmologies',
+                        count: counts.mythologies,
+                        countLabel: 'mythologies',
+                        link: 'mythos/index.html',
+                        color: '#9370DB'
+                    },
+                    {
+                        id: 'magic',
+                        icon: '✨',
+                        title: 'Magic Systems',
+                        description: 'Esoteric practices, ritual magic, and mystical traditions',
+                        count: counts.magic,
+                        countLabel: 'systems',
+                        link: 'magic/index.html',
+                        color: '#c084fc'
+                    },
+                    {
+                        id: 'herbalism',
+                        icon: '🌿',
+                        title: 'Herbalism',
+                        description: 'Sacred plants, traditional medicine, and botanical wisdom',
+                        count: counts.herbalism,
+                        countLabel: 'herbs',
+                        link: 'herbalism/index.html',
+                        color: '#4ade80'
+                    },
+                    {
+                        id: 'items',
+                        icon: '⚔️',
+                        title: 'Sacred Items',
+                        description: 'Mythical weapons, artifacts, and objects of power',
+                        count: counts.items,
+                        countLabel: 'items',
+                        link: 'spiritual-items/index.html',
+                        color: '#f59e0b'
+                    },
+                    {
+                        id: 'theories',
+                        icon: '📝',
+                        title: 'User Theories',
+                        description: 'Community-contributed research and scholarly insights',
+                        count: counts.theories,
+                        countLabel: 'submissions',
+                        link: 'theories/user-submissions/browse.html',
+                        color: '#60a5fa'
+                    },
+                    {
+                        id: 'places',
+                        icon: '🏛️',
+                        title: 'Sacred Places',
+                        description: 'Temples, mountains, and pilgrimage destinations',
+                        count: counts.places,
+                        countLabel: 'places',
+                        link: 'spiritual-places/index.html',
+                        color: '#ec4899'
+                    }
+                ];
 
                 const grid = document.createElement('div');
                 grid.className = 'mythology-grid';
 
-                filtered.forEach(mythos => {
-                    const card = this.createMythologyCard(mythos);
+                contentTypes.forEach(content => {
+                    const card = this.createContentCard(content);
                     grid.appendChild(card);
                 });
 
@@ -671,110 +687,30 @@
                 container.appendChild(grid);
             }
 
-            createMythologyCard(mythos) {
+            createContentCard(content) {
                 const card = document.createElement('div');
-                card.className = `mythos-card ${mythos.completed ? 'completed' : ''}`;
-                card.style.borderColor = mythos.color || '#9370DB';
-                card.style.color = mythos.color || '#9370DB';
+                card.className = 'mythos-card';
+                card.style.borderColor = content.color;
+                card.style.color = content.color;
+
+                const displayCount = content.count > 0 ? `${content.count}+` : 'Coming Soon';
 
                 card.innerHTML = `
-                    <div class="mythos-icon">${mythos.icon || '📖'}</div>
-                    <div class="mythos-name">${mythos.displayName}</div>
-                    <div class="mythos-description">${mythos.description || ''}</div>
+                    <div class="mythos-icon">${content.icon}</div>
+                    <div class="mythos-name">${content.title}</div>
+                    <div class="mythos-description">${content.description}</div>
                     <div class="meta-badges">
-                        <span class="meta-badge">📅 ${mythos.era || 'Unknown'}</span>
-                        ${mythos.regions ? mythos.regions.map(r =>
-                            `<span class="meta-badge">🌍 ${r}</span>`
-                        ).join('') : ''}
-                        ${mythos.coreConcepts ?
-                            `<span class="meta-badge">💫 ${mythos.coreConcepts.length} Concepts</span>`
-                        : ''}
+                        <span class="meta-badge" style="background: ${content.color}22; border-color: ${content.color};">
+                            ${displayCount} ${content.countLabel}
+                        </span>
                     </div>
                 `;
 
                 card.onclick = () => {
-                    window.location.href = `mythos/${mythos.id}/index.html`;
+                    window.location.href = content.link;
                 };
 
-                card.dataset.era = mythos.era || '';
-                card.dataset.regions = (mythos.regions || []).join(',');
-                card.dataset.completed = mythos.completed || false;
-
                 return card;
-            }
-
-            filterMythologies(mythologies) {
-                // Exclude non-traditional mythologies (these go in "Explore Related Sections")
-                const excludedCategories = ['comparative', 'herbalism', 'themes', 'freemasons', 'tarot'];
-
-                return mythologies.filter(mythos => {
-                    // Exclude special categories
-                    if (excludedCategories.includes(mythos.id)) {
-                        return false;
-                    }
-
-                    // Text search
-                    if (this.searchTerm) {
-                        const searchLower = this.searchTerm.toLowerCase();
-                        const matchesSearch =
-                            mythos.displayName?.toLowerCase().includes(searchLower) ||
-                            mythos.description?.toLowerCase().includes(searchLower) ||
-                            mythos.coreConcepts?.some(c => c.toLowerCase().includes(searchLower));
-
-                        if (!matchesSearch) return false;
-                    }
-
-                    // Filter
-                    if (this.currentFilter === 'all') return true;
-                    if (this.currentFilter === 'completed') return mythos.completed === true;
-
-                    const era = (mythos.era || '').toLowerCase();
-                    const regions = (mythos.regions || []).map(r => r.toLowerCase());
-
-                    if (this.currentFilter === 'ancient') {
-                        return era.includes('bce') || era.includes('000');
-                    }
-                    if (this.currentFilter === 'eastern') {
-                        return regions.some(r => r.includes('asia') || r.includes('india') || r.includes('china'));
-                    }
-                    if (this.currentFilter === 'western') {
-                        return regions.some(r => r.includes('europe') || r.includes('rome') || r.includes('greece'));
-                    }
-
-                    return true;
-                });
-            }
-
-            setupEventListeners() {
-                // Filter buttons
-                document.querySelectorAll('.filter-button').forEach(button => {
-                    button.addEventListener('click', async () => {
-                        document.querySelectorAll('.filter-button').forEach(b =>
-                            b.classList.remove('active')
-                        );
-                        button.classList.add('active');
-                        this.currentFilter = button.dataset.filter;
-
-                        const mythologies = await this.db.getMythologies();
-                        this.renderMythologies(mythologies);
-                    });
-                });
-
-                // Search input
-                const searchInput = document.getElementById('globalSearch');
-                searchInput.addEventListener('input', async (e) => {
-                    this.searchTerm = e.target.value;
-                    const mythologies = await this.db.getMythologies();
-                    this.renderMythologies(mythologies);
-
-                    const filtered = this.filterMythologies(mythologies);
-                    const results = document.getElementById('searchResults');
-                    if (this.searchTerm.length >= 2) {
-                        results.textContent = `Found ${filtered.length} matches`;
-                    } else {
-                        results.textContent = '';
-                    }
-                });
             }
         }
 
@@ -790,7 +726,7 @@
                     }
                 });
 
-                const db = new MythologyDatabase();
+                const db = new ContentDatabase();
                 const ui = new UIController(db);
                 await ui.init();
 
@@ -800,7 +736,7 @@
                 console.log('✅ Firebase integration initialized successfully');
             } catch (error) {
                 console.error('❌ Failed to initialize:', error);
-                document.getElementById('mythologyGridContainer').innerHTML = `
+                document.getElementById('contentGridContainer').innerHTML = `
                     <div class="error">
                         <strong>Firebase not configured</strong>
                         <p>This page requires Firebase configuration. Please see the migration documentation.</p>
