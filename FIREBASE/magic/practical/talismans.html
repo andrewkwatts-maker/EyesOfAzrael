@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talismans & Amulets - Objects of Power</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--spacing-4xl) var(--spacing-lg);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-3xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .icon {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-lg);
+            text-shadow: 0 0 20px var(--color-primary);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            margin-bottom: var(--spacing-lg);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: var(--font-heading);
+        }
+
+        .subtitle {
+            font-size: var(--font-size-xl);
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        .section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .section-icon {
+            font-size: var(--font-size-4xl);
+        }
+
+        h2 {
+            font-size: var(--font-size-3xl);
+            color: var(--color-primary);
+            font-family: var(--font-heading);
+        }
+
+        h3 {
+            font-size: var(--font-size-2xl);
+            color: var(--color-secondary);
+            margin: var(--spacing-xl) 0 var(--spacing-md);
+            font-family: var(--font-heading);
+        }
+
+        h4 {
+            font-size: var(--font-size-xl);
+            color: var(--color-accent);
+            margin: var(--spacing-lg) 0 var(--spacing-sm);
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-md);
+            line-height: var(--leading-relaxed);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-md);
+        }
+
+        .technique-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .technique-card {
+            background: rgba(var(--color-secondary-rgb), 0.05);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-base);
+        }
+
+        .technique-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .step-list {
+            list-style: none;
+            counter-reset: step-counter;
+            margin: var(--spacing-lg) 0;
+        }
+
+        .step-list li {
+            counter-increment: step-counter;
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            background: rgba(var(--color-accent-rgb, 139, 127, 255), 0.1);
+            border-left: 3px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            position: relative;
+            padding-left: var(--spacing-4xl);
+        }
+
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: var(--spacing-md);
+            top: var(--spacing-md);
+            background: var(--color-accent);
+            color: var(--color-background);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--font-bold);
+        }
+
+        .correspondence-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-lg) 0;
+        }
+
+        .correspondence-table th,
+        .correspondence-table td {
+            padding: var(--spacing-md);
+            border: 1px solid var(--color-border);
+            text-align: left;
+        }
+
+        .correspondence-table th {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            color: var(--color-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        .correspondence-table tr:hover {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+        }
+
+        .source-list {
+            list-style: none;
+            margin: var(--spacing-lg) 0;
+        }
+
+        .source-list li {
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--color-secondary);
+        }
+
+        .source-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            display: block;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .source-author {
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        .cross-ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .cross-ref-link {
+            display: block;
+            padding: var(--spacing-md);
+            background: rgba(var(--color-accent-rgb, 139, 127, 255), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+        }
+
+        .cross-ref-link:hover {
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.2);
+            transform: translateX(5px);
+        }
+
+        .nav-section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            text-align: center;
+            margin-top: var(--spacing-3xl);
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            margin: var(--spacing-sm);
+            transition: all var(--transition-base);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .example-box {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border: 2px dashed var(--color-secondary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .warning-box {
+            background: rgba(255, 100, 100, 0.1);
+            border-left: 4px solid #ff6464;
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-md);
+        }
+
+        ul, ol {
+            margin-left: var(--spacing-xl);
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text-secondary);
+        }
+
+        li {
+            margin-bottom: var(--spacing-sm);
+            line-height: var(--leading-relaxed);
+        }
+
+        /* Interlink Panel Styles */
+        .interlink-panel { background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-8); margin: var(--space-10) 0; }
+        .interlink-panel h3 { color: var(--color-primary); font-size: var(--text-2xl); margin-bottom: var(--space-6); }
+        .interlink-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-4); }
+        .archetype-link-card, .parallel-card { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border: 1px solid var(--color-border); border-radius: var(--radius-lg); text-decoration: none; transition: all 0.3s; }
+        .archetype-link-card:hover, .parallel-card:hover { background: rgba(var(--color-primary-rgb), 0.2); transform: translateY(-2px); }
+        .card-icon { font-size: var(--text-2xl); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-primary-rgb), 0.2); border-radius: var(--radius-lg); }
+        .card-content h4 { color: var(--color-text-primary); font-size: var(--text-base); margin-bottom: var(--space-1); }
+        .card-content span { color: var(--color-text-secondary); font-size: var(--text-sm); }
+    </style>
+</head>
+<body>
+    
+    <div id="theme-picker-container"></div>
+<div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Talismans & Amulets</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> → <a href="../index.html">Magic</a> → <a href="index.html">Practical</a> → <span>Talismans</span>
+</nav>
+
+        <!-- OVERVIEW SECTION -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-icon">📜</span>
+                <h2>Overview & Historical Context</h2>
+            </div>
+
+            <p>
+                Talismans and amulets represent humanity's oldest and most universal form of magical practice—the creation,
+                consecration, and carrying of physical objects imbued with supernatural power. Found in virtually every culture
+                across all periods of history, these charged objects serve as focal points for magical intention, protective
+                shields against harm, attractors of beneficial energies, and tangible links between the material and spiritual realms.
+            </p>
+
+            <h3>Defining the Difference: Talisman vs. Amulet</h3>
+            <p>
+                While often used interchangeably, traditional magical theory distinguishes between these two categories:
+            </p>
+
+            <div class="highlight-box">
+                <h4>Amulets</h4>
+                <p>
+                    <strong>Function:</strong> Passive protection; deflecting, absorbing, or repelling negative energies, evil spirits,
+                    illness, bad luck, or psychic attack.
+                </p>
+                <p>
+                    <strong>Energy:</strong> Defensive, protective, purifying, banishing
+                </p>
+                <p>
+                    <strong>Examples:</strong> Evil eye beads, protective pentacles, Saint Christopher medals, Hamsa hands,
+                    red string bracelets, iron horseshoes, protective herbs in sachets
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <h4>Talismans</h4>
+                <p>
+                    <strong>Function:</strong> Active attraction; drawing specific energies, opportunities, spirits, or conditions
+                    toward the bearer. Actively creates change.
+                </p>
+                <p>
+                    <strong>Energy:</strong> Attractive, magnetic, transformative, empowering
+                </p>
+                <p>
+                    <strong>Examples:</strong> Love attraction charms, prosperity talismans, success seals, planetary talismans
+                    from grimoires, power objects, vision quest medicine bundles
+                </p>
+            </div>
+
+            <p>
+                In practice, many magical objects combine both functions—protecting while attracting, or attracting protective
+                forces. The distinction is more theoretical than absolute, but understanding the directional energy (repelling
+                vs. attracting) helps in proper construction and consecration.
+            </p>
+
+            <h3>Cross-Cultural Historical Context</h3>
+
+            <div class="technique-grid">
+                <div class="technique-card">
+                    <h4>Ancient Egypt</h4>
+                    <p>
+                        Elaborate system of amulets placed on mummies: scarab beetles for resurrection, Eye of Horus for protection,
+                        djed pillars for stability, tyet knots for Isis's protection. Specific chapters of the <em class="corpus-link">Book of the Dead</em>
+                        prescribed amulets for safe passage through the afterlife.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Greco-Roman World</h4>
+                    <p>
+                        Carved gemstones (engraved gems) bearing divine images, magical words, and planetary symbols. Orphic gold
+                        tablets with passwords for the underworld. Bulla worn by children for protection until adulthood.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Medieval Europe</h4>
+                    <p>
+                        Grimoire talismans from texts like the <em class="corpus-link">Key of Solomon</em>, planetary seals from
+                        kameas (magic squares), agnus dei wax medallions blessed by popes, reliquaries containing saints' relics.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Islamic Tradition</h4>
+                    <p>
+                        Quranic verses in lockets (ta'wiz), magic squares with divine names, hand of Fatima amulets, elaborate
+                        talismans from texts like the <em class="corpus-link">Picatrix</em> combining astrology, geometry, and sacred language.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Jewish Kabbalah</h4>
+                    <p>
+                        Mezuzah scrolls on doorposts, phylacteries (tefillin), amulets inscribed with divine names and angel seals,
+                        kameas (magic squares) of planets and Sephiroth, protective spells using combinations of Hebrew letters.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>East Asian Traditions</h4>
+                    <p>
+                        Taoist talismanic seals (fu), Buddhist protective sutras carried in amulet boxes, omamori charms from
+                        Shinto shrines, feng shui protective objects, jade carvings with auspicious symbols.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Hindu & Tibetan</h4>
+                    <p>
+                        Yantras (geometric diagrams) on metal or paper, mantra-inscribed rings, sacred thread ceremonies,
+                        protective amulets blessed by gurus, Tibetan prayer wheels and gau boxes containing sacred texts.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>African Diaspora</h4>
+                    <p>
+                        Mojo bags/hands in Hoodoo containing personal concerns and curios, gris-gris in Vodou, resguardos in
+                        Santeria, protective necklaces of elekes beads, Congolese nkisi power objects.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Native American</h4>
+                    <p>
+                        Medicine bundles containing sacred items from vision quests, protective fetishes, dream catchers,
+                        turquoise jewelry for protection, ceremonial objects imbued with tribal power.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TECHNIQUES & METHODS -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-icon">🛠️</span>
+                <h2>Techniques & Methods of Creation</h2>
+            </div>
+
+            <h3>General Consecration Procedure</h3>
+            <p>
+                While specific traditions vary, most talisman/amulet creation follows this general structure:
+            </p>
+
+            <ol class="step-list">
+                <li>
+                    <strong>Determine Intent:</strong> Be absolutely clear on the specific purpose. Vague intention creates
+                    vague results. Write a clear statement of what the object should do.
+                </li>
+                <li>
+                    <strong>Choose Materials:</strong> Select base material (metal, stone, wood, fabric) based on sympathetic
+                    correspondences. Gold for solar/success, silver for lunar/psychic, iron for protection, etc.
+                </li>
+                <li>
+                    <strong>Select Timing:</strong> Create during astrologically favorable times. Planetary hours and days,
+                    lunar phases, and specific astrological elections strengthen the working.
+                </li>
+                <li>
+                    <strong>Purification:</strong> Cleanse the object of all previous energies using salt water, smoke, sound,
+                    or visualization. Start with a spiritually neutral base.
+                </li>
+                <li>
+                    <strong>Inscription/Decoration:</strong> Add symbols, words of power, sigils, deity images, or geometric
+                    patterns. This encodes the intention into the object's form.
+                </li>
+                <li>
+                    <strong>Consecration Ritual:</strong> Perform ceremony to awaken and empower the object. This typically
+                    includes invocation of divine forces, elemental blessings, charging with energy, and binding the intention.
+                </li>
+                <li>
+                    <strong>Activation:</strong> Give the talisman its first "feeding" of energy. Methods include anointing
+                    with oils, breathing life force into it, exposing to specific light (sun/moon/candle), or ritual offering.
+                </li>
+                <li>
+                    <strong>Sealing:</strong> Close the working and seal the power within. Some traditions wrap objects in
+                    silk, others use wax seals, spoken formulas, or ritual gestures.
+                </li>
+                <li>
+                    <strong>Bonding:</strong> Establish personal connection by wearing/carrying the object skin-to-skin for
+                    specific period (often 7, 9, or 40 days) to attune it to your energy.
+                </li>
+                <li>
+                    <strong>Maintenance:</strong> Regularly cleanse, recharge, and feed the talisman. Some require monthly
+                    lunar recharging, others need periodic offerings or prayers.
+                </li>
+            </ol>
+
+            <h3>Traditional Construction Methods</h3>
+
+            <h4>Planetary Talismans (Grimoire Method)</h4>
+            <p>
+                Based on medieval and Renaissance grimoires, particularly the <em class="corpus-link">Picatrix</em> and works
+                of Cornelius Agrippa:
+            </p>
+
+            <div class="example-box">
+                <p><strong>Creating a Jupiter Talisman for Prosperity:</strong></p>
+                <ol>
+                    <li><strong>Timing:</strong> Thursday during the hour of Jupiter, when Jupiter is well-dignified in the sky</li>
+                    <li><strong>Material:</strong> Tin (Jupiter's metal) or silver</li>
+                    <li><strong>Inscription (Front):</strong> Jupiter's sigil derived from the kamea (magic square) of Jupiter</li>
+                    <li><strong>Inscription (Back):</strong> Divine names: YHVH Tzabaoth, or intelligence names: Yophiel, Hismael</li>
+                    <li><strong>Consecration:</strong> Fumigate with cedar or hyssop incense while invoking Jupiter</li>
+                    <li><strong>Prayer:</strong> Orphic Hymn to Zeus or improvised invocation requesting Jupiter's blessing</li>
+                    <li><strong>Seal:</strong> Wrap in blue or purple silk and anoint with olive oil</li>
+                </ol>
+            </div>
+
+            <h4>Hoodoo Mojo Bag/Hand</h4>
+            <p>
+                African-American folk magic tradition of creating small fabric bags containing magical ingredients:
+            </p>
+
+            <div class="example-box">
+                <p><strong>Creating a Money Drawing Mojo:</strong></p>
+                <ul>
+                    <li><strong>Bag Color:</strong> Green flannel (prosperity)</li>
+                    <li><strong>Personal Concerns:</strong> Strand of your hair, fingernail clipping, or name paper</li>
+                    <li><strong>Magnetic Curios:</strong> Pyrite, lodestone, High John the Conqueror root, five-finger grass</li>
+                    <li><strong>Monetary Items:</strong> Silver dime, piece of currency, or magnetic sand</li>
+                    <li><strong>Herbs:</strong> Basil, cinnamon chips, chamomile, Irish moss</li>
+                    <li><strong>Feeding:</strong> Dress weekly with Money Drawing oil or whiskey</li>
+                    <li><strong>Carrying:</strong> Keep in left pocket, under pillow, or on altar; never let others touch it</li>
+                </ul>
+            </div>
+
+            <h4>Knotted Cord Amulet</h4>
+            <p>
+                Simple but powerful method using sympathetic magic and color symbolism:
+            </p>
+
+            <div class="example-box">
+                <p><strong>Protection Cord:</strong></p>
+                <ol>
+                    <li>Choose red thread/cord (protection, life force)</li>
+                    <li>Measure around wrist, ankle, or create bracelet length</li>
+                    <li>During waxing moon, tie nine knots while chanting protection prayer/spell</li>
+                    <li>Each knot binds protective energy and specific intention</li>
+                    <li>Wear until purpose achieved or cord breaks naturally (releasing energy)</li>
+                    <li>Traditional formula: "By knot of one, the spell's begun. By knot of two, it cometh true..."</li>
+                </ol>
+            </div>
+
+            <h4>Crystal/Stone Charging</h4>
+            <p>
+                Modern but effective method using the inherent properties of minerals:
+            </p>
+
+            <ol class="step-list">
+                <li>Select stone with appropriate properties (amethyst for spirituality, citrine for abundance, black tourmaline for protection)</li>
+                <li>Cleanse thoroughly (salt water, smoke, moonlight, or sound)</li>
+                <li>Hold in hands and clearly visualize/state your intention repeatedly</li>
+                <li>Charge under appropriate moon phase or sunlight depending on intent</li>
+                <li>Carry in pocket, wear as jewelry, or place in relevant location (amethyst under pillow for dreams, citrine in cash register)</li>
+                <li>Cleanse and recharge monthly or when energy feels depleted</li>
+            </ol>
+
+            <h4>Petition Paper Talisman</h4>
+            <p>
+                Simple paper magic found in multiple traditions:
+            </p>
+
+            <div class="example-box">
+                <p><strong>Love Drawing Petition:</strong></p>
+                <ol>
+                    <li>On pink or red paper, write your desire in present tense: "I attract true love"</li>
+                    <li>Dress the four corners and center with love oil (rose, jasmine, ylang-ylang)</li>
+                    <li>Fold toward you (attracting) an odd number of times (3, 5, 7, or 9)</li>
+                    <li>Turn clockwise 90° and fold again toward you</li>
+                    <li>Seal with red or pink wax</li>
+                    <li>Carry in mojo bag, place under love-drawing candle, or keep in pillowcase</li>
+                    <li>Feed weekly with additional oil and focused intention</li>
+                </ol>
+            </div>
+
+            <h3>Advanced Techniques</h3>
+
+            <div class="technique-grid">
+                <div class="technique-card">
+                    <h4>Ensouling Talismans</h4>
+                    <p>
+                        Advanced practice of binding a spirit entity into the talisman to actively work on your behalf. Requires
+                        proper spirit conjuration skills and ethical consideration. Found in grimoire magic and some shamanic traditions.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Linked Talismans</h4>
+                    <p>
+                        Creating matched pair of objects that remain energetically connected regardless of distance. Used for
+                        maintaining connection between loved ones, remote healing, or establishing psychic links.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Composite Talismans</h4>
+                    <p>
+                        Combining multiple magical systems in one object: planetary seals + runic inscriptions + crystal + herbs +
+                        sigils. Each layer adds specific energy and creates complex multidimensional tool.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Living Talismans</h4>
+                    <p>
+                        Using living plants as talismans (potted basil for prosperity, aloe for protection). Requires ongoing care
+                        and relationship. Plant's health reflects and affects the magical working.
+                    </p>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>Important Cautions</h4>
+                <ul>
+                    <li>Never create love talismans targeting specific, non-consenting individuals (violation of free will)</li>
+                    <li>Cursing talismans carry serious karmic considerations and potential backlash</li>
+                    <li>Powerful talismans require proper disposal if you wish to deactivate them (burial, running water, fire)</li>
+                    <li>Some traditions warn that letting others touch your personal talismans weakens or corrupts them</li>
+                    <li>Buying pre-made talismans is less effective than creating your own (lacks personal energy)</li>
+                    <li>If a protective amulet breaks, it may have absorbed a spiritual attack—cleanse yourself and create new one</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- MATERIALS & CORRESPONDENCES -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-icon">🎨</span>
+                <h2>Materials & Correspondences</h2>
+            </div>
+
+            <h3>Metals and Their Properties</h3>
+            <table class="correspondence-table">
+                <thead>
+                    <tr>
+                        <th>Metal</th>
+                        <th>Planet</th>
+                        <th>Magical Properties</th>
+                        <th>Best For</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Gold</td>
+                        <td>Sun</td>
+                        <td>Success, wealth, vitality, masculine power, confidence</td>
+                        <td>Prosperity talismans, success in business, solar magic, vitality</td>
+                    </tr>
+                    <tr>
+                        <td>Silver</td>
+                        <td>Moon</td>
+                        <td>Psychic ability, intuition, feminine power, dreams, emotions</td>
+                        <td>Psychic development, lunar magic, goddess work, dream talismans</td>
+                    </tr>
+                    <tr>
+                        <td>Copper</td>
+                        <td>Venus</td>
+                        <td>Love, beauty, attraction, artistic creativity, harmony</td>
+                        <td>Love talismans, beauty magic, artistic inspiration, attraction</td>
+                    </tr>
+                    <tr>
+                        <td>Iron</td>
+                        <td>Mars</td>
+                        <td>Protection, strength, courage, grounding, banishing spirits</td>
+                        <td>Protection amulets, courage talismans, grounding, fairy protection</td>
+                    </tr>
+                    <tr>
+                        <td>Tin</td>
+                        <td>Jupiter</td>
+                        <td>Expansion, abundance, luck, legal success, wisdom</td>
+                        <td>Prosperity, legal matters, expansion of consciousness, luck</td>
+                    </tr>
+                    <tr>
+                        <td>Lead</td>
+                        <td>Saturn</td>
+                        <td>Binding, banishing, protection, endurance, limitation</td>
+                        <td>Binding spells, protective seals, banishing, curse tablets (defixiones)</td>
+                    </tr>
+                    <tr>
+                        <td>Mercury/Quicksilver</td>
+                        <td>Mercury</td>
+                        <td>Communication, travel, commerce, intellect, transformation</td>
+                        <td>Communication magic, mercurial talismans (rarely used, toxic)</td>
+                    </tr>
+                    <tr>
+                        <td>Brass</td>
+                        <td>Sun/Venus</td>
+                        <td>Protection, healing, solar energy, attraction</td>
+                        <td>General purpose protective amulets, affordable alternative to gold</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Stones and Crystals</h3>
+            <table class="correspondence-table">
+                <thead>
+                    <tr>
+                        <th>Stone</th>
+                        <th>Properties</th>
+                        <th>Talismanic Uses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Amethyst</td>
+                        <td>Spirituality, sobriety, psychic protection, crown chakra</td>
+                        <td>Psychic development, protection from intoxication, spiritual connection</td>
+                    </tr>
+                    <tr>
+                        <td>Black Tourmaline</td>
+                        <td>Powerful protection, grounding, EMF shielding, banishing</td>
+                        <td>Protection amulets, grounding talismans, electromagnetic protection</td>
+                    </tr>
+                    <tr>
+                        <td>Carnelian</td>
+                        <td>Courage, vitality, creativity, motivation, sacral chakra</td>
+                        <td>Courage talismans, creative inspiration, sexual vitality</td>
+                    </tr>
+                    <tr>
+                        <td>Citrine</td>
+                        <td>Abundance, manifestation, confidence, solar plexus</td>
+                        <td>Prosperity talismans, success in business, manifestation work</td>
+                    </tr>
+                    <tr>
+                        <td>Clear Quartz</td>
+                        <td>Amplification, clarity, programmable, universal</td>
+                        <td>Universal talisman, amplifying other stones, clarity of mind</td>
+                    </tr>
+                    <tr>
+                        <td>Hematite</td>
+                        <td>Grounding, protection, confidence, deflecting negativity</td>
+                        <td>Grounding amulets, protective jewelry, confidence talismans</td>
+                    </tr>
+                    <tr>
+                        <td>Lapis Lazuli</td>
+                        <td>Wisdom, truth, spiritual power, third eye, communication</td>
+                        <td>Wisdom talismans, truthful communication, Egyptian-style amulets</td>
+                    </tr>
+                    <tr>
+                        <td>Malachite</td>
+                        <td>Transformation, protection, heart healing, abundance</td>
+                        <td>Transformation talismans, heart chakra work, prosperity</td>
+                    </tr>
+                    <tr>
+                        <td>Rose Quartz</td>
+                        <td>Love, emotional healing, self-love, heart chakra, compassion</td>
+                        <td>Love talismans, heart healing, self-love amulets</td>
+                    </tr>
+                    <tr>
+                        <td>Tiger's Eye</td>
+                        <td>Courage, confidence, protection, prosperity, willpower</td>
+                        <td>Confidence talismans, prosperity, protection during travel</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Natural Objects as Talismans</h3>
+            <ul>
+                <li><strong>Lodestone (Magnetite):</strong> Drawing/attraction, especially in Hoodoo. Used in pairs (male/female) to attract love, money, or luck. Fed with magnetic sand and oils.</li>
+                <li><strong>Fossils:</strong> Ancient wisdom, connection to earth's memory, grounding, past-life work, ancestor connection</li>
+                <li><strong>Rabbit's Foot:</strong> Traditional luck talisman (ethically questionable; consider synthetic or symbolic alternatives)</li>
+                <li><strong>Four-Leaf Clover:</strong> Luck, protection, psychic sight (each leaf represents faith, hope, love, luck)</li>
+                <li><strong>Acorns:</strong> Potential, protection, luck, Norse connection to Thor (place on windowsill for lightning protection)</li>
+                <li><strong>Seeds:</strong> New beginnings, fertility, prosperity (carry in green mojo for growth)</li>
+                <li><strong>Shells:</strong> Water element, psychic ability, protection during travel, goddess connection (cowrie shells for prosperity)</li>
+                <li><strong>Feathers:</strong> Air element, messages from spirits, specific bird energies (crow for magic, owl for wisdom, dove for peace)</li>
+                <li><strong>Animal Bones/Teeth:</strong> Power of specific animals, shamanic work, ancestor connection (ethical sourcing essential)</li>
+                <li><strong>Driftwood:</strong> Shaped by water and time, transformation, going with the flow, water magic</li>
+            </ul>
+
+            <h3>Symbolic Elements</h3>
+            <div class="technique-grid">
+                <div class="technique-card">
+                    <h4>Sacred Geometry</h4>
+                    <p>Pentacles (5-pointed stars for elements/protection), hexagrams (6-pointed for planetary magic), septagram (7-pointed for fairy/otherworld), sacred circles, vesica piscis, flower of life</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Divine Names</h4>
+                    <p>Hebrew names of God (YHVH, Elohim, Adonai, El Shaddai), angelic names, deity names from your tradition, names of power from grimoires</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Sigils & Seals</h4>
+                    <p>Planetary sigils from kameas, angelic seals, goetic demon seals, personal sigils of intention, traditional protective seals (Seal of Solomon)</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Runic Formulas</h4>
+                    <p>Elder Futhark runes for specific purposes (Algiz for protection, Fehu for wealth, Kenaz for knowledge), bind-runes combining multiple runes, runic words of power</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Images & Icons</h4>
+                    <p>Deity images, saint pictures, animal totems, mythological scenes, alchemical symbols, astrological glyphs, Egyptian hieroglyphs</p>
+                </div>
+                <div class="technique-card">
+                    <h4>Sacred Scripts</h4>
+                    <p>Verses from holy books (Bible, Quran, Vedas), protective psalms, mantras written on paper, dharani scrolls, Theban alphabet for concealment</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRADITIONS & APPLICATIONS -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-icon">🌍</span>
+                <h2>Cultural Traditions & Applications</h2>
+            </div>
+
+            <h3>Famous Historical Talismans & Amulets</h3>
+
+            <div class="technique-grid">
+                <div class="technique-card">
+                    <h4>The Hamsa (Hand of Fatima/Miriam)</h4>
+                    <p>
+                        Middle Eastern protective amulet shaped like an open palm, often with eye in center. Wards against evil
+                        eye. Found in Jewish, Islamic, and Christian communities across Mediterranean and Middle East.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Nazar (Evil Eye Bead)</h4>
+                    <p>
+                        Blue and white concentric circle amulet from Turkey and Greece. Reflects the evil eye back to sender.
+                        Commonly hung in homes, worn as jewelry, or placed on babies and animals.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Abraxas Gems</h4>
+                    <p>
+                        Gnostic amulets featuring the deity Abraxas (rooster head, human body, serpent legs). Name contains
+                        Greek letters totaling 365, representing totality of creation. Popular in late antiquity.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Seal of Solomon</h4>
+                    <p>
+                        Six-pointed star or pentagram used to command spirits. According to legend, King Solomon used ring
+                        bearing this seal to control demons and djinn. Featured prominently in grimoire magic.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Scarab Amulets</h4>
+                    <p>
+                        Ancient Egyptian beetle-shaped amulets symbolizing resurrection, transformation, and protection.
+                        Placed over the heart of mummies with specific funerary texts inscribed on the flat underside.
+                    </p>
+                </div>
+                <div class="technique-card">
+                    <h4>Thor's Hammer (Mjolnir)</h4>
+                    <p>
+                        Norse protective amulet worn as pendant. Calls on Thor's protection and strength. Historically worn
+                        in defiance of Christian conversion; modern revival in Nordic neopaganism.
+                    </p>
+                </div>
+            </div>
+
+            <h3>Practical Applications by Need</h3>
+
+            <h4>Protection Amulets</h4>
+            <ul>
+                <li><strong>Home Protection:</strong> Iron horseshoe above door, protective herbs in red flannel (rue, rosemary, salt), pentacle seal at entrance, mezuzah on doorpost</li>
+                <li><strong>Travel Safety:</strong> Saint Christopher medal, turquoise stone, protective psalm in wallet, tiger's eye bracelet</li>
+                <li><strong>Psychic Protection:</strong> Black tourmaline, obsidian, Seal of Solomon, protective sigil pendant, salt in left pocket</li>
+                <li><strong>Legal Protection:</strong> High John the Conqueror root, galangal root, Court Case oil-dressed mojo, Jupiter talisman</li>
+                <li><strong>Child Protection:</strong> Red thread bracelet, protective saint medal, mother's blessing, coral bead necklace</li>
+            </ul>
+
+            <h4>Prosperity & Success Talismans</h4>
+            <ul>
+                <li><strong>General Prosperity:</strong> Lodestone pair fed with money-drawing oil, citrine in wallet, Jupiter talisman, bayberry root</li>
+                <li><strong>Business Success:</strong> Mercury talisman for commerce, bergamot-dressed mojo, pyrite in cash register, success sigil in business card holder</li>
+                <li><strong>Employment:</strong> Green candle on job petition, crown of success oil, five-finger grass, business card under lodestone</li>
+                <li><strong>Gambling Luck:</strong> Lucky hand root, fast luck oil, nutmeg in pocket (ethically fraught; use sparingly)</li>
+            </ul>
+
+            <h4>Love & Relationship Talismans</h4>
+            <ul>
+                <li><strong>Attract Love:</strong> Rose quartz, love-drawing mojo (rose petals, damiana, catnip, lodestones), Venus talisman, copper bracelet charged under Venus hour</li>
+                <li><strong>Strengthen Relationship:</strong> Matched rose quartz pair, love oil on matching jewelry, photograph under lodestone pair, red thread binding</li>
+                <li><strong>Self-Love:</strong> Pink candle over self-love petition, rose quartz under pillow, mirror sigil work, bath in love-drawing herbs</li>
+                <li><strong>Healing Heartbreak:</strong> Apache tear stone to absorb grief, moonstone for emotional balance, cord-cutting ritual with remains as release talisman</li>
+            </ul>
+
+            <h4>Health & Healing Talismans</h4>
+            <ul>
+                <li><strong>General Health:</strong> Green aventurine, healing oil-dressed mojo, Sun talisman for vitality, clear quartz programmed for wellness</li>
+                <li><strong>Mental Health:</strong> Lepidolite for anxiety, amethyst for sobriety, citrine for depression, blue lace agate for calm communication</li>
+                <li><strong>Specific Ailments:</strong> Carnelian for blood issues, malachite for inflammation, amber for pain relief, moonstone for hormonal balance (complementary to medical care)</li>
+            </ul>
+
+            <h4>Spiritual Development Talismans</h4>
+            <ul>
+                <li><strong>Psychic Opening:</strong> Third eye-focused crystals (lapis, azurite, amethyst), Moon talisman, mugwort and star anise in purple mojo</li>
+                <li><strong>Meditation:</strong> Clear quartz, amethyst cluster on altar, sandalwood mala beads, meditation sigil</li>
+                <li><strong>Divination Enhancement:</strong> Moonstone, azurite, crystal ball, divination tools left under full moon</li>
+                <li><strong>Spiritual Protection:</strong> Pentacle pendant, obsidian, frankincense resin in mojo, protective prayer/mantra on paper</li>
+            </ul>
+
+            <div class="warning-box">
+                <h4>Maintenance & Care</h4>
+                <p>Talismans and amulets require ongoing care to remain effective:</p>
+                <ul>
+                    <li><strong>Cleansing:</strong> Regular cleansing (monthly at minimum) removes accumulated negative energy. Methods: salt water (not for porous stones), smoke, sound, moonlight, visualization</li>
+                    <li><strong>Recharging:</strong> Periodic recharging under appropriate moon phase, sunlight, or by repeating consecration ritual</li>
+                    <li><strong>Feeding:</strong> Hoodoo mojos need weekly feeding with oils, whiskey, or Florida water to keep them "alive"</li>
+                    <li><strong>Respect:</strong> Treat as sacred object. Don't casually discard or let others handle without permission</li>
+                    <li><strong>Disposal:</strong> If you no longer need it, properly decommission: thank it, release the energy, then bury, burn, or cast into running water</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- PRIMARY SOURCES -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-icon">📚</span>
+                <h2>Primary Sources & Recommended Reading</h2>
+            </div>
+
+            <ul class="source-list">
+                <li>
+                    <span class="source-title">The Picatrix (Ghāyat al-Ḥakīm)</span>
+                    <span class="source-author">Anonymous (11th century Arabic, translated by various)</span>
+                    <p>
+                        The most comprehensive medieval text on talismanic magic. Contains elaborate instructions for creating
+                        planetary talismans, astrological elections, suffumigations, and magical images. Essential for understanding
+                        the Islamic-Hermetic tradition of talismanic art. Dense and complex but foundational.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">Three Books of Occult Philosophy</span>
+                    <span class="source-author">Heinrich Cornelius Agrippa (1531)</span>
+                    <p>
+                        Comprehensive Renaissance magical encyclopedia. Book II focuses heavily on celestial magic including planetary
+                        talismans, magic squares (kameas), appropriate timing, and correspondences. Synthesizes medieval grimoire
+                        tradition with Neoplatonic philosophy.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">The Book of Talismans, Amulets and Zodiacal Gems</span>
+                    <span class="source-author">William Thomas Pavitt & Kate Pavitt (1914)</span>
+                    <p>
+                        Classic early 20th century survey of talismanic traditions worldwide. Covers gemstone lore, planetary magic,
+                        zodiacal correspondences, and historical amulets. Well-researched compilation of traditional knowledge, though
+                        some interpretations dated.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">The Magus, or Celestial Intelligencer</span>
+                    <span class="source-author">Francis Barrett (1801)</span>
+                    <p>
+                        Influential grimoire compiling earlier sources. Extensive section on talismanic magic with planetary seals,
+                        sigils of spirits, and consecration rituals. Heavily influenced the Golden Dawn and subsequent Western
+                        ceremonial magic.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">Hoodoo Herb and Root Magic</span>
+                    <span class="source-author">Catherine Yronwode (2002)</span>
+                    <p>
+                        Authoritative guide to African-American folk magic materials. Extensive coverage of mojo bags, lucky charms,
+                        roots, and curios used in Hoodoo talismanic work. Based on historical sources and living tradition. Essential
+                        for understanding American folk amulet practice.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">The Book of Protection: Being a Collection of Charms</span>
+                    <span class="source-author">Hermann Gollancz (1912)</span>
+                    <p>
+                        Collection of Syriac Christian protective amulets, prayers, and charms. Demonstrates Middle Eastern Christian
+                        magical practice blending Biblical tradition with regional folk magic. Valuable for understanding Near Eastern
+                        amulet traditions.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">Practical Sigil Magic</span>
+                    <span class="source-author">Frater U∴D∴ (1991)</span>
+                    <p>
+                        While focused on sigils, contains excellent section on creating talismanic objects using modern chaos magic
+                        techniques combined with traditional correspondences. Bridges historical and contemporary practice effectively.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">Jewish Magic and Superstition</span>
+                    <span class="source-author">Joshua Trachtenberg (1939)</span>
+                    <p>
+                        Scholarly study of Jewish folk magic including extensive coverage of amulets, kameas, mezuzot, and protective
+                        charms. Examines Kabbalistic amulet traditions and their integration with European folk practice. Academic but
+                        accessible.
+                    </p>
+                </li>
+                <li>
+                    <span class="source-title">The Crystal Bible</span>
+                    <span class="source-author">Judy Hall (2003)</span>
+                    <p>
+                        Modern standard reference for crystal and stone correspondences. While New Age in orientation, provides
+                        comprehensive directory of stone properties for talismanic use. Practical and well-organized.
+                    </p>
+                </li>
+            </ul>
+
+            <h3>Historical Grimoire Sources</h3>
+            <ul>
+                <li><em class="corpus-link">The Key of Solomon</em> (Clavicula Salomonis) - Medieval grimoire with planetary pentacles and consecration rites</li>
+                <li><em class="corpus-link">The Lesser Key of Solomon</em> (Lemegeton) - Goetic seals and spirit sigils</li>
+                <li><em class="corpus-link">The Sacred Magic of Abramelin the Mage</em> - Word squares and protective talismans</li>
+                <li><em class="corpus-link">The Sworn Book of Honorius</em> - Medieval angelic seals and consecration</li>
+                <li><em>The Book of Raziel the Angel</em> - Jewish mystical text with amulets and kameas</li>
+            </ul>
+        </section>
+
+        <!-- CROSS-REFERENCES -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-icon">🔗</span>
+                <h2>Related Practices & Cross-References</h2>
+            </div>
+
+            <h3>Related Magical Practices</h3>
+            <div class="cross-ref-grid">
+                <a href="sigil-magic.html" class="cross-ref-link">
+                    ⚝ Sigil Magic<br>
+                    <small>Creating personal sigils for talismanic inscription</small>
+                </a>
+                <a href="candle-magic.html" class="cross-ref-link">
+                    🕯️ Candle Magic<br>
+                    <small>Consecrating talismans with candle flame</small>
+                </a>
+                <a href="../../herbalism/index.html" class="cross-ref-link">
+                    🌿 Magical Herbalism<br>
+                    <small>Herbs and plants for mojo bags and sachets</small>
+                </a>
+                <a href="knot-magic.html" class="cross-ref-link">
+                    🪢 Knot Magic<br>
+                    <small>Knotted cords as binding talismans</small>
+                </a>
+                <a href="../ritual/ceremonial-magic.html" class="cross-ref-link">
+                    🔯 Ceremonial Magic<br>
+                    <small>Grimoire traditions of talismanic consecration</small>
+                </a>
+                <a href="../divination/astrology.html" class="cross-ref-link">
+                    ♈ Astrology<br>
+                    <small>Planetary timing for talisman creation</small>
+                </a>
+            </div>
+
+            <h3>Mythological & Cultural Connections</h3>
+            <div class="cross-ref-grid">
+                <a href="../../mythos/egyptian/magic/index.html" class="cross-ref-link">
+                    𓁟 Egyptian Amulet Magic<br>
+                    <small>Scarabs, ankhs, and funerary talismans</small>
+                </a>
+                <a href="../../mythos/islamic/magic/index.html" class="cross-ref-link">
+                    ☪️ Islamic Talismanic Magic<br>
+                    <small>Quranic verses, magic squares, and ta'wiz</small>
+                </a>
+                <a href="../../mythos/norse/magic/index.html" class="cross-ref-link">
+                    ᚱ Norse Runic Amulets<br>
+                    <small>Mjolnir pendants and protective rune stones</small>
+                </a>
+                <a href="../../mythos/hindu/magic/index.html" class="cross-ref-link">
+                    🕉️ Hindu Yantras & Mantras<br>
+                    <small>Geometric talismans and sacred syllables</small>
+                </a>
+                <a href="../../mythos/greek/magic/index.html" class="cross-ref-link">
+                    🏛️ Greco-Roman Gems<br>
+                    <small>Engraved gemstone amulets and magical gems</small>
+                </a>
+            </div>
+
+            <h3>Talisman Materials & Items</h3>
+            <div class="cross-ref-grid">
+                <a href="../../spiritual-items/crystals/index.html" class="cross-ref-link">
+                    💎 Crystals & Stones<br>
+                    <small>Gemstone talismans and mineral magic</small>
+                </a>
+                <a href="../../spiritual-items/metals/index.html" class="cross-ref-link">
+                    🪙 Magical Metals<br>
+                    <small>Gold, silver, copper, and planetary metals</small>
+                </a>
+                <a href="../../spiritual-items/herbs/index.html" class="cross-ref-link">
+                    🌿 Herbs & Roots<br>
+                    <small>Herbal sachets and mojo bag components</small>
+                </a>
+                <a href="../../spiritual-items/oils/index.html" class="cross-ref-link">
+                    🫙 Anointing Oils<br>
+                    <small>Consecrating and feeding talismans</small>
+                </a>
+                <a href="../../spiritual-items/fabric/index.html" class="cross-ref-link">
+                    🧵 Fabric & Cords<br>
+                    <small>Mojo bags, sachets, and wrapping materials</small>
+                </a>
+            </div>
+
+            <h3>Deities of Protection & Power</h3>
+            <div class="cross-ref-grid">
+                <a href="../../mythos/egyptian/deities/isis.html" class="cross-ref-link">
+                    𓁟 Isis<br>
+                    <small>Egyptian goddess of magic and protective amulets</small>
+                </a>
+                <a href="../../mythos/greek/deities/hecate.html" class="cross-ref-link">
+                    🌙 Hecate<br>
+                    <small>Greek goddess of witchcraft and protection magic</small>
+                </a>
+                <a href="../../mythos/norse/deities/thor.html" class="cross-ref-link">
+                    ⚡ Thor<br>
+                    <small>Norse god whose hammer Mjolnir is a protective talisman</small>
+                </a>
+                <a href="../../mythos/hindu/deities/durga.html" class="cross-ref-link">
+                    🗡️ Durga<br>
+                    <small>Hindu warrior goddess of protection</small>
+                </a>
+                <a href="../../mythos/christian/figures/st-michael.html" class="cross-ref-link">
+                    ⚔️ St. Michael<br>
+                    <small>Archangel of protection and spiritual warfare</small>
+                </a>
+            </div>
+        </section>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel">
+            <h3>Explore Related Content</h3>
+            <h4 style="color: var(--color-secondary); margin: var(--space-4) 0;">Archetype Connections</h4>
+            <div class="interlink-grid">
+                <a href="../../archetypes/index.html" class="archetype-link-card"><div class="card-icon">&#128302;</div><div class="card-content"><h4>The Magician</h4><span>Enchantment and binding</span></div></a>
+                <a href="../../archetypes/index.html" class="archetype-link-card"><div class="card-icon">&#128737;</div><div class="card-content"><h4>The Guardian</h4><span>Protective amulets</span></div></a>
+            </div>
+            <h4 style="color: var(--color-secondary); margin: var(--space-6) 0 var(--space-4) 0;">Cross-Cultural Parallels</h4>
+            <div class="interlink-grid">
+                <a href="../../mythos/egyptian/index.html" class="parallel-card"><div class="card-icon">&#128737;</div><div class="card-content"><h4>Egyptian Amulets</h4><span>Ankh, djed, scarab</span></div></a>
+                <a href="../../mythos/jewish/index.html" class="parallel-card"><div class="card-icon">&#10017;</div><div class="card-content"><h4>Kabbalistic Talismans</h4><span>Hebrew divine names</span></div></a>
+            </div>
+            <h4 style="color: var(--color-secondary); margin: var(--space-6) 0 var(--space-4) 0;">See Also</h4>
+            <div class="interlink-grid">
+                <a href="../texts/picatrix.html" class="parallel-card"><div class="card-icon">&#128218;</div><div class="card-content"><h4>Picatrix</h4><span>Astrological talisman lore</span></div></a>
+                <a href="../divination/astrology.html" class="parallel-card"><div class="card-icon">&#9788;</div><div class="card-content"><h4>Planetary Magic</h4><span>Timing for creation</span></div></a>
+            </div>
+        </section>
+
+        <!-- NAVIGATION -->
+        <nav class="nav-section">
+            <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">Continue Exploring</h3>
+            <a href="../index.html" class="nav-button">🪄 Magical Systems Index</a>
+            <a href="spirit-work.html" class="nav-button">👻 Next: Spirit Work</a>
+            <a href="../../index.html" class="nav-button">🏠 Return to Home</a>
+        </nav>
+    </div>
+
+    <!-- Theme Picker UI -->
+</body>
+</html>

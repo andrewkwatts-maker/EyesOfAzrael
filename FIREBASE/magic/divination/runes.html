@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runes - Divination Systems</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--space-5);
+        }
+
+        .container {
+            max-width: var(--container-lg);
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--space-16) var(--space-5);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-10);
+            border: 2px solid var(--color-border);
+        }
+
+        .header-icon {
+            font-size: 5rem;
+            margin-bottom: var(--space-4);
+        }
+
+        h1 {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-5);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: var(--text-xl);
+            color: var(--color-text-secondary);
+            margin: var(--space-3) 0;
+            font-style: italic;
+        }
+
+        .section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+        }
+
+        h2 {
+            font-size: var(--text-3xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-3);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        h3 {
+            font-size: var(--text-2xl);
+            color: var(--color-secondary);
+            margin-top: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+
+        h4 {
+            font-size: var(--text-xl);
+            color: var(--color-primary);
+            margin-top: var(--space-4);
+            margin-bottom: var(--space-3);
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-4);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin-left: var(--space-6);
+            margin-bottom: var(--space-4);
+            color: var(--color-text-secondary);
+        }
+
+        li {
+            margin-bottom: var(--space-2);
+            line-height: var(--leading-relaxed);
+        }
+
+        .rune-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-6) 0;
+        }
+
+        .rune-item {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            text-align: center;
+        }
+
+        .rune-symbol {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-2);
+            color: var(--color-primary);
+        }
+
+        .rune-name {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .rune-meaning {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-bottom: var(--space-2);
+        }
+
+        .rune-description {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .source-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .source-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 3px solid var(--color-primary);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+            border-radius: var(--radius-md);
+        }
+
+        .cross-ref {
+            display: inline-block;
+            padding: var(--space-2) var(--space-4);
+            background: rgba(var(--color-secondary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            margin: var(--space-2);
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+        }
+
+        .cross-ref:hover {
+            background: rgba(var(--color-secondary-rgb), 0.4);
+            transform: translateY(-2px);
+        }
+
+        .nav-section {
+            text-align: center;
+            margin-top: var(--space-10);
+            padding: var(--space-6);
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: var(--space-4) var(--space-8);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+            margin: var(--space-2);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-accent-rgb), 0.1);
+            border-left: 4px solid var(--color-accent);
+            padding: var(--space-4);
+            margin: var(--space-4) 0;
+            border-radius: var(--radius-md);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-4) 0;
+        }
+
+        th, td {
+            padding: var(--space-3);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            color: var(--color-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        .aett-section {
+            margin: var(--space-6) 0;
+            padding: var(--space-4);
+            background: rgba(var(--color-secondary-rgb), 0.05);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Interlink Panel Styles */
+        .interlink-panel {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin: var(--space-10) 0;
+        }
+
+        .interlink-panel h3 {
+            color: var(--color-primary);
+            font-size: var(--text-2xl);
+            margin-bottom: var(--space-6);
+        }
+
+        .interlink-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .archetype-link-card, .parallel-card {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            padding: var(--space-4);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            transition: all var(--transition-base);
+        }
+
+        .archetype-link-card:hover, .parallel-card:hover {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            transform: translateY(-2px);
+        }
+
+        .card-icon {
+            font-size: var(--text-2xl);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+        }
+
+        .card-content h4 {
+            color: var(--color-text-primary);
+            font-size: var(--text-base);
+            margin-bottom: var(--space-1);
+        }
+
+        .card-content span {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="theme-picker-container"></div>
+<div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Runes</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> → <a href="../index.html">Magic</a> → <a href="index.html">Divination</a> → <span>Runes</span>
+</nav>
+
+        <!-- OVERVIEW -->
+        <section class="section">
+            <h2>Overview & Historical Origins</h2>
+
+            <p>
+                Runes (from Old Norse "rún" meaning "secret" or "mystery") are the letters of ancient Germanic
+                alphabets that served dual purposes as both a writing system and a magical tool. The earliest
+                attestations of runic writing appear around 150 CE in Scandinavia and Germanic territories,
+                though the system likely developed somewhat earlier. Unlike purely phonetic alphabets, each
+                rune carried symbolic meaning, magical power, and associations with cosmic forces.
+            </p>
+
+            <p>
+                The word "rune" itself reveals the esoteric dimension: it shares roots with Gothic "rūna"
+                (secret), Old Irish "rún" (mystery), and Welsh "rhin" (charm), indicating that these letters
+                were never merely functional writing tools but conduits of hidden knowledge and power.
+            </p>
+
+            <div class="highlight-box">
+                <h4>Mythological Origins</h4>
+                <p>
+                    According to Norse mythology, the god Odin discovered the runes through a shamanic ordeal
+                    described in the <em>Hávamál</em> (Sayings of the High One) of the Poetic Edda. Odin hung
+                    himself on the world tree Yggdrasil for nine nights, pierced by his own spear, without
+                    food or water, gazing into the abyss below. Through this self-sacrifice, he perceived the
+                    runes and grasped them, gaining their wisdom and power. This myth establishes runes as
+                    divine knowledge obtained through sacrifice and worthy of profound respect.
+                </p>
+            </div>
+
+            <h3>Historical Development</h3>
+            <p>
+                Runic alphabets evolved through several major forms:
+            </p>
+            <ul>
+                <li><strong>Elder Futhark (c. 150-800 CE):</strong> The oldest form with 24 runes, used across
+                    Germanic territories</li>
+                <li><strong>Younger Futhark (c. 800-1100 CE):</strong> Simplified 16-rune system used in Viking
+                    Age Scandinavia</li>
+                <li><strong>Anglo-Saxon Futhorc (c. 400-1100 CE):</strong> Extended system with up to 33 runes
+                    used in England</li>
+                <li><strong>Medieval Runes (c. 1100-1500 CE):</strong> Various developments including dotted runes
+                    and regional variations</li>
+            </ul>
+
+            <h3>Etymology and Naming</h3>
+            <p>
+                The runic alphabet is called "Futhark" after its first six letters: Fehu, Uruz, Thurisaz,
+                Ansuz, Raidho, Kaunan (ᚠᚢᚦᚨᚱᚲ). Each rune has a name representing a concrete object or concept
+                that embodies its phonetic value, magical meaning, and cosmic principle—a characteristic
+                distinguishing runes from abstract letter symbols.
+            </p>
+
+            <h3>Purpose and Applications</h3>
+            <ul>
+                <li><strong>Divination:</strong> Casting runes to gain insight into situations and receive guidance</li>
+                <li><strong>Magic and Spellwork:</strong> Inscribing runes to invoke their powers</li>
+                <li><strong>Protection:</strong> Carving runic formulas on weapons, ships, homes, and amulets</li>
+                <li><strong>Communication:</strong> Writing inscriptions, memorials, and messages</li>
+                <li><strong>Meditation:</strong> Contemplating individual runes to access their wisdom</li>
+                <li><strong>Ritual:</strong> Incorporating runic symbols into ceremonial practices</li>
+            </ul>
+        </section>
+
+        <!-- KEY COMPONENTS -->
+        <section class="section">
+            <h2>The Elder Futhark: 24 Sacred Symbols</h2>
+
+            <p>
+                The Elder Futhark is organized into three groups called "Ættir" (singular: "Ætt," meaning
+                "family" or "clan"), each containing eight runes. This division may reflect cosmological
+                principles or magical categorizations.
+            </p>
+
+            <div class="aett-section">
+                <h3>First Ætt: Freya's Ætt (Fertility and Prosperity)</h3>
+                <p>
+                    Associated with the goddess Freya and themes of wealth, vitality, creation, and defense.
+                </p>
+
+                <div class="rune-grid">
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᚠ</div>
+                        <div class="rune-name">Fehu</div>
+                        <div class="rune-meaning">"Cattle" / "Wealth"</div>
+                        <div class="rune-description">
+                            Mobile wealth, prosperity, abundance, earned income, energy transfer, primal fire.
+                            Represents moveable property and the circulation of power.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᚢ</div>
+                        <div class="rune-name">Uruz</div>
+                        <div class="rune-meaning">"Aurochs" / "Primal Strength"</div>
+                        <div class="rune-description">
+                            Raw power, vitality, health, endurance, primal force. The wild ox represents
+                            untamed strength and life force.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᚦ</div>
+                        <div class="rune-name">Thurisaz</div>
+                        <div class="rune-meaning">"Giant" / "Thorn"</div>
+                        <div class="rune-description">
+                            Reactive force, protection, destruction, chaos, Thor's hammer. Represents both
+                            defense and dangerous power that must be handled carefully.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᚨ</div>
+                        <div class="rune-name">Ansuz</div>
+                        <div class="rune-meaning">"God" / "Divine Breath"</div>
+                        <div class="rune-description">
+                            Communication, wisdom, divine inspiration, Odin's rune. Represents the power of
+                            speech, poetry, and revelation.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᚱ</div>
+                        <div class="rune-name">Raidho</div>
+                        <div class="rune-meaning">"Riding" / "Journey"</div>
+                        <div class="rune-description">
+                            Travel, movement, rhythm, right action, cosmic order. Represents both physical
+                            journeys and spiritual quests.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᚲ</div>
+                        <div class="rune-name">Kaunan/Kenaz</div>
+                        <div class="rune-meaning">"Torch" / "Knowledge"</div>
+                        <div class="rune-description">
+                            Controlled fire, illumination, craft, creativity, knowledge. The torch that
+                            reveals truth and enables transformation.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᚷ</div>
+                        <div class="rune-name">Gebo</div>
+                        <div class="rune-meaning">"Gift"</div>
+                        <div class="rune-description">
+                            Exchange, partnership, generosity, sacrifice, balance. Represents the sacred
+                            bond created through giving and receiving.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᚹ</div>
+                        <div class="rune-name">Wunjo</div>
+                        <div class="rune-meaning">"Joy"</div>
+                        <div class="rune-description">
+                            Happiness, harmony, fellowship, perfection, shared purpose. The joy that comes
+                            from alignment with one's true path.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="aett-section">
+                <h3>Second Ætt: Heimdall's Ætt (Challenge and Transformation)</h3>
+                <p>
+                    Associated with Heimdall, guardian of Bifrost, and themes of challenge, testing, and
+                    necessary disruption leading to growth.
+                </p>
+
+                <div class="rune-grid">
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᚺ</div>
+                        <div class="rune-name">Hagalaz</div>
+                        <div class="rune-meaning">"Hail"</div>
+                        <div class="rune-description">
+                            Disruption, natural forces, crisis, testing, primal seed. Destructive change
+                            that clears the way for new growth.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᚾ</div>
+                        <div class="rune-name">Nauthiz</div>
+                        <div class="rune-meaning">"Need"</div>
+                        <div class="rune-description">
+                            Necessity, constraint, resistance, need-fire. Pressure that forces innovation
+                            and reveals true strength.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛁ</div>
+                        <div class="rune-name">Isa</div>
+                        <div class="rune-meaning">"Ice"</div>
+                        <div class="rune-description">
+                            Standstill, stasis, concentration, self-focus. Frozen potential awaiting the
+                            right moment for action.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛃ</div>
+                        <div class="rune-name">Jera</div>
+                        <div class="rune-meaning">"Year" / "Harvest"</div>
+                        <div class="rune-description">
+                            Cycles, seasons, fruition, natural timing. The reward for patient effort aligned
+                            with natural rhythms.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛇ</div>
+                        <div class="rune-name">Eihwaz</div>
+                        <div class="rune-meaning">"Yew Tree"</div>
+                        <div class="rune-description">
+                            Endurance, death and rebirth, transformation, the World Tree. Connection between
+                            worlds and the mysteries of life and death.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛈ</div>
+                        <div class="rune-name">Perthro</div>
+                        <div class="rune-meaning">"Lot Cup" / "Mystery"</div>
+                        <div class="rune-description">
+                            Fate, hidden things, divination, chance, the unknown. The dice cup of the Norns
+                            containing secrets and surprises.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛉ</div>
+                        <div class="rune-name">Algiz</div>
+                        <div class="rune-meaning">"Elk" / "Protection"</div>
+                        <div class="rune-description">
+                            Defense, higher awareness, connection to divine, sanctuary. The protective force
+                            that wards off harm and elevates consciousness.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛊ</div>
+                        <div class="rune-name">Sowilo</div>
+                        <div class="rune-meaning">"Sun"</div>
+                        <div class="rune-description">
+                            Success, wholeness, life force, victory, guidance. The unconquerable sun
+                            representing triumph and clarity.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="aett-section">
+                <h3>Third Ætt: Tyr's Ætt (Community and Spirit)</h3>
+                <p>
+                    Associated with Tyr, god of justice and sacrifice, and themes of social order, spiritual
+                    development, and divine connection.
+                </p>
+
+                <div class="rune-grid">
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛏ</div>
+                        <div class="rune-name">Tiwaz</div>
+                        <div class="rune-meaning">"Tyr" / "Sky God"</div>
+                        <div class="rune-description">
+                            Justice, honor, leadership, warrior spirit, self-sacrifice. The principle of
+                            right order and noble sacrifice for the greater good.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛒ</div>
+                        <div class="rune-name">Berkano</div>
+                        <div class="rune-meaning">"Birch" / "Growth"</div>
+                        <div class="rune-description">
+                            Birth, fertility, nurturing, new beginnings, the goddess. Gentle growth and
+                            the protective maternal force.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛖ</div>
+                        <div class="rune-name">Ehwaz</div>
+                        <div class="rune-meaning">"Horse"</div>
+                        <div class="rune-description">
+                            Partnership, trust, movement, teamwork, progress. The bond between rider and
+                            horse symbolizing cooperation.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛗ</div>
+                        <div class="rune-name">Mannaz</div>
+                        <div class="rune-meaning">"Man" / "Humanity"</div>
+                        <div class="rune-description">
+                            The self, human consciousness, social order, intelligence. Divine structure
+                            in human form and community.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛚ</div>
+                        <div class="rune-name">Laguz</div>
+                        <div class="rune-meaning">"Water" / "Lake"</div>
+                        <div class="rune-description">
+                            Flow, intuition, psychic powers, the unconscious, life's currents. The deep
+                            waters of emotion and inner knowing.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛜ</div>
+                        <div class="rune-name">Ingwaz</div>
+                        <div class="rune-meaning">"Ing" / "Fertility God"</div>
+                        <div class="rune-description">
+                            Completion, integration, potential energy, gestation. The seed containing
+                            future potential awaiting release.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛞ</div>
+                        <div class="rune-name">Dagaz</div>
+                        <div class="rune-meaning">"Day"</div>
+                        <div class="rune-description">
+                            Breakthrough, awakening, transformation, clarity. The dawn bringing radical
+                            shift and enlightenment.
+                        </div>
+                    </div>
+                    <div class="rune-item">
+                        <div class="rune-symbol">ᛟ</div>
+                        <div class="rune-name">Othala</div>
+                        <div class="rune-meaning">"Ancestral Property"</div>
+                        <div class="rune-description">
+                            Heritage, homeland, inheritance, tradition, ancestors. The sacred legacy
+                            passed through generations.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>The Blank Rune: Modern Addition</h3>
+            <p>
+                Some modern rune sets include a blank rune called "Wyrd" (meaning "fate" or "destiny"), though
+                this has no historical precedent. Introduced in the 1980s by Ralph Blum, it represents the
+                unknowable, fate, and divine mystery. Traditional practitioners typically do not use this rune,
+                considering the historical 24-rune Elder Futhark complete.
+            </p>
+        </section>
+
+        <!-- PRACTICE & METHODS -->
+        <section class="section">
+            <h2>Practice & Methods</h2>
+
+            <h3>Traditional Runic Magic</h3>
+
+            <h4>Rune Carving and Inscription</h4>
+            <p>
+                Historical evidence shows runes carved on various objects for magical purposes:
+            </p>
+            <ul>
+                <li><strong>Weapons:</strong> Swords and spears inscribed for victory and protection</li>
+                <li><strong>Amulets:</strong> Personal items bearing protective formulas</li>
+                <li><strong>Ships:</strong> Prows carved with runes for safe passage</li>
+                <li><strong>Stones:</strong> Memorial runestones and boundary markers</li>
+                <li><strong>Wood:</strong> Staves and talismans for various purposes</li>
+            </ul>
+
+            <p>
+                The act of carving itself was considered magical. Runes were often colored red with blood or
+                ochre to "awaken" them. The <em>Hávamál</em> mentions that runes must be "cut," "read," "tested,"
+                and "used" to be effective—suggesting a complete process of creation, interpretation, and activation.
+            </p>
+
+            <h4>Galdrastafir (Magical Staves)</h4>
+            <p>
+                In later Icelandic magic, individual runes were combined into complex symbols called galdrastafir
+                or magical staves. These bindrunes (runes bound together) create concentrated magical formulas,
+                such as the Ægishjálmur (Helm of Awe) for protection and intimidation.
+            </p>
+
+            <h3>Divination Practices</h3>
+
+            <h4>Creating a Rune Set</h4>
+            <p>
+                Traditional materials for rune divination include:
+            </p>
+            <ul>
+                <li><strong>Wood:</strong> Oak, ash, or fruitwood, preferably from fallen branches</li>
+                <li><strong>Stone:</strong> Smooth river stones or beach pebbles</li>
+                <li><strong>Bone:</strong> Historically used, though less common in modern practice</li>
+                <li><strong>Clay:</strong> Handmade clay tiles marked and fired</li>
+            </ul>
+
+            <p>
+                Many practitioners consecrate their runes through ritual, offering them to the gods (especially
+                Odin), exposing them to the elements, or passing them through incense smoke. The act of making
+                one's own rune set is considered spiritually significant, creating a personal connection to the symbols.
+            </p>
+
+            <h4>Casting Methods</h4>
+
+            <div class="highlight-box">
+                <h4>Historical Method: Three-Rune Casting</h4>
+                <p>
+                    Tacitus, writing in 98 CE in <em>Germania</em>, describes Germanic priests cutting branches
+                    from fruit-bearing trees, marking them with signs, and casting them on a white cloth. Three
+                    were selected and interpreted. This may be the earliest description of runic divination,
+                    though Tacitus doesn't specifically mention runes by name.
+                </p>
+            </div>
+
+            <p><strong>Single Rune Draw:</strong> For daily guidance or simple yes/no questions, draw one rune
+            from the bag while focusing on your question.</p>
+
+            <p><strong>Three Rune Spread:</strong> Cast or draw three runes representing:</p>
+            <ul>
+                <li>Past / Present / Future</li>
+                <li>Situation / Action / Outcome</li>
+                <li>Self / Challenge / Guidance</li>
+            </ul>
+
+            <p><strong>Runic Cross (Five Runes):</strong></p>
+            <ol>
+                <li>Center: Present situation or core issue</li>
+                <li>Left: Past influences or what's leaving</li>
+                <li>Right: Future potential or what's approaching</li>
+                <li>Below: Foundation or underlying cause</li>
+                <li>Above: Best outcome or higher guidance</li>
+            </ol>
+
+            <p><strong>Futhark Spread (Nine or 24 Runes):</strong> Complex layout examining multiple life
+            areas, using positions corresponding to each rune's domain.</p>
+
+            <p><strong>Casting on Cloth:</strong> Some practitioners cast all runes on a marked cloth and
+            interpret based on proximity, patterns, and which land face-up.</p>
+
+            <h3>Interpretation Guidelines</h3>
+            <ul>
+                <li><strong>Upright vs. Reversed:</strong> Some readers interpret reversed runes as blocked,
+                    internalized, or opposite energy; others read all orientations as containing both positive
+                    and challenging aspects</li>
+                <li><strong>Rune Relationships:</strong> Consider how runes interact—complementary, conflicting,
+                    or modifying each other's meanings</li>
+                <li><strong>Intuition:</strong> Traditional practice emphasized personal gnosis and direct
+                    communication with the runes</li>
+                <li><strong>Context:</strong> The same rune means different things in different positions and
+                    questions</li>
+            </ul>
+
+            <h3>Meditation and Spiritual Practice</h3>
+            <p>
+                Beyond divination, runes serve as tools for spiritual development:
+            </p>
+            <ul>
+                <li><strong>Rune Yoga (Stadha):</strong> Assuming body positions mimicking rune shapes</li>
+                <li><strong>Rune Chanting (Galdr):</strong> Intoning rune names and sounds for meditation and magic</li>
+                <li><strong>Pathworking:</strong> Meditating on individual runes to internalize their wisdom</li>
+                <li><strong>Daily Rune:</strong> Drawing one rune each morning for contemplation throughout the day</li>
+            </ul>
+        </section>
+
+        <!-- TRADITIONS & VARIATIONS -->
+        <section class="section">
+            <h2>Traditions & Variations</h2>
+
+            <h3>Historical Runic Systems</h3>
+
+            <h4>Younger Futhark (Viking Age)</h4>
+            <p>
+                Developed around 800 CE as Old Norse evolved, the Younger Futhark reduced the alphabet to 16
+                runes despite the language having more sounds than Elder Futhark's Old Norse. This created
+                ambiguity where one rune could represent multiple sounds, requiring context for interpretation.
+                The compression may reflect changing magical priorities or practical adaptations.
+            </p>
+
+            <h4>Anglo-Saxon Futhorc</h4>
+            <p>
+                The Anglo-Saxon system expanded to 28-33 runes to accommodate Old English sounds, adding runes
+                for concepts like "day" (Dæg), "estate" (Ethel), and "bow" (Yr). The <em>Anglo-Saxon Rune Poem</em>
+                (8th-9th century CE) provides verse descriptions of each rune's meaning, a crucial source for
+                understanding runic symbolism.
+            </p>
+
+            <h4>Armanen Runes</h4>
+            <p>
+                An 18-rune system developed by Guido von List in early 20th-century Germany, based on his claimed
+                visionary experience. While influential in Germanic mysticism and unfortunately appropriated by
+                Nazi occultism, these are modern constructions rather than historical systems. Contemporary
+                practitioners debate their legitimacy and prefer historically attested rune rows.
+            </p>
+
+            <h3>Modern Reconstructionist Approaches</h3>
+
+            <h4>Heathenry and Ásatrú</h4>
+            <p>
+                Contemporary Norse/Germanic Paganism incorporates runes as part of religious practice, emphasizing:
+            </p>
+            <ul>
+                <li>Historically accurate interpretation based on surviving texts and archaeological evidence</li>
+                <li>Connection to Norse deities, especially Odin as master of runes</li>
+                <li>Integration with other Norse practices like blót (sacrifice) and sumbel (ritual toasting)</li>
+                <li>Respect for runes as sacred, not merely fortune-telling tools</li>
+            </ul>
+
+            <h4>Academic Runology</h4>
+            <p>
+                Scholarly study of runes focuses on:
+            </p>
+            <ul>
+                <li>Linguistic analysis of runic inscriptions for understanding Germanic language development</li>
+                <li>Archaeological context of runestones and artifacts</li>
+                <li>Historical evidence for magical uses versus literary/commemorative functions</li>
+                <li>Comparison of runic systems across regions and time periods</li>
+            </ul>
+
+            <h3>Contemporary Esoteric Uses</h3>
+
+            <h4>New Age Adaptations</h4>
+            <p>
+                Modern divination often simplifies rune meanings for accessibility, sometimes detaching them
+                from Norse cultural context. While this democratizes the practice, it can lose depth found in
+                studying the runes within their mythological and linguistic framework.
+            </p>
+
+            <h4>Chaos Magic and Eclectic Practice</h4>
+            <p>
+                Some practitioners combine runes with other magical systems (Tarot, Kabbalah, planetary magic),
+                create personal rune meanings, or develop new bindrunes for specific intentions. This approach
+                values results and personal gnosis over historical authenticity.
+            </p>
+        </section>
+
+        <!-- PRIMARY SOURCES -->
+        <section class="section">
+            <h2>Primary Sources & Further Reading</h2>
+
+            <h3>Primary Historical Texts</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong><em>Hávamál</em> (Sayings of the High One), from the Poetic Edda (c. 1270 CE,
+                    preserving earlier oral traditions)</strong><br>
+                    Stanzas 138-145 describe Odin's discovery of the runes through self-sacrifice, and stanzas
+                    146-164 enumerate magical songs and rune uses. Primary source for understanding the mythological
+                    and spiritual significance of runes in Norse culture.
+                </li>
+                <li class="source-item">
+                    <strong><em>The Anglo-Saxon Rune Poem</em> (8th-9th century CE)</strong><br>
+                    Verse descriptions of 29 runes providing symbolic meanings: "Feoh is a comfort to everyone;
+                    yet each man must share it freely, if he wishes to gain honor in the sight of the Lord."
+                    Crucial for interpreting rune symbolism.
+                </li>
+                <li class="source-item">
+                    <strong><em>The Norwegian Rune Poem</em> (13th century)</strong><br>
+                    Describes the 16 runes of the Younger Futhark with terse verses. Example: "Kaun [torch]
+                    is fatal to children; death makes a corpse pale."
+                </li>
+                <li class="source-item">
+                    <strong><em>The Icelandic Rune Poem</em> (15th century)</strong><br>
+                    Later composition providing interpretations of the Younger Futhark, showing evolved meanings
+                    in medieval Iceland.
+                </li>
+                <li class="source-item">
+                    <strong>Tacitus, <em>Germania</em> (98 CE)</strong><br>
+                    Roman historian's account of Germanic divination practices: "They cut a branch from a
+                    fruit-bearing tree and divide it into small pieces which they mark with certain signs and
+                    throw at random onto a white cloth." Earliest possible reference to runic divination.
+                </li>
+            </ul>
+
+            <h3>Academic and Historical Studies</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Page, R.I. <em>Runes</em> (1987)</strong><br>
+                    Authoritative scholarly introduction to runic inscriptions, their historical development,
+                    and linguistic significance. Essential reading for understanding runes in historical context.
+                </li>
+                <li class="source-item">
+                    <strong>Elliott, Ralph W.V. <em>Runes: An Introduction</em> (1989)</strong><br>
+                    Comprehensive academic overview covering the origins, development, and uses of runes across
+                    Germanic territories. Balances linguistic and cultural perspectives.
+                </li>
+                <li class="source-item">
+                    <strong>Düwel, Klaus. <em>Runenkunde</em> (Runology) (4th edition, 2008)</strong><br>
+                    Definitive German-language academic work on runology, covering inscriptions, magical uses,
+                    and scholarly debates. The standard reference for serious students.
+                </li>
+                <li class="source-item">
+                    <strong>Looijenga, Tineke. <em>Texts and Contexts of the Oldest Runic Inscriptions</em>
+                    (2003)</strong><br>
+                    Detailed analysis of the earliest runic inscriptions, providing archaeological context and
+                    linguistic interpretation. Valuable for understanding runes' original functions.
+                </li>
+                <li class="source-item">
+                    <strong>MacLeod, Mindy, and Bernard Mees. <em>Runic Amulets and Magic Objects</em> (2006)</strong><br>
+                    Scholarly examination of runes used for magical purposes, analyzing inscriptions on amulets,
+                    weapons, and other artifacts. Bridges archaeological evidence and magical practice.
+                </li>
+            </ul>
+
+            <h3>Practical and Esoteric Works</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Thorsson, Edred (Stephen Flowers). <em>Futhark: A Handbook of Rune Magic</em> (1984)</strong><br>
+                    Influential modern work reconstructing runic magic based on historical sources and Heathen
+                    spirituality. Combines scholarship with practical magical applications, though some
+                    interpretations are speculative.
+                </li>
+                <li class="source-item">
+                    <strong>Thorsson, Edred. <em>Runelore: A Handbook of Esoteric Runology</em> (1987)</strong><br>
+                    Deeper exploration of runic philosophy, cosmology, and advanced magical techniques.
+                    Emphasizes the runes as a complete initiatory system.
+                </li>
+                <li class="source-item">
+                    <strong>Pennick, Nigel. <em>Runic Astrology</em> (1990) and <em>The Complete Illustrated
+                    Guide to Runes</em> (1999)</strong><br>
+                    Accessible introductions to rune divination and magic, incorporating both historical
+                    information and contemporary practice. Less academic but practically oriented.
+                </li>
+                <li class="source-item">
+                    <strong>Aswynn, Freya. <em>Northern Mysteries and Magick: Runes & Feminine Powers</em>
+                    (1998)</strong><br>
+                    Integrates runes with Norse mythology, particularly emphasizing goddess traditions and
+                    feminine aspects often overlooked in male-dominated interpretations.
+                </li>
+                <li class="source-item">
+                    <strong>Paxson, Diana L. <em>Taking Up the Runes</em> (2005)</strong><br>
+                    Comprehensive guide from a Heathen perspective, balancing historical research with
+                    practical application. Includes divination techniques, meditation practices, and
+                    cultural context.
+                </li>
+            </ul>
+
+            <h3>Norse Mythology Context</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Larrington, Carolyne (trans.). <em>The Poetic Edda</em> (2014)</strong><br>
+                    Modern translation of the primary source for Norse mythology, including the <em>Hávamál</em>
+                    and other texts referencing runes. Essential for understanding the mythological framework.
+                </li>
+                <li class="source-item">
+                    <strong>Sturluson, Snorri. <em>The Prose Edda</em> (trans. Jesse Byock, 2005)</strong><br>
+                    13th-century compilation of Norse myths providing context for the gods, cosmology, and
+                    magical practices mentioned in connection with runes.
+                </li>
+            </ul>
+        </section>
+
+        <!-- CROSS-REFERENCES -->
+        <section class="section">
+            <h2>Cross-References & Related Practices</h2>
+
+            <h3>Related Divination Systems</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="runes.html" class="cross-ref">Ogham - Celtic Tree Alphabet</a>
+                <a href="tarot.html" class="cross-ref">Tarot - Archetypal Symbolism</a>
+                <a href="i-ching.html" class="cross-ref">I Ching - Chinese Hexagrams</a>
+                <a href="geomancy.html" class="cross-ref">Geomancy - Earth Divination</a>
+            </div>
+
+            <h3>Norse Mythology and Tradition</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../../mythos/norse/deities/odin.html" class="cross-ref">Odin - All-Father & Rune Master</a>
+                <a href="../../mythos/norse/cosmology/yggdrasil.html" class="cross-ref">Yggdrasil - World Tree</a>
+                <a href="../../index.html" class="cross-ref">The Norns - Weavers of Fate</a>
+                <a href="../ritual/shamanism.html" class="cross-ref">Norse Shamanism (Seiðr)</a>
+            </div>
+
+            <h3>Magical Practices</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../practical/sigil-magic.html" class="cross-ref">Sigil Magic</a>
+                <a href="../practical/talismans.html" class="cross-ref">Talismans & Amulets</a>
+                <a href="../ritual/ceremonial-magic.html" class="cross-ref">Ceremonial Magic</a>
+            </div>
+
+            <h3>Archetypal Connections</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../../archetypes/index.html" class="cross-ref">The Sage (Odin)</a>
+                <a href="../../archetypes/index.html" class="cross-ref">The Warrior (Tyr)</a>
+                <a href="../../archetypes/index.html" class="cross-ref">The Magician</a>
+            </div>
+        </section>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel">
+            <h3>Explore Related Content</h3>
+
+            <h4 style="color: var(--color-secondary); margin: var(--space-4) 0;">Archetype Connections</h4>
+            <div class="interlink-grid">
+                <a href="../../archetypes/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128218;</div>
+                    <div class="card-content">
+                        <h4>The Sage (Odin)</h4>
+                        <span>Sacrificial wisdom seeker</span>
+                    </div>
+                </a>
+                <a href="../../archetypes/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#9876;</div>
+                    <div class="card-content">
+                        <h4>The Warrior (Tyr)</h4>
+                        <span>Tiwaz rune and valor</span>
+                    </div>
+                </a>
+                <a href="../../archetypes/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128302;</div>
+                    <div class="card-content">
+                        <h4>The Magician</h4>
+                        <span>Runic sorcery (galdr)</span>
+                    </div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--space-6) 0 var(--space-4) 0;">Cross-Cultural Parallels</h4>
+            <div class="interlink-grid">
+                <a href="../../mythos/norse/index.html" class="parallel-card">
+                    <div class="card-icon">&#9889;</div>
+                    <div class="card-content">
+                        <h4>Norse Mythology</h4>
+                        <span>Odin's runic wisdom</span>
+                    </div>
+                </a>
+                <a href="../../mythos/celtic/index.html" class="parallel-card">
+                    <div class="card-icon">&#9752;</div>
+                    <div class="card-content">
+                        <h4>Celtic Ogham</h4>
+                        <span>Tree alphabet parallel</span>
+                    </div>
+                </a>
+                <a href="tarot.html" class="parallel-card">
+                    <div class="card-icon">&#127183;</div>
+                    <div class="card-content">
+                        <h4>Tarot System</h4>
+                        <span>Symbolic divination parallel</span>
+                    </div>
+                </a>
+                <a href="i-ching.html" class="parallel-card">
+                    <div class="card-icon">&#9776;</div>
+                    <div class="card-content">
+                        <h4>I Ching</h4>
+                        <span>Eastern casting divination</span>
+                    </div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--space-6) 0 var(--space-4) 0;">See Also</h4>
+            <div class="interlink-grid">
+                <a href="../practical/sigil-magic.html" class="parallel-card">
+                    <div class="card-icon">&#10035;</div>
+                    <div class="card-content">
+                        <h4>Sigil Magic</h4>
+                        <span>Bind-rune techniques</span>
+                    </div>
+                </a>
+                <a href="../practical/talismans.html" class="parallel-card">
+                    <div class="card-icon">&#128141;</div>
+                    <div class="card-content">
+                        <h4>Runic Talismans</h4>
+                        <span>Amulets and inscriptions</span>
+                    </div>
+                </a>
+                <a href="../ritual/shamanism.html" class="parallel-card">
+                    <div class="card-icon">&#127795;</div>
+                    <div class="card-content">
+                        <h4>Norse Shamanism</h4>
+                        <span>Seidr and runic magic</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- NAVIGATION -->
+        <div class="nav-section">
+            <h3 style="color: var(--color-primary); margin-bottom: var(--space-5);">Continue Exploring</h3>
+            <a href="../index.html" class="nav-button">Magical Systems Index</a>
+            <a href="tarot.html" class="nav-button">Tarot</a>
+            <a href="astrology.html" class="nav-button">Astrology</a>
+            <a href="../../index.html" class="nav-button">Home</a>
+        </div>
+    </div>
+
+    <!-- Theme Picker UI -->
+</body>
+</html>

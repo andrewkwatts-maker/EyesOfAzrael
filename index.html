@@ -3,175 +3,623 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eyes of Azrael - Temporarily Offline</title>
+    <title>Eyes of Azrael - World Mythos Explorer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="themes/theme-base.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config (load before other scripts) -->
+    <script src="js/firebase-init.js"></script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --color-primary: #9370DB;
+            --color-secondary: #DAA520;
+            --color-success: #4ade80;
+            --color-border: rgba(147, 112, 219, 0.3);
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-2xl: 24px;
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
             color: #e0e0e0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin: 0;
+            padding: 0;
             min-height: 100vh;
-            padding: 2rem;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
+        .hero-section {
+            background: rgba(147, 51, 234, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-xl) var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
             text-align: center;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 3rem 2rem;
-            border-radius: 16px;
-            border: 2px solid rgba(147, 51, 234, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         }
 
-        h1 {
+        .hero-section h1 {
             font-size: 3rem;
-            margin-bottom: 1rem;
-            color: #9370DB;
-            text-shadow: 0 0 20px rgba(147, 112, 219, 0.5);
+            background: linear-gradient(135deg, #fff, rgba(255,255,255,0.9));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--spacing-md);
         }
 
-        .subtitle {
-            font-size: 1.5rem;
-            color: #DAA520;
-            margin-bottom: 2rem;
-            opacity: 0.9;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-xl) 0;
         }
 
-        .message {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            margin-bottom: 2rem;
-            color: #c0c0c0;
+        .stat-card {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            border: 2px solid var(--color-border);
         }
 
-        .status {
-            display: inline-block;
-            padding: 0.75rem 2rem;
-            background: linear-gradient(135deg, rgba(255, 69, 0, 0.3), rgba(255, 140, 0, 0.2));
-            border: 2px solid #ff6347;
-            border-radius: 8px;
-            margin-top: 1rem;
-            font-size: 1.2rem;
-            color: #ff6347;
+        .stat-number {
+            font-size: 3rem;
             font-weight: bold;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .info {
-            margin-top: 3rem;
-            padding: 1.5rem;
-            background: rgba(147, 51, 234, 0.1);
-            border-left: 4px solid #9370DB;
-            border-radius: 8px;
-            text-align: left;
-        }
-
-        .info h2 {
-            color: #9370DB;
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-        }
-
-        .info ul {
-            list-style: none;
-            padding-left: 1rem;
-        }
-
-        .info li {
-            margin: 0.75rem 0;
-            line-height: 1.6;
-        }
-
-        .info li::before {
-            content: "▸ ";
-            color: #DAA520;
-            font-weight: bold;
-            margin-right: 0.5rem;
-        }
-
-        .footer {
-            margin-top: 3rem;
+        .stat-label {
             font-size: 0.9rem;
-            opacity: 0.6;
+            color: #c0c0c0;
+            margin-top: var(--spacing-sm);
         }
 
-        .github-link {
-            color: #9370DB;
+        /* Widget System */
+        .widget {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+        }
+
+        .widget-header {
+            font-size: 1.8rem;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        /* Mythology Grid Widget */
+        .mythology-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .mythos-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mythos-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: currentColor;
+        }
+
+        .mythos-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(147, 112, 219, 0.4);
+            border-color: var(--color-primary);
+        }
+
+        .mythos-card.completed::after {
+            content: 'Complete';
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            background: var(--color-success);
+            color: #000;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .mythos-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .mythos-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            color: var(--color-primary);
+        }
+
+        .mythos-description {
+            font-size: 0.9rem;
+            color: #c0c0c0;
+            line-height: 1.6;
+            margin: var(--spacing-sm) 0;
+        }
+
+        .meta-badges {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+            margin-top: var(--spacing-md);
+        }
+
+        .meta-badge {
+            background: rgba(147, 112, 219, 0.2);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 999px;
+            font-size: 0.75rem;
+            border: 1px solid var(--color-border);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: var(--spacing-xl);
+            color: var(--color-secondary);
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* Search Widget */
+        .search-widget {
+            margin: var(--spacing-xl) 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: var(--spacing-md);
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            color: #fff;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 20px rgba(147, 112, 219, 0.3);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+            margin-top: var(--spacing-md);
+        }
+
+        .filter-button {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(147, 112, 219, 0.2);
+            border: 2px solid var(--color-border);
+            border-radius: 999px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-button:hover {
+            background: rgba(147, 112, 219, 0.4);
+            transform: scale(1.05);
+        }
+
+        .filter-button.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        /* Error State */
+        .error {
+            background: rgba(255, 69, 0, 0.2);
+            border: 2px solid #ff6347;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            color: #ff6347;
+        }
+
+        /* Navigation Links */
+        .nav-links {
+            display: flex;
+            gap: var(--spacing-lg);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-lg);
+        }
+
+        .nav-link {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--radius-lg);
             text-decoration: none;
-            border-bottom: 1px solid rgba(147, 112, 219, 0.3);
+            font-weight: 600;
             transition: all 0.3s ease;
         }
 
-        .github-link:hover {
-            color: #DAA520;
-            border-bottom-color: rgba(218, 165, 32, 0.5);
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .pulse {
-            animation: pulse 2s ease-in-out infinite;
+        .nav-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(147, 112, 219, 0.5);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>👁️ Eyes of Azrael</h1>
-        <div class="subtitle">Mythology, Physics & Esoteric Knowledge</div>
-
-        <div class="status pulse">
-            ⚠️ SITE TEMPORARILY OFFLINE
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1>👁️ Eyes of Azrael</h1>
+            <p style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.95);">
+                World Mythos Explorer - Journey through 15+ mythological traditions spanning 6,000 years
+            </p>
         </div>
 
-        <div class="message">
-            <p>The Eyes of Azrael website is currently offline for maintenance and content review.</p>
+        <!-- Stats Widget -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-mythologies">--</div>
+                <div class="stat-label">Mythological Traditions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-deities">--</div>
+                <div class="stat-label">Deities & Entities</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-archetypes">--</div>
+                <div class="stat-label">Universal Archetypes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">6000+</div>
+                <div class="stat-label">Years of History</div>
+            </div>
         </div>
 
-        <div class="info">
-            <h2>📋 What's Happening</h2>
-            <ul>
-                <li>All theory pages have been enhanced with comprehensive intellectual honesty warnings</li>
-                <li>Content is being reviewed for accuracy and proper framing</li>
-                <li>Speculative material is being clearly labeled as thought experiments, not factual claims</li>
-                <li>The site will return with improved critical thinking frameworks</li>
-            </ul>
+        <!-- Search Widget -->
+        <div class="widget search-widget">
+            <h2 class="widget-header">🔍 Search Across All Mythologies</h2>
+            <input
+                type="text"
+                class="search-input"
+                id="globalSearch"
+                placeholder="Search for gods, concepts, practices... (e.g., 'creation', 'Zeus', 'Sefirot')"
+            >
+            <div class="filter-buttons">
+                <button class="filter-button active" data-filter="all">All Traditions</button>
+                <button class="filter-button" data-filter="completed">Completed Only</button>
+                <button class="filter-button" data-filter="ancient">Ancient (Pre-500 CE)</button>
+                <button class="filter-button" data-filter="eastern">Eastern</button>
+                <button class="filter-button" data-filter="western">Western</button>
+            </div>
+            <p id="searchResults" style="margin-top: 1rem; color: #c0c0c0;"></p>
         </div>
 
-        <div class="info" style="margin-top: 2rem;">
-            <h2>🔍 Recent Updates</h2>
-            <ul>
-                <li>Added "Reality Check" warnings to all correlation claims</li>
-                <li>Implemented correlation rating system (⭐⭐⭐ Strong to ⭐ Weak)</li>
-                <li>Removed weakest correlations (e.g., Wu Xing 5-forces mapping)</li>
-                <li>Emphasized parsimonious explanations (mathematical universality, confirmation bias)</li>
-                <li>Positioned content as "intellectual entertainment" and "pattern exploration"</li>
-            </ul>
+        <!-- Mythology Grid Widget -->
+        <div class="widget">
+            <h2 class="widget-header">Mythological Traditions</h2>
+            <div id="mythologyGridContainer">
+                <div class="loading">Loading mythologies from Firebase</div>
+            </div>
         </div>
 
-        <div class="info" style="margin-top: 2rem;">
-            <h2>⏱️ Expected Return</h2>
-            <ul>
-                <li>Timeline: To be determined pending final content review</li>
-                <li>GitHub Repository: <a href="https://github.com/andrewkwatts-maker/EyesOfAzrael" class="github-link" target="_blank">github.com/andrewkwatts-maker/EyesOfAzrael</a></li>
-                <li>All code and content remains publicly accessible on GitHub</li>
-            </ul>
-        </div>
-
-        <div class="footer">
-            <p>Thank you for your patience and understanding.</p>
-            <p style="margin-top: 0.5rem;">— Eyes of Azrael Team</p>
+        <!-- Related Sections Widget -->
+        <div class="widget">
+            <h2 class="widget-header">Explore Related Sections</h2>
+            <div class="nav-links">
+                <a href="archetypes/index.html" class="nav-link">⚡ Universal Archetypes</a>
+                <a href="magic/index.html" class="nav-link">✨ Magical Systems</a>
+                <a href="herbalism/index.html" class="nav-link">🌿 Sacred Herbalism</a>
+                <a href="theories/index.html" class="nav-link">🔬 Theories & Analysis</a>
+                <a href="about.html" class="nav-link">📚 About</a>
+            </div>
         </div>
     </div>
+
+    <!-- Firebase Data Layer -->
+    <script>
+        // Firebase Database Interface
+        class MythologyDatabase {
+            constructor() {
+                this.db = firebase.firestore();
+                this.cache = new Map();
+            }
+
+            // Get all mythologies
+            async getMythologies() {
+                if (this.cache.has('mythologies')) {
+                    return this.cache.get('mythologies');
+                }
+
+                try {
+                    const snapshot = await this.db.collection('mythologies')
+                        .orderBy('displayName')
+                        .get();
+
+                    const mythologies = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+
+                    this.cache.set('mythologies', mythologies);
+                    return mythologies;
+                } catch (error) {
+                    console.error('Error fetching mythologies:', error);
+                    throw error;
+                }
+            }
+
+            // Get statistics
+            async getStats() {
+                try {
+                    const [mythCount, deityCount, archetypeCount] = await Promise.all([
+                        this.db.collection('mythologies').get(),
+                        this.db.collection('deities').get(),
+                        this.db.collection('archetypes').get()
+                    ]);
+
+                    return {
+                        mythologies: mythCount.size,
+                        deities: deityCount.size,
+                        archetypes: archetypeCount.size
+                    };
+                } catch (error) {
+                    console.error('Error fetching stats:', error);
+                    return { mythologies: 0, deities: 0, archetypes: 0 };
+                }
+            }
+
+            // Real-time listener for mythologies
+            subscribeMythologies(callback) {
+                return this.db.collection('mythologies')
+                    .orderBy('displayName')
+                    .onSnapshot(snapshot => {
+                        const mythologies = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        this.cache.set('mythologies', mythologies);
+                        callback(mythologies);
+                    });
+            }
+        }
+
+        // UI Controller
+        class UIController {
+            constructor(db) {
+                this.db = db;
+                this.currentFilter = 'all';
+                this.searchTerm = '';
+            }
+
+            async init() {
+                await this.loadStats();
+                await this.loadMythologies();
+                this.setupEventListeners();
+            }
+
+            async loadStats() {
+                const stats = await this.db.getStats();
+                document.getElementById('stat-mythologies').textContent = stats.mythologies;
+                document.getElementById('stat-deities').textContent = stats.deities;
+                document.getElementById('stat-archetypes').textContent = stats.archetypes;
+            }
+
+            async loadMythologies() {
+                const container = document.getElementById('mythologyGridContainer');
+
+                try {
+                    const mythologies = await this.db.getMythologies();
+                    this.renderMythologies(mythologies);
+                } catch (error) {
+                    container.innerHTML = `
+                        <div class="error">
+                            <strong>Error loading mythologies:</strong> ${error.message}
+                            <br><br>
+                            <em>Note: Firebase configuration required. See FIREBASE_MIGRATION_SCHEMA.md for setup instructions.</em>
+                        </div>
+                    `;
+                }
+            }
+
+            renderMythologies(mythologies) {
+                const container = document.getElementById('mythologyGridContainer');
+                const filtered = this.filterMythologies(mythologies);
+
+                if (filtered.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #c0c0c0;">No mythologies match your filters.</p>';
+                    return;
+                }
+
+                const grid = document.createElement('div');
+                grid.className = 'mythology-grid';
+
+                filtered.forEach(mythos => {
+                    const card = this.createMythologyCard(mythos);
+                    grid.appendChild(card);
+                });
+
+                container.innerHTML = '';
+                container.appendChild(grid);
+            }
+
+            createMythologyCard(mythos) {
+                const card = document.createElement('div');
+                card.className = `mythos-card ${mythos.completed ? 'completed' : ''}`;
+                card.style.borderColor = mythos.color || '#9370DB';
+                card.style.color = mythos.color || '#9370DB';
+
+                card.innerHTML = `
+                    <div class="mythos-icon">${mythos.icon || '📖'}</div>
+                    <div class="mythos-name">${mythos.displayName}</div>
+                    <div class="mythos-description">${mythos.description || ''}</div>
+                    <div class="meta-badges">
+                        <span class="meta-badge">📅 ${mythos.era || 'Unknown'}</span>
+                        ${mythos.regions ? mythos.regions.map(r =>
+                            `<span class="meta-badge">🌍 ${r}</span>`
+                        ).join('') : ''}
+                        ${mythos.coreConcepts ?
+                            `<span class="meta-badge">💫 ${mythos.coreConcepts.length} Concepts</span>`
+                        : ''}
+                    </div>
+                `;
+
+                card.onclick = () => {
+                    window.location.href = `mythos/${mythos.id}/index.html`;
+                };
+
+                card.dataset.era = mythos.era || '';
+                card.dataset.regions = (mythos.regions || []).join(',');
+                card.dataset.completed = mythos.completed || false;
+
+                return card;
+            }
+
+            filterMythologies(mythologies) {
+                return mythologies.filter(mythos => {
+                    // Text search
+                    if (this.searchTerm) {
+                        const searchLower = this.searchTerm.toLowerCase();
+                        const matchesSearch =
+                            mythos.displayName?.toLowerCase().includes(searchLower) ||
+                            mythos.description?.toLowerCase().includes(searchLower) ||
+                            mythos.coreConcepts?.some(c => c.toLowerCase().includes(searchLower));
+
+                        if (!matchesSearch) return false;
+                    }
+
+                    // Filter
+                    if (this.currentFilter === 'all') return true;
+                    if (this.currentFilter === 'completed') return mythos.completed === true;
+
+                    const era = (mythos.era || '').toLowerCase();
+                    const regions = (mythos.regions || []).map(r => r.toLowerCase());
+
+                    if (this.currentFilter === 'ancient') {
+                        return era.includes('bce') || era.includes('000');
+                    }
+                    if (this.currentFilter === 'eastern') {
+                        return regions.some(r => r.includes('asia') || r.includes('india') || r.includes('china'));
+                    }
+                    if (this.currentFilter === 'western') {
+                        return regions.some(r => r.includes('europe') || r.includes('rome') || r.includes('greece'));
+                    }
+
+                    return true;
+                });
+            }
+
+            setupEventListeners() {
+                // Filter buttons
+                document.querySelectorAll('.filter-button').forEach(button => {
+                    button.addEventListener('click', async () => {
+                        document.querySelectorAll('.filter-button').forEach(b =>
+                            b.classList.remove('active')
+                        );
+                        button.classList.add('active');
+                        this.currentFilter = button.dataset.filter;
+
+                        const mythologies = await this.db.getMythologies();
+                        this.renderMythologies(mythologies);
+                    });
+                });
+
+                // Search input
+                const searchInput = document.getElementById('globalSearch');
+                searchInput.addEventListener('input', async (e) => {
+                    this.searchTerm = e.target.value;
+                    const mythologies = await this.db.getMythologies();
+                    this.renderMythologies(mythologies);
+
+                    const filtered = this.filterMythologies(mythologies);
+                    const results = document.getElementById('searchResults');
+                    if (this.searchTerm.length >= 2) {
+                        results.textContent = `Found ${filtered.length} matches`;
+                    } else {
+                        results.textContent = '';
+                    }
+                });
+            }
+        }
+
+        // Initialize when DOM and Firebase are ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Wait for Firebase to initialize
+                await new Promise(resolve => {
+                    if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                        resolve();
+                    } else {
+                        setTimeout(resolve, 1000);
+                    }
+                });
+
+                const db = new MythologyDatabase();
+                const ui = new UIController(db);
+                await ui.init();
+
+                console.log('✅ Firebase integration initialized successfully');
+            } catch (error) {
+                console.error('❌ Failed to initialize:', error);
+                document.getElementById('mythologyGridContainer').innerHTML = `
+                    <div class="error">
+                        <strong>Firebase not configured</strong>
+                        <p>This page requires Firebase configuration. Please see the migration documentation.</p>
+                    </div>
+                `;
+            }
+        });
+    </script>
 </body>
 </html>

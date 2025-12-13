@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Theory - Eyes of Azrael</title>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="../../css/user-auth.css">
+
+    <style>
+        .submit-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .submit-hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(79, 70, 229, 0.1) 100%);
+            border-radius: var(--radius-xl, 16px);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+        }
+
+        .submit-hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #9333ea 0%, #4f46e5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .submit-hero p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .submit-form-container {
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: var(--radius-xl, 16px);
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .form-section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--accent-purple, #9333ea);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: var(--radius-md, 8px);
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: rgba(147, 51, 234, 0.6);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-hint {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(147, 51, 234, 0.2);
+        }
+
+        .form-actions-left {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-actions-right {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: var(--radius-md, 8px);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #9333ea 0%, #4f46e5 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(147, 51, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(147, 51, 234, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: 2px solid #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid rgba(239, 68, 68, 0.5);
+            border-radius: var(--radius-md, 8px);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            color: #fca5a5;
+        }
+
+        .success-message {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px solid rgba(34, 197, 94, 0.5);
+            border-radius: var(--radius-md, 8px);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            color: #86efac;
+        }
+
+        .loading-screen {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: var(--radius-xl, 16px);
+        }
+
+        .loading-screen h2 {
+            margin-bottom: 1rem;
+            color: var(--accent-purple, #9333ea);
+        }
+
+        #editor-container {
+            margin-top: 1rem;
+        }
+
+        #taxonomy-container {
+            margin-top: 1rem;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            font-size: 3rem;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="submit-page">
+        <div class="submit-hero">
+            <h1>Edit Your Theory</h1>
+            <p>Update your insights, connections, and discoveries.</p>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="spinner">⏳</div>
+            <h2>Loading theory...</h2>
+            <p>Please wait while we retrieve your theory data.</p>
+        </div>
+
+        <!-- Error Screen -->
+        <div id="error-screen" class="loading-screen" style="display: none;">
+            <h2>Error</h2>
+            <p id="error-message"></p>
+            <button class="btn btn-secondary" onclick="window.location.href='browse.html'">
+                Back to Browse
+            </button>
+        </div>
+
+        <!-- Edit Form -->
+        <div id="edit-form" class="submit-form-container" style="display: none;">
+            <form id="theory-form">
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Basic Information</h2>
+
+                    <div class="form-group">
+                        <label for="theory-title">Theory Title *</label>
+                        <input type="text"
+                               id="theory-title"
+                               name="title"
+                               placeholder="e.g., The Universal Flood Myth: A Cross-Cultural Analysis"
+                               required>
+                        <small class="form-hint">A clear, descriptive title for your theory (minimum 5 characters)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="theory-summary">Summary</label>
+                        <textarea id="theory-summary"
+                                  name="summary"
+                                  rows="3"
+                                  placeholder="Brief summary of your theory (optional but recommended)"></textarea>
+                        <small class="form-hint">A short summary to give readers a quick overview</small>
+                    </div>
+                </div>
+
+                <!-- Topic & Subtopic -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Classification</h2>
+                    <div id="taxonomy-container"></div>
+                    <small class="form-hint">Select a topic and subtopic, or create your own custom categories</small>
+                </div>
+
+                <!-- Rich Content Editor -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Content</h2>
+                    <div id="editor-container"></div>
+                    <small class="form-hint">Use panels to organize your theory, add images for visual support, link to external sources, and reference texts from our corpus</small>
+                </div>
+
+                <!-- Related Information -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Related Information</h2>
+
+                    <div class="form-group">
+                        <label for="related-mythologies">Related Mythologies</label>
+                        <input type="text"
+                               id="related-mythologies"
+                               name="mythologies"
+                               placeholder="e.g., Greek, Norse, Egyptian (comma-separated)">
+                        <small class="form-hint">List mythologies relevant to your theory</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="theory-tags">Tags</label>
+                        <input type="text"
+                               id="theory-tags"
+                               name="tags"
+                               placeholder="e.g., flood myth, creation, symbolism (comma-separated)">
+                        <small class="form-hint">Add tags to help others discover your theory</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="theory-sources">Sources</label>
+                        <textarea id="theory-sources"
+                                  name="sources"
+                                  rows="4"
+                                  placeholder="List your sources, references, and citations here"></textarea>
+                        <small class="form-hint">Academic sources, books, articles, websites, etc.</small>
+                    </div>
+                </div>
+
+                <!-- Error/Success Messages -->
+                <div id="form-messages"></div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <div class="form-actions-left">
+                        <button type="button" class="btn btn-danger" id="delete-btn">
+                            Delete Theory
+                        </button>
+                    </div>
+                    <div class="form-actions-right">
+                        <button type="button" class="btn btn-secondary" id="cancel-btn">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Update Theory
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal-container"></div>
+
+    <!-- Firebase SDK (CDN) - No Storage needed for URL-only images -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../../firebase-config.js"></script>
+
+    <!-- Scripts -->
+    <script src="../../js/firebase-auth.js"></script>
+    <script src="../../js/components/google-signin-button.js"></script>
+    <script src="../../js/auth-guard.js"></script>
+    <script src="../../js/user-theories.js"></script>
+    <script src="../../js/theory-taxonomy.js"></script>
+    <script src="../../js/theory-ownership.js"></script>
+    <script src="../../js/components/theory-editor.js"></script>
+    <script src="../../js/components/delete-confirmation-modal.js"></script>
+    <script src="../../js/components/image-uploader.js"></script>
+
+    <script>
+        let editor = null;
+        let taxonomy = null;
+        let currentTheory = null;
+        let theoryId = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get theory ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            theoryId = urlParams.get('id');
+
+            if (!theoryId) {
+                showError('No theory ID provided');
+                return;
+            }
+
+            // Check authentication and ownership
+            checkAuthAndOwnership();
+        });
+
+        /**
+         * Check authentication and ownership
+         */
+        async function checkAuthAndOwnership() {
+            // Check if logged in
+            if (!window.userAuth || !window.userAuth.isLoggedIn()) {
+                showError('You must be logged in to edit theories');
+                return;
+            }
+
+            // Check ownership
+            const verification = await window.theoryOwnership.verifyOwnership(theoryId, 'edit');
+            if (!verification.authorized) {
+                showError(verification.error);
+                return;
+            }
+
+            // Load theory data
+            await loadTheory();
+        }
+
+        /**
+         * Load theory data
+         */
+        async function loadTheory() {
+            currentTheory = await window.userTheories.getTheory(theoryId);
+
+            if (!currentTheory) {
+                showError('Theory not found');
+                return;
+            }
+
+            // Hide loading screen, show form
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('edit-form').style.display = 'block';
+
+            // Initialize form with theory data
+            initializeForm();
+        }
+
+        /**
+         * Initialize the form with existing theory data
+         */
+        function initializeForm() {
+            // Populate basic fields
+            document.getElementById('theory-title').value = currentTheory.title || '';
+            document.getElementById('theory-summary').value = currentTheory.summary || '';
+            document.getElementById('theory-sources').value = currentTheory.sources || '';
+
+            // Populate related mythologies
+            if (currentTheory.relatedMythologies && currentTheory.relatedMythologies.length > 0) {
+                document.getElementById('related-mythologies').value = currentTheory.relatedMythologies.join(', ');
+            }
+
+            // Populate tags
+            if (currentTheory.tags && currentTheory.tags.length > 0) {
+                document.getElementById('theory-tags').value = currentTheory.tags.join(', ');
+            }
+
+            // Initialize rich content editor
+            const editorContainer = document.getElementById('editor-container');
+            if (!editor) {
+                editor = new TheoryEditor(editorContainer);
+
+                // Load existing content
+                if (currentTheory.richContent) {
+                    editor.setData(currentTheory.richContent);
+                }
+            }
+
+            // Initialize taxonomy selector
+            const taxonomyContainer = document.getElementById('taxonomy-container');
+            if (!taxonomy && window.theoryTaxonomy) {
+                taxonomyContainer.innerHTML = window.theoryTaxonomy.renderTopicSelector();
+                window.theoryTaxonomy.attachTopicSelectorEvents(taxonomyContainer);
+
+                // Set selected topic/subtopic
+                if (currentTheory.topic) {
+                    window.theoryTaxonomy.setSelectedTopic(taxonomyContainer, currentTheory.topic, currentTheory.subtopic);
+                }
+
+                taxonomy = true;
+            }
+
+            // Attach event listeners
+            document.getElementById('theory-form').addEventListener('submit', handleSubmit);
+            document.getElementById('cancel-btn').addEventListener('click', handleCancel);
+            document.getElementById('delete-btn').addEventListener('click', handleDelete);
+        }
+
+        /**
+         * Handle form submission
+         */
+        function handleSubmit(e) {
+            e.preventDefault();
+
+            const messagesContainer = document.getElementById('form-messages');
+            messagesContainer.innerHTML = '';
+
+            // Get basic form data
+            const title = document.getElementById('theory-title').value.trim();
+            const summary = document.getElementById('theory-summary').value.trim();
+            const sources = document.getElementById('theory-sources').value.trim();
+
+            // Get related mythologies and tags
+            const mythologiesInput = document.getElementById('related-mythologies').value.trim();
+            const relatedMythologies = mythologiesInput ? mythologiesInput.split(',').map(m => m.trim()) : [];
+
+            const tagsInput = document.getElementById('theory-tags').value.trim();
+            const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()) : [];
+
+            // Get rich content from editor
+            const editorValidation = editor.validate();
+            if (!editorValidation.valid) {
+                showFormError(editorValidation.error);
+                return;
+            }
+
+            const richContent = editor.getData();
+
+            // Get taxonomy data
+            const taxonomyContainer = document.getElementById('taxonomy-container');
+            const taxonomyData = window.theoryTaxonomy.getSelectedTopicData(taxonomyContainer);
+
+            if (!taxonomyData) {
+                showFormError('Please select or create a topic and subtopic');
+                return;
+            }
+
+            // Prepare update data
+            const updateData = {
+                title,
+                summary,
+                richContent: {
+                    panels: richContent.panels,
+                    images: richContent.images,
+                    links: richContent.links,
+                    corpusSearches: richContent.corpusSearches
+                },
+                topic: taxonomyData.topic,
+                topicName: taxonomyData.topicName,
+                topicIcon: taxonomyData.topicIcon,
+                subtopic: taxonomyData.subtopic,
+                subtopicName: taxonomyData.subtopicName,
+                sources,
+                relatedMythologies,
+                tags
+            };
+
+            // Update theory
+            const result = window.userTheories.updateTheory(theoryId, updateData);
+
+            if (result.success) {
+                showFormSuccess('Theory updated successfully! Redirecting to view page...');
+                setTimeout(() => {
+                    window.location.href = `view.html?id=${theoryId}`;
+                }, 2000);
+            } else {
+                showFormError(result.error || 'Failed to update theory');
+            }
+        }
+
+        /**
+         * Handle cancel button
+         */
+        function handleCancel() {
+            if (confirm('Are you sure? Any unsaved changes will be lost.')) {
+                window.location.href = `view.html?id=${theoryId}`;
+            }
+        }
+
+        /**
+         * Handle delete button
+         */
+        function handleDelete() {
+            // Use delete confirmation modal
+            window.deleteConfirmationModal.show(theoryId);
+        }
+
+        /**
+         * Show error screen
+         */
+        function showError(message) {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('edit-form').style.display = 'none';
+            document.getElementById('error-screen').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+        }
+
+        /**
+         * Show form error message
+         */
+        function showFormError(message) {
+            const messagesContainer = document.getElementById('form-messages');
+            messagesContainer.innerHTML = `
+                <div class="error-message">
+                    <strong>Error:</strong> ${message}
+                </div>
+            `;
+            messagesContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        /**
+         * Show form success message
+         */
+        function showFormSuccess(message) {
+            const messagesContainer = document.getElementById('form-messages');
+            messagesContainer.innerHTML = `
+                <div class="success-message">
+                    <strong>Success:</strong> ${message}
+                </div>
+            `;
+            messagesContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+
+    <!-- Load auth modal template -->
+    <script>
+        fetch('../../auth-modal-template.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('auth-modal-container').innerHTML = html;
+            });
+    </script>
+</body>
+</html>

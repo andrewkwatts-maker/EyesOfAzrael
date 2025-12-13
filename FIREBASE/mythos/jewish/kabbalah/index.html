@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kabbalah - Jewish Mysticism</title>
+<link href="../../../themes/theme-base.css" rel="stylesheet"/>
+<link href="../../../styles.css" rel="stylesheet"/>
+<link href="../../../themes/corpus-links.css" rel="stylesheet"/>
+<link rel="stylesheet" href="../../../themes/smart-links.css">
+<script defer src="../../../themes/smart-links.js"></script>
+<script defer src="../../../themes/theme-animations.js"></script>
+<script defer src="../../../themes/theme-picker.js"></script>
+<style>
+    :root {
+        --kabbalah-gold: #FFD700;
+        --kabbalah-purple: #9370DB;
+        --kabbalah-blue: #4169E1;
+        --kabbalah-crimson: #DC143C;
+        --physics-cyan: #00CED1;
+    }
+
+    /* Ensure body uses theme background */
+    body {
+        background: var(--color-background);
+        color: var(--color-text-primary);
+    }
+
+    /* Ensure main container uses theme background */
+    main {
+        background: transparent;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        position: relative;
+        background: linear-gradient(135deg,
+            rgba(147, 112, 219, 0.1) 0%,
+            rgba(65, 105, 225, 0.08) 50%,
+            rgba(255, 215, 0, 0.05) 100%);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-xl);
+        padding: 3rem 2.5rem;
+        margin-bottom: 3rem;
+        box-shadow: var(--shadow-xl);
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        margin: 0 0 1rem 0;
+        background: linear-gradient(135deg, var(--kabbalah-gold) 0%, var(--kabbalah-purple) 50%, var(--kabbalah-blue) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.2;
+    }
+
+    .hero-subtitle {
+        font-size: 1.3rem;
+        color: var(--color-text-secondary);
+        font-style: italic;
+        margin-bottom: 1.5rem;
+        font-weight: 300;
+    }
+
+    .hero-description {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: var(--color-text-primary);
+        max-width: 900px;
+    }
+
+    .hero-description strong {
+        color: var(--kabbalah-gold);
+        font-weight: 600;
+    }
+
+    /* Section Headers */
+    .section-header {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 3rem 0 1.5rem 0;
+        color: var(--accent-primary);
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .section-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--kabbalah-gold), transparent);
+        border-radius: 2px;
+    }
+
+    /* Topic Cards Grid */
+    .topics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .topic-card {
+        position: relative;
+        background: var(--color-surface);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .topic-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        border-color: var(--kabbalah-gold);
+        box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.3),
+            0 0 20px rgba(255, 215, 0, 0.2);
+    }
+
+    .topic-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+        transition: transform 0.4s ease;
+        filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.3));
+    }
+
+    .topic-card:hover .topic-icon {
+        transform: scale(1.15) rotateY(180deg);
+    }
+
+    .topic-card h3 {
+        color: var(--kabbalah-gold);
+        margin: 0 0 0.75rem 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .topic-card p {
+        color: var(--color-text-secondary);
+        margin: 0;
+        line-height: 1.6;
+        font-size: 1rem;
+    }
+
+    /* Overview Cards */
+    .overview-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .overview-card {
+        position: relative;
+        background: linear-gradient(135deg, rgba(65, 105, 225, 0.1) 0%, rgba(147, 112, 219, 0.1) 100%);
+        backdrop-filter: blur(10px);
+        border: 2px solid var(--kabbalah-blue);
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .overview-card::before {
+        content: 'COMPREHENSIVE';
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--kabbalah-blue);
+        color: var(--color-background);
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-full);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+    }
+
+    .overview-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--kabbalah-gold);
+        box-shadow: 0 15px 35px rgba(65, 105, 225, 0.3);
+    }
+
+    .overview-card h3 {
+        color: var(--kabbalah-blue);
+        margin: 0 0 0.5rem 0;
+        font-size: 1.3rem;
+    }
+
+    .overview-card .icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    /* Key Features Box */
+    .features-box {
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.08) 0%, rgba(147, 112, 219, 0.08) 100%);
+        border: 2px solid var(--kabbalah-gold);
+        border-left: 6px solid var(--kabbalah-gold);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: 0 8px 20px rgba(255, 215, 0, 0.1);
+    }
+
+    .features-box h3 {
+        color: var(--kabbalah-gold);
+        margin: 0 0 1rem 0;
+        font-size: 1.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .features-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .feature-item {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .feature-item:hover {
+        transform: translateX(5px);
+        border-color: var(--kabbalah-gold);
+    }
+
+    .feature-item strong {
+        color: var(--kabbalah-gold);
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Physics Integration Panel */
+    .physics-panel {
+        background: linear-gradient(135deg, rgba(0, 206, 209, 0.05) 0%, rgba(0, 206, 209, 0.02) 100%);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 2px solid var(--physics-cyan);
+        border-radius: var(--radius-xl);
+        padding: 2.5rem;
+        margin: 3rem 0;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .physics-panel-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .physics-panel-header h2 {
+        color: var(--physics-cyan);
+        margin: 0;
+        font-size: 1.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .physics-badge {
+        display: inline-block;
+        background: rgba(0, 206, 209, 0.15);
+        border: 2px solid var(--physics-cyan);
+        color: var(--physics-cyan);
+        padding: 0.4rem 1rem;
+        border-radius: var(--radius-full);
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .physics-intro {
+        background: rgba(0, 206, 209, 0.1);
+        border-left: 4px solid var(--physics-cyan);
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border-radius: var(--radius-sm);
+        font-style: italic;
+    }
+
+    .physics-link-box {
+        background: var(--color-surface);
+        border: 2px solid var(--physics-cyan);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin-top: 1.5rem;
+        transition: all 0.3s ease;
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .physics-link-box:hover {
+        transform: translateX(5px);
+        box-shadow: 0 0 40px rgba(0, 206, 209, 0.4);
+        border-color: #00FFFF;
+    }
+
+    .physics-link-box h3 {
+        color: var(--physics-cyan);
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+        font-size: 1.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .physics-highlights {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .physics-highlight {
+        background: rgba(0, 206, 209, 0.1);
+        border: 1px solid rgba(0, 206, 209, 0.3);
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        font-size: 0.95rem;
+        color: var(--color-text-secondary);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .physics-highlight:hover {
+        background: rgba(0, 206, 209, 0.15);
+        border-color: var(--physics-cyan);
+        transform: scale(1.05);
+    }
+
+    .physics-highlight strong {
+        color: var(--physics-cyan);
+        display: block;
+        font-size: 1.2rem;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Interlink Panel */
+    .interlink-panel {
+        background: var(--color-surface);
+        backdrop-filter: blur(10px);
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        margin: 3rem 0;
+    }
+
+    .interlink-header {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin: 0 0 1.5rem 0;
+        color: var(--accent-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .interlink-icon {
+        font-size: 1.4rem;
+    }
+
+    .interlink-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 1.5rem;
+    }
+
+    .interlink-section-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-text-secondary);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--color-border);
+    }
+
+    .item-link-card, .magic-link-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: var(--color-surface);
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: 1rem;
+        margin-top: 0.75rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .item-link-card:hover, .magic-link-card:hover {
+        transform: translateX(5px);
+        border-color: var(--kabbalah-gold);
+        box-shadow: 0 5px 20px rgba(255, 215, 0, 0.2);
+    }
+
+    .item-icon, .magic-icon {
+        font-size: 2rem;
+        min-width: 2rem;
+    }
+
+    .item-info, .magic-info {
+        flex: 1;
+    }
+
+    .item-info h4, .magic-info h4 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.1rem;
+        color: var(--accent-primary);
+    }
+
+    .item-type, .magic-type {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--color-text-secondary);
+    }
+
+    .tradition-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-full);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .tradition-badge.islamic {
+        background: rgba(0, 128, 0, 0.2);
+        color: #2E8B57;
+        border: 1px solid #2E8B57;
+    }
+
+    /* Parallel Traditions */
+    .parallel-traditions {
+        background: linear-gradient(135deg, rgba(147, 112, 219, 0.05), rgba(65, 105, 225, 0.05));
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+    }
+
+    .parallel-traditions h4 {
+        margin: 0 0 1rem 0;
+        color: var(--accent-primary);
+        font-size: 1.2rem;
+    }
+
+    .parallel-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+    }
+
+    .parallel-card {
+        background: var(--color-surface);
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .parallel-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--kabbalah-purple);
+        box-shadow: 0 8px 20px rgba(147, 112, 219, 0.3);
+    }
+
+    .tradition-flag {
+        font-size: 1.8rem;
+    }
+
+    .parallel-name {
+        font-weight: 600;
+        color: var(--accent-primary);
+    }
+
+    .tradition-label {
+        font-size: 0.75rem;
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* See Also Section */
+    .see-also-section {
+        background: var(--color-surface);
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .see-also-section h4 {
+        margin: 0 0 1rem 0;
+        color: var(--accent-primary);
+        font-size: 1.2rem;
+    }
+
+    .see-also-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .see-also-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--color-surface);
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-full);
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .see-also-link:hover {
+        border-color: var(--kabbalah-gold);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+    }
+
+    .see-also-link span {
+        font-size: 1.2rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+
+        .topics-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-header {
+            font-size: 1.6rem;
+        }
+
+        .physics-panel-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .physics-highlights {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+</head>
+<body>
+<div id="theme-picker-container"></div>
+<header>
+    <div class="header-content">
+        <h1><a data-term="Kabbalah" data-tradition="jewish" class="corpus-link" href="../../../mythos/jewish/corpus-search.html?term=kabbalah" title="View kabbalah in ancient texts">Kabbalah</a> - Jewish Mysticism</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../../index.html">Home</a> &rarr; <a href="../../index.html">Mythos</a> &rarr; <a href="../index.html">Jewish</a> &rarr; <span>Kabbalah</span>
+</nav>
+<main>
+<!-- Hero Section -->
+<section class="hero-section">
+    <h2 class="hero-title">The Hidden Wisdom</h2>
+    <p class="hero-subtitle">Mystical Pathways to Divine Understanding</p>
+    <div class="hero-description">
+        <p>
+            <strong><a data-term="Kabbalah" data-tradition="jewish" class="corpus-link" href="../../../mythos/jewish/corpus-search.html?term=kabbalah" title="View kabbalah in ancient texts">Kabbalah</a></strong> (Hebrew: קַבָּלָה, "receiving" or "tradition") is the profound mystical and esoteric tradition of Judaism. It explores the deepest mysteries of existence: the nature of the Divine, the architecture of the universe, the human soul's journey, and the sacred relationship between all creation.
+        </p>
+        <p style="margin-top: 1rem;">
+            Through intricate systems of symbols, meditations, and spiritual practices, Kabbalah reveals how the <a class="corpus-link" data-term="Ein Sof" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=ein%20sof" title="Search corpus for 'Ein Sof'">Ein Sof</a> (The Infinite) emanates creation through the <a class="corpus-link" data-term="Sefirot" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=sefirot" title="Search corpus for 'Sefirot'">Ten Sefirot</a>, mapping the divine consciousness and inviting humanity to participate in <a class="corpus-link" data-term="Tikkun" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=qliphoth" title="Search corpus for 'Tikkun'">Tikkun</a> (cosmic repair).
+        </p>
+    </div>
+</section>
+
+<!-- Key Features Box -->
+<section class="features-box">
+    <h3>Key Kabbalistic Sources</h3>
+    <p>The foundation texts that shaped Jewish mysticism across the centuries:</p>
+    <div class="features-list">
+        <div class="feature-item">
+            <strong><a class="corpus-link" data-term="Sefer Yetzirah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=kabbalah" title="Search corpus for 'Sefer Yetzirah'">Sefer Yetzirah</a></strong>
+            <span>Book of Formation (3rd-6th century) - The cosmic architecture</span>
+        </div>
+        <div class="feature-item">
+            <strong>Sefer HaBahir</strong>
+            <span>Book of Illumination (12th century) - Early Sefirot teachings</span>
+        </div>
+        <div class="feature-item">
+            <strong><a class="corpus-link" data-term="Zohar" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=kabbalah" title="Search corpus for 'Zohar'">Zohar</a></strong>
+            <span>Book of Splendor (13th century) - The crown jewel of Kabbalah</span>
+        </div>
+        <div class="feature-item">
+            <strong><a class="corpus-link" data-term="Etz Chaim" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=tree%20of%20life" title="Search corpus for 'Etz Chaim'">Etz Chaim</a></strong>
+            <span>Tree of Life (16th century) - Lurianic systematic teachings</span>
+        </div>
+        <div class="feature-item">
+            <strong>Pardes Rimonim</strong>
+            <span>Orchard of Pomegranates - Cordovero's comprehensive system</span>
+        </div>
+        <div class="feature-item">
+            <strong>Tanya</strong>
+            <span>Chabad Hasidic philosophy - Mysticism and daily life</span>
+        </div>
+    </div>
+</section>
+
+<!-- Main Topics Section -->
+<h2 class="section-header">Explore Kabbalistic Teachings</h2>
+<div class="topics-grid">
+    <a href="sefirot/index.html" class="topic-card">
+        <span class="topic-icon">💎</span>
+        <h3>The Ten Sefirot</h3>
+        <p>The ten divine emanations through which Ein Sof reveals itself and creates all reality. The sacred map of divine consciousness flowing from crown to kingdom.</p>
+    </a>
+
+    <a href="worlds/index.html" class="topic-card">
+        <span class="topic-icon">🌍</span>
+        <h3>The Four Worlds</h3>
+        <p>Atziluth, Beriah, Yetzirah, and Assiah - the four levels of creation descending from pure divinity to physical matter. The cosmic hierarchy of existence.</p>
+    </a>
+
+    <a href="names/index.html" class="topic-card">
+        <span class="topic-icon">✡</span>
+        <h3>The 72 Names of God</h3>
+        <p>The Shemhamphorasch - 72 divine names derived from Exodus 14:19-21, each containing specific spiritual powers and cosmic forces.</p>
+    </a>
+
+    <a href="sparks/index.html" class="topic-card">
+        <span class="topic-icon">⚡</span>
+        <h3>The 288 Sparks</h3>
+        <p>The complete system: 72 Names manifested across 4 Worlds = 288 divine sparks. The total configuration of spiritual forces permeating creation.</p>
+    </a>
+
+    <a href="angels.html" class="topic-card">
+        <span class="topic-icon">👼</span>
+        <h3>Angels & Demons</h3>
+        <p>The celestial hierarchy of angels serving the Sefirot, and the shadow forces of the Sitra Achra (Other Side) - the demonic realms.</p>
+    </a>
+
+    <a href="qlippot.html" class="topic-card">
+        <span class="topic-icon">🌑</span>
+        <h3>The Qlippot</h3>
+        <p>The "shells" or "husks" - shadow reflections of the Sefirot representing spiritual obstacles, broken vessels, and the forces of evil.</p>
+    </a>
+
+    <a href="concepts.html" class="topic-card">
+        <span class="topic-icon">📚</span>
+        <h3>Kabbalistic Concepts</h3>
+        <p>Tzimtzum, Shekhinah, Devekut, Ein Sof, and other foundational concepts that form the philosophical bedrock of Jewish mysticism.</p>
+    </a>
+
+    <a href="ascension.html" class="topic-card">
+        <span class="topic-icon">🪜</span>
+        <h3>The Ascension Path</h3>
+        <p>The mystical journey from Malkhut to Keter - the stages of spiritual development, divine union, and the soul's return to its source.</p>
+    </a>
+</div>
+
+<!-- Comprehensive Overview Section -->
+<h2 class="section-header">Comprehensive Overviews</h2>
+<p style="color: var(--color-text-secondary); margin-bottom: 1.5rem;">
+    Deep dives into the major systematic teachings - complete guides to understanding the full scope of each tradition.
+</p>
+<div class="overview-cards">
+    <a href="sefirot_overview.html" class="overview-card">
+        <div class="icon">💎</div>
+        <h3>Sefirot Overview</h3>
+        <p>Complete guide to all ten emanations, their relationships, paths, and the structure of the Tree of Life.</p>
+    </a>
+
+    <a href="worlds_overview.html" class="overview-card">
+        <div class="icon">🌍</div>
+        <h3>Worlds Overview</h3>
+        <p>In-depth exploration of the Four Worlds system, showing how reality cascades from divine to physical.</p>
+    </a>
+
+    <a href="names_overview.html" class="overview-card">
+        <div class="icon">✡</div>
+        <h3>Names Overview</h3>
+        <p>The complete system of 72 divine names, their derivation, meanings, and spiritual applications.</p>
+    </a>
+</div>
+
+<!-- Interlink Panel Section -->
+<section class="interlink-panel">
+    <h3 class="interlink-header">
+        <span class="interlink-icon">🔗</span>
+        Related Across the Mythos
+    </h3>
+
+    <div class="interlink-grid">
+        <div class="interlink-section">
+            <div class="interlink-section-title">Jewish Tradition</div>
+            <a href="../index.html" class="item-link-card">
+                <div class="item-icon">✡</div>
+                <div class="item-info">
+                    <h4>Jewish Mythology</h4>
+                    <p class="item-type">Parent tradition</p>
+                </div>
+            </a>
+            <a href="../deities/index.html" class="item-link-card">
+                <div class="item-icon">🌟</div>
+                <div class="item-info">
+                    <h4>Divine Names</h4>
+                    <p class="item-type">Names of God</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="interlink-section">
+            <div class="interlink-section-title">Mystical Parallels</div>
+            <a href="../../islamic/cosmology/index.html" class="magic-link-card">
+                <div class="magic-icon">☪</div>
+                <div class="magic-info">
+                    <h4>Sufism</h4>
+                    <p class="magic-type">Islamic Mysticism</p>
+                </div>
+                <span class="tradition-badge islamic">Islamic</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="parallel-traditions" style="margin-top: 1.5rem;">
+        <h4>🌍 Cross-Cultural Parallels</h4>
+        <p style="margin-bottom: 1rem; color: var(--color-text-secondary); font-size: 0.95rem;">
+            Mystical traditions worldwide share profound insights into multi-layered reality and divine emanation:
+        </p>
+        <div class="parallel-grid">
+            <a href="../../christian/cosmology/index.html" class="parallel-card">
+                <span class="tradition-flag">✝</span>
+                <span class="parallel-name">Christian Mysticism</span>
+                <span class="tradition-label">Christian</span>
+            </a>
+            <a href="../../../index.html" class="parallel-card">
+                <span class="tradition-flag">🕉</span>
+                <span class="parallel-name">Vedanta</span>
+                <span class="tradition-label">Hindu</span>
+            </a>
+            <a href="../../greek/magic/index.html" class="parallel-card">
+                <span class="tradition-flag">⚗</span>
+                <span class="parallel-name">Hermeticism</span>
+                <span class="tradition-label">Greek</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<div class="see-also-section">
+    <h4>📚 See Also</h4>
+    <div class="see-also-links">
+        <a href="sefirot/index.html" class="see-also-link"><span>💎</span> Sefirot Index</a>
+        <a href="worlds/index.html" class="see-also-link"><span>🌍</span> Worlds Index</a>
+        <a href="names/index.html" class="see-also-link"><span>✡</span> Names Index</a>
+        <a href="sparks/index.html" class="see-also-link"><span>⚡</span> 288 Sparks</a>
+        <a href="angels.html" class="see-also-link"><span>👼</span> Angels & Demons</a>
+        <a href="qlippot.html" class="see-also-link"><span>🌑</span> Qlippot</a>
+        <a href="concepts.html" class="see-also-link"><span>📚</span> Core Concepts</a>
+        <a href="ascension.html" class="see-also-link"><span>🪜</span> Ascension Path</a>
+        <a href="../index.html" class="see-also-link"><span>✡</span> Jewish Home</a>
+    </div>
+</div>
+
+<!-- Physics Integration Special Panel - At Bottom -->
+<section class="physics-panel">
+    <div class="physics-panel-header">
+        <h2>⚛ Modern Interpretations: Physics Integration</h2>
+        <span class="physics-badge">🔬 User Theory</span>
+    </div>
+
+    <div class="physics-panel-content">
+        <div class="physics-intro">
+            <strong>Note:</strong> This section presents a speculative integration between traditional Kabbalistic teachings
+            and modern theoretical physics. While drawing from ancient wisdom, these interpretations represent
+            contemporary exploration and should be distinguished from traditional Jewish mystical teachings.
+        </div>
+
+        <p>
+            Remarkable numerical correspondences emerge when examining Kabbalistic structures through the lens
+            of modern physics. The system of <strong>72 Names</strong>, <strong>10 Sefirot</strong>, and
+            <strong>4 Worlds</strong> creates a 288-element framework that may parallel fundamental structures
+            in particle physics and quantum field theory.
+        </p>
+
+        <a href="physics-integration.html" class="physics-link-box">
+            <h3>🔬 Explore the Physics Integration</h3>
+            <p>
+                Discover how the Kabbalistic framework connects to concepts from <strong>Principia Metaphysica</strong>,
+                including gauge symmetries, quantum field operators, and the geometric structure of spacetime.
+            </p>
+
+            <div class="physics-highlights">
+                <div class="physics-highlight">
+                    <strong>72</strong>
+                    Names ↔ Gauge Configurations
+                </div>
+                <div class="physics-highlight">
+                    <strong>10</strong>
+                    Sefirot ↔ Dimensional Structure
+                </div>
+                <div class="physics-highlight">
+                    <strong>4</strong>
+                    Worlds ↔ Fundamental Forces
+                </div>
+                <div class="physics-highlight">
+                    <strong>288</strong>
+                    Sparks ↔ Field Operators
+                </div>
+            </div>
+        </a>
+
+        <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--color-text-secondary);">
+            This integration draws from the comprehensive physics framework developed in
+            <em>Principia Metaphysica</em>, exploring how ancient mystical systems may encode
+            profound insights about the nature of reality that resonate with cutting-edge theoretical physics.
+        </p>
+    </div>
+</section>
+</main>
+<footer>
+<p>
+    <strong>Kabbalah</strong> - Jewish Mysticism<br/>
+    Based on <a class="corpus-link" data-term="Sefer Yetzirah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=kabbalah" title="Search corpus for 'Sefer Yetzirah'">Sefer Yetzirah</a>,
+    <a class="corpus-link" data-term="Zohar" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=kabbalah" title="Search corpus for 'Zohar'">Zohar</a>, and Lurianic teachings<br/>
+    <a href="https://www.sefaria.org/texts/Kabbalah" target="_blank">Study Kabbalah at Sefaria.org</a>
+</p>
+</footer>
+</body>
+</html>

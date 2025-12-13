@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archetype Cross-Reference Matrix</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../themes/corpus-links.css">
+    <script defer src="../themes/theme-animations.js"></script>
+    <script src="../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../themes/smart-links.css">
+    <script defer src="../themes/smart-links.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--space-5);
+        }
+        .container { max-width: var(--container-2xl); margin: 0 auto; }
+        header {
+            text-align: center; padding: var(--space-10) var(--space-5); background: var(--color-surface);
+            backdrop-filter: blur(10px); border-radius: var(--radius-xl); margin-bottom: var(--space-10); border: 2px solid var(--color-border);
+        }
+        h1 {
+            font-size: var(--text-5xl); margin-bottom: var(--space-4);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .subtitle { font-size: var(--text-lg); color: var(--color-text-secondary); margin-top: var(--space-4); }
+        .controls {
+            display: flex; gap: var(--space-5); justify-content: center; align-items: center; flex-wrap: wrap;
+            margin: var(--space-8) 0; padding: var(--space-5); background: var(--color-surface); backdrop-filter: blur(10px); border-radius: var(--radius-lg); border: 1px solid var(--color-border);
+        }
+        .filter-select {
+            padding: var(--space-3) var(--space-4); background: rgba(var(--color-primary-rgb), 0.2); border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg); color: var(--color-text-primary); font-size: var(--text-base); cursor: pointer;
+        }
+        .filter-select:focus { outline: none; border-color: var(--color-primary); }
+        .matrix-container {
+            overflow-x: auto; margin: var(--space-5) 0; background: var(--color-surface); backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg); padding: var(--space-5); border: 1px solid var(--color-border);
+        }
+        table {
+            width: 100%; border-collapse: collapse; min-width: 1200px;
+        }
+        th {
+            background: rgba(var(--color-primary-rgb), 0.3); color: var(--color-primary); padding: var(--space-3) var(--space-2);
+            text-align: left; position: sticky; top: 0; z-index: 10; font-weight: var(--font-semibold); font-size: var(--text-sm);
+        }
+        th.deity-header { min-width: 150px; }
+        td {
+            padding: var(--space-2); border: 1px solid var(--color-border);
+            text-align: center; cursor: pointer; transition: all 0.2s ease;
+        }
+        tr:hover { background: var(--color-surface-hover); }
+        .match-excellent { background: rgba(50, 205, 50, 0.2); color: #32CD32; font-weight: bold; }
+        .match-good { background: rgba(255, 215, 0, 0.2); color: #FFD700; font-weight: bold; }
+        .match-partial { background: rgba(255, 165, 0, 0.2); color: #FFA500; }
+        .match-none { background: rgba(100, 100, 100, 0.1); color: var(--color-text-secondary); }
+        .deity-name {
+            text-align: left; padding-left: var(--space-4); font-weight: var(--font-semibold); color: var(--color-primary);
+        }
+        .tradition-label { font-size: var(--text-xs); color: var(--color-text-secondary); font-weight: normal; }
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 1000; overflow-y: auto;
+        }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content {
+            background: var(--color-surface); backdrop-filter: blur(20px); padding: var(--space-10);
+            border-radius: var(--radius-2xl); max-width: 800px; width: 90%; border: 2px solid var(--color-border);
+            position: relative; max-height: 90vh; overflow-y: auto;
+        }
+        .modal-close {
+            position: absolute; top: var(--space-4); right: var(--space-5); font-size: var(--text-4xl); cursor: pointer;
+            color: var(--color-primary); transition: color 0.3s;
+        }
+        .modal-close:hover { color: var(--color-secondary); }
+        .modal-title {
+            font-size: var(--text-3xl); color: var(--color-primary); margin-bottom: var(--space-5); border-bottom: 2px solid var(--color-border);
+            padding-bottom: var(--space-3);
+        }
+        .manifestation-item {
+            margin: var(--space-4) 0; padding: var(--space-4); background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 3px solid var(--color-primary); border-radius: var(--radius-md);
+        }
+        .manifestation-item h4 { color: var(--color-primary); margin-bottom: var(--space-3); }
+        .manifestation-item ul { margin-left: var(--space-5); line-height: var(--leading-loose); }
+        .legend {
+            display: flex; gap: var(--space-5); justify-content: center; flex-wrap: wrap; margin: var(--space-8) 0;
+            padding: var(--space-5); background: var(--color-surface); backdrop-filter: blur(10px); border-radius: var(--radius-lg); border: 1px solid var(--color-border);
+        }
+        .legend-item { display: flex; align-items: center; gap: var(--space-3); }
+        .legend-box {
+            width: 30px; height: 20px; border-radius: var(--radius-sm); border: 1px solid var(--color-border);
+        }
+        .btn-back {
+            display: inline-block;
+            padding: var(--space-4) var(--space-8);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base, 0.3s ease);
+            margin: var(--space-2);
+        }
+        .btn-back:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+    <div class="container">
+        <header>
+    <div class="header-content">
+        <h1>📊 Archetype Cross-Reference Matrix</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../mythos/index.html">Home</a> → <a href="celestial/index.html">Archetypes</a> → <span>Cross Reference Matrix</span>
+</nav>
+
+        <div class="controls">
+            <label style="color: var(--color-primary); font-weight: var(--font-semibold);">Filter by Tradition:</label>
+            <select class="filter-select" id="traditionFilter">
+                <option value="all">All Traditions</option>
+                <option value="greek">Greek</option>
+                <option value="roman">Roman</option>
+                <option value="norse">Norse</option>
+                <option value="egyptian">Egyptian</option>
+                <option value="hindu">Hindu</option>
+                <option value="chinese">Chinese</option>
+                <option value="sumerian">Sumerian</option>
+                <option value="babylonian">Babylonian</option>
+                <option value="persian">Persian</option>
+            </select>
+
+            <label style="color: var(--color-primary); font-weight: var(--font-semibold);">Filter by Archetype:</label>
+            <select class="filter-select" id="archetypeFilter">
+                <option value="all">All Archetypes</option>
+                <option value="sky-father">Sky Father</option>
+                <option value="earth-mother">Earth Mother</option>
+                <option value="trickster">Trickster</option>
+                <option value="death">Death God</option>
+                <option value="love">Love Goddess</option>
+                <option value="war">War God</option>
+                <option value="wisdom">Wisdom Goddess</option>
+                <option value="healing">Healing Deity</option>
+                <option value="cosmic-creator">Cosmic Creator</option>
+                <option value="celestial">Celestial Beings</option>
+            </select>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box match-excellent"></div>
+                <span>Excellent Match (90-100%)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box match-good"></div>
+                <span>Good Match (70-89%)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box match-partial"></div>
+                <span>Partial Match (50-69%)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box match-none"></div>
+                <span>Minimal/No Match (&lt;50%)</span>
+            </div>
+        </div>
+
+        <div class="matrix-container">
+            <table id="matrixTable">
+                <thead>
+                    <tr>
+                        <th class="deity-header">Deity (Tradition)</th>
+                        <th>⚡<br>Sky Father</th>
+                        <th>🌍<br>Earth Mother</th>
+                        <th>🎭<br>Trickster</th>
+                        <th>💀<br>Death God</th>
+                        <th>💖<br>Love</th>
+                        <th>⚔️<br>War</th>
+                        <th>📚<br>Wisdom</th>
+                        <th>⚕️<br>Healing</th>
+                        <th>🌌<br>Cosmic Creator</th>
+                        <th>👼<br>Celestial</th>
+                    </tr>
+                </thead>
+                <tbody id="matrixBody">
+                    <!-- Zeus -->
+                    <tr data-tradition="greek">
+                        <td class="deity-name">
+                            <a href="../mythos/greek/deities/zeus.html" style="color: var(--color-primary); text-decoration: none; transition: color 0.3s;">Zeus</a>
+                            <span class="tradition-label">(Greek)</span>
+                        </td>
+                        <td class="match-excellent" onclick="showManifestation('Zeus', 'Sky Father', 'excellent')">98%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial" onclick="showManifestation('Zeus', 'Trickster', 'partial')">55%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial">45%</td>
+                        <td class="match-good" onclick="showManifestation('Zeus', 'War God', 'good')">75%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial">50%</td>
+                        <td class="match-none">—</td>
+                    </tr>
+
+                    <!-- Jupiter -->
+                    <tr data-tradition="roman">
+                        <td class="deity-name">
+                            <a href="../mythos/roman/deities/jupiter.html" style="color: var(--color-primary); text-decoration: none; transition: color 0.3s;">Jupiter</a>
+                            <span class="tradition-label">(Roman)</span>
+                        </td>
+                        <td class="match-excellent" onclick="showManifestation('Jupiter', 'Sky Father', 'excellent')">97%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial">40%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-good">70%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial">48%</td>
+                        <td class="match-none">—</td>
+                    </tr>
+
+                    <!-- Odin -->
+                    <tr data-tradition="norse">
+                        <td class="deity-name">
+                            <a href="../mythos/norse/deities/odin.html" style="color: var(--color-primary); text-decoration: none; transition: color 0.3s;">Odin</a>
+                            <span class="tradition-label">(Norse)</span>
+                        </td>
+                        <td class="match-good" onclick="showManifestation('Odin', 'Sky Father', 'good')">85%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-good" onclick="showManifestation('Odin', 'Trickster', 'good')">70%</td>
+                        <td class="match-good">78%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-excellent">92%</td>
+                        <td class="match-excellent" onclick="showManifestation('Odin', 'Wisdom', 'excellent')">95%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial">55%</td>
+                        <td class="match-none">—</td>
+                    </tr>
+
+                    <!-- Athena -->
+                    <tr data-tradition="greek">
+                        <td class="deity-name">
+                            <a href="../mythos/greek/deities/athena.html" style="color: var(--color-primary); text-decoration: none; transition: color 0.3s;">Athena</a>
+                            <span class="tradition-label">(Greek)</span>
+                        </td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial">45%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-excellent" onclick="showManifestation('Athena', 'War God', 'excellent')">90%</td>
+                        <td class="match-excellent" onclick="showManifestation('Athena', 'Wisdom', 'excellent')">98%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                    </tr>
+
+                    <!-- Brahma -->
+                    <tr data-tradition="hindu">
+                        <td class="deity-name">
+                            <a href="../mythos/hindu/deities/brahma.html" style="color: var(--color-primary); text-decoration: none; transition: color 0.3s;">Brahma</a>
+                            <span class="tradition-label">(Hindu)</span>
+                        </td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-good">75%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-excellent" onclick="showManifestation('Brahma', 'Cosmic Creator', 'excellent')">96%</td>
+                        <td class="match-none">—</td>
+                    </tr>
+
+                    <!-- Loki -->
+                    <tr data-tradition="norse">
+                        <td class="deity-name">
+                            <a href="../mythos/norse/deities/loki.html" style="color: var(--color-primary); text-decoration: none; transition: color 0.3s;">Loki</a>
+                            <span class="tradition-label">(Norse)</span>
+                        </td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-excellent" onclick="showManifestation('Loki', 'Trickster', 'excellent')">99%</td>
+                        <td class="match-partial">60%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial">55%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial">45%</td>
+                        <td class="match-none">—</td>
+                    </tr>
+
+                    <!-- Hades -->
+                    <tr data-tradition="greek">
+                        <td class="deity-name">
+                            <a href="../mythos/greek/deities/hades.html" style="color: var(--color-primary); text-decoration: none; transition: color 0.3s;">Hades</a>
+                            <span class="tradition-label">(Greek)</span>
+                        </td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial">48%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-excellent" onclick="showManifestation('Hades', 'Death God', 'excellent')">94%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                    </tr>
+
+                    <!-- Aphrodite -->
+                    <tr data-tradition="greek">
+                        <td class="deity-name">
+                            <a href="../mythos/greek/deities/aphrodite.html" style="color: var(--color-primary); text-decoration: none; transition: color 0.3s;">Aphrodite</a>
+                            <span class="tradition-label">(Greek)</span>
+                        </td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial">50%</td>
+                        <td class="match-good">72%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-excellent" onclick="showManifestation('Aphrodite', 'Love', 'excellent')">98%</td>
+                        <td class="match-partial">55%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial">45%</td>
+                        <td class="match-none">—</td>
+                    </tr>
+
+                    <!-- Indra -->
+                    <tr data-tradition="hindu">
+                        <td class="deity-name">
+                            <a href="../mythos/hindu/deities/indra.html" style="color: var(--color-primary); text-decoration: none; transition: color 0.3s;">Indra</a>
+                            <span class="tradition-label">(Hindu)</span>
+                        </td>
+                        <td class="match-excellent" onclick="showManifestation('Indra', 'Sky Father', 'excellent')">93%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial">58%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-excellent" onclick="showManifestation('Indra', 'War God', 'excellent')">95%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                    </tr>
+
+                    <!-- Saraswati -->
+                    <tr data-tradition="hindu">
+                        <td class="deity-name">
+                            <a href="../mythos/hindu/deities/saraswati.html" style="color: var(--color-primary); text-decoration: none; transition: color 0.3s;">Saraswati</a>
+                            <span class="tradition-label">(Hindu)</span>
+                        </td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-excellent" onclick="showManifestation('Saraswati', 'Wisdom', 'excellent')">98%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-partial">48%</td>
+                        <td class="match-none">—</td>
+                    </tr>
+
+                    <!-- Osiris -->
+                    <tr data-tradition="egyptian">
+                        <td class="deity-name">
+                            <a href="../mythos/egyptian/deities/osiris.html" style="color: var(--color-primary); text-decoration: none; transition: color 0.3s;">Osiris</a>
+                            <span class="tradition-label">(Egyptian)</span>
+                        </td>
+                        <td class="match-none">—</td>
+                        <td class="match-good">75%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-excellent" onclick="showManifestation('Osiris', 'Death God', 'excellent')">96%</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-none">—</td>
+                        <td class="match-good">72%</td>
+                        <td class="match-none">—</td>
+                    </tr>
+
+                    <!-- More deities can be added following the same pattern -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel" style="background: var(--color-surface); backdrop-filter: blur(10px); padding: var(--space-8); border-radius: var(--radius-xl); margin: var(--space-12) 0; border: 2px solid var(--color-border);">
+            <h3 style="color: var(--color-primary); margin-bottom: var(--space-5);">Related Content</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-5); margin-bottom: var(--space-8);">
+                <div style="background: rgba(var(--color-primary-rgb), 0.1); padding: var(--space-5); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+                    <h4 style="color: var(--color-primary); margin-bottom: var(--space-4);">Key Archetype Pages</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--space-2);"><a href="sky-father/index.html" style="color: var(--color-text-secondary);">Sky Father</a> - Thunder gods and kings</li>
+                        <li style="margin-bottom: var(--space-2);"><a href="trickster/index.html" style="color: var(--color-text-secondary);">Trickster</a> - Divine chaos agents</li>
+                        <li style="margin-bottom: var(--space-2);"><a href="death/index.html" style="color: var(--color-text-secondary);">Death God</a> - Underworld rulers</li>
+                        <li style="margin-bottom: var(--space-2);"><a href="wisdom/wisdom-goddess.html" style="color: var(--color-text-secondary);">Wisdom Goddess</a> - Divine intelligence</li>
+                    </ul>
+                </div>
+                <div style="background: rgba(var(--color-primary-rgb), 0.1); padding: var(--space-5); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+                    <h4 style="color: var(--color-primary); margin-bottom: var(--space-4);">Mythology Traditions</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--space-2);"><a href="../mythos/greek/index.html" style="color: var(--color-text-secondary);">Greek Mythology</a></li>
+                        <li style="margin-bottom: var(--space-2);"><a href="../mythos/norse/index.html" style="color: var(--color-text-secondary);">Norse Mythology</a></li>
+                        <li style="margin-bottom: var(--space-2);"><a href="../mythos/hindu/index.html" style="color: var(--color-text-secondary);">Hindu Mythology</a></li>
+                        <li style="margin-bottom: var(--space-2);"><a href="../mythos/egyptian/index.html" style="color: var(--color-text-secondary);">Egyptian Mythology</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div style="background: rgba(var(--color-primary-rgb), 0.05); padding: var(--space-4); border-radius: var(--radius-md);">
+                <h4 style="color: var(--color-primary); margin-bottom: var(--space-3);">See Also</h4>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-4);">
+                    <li><a href="deity-archetypes/index.html" style="color: var(--color-text-secondary);">Deity Archetypes</a></li>
+                    <li><a href="cosmic-creator/index.html" style="color: var(--color-text-secondary);">Cosmic Creator</a></li>
+                    <li><a href="love/index.html" style="color: var(--color-text-secondary);">Love Goddess</a></li>
+                    <li><a href="war/index.html" style="color: var(--color-text-secondary);">War God</a></li>
+                    <li><a href="healing/index.html" style="color: var(--color-text-secondary);">Healing Deity</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <div style="text-align: center; margin: var(--space-12) 0;">
+            <a href="index.html" class="btn-back">Back to Archetype Index</a>
+            <a href="../index.html" class="btn-back">Return Home</a>
+        </div>
+    </div>
+
+    <!-- Modal for detailed manifestations -->
+    <div id="manifestationModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <h2 class="modal-title" id="modalTitle">Deity × Archetype</h2>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const traditionFilter = document.getElementById('traditionFilter');
+        const archetypeFilter = document.getElementById('archetypeFilter');
+        const matrixBody = document.getElementById('matrixBody');
+
+        traditionFilter.addEventListener('change', filterMatrix);
+        archetypeFilter.addEventListener('change', filterMatrix);
+
+        function filterMatrix() {
+            const tradition = traditionFilter.value;
+            const rows = matrixBody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const rowTradition = row.dataset.tradition;
+                if (tradition === 'all' || rowTradition === tradition) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function showManifestation(deity, archetype, matchType) {
+            const modal = document.getElementById('manifestationModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalTitle.textContent = `${deity} as ${archetype}`;
+
+            // Content varies by deity and archetype
+            let content = '';
+
+            if (deity === 'Zeus' && archetype === 'Sky Father') {
+                content = `
+                    <div class="manifestation-item">
+                        <h4>Primary Characteristics</h4>
+                        <ul>
+                            <li><strong>Supreme Authority:</strong> King of all Olympian gods, ruler of the cosmos</li>
+                            <li><strong>Thunder & Lightning:</strong> Wields the thunderbolt (keraunos) as his signature weapon</li>
+                            <li><strong>Sky Domain:</strong> Controls weather, storms, and all atmospheric phenomena</li>
+                            <li><strong>Cosmic Justice:</strong> Upholds oaths, punishes hubris, protects suppliants</li>
+                            <li><strong>Mountain Dwelling:</strong> Resides on Mount Olympus, closest to the heavens</li>
+                        </ul>
+                    </div>
+                    <div class="manifestation-item">
+                        <h4>Primary Sources</h4>
+                        <ul>
+                            <li><strong>Hesiod, Theogony 886-900:</strong> Birth from Zeus's head after swallowing Metis</li>
+                            <li><strong>Homer, Iliad 1.528-530:</strong> "He made great Olympus quake" with his nod</li>
+                            <li><strong>Hesiod, Works and Days 256-262:</strong> Zeus as giver of justice to mankind</li>
+                        </ul>
+                    </div>
+                    <div class="manifestation-item">
+                        <h4>Symbolic Elements</h4>
+                        <ul>
+                            <li><strong>Eagle:</strong> Sacred bird, soaring closest to heaven</li>
+                            <li><strong>Oak Tree:</strong> Sacred plant, struck by lightning yet enduring</li>
+                            <li><strong>Bull:</strong> Strength, fertility, transformation (Europa myth)</li>
+                        </ul>
+                    </div>
+                `;
+            } else if (deity === 'Loki' && archetype === 'Trickster') {
+                content = `
+                    <div class="manifestation-item">
+                        <h4>Primary Characteristics</h4>
+                        <ul>
+                            <li><strong>Shape-Shifting:</strong> Changes into mare, salmon, fly, old woman—gender and species fluid</li>
+                            <li><strong>Boundary Transgression:</strong> Neither fully god nor giant, allied with both</li>
+                            <li><strong>Chaos Bringer:</strong> Causes death of Baldr, precipitates Ragnarok</li>
+                            <li><strong>Clever Solutions:</strong> Solves problems for gods (Mjolnir, Gungnir, Draupnir) through trickery</li>
+                            <li><strong>Sacred Fool:</strong> Makes gods uncomfortable but serves necessary function</li>
+                        </ul>
+                    </div>
+                    <div class="manifestation-item">
+                        <h4>Primary Sources</h4>
+                        <ul>
+                            <li><strong>Prose Edda, Gylfaginning 42:</strong> Gender-shifts to mare, gives birth to eight-legged Sleipnir</li>
+                            <li><strong>Prose Edda, Gylfaginning 49:</strong> Tricks Hod into killing Baldr with mistletoe</li>
+                            <li><strong>Poetic Edda, Lokasenna:</strong> Mocks all gods at feast, revealing hidden truths</li>
+                        </ul>
+                    </div>
+                    <div class="manifestation-item">
+                        <h4>Cultural Function</h4>
+                        <ul>
+                            <li><strong>Necessary Chaos:</strong> Destruction enables renewal at Ragnarok</li>
+                            <li><strong>Truth-Teller:</strong> Reveals hypocrisy of gods through insults</li>
+                            <li><strong>Creative Theft:</strong> Obtains treasures that define gods' identities</li>
+                        </ul>
+                    </div>
+                `;
+            } else {
+                content = `
+                    <div class="manifestation-item">
+                        <h4>How ${deity} Embodies ${archetype}</h4>
+                        <p>This deity demonstrates key characteristics of the ${archetype} archetype through mythology, worship, and symbolic associations.</p>
+                        <p style="margin-top: var(--space-4); font-style: italic; color: var(--color-text-secondary);">
+                            Click the deity name in the matrix to view their full page with comprehensive sources and analysis.
+                        </p>
+                    </div>
+                `;
+            }
+
+            modalBody.innerHTML = content;
+            modal.classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('manifestationModal').classList.remove('show');
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('manifestationModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+
+</body>
+</html>

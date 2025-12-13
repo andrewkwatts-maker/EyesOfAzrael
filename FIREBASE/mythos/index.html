@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../themes/corpus-links.css">
+<link rel="stylesheet" href="../themes/smart-links.css">
+<script defer src="../themes/smart-links.js"></script>
+    <script defer src="../themes/theme-picker.js"></script>
+    <script defer src="../themes/theme-animations.js"></script>
+    <title>World Mythos Explorer - Comprehensive Mythology Encyclopedia</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-4xl) var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+            text-align: center;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-section h1 {
+            font-size: var(--font-size-4xl);
+            background: linear-gradient(135deg, #fff, rgba(255,255,255,0.9));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .hero-section p {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mythology-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-xl) 0;
+        }
+
+        .mythos-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mythos-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: currentColor;
+        }
+
+        .mythos-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.4);
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.1);
+        }
+
+        .mythos-card.completed {
+            border-color: var(--color-success);
+        }
+
+        .mythos-card.completed::after {
+            content: 'Complete';
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            background: var(--color-success);
+            color: #000000;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-semibold);
+        }
+
+        .mythos-icon {
+            font-size: var(--font-size-5xl);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .mythos-name {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-semibold);
+            margin-bottom: var(--spacing-sm);
+            color: var(--color-primary);
+        }
+
+        .mythos-description {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+            margin: var(--spacing-sm) 0;
+        }
+
+        .mythos-meta {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+            margin-top: var(--spacing-md);
+        }
+
+        .meta-badge {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            border: 1px solid var(--color-border);
+        }
+
+        .search-section {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: var(--spacing-md);
+            font-size: var(--font-size-lg);
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            color: var(--color-text-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .filter-section {
+            display: flex;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+            margin-top: var(--spacing-md);
+        }
+
+        .filter-button {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-full);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: var(--font-size-sm);
+        }
+
+        .filter-button:hover {
+            background: rgba(var(--color-primary-rgb), 0.4);
+            transform: scale(1.05);
+        }
+
+        .filter-button.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #ffffff;
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-xl) 0;
+        }
+
+        .stat-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            border: 2px solid var(--color-border);
+        }
+
+        .stat-number {
+            font-size: var(--font-size-4xl);
+            font-weight: var(--font-bold);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-sm);
+        }
+
+        .cross-section-nav {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-lg);
+        }
+
+        .cross-section-link {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+        }
+
+        .cross-section-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+    <header>
+        <div class="header-content">
+            <h1>World Mythos Explorer</h1>
+        </div>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Home</a> →
+        <span>Mythologies</span>
+    </nav>
+
+    <main>
+        <div class="hero-section">
+            <h1>Explore World Mythology</h1>
+            <p style="font-size: 1.2rem; max-width: 800px; margin: 0 auto;">
+                Journey through 15+ mythological traditions spanning 6,000 years of human spiritual imagination.
+                From the Sefirot of Jewish Kabbalah to the Nine Realms of Norse cosmology, discover the gods,
+                heroes, demons, and cosmic forces that shape our world's sacred stories.
+            </p>
+        </div>
+
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-traditions">15</div>
+                <div class="stat-label">Mythological Traditions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-concepts">7</div>
+                <div class="stat-label">Universal Concepts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-magic">15</div>
+                <div class="stat-label">Magic Systems</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">6000+</div>
+                <div class="stat-label">Years of History</div>
+            </div>
+        </div>
+
+        <div class="search-section">
+            <h2>🔍 Search Across All Mythologies</h2>
+            <input
+                type="text"
+                class="search-input"
+                id="globalSearch"
+                placeholder="Search for gods, concepts, practices, entities... (e.g., 'creation', 'underworld', 'Zeus', 'Sefirot')"
+            >
+            <div class="filter-section">
+                <button class="filter-button active" data-filter="all">All Traditions</button>
+                <button class="filter-button" data-filter="ancient">Ancient (Pre-500 CE)</button>
+                <button class="filter-button" data-filter="medieval">Medieval (500-1500 CE)</button>
+                <button class="filter-button" data-filter="modern">Modern (1500+)</button>
+                <button class="filter-button" data-filter="eastern">Eastern</button>
+                <button class="filter-button" data-filter="western">Western</button>
+            </div>
+            <p id="searchResults" style="margin-top: 1rem; color: var(--text-secondary);"></p>
+        </div>
+
+        <h2 style="margin: 3rem 0 1.5rem 0;">Mythological Traditions</h2>
+        <div class="mythology-grid" id="mythologyGrid">
+            <!-- Dynamically populated -->
+        </div>
+
+
+        <div class="glass-card" id="about">
+            <h2 style="color: var(--color-primary); margin-bottom: var(--spacing-md);">About the Mythos Explorer</h2>
+            <p style="color: var(--color-text-secondary); line-height: var(--leading-relaxed);">
+                The <strong>World Mythos Explorer</strong> is a comprehensive encyclopedia documenting the mythological
+                traditions, spiritual practices, and magical systems of human civilization. Our goal is to create a
+                unified reference that reveals both the unique characteristics of each tradition and the universal
+                patterns that connect them.
+            </p>
+
+            <h3 style="color: var(--color-primary); margin-top: var(--spacing-lg); margin-bottom: var(--spacing-sm);">Features</h3>
+            <ul style="color: var(--color-text-secondary); line-height: var(--leading-loose);">
+                <li><strong>Cross-Referencing:</strong> Discover how similar concepts appear across different traditions</li>
+                <li><strong>Filtering:</strong> Filter by era, region, or completion status</li>
+                <li><strong>Universal Search:</strong> Search across all mythologies simultaneously</li>
+                <li><strong>Magic Systems:</strong> Organized classification of magical practices</li>
+                <li><strong>Academic Sources:</strong> Based on scholarly research and primary texts</li>
+            </ul>
+        </div>
+
+        <!-- INTERLINK PANEL: Related Sections -->
+        <section class="interlink-panel glass-card">
+            <h3 class="interlink-header" style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">
+                <span class="interlink-icon">Explore Related Sections</span>
+            </h3>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+                <a href="../archetypes/index.html" style="text-decoration: none; display: block; padding: var(--spacing-lg); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-xl); border: 2px solid var(--color-border); transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-3xl); margin-bottom: var(--spacing-sm); text-align: center;">Universal Archetypes</div>
+                    <p style="color: var(--color-text-secondary); text-align: center; font-size: var(--font-size-sm);">Cross-cultural patterns in deities, stories, and symbols</p>
+                </a>
+
+                <a href="../magic/index.html" style="text-decoration: none; display: block; padding: var(--spacing-lg); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-xl); border: 2px solid var(--color-border); transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-3xl); margin-bottom: var(--spacing-sm); text-align: center;">Magical Systems</div>
+                    <p style="color: var(--color-text-secondary); text-align: center; font-size: var(--font-size-sm);">Divination, ritual, and esoteric practices worldwide</p>
+                </a>
+
+                <a href="../herbalism/index.html" style="text-decoration: none; display: block; padding: var(--spacing-lg); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-xl); border: 2px solid var(--color-border); transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-3xl); margin-bottom: var(--spacing-sm); text-align: center;">Sacred Herbalism</div>
+                    <p style="color: var(--color-text-secondary); text-align: center; font-size: var(--font-size-sm);">Plants in medicine, magic, and spiritual practice</p>
+                </a>
+
+                <a href="../spiritual-items/index.html" style="text-decoration: none; display: block; padding: var(--spacing-lg); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-xl); border: 2px solid var(--color-border); transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-3xl); margin-bottom: var(--spacing-sm); text-align: center;">Sacred Items & Relics</div>
+                    <p style="color: var(--color-text-secondary); text-align: center; font-size: var(--font-size-sm);">Weapons, artifacts, and ritual objects of power</p>
+                </a>
+
+                <a href="../spiritual-places/index.html" style="text-decoration: none; display: block; padding: var(--spacing-lg); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-xl); border: 2px solid var(--color-border); transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-3xl); margin-bottom: var(--spacing-sm); text-align: center;">Sacred Places</div>
+                    <p style="color: var(--color-text-secondary); text-align: center; font-size: var(--font-size-sm);">Temples, mountains, and pilgrimage destinations</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- Cross-Section Navigation -->
+        <div class="glass-card" style="text-align: center;">
+            <h2 style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">Explore More</h2>
+            <div class="cross-section-nav">
+                <a href="../archetypes/index.html" class="cross-section-link">Universal Archetypes</a>
+                <a href="../magic/index.html" class="cross-section-link">Magical Systems</a>
+                <a href="../herbalism/index.html" class="cross-section-link">Sacred Herbalism</a>
+                <a href="../spiritual-items/index.html" class="cross-section-link">Sacred Items</a>
+                <a href="../spiritual-places/index.html" class="cross-section-link">Sacred Places</a>
+                <a href="../index.html" class="cross-section-link">Home</a>
+            </div>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-secondary); border-top: 1px solid var(--color-border); margin-top: var(--spacing-xl);">
+        <p>World Mythos Explorer | <a href="../about.html" style="color: var(--color-primary);">Sources & Citations</a></p>
+    </footer>
+
+    <script src="../mythos_data.js"></script>
+    <script>
+        // Populate mythology cards
+        function populateMythologies() {
+            const grid = document.getElementById('mythologyGrid');
+            MYTHOLOGY_BRANCHES.forEach(mythos => {
+                const card = document.createElement('div');
+                card.className = `mythos-card ${mythos.completed ? 'completed' : ''}`;
+                card.style.borderColor = mythos.color;
+                card.style.color = mythos.color;
+
+                const eraCount = mythos.era.split('-').length;
+                const conceptCount = mythos.coreConcepts.length;
+                const textCount = mythos.keyTexts ? mythos.keyTexts.length : 0;
+
+                card.innerHTML = `
+                    <div class="mythos-icon">${mythos.icon}</div>
+                    <div class="mythos-name">${mythos.displayName}</div>
+                    <div class="mythos-description">${mythos.description}</div>
+                    <div class="mythos-meta">
+                        <span class="meta-badge">📅 ${mythos.era}</span>
+                        <span class="meta-badge">🌍 ${mythos.regions.join(', ')}</span>
+                        ${textCount > 0 ? `<span class="meta-badge">📚 ${textCount} Key Texts</span>` : ''}
+                        <span class="meta-badge">💫 ${conceptCount} Concepts</span>
+                    </div>
+                `;
+
+                card.onclick = () => {
+                    if (mythos.completed) {
+                        window.location.href = 'jewish/index.html';
+                    } else {
+                        window.location.href = `${mythos.id}/index.html`;
+                    }
+                };
+
+                card.dataset.mythos = mythos.id;
+                card.dataset.completed = mythos.completed || false;
+                card.dataset.era = mythos.era;
+                card.dataset.regions = mythos.regions.join(',');
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Populate universal concepts
+        function populateConcepts() {
+            const grid = document.getElementById('conceptGrid');
+            Object.entries(UNIVERSAL_CONCEPTS).forEach(([key, concept]) => {
+                const card = document.createElement('div');
+                card.className = 'concept-card';
+
+                const count = Object.keys(concept.occurrences).length;
+                const traditions = Object.keys(concept.occurrences).join(', ');
+
+                card.innerHTML = `
+                    <div class="concept-name">${concept.name}</div>
+                    <div class="concept-count">Found in ${count} traditions</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                        ${traditions}
+                    </div>
+                `;
+
+                card.onclick = () => {
+                    showConceptDetails(concept);
+                };
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Populate magic systems
+        function populateMagicSystems() {
+            const grid = document.getElementById('magicGrid');
+            MAGIC_SYSTEMS.byPractice.forEach(magic => {
+                const card = document.createElement('div');
+                card.className = 'magic-card';
+
+                card.innerHTML = `
+                    <div class="magic-name">${magic.name}</div>
+                    <div style="font-size: 0.85rem; margin: 0.3rem 0;">${magic.description}</div>
+                    ${magic.aka ? `<div style="font-size: 0.75rem; font-style: italic; color: var(--accent-secondary);">aka: ${magic.aka.join(', ')}</div>` : ''}
+                    <div class="magic-traditions">
+                        ${magic.traditions.length} traditions
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Filter functionality
+        document.querySelectorAll('.filter-button').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.filter-button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                const filter = this.dataset.filter;
+                filterMythologies(filter);
+            });
+        });
+
+        function filterMythologies(filter) {
+            const cards = document.querySelectorAll('.mythos-card');
+
+            cards.forEach(card => {
+                let show = true;
+
+                if (filter === 'completed') {
+                    show = card.dataset.completed === 'true';
+                } else if (filter === 'ancient') {
+                    const era = card.dataset.era.toLowerCase();
+                    show = era.includes('bce') || era.includes('000');
+                } else if (filter === 'medieval') {
+                    const era = card.dataset.era;
+                    show = era.includes('CE') && !era.includes('Present');
+                } else if (filter === 'modern') {
+                    show = card.dataset.era.includes('Present') || card.dataset.era.includes('1400');
+                } else if (filter === 'eastern') {
+                    const regions = card.dataset.regions.toLowerCase();
+                    show = regions.includes('asia') || regions.includes('india') || regions.includes('china');
+                } else if (filter === 'western') {
+                    const regions = card.dataset.regions.toLowerCase();
+                    show = regions.includes('europe') || regions.includes('rome') || regions.includes('greece');
+                }
+
+                card.style.display = show ? 'block' : 'none';
+            });
+        }
+
+        // Global search
+        document.getElementById('globalSearch').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            const results = document.getElementById('searchResults');
+
+            if (query.length < 2) {
+                results.textContent = '';
+                return;
+            }
+
+            let matches = [];
+
+            // Search in mythology branches
+            MYTHOLOGY_BRANCHES.forEach(mythos => {
+                if (mythos.name.toLowerCase().includes(query) ||
+                    mythos.displayName.toLowerCase().includes(query) ||
+                    mythos.description.toLowerCase().includes(query) ||
+                    mythos.coreConcepts.some(c => c.toLowerCase().includes(query))) {
+                    matches.push(`${mythos.icon} ${mythos.displayName}`);
+                }
+            });
+
+
+
+            if (matches.length > 0) {
+                results.textContent = `Found ${matches.length} matches: ${matches.slice(0, 5).join(', ')}${matches.length > 5 ? '...' : ''}`;
+            } else {
+                results.textContent = 'No matches found. Try different keywords.';
+            }
+        });
+
+        function showConceptDetails(concept) {
+            alert(`${concept.name}\n\nOccurrences:\n` +
+                  Object.entries(concept.occurrences)
+                      .map(([trad, desc]) => `• ${trad}: ${desc}`)
+                      .join('\n'));
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            populateMythologies();
+            
+            
+        });
+    </script>
+</body>
+</html>

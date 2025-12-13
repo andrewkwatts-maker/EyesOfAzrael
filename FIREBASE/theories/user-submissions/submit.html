@@ -1,0 +1,2176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Theory - Eyes of Azrael</title>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../css/user-auth.css">
+    <link rel="stylesheet" href="../../css/public-view.css">
+    <link rel="stylesheet" href="../../css/image-uploader.css">
+    <link rel="stylesheet" href="../../css/grid-panel-editor-v2.css">
+    <link rel="stylesheet" href="../../css/icon-picker.css">
+    <link rel="stylesheet" href="../../css/svg-editor.css">
+    <link rel="stylesheet" href="../../css/smart-fields.css">
+
+    <!-- Theme System -->
+    <script defer src="../../themes/theme-picker.js"></script>
+
+    <style>
+        body {
+            background: var(--color-background, #0a0e27);
+            background-image:
+                radial-gradient(at 40% 20%, rgba(var(--color-primary-rgb, 139, 127, 255), 0.05) 0px, transparent 50%),
+                radial-gradient(at 80% 80%, rgba(var(--color-secondary-rgb, 255, 126, 182), 0.05) 0px, transparent 50%);
+            color: var(--color-text-primary, #e5e7eb);
+            min-height: 100vh;
+        }
+
+        .submit-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-2xl);
+        }
+
+        .submit-hero {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+            padding: var(--spacing-xl) var(--spacing-2xl);
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.1) 0%,
+                rgba(var(--color-secondary-rgb), 0.05) 100%);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .submit-hero p {
+            font-size: var(--font-size-base);
+            color: var(--color-text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: var(--leading-relaxed);
+        }
+
+        .submit-form-container {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .form-section {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .glass-card {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-base);
+        }
+
+        .glass-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+        }
+
+        .form-section-title {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-semibold);
+            margin-bottom: var(--spacing-lg);
+            color: var(--color-primary);
+            font-family: var(--font-heading);
+            text-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: var(--font-medium);
+            margin-bottom: var(--spacing-sm);
+            color: var(--color-text-primary);
+            font-size: var(--font-size-base);
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group input[type="number"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: var(--spacing-md);
+            background: rgba(26, 31, 58, 0.6);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-primary);
+            font-family: var(--font-primary);
+            font-size: var(--font-size-base);
+            transition: all var(--transition-base);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .form-group select[multiple] {
+            padding: var(--spacing-sm);
+            background: rgba(26, 31, 58, 0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .form-group select[multiple] option {
+            padding: var(--spacing-sm);
+            margin: var(--spacing-xs) 0;
+            border-radius: var(--radius-sm);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            transition: all var(--transition-fast);
+        }
+
+        .form-group select[multiple] option:hover {
+            background: rgba(var(--color-primary-rgb), 0.25);
+        }
+
+        .form-group select[multiple] option:checked {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.5),
+                rgba(var(--color-secondary-rgb), 0.5));
+            font-weight: var(--font-semibold);
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="date"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            background: rgba(26, 31, 58, 0.95);
+            box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            line-height: var(--leading-relaxed);
+        }
+
+        .form-hint {
+            display: block;
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-xs);
+            font-style: italic;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: flex-end;
+            margin-top: var(--spacing-2xl);
+            padding-top: var(--spacing-xl);
+            border-top: 2px solid var(--color-border);
+        }
+
+        .btn {
+            padding: var(--spacing-md) var(--spacing-2xl);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-semibold);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            font-family: var(--font-primary);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            color: var(--color-background);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            color: var(--color-text-primary);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-surface-hover);
+            border-color: var(--color-accent);
+            box-shadow: 0 0 15px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .metadata-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+        }
+
+        @media (max-width: 768px) {
+            .metadata-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid rgba(239, 68, 68, 0.5);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            color: #fca5a5;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .success-message {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px solid rgba(34, 197, 94, 0.5);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            color: #86efac;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .login-required {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-2xl);
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-required h2 {
+            margin-bottom: var(--spacing-lg);
+            color: var(--color-primary);
+        }
+
+        .login-required p {
+            margin-bottom: var(--spacing-xl);
+            opacity: 0.8;
+            color: var(--color-text-secondary);
+        }
+
+        #editor-container {
+            margin-top: var(--spacing-lg);
+        }
+
+        #taxonomy-container {
+            margin-top: var(--spacing-lg);
+        }
+
+        /* Progressive Disclosure Styles */
+        .form-section {
+            position: relative;
+            transition: all var(--transition-base);
+        }
+
+        .form-section.section-locked {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: grayscale(0.8);
+        }
+
+        .form-section.section-locked::before {
+            content: '🔒';
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            font-size: 1.5rem;
+            z-index: 10;
+        }
+
+        .form-section.section-completed .form-section-title::after {
+            content: ' ✅';
+            color: var(--color-success, #22c55e);
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .form-section.section-active {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-lg), 0 0 20px rgba(var(--color-primary-rgb), 0.25);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .section-requirement-hint {
+            background: rgba(var(--color-accent-rgb, 255, 124, 230), 0.1);
+            border-left: 3px solid var(--color-accent);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .section-requirement-hint strong {
+            color: var(--color-accent);
+        }
+
+        /* Context Banner Styles */
+        .context-banner {
+            background: linear-gradient(135deg,
+                rgba(var(--color-accent-rgb, 255, 124, 230), 0.15) 0%,
+                rgba(var(--color-primary-rgb, 139, 127, 255), 0.15) 100%);
+            border: 2px solid var(--color-accent);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg) var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md), 0 0 20px rgba(var(--color-accent-rgb), 0.2);
+        }
+
+        .context-banner-content {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .context-banner-icon {
+            font-size: 1.5rem;
+        }
+
+        .context-banner-text {
+            flex: 1;
+            font-size: var(--font-size-base);
+            color: var(--color-text-primary);
+        }
+
+        .context-banner-text strong {
+            color: var(--color-accent);
+            font-weight: var(--font-semibold);
+        }
+
+        .context-banner-link {
+            color: var(--color-accent);
+            text-decoration: underline;
+            font-size: var(--font-size-sm);
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .context-banner-link:hover {
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        /* Locked Field Styles */
+        .form-group.field-locked {
+            position: relative;
+        }
+
+        .form-group.field-locked input,
+        .form-group.field-locked select,
+        .form-group.field-locked textarea {
+            background: rgba(var(--color-accent-rgb, 255, 124, 230), 0.05);
+            border-color: var(--color-accent);
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .field-lock-indicator {
+            position: absolute;
+            right: var(--spacing-md);
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .field-lock-tooltip {
+            position: absolute;
+            top: -2.5rem;
+            right: var(--spacing-md);
+            background: var(--color-surface);
+            border: 2px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-base);
+            z-index: 20;
+            box-shadow: var(--shadow-md);
+        }
+
+        .form-group.field-locked:hover .field-lock-tooltip {
+            opacity: 1;
+        }
+
+        .form-group.field-locked label::after {
+            content: ' 🔒';
+            font-size: 0.85em;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Picker -->
+    <div id="theme-picker-container"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>✨ Submit Your Theory</h1>
+        </div>
+    </header>
+
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../index.html">Home</a> →
+        <a href="browse.html">User Theories</a> →
+        <span>Submit</span>
+    </nav>
+
+    <main>
+    <div class="submit-page">
+        <div class="submit-hero">
+            <p>Share your insights, connections, and discoveries about mythology, sacred texts, and spiritual wisdom with the community.</p>
+        </div>
+
+        <!-- Context Info Banner (shown when context parameters exist) -->
+        <div id="context-banner" class="context-banner" style="display: none;">
+            <div class="context-banner-content">
+                <span class="context-banner-icon">📍</span>
+                <span class="context-banner-text">
+                    <strong>Submitting to:</strong> <span id="context-display"></span>
+                </span>
+                <a href="submit.html" class="context-banner-link">Change context</a>
+            </div>
+        </div>
+
+        <!-- Login Required Message (shown when not logged in) -->
+        <div id="login-required" class="login-required" style="display: none;">
+            <div class="login-prompt">
+                <div class="login-prompt-icon">🔒</div>
+                <h2 class="login-prompt-title">Sign In Required</h2>
+                <p class="login-prompt-text">
+                    You must be signed in to submit your own theories and share your insights with the community.
+                </p>
+                <div class="login-prompt-actions">
+                    <button class="google-signin-btn google-signin-large google-signin-dark"
+                            onclick="window.authGuard?.showLoginPrompt('Sign in to submit theories', 'submit')">
+                        <svg class="google-icon" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        <span class="google-signin-text">Sign in with Google</span>
+                    </button>
+                </div>
+                <div class="public-view-notice" style="margin-top: 2rem;">
+                    <div class="public-view-notice-title">Why sign in?</div>
+                    <ul class="sidebar-login-features" style="margin-top: 1rem;">
+                        <li>Submit your own theories and insights</li>
+                        <li>Vote on theories from other theorists</li>
+                        <li>Comment and engage with the community</li>
+                        <li>Edit and manage your submissions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submission Form (shown when logged in) -->
+        <div id="submission-form" class="submit-form-container" style="display: none;">
+            <form id="theory-form">
+                <!-- Contribution Type -->
+                <div class="form-section glass-card section-active" data-section="contribution-type">
+                    <h2 class="form-section-title">🎯 Contribution Type</h2>
+
+                    <div class="form-group">
+                        <label for="contribution-type">What would you like to contribute? *</label>
+                        <select id="contribution-type" name="contributionType" required>
+                            <option value="">-- Select Contribution Type --</option>
+                            <option value="theory">💡 Theory / Analysis</option>
+                            <option value="deity">⚡ Deity / God</option>
+                            <option value="hero">🦸 Hero / Legendary Figure</option>
+                            <option value="creature">🐉 Creature / Monster</option>
+                            <option value="place">🏛️ Place / Location</option>
+                            <option value="concept">💭 Concept / Principle</option>
+                            <option value="ritual">🕯️ Ritual / Ceremony</option>
+                            <option value="magic">✨ Magic / Spell / Practice</option>
+                            <option value="herb">🌿 Sacred Plant / Herb</option>
+                            <option value="symbol">☥ Symbol / Emblem</option>
+                            <option value="text">📜 Sacred Text / Scripture</option>
+                            <option value="archetype">🔮 Archetype / Pattern</option>
+                            <option value="item">⚔️ Sacred Item / Artifact</option>
+                            <option value="cosmology">🌌 Cosmological Structure</option>
+                            <option value="lineage">👥 Genealogy / Family Line</option>
+                            <option value="event">⚔️ Mythological Event</option>
+                            <option value="mythology">🌍 New Mythology / Tradition</option>
+                        </select>
+                        <small class="form-hint">Theories analyze existing content. Assets add new deities, places, items, etc. to the database.</small>
+                    </div>
+                </div>
+
+                <!-- Basic Information -->
+                <div class="form-section glass-card section-locked" data-section="basic">
+                    <div class="section-requirement-hint">
+                        <strong>📋 Complete the Contribution Type first</strong> to unlock this section
+                    </div>
+                    <h2 class="form-section-title">📝 Basic Information</h2>
+
+                    <div class="form-group">
+                        <label for="theory-title">Name / Title *</label>
+                        <input type="text"
+                               id="theory-title"
+                               name="title"
+                               placeholder="e.g., Zeus, The Universal Flood Myth"
+                               required>
+                        <small class="form-hint">Primary name or title for this contribution</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="alternate-names">Alternate Names / Epithets</label>
+                        <input type="text"
+                               id="alternate-names"
+                               name="alternateNames"
+                               placeholder="e.g., Jupiter, Jove, Sky Father, Cloud Gatherer (comma-separated)">
+                        <small class="form-hint">Other names, titles, or epithets (separated by commas)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="theory-summary">Summary / Description *</label>
+                        <textarea id="theory-summary"
+                                  name="summary"
+                                  rows="4"
+                                  placeholder="Brief summary or description..."
+                                  required></textarea>
+                        <small class="form-hint">A concise summary to give readers a quick overview</small>
+                    </div>
+
+                    <!-- Optional Metadata -->
+                    <div class="metadata-row">
+                        <div class="form-group">
+                            <label for="date-created">Date / Time Period</label>
+                            <input type="text"
+                                   id="date-created"
+                                   name="datePeriod"
+                                   placeholder="e.g., 8th century BCE, Bronze Age, 1200-900 BCE">
+                            <small class="form-hint">Historical period, date of composition, or era</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confidence-level">Confidence Level</label>
+                            <select id="confidence-level" name="confidenceLevel">
+                                <option value="">-- Not Specified --</option>
+                                <option value="verified">✅ Verified (Primary sources confirm)</option>
+                                <option value="high">🟢 High (Multiple scholarly sources)</option>
+                                <option value="medium">🟡 Medium (Some scholarly support)</option>
+                                <option value="low">🟠 Low (Limited sources)</option>
+                                <option value="speculative">🔴 Speculative (Theory/hypothesis)</option>
+                                <option value="user-theory">💭 User Theory (Personal analysis)</option>
+                            </select>
+                            <small class="form-hint">How well-supported is this information?</small>
+                        </div>
+                    </div>
+
+                    <div class="metadata-row">
+                        <div class="form-group">
+                            <label for="author-attribution">Author / Attribution</label>
+                            <input type="text"
+                                   id="author-attribution"
+                                   name="authorAttribution"
+                                   placeholder="e.g., Homer, Anonymous, Traditional">
+                            <small class="form-hint">Original author or source of this information</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="language-origin">Original Language</label>
+                            <input type="text"
+                                   id="language-origin"
+                                   name="languageOrigin"
+                                   placeholder="e.g., Ancient Greek, Sanskrit, Hebrew">
+                            <small class="form-hint">Original language if applicable</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Taxonomy Classification -->
+                <div class="form-section glass-card section-locked" data-section="classification">
+                    <div class="section-requirement-hint">
+                        <strong>📝 Complete Basic Information first</strong> (Title and Summary required)
+                    </div>
+                    <h2 class="form-section-title">🗂️ Classification</h2>
+                    <p style="margin-bottom: 1rem; opacity: 0.8; font-size: 0.95rem;">
+                        📌 <strong>Note:</strong> Classification options adapt based on your contribution type.
+                        For assets (deity, hero, etc.), you'll select the mythology and appropriate category section.
+                    </p>
+
+                    <div class="form-group">
+                        <label for="taxonomy-page">Mythology/Tradition *</label>
+                        <select id="taxonomy-page" name="page" required>
+                            <option value="">-- Select Mythology/Tradition --</option>
+                        </select>
+                        <small class="form-hint">Which mythology or tradition does this theory relate to?</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taxonomy-section">Category Section <span id="section-required-indicator"></span></label>
+                        <select id="taxonomy-section" name="section">
+                            <option value="">-- Select Section (Optional) --</option>
+                        </select>
+                        <small class="form-hint">Specific section within the page (e.g., Deities, Heroes, Cosmology)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taxonomy-topic">Specific Topic (Optional)</label>
+                        <select id="taxonomy-topic" name="topic">
+                            <option value="">-- Select Topic (Optional) --</option>
+                        </select>
+                        <small class="form-hint">Specific topic within the section (e.g., Zeus, Abraham, Tree of Life)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taxonomy-user-topic">Your Topic (Optional)</label>
+                        <input type="text" id="taxonomy-user-topic" name="userTopic" placeholder="e.g., Divine Geometry, Sky Father Archetype">
+                        <small class="form-hint">Create your own topic name for this theory</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taxonomy-user-subtopic">Your Subtopic (Optional)</label>
+                        <input type="text" id="taxonomy-user-subtopic" name="userSubtopic" placeholder="e.g., String Theory Connections, Indo-European Parallels">
+                        <small class="form-hint">Further refine your topic</small>
+                    </div>
+                </div>
+
+                <!-- Rich Content Editor -->
+                <div class="form-section glass-card section-locked" data-section="content">
+                    <div class="section-requirement-hint">
+                        <strong>🗂️ Complete Classification first</strong> (Select mythology/tradition)
+                    </div>
+                    <h2 class="form-section-title">📖 Content</h2>
+                    <div id="editor-container"></div>
+                    <small class="form-hint">Use panels to organize your theory, add images for visual support, link to external sources, and reference texts from our corpus</small>
+                </div>
+
+                <!-- Related Information -->
+                <div class="form-section glass-card section-locked" data-section="metadata">
+                    <div class="section-requirement-hint">
+                        <strong>📖 Add at least one content panel first</strong>
+                    </div>
+                    <h2 class="form-section-title">🔗 Related Information</h2>
+
+                    <div class="form-group">
+                        <label for="related-mythologies">Related Mythologies</label>
+                        <select id="related-mythologies" name="mythologies" multiple size="6">
+                            <option value="greek">Greek</option>
+                            <option value="roman">Roman</option>
+                            <option value="norse">Norse</option>
+                            <option value="egyptian">Egyptian</option>
+                            <option value="mesopotamian">Mesopotamian (Sumerian/Babylonian)</option>
+                            <option value="celtic">Celtic</option>
+                            <option value="jewish">Jewish</option>
+                            <option value="christian">Christian</option>
+                            <option value="hindu">Hindu</option>
+                            <option value="buddhist">Buddhist</option>
+                            <option value="chinese">Chinese</option>
+                            <option value="japanese">Japanese</option>
+                            <option value="native-american">Native American</option>
+                            <option value="african">African</option>
+                        </select>
+                        <small class="form-hint">Hold Ctrl/Cmd to select multiple mythologies relevant to your contribution</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="theory-tags">Tags</label>
+                        <input type="text"
+                               id="theory-tags"
+                               name="tags"
+                               placeholder="e.g., flood myth, creation, symbolism (comma-separated)">
+                        <small class="form-hint">Add tags to help others discover your contribution</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="theory-themes">Common Themes</label>
+                        <select id="theory-themes" name="themes" multiple size="5">
+                            <option value="creation">Creation & Cosmology</option>
+                            <option value="flood">Flood & Destruction</option>
+                            <option value="hero-journey">Hero's Journey</option>
+                            <option value="divine-hierarchy">Divine Hierarchy</option>
+                            <option value="underworld">Underworld & Afterlife</option>
+                            <option value="sacred-marriage">Sacred Marriage</option>
+                            <option value="cosmic-battle">Cosmic Battle (Order vs Chaos)</option>
+                            <option value="world-tree">World Tree / Axis Mundi</option>
+                            <option value="sacred-geometry">Sacred Geometry</option>
+                            <option value="numerology">Numerology & Gematria</option>
+                            <option value="astrology">Astrology & Celestial</option>
+                            <option value="alchemy">Alchemy & Transformation</option>
+                            <option value="prophecy">Prophecy & Revelation</option>
+                            <option value="ritual">Ritual & Practice</option>
+                        </select>
+                        <small class="form-hint">Select universal themes present in your contribution</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="theory-sources">Sources & References</label>
+                        <textarea id="theory-sources"
+                                  name="sources"
+                                  rows="4"
+                                  placeholder="List your sources, references, and citations here...&#10;Example:&#10;- Plato, Timaeus (360 BCE)&#10;- Campbell, Joseph. The Hero with a Thousand Faces (1949)&#10;- https://example.com/article"></textarea>
+                        <small class="form-hint">Academic sources, books, articles, websites, sacred texts, etc.</small>
+                    </div>
+                </div>
+
+                <!-- Asset-Specific Metadata (shown conditionally based on contribution type) -->
+                <div id="asset-metadata" class="form-section glass-card section-locked" data-section="asset-details" style="display: none;">
+                    <div class="section-requirement-hint">
+                        <strong>📝 Complete Basic Information first</strong> to add asset-specific details
+                    </div>
+                    <h2 class="form-section-title">📊 Asset Details</h2>
+
+                    <!-- Deity/God Fields -->
+                    <div id="deity-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="deity-pantheon">Pantheon</label>
+                            <div id="deity-pantheon-container"></div>
+                            <small class="form-hint">Which pantheon or group does this deity belong to?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="deity-domain">Domain/Sphere</label>
+                            <div id="deity-domain-container"></div>
+                            <small class="form-hint">What is this deity's primary domain or area of influence?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="deity-symbols">Symbols & Attributes</label>
+                            <input type="text" id="deity-symbols" name="symbols" placeholder="e.g., lightning bolt, eagle, oak tree">
+                            <small class="form-hint">Sacred symbols, animals, plants, or objects associated with this deity</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="deity-epithets">Epithets & Alternate Names</label>
+                            <input type="text" id="deity-epithets" name="epithets" placeholder="e.g., Sky Father, Thunderer, Cloud Gatherer">
+                            <small class="form-hint">Other names or titles for this deity (comma-separated)</small>
+                        </div>
+                    </div>
+
+                    <!-- Hero/Figure Fields -->
+                    <div id="hero-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="hero-role">Role/Archetype</label>
+                            <select id="hero-role" name="heroRole">
+                                <option value="">-- Select Role --</option>
+                                <option value="warrior">Warrior / Hero</option>
+                                <option value="prophet">Prophet / Seer</option>
+                                <option value="king">King / Ruler</option>
+                                <option value="sage">Sage / Wise One</option>
+                                <option value="trickster">Trickster</option>
+                                <option value="martyr">Martyr / Sacrifice</option>
+                                <option value="redeemer">Redeemer / Savior</option>
+                                <option value="teacher">Teacher / Guide</option>
+                            </select>
+                            <small class="form-hint">What archetype or role does this figure embody?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="hero-era">Historical/Mythical Era</label>
+                            <input type="text" id="hero-era" name="era" placeholder="e.g., Bronze Age, Biblical Period, Mythical Time">
+                            <small class="form-hint">When did this figure live or operate?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="hero-deeds">Notable Deeds/Acts</label>
+                            <textarea id="hero-deeds" name="deeds" rows="3" placeholder="Brief description of major accomplishments..."></textarea>
+                            <small class="form-hint">Key actions or accomplishments this figure is known for</small>
+                        </div>
+                    </div>
+
+                    <!-- Creature/Being Fields -->
+                    <div id="creature-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="creature-type">Creature Type</label>
+                            <select id="creature-type" name="creatureType">
+                                <option value="">-- Select Type --</option>
+                                <option value="dragon">Dragon / Serpent</option>
+                                <option value="angel">Angel / Divine Messenger</option>
+                                <option value="demon">Demon / Dark Entity</option>
+                                <option value="giant">Giant / Titan</option>
+                                <option value="hybrid">Hybrid Creature</option>
+                                <option value="elemental">Elemental Being</option>
+                                <option value="guardian">Guardian Creature</option>
+                                <option value="monster">Monster / Chaos Being</option>
+                            </select>
+                            <small class="form-hint">What category of being is this?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="creature-attributes">Physical Attributes</label>
+                            <input type="text" id="creature-attributes" name="attributes" placeholder="e.g., wings, multiple heads, fire breath">
+                            <small class="form-hint">Notable physical characteristics</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="creature-behavior">Behavior/Nature</label>
+                            <input type="text" id="creature-behavior" name="behavior" placeholder="e.g., guardian, chaotic, benevolent">
+                            <small class="form-hint">Typical behavior or nature of this creature</small>
+                        </div>
+                    </div>
+
+                    <!-- Place/Location Fields -->
+                    <div id="place-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="place-type">Location Type</label>
+                            <select id="place-type" name="placeType">
+                                <option value="">-- Select Type --</option>
+                                <option value="earth">Earth Location (Physical)</option>
+                                <option value="mythical">Mythical Realm</option>
+                                <option value="celestial">Celestial / Heavenly</option>
+                                <option value="abstract">Abstract / Spiritual</option>
+                            </select>
+                            <small class="form-hint">What kind of place is this?</small>
+                        </div>
+                        <div class="form-group" id="place-location-group">
+                            <label for="place-location">Location</label>
+                            <div id="place-location-container">
+                                <input type="text" id="place-location" name="location" placeholder="Select location type first">
+                            </div>
+                            <small class="form-hint">Location details will adapt based on type selected</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="place-significance">Spiritual Significance</label>
+                            <textarea id="place-significance" name="significance" rows="3" placeholder="Why is this place sacred or important?"></textarea>
+                            <small class="form-hint">The religious, mythical, or spiritual importance of this location</small>
+                        </div>
+                    </div>
+
+                    <!-- Item/Artifact Fields -->
+                    <div id="item-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="item-type">Item Type</label>
+                            <select id="item-type" name="itemType">
+                                <option value="">-- Select Type --</option>
+                                <option value="weapon">Weapon</option>
+                                <option value="tool">Tool / Instrument</option>
+                                <option value="jewelry">Jewelry / Ornament</option>
+                                <option value="vessel">Vessel / Container</option>
+                                <option value="clothing">Clothing / Garment</option>
+                                <option value="book">Book / Scroll</option>
+                                <option value="relic">Relic</option>
+                            </select>
+                            <small class="form-hint">What kind of object is this?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-powers">Powers/Properties</label>
+                            <input type="text" id="item-powers" name="powers" placeholder="e.g., grants immortality, controls weather, heals wounds">
+                            <small class="form-hint">Special powers or properties of this item</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-origin">Origin/Creation</label>
+                            <input type="text" id="item-origin" name="origin" placeholder="e.g., forged by Hephaestus, gift from the gods">
+                            <small class="form-hint">How was this item created or obtained?</small>
+                        </div>
+                    </div>
+
+                    <!-- Herb/Plant Fields -->
+                    <div id="herb-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="herb-botanical">Botanical Name</label>
+                            <input type="text" id="herb-botanical" name="botanical" placeholder="e.g., Salvia officinalis">
+                            <small class="form-hint">Scientific/botanical name if known</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="herb-uses">Sacred Uses</label>
+                            <textarea id="herb-uses" name="uses" rows="3" placeholder="Ritual uses, medicinal properties, spiritual significance..."></textarea>
+                            <small class="form-hint">How is this plant used in spiritual or ritual contexts?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="herb-associations">Divine Associations</label>
+                            <input type="text" id="herb-associations" name="associations" placeholder="e.g., sacred to Apollo, used in temple incense">
+                            <small class="form-hint">Which deities or practices is this plant associated with?</small>
+                        </div>
+                    </div>
+
+                    <!-- Text Fields -->
+                    <div id="text-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="text-type">Text Type</label>
+                            <select id="text-type" name="textType">
+                                <option value="">-- Select Type --</option>
+                                <option value="scripture">Scripture / Canon</option>
+                                <option value="apocrypha">Apocrypha</option>
+                                <option value="wisdom">Wisdom Literature</option>
+                                <option value="hymn">Hymn / Prayer</option>
+                                <option value="epic">Epic / Saga</option>
+                                <option value="prophecy">Prophecy / Vision</option>
+                                <option value="commentary">Commentary / Exegesis</option>
+                            </select>
+                            <small class="form-hint">What category of sacred text is this?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="text-author">Author/Tradition</label>
+                            <input type="text" id="text-author" name="author" placeholder="e.g., Anonymous, Moses, Homer">
+                            <small class="form-hint">Who wrote this text or which tradition it comes from?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="text-date">Date/Period</label>
+                            <input type="text" id="text-date" name="date" placeholder="e.g., 8th century BCE, 1st century CE">
+                            <small class="form-hint">When was this text composed?</small>
+                        </div>
+                    </div>
+
+                    <!-- Concept/Teaching Fields -->
+                    <div id="concept-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="concept-category">Concept Category</label>
+                            <select id="concept-category" name="conceptCategory">
+                                <option value="">-- Select Category --</option>
+                                <option value="cosmology">Cosmology</option>
+                                <option value="theology">Theology / Divine Nature</option>
+                                <option value="eschatology">Eschatology / End Times</option>
+                                <option value="soteriology">Soteriology / Salvation</option>
+                                <option value="mysticism">Mysticism / Gnosis</option>
+                                <option value="ethics">Ethics / Morality</option>
+                                <option value="ritual">Ritual Practice</option>
+                                <option value="philosophy">Philosophy</option>
+                            </select>
+                            <small class="form-hint">What area of spiritual thought does this concept belong to?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="concept-key-principles">Key Principles</label>
+                            <textarea id="concept-key-principles" name="keyPrinciples" rows="3" placeholder="Core ideas and principles of this teaching..."></textarea>
+                            <small class="form-hint">Main ideas or tenets of this concept</small>
+                        </div>
+                    </div>
+
+                    <!-- Mythology/Tradition Fields -->
+                    <div id="mythology-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="mythology-culture">Culture/People</label>
+                            <input type="text" id="mythology-culture" name="culture" placeholder="e.g., Ancient Greeks, Celts, Yoruba">
+                            <small class="form-hint">Which culture or people created this mythology?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="mythology-region">Geographic Region</label>
+                            <input type="text" id="mythology-region" name="region" placeholder="e.g., Mediterranean, Northern Europe, West Africa">
+                            <small class="form-hint">Where did this mythology originate?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="mythology-period">Time Period</label>
+                            <input type="text" id="mythology-period" name="period" placeholder="e.g., Bronze Age, Classical Period, Medieval">
+                            <small class="form-hint">When was this mythology active?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="mythology-key-texts">Key Texts/Sources</label>
+                            <input type="text" id="mythology-key-texts" name="keyTexts" placeholder="e.g., Theogony, Eddas, Popol Vuh">
+                            <small class="form-hint">Primary texts or sources for this mythology</small>
+                        </div>
+                    </div>
+
+                    <!-- Ritual/Ceremony Fields -->
+                    <div id="ritual-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="ritual-purpose">🎯 Purpose</label>
+                            <input type="text" id="ritual-purpose" name="ritualPurpose" placeholder="e.g., Healing, Protection, Divination">
+                            <small class="form-hint">What is this ritual meant to accomplish?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="ritual-participants">👥 Participants</label>
+                            <input type="text" id="ritual-participants" name="ritualParticipants" placeholder="e.g., Priest, Priestess, Community">
+                            <small class="form-hint">Who typically performs this ritual?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="ritual-materials">📦 Required Materials</label>
+                            <textarea id="ritual-materials" name="ritualMaterials" rows="3" placeholder="List items needed for the ritual..."></textarea>
+                            <small class="form-hint">Materials, tools, or ingredients required</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="ritual-timing">⏰ Timing/Occasions</label>
+                            <input type="text" id="ritual-timing" name="ritualTiming" placeholder="e.g., Full Moon, Spring Equinox, Daily">
+                            <small class="form-hint">When is this ritual performed?</small>
+                        </div>
+                    </div>
+
+                    <!-- Magic/Spell Fields -->
+                    <div id="magic-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="magic-type">✨ Magic Type</label>
+                            <select id="magic-type" name="magicType">
+                                <option value="">-- Select Type --</option>
+                                <option value="divination">Divination</option>
+                                <option value="healing">Healing</option>
+                                <option value="protection">Protection</option>
+                                <option value="transformation">Transformation</option>
+                                <option value="invocation">Invocation/Summoning</option>
+                                <option value="curse">Curse/Hex</option>
+                                <option value="blessing">Blessing/Consecration</option>
+                            </select>
+                            <small class="form-hint">What category of magic is this?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="magic-components">🔮 Components/Materials</label>
+                            <textarea id="magic-components" name="magicComponents" rows="3" placeholder="List required components..."></textarea>
+                            <small class="form-hint">Materials, words, or actions required</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="magic-difficulty">📊 Difficulty Level</label>
+                            <select id="magic-difficulty" name="magicDifficulty">
+                                <option value="common">Common Knowledge</option>
+                                <option value="practiced">Requires Practice</option>
+                                <option value="advanced">Advanced/Priestly</option>
+                                <option value="secret">Secret/Forbidden</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Symbol/Emblem Fields -->
+                    <div id="symbol-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="symbol-meaning">💡 Meaning/Significance</label>
+                            <textarea id="symbol-meaning" name="symbolMeaning" rows="3" placeholder="What does this symbol represent?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="symbol-usage">🎨 Usage</label>
+                            <textarea id="symbol-usage" name="symbolUsage" rows="3" placeholder="How is this symbol used?"></textarea>
+                            <small class="form-hint">Ritual use, protective use, decorative use, etc.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="symbol-deities">⚡ Associated Deities</label>
+                            <input type="text" id="symbol-deities" name="symbolDeities" placeholder="e.g., Zeus, Athena">
+                            <small class="form-hint">Which gods or figures use this symbol?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="symbol-unicode">☥ Unicode/Symbol</label>
+                            <input type="text" id="symbol-unicode" name="symbolUnicode" placeholder="☥ ⚡ 🔱">
+                            <small class="form-hint">The actual symbol character if available</small>
+                        </div>
+                    </div>
+
+                    <!-- Archetype/Pattern Fields -->
+                    <div id="archetype-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="archetype-category">🔮 Archetype Category</label>
+                            <select id="archetype-category" name="archetypeCategory">
+                                <option value="">-- Select Category --</option>
+                                <option value="hero">Hero Journey</option>
+                                <option value="shadow">Shadow/Dark Side</option>
+                                <option value="anima">Anima/Animus</option>
+                                <option value="wise">Wise Old Man/Woman</option>
+                                <option value="trickster">Trickster</option>
+                                <option value="mother">Mother/Father</option>
+                                <option value="child">Divine Child</option>
+                                <option value="self">Self/Wholeness</option>
+                            </select>
+                            <small class="form-hint">Which Jungian or universal archetype?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="archetype-examples">📚 Examples Across Mythologies</label>
+                            <textarea id="archetype-examples" name="archetypeExamples" rows="3" placeholder="List figures that embody this archetype..."></textarea>
+                            <small class="form-hint">e.g., Hercules (Greek), Gilgamesh (Sumerian), Beowulf (Norse)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="archetype-patterns">🔄 Common Patterns</label>
+                            <textarea id="archetype-patterns" name="archetypePatterns" rows="3" placeholder="Recurring themes and patterns..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Cosmology/Cosmological Structure Fields -->
+                    <div id="cosmology-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="cosmology-structure">🌌 Cosmic Structure</label>
+                            <textarea id="cosmology-structure" name="cosmologyStructure" rows="4" placeholder="Describe the structure of this cosmology..."></textarea>
+                            <small class="form-hint">Realms, levels, dimensions, etc.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="cosmology-inhabitants">👥 Inhabitants</label>
+                            <textarea id="cosmology-inhabitants" name="cosmologyInhabitants" rows="3" placeholder="Who/what inhabits each realm?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="cosmology-access">🚪 Access/Travel</label>
+                            <textarea id="cosmology-access" name="cosmologyAccess" rows="3" placeholder="How do beings move between realms?"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Lineage/Genealogy Fields -->
+                    <div id="lineage-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="lineage-progenitor">👤 Progenitor/Founder</label>
+                            <input type="text" id="lineage-progenitor" name="lineageProgenitor" placeholder="e.g., Abraham, Zeus, Odin">
+                            <small class="form-hint">Who founded this lineage?</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="lineage-generations">📜 Key Generations</label>
+                            <textarea id="lineage-generations" name="lineageGenerations" rows="4" placeholder="List important members across generations..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="lineage-significance">⭐ Significance</label>
+                            <textarea id="lineage-significance" name="lineageSignificance" rows="3" placeholder="Why is this lineage important?"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Event/Mythological Event Fields -->
+                    <div id="event-fields" class="asset-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="event-type">⚔️ Event Type</label>
+                            <select id="event-type" name="eventType">
+                                <option value="">-- Select Type --</option>
+                                <option value="creation">Creation Event</option>
+                                <option value="war">War/Battle</option>
+                                <option value="flood">Flood/Cataclysm</option>
+                                <option value="transformation">Transformation</option>
+                                <option value="prophecy">Prophetic Event</option>
+                                <option value="sacrifice">Sacrifice/Offering</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-participants">👥 Key Participants</label>
+                            <input type="text" id="event-participants" name="eventParticipants" placeholder="Gods, heroes, creatures involved">
+                        </div>
+                        <div class="form-group">
+                            <label for="event-outcome">📊 Outcome/Consequences</label>
+                            <textarea id="event-outcome" name="eventOutcome" rows="3" placeholder="What resulted from this event?"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error/Success Messages -->
+                <div id="form-messages"></div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='browse.html'">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        🚀 Submit Theory
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    </main>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal-container"></div>
+
+    <!-- Firebase SDK (CDN) - No Storage needed for URL-only images -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../../firebase-config.js"></script>
+
+    <!-- Scripts -->
+    <script src="../../js/firebase-auth.js"></script>
+    <script src="../../js/components/google-signin-button.js"></script>
+    <script src="../../js/auth-guard.js"></script>
+    <script src="../../js/user-theories.js"></script>
+    <script src="../../js/theory-taxonomy.js"></script>
+    <script src="../../js/theory-taxonomy-v2.js"></script>
+    <script src="../../js/components/image-uploader.js"></script>
+    <script src="../../js/components/icon-picker.js"></script>
+    <script src="../../js/gemini-svg-generator.js"></script>
+    <script src="../../js/components/svg-editor-modal.js"></script>
+    <script src="../../js/components/grid-panel-editor.js"></script>
+    <script src="../../js/components/theory-editor.js"></script>
+    <script src="../../js/components/smart-fields.js"></script>
+    <script src="../../js/form-config.js"></script>
+
+    <script>
+        let editor = null;
+        let taxonomy = null;
+        let formState = {
+            contributionType: '',
+            title: '',
+            summary: '',
+            page: '',
+            section: '',
+            topic: '',
+            richContent: null
+        };
+
+        // Context parameters from URL
+        let contextParams = {
+            context: null,      // e.g., 'egyptian', 'christian', 'greek'
+            section: null,      // e.g., 'deities', 'heroes', 'cosmology'
+            type: null,         // e.g., 'deity', 'hero', 'theory'
+            topic: null         // e.g., 'ra', 'osiris' (optional)
+        };
+
+        // Locked fields based on context
+        let lockedFields = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Parse URL parameters first
+            parseContextParameters();
+
+            checkAuthAndInitialize();
+
+            // Listen for auth changes
+            window.addEventListener('userLogin', () => checkAuthAndInitialize());
+            window.addEventListener('userLogout', () => checkAuthAndInitialize());
+
+            // Form submission
+            document.getElementById('theory-form').addEventListener('submit', handleSubmit);
+        });
+
+        /**
+         * Load page taxonomy data for internal link selector
+         */
+        async function loadPageTaxonomy() {
+            try {
+                const response = await fetch('../../data/page-taxonomy.json');
+                if (response.ok) {
+                    window.pageTaxonomy = await response.json();
+                    console.log('Page taxonomy loaded:', Object.keys(window.pageTaxonomy).length, 'categories');
+                } else {
+                    console.warn('Could not load page taxonomy');
+                    window.pageTaxonomy = {};
+                }
+            } catch (error) {
+                console.error('Error loading page taxonomy:', error);
+                window.pageTaxonomy = {};
+            }
+        }
+
+        /**
+         * Parse URL parameters for context
+         */
+        function parseContextParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            contextParams.context = urlParams.get('context') || null;
+            contextParams.section = urlParams.get('section') || null;
+            contextParams.type = urlParams.get('type') || null;
+            contextParams.topic = urlParams.get('topic') || null;
+
+            // Show context banner if context exists
+            if (contextParams.context) {
+                displayContextBanner();
+            }
+        }
+
+        /**
+         * Display context banner with current submission context
+         */
+        function displayContextBanner() {
+            const banner = document.getElementById('context-banner');
+            const displayText = document.getElementById('context-display');
+
+            if (!contextParams.context) {
+                banner.style.display = 'none';
+                return;
+            }
+
+            // Build display text
+            let text = capitalizeFirst(contextParams.context) + ' Mythology';
+
+            if (contextParams.section) {
+                text += ' → ' + capitalizeFirst(contextParams.section);
+            }
+
+            if (contextParams.topic) {
+                text += ' → ' + capitalizeFirst(contextParams.topic);
+            }
+
+            displayText.textContent = text;
+            banner.style.display = 'block';
+        }
+
+        /**
+         * Capitalize first letter of string
+         */
+        function capitalizeFirst(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        /**
+         * Check authentication and initialize form
+         */
+        function checkAuthAndInitialize() {
+            const isLoggedIn = window.userAuth && window.userAuth.isLoggedIn();
+
+            document.getElementById('login-required').style.display = isLoggedIn ? 'none' : 'block';
+            document.getElementById('submission-form').style.display = isLoggedIn ? 'block' : 'none';
+
+            if (isLoggedIn) {
+                initializeForm();
+            }
+        }
+
+        /**
+         * Update form state and trigger progressive disclosure
+         */
+        function updateFormState(field, value) {
+            formState[field] = value;
+            updateProgressiveDisclosure();
+        }
+
+        /**
+         * Check if a field is locked by context
+         */
+        function isFieldLocked(fieldId) {
+            return lockedFields.includes(fieldId);
+        }
+
+        /**
+         * Update progressive disclosure based on current form state
+         */
+        function updateProgressiveDisclosure() {
+            if (!window.formConfig) return;
+
+            const visibleSections = window.formConfig.getVisibleSections(formState);
+            const allSections = document.querySelectorAll('[data-section]');
+
+            allSections.forEach(sectionEl => {
+                const sectionKey = sectionEl.getAttribute('data-section');
+
+                // Skip the contribution-type section - always visible
+                if (sectionKey === 'contribution-type') return;
+
+                const isVisible = visibleSections.includes(sectionKey);
+                const isCompleted = window.formConfig.isSectionCompleted(sectionKey, formState);
+                const hintEl = sectionEl.querySelector('.section-requirement-hint');
+
+                if (isVisible) {
+                    sectionEl.classList.remove('section-locked');
+                    sectionEl.classList.add('section-active');
+                    if (hintEl) hintEl.style.display = 'none';
+
+                    if (isCompleted) {
+                        sectionEl.classList.add('section-completed');
+                        sectionEl.classList.remove('section-active');
+                    } else {
+                        sectionEl.classList.remove('section-completed');
+                    }
+                } else {
+                    // Don't lock sections if they contain locked fields with values
+                    // This allows locked pre-filled fields to trigger progressive disclosure
+                    const hasLockedFieldsWithValues = Array.from(sectionEl.querySelectorAll('input, select, textarea'))
+                        .some(field => isFieldLocked(field.id) && field.value);
+
+                    if (!hasLockedFieldsWithValues) {
+                        sectionEl.classList.add('section-locked');
+                        sectionEl.classList.remove('section-active', 'section-completed');
+                        if (hintEl) hintEl.style.display = 'block';
+                    } else {
+                        // Section has locked fields with values, treat as completed
+                        sectionEl.classList.remove('section-locked');
+                        sectionEl.classList.add('section-completed');
+                        if (hintEl) hintEl.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        /**
+         * Initialize form field listeners for progressive disclosure
+         */
+        function initializeFormListeners() {
+            // Contribution Type
+            document.getElementById('contribution-type')?.addEventListener('change', (e) => {
+                // Only update if not locked
+                if (!isFieldLocked('contribution-type')) {
+                    updateFormState('contributionType', e.target.value);
+                }
+            });
+
+            // Title
+            document.getElementById('theory-title')?.addEventListener('input', (e) => {
+                updateFormState('title', e.target.value.trim());
+            });
+
+            // Summary
+            document.getElementById('theory-summary')?.addEventListener('input', (e) => {
+                updateFormState('summary', e.target.value.trim());
+            });
+
+            // Page
+            document.getElementById('taxonomy-page')?.addEventListener('change', (e) => {
+                // Only update if not locked
+                if (!isFieldLocked('taxonomy-page')) {
+                    updateFormState('page', e.target.value);
+                }
+            });
+
+            // Section
+            document.getElementById('taxonomy-section')?.addEventListener('change', (e) => {
+                // Only update if not locked
+                if (!isFieldLocked('taxonomy-section')) {
+                    updateFormState('section', e.target.value);
+                }
+            });
+
+            // Topic
+            document.getElementById('taxonomy-topic')?.addEventListener('change', (e) => {
+                // Only update if not locked
+                if (!isFieldLocked('taxonomy-topic')) {
+                    updateFormState('topic', e.target.value);
+                }
+            });
+
+            // Monitor grid panel editor changes
+            if (editor) {
+                // Monkey patch the editor's data update to track state
+                const originalOnChange = editor.onChange;
+                editor.onChange = function() {
+                    if (originalOnChange) originalOnChange.call(this);
+                    const data = editor.getData();
+                    updateFormState('richContent', data);
+                };
+            }
+        }
+
+        /**
+         * Initialize the form components
+         */
+        async function initializeForm() {
+            // Get current user ID
+            const currentUser = window.userAuth?.getCurrentUser();
+            const userId = currentUser?.username || null;
+
+            // Load page taxonomy for internal link selector
+            await loadPageTaxonomy();
+
+            // Initialize Grid Panel Editor
+            const editorContainer = document.getElementById('editor-container');
+            if (!editor) {
+                editor = new GridPanelEditor(editorContainer, null);
+            }
+
+            // Initialize taxonomy V2 cascading selects
+            if (!taxonomy && window.taxonomyV2) {
+                // Wait for taxonomy to load
+                while (!window.taxonomyV2.pageTaxonomy) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                initializeTaxonomySelects();
+                taxonomy = true;
+            }
+
+            // Initialize contribution type handler
+            initializeContributionTypeHandler();
+
+            // Initialize form field listeners for progressive disclosure
+            initializeFormListeners();
+
+            // Initialize smart fields
+            initializeSmartFields();
+
+            // Apply context parameters to form (pre-fill and lock fields)
+            applyContextToForm();
+
+            // Initialize progressive disclosure state
+            updateProgressiveDisclosure();
+        }
+
+        /**
+         * Initialize smart fields for asset metadata
+         */
+        async function initializeSmartFields() {
+            if (!window.smartFields || !window.formConfig) {
+                console.warn('Smart fields or form config not loaded');
+                return;
+            }
+
+            // Initialize deity pantheon field
+            const pantheonConfig = window.formConfig.smartFields.pantheon;
+            if (pantheonConfig) {
+                const pantheonHTML = await window.smartFields.renderSmartField(
+                    pantheonConfig,
+                    'deity-pantheon',
+                    ''
+                );
+                const pantheonContainer = document.getElementById('deity-pantheon-container');
+                if (pantheonContainer) {
+                    pantheonContainer.innerHTML = pantheonHTML;
+                }
+            }
+
+            // Initialize deity domain field
+            const domainConfig = window.formConfig.smartFields.domain;
+            if (domainConfig) {
+                const domainHTML = await window.smartFields.renderSmartField(
+                    domainConfig,
+                    'deity-domain',
+                    []
+                );
+                const domainContainer = document.getElementById('deity-domain-container');
+                if (domainContainer) {
+                    domainContainer.innerHTML = domainHTML;
+                }
+            }
+
+            // Initialize place location type change handler
+            const placeTypeSelect = document.getElementById('place-type');
+            if (placeTypeSelect) {
+                placeTypeSelect.addEventListener('change', async (e) => {
+                    const placeType = e.target.value;
+                    const locationContainer = document.getElementById('place-location-container');
+
+                    if (!placeType || !locationContainer) return;
+
+                    // Get location type config from formConfig
+                    const locationConfig = window.formConfig.locationTypes[placeType];
+
+                    if (!locationConfig) {
+                        locationContainer.innerHTML = '<input type="text" id="place-location" name="location" placeholder="Enter location">';
+                        return;
+                    }
+
+                    let locationHTML = '';
+
+                    if (locationConfig.fieldType === 'coordinates') {
+                        // Render coordinate input for Earth locations
+                        locationHTML = window.smartFields.renderCoordinateInput('place-location', {});
+                    } else if (locationConfig.fieldType === 'hierarchical') {
+                        // Render hierarchical select for mythical/celestial
+                        const hierarchicalConfig = {
+                            type: 'hierarchical',
+                            label: locationConfig.label,
+                            options: locationConfig.options,
+                            allowCustom: true
+                        };
+                        locationHTML = await window.smartFields.renderSmartField(
+                            hierarchicalConfig,
+                            'place-location',
+                            ''
+                        );
+                    } else {
+                        // Fallback to text input
+                        locationHTML = '<input type="text" id="place-location" name="location" placeholder="Enter location" class="smart-field">';
+                    }
+
+                    locationContainer.innerHTML = locationHTML;
+                });
+            }
+        }
+
+        /**
+         * Initialize contribution type change handler
+         * Shows/hides asset-specific fields based on contribution type
+         * Updates classification options based on contribution type
+         */
+        function initializeContributionTypeHandler() {
+            const contributionTypeSelect = document.getElementById('contribution-type');
+            const assetMetadataSection = document.getElementById('asset-metadata');
+            const classificationSection = document.querySelector('.form-section:has(#taxonomy-page)');
+            const taxonomyPage = document.getElementById('taxonomy-page');
+            const taxonomySection = document.getElementById('taxonomy-section');
+            const taxonomyTopic = document.getElementById('taxonomy-topic');
+
+            // Map of contribution types to their field divs
+            const assetFieldsMap = {
+                'deity': 'deity-fields',
+                'hero': 'hero-fields',
+                'creature': 'creature-fields',
+                'place': 'place-fields',
+                'item': 'item-fields',
+                'herb': 'herb-fields',
+                'text': 'text-fields',
+                'concept': 'concept-fields',
+                'ritual': 'ritual-fields',
+                'magic': 'magic-fields',
+                'symbol': 'symbol-fields',
+                'archetype': 'archetype-fields',
+                'cosmology': 'cosmology-fields',
+                'lineage': 'lineage-fields',
+                'event': 'event-fields',
+                'mythology': 'mythology-fields'
+            };
+
+            // Map contribution types to appropriate sections they can be filed under
+            const contributionTypeToSections = {
+                'deity': ['deities', 'gods', 'goddesses', 'pantheon'],
+                'hero': ['heroes', 'figures', 'prophets', 'saints'],
+                'creature': ['creatures', 'beings', 'angels', 'demons', 'spirits'],
+                'place': ['places', 'locations', 'realms', 'geography'],
+                'item': ['items', 'artifacts', 'relics', 'tools'],
+                'herb': ['herbs', 'plants', 'sacred-plants', 'botanicals'],
+                'text': ['texts', 'scriptures', 'books', 'writings'],
+                'concept': ['concepts', 'teachings', 'theology', 'philosophy'],
+                'ritual': ['rituals', 'ceremonies', 'practices', 'rites'],
+                'magic': ['magic', 'spells', 'practices', 'sorcery'],
+                'symbol': ['symbols', 'emblems', 'signs', 'icons'],
+                'archetype': ['archetypes', 'patterns', 'concepts'],
+                'cosmology': ['cosmology', 'realms', 'structure'],
+                'lineage': ['lineage', 'genealogy', 'family'],
+                'event': ['events', 'history', 'myths'],
+                'mythology': [] // New mythologies go at top level
+            };
+
+            contributionTypeSelect.addEventListener('change', (e) => {
+                const selectedType = e.target.value;
+
+                // Hide all asset fields first
+                document.querySelectorAll('.asset-fields').forEach(div => {
+                    div.style.display = 'none';
+                });
+
+                // Update asset metadata visibility
+                const assetTypes = ['deity', 'hero', 'creature', 'place', 'item', 'herb', 'text', 'concept', 'ritual', 'magic', 'symbol', 'archetype', 'cosmology', 'lineage', 'event', 'mythology'];
+                const showAssetMetadata = assetTypes.includes(selectedType);
+
+                // Update classification section based on type
+                if (selectedType === 'theory' || selectedType === '') {
+                    // Theory: Full taxonomy (Page → Section → Topic)
+                    assetMetadataSection.style.display = 'none';
+                    taxonomyPage.parentElement.querySelector('.form-hint').textContent =
+                        'Which mythology or tradition does this theory relate to?';
+                    taxonomySection.parentElement.style.display = 'block';
+                    taxonomyTopic.parentElement.style.display = 'block';
+
+                    // Re-enable all sections
+                    Array.from(taxonomySection.options).forEach(opt => {
+                        opt.disabled = false;
+                    });
+                } else if (selectedType === 'mythology') {
+                    // New Mythology: Only Page (mythology name), no section/topic
+                    assetMetadataSection.style.display = 'block';
+                    taxonomyPage.parentElement.querySelector('.form-hint').textContent =
+                        'This will create a new mythology category at the top level';
+                    taxonomySection.parentElement.style.display = 'none';
+                    taxonomyTopic.parentElement.style.display = 'none';
+                    taxonomySection.value = '';
+                    taxonomyTopic.value = '';
+                } else {
+                    // Other Assets: Page (mythology) + filtered Section (asset type appropriate)
+                    // Don't directly show - let progressive disclosure handle it
+                    assetMetadataSection.style.display = showAssetMetadata ? 'block' : 'none';
+                    taxonomyPage.parentElement.querySelector('.form-hint').textContent =
+                        `Which mythology does this ${selectedType} belong to?`;
+                    taxonomySection.parentElement.style.display = 'block';
+                    taxonomySection.parentElement.querySelector('.form-hint').textContent =
+                        `Select the appropriate section for this ${selectedType} (e.g., ${contributionTypeToSections[selectedType]?.join(', ') || 'appropriate category'})`;
+                    taxonomyTopic.parentElement.style.display = 'none';
+                    taxonomyTopic.value = '';
+
+                    // Filter sections based on contribution type
+                    const allowedSections = contributionTypeToSections[selectedType] || [];
+                    Array.from(taxonomySection.options).forEach(opt => {
+                        if (opt.value === '') {
+                            opt.disabled = false; // Keep placeholder enabled
+                        } else {
+                            // Enable if section matches the contribution type
+                            const sectionId = opt.value.toLowerCase();
+                            const isAllowed = allowedSections.some(allowed =>
+                                sectionId.includes(allowed) || allowed.includes(sectionId)
+                            );
+                            opt.disabled = !isAllowed;
+                            if (!isAllowed && opt.selected) {
+                                taxonomySection.value = '';
+                            }
+                        }
+                    });
+                }
+
+                // Show specific asset fields
+                const fieldsToShow = assetFieldsMap[selectedType];
+                if (fieldsToShow) {
+                    document.getElementById(fieldsToShow).style.display = 'block';
+                }
+            });
+        }
+
+        /**
+         * Apply context parameters to form
+         * Pre-fills and locks fields based on URL context
+         */
+        function applyContextToForm() {
+            // Reset locked fields
+            lockedFields = [];
+
+            // 1. Apply contribution type from context
+            if (contextParams.type) {
+                const contributionTypeSelect = document.getElementById('contribution-type');
+                if (contributionTypeSelect) {
+                    contributionTypeSelect.value = contextParams.type;
+                    lockField('contribution-type', 'Contribution Type');
+                    updateFormState('contributionType', contextParams.type);
+
+                    // Trigger change event to update dependent fields
+                    contributionTypeSelect.dispatchEvent(new Event('change'));
+                }
+            }
+
+            // 2. Apply mythology/context (page)
+            if (contextParams.context) {
+                const pageSelect = document.getElementById('taxonomy-page');
+                if (pageSelect) {
+                    // Try to match context to page value
+                    const matchingOption = Array.from(pageSelect.options).find(opt =>
+                        opt.value.toLowerCase() === contextParams.context.toLowerCase() ||
+                        opt.textContent.toLowerCase().includes(contextParams.context.toLowerCase())
+                    );
+
+                    if (matchingOption) {
+                        pageSelect.value = matchingOption.value;
+                        lockField('taxonomy-page', 'Mythology/Tradition');
+                        updateFormState('page', matchingOption.value);
+
+                        // Trigger change event to populate sections
+                        pageSelect.dispatchEvent(new Event('change'));
+                    }
+                }
+            }
+
+            // 3. Apply section from context (after page is set)
+            if (contextParams.section && contextParams.context) {
+                // Use setTimeout to ensure section dropdown is populated after page change
+                setTimeout(() => {
+                    const sectionSelect = document.getElementById('taxonomy-section');
+                    if (sectionSelect) {
+                        const matchingOption = Array.from(sectionSelect.options).find(opt =>
+                            opt.value.toLowerCase() === contextParams.section.toLowerCase() ||
+                            opt.textContent.toLowerCase().includes(contextParams.section.toLowerCase())
+                        );
+
+                        if (matchingOption) {
+                            sectionSelect.value = matchingOption.value;
+                            lockField('taxonomy-section', 'Category Section');
+                            updateFormState('section', matchingOption.value);
+
+                            // Trigger change event to populate topics
+                            sectionSelect.dispatchEvent(new Event('change'));
+                        }
+                    }
+                }, 100);
+            }
+
+            // 4. Apply topic from context (after section is set)
+            if (contextParams.topic && contextParams.context) {
+                setTimeout(() => {
+                    const topicSelect = document.getElementById('taxonomy-topic');
+                    if (topicSelect) {
+                        const matchingOption = Array.from(topicSelect.options).find(opt =>
+                            opt.value.toLowerCase() === contextParams.topic.toLowerCase() ||
+                            opt.textContent.toLowerCase().includes(contextParams.topic.toLowerCase())
+                        );
+
+                        if (matchingOption) {
+                            topicSelect.value = matchingOption.value;
+                            lockField('taxonomy-topic', 'Specific Topic');
+                            updateFormState('topic', matchingOption.value);
+                        }
+                    }
+                }, 200);
+            }
+        }
+
+        /**
+         * Lock a form field and add visual indicators
+         */
+        function lockField(fieldId, fieldLabel) {
+            const field = document.getElementById(fieldId);
+            if (!field) return;
+
+            const formGroup = field.closest('.form-group');
+            if (!formGroup) return;
+
+            // Add to locked fields array
+            if (!lockedFields.includes(fieldId)) {
+                lockedFields.push(fieldId);
+            }
+
+            // Disable the field
+            field.disabled = true;
+
+            // Add locked class to form group
+            formGroup.classList.add('field-locked');
+
+            // Add tooltip
+            let tooltip = formGroup.querySelector('.field-lock-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'field-lock-tooltip';
+                tooltip.textContent = 'Locked by page context - submit from main page to change';
+                formGroup.style.position = 'relative';
+                formGroup.appendChild(tooltip);
+            }
+        }
+
+        /**
+         * Unlock all locked fields (useful if context is cleared)
+         */
+        function unlockAllFields() {
+            lockedFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field) return;
+
+                const formGroup = field.closest('.form-group');
+                if (!formGroup) return;
+
+                // Re-enable the field
+                field.disabled = false;
+
+                // Remove locked class
+                formGroup.classList.remove('field-locked');
+
+                // Remove tooltip
+                const tooltip = formGroup.querySelector('.field-lock-tooltip');
+                if (tooltip) {
+                    tooltip.remove();
+                }
+            });
+
+            lockedFields = [];
+        }
+
+        /**
+         * Initialize cascading taxonomy selects
+         */
+        function initializeTaxonomySelects() {
+            const pageSelect = document.getElementById('taxonomy-page');
+            const sectionSelect = document.getElementById('taxonomy-section');
+            const topicSelect = document.getElementById('taxonomy-topic');
+
+            // Populate page select
+            const categories = window.taxonomyV2.getCategories();
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.textContent = cat.name;
+                pageSelect.appendChild(option);
+            });
+
+            // Page change handler
+            pageSelect.addEventListener('change', () => {
+                const pageId = pageSelect.value;
+
+                // Reset dependent selects
+                sectionSelect.innerHTML = '<option value="">-- Select Section (Optional) --</option>';
+                topicSelect.innerHTML = '<option value="">-- Select Topic (Optional) --</option>';
+
+                if (!pageId) return;
+
+                // Populate sections
+                const sections = window.taxonomyV2.getSections(pageId);
+                sections.forEach(sec => {
+                    const option = document.createElement('option');
+                    option.value = sec.id;
+                    option.textContent = sec.name;
+                    sectionSelect.appendChild(option);
+                });
+
+                // Populate top-level topics (topics directly under page)
+                const topLevelTopics = window.taxonomyV2.getTopics(pageId, null);
+                topLevelTopics.forEach(top => {
+                    const option = document.createElement('option');
+                    option.value = top.id;
+                    option.textContent = top.name;
+                    topicSelect.appendChild(option);
+                });
+            });
+
+            // Section change handler
+            sectionSelect.addEventListener('change', () => {
+                const pageId = pageSelect.value;
+                const sectionId = sectionSelect.value;
+
+                // Reset topic select
+                topicSelect.innerHTML = '<option value="">-- Select Topic (Optional) --</option>';
+
+                if (!sectionId) {
+                    // Repopulate with top-level topics if section cleared
+                    const topLevelTopics = window.taxonomyV2.getTopics(pageId, null);
+                    topLevelTopics.forEach(top => {
+                        const option = document.createElement('option');
+                        option.value = top.id;
+                        option.textContent = top.name;
+                        topicSelect.appendChild(option);
+                    });
+                    return;
+                }
+
+                // Populate topics for this section
+                const topics = window.taxonomyV2.getTopics(pageId, sectionId);
+                topics.forEach(top => {
+                    const option = document.createElement('option');
+                    option.value = top.id;
+                    option.textContent = top.name;
+                    topicSelect.appendChild(option);
+                });
+            });
+        }
+
+        /**
+         * Handle form submission
+         */
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            const messagesContainer = document.getElementById('form-messages');
+            messagesContainer.innerHTML = '';
+
+            // Get basic form data
+            const title = document.getElementById('theory-title').value.trim();
+            const summary = document.getElementById('theory-summary').value.trim();
+            const sources = document.getElementById('theory-sources').value.trim();
+
+            if (!title) {
+                showError('Please enter a theory title');
+                return;
+            }
+            if (!summary) {
+                showError('Please enter a theory summary');
+                return;
+            }
+
+            // Get contribution type
+            const contributionType = document.getElementById('contribution-type').value;
+
+            // Get related mythologies (now a multi-select)
+            const mythologiesSelect = document.getElementById('related-mythologies');
+            const relatedMythologies = Array.from(mythologiesSelect.selectedOptions).map(opt => opt.value);
+
+            // Get tags
+            const tagsInput = document.getElementById('theory-tags').value.trim();
+            const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()) : [];
+
+            // Get themes (multi-select)
+            const themesSelect = document.getElementById('theory-themes');
+            const themes = Array.from(themesSelect.selectedOptions).map(opt => opt.value);
+
+            // Get grid panel data
+            const richContent = editor.getData();
+
+            if (!richContent.panels || richContent.panels.length === 0) {
+                showError('Please add at least one panel to your theory');
+                return;
+            }
+
+            // Get taxonomy data (new V2 system)
+            const page = document.getElementById('taxonomy-page')?.value;
+            const section = document.getElementById('taxonomy-section')?.value || null;
+            const topic = document.getElementById('taxonomy-topic')?.value || null;
+            const userTopic = document.getElementById('taxonomy-user-topic')?.value || null;
+            const userSubtopic = document.getElementById('taxonomy-user-subtopic')?.value || null;
+
+            if (!page) {
+                showError('Please select a Page category for your theory');
+                return;
+            }
+
+            // Collect comprehensive metadata fields
+            const metadata = {
+                // Universal metadata (available for all contribution types)
+                alternateNames: document.getElementById('alternate-names')?.value || null,
+                datePeriod: document.getElementById('date-created')?.value || null,
+                confidenceLevel: document.getElementById('confidence-level')?.value || null,
+                authorAttribution: document.getElementById('author-attribution')?.value || null,
+                languageOrigin: document.getElementById('language-origin')?.value || null
+            };
+
+            // Collect asset-specific metadata
+            const assetMetadata = {};
+            if (contributionType !== 'theory') {
+                assetMetadata.contributionType = contributionType;
+
+                // Collect type-specific fields
+                switch (contributionType) {
+                    case 'deity':
+                        assetMetadata.pantheon = document.getElementById('deity-pantheon')?.value || null;
+                        assetMetadata.domain = document.getElementById('deity-domain')?.value || null;
+                        assetMetadata.symbols = document.getElementById('deity-symbols')?.value || null;
+                        assetMetadata.epithets = document.getElementById('deity-epithets')?.value || null;
+                        break;
+                    case 'hero':
+                        assetMetadata.heroRole = document.getElementById('hero-role')?.value || null;
+                        assetMetadata.era = document.getElementById('hero-era')?.value || null;
+                        assetMetadata.deeds = document.getElementById('hero-deeds')?.value || null;
+                        break;
+                    case 'creature':
+                        assetMetadata.creatureType = document.getElementById('creature-type')?.value || null;
+                        assetMetadata.attributes = document.getElementById('creature-attributes')?.value || null;
+                        assetMetadata.behavior = document.getElementById('creature-behavior')?.value || null;
+                        break;
+                    case 'place':
+                        assetMetadata.placeType = document.getElementById('place-type')?.value || null;
+                        assetMetadata.location = document.getElementById('place-location')?.value || null;
+                        assetMetadata.significance = document.getElementById('place-significance')?.value || null;
+                        break;
+                    case 'item':
+                        assetMetadata.itemType = document.getElementById('item-type')?.value || null;
+                        assetMetadata.powers = document.getElementById('item-powers')?.value || null;
+                        assetMetadata.origin = document.getElementById('item-origin')?.value || null;
+                        break;
+                    case 'herb':
+                        assetMetadata.botanical = document.getElementById('herb-botanical')?.value || null;
+                        assetMetadata.uses = document.getElementById('herb-uses')?.value || null;
+                        assetMetadata.associations = document.getElementById('herb-associations')?.value || null;
+                        break;
+                    case 'text':
+                        assetMetadata.textType = document.getElementById('text-type')?.value || null;
+                        assetMetadata.author = document.getElementById('text-author')?.value || null;
+                        assetMetadata.date = document.getElementById('text-date')?.value || null;
+                        break;
+                    case 'concept':
+                        assetMetadata.conceptCategory = document.getElementById('concept-category')?.value || null;
+                        assetMetadata.keyPrinciples = document.getElementById('concept-key-principles')?.value || null;
+                        break;
+                    case 'ritual':
+                        assetMetadata.ritualPurpose = document.getElementById('ritual-purpose')?.value || null;
+                        assetMetadata.ritualParticipants = document.getElementById('ritual-participants')?.value || null;
+                        assetMetadata.ritualMaterials = document.getElementById('ritual-materials')?.value || null;
+                        assetMetadata.ritualTiming = document.getElementById('ritual-timing')?.value || null;
+                        break;
+                    case 'magic':
+                        assetMetadata.magicType = document.getElementById('magic-type')?.value || null;
+                        assetMetadata.magicComponents = document.getElementById('magic-components')?.value || null;
+                        assetMetadata.magicDifficulty = document.getElementById('magic-difficulty')?.value || null;
+                        break;
+                    case 'symbol':
+                        assetMetadata.symbolMeaning = document.getElementById('symbol-meaning')?.value || null;
+                        assetMetadata.symbolUsage = document.getElementById('symbol-usage')?.value || null;
+                        assetMetadata.symbolDeities = document.getElementById('symbol-deities')?.value || null;
+                        assetMetadata.symbolUnicode = document.getElementById('symbol-unicode')?.value || null;
+                        break;
+                    case 'archetype':
+                        assetMetadata.archetypeCategory = document.getElementById('archetype-category')?.value || null;
+                        assetMetadata.archetypeExamples = document.getElementById('archetype-examples')?.value || null;
+                        assetMetadata.archetypePatterns = document.getElementById('archetype-patterns')?.value || null;
+                        break;
+                    case 'cosmology':
+                        assetMetadata.cosmologyStructure = document.getElementById('cosmology-structure')?.value || null;
+                        assetMetadata.cosmologyInhabitants = document.getElementById('cosmology-inhabitants')?.value || null;
+                        assetMetadata.cosmologyAccess = document.getElementById('cosmology-access')?.value || null;
+                        break;
+                    case 'lineage':
+                        assetMetadata.lineageProgenitor = document.getElementById('lineage-progenitor')?.value || null;
+                        assetMetadata.lineageGenerations = document.getElementById('lineage-generations')?.value || null;
+                        assetMetadata.lineageSignificance = document.getElementById('lineage-significance')?.value || null;
+                        break;
+                    case 'event':
+                        assetMetadata.eventType = document.getElementById('event-type')?.value || null;
+                        assetMetadata.eventParticipants = document.getElementById('event-participants')?.value || null;
+                        assetMetadata.eventOutcome = document.getElementById('event-outcome')?.value || null;
+                        break;
+                    case 'mythology':
+                        assetMetadata.culture = document.getElementById('mythology-culture')?.value || null;
+                        assetMetadata.region = document.getElementById('mythology-region')?.value || null;
+                        assetMetadata.period = document.getElementById('mythology-period')?.value || null;
+                        assetMetadata.keyTexts = document.getElementById('mythology-key-texts')?.value || null;
+                        break;
+                }
+            }
+
+            // Prepare submission data
+            const theoryData = {
+                title,
+                summary,
+                content: summary, // Use summary as main content
+                richContent: {
+                    panels: richContent.panels
+                },
+                // Contribution type
+                contributionType: contributionType || 'theory',
+                // New taxonomy V2 fields
+                page,
+                section,
+                topic,
+                userTopic,
+                userSubtopic,
+                // Universal metadata fields
+                metadata,
+                // Legacy metadata fields (for backwards compatibility)
+                sources,
+                relatedMythologies,
+                tags,
+                themes,
+                // Asset-specific metadata
+                assetMetadata,
+                status: 'published'
+            };
+
+            // Submit theory
+            const result = window.userTheories.submitTheory(theoryData);
+
+            if (result.success) {
+                showSuccess('Theory submitted successfully! Redirecting to browse page...');
+                setTimeout(() => {
+                    window.location.href = `browse.html?highlight=${result.theory.id}`;
+                }, 2000);
+            } else {
+                showError(result.error || 'Failed to submit theory');
+            }
+        }
+
+        /**
+         * Show error message
+         */
+        function showError(message) {
+            const messagesContainer = document.getElementById('form-messages');
+            messagesContainer.innerHTML = `
+                <div class="error-message">
+                    <strong>❌ Error:</strong> ${message}
+                </div>
+            `;
+            messagesContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        /**
+         * Show success message
+         */
+        function showSuccess(message) {
+            const messagesContainer = document.getElementById('form-messages');
+            messagesContainer.innerHTML = `
+                <div class="success-message">
+                    <strong>✅ Success:</strong> ${message}
+                </div>
+            `;
+            messagesContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+
+    <!-- Load Firebase auth modal template -->
+    <script>
+        fetch('../../auth-modal-firebase.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('auth-modal-container').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading auth modal:', error);
+            });
+    </script>
+</body>
+</html>

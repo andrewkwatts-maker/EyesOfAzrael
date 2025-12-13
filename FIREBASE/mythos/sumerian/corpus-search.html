@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sumerian Corpus Search - ORACC Cuneiform Texts</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+<link rel="stylesheet" href="../../themes/smart-links.css">
+<script defer src="../../themes/smart-links.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+<script src="../../themes/theme-picker.js" defer></script>
+    <style>
+        :root {
+            --mythos-primary: #8B4513;
+            --mythos-secondary: #D2691E;
+        }
+
+        .search-header {
+            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
+            color: white;
+            padding: 2rem;
+            border-radius: var(--radius-lg, 15px);
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1.1rem;
+            border: 2px solid var(--mythos-primary);
+            border-radius: var(--radius-sm, 8px);
+            margin-bottom: 1rem;
+        }
+
+        .search-button {
+            background: var(--mythos-primary);
+            color: white;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: var(--radius-sm, 8px);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-button:hover {
+            background: var(--mythos-secondary);
+        }
+
+        .result-item {
+            background: #f9f9f9;
+            border-left: 4px solid var(--mythos-primary);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: var(--radius-sm, 8px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .result-citation {
+            font-weight: bold;
+            color: var(--mythos-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .result-transliteration {
+            font-family: 'Courier New', monospace;
+            background: #ffffff;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 0.75rem 0;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .result-translation {
+            color: #666;
+            font-style: italic;
+            margin: 0.75rem 0;
+            padding-left: 1rem;
+            border-left: 2px solid #ddd;
+        }
+
+        .result-metadata {
+            display: flex;
+            gap: 1.5rem;
+            margin: 0.75rem 0;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .result-link {
+            margin-top: 0.75rem;
+        }
+
+        .result-link a {
+            color: var(--mythos-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .result-link a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #777;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            background: #f9f9f9;
+            border-radius: var(--radius-sm, 8px);
+            color: #666;
+        }
+
+        .matched-term {
+            background: #ffe066;
+            padding: 0 0.25rem;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .language-badge {
+            display: inline-block;
+            background: var(--mythos-primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-md, 12px);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .help-section {
+            background: #f0f8ff;
+            border: 1px solid #b3d9ff;
+            padding: 1.5rem;
+            border-radius: var(--radius-sm, 8px);
+            margin: 2rem 0;
+        }
+
+        .help-section h3 {
+            color: var(--mythos-primary);
+            margin-top: 0;
+        }
+
+        .quick-search {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .quick-search-btn {
+            background: rgba(139, 69, 19, 0.1);
+            border: 1px solid rgba(139, 69, 19, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-xl, 20px);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .quick-search-btn:hover {
+            background: var(--mythos-primary);
+            color: white;
+        }
+
+        .transliteration-guide {
+            background: #ffffff9e6;
+            border: 1px solid #ffe066;
+            padding: 1rem;
+            border-radius: var(--radius-sm, 8px);
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Picker UI -->
+    <div id="theme-picker-container"></div>
+
+    <header>
+    <div class="header-content">
+        <h1>📜 Sumerian Corpus Search</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../mythos/index.html">Home</a> →
+                <a href="../index.html">Sumerian</a> →
+                <span>Corpus Search</span>
+</nav>
+
+    <main>
+        <section class="search-header">
+            <h2>Search Sumerian Cuneiform Texts</h2>
+            <p style="font-size: 1.1rem; margin-top: 0.5rem;">
+                Search the Open Richly Annotated Cuneiform Corpus (ORACC) for Sumerian deities, concepts, and mythological terms.
+                Results include transliterations, translations, and links to original sources.
+            </p>
+        </section>
+
+        <section class="search-box">
+            <label for="search-input" style="font-weight: bold; display: block; margin-bottom: 0.5rem;">
+                Search Term (deity name, concept, or keyword):
+            </label>
+            <input
+                type="text"
+                id="search-input"
+                class="search-input"
+                placeholder="e.g., Inanna, Enlil, me, kur..."
+            >
+            <button class="search-button" onclick="performSearch()">🔍 Search Corpus</button>
+
+            <div style="margin-top: 1.5rem;">
+                <strong>Quick Search:</strong>
+                <div class="quick-search">
+                    <button class="quick-search-btn" onclick="quickSearch('inanna')">Inanna</button>
+                    <button class="quick-search-btn" onclick="quickSearch('enki')">Enki</button>
+                    <button class="quick-search-btn" onclick="quickSearch('enlil')">Enlil</button>
+                    <button class="quick-search-btn" onclick="quickSearch('an')">An</button>
+                    <button class="quick-search-btn" onclick="quickSearch('dumuzi')">Dumuzi</button>
+                    <button class="quick-search-btn" onclick="quickSearch('ereshkigal')">Ereshkigal</button>
+                    <button class="quick-search-btn" onclick="quickSearch('ninhursag')">Ninhursag</button>
+                    <button class="quick-search-btn" onclick="quickSearch('utu')">Utu</button>
+                    <button class="quick-search-btn" onclick="quickSearch('me')">Me (Divine Powers)</button>
+                    <button class="quick-search-btn" onclick="quickSearch('kur')">Kur (Underworld)</button>
+                </div>
+            </div>
+        </section>
+
+        <div id="results-container"></div>
+
+        <section class="help-section">
+            <h3>About Cuneiform Transliteration</h3>
+            <div class="transliteration-guide">
+                <p><strong>Transliteration Conventions:</strong></p>
+                <ul>
+                    <li><strong>š</strong> = sh sound (e.g., Ninhursag = nin-ḫur-saĝ)</li>
+                    <li><strong>ḫ</strong> = h sound (guttural)</li>
+                    <li><strong>ĝ</strong> = ng sound</li>
+                    <li><strong>DN</strong> = Divine Name (deity)</li>
+                    <li><strong>[ ]</strong> = Restored text (damaged or missing on tablet)</li>
+                    <li><strong>form[meaning]</strong> = Sumerian word with English gloss</li>
+                </ul>
+            </div>
+
+            <h3>About ORACC</h3>
+            <p>
+                The <strong>Open Richly Annotated Cuneiform Corpus (ORACC)</strong> is a collaborative effort
+                by scholars worldwide to provide digital editions of cuneiform texts with full linguistic annotation.
+                It includes texts from ~3200 BCE to 100 CE in Sumerian, Akkadian, Hittite, and other ancient languages.
+            </p>
+            <p>
+                <a href="http://oracc.museum.upenn.edu" target="_blank" style="color: var(--mythos-primary); font-weight: bold;">
+                    Visit ORACC Website →
+                </a>
+            </p>
+
+            <h3>Projects Included</h3>
+            <ul>
+                <li><strong>ETCSL</strong> - Electronic Text Corpus of Sumerian Literature (myths, hymns, epics)</li>
+                <li><strong>DCCLT</strong> - Digital Corpus of Cuneiform Lexical Texts</li>
+                <li><strong>Various other ORACC projects</strong> containing Sumerian texts</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>
+            <strong>Sumerian Corpus Search</strong> - ORACC Cuneiform Texts<br>
+            <a href="../../mythos/index.html">World Mythos Home</a> |
+            <a href="../index.html">Sumerian Tradition</a>
+        </p>
+    </footer>
+
+    <script>
+        // Get URL parameters
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Load pre-indexed data for a deity
+        function loadPreIndexedData(term) {
+            const termLower = term.toLowerCase();
+            const dataFile = `../../../corpus/data/${termLower}.json`;
+
+            fetch(dataFile)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('No pre-indexed data available');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayResults(data.results, term);
+                })
+                .catch(error => {
+                    console.log('Pre-indexed data not available, using sample data:', error);
+                    displaySampleResults(term);
+                });
+        }
+
+        // Display sample results (when corpus data not available)
+        function displaySampleResults(term) {
+            const sampleData = {
+                'inanna': [
+                    {
+                        text_name: 'ETCSL c.1.4.1 (Inanna and Enki)',
+                        context: 'an ki-ta ... **inanna[Inanna]DN** nin me-a',
+                        full_verse: 'inanna[Inanna]DN nin[lady]N me[divine-power]N-a[of]',
+                        translation: 'Inanna, Lady of the Divine Powers',
+                        metadata: { project: 'etcsl', text_id: 'c.1.4.1', lang: 'sux' },
+                        url: 'http://oracc.museum.upenn.edu/etcsl/c.1.4.1'
+                    },
+                    {
+                        text_name: 'ETCSL c.1.4.3 (Descent of Inanna)',
+                        context: '... **inanna[Inanna]DN** kur-ra ed3-de3',
+                        full_verse: 'inanna[Inanna]DN kur[netherworld]N-ra ed3[descend]V-de3[to]',
+                        translation: 'Inanna to the netherworld descended',
+                        metadata: { project: 'etcsl', text_id: 'c.1.4.3', lang: 'sux' },
+                        url: 'http://oracc.museum.upenn.edu/etcsl/c.1.4.3'
+                    }
+                ],
+                'enki': [
+                    {
+                        text_name: 'ETCSL c.1.1.1 (Enki and the World Order)',
+                        context: '... **enki[Enki]DN** abzu-ta nam tar-re',
+                        full_verse: 'enki[Enki]DN abzu[underground-water]N-ta nam[destiny]N tar[decree]V-e',
+                        translation: 'Enki from the Abzu decrees destiny',
+                        metadata: { project: 'etcsl', text_id: 'c.1.1.1', lang: 'sux' },
+                        url: 'http://oracc.museum.upenn.edu/etcsl/c.1.1.1'
+                    }
+                ],
+                'enlil': [
+                    {
+                        text_name: 'ETCSL c.1.2.1 (Enlil and Ninlil)',
+                        context: 'an ki-ta ... **enlil[Enlil]DN** kur-gal-am3',
+                        full_verse: 'enlil[Enlil]DN kur[mountain]N-gal[great]AJ-am3[be]',
+                        translation: 'Enlil is the great mountain',
+                        metadata: { project: 'etcsl', text_id: 'c.1.2.1', lang: 'sux' },
+                        url: 'http://oracc.museum.upenn.edu/etcsl/c.1.2.1'
+                    }
+                ]
+            };
+
+            const results = sampleData[term.toLowerCase()] || [];
+            displayResults(results, term);
+        }
+
+        // Display search results
+        function displayResults(results, searchTerm) {
+            const container = document.getElementById('results-container');
+
+            if (!results || results.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <h3>No Results Found</h3>
+                        <p>No corpus entries found for "${searchTerm}".</p>
+                        <p>Try searching for other deities or concepts, or check the spelling.</p>
+                        <p style="margin-top: 1rem;">
+                            <strong>Note:</strong> This is a demonstration using sample data.
+                            Full ORACC corpus data requires downloading the complete corpus.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <section>
+                    <h2 style="color: var(--mythos-primary);">
+                        Search Results for "${searchTerm}"
+                    </h2>
+                    <p >
+                        Found ${results.length} text${results.length !== 1 ? 's' : ''} mentioning this term
+                    </p>
+            `;
+
+            results.forEach(result => {
+                const language = result.metadata?.lang === 'sux' ? 'Sumerian' :
+                               result.metadata?.lang === 'akk' ? 'Akkadian' : 'Unknown';
+
+                // Highlight matched terms in context
+                const contextHTML = result.context
+                    .replace(/\*\*(.*?)\*\*/g, '<span class="matched-term">$1</span>');
+
+                html += `
+                    <div class="result-item">
+                        <div class="result-citation">
+                            ${result.text_name || result.text_id}
+                            <span class="language-badge">${language}</span>
+                        </div>
+
+                        <div class="result-metadata">
+                            <span>📚 Project: ${result.metadata?.project || result.book || 'ORACC'}</span>
+                            <span>📄 Text ID: ${result.metadata?.text_id || result.text_id}</span>
+                        </div>
+
+                        <div class="result-transliteration">
+                            ${contextHTML || result.full_verse}
+                        </div>
+
+                        ${result.translation ? `
+                            <div class="result-translation">
+                                ${result.translation}
+                            </div>
+                        ` : ''}
+
+                        ${result.url ? `
+                            <div class="result-link">
+                                <a href="../../index.html" target="_blank">
+                                    View on ORACC Website →
+                                </a>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            html += '</section>';
+            container.innerHTML = html;
+        }
+
+        // Perform search
+        function performSearch() {
+            const searchInput = document.getElementById('search-input');
+            const term = searchInput.value.trim();
+
+            if (!term) {
+                alert('Please enter a search term');
+                return;
+            }
+
+            // Show loading
+            const container = document.getElementById('results-container');
+            container.innerHTML = '<div class="loading">🔍 Searching corpus...</div>';
+
+            // Update URL
+            const url = new URL(window.location);
+            url.searchParams.set('term', term);
+            url.searchParams.set('language', 'sumerian');
+            window.history.pushState({}, '', url);
+
+            // Load results
+            setTimeout(() => {
+                loadPreIndexedData(term);
+            }, 500);
+        }
+
+        // Quick search helper
+        function quickSearch(term) {
+            document.getElementById('search-input').value = term;
+            performSearch();
+        }
+
+        // Handle Enter key in search box
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            // Load results if URL has parameters
+            const term = getUrlParameter('term');
+            if (term) {
+                searchInput.value = term;
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>

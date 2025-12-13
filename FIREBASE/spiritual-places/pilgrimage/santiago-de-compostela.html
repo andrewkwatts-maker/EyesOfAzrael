@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Santiago de Compostela - The Way of Saint James | Eyes of Azrael</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        .hero-section {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.1) 0%,
+                rgba(var(--color-surface-rgb), 0.05) 100%);
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: block;
+            filter: drop-shadow(0 0 20px rgba(var(--color-primary-rgb), 0.5));
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 30px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 1rem;
+        }
+
+        .hero-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(var(--color-surface-rgb), 0.3);
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .content-section {
+            margin-bottom: 2rem;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3),
+                        0 0 20px rgba(var(--color-primary-rgb), 0.1),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--color-primary);
+            text-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .section-icon {
+            font-size: 1.5rem;
+            filter: drop-shadow(0 0 10px rgba(var(--color-primary-rgb), 0.5));
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-box {
+            background: rgba(var(--color-surface-rgb), 0.15);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.15);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-box:hover {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-color: rgba(var(--color-primary-rgb), 0.3);
+            box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+        }
+
+        .feature-box h4 {
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .route-card {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.15) 0%,
+                rgba(var(--color-surface-rgb), 0.1) 100%);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.25);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .route-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 0 25px rgba(var(--color-primary-rgb), 0.2);
+        }
+
+        .route-card h4 {
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .route-card .distance {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+
+        .deity-card {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.2) 0%,
+                rgba(var(--color-surface-rgb), 0.1) 100%);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .deity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+                        0 0 30px rgba(var(--color-primary-rgb), 0.2);
+        }
+
+        .deity-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            display: block;
+            filter: drop-shadow(0 0 15px rgba(var(--color-primary-rgb), 0.5));
+        }
+
+        .deity-card h4 {
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 2px solid rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.35rem;
+            top: 0.25rem;
+            width: 12px;
+            height: 12px;
+            background: var(--color-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .timeline-date {
+            color: var(--color-primary);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .quote-box {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.1) 0%,
+                rgba(var(--color-surface-rgb), 0.05) 100%);
+            border-left: 4px solid var(--color-primary);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 12px 12px 0;
+            font-style: italic;
+        }
+
+        .quote-box cite {
+            display: block;
+            margin-top: 0.75rem;
+            font-style: normal;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .interlink-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .interlink-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(var(--color-surface-rgb), 0.1);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: 10px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .interlink-card:hover {
+            background: rgba(var(--color-primary-rgb), 0.15);
+            border-color: rgba(var(--color-primary-rgb), 0.4);
+            transform: translateX(5px);
+            box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.2);
+        }
+
+        .interlink-icon {
+            font-size: 1.5rem;
+            filter: drop-shadow(0 0 8px rgba(var(--color-primary-rgb), 0.4));
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 0.7;
+        }
+
+        .breadcrumb .separator {
+            opacity: 0.5;
+        }
+
+        .symbol-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .symbol-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(var(--color-surface-rgb), 0.1);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .symbol-item:hover {
+            background: rgba(var(--color-primary-rgb), 0.15);
+            transform: scale(1.05);
+        }
+
+        .symbol-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../../index.html">Home</a>
+        <span class="separator">></span>
+        <a href="../index.html">Spiritual Places</a>
+        <span class="separator">></span>
+        <a href="../../archetypes/celestial/index.html">Pilgrimage</a>
+        <span class="separator">></span>
+        <span>Santiago de Compostela</span>
+    </nav>
+
+    <header class="hero-section">
+        <span class="hero-icon">🐚</span>
+        <h1 class="hero-title">Santiago de Compostela</h1>
+        <p class="hero-subtitle">The Way of Saint James - Medieval Europe's Greatest Pilgrimage</p>
+        <div class="hero-meta">
+            <span class="meta-item">📍 Galicia, Spain</span>
+            <span class="meta-item">✝️ Christianity</span>
+            <span class="meta-item">📅 Est. 9th Century CE</span>
+            <span class="meta-item">🏆 UNESCO World Heritage Site</span>
+        </div>
+    </header>
+
+    <main>
+        <section class="content-section">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <span class="section-icon">📜</span>
+                    Historical Overview
+                </h2>
+                <p>Santiago de Compostela, meaning "Saint James of the Field of Stars," has been one of the three most important Christian pilgrimage destinations since the medieval period, alongside <a href="jerusalem.html" data-entity="place">Jerusalem</a> and Rome. The city claims to hold the remains of Saint James the Greater, one of Jesus's twelve apostles and the first to be martyred.</p>
+
+                <div class="timeline" style="margin-top: 1.5rem;">
+                    <div class="timeline-item">
+                        <span class="timeline-date">44 CE</span>
+                        <p>Saint James martyred in Jerusalem by Herod Agrippa</p>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-date">813 CE</span>
+                        <p>Discovery of the tomb by hermit Pelayo, guided by mysterious stars</p>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-date">829 CE</span>
+                        <p>King Alfonso II builds first church over the relics</p>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-date">997 CE</span>
+                        <p>Al-Mansur raids the city, spares the tomb</p>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-date">1075-1211</span>
+                        <p>Construction of the current Romanesque cathedral</p>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-date">1993</span>
+                        <p>Camino Frances designated UNESCO World Heritage Site</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <span class="section-icon">🚶</span>
+                    The Camino Routes
+                </h2>
+                <p>The Camino de Santiago consists of multiple ancient routes converging on the cathedral city. Each path offers unique spiritual and cultural experiences for pilgrims seeking transformation through journey.</p>
+
+                <div class="feature-grid">
+                    <div class="route-card">
+                        <h4>🛤️ Camino Frances</h4>
+                        <p>The most popular route, crossing the Pyrenees from France through Pamplona, Burgos, and Leon.</p>
+                        <span class="distance">Distance: 780 km from Saint-Jean-Pied-de-Port</span>
+                    </div>
+                    <div class="route-card">
+                        <h4>🌊 Camino del Norte</h4>
+                        <p>The coastal route along the Bay of Biscay, known for dramatic scenery and challenging terrain.</p>
+                        <span class="distance">Distance: 825 km from Irun</span>
+                    </div>
+                    <div class="route-card">
+                        <h4>🏛️ Via de la Plata</h4>
+                        <p>Ancient Roman trade route from Seville, the longest traditional path to Santiago.</p>
+                        <span class="distance">Distance: 1,000 km from Seville</span>
+                    </div>
+                    <div class="route-card">
+                        <h4>🇵🇹 Camino Portugues</h4>
+                        <p>Routes from Lisbon or Porto, following medieval pilgrimage traditions from Portugal.</p>
+                        <span class="distance">Distance: 620 km from Lisbon</span>
+                    </div>
+                    <div class="route-card">
+                        <h4>⭐ Camino Primitivo</h4>
+                        <p>The original route taken by King Alfonso II, through mountainous Asturias.</p>
+                        <span class="distance">Distance: 321 km from Oviedo</span>
+                    </div>
+                    <div class="route-card">
+                        <h4>🌅 Camino Finisterre</h4>
+                        <p>Extension beyond Santiago to the "end of the world" at Cape Finisterre.</p>
+                        <span class="distance">Distance: 89 km to Finisterre</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <span class="section-icon">⛪</span>
+                    The Cathedral
+                </h2>
+                <p>The Cathedral of Santiago de Compostela is a masterpiece of Romanesque architecture with later Baroque additions. It houses the supposed relics of Saint James and serves as the culmination point for all Camino routes.</p>
+
+                <div class="feature-grid">
+                    <div class="feature-box">
+                        <h4>🚪 Portico of Glory</h4>
+                        <p>Master Mateo's 12th-century sculptural masterpiece depicting the heavenly Jerusalem, saints, and the Second Coming. Pilgrims traditionally touch the Tree of Jesse column.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>⚱️ The Crypt</h4>
+                        <p>Silver reliquary containing the bones of Saint James, rediscovered in 1879 after being hidden from English privateer Francis Drake.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🕯️ Botafumeiro</h4>
+                        <p>The famous giant censer, weighing 80 kg, swung across the transept during special masses. Originally used to mask the odor of weary pilgrims.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🤗 Embrace of the Apostle</h4>
+                        <p>Pilgrims climb behind the altar to embrace the jeweled statue of Saint James, completing their spiritual journey.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <span class="section-icon">🐚</span>
+                    Pilgrim Symbols
+                </h2>
+                <p>The Camino has developed rich symbolism over centuries, with objects that identify pilgrims and carry deep spiritual meaning.</p>
+
+                <div class="symbol-grid">
+                    <div class="symbol-item">
+                        <span class="symbol-icon">🐚</span>
+                        <strong>Scallop Shell</strong>
+                        <p>Universal symbol of the Way</p>
+                    </div>
+                    <div class="symbol-item">
+                        <span class="symbol-icon">🏵️</span>
+                        <strong>Yellow Arrow</strong>
+                        <p>Way markers painted by volunteers</p>
+                    </div>
+                    <div class="symbol-item">
+                        <span class="symbol-icon">🎒</span>
+                        <strong>Pilgrim Staff</strong>
+                        <p>Traditional walking aid and protection</p>
+                    </div>
+                    <div class="symbol-item">
+                        <span class="symbol-icon">📜</span>
+                        <strong>Credential</strong>
+                        <p>Pilgrim passport stamped along the way</p>
+                    </div>
+                    <div class="symbol-item">
+                        <span class="symbol-icon">🎖️</span>
+                        <strong>Compostela</strong>
+                        <p>Certificate for completing 100+ km</p>
+                    </div>
+                    <div class="symbol-item">
+                        <span class="symbol-icon">🌟</span>
+                        <strong>Cross of Santiago</strong>
+                        <p>Red sword-cross of the Order</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <span class="section-icon">✨</span>
+                    Religious Significance
+                </h2>
+
+                <div class="quote-box">
+                    <p>"The world is a book, and those who do not travel read only one page."</p>
+                    <cite>— Saint Augustine, often quoted by Camino pilgrims</cite>
+                </div>
+
+                <p>The pilgrimage to Santiago de Compostela represents multiple spiritual dimensions that continue to draw hundreds of thousands annually:</p>
+
+                <div class="feature-grid">
+                    <div class="feature-box">
+                        <h4>🛤️ Metaphor of Life's Journey</h4>
+                        <p>The Camino mirrors the Christian understanding of life as a pilgrimage toward the heavenly Jerusalem, with its trials, companions, and ultimate destination.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>✝️ Penitential Practice</h4>
+                        <p>Medieval pilgrims walked to earn indulgences or fulfill vows. The physical hardship was understood as participation in Christ's suffering.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🔄 Personal Transformation</h4>
+                        <p>The sustained walking meditation, stripped of daily distractions, facilitates profound inner change and spiritual awakening.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🤝 Community of Pilgrims</h4>
+                        <p>The camino creates temporary communities transcending nationality, age, and background, embodying Christian fellowship.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <span class="section-icon">👤</span>
+                    Saint James the Greater
+                </h2>
+
+                <div class="feature-grid">
+                    <div class="deity-card">
+                        <span class="deity-icon">⚔️</span>
+                        <h4>Santiago Matamoros</h4>
+                        <p>"Saint James the Moor-slayer" - warrior depiction from Reconquista legends, shown on horseback in battle</p>
+                    </div>
+                    <div class="deity-card">
+                        <span class="deity-icon">🚶</span>
+                        <h4>Santiago Peregrino</h4>
+                        <p>Saint James as pilgrim - the peaceful depiction with staff, gourd, scallop shell, and wide-brimmed hat</p>
+                    </div>
+                    <div class="deity-card">
+                        <span class="deity-icon">📖</span>
+                        <h4>Santiago Apostol</h4>
+                        <p>James as Apostle - shown with scroll representing his epistle, as one of Jesus's inner circle</p>
+                    </div>
+                </div>
+
+                <p style="margin-top: 1.5rem;">According to tradition, James preached in Hispania before returning to Jerusalem, where he became the first apostle martyred. His disciples brought his body by stone boat to Galicia, where it lay forgotten until the hermit Pelayo witnessed mysterious lights over the field - campus stellae, "field of stars."</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <span class="section-icon">🌍</span>
+                    Modern Significance
+                </h2>
+                <p>The Camino has experienced remarkable revival since the 1980s, evolving from a purely religious practice to embrace secular spiritual seekers. Over 400,000 pilgrims received the Compostela certificate in recent Holy Years.</p>
+
+                <div class="feature-grid">
+                    <div class="feature-box">
+                        <h4>🎬 Cultural Renaissance</h4>
+                        <p>Films like "The Way" (2010) and Paulo Coelho's "The Pilgrimage" sparked global interest in the Camino experience.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🧘 Secular Spirituality</h4>
+                        <p>Many modern pilgrims walk for personal growth, mindfulness, or life transitions rather than traditional religious devotion.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🏨 Infrastructure</h4>
+                        <p>Network of albergues (pilgrim hostels), way markers, and support services maintained by volunteers and local governments.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🌐 Holy Year (Ano Santo)</h4>
+                        <p>When July 25 falls on Sunday, pilgrims can gain plenary indulgence by entering through the Holy Door.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <span class="section-icon">🔗</span>
+                    Related Topics
+                </h2>
+                <div class="interlink-section">
+                    <a href="jerusalem.html" class="interlink-card" data-entity="place">
+                        <span class="interlink-icon">✡️</span>
+                        <div>
+                            <strong>Jerusalem</strong>
+                            <p>The holiest city in Christianity</p>
+                        </div>
+                    </a>
+                    <a href="lourdes.html" class="interlink-card" data-entity="place">
+                        <span class="interlink-icon">💧</span>
+                        <div>
+                            <strong>Lourdes</strong>
+                            <p>Marian apparition site in France</p>
+                        </div>
+                    </a>
+                    <a href="fatima.html" class="interlink-card" data-entity="place">
+                        <span class="interlink-icon">🌟</span>
+                        <div>
+                            <strong>Fatima</strong>
+                            <p>Portuguese pilgrimage destination</p>
+                        </div>
+                    </a>
+                    <a href="../../mythos/christian/deities/jesus-christ.html" class="interlink-card" data-entity="deity">
+                        <span class="interlink-icon">✝️</span>
+                        <div>
+                            <strong>Jesus Christ</strong>
+                            <p>Central figure of Christianity</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <span class="section-icon">📚</span>
+                    Bibliography
+                </h2>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.1);">
+                        Gitlitz, David M. & Davidson, Linda Kay. <em>The Pilgrimage Road to Santiago</em>. St. Martin's Griffin, 2000.
+                    </li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.1);">
+                        Mullins, Edwin. <em>The Pilgrimage to Santiago</em>. Signal Books, 2001.
+                    </li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.1);">
+                        Frey, Nancy Louise. <em>Pilgrim Stories: On and Off the Road to Santiago</em>. University of California Press, 1998.
+                    </li>
+                    <li style="padding: 0.5rem 0;">
+                        Coelho, Paulo. <em>The Pilgrimage</em>. HarperOne, 1987.
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <script src="../../themes/theme-picker.js"></script>
+    <script src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/smart-links.js"></script>
+</body>
+</html>

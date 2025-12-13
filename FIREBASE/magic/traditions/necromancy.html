@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Necromancy - The Art of Death Magic</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--space-5);
+        }
+
+        .container {
+            max-width: var(--container-lg);
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--space-16) var(--space-5);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-10);
+            border: 2px solid var(--color-border);
+        }
+
+        h1 {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-5);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: var(--text-xl);
+            color: var(--color-text-secondary);
+            margin: var(--space-5) 0;
+            font-style: italic;
+        }
+
+        .section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+        }
+
+        h2 {
+            font-size: var(--text-3xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-6);
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: var(--space-3);
+        }
+
+        h3 {
+            font-size: var(--text-2xl);
+            color: var(--color-secondary);
+            margin: var(--space-6) 0 var(--space-4) 0;
+        }
+
+        h4 {
+            font-size: var(--text-xl);
+            color: var(--color-primary);
+            margin: var(--space-5) 0 var(--space-3) 0;
+        }
+
+        p {
+            margin-bottom: var(--space-4);
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin: var(--space-4) 0;
+            padding-left: var(--space-8);
+        }
+
+        li {
+            margin-bottom: var(--space-3);
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--space-5);
+            margin: var(--space-5) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .practice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .practice-card {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            transition: all var(--transition-base);
+        }
+
+        .practice-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .tools-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-5);
+            margin: var(--space-5) 0;
+        }
+
+        .tool-item {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+        }
+
+        .tool-name {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .source-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 3px solid var(--color-secondary);
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
+            border-radius: var(--radius-md);
+        }
+
+        .source-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .source-author {
+            font-style: italic;
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+        }
+
+        .cross-ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-5) 0;
+        }
+
+        .cross-ref-link {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            text-align: center;
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+            display: block;
+        }
+
+        .cross-ref-link:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .nav-section {
+            display: flex;
+            gap: var(--space-4);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--space-8);
+        }
+
+        .nav-button {
+            padding: var(--space-4) var(--space-6);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .warning-box {
+            background: rgba(255, 100, 100, 0.1);
+            border-left: 4px solid #ff6464;
+            padding: var(--space-5);
+            margin: var(--space-5) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        blockquote {
+            font-style: italic;
+            border-left: 4px solid var(--color-primary);
+            padding-left: var(--space-5);
+            margin: var(--space-5) 0;
+            color: var(--color-text-secondary);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: var(--space-8);
+            margin: var(--space-6) 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--color-border);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: var(--space-6);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -42px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            border: 3px solid var(--color-background);
+        }
+
+        .timeline-date {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .tradition-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-5);
+            margin: var(--space-5) 0;
+        }
+
+        .tradition-card {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+        }
+
+        .tradition-name {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+            font-size: var(--text-lg);
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="theme-picker-container"></div>
+<div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Necromancy</h1>
+        <p class="subtitle">The Art of Death Magic and Spirit Communication</p>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> &rarr; <a href="../index.html">Magic</a> &rarr; <a href="index.html">Traditions</a> &rarr; <span>Necromancy</span>
+</nav>
+
+        <!-- OVERVIEW SECTION -->
+        <section class="section">
+            <h2>Overview</h2>
+            <p>
+                Necromancy (from Greek nekros "dead body" + manteia "divination") encompasses a diverse range of
+                magical practices centered on death, the dead, and the realms beyond mortal life. While popularly
+                associated with raising corpses and dark sorcery, authentic necromantic traditions primarily focus
+                on communicating with the deceased to gain knowledge, honor ancestors, heal the living, or understand
+                mortality's mysteries. Necromancy appears in virtually every human culture, reflecting our universal
+                concern with death and what lies beyond.
+            </p>
+
+            <div class="highlight-box">
+                <h4>Distinguishing Necromancy from Demonology</h4>
+                <p>
+                    Necromancy specifically concerns the dead - ancestors, ghosts, and spirits of those who once lived.
+                    This distinguishes it from demonology or spirit evocation dealing with entities that were never
+                    human. While grimoire traditions sometimes blur these categories (demons may be commanded to
+                    summon the dead), the core of necromancy involves human souls and their continued existence
+                    after bodily death. This connection to human experience gives necromancy its unique emotional
+                    and ethical dimensions.
+                </p>
+            </div>
+
+            <h3>Historical Overview</h3>
+            <p>
+                Practices involving the dead are among humanity's oldest spiritual technologies, evidenced in
+                prehistoric burial practices suggesting belief in afterlife communication. Every major civilization
+                developed forms of necromancy - from the Greek nekyia to Chinese ancestor veneration, from African
+                ancestral religions to Mesoamerican death cults. The term "necromancy" itself was coined by Greeks
+                but the practices are universal.
+            </p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">Paleolithic Era</div>
+                    <p>Earliest evidence of deliberate burial and possible ancestor veneration; red ochre suggesting belief in afterlife</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Ancient Mesopotamia (3000+ BCE)</div>
+                    <p>Necromantic practices documented; the dead consulted through rituals at burial sites</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Classical Greece (800-300 BCE)</div>
+                    <p>Nekyia at oracles of the dead; Odyssey's descent to Hades; philosophical debates about the soul</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Roman Era</div>
+                    <p>Lemures and larvae (ghosts); ancestor cult; legal prohibitions against harmful necromancy</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Medieval Europe</div>
+                    <p>Church condemnation; necromancy conflated with demonic magic; grimoire traditions develop</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">19th Century</div>
+                    <p>Spiritualism emerges; seances and mediumship become widespread; scientific investigations begin</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Contemporary</div>
+                    <p>Ancestor veneration continues globally; modern magical practitioners revive traditional methods</p>
+                </div>
+            </div>
+
+            <h3>Theological and Philosophical Frameworks</h3>
+            <p>
+                Necromantic traditions rest on fundamental beliefs about the soul's nature and fate after death.
+                While specific beliefs vary enormously, most necromantic systems share certain assumptions: that
+                some aspect of personhood survives bodily death; that the dead retain knowledge, personality, and
+                agency; that communication between living and dead is possible through proper means; and that the
+                dead can affect the living world and vice versa.
+            </p>
+
+            <blockquote>
+                "I called on the dead, and they answered. I asked for knowledge, and they gave wisdom bought with
+                their own suffering. I sought the ancestors, and they showed me the path they walked before me."
+                <br><em>- Traditional practitioner's invocation</em>
+            </blockquote>
+        </section>
+
+        <!-- TYPES OF NECROMANCY -->
+        <section class="section">
+            <h2>Types of Necromantic Practice</h2>
+            <p>
+                Necromancy encompasses multiple distinct practices, from the veneration of beloved ancestors to
+                the conjuration of spirits for magical purposes. Different traditions emphasize different
+                approaches, and individual practitioners may work within specific specializations.
+            </p>
+
+            <div class="tradition-grid">
+                <div class="tradition-card">
+                    <div class="tradition-name">Ancestor Veneration</div>
+                    <p>
+                        The most widespread form of necromancy involves honoring and communicating with one's own
+                        ancestors - parents, grandparents, and lineage extending back through generations. Found
+                        in virtually all cultures, ancestor veneration seeks guidance, protection, and blessings
+                        from those who walked before. Offerings, prayers, and memorial rituals maintain the
+                        relationship between living and dead family members.
+                    </p>
+                </div>
+
+                <div class="tradition-card">
+                    <div class="tradition-name">Divinatory Necromancy</div>
+                    <p>
+                        Using the dead as sources of hidden knowledge, especially about the future. The Greek
+                        nekromanteion (oracle of the dead) exemplifies this approach - visitors would enter
+                        underground chambers, perform rituals, and receive prophecies from the deceased. The dead
+                        were believed to possess knowledge unavailable to the living, transcending time's
+                        limitations.
+                    </p>
+                </div>
+
+                <div class="tradition-card">
+                    <div class="tradition-name">Mediumship and Channeling</div>
+                    <p>
+                        Allowing spirits of the dead to communicate through a living medium, who may enter trance
+                        states while the spirit speaks through them. This practice became systematized in 19th-century
+                        Spiritualism but exists in many cultures. The medium serves as a bridge between worlds,
+                        temporarily lending their body or voice to the deceased.
+                    </p>
+                </div>
+
+                <div class="tradition-card">
+                    <div class="tradition-name">Ceremonial Evocation</div>
+                    <p>
+                        Formal ritual summoning of specific deceased individuals, often using elaborate ceremonial
+                        procedures derived from grimoire traditions. This approach treats necromancy as a branch of
+                        ceremonial magic, using circles, divine names, and conjurations to compel or invite spirits
+                        to appear and communicate.
+                    </p>
+                </div>
+
+                <div class="tradition-card">
+                    <div class="tradition-name">Death Magic (Black Necromancy)</div>
+                    <p>
+                        The darker applications sometimes associated with necromancy: using death energy or the
+                        restless dead for harmful purposes, binding ghosts to service, or manipulating the forces
+                        of death for personal power. Most traditions strongly condemn such practices, warning of
+                        spiritual and karmic consequences.
+                    </p>
+                </div>
+
+                <div class="tradition-card">
+                    <div class="tradition-name">Psychopomp Work</div>
+                    <p>
+                        Helping the dead transition properly to their next state - guiding lost spirits, releasing
+                        trapped ghosts, or completing funeral rites for the improperly buried. This healing work
+                        benefits both the dead who find peace and the living who are freed from haunting.
+                    </p>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>Ethical Considerations</h4>
+                <p>
+                    Necromantic practice raises significant ethical questions. Do the dead have rights? Is it
+                    appropriate to disturb their rest for our purposes? What obligations do we have to ancestors
+                    and what obligations do they have to us? Traditional systems typically emphasize reciprocity -
+                    the living honor the dead through offerings and memory; the dead protect and guide the living
+                    in return. Coercive practices that force or compel spirits are widely condemned.
+                </p>
+            </div>
+        </section>
+
+        <!-- CORE PRACTICES -->
+        <section class="section">
+            <h2>Core Practices</h2>
+
+            <div class="practice-grid">
+                <div class="practice-card">
+                    <h4>Creating Sacred Space</h4>
+                    <p>
+                        Necromantic work requires appropriate space - a threshold between worlds where living and
+                        dead can meet. This might be a cemetery, a crossroads, a specially prepared ritual space,
+                        or an ancestor altar in the home. The space must be purified, consecrated, and opened for
+                        spirit communication. Darkness or candlelight traditionally facilitates contact, as does
+                        working at liminal times (midnight, twilight, new moon).
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Offerings and Feeding the Dead</h4>
+                    <p>
+                        The dead require sustenance to maintain connection with our world. Offerings may include
+                        food and drink the deceased enjoyed in life, incense, candles, flowers, and more elaborate
+                        gifts. In some traditions, blood offerings provide life-force the dead cannot generate
+                        themselves. Regular offerings maintain relationships with ancestors; special offerings
+                        accompany specific requests or ceremonies.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Invocation and Calling</h4>
+                    <p>
+                        Summoning specific spirits requires knowing their name, speaking it with intention, and
+                        creating conditions favorable to their appearance. Invocations may be formal prayers,
+                        sung songs, rhythmic chanting, or simple heartfelt speech. Some traditions use specific
+                        conjurations demanding appearance in divine names; others invite ancestors respectfully.
+                        The relationship determines the approach.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Divination by the Dead</h4>
+                    <p>
+                        Receiving information from spirits through various means: direct communication in trance
+                        or possession, reading signs and omens, dreams in which the dead appear, or using
+                        divinatory tools consecrated to spirit work. Ouija boards, pendulums, and similar tools
+                        may facilitate communication. Some practitioners scry in mirrors or dark surfaces to
+                        perceive spirit presence.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Working with Grave Dirt and Relics</h4>
+                    <p>
+                        Physical materials connected to the dead carry their essence and facilitate contact.
+                        Grave dirt (properly obtained with appropriate offerings), bones, personal possessions,
+                        photographs, and other relics provide links to specific spirits. These materials may be
+                        used in rituals, worn as talismans, or placed on altars to strengthen ancestral connection.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Dream Incubation</h4>
+                    <p>
+                        Preparing to receive messages from the dead through dreams. This may involve sleeping in
+                        sacred places, performing specific rituals before sleep, placing objects under the pillow,
+                        or making prayers requesting dream visitation. Dreams provide a meeting ground where living
+                        and dead can communicate more easily than in waking consciousness.
+                    </p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h4>Protection in Necromantic Work</h4>
+                <p>
+                    Working with the dead carries risks. Not all spirits have the living's best interests at heart;
+                    some are confused, hostile, or predatory. Traditional practices therefore emphasize protection:
+                    working within circles or consecrated space, invoking guardian spirits or divine protection,
+                    maintaining clear boundaries, and knowing how to dismiss unwanted presences. Practitioners also
+                    guard against becoming obsessed with death, maintaining balance with the concerns of living.
+                </p>
+            </div>
+        </section>
+
+        <!-- TOOLS & MATERIALS -->
+        <section class="section">
+            <h2>Tools & Materials</h2>
+
+            <div class="tools-list">
+                <div class="tool-item">
+                    <div class="tool-name">The Ancestor Altar</div>
+                    <p>
+                        A dedicated space for honoring the dead, typically featuring photographs, mementos, and
+                        offerings for ancestors. The altar provides a focal point for regular veneration and
+                        special ceremonies. Different traditions have specific requirements for altar setup,
+                        orientation, and maintenance.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Skull or Bone</div>
+                    <p>
+                        Human or animal skulls serve as traditional necromantic tools - vessels for spirit habitation,
+                        focal points for communication, or symbols of death's reality. Properly consecrated, a skull
+                        may house a familiar spirit or provide a "phone line" to the ancestral realm. Ethical sourcing
+                        is crucial.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Black Mirror</div>
+                    <p>
+                        A dark, reflective surface used for scrying and spirit vision. The mirror may reveal spirit
+                        faces, facilitate communication, or serve as a portal through which the dead can manifest.
+                        Traditional black mirrors were made of obsidian or black-painted glass.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Candles (Especially Black and White)</div>
+                    <p>
+                        Candles illuminate the darkness where spirits manifest and serve as offerings of light and
+                        energy. Black candles traditionally summon the dead or facilitate underworld work; white
+                        candles honor and elevate them. Specific spirits may prefer other colors associated with
+                        their nature.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Graveyard Dirt</div>
+                    <p>
+                        Soil from graves carries the essence of those buried there. Different graves provide
+                        different powers - a soldier's grave for protection, a healer's for medicine, an ancestor's
+                        for family blessing. Dirt must be obtained respectfully, with appropriate offerings left
+                        in exchange.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Herbs of the Dead</div>
+                    <p>
+                        Plants associated with death, the underworld, and spirit communication. These include
+                        wormwood, mugwort, datura (extremely dangerous), yew, cypress, and various nightshades.
+                        Such herbs may be burned as incense, made into anointing oils, or used in ritual baths.
+                        Many are toxic and require caution.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Spirit Communication Tools</div>
+                    <p>
+                        Various devices facilitate spirit communication: spirit boards (Ouija), pendulums, automatic
+                        writing implements, and electronic devices (in modern practice). These provide means for
+                        spirits to communicate through physical movement or phenomena the medium can interpret.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Offerings for the Dead</div>
+                    <p>
+                        Traditional offerings include water (the dead are always thirsty), coffee or alcohol,
+                        tobacco smoke, flowers, coins, and foods the deceased enjoyed. Different cultures have
+                        specific offering traditions - rum in Caribbean practice, sake in Japanese, specific foods
+                        for specific festivals.
+                    </p>
+                </div>
+            </div>
+
+            <h3>Times and Places</h3>
+            <p>
+                Necromantic work is traditionally performed at liminal times and places where the boundary between
+                worlds thins:
+            </p>
+
+            <ul>
+                <li><strong>Times:</strong> Midnight, twilight, dark moon, Samhain/All Souls, death anniversaries, specific festival days</li>
+                <li><strong>Places:</strong> Cemeteries, crossroads, thresholds, ancestral lands, places of death, underground spaces</li>
+                <li><strong>Conditions:</strong> Darkness or candlelight, silence, solitude, fasting or special diet, ritual purity</li>
+            </ul>
+        </section>
+
+        <!-- CULTURAL TRADITIONS -->
+        <section class="section">
+            <h2>Cultural Traditions</h2>
+
+            <h3>Western Traditions</h3>
+
+            <h4>Greek Nekyia</h4>
+            <p>
+                Ancient Greece possessed oracles of the dead (nekromanteia) where consultants could communicate with
+                deceased souls. The most famous was at Ephyra in Epirus, where underground chambers allowed visitors
+                to perform rituals and receive prophecies from the dead. Homer's Odyssey describes Odysseus's
+                consultation with the dead at the world's edge, establishing literary patterns for Western necromancy.
+            </p>
+
+            <h4>Roman Practices</h4>
+            <p>
+                Rome maintained elaborate ancestor cults alongside fear of restless dead (lemures, larvae). The
+                Parentalia festival honored deceased family members, while the Lemuria sought to appease potentially
+                dangerous spirits. Roman law prohibited harmful necromancy while permitting ancestor veneration.
+            </p>
+
+            <h4>Medieval Grimoire Traditions</h4>
+            <p>
+                Medieval grimoires sometimes included necromantic procedures, typically framed within Christian
+                conjuration using divine names and threats of hellfire. The Munich Manual and similar texts provide
+                elaborate rituals for summoning the dead, though these often blur into demonic magic. Church
+                condemnation drove such practices underground.
+            </p>
+
+            <div class="highlight-box">
+                <h4>Spiritualism</h4>
+                <p>
+                    The 19th-century Spiritualist movement democratized necromancy, making spirit communication
+                    a widespread practice through seances, mediums, and spirit photography. Founded in 1848 with
+                    the Fox sisters' reported spirit communications, Spiritualism spread rapidly, influencing
+                    millions and prompting scientific investigation of survival after death. Its techniques -
+                    table-tipping, automatic writing, trance mediumship - remain influential.
+                </p>
+            </div>
+
+            <h3>Non-Western Traditions</h3>
+
+            <h4>African and Diasporic</h4>
+            <p>
+                African Traditional Religions and their diaspora descendants (Vodou, Santeria, Candomble) maintain
+                elaborate relationships with ancestral spirits. The egun (ancestors) or similar beings receive
+                regular veneration, participate in family decisions, and may manifest through possession. This
+                living tradition represents perhaps the most vital contemporary necromantic practice.
+            </p>
+
+            <h4>East Asian Ancestor Veneration</h4>
+            <p>
+                Chinese, Japanese, Korean, and Vietnamese cultures maintain sophisticated ancestor veneration systems.
+                Confucian filial piety extends beyond death; ancestors receive offerings, prayers, and regular
+                attention at household shrines and public festivals. The dead remain part of the family, capable
+                of blessing or cursing depending on how they are treated.
+            </p>
+
+            <h4>Mesoamerican Death Cults</h4>
+            <p>
+                Pre-Columbian Mesoamerican cultures maintained complex relationships with death. The Aztec Mictlan,
+                Maya Xibalba, and other underworld concepts shaped elaborate mortuary practices. Modern Dia de los
+                Muertos celebrations continue this tradition, honoring the dead with altars, offerings, and
+                celebration of their return.
+            </p>
+        </section>
+
+        <!-- PRIMARY SOURCES -->
+        <section class="section">
+            <h2>Primary Sources</h2>
+
+            <div class="source-item">
+                <div class="source-title">The Odyssey, Book XI (The Nekyia)</div>
+                <div class="source-author">Homer, c. 8th century BCE; trans. Robert Fagles, Penguin, 1996</div>
+                <p>
+                    Odysseus's journey to the underworld's edge to consult the dead prophet Tiresias. This
+                    foundational Western text describes Greek necromantic procedures: the trench, blood offerings,
+                    and spirits rising to drink and speak. Essential reference for understanding classical
+                    necromancy.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Greek Magical Papyri</div>
+                <div class="source-author">Ed. Hans Dieter Betz, University of Chicago Press, 1986</div>
+                <p>
+                    Collection of Greco-Egyptian magical texts including necromantic procedures - summoning the
+                    dead, dream oracles from corpses, and binding spirits to service. Shows the syncretic
+                    combination of Greek, Egyptian, and Jewish elements in late ancient necromancy.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">Forbidden Rites: A Necromancer's Manual of the Fifteenth Century</div>
+                <div class="source-author">Richard Kieckhefer, Penn State Press, 1997</div>
+                <p>
+                    Scholarly analysis and translation of the Munich Manual, a medieval necromantic grimoire.
+                    Kieckhefer places the text in historical context and examines its procedures for summoning
+                    spirits of the dead. Essential for understanding medieval European necromancy.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Book of Oberon</div>
+                <div class="source-author">Ed. Daniel Harms et al., Llewellyn, 2015</div>
+                <p>
+                    16th-century English grimoire including extensive necromantic material. Procedures for
+                    summoning specific types of spirits, binding them to service, and obtaining knowledge from
+                    the dead. Shows English magical traditions contemporary with John Dee.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">Honoring Your Ancestors</div>
+                <div class="source-author">Mallorie Vaudoise, Llewellyn, 2019</div>
+                <p>
+                    Practical guide to ancestor veneration from a modern magical perspective. Covers establishing
+                    an ancestor altar, making offerings, communicating with the dead, and healing ancestral trauma.
+                    Accessible introduction for contemporary practitioners.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">Communing with the Spirits</div>
+                <div class="source-author">Martin Coleman, Samuel Weiser, 1998</div>
+                <p>
+                    History and practice of Western necromancy from classical antiquity through Spiritualism
+                    to contemporary practice. Covers major traditions, techniques, and provides practical
+                    instruction for spirit communication.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">Ancestor Paths: Honoring Our Ancestors and Guardian Spirits</div>
+                <div class="source-author">Awo Fa'lokun Fatunmbi, Original Publications, 2011</div>
+                <p>
+                    African Traditional Religion perspective on ancestor veneration from an initiated Ifa priest.
+                    Covers the importance of the egun, proper veneration practices, and the relationship between
+                    living and dead in Yoruba tradition.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">Speaking with the Dead</div>
+                <div class="source-author">Konstantinos, Llewellyn, 2004</div>
+                <p>
+                    Practical manual for various forms of spirit communication including seance procedures,
+                    Ouija techniques, electronic voice phenomena, and more. Covers both traditional and modern
+                    approaches to contacting the dead.
+                </p>
+            </div>
+        </section>
+
+        <!-- CROSS-REFERENCES -->
+        <section class="section">
+            <h2>Cross-References & Related Traditions</h2>
+
+            <div class="cross-ref-grid">
+                <a href="voodoo.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">&#128126;</div>
+                    <div><strong>Vodou</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Ancestor and spirit traditions</div>
+                </a>
+
+                <a href="shamanism.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">&#129703;</div>
+                    <div><strong>Shamanism</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Underworld journeys</div>
+                </a>
+
+                <a href="goetia.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">&#128310;</div>
+                    <div><strong>Goetia</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Spirit evocation</div>
+                </a>
+
+                <a href="../../mythos/greek/cosmology/underworld.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">&#127769;</div>
+                    <div><strong>Greek Underworld</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Hades and the dead</div>
+                </a>
+
+                <a href="seidr.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">&#128302;</div>
+                    <div><strong>Seidr</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Norse spirit practices</div>
+                </a>
+
+                <a href="heka.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">&#128737;</div>
+                    <div><strong>Heka</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Egyptian afterlife magic</div>
+                </a>
+            </div>
+
+            <h3 style="margin-top: var(--space-8);">Related Concepts and Practices</h3>
+            <ul>
+                <li><strong>Ancestor Veneration:</strong> Honoring the dead across virtually all human cultures</li>
+                <li><strong>Spiritualism:</strong> 19th-20th century movement focused on spirit communication</li>
+                <li><strong>Psychopomp Work:</strong> Guiding souls of the dead to their proper destination</li>
+                <li><strong>Ghost Hunting:</strong> Modern investigation of hauntings and paranormal phenomena</li>
+                <li><strong>Mediumship:</strong> Allowing spirits to communicate through a living person</li>
+                <li><strong>Death Midwifery:</strong> Assisting the dying and their spirits' transition</li>
+            </ul>
+        </section>
+
+        <!-- INTERLINK PANEL -->
+        <section class="section">
+            <section class="interlink-panel">
+                <h3 class="interlink-header" style="display: flex; align-items: center; gap: var(--space-3); color: var(--color-primary); margin-bottom: var(--space-6);">
+                    <span class="interlink-icon">&#128279;</span>
+                    Related Across the Mythos
+                </h3>
+
+                <div class="interlink-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-6);">
+                    <!-- Source Traditions -->
+                    <div class="interlink-section">
+                        <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--color-secondary); margin-bottom: var(--space-4);">Source Traditions</div>
+                        <a href="../../mythos/greek/index.html" class="cross-ref-link" style="display: block; padding: var(--space-5); background: rgba(var(--color-primary-rgb), 0.1); border: 2px solid var(--color-border); border-radius: var(--radius-lg); text-decoration: none;">
+                            <div style="font-size: 2rem; margin-bottom: var(--space-2); text-align: center;">&#127894;</div>
+                            <div style="text-align: center;"><strong style="color: var(--color-primary);">Greek Mythology</strong></div>
+                            <div style="font-size: var(--text-sm); color: var(--color-text-secondary); text-align: center;">Hades, Persephone, and the Underworld</div>
+                        </a>
+                    </div>
+
+                    <!-- Death Deities -->
+                    <div class="interlink-section">
+                        <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--color-secondary); margin-bottom: var(--space-4);">Associated Deities</div>
+                        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                            <a href="../../mythos/greek/deities/hades.html" class="cross-ref-link" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none;">
+                                <span style="font-size: 1.5rem;">&#128128;</span>
+                                <div>
+                                    <strong style="color: var(--color-primary);">Hades</strong>
+                                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Greek lord of the dead</div>
+                                </div>
+                            </a>
+                            <a href="../../mythos/egyptian/deities/anubis.html" class="cross-ref-link" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none;">
+                                <span style="font-size: 1.5rem;">&#129442;</span>
+                                <div>
+                                    <strong style="color: var(--color-primary);">Anubis</strong>
+                                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Egyptian guide of souls</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Related Practices -->
+                    <div class="interlink-section">
+                        <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--color-secondary); margin-bottom: var(--space-4);">Related Practices</div>
+                        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                            <a href="voodoo.html" class="cross-ref-link" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none;">
+                                <span style="font-size: 1.5rem;">&#128126;</span>
+                                <div>
+                                    <strong style="color: var(--color-primary);">Vodou</strong>
+                                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Gede and ancestor traditions</div>
+                                </div>
+                            </a>
+                            <a href="shamanism.html" class="cross-ref-link" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none;">
+                                <span style="font-size: 1.5rem;">&#129703;</span>
+                                <div>
+                                    <strong style="color: var(--color-primary);">Shamanism</strong>
+                                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Underworld journeys</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cross-Cultural Parallels -->
+                <div class="parallel-traditions" style="margin-top: var(--space-8); padding: var(--space-6); background: rgba(var(--color-primary-rgb), 0.05); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+                    <h4 style="color: var(--color-primary); margin-bottom: var(--space-4);">&#127757; Cross-Cultural Parallel Practices</h4>
+                    <p style="color: var(--color-text-secondary); margin-bottom: var(--space-4); font-size: var(--text-sm);">Death and ancestor traditions worldwide:</p>
+                    <div class="parallel-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-4);">
+                        <a href="voodoo.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; transition: all var(--transition-base);">
+                            <span class="tradition-flag" style="font-size: 1.5rem;">&#128128;</span>
+                            <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Vodou</span>
+                            <span class="tradition-label" style="font-size: var(--text-sm); color: var(--color-text-secondary);">African Diasporic</span>
+                        </a>
+                        <a href="heka.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; transition: all var(--transition-base);">
+                            <span class="tradition-flag" style="font-size: 1.5rem;">&#128737;</span>
+                            <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Heka</span>
+                            <span class="tradition-label" style="font-size: var(--text-sm); color: var(--color-text-secondary);">Egyptian</span>
+                        </a>
+                        <a href="seidr.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; transition: all var(--transition-base);">
+                            <span class="tradition-flag" style="font-size: 1.5rem;">&#128302;</span>
+                            <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Seidr</span>
+                            <span class="tradition-label" style="font-size: var(--text-sm); color: var(--color-text-secondary);">Norse</span>
+                        </a>
+                        <a href="shamanism.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; transition: all var(--transition-base);">
+                            <span class="tradition-flag" style="font-size: 1.5rem;">&#129703;</span>
+                            <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Shamanism</span>
+                            <span class="tradition-label" style="font-size: var(--text-sm); color: var(--color-text-secondary);">Universal</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- See Also -->
+                <div class="see-also-section" style="margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--color-border);">
+                    <h4 style="color: var(--color-primary); margin-bottom: var(--space-4);">&#128218; See Also</h4>
+                    <div class="see-also-links" style="display: flex; flex-wrap: wrap; gap: var(--space-3);">
+                        <a href="../../archetypes/celestial/index.html" class="see-also-link" style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-full); text-decoration: none; font-size: var(--text-sm); color: var(--color-text-primary);">
+                            <span>&#128128;</span> Psychopomp Archetype
+                        </a>
+                        <a href="../../mythos/babylonian/cosmology/afterlife.html" class="see-also-link" style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-full); text-decoration: none; font-size: var(--text-sm); color: var(--color-text-primary);">
+                            <span>&#127769;</span> Afterlife Beliefs
+                        </a>
+                        <a href="../../index.html" class="see-also-link" style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-full); text-decoration: none; font-size: var(--text-sm); color: var(--color-text-primary);">
+                            <span>&#128188;</span> Ancestor Veneration
+                        </a>
+                        <a href="../../index.html" class="see-also-link" style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-full); text-decoration: none; font-size: var(--text-sm); color: var(--color-text-primary);">
+                            <span>&#128123;</span> Ghosts and Spirits
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- NAVIGATION -->
+        <nav class="nav-section">
+            <a href="../index.html" class="nav-button">Return to Magic Index</a>
+            <a href="../../index.html" class="nav-button">Death Traditions</a>
+            <a href="../../index.html" class="nav-button">Home</a>
+        </nav>
+    </div>
+
+    <!-- Theme Picker UI -->
+</body>
+</html>

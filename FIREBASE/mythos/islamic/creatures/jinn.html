@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The</title>
+<link href="../../../styles.css" rel="stylesheet"/>
+<link href="../../../themes/theme-base.css" rel="stylesheet"/>
+
+<link href="../../../themes/corpus-links.css" rel="stylesheet"/>
+<link rel="stylesheet" href="../../../themes/smart-links.css">
+<script defer src="../../../themes/smart-links.js"></script>
+    <script defer src="../../../themes/theme-animations.js"></script>
+<script defer="None" src="../../../themes/theme-picker.js"></script>
+<style>
+        :root {
+            --mythos-primary: #008000;
+            --mythos-secondary: #00CED1;
+        }
+        .deity-header {
+            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
+            color: var(--color-text-primary);
+            padding: var(--space-12) var(--space-8);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-8);
+            text-align: center;
+        }
+        .deity-icon { font-size: var(--text-5xl); margin-bottom: var(--space-4); }
+        .attribute-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-6) 0;
+        }
+        .attribute-card {
+            background: var(--color-surface); backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            padding: var(--space-4);
+            border-radius: var(--radius-xl);
+        }
+        .attribute-label {
+            color: var(--color-primary);
+            font-weight: var(--font-bold);
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .attribute-value { font-size: var(--text-lg); }
+        .codex-search-section { margin: 20px 0; border: 1px solid #ddd; border-radius: var(--radius-lg); background: #f9f9f9; }
+        .codex-search-header {
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            border-radius: var(--radius-lg) 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+        .codex-search-header:hover { background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%); }
+        .codex-search-header h3 { margin: 0; font-size: 16px; font-weight: 600; }
+        .expand-icon { font-size: 20px; transition: transform 0.3s ease; }
+        .expanded .expand-icon { transform: rotate(180deg); }
+        .codex-search-content { display: none; padding: 15px; background: white; border-radius: 0 0 8px 8px; }
+        .codex-search-content.show { display: block; }
+        .search-result-item { margin: 10px 0; padding: 10px; border-left: 3px solid #667eea; background: #f5f7ff; }
+        .citation { font-weight: 600; color: #667eea; cursor: pointer; margin-bottom: 8px; }
+        .citation:hover { color: #764ba2; text-decoration: underline; }
+        .verse-text { display: none; margin-top: 8px; padding: 10px; background: white; border-left: 2px solid #764ba2; font-style: italic; color: #333; }
+        .verse-text.show { display: block; }
+        .book-reference { font-size: 12px; color: var(--color-text-secondary); margin-top: 5px; }
+        .inline-search-link {
+            color: #667eea;
+            text-decoration: none;
+            border-bottom: 1px dashed #667eea;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .inline-search-link:hover { color: #764ba2; border-bottom-color: #764ba2; }
+        .related-card { background: var(--color-surface); backdrop-filter: blur(10px); padding: var(--space-6); border-radius: var(--radius-xl); }
+    </style>
+</head>
+<body>
+<div id="theme-picker-container"></div>
+<header>
+    <div class="header-content">
+        <h1>🕌 The <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a></h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../../mythos/index.html">Home</a> →
+                <a href="../index.html">Islamic</a> →
+                <a href="index.html">Creatures</a> →
+                <span><a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">Jinn</a></span>
+</nav>
+<main>
+<section class="deity-header">
+<div class="deity-icon">🔥</div>
+<h2>Al-<a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a> (الجن)</h2>
+<p class="subtitle" style="font-size: var(--text-2xl); margin: 0.5rem 0;"><a data-term="Beings" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View beings in ancient texts">Beings</a> Created from Smokeless Fire</p>
+<p style="font-size: var(--text-lg); margin-top: var(--space-4);">
+                The <a class="inline-search-link" data-search-term="Jinn" href="#" onclick="performCodexSearch(event, 'Jinn')">Jinn</a>
+                are a class of sentient <a data-term="Beings" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View beings in ancient texts">beings</a> created from smokeless fire, existing in a dimension parallel to humans. Like humans,
+                they possess <a class="inline-search-link" data-search-term="free will" href="#" onclick="performCodexSearch(event, 'free will')">free will</a>,
+                face moral choices, and will be judged on the Day of <a class="corpus-link" data-term="Resurrection" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=resurrection" title="Search corpus for 'Resurrection'">Resurrection</a>. Among them are believers, disbelievers, righteous, and wicked.
+        </p></section>
+<section>
+<h2 style="color: var(--color-primary);"><a data-term="Core Attributes" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View core attributes in ancient texts">Core Attributes</a></h2>
+<div class="attribute-grid">
+<div class="attribute-card">
+<div class="attribute-label">Created From</div>
+<div class="attribute-value">Smokeless fire (marij min <a class="corpus-link" data-term="Nar" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Nar'">nar</a>)</div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label">Purpose</div>
+<div class="attribute-value">To worship <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a></div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label">Free Will</div>
+<div class="attribute-value">Yes - accountable for actions</div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label">Lifespan</div>
+<div class="attribute-value">Far longer than humans</div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label">Abilities</div>
+<div class="attribute-value">Shapeshifting, great speed, invisibility</div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label">Types</div>
+<div class="attribute-value">Muslim <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a>, disbelieving <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a>, Shayatin</div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label">Most Famous</div>
+<div class="attribute-value"><a class="corpus-link" data-term="Iblis" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Iblis'">Iblis</a> (<a class="corpus-link" data-term="Satan" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Satan'">Satan</a>) - rebellious <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a></div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label">Mentioned in <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a></div>
+<div class="attribute-value">Dedicated Surah (Al-<a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a>, 72)</div>
+</div></div></section>
+<div class="codex-search-section">
+<div class="codex-search-header" onclick="toggleCodexSearch(this)">
+<h3>📚 Primary Sources: The <a data-term="Creation" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View creation in ancient texts">Creation</a> of <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">Jinn</a></h3>
+<span class="expand-icon">▼</span>
+</div>
+<div class="codex-search-content">
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 55:14-15
+                    </div>
+<div class="verse-text">
+                        "He created man from clay like [that of] pottery. And He created the <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a> from a smokeless flame of fire."
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Ar-Rahman (The Most Merciful), verses 14-15
+                    </div>
+</div>
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 15:26-27
+                    </div>
+<div class="verse-text">
+                        "And We did certainly create man out of clay from an altered black mud. And the <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a> We created before from scorching fire."
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Al-Hijr, verses 26-27
+                    </div>
+</div>
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 51:56
+                    </div>
+<div class="verse-text">
+                        "And I did not create the <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a> and mankind except to worship Me."
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Adh-Dhariyat (The Winnowing Winds), verse 56
+                    </div>
+</div>
+</div>
+</div>
+<section style="margin-top: var(--space-8);">
+<h2 style="color: var(--color-primary);"><a data-term="Nature" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View nature in ancient texts">Nature</a> and Characteristics</h2>
+<h3 style="color: var(--color-secondary);">Origin and Essence</h3>
+<p>
+                Unlike humans created from clay and angels created from <a class="corpus-link" data-term="Light" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=light_of_the_world" title="Search corpus for 'Light'">light</a>,
+                <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> were created from "marij min <a class="corpus-link" data-term="Nar" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Nar'">nar</a>" - a smokeless flame of fire. This fiery origin grants them unique properties:
+                they can move at tremendous speeds, change forms, and exist in dimensions beyond normal human perception. Their <a data-term="Creation" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View creation in ancient texts">creation</a>
+                predates humanity, as mentioned in the <a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a>: "And the <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> We created before from scorching fire" (15:27).
+            </p>
+<h3 style="color: var(--color-secondary); margin-top: var(--space-6);">Parallel Society</h3>
+<p>
+<a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a> live in communities with social structures similar to humans. They marry, have children, eat, drink, and die.
+                They have kings, leaders, and various tribes. Some <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> are Muslim, following <a class="inline-search-link" href="../deities/muhammad.html">Prophet Muhammad</a>
+                and the <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, while others are disbelievers.
+                The <a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a> records <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> listening to Quranic recitation and accepting Islam (Surah 72).
+            </p>
+<h3 style="color: var(--color-secondary); margin-top: var(--space-6);">Abilities and Limitations</h3>
+<p>
+<a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a> possess abilities that exceed human capacity:
+            </p>
+<ul style="margin: var(--space-4) 0 0 2rem; line-height: var(--leading-relaxed);">
+<li><strong>Shapeshifting:</strong> Can take various forms including animals (often snakes or dogs)</li>
+<li><strong>Invisibility:</strong> Normally invisible to humans unless they choose to appear</li>
+<li><strong>Great Speed:</strong> Can travel vast distances quickly</li>
+<li><strong>Strength:</strong> Physically stronger than humans in many cases</li>
+<li><strong>Longevity:</strong> Live for centuries, possibly millennia</li>
+</ul>
+<p style="margin-top: var(--space-4);">
+                However, <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> have important limitations. They cannot know the Ghayb
+                (unseen/future), despite common misconceptions. The <a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a> states that when <a data-term="Prophet" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet in ancient texts">Prophet</a> Sulayman
+                (<a class="corpus-link" data-term="Solomon" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Solomon'">Solomon</a>) died, the <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> working for him didn't realize until much later, proving their ignorance of the unseen (34:14).
+                They also cannot harm believers who maintain proper dhikr
+                (remembrance of Allah) and protection.
+        </p></section>
+<div class="codex-search-section">
+<div class="codex-search-header" onclick="toggleCodexSearch(this)">
+<h3>📚 <a data-term="Primary" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View primary in ancient texts">Primary</a> Sources: Nature and Abilities of <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">Jinn</a></h3>
+<span class="expand-icon">▼</span>
+</div>
+<div class="codex-search-content">
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 72:1-6
+                    </div>
+<div class="verse-text">
+                        "Say, [O <a data-term="Muhammad" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View muhammad in ancient texts">Muhammad</a>], 'It has been revealed to me that a group of the <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> listened and said, "Indeed, we have heard an amazing <a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a>.
+                        It guides to the right course, and we have believed in it. And we will never associate with our Lord anyone. And [it teaches] that exalted
+                        is the nobleness of our Lord; He has not taken a wife or a son. And that our foolish one [i.e., <a class="corpus-link" data-term="Iblis" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Iblis'">Iblis</a>] has been saying about Allah
+                        an excessive transgression. And we had thought that mankind and the <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> would never speak about Allah a lie. And there were men from mankind
+                        who sought refuge in men from the <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a>, so they [only] increased them in burden."'"
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Al-<a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">Jinn</a>, verses 1-6
+                    </div>
+</div>
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 34:12-14
+                    </div>
+<div class="verse-text">
+                        "And to <a class="corpus-link" data-term="Solomon" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Solomon'">Solomon</a> [We subjected] the wind - its morning [<a data-term="Journey" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View journey in ancient texts">journey</a> was that of] a month - and its afternoon [journey was that of] a month,
+                        and We made flow for him a spring of [liquid] copper. And among the <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> were those who worked for him by the permission of his Lord.
+                        And whoever deviated among them from Our command - We will make him taste of the punishment of the Blaze... And when We decreed for <a class="corpus-link" data-term="Solomon" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Solomon'">Solomon</a> death,
+                        nothing indicated to the <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> his death except a creature of the earth eating his staff. But when he fell, it became clear to the <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a>
+                        that if they had known the unseen, they would not have remained in humiliating punishment."
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Saba (Sheba), verses 12-14
+                    </div>
+</div>
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+                        Sahih Muslim:Book 26:<a class="corpus-link" data-term="Hadith" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Hadith'">Hadith</a> 5557
+                    </div>
+<div class="verse-text">
+                        "The <a class="corpus-link" data-term="Messenger" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=gabriel" title="Search corpus for 'Messenger'">Messenger</a> of Allah said: 'The <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> are of three types: a type that has wings and flies through the air; a type that looks like snakes and dogs;
+                        and a type that stops for a rest then resumes its <a data-term="Journey" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View journey in ancient texts">journey</a>.'"
+                    </div>
+<div class="book-reference">
+                        Source: Sahih Muslim, Book of Salutations and Greetings, <a class="corpus-link" data-term="Hadith" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Hadith'">Hadith</a> 5557
+                    </div>
+</div>
+</div>
+</div>
+<section style="margin-top: var(--space-8);">
+<h2 style="color: var(--color-primary);">Types of <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a></h2>
+<h3 style="color: var(--color-secondary);">1. Believing <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a> (Muslim <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">Jinn</a>)</h3>
+<p>
+                These <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a> have accepted <a class="inline-search-link" href="../cosmology/tawhid.html">Tawhid</a> (<a class="corpus-link" data-term="Monotheism" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Monotheism'">monotheism</a>) and follow <a data-term="Islamic" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View islamic in ancient texts">Islamic</a> teachings.
+                Surah Al-<a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">Jinn</a> describes a group who heard the <a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a> being recited and immediately recognized its truth. They return to their people as warners,
+                calling them to <a class="corpus-link" data-term="Faith" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=faith" title="Search corpus for 'Faith'">faith</a>. Believing <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> will enter <a class="inline-search-link" href="../cosmology/afterlife.html">Jannah</a> (<a class="corpus-link" data-term="Paradise" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Paradise'">Paradise</a>)
+                just as righteous humans will.
+            </p>
+<h3 style="color: var(--color-secondary); margin-top: var(--space-6);">2. Disbelieving <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a></h3>
+<p>
+                Like humans, many <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a> reject <a class="corpus-link" data-term="Faith" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=faith" title="Search corpus for 'Faith'">faith</a> and will face punishment in <a class="inline-search-link" href="../cosmology/afterlife.html">Jahannam</a> (<a class="corpus-link" data-term="Hell" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Hell'">Hell</a>).
+                The <a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a> states: "And We have certainly created for <a class="corpus-link" data-term="Hell" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Hell'">Hell</a> many of the <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> and mankind" (7:179). These <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> may mislead humans,
+                spread falsehood, and work against <a data-term="Divine" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View divine in ancient texts">divine</a> guidance.
+            </p>
+<h3 style="color: var(--color-secondary); margin-top: var(--space-6);">3. Shayatin (Satanic <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a>)</h3>
+<p>
+                Shayatin (plural of <a class="corpus-link" data-term="Shaytan" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Shaytan'">Shaytan</a>) are rebellious <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> who actively work to mislead humanity.
+                Led by <a class="corpus-link" data-term="Iblis" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Iblis'">Iblis</a>, they whisper evil suggestions, beautify sin, and attempt to lead people
+                away from Allah's path. The <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> warns: "Indeed, <a class="corpus-link" data-term="Satan" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Satan'">Satan</a> is an enemy to you; so take him as an enemy" (35:6).
+            </p>
+<h3 style="color: var(--color-secondary); margin-top: var(--space-6);">4. Ifrit</h3>
+<p>
+                Ifrit (عفريت) are powerful and cunning <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a>, often associated with the underworld
+                and infernal regions. The <a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a> mentions an ifrit in the court of <a data-term="Prophet" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet in ancient texts">Prophet</a> Sulayman,
+                who offered to bring the Queen of Sheba's throne before the prophet could rise from his seat (27:39). They are known for strength and resourcefulness.
+            </p>
+<h3 style="color: var(--color-secondary); margin-top: var(--space-6);">5. Marid</h3>
+<p>
+                Marid are among the most powerful and rebellious types of <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a>. They are often depicted as arrogant and difficult to control,
+                even in the stories of <a data-term="Prophet" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet in ancient texts">Prophet</a> Sulayman, who had dominion over <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> through Allah's permission.
+        </p></section>
+<div class="codex-search-section">
+<div class="codex-search-header" onclick="toggleCodexSearch(this)">
+<h3>📚 <a data-term="Primary" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View primary in ancient texts">Primary</a> Sources: Interaction Between <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">Jinn</a> and Humans</h3>
+<span class="expand-icon">▼</span>
+</div>
+<div class="codex-search-content">
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 6:128-130
+                    </div>
+<div class="verse-text">
+                        "And [mention, O <a data-term="Muhammad" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View muhammad in ancient texts">Muhammad</a>], the Day when He will gather them together [and say], 'O company of <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a>, you have [misled] many of mankind.'
+                        And their allies among mankind will say, 'Our Lord, some of us made use of others, and we have [now] reached our term which You appointed for us.'
+                        He will say, 'The Fire is your residence, wherein you will abide eternally, except for what Allah wills. Indeed, your Lord is Wise and Knowing.'
+                        And thus will We make some of the wrongdoers allies of others for what they used to earn. 'O company of <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> and mankind, did there not come
+                        to you messengers from among you, relating to you My verses and warning you of the meeting of this Day of yours?' They will say,
+                        'We bear witness against ourselves'; and the worldly life had deluded them, and they will bear witness against themselves that they were disbelievers."
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Al-An'am (The Cattle), verses 128-130
+                    </div>
+</div>
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 114:1-6
+                    </div>
+<div class="verse-text">
+                        "Say, 'I seek refuge in the Lord of mankind, The <a class="corpus-link" data-term="Sovereign" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=king_of_kings" title="Search corpus for 'Sovereign'">Sovereign</a> of mankind, The God of mankind, From the evil of the retreating whisperer -
+                        Who whispers [evil] into the breasts of mankind - From among the <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a> and mankind.'"
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah An-Nas (Mankind), verses 1-6
+                    </div>
+</div>
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+                        Sahih Bukhari:Book 54:<a class="corpus-link" data-term="Hadith" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Hadith'">Hadith</a> 450
+                    </div>
+<div class="verse-text">
+                        "The <a data-term="Prophet" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet in ancient texts">Prophet</a> said, 'If you hear the crowing of a rooster, ask for Allah's Blessings for their crowing indicates that they have seen an angel.
+                        And if you hear the braying of donkeys, seek refuge with Allah from <a class="corpus-link" data-term="Satan" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Satan'">Satan</a> for their braying indicates that they have seen a <a class="corpus-link" data-term="Satan" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Satan'">Satan</a>.'"
+                    </div>
+<div class="book-reference">
+                        Source: Sahih Al-Bukhari, Book of Beginning of <a data-term="Creation" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View creation in ancient texts">Creation</a>, <a class="corpus-link" data-term="Hadith" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Hadith'">Hadith</a> 450
+                    </div>
+</div>
+</div>
+</div>
+<section style="margin-top: var(--space-8);">
+<h2 style="color: var(--color-primary);">Protection from Harmful <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a></h2>
+<h3 style="color: var(--color-secondary);"><a data-term="Islamic" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View islamic in ancient texts">Islamic</a> Protective Measures</h3>
+<p>
+<a data-term="Islamic Tradition" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View islamic tradition in ancient texts">Islamic tradition</a> provides numerous protections against harmful <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a>:
+            </p>
+<ul style="margin: var(--space-4) 0 0 2rem; line-height: var(--leading-relaxed);">
+<li><strong>Ayat al-Kursi:</strong> Reciting Verse of the Throne (2:255) provides protection</li>
+<li><strong>Last Two Verses of Al-Baqarah:</strong> Powerful protection when recited before sleep</li>
+<li><strong>Surah Al-Falaq and An-Nas:</strong> The two protective chapters seeking refuge in <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a></li>
+<li><strong>Bismillah:</strong> Saying "In the name of <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a>" when entering spaces, eating, etc.</li>
+<li><strong>Regular <a class="corpus-link" data-term="Prayer" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Prayer'">Prayer</a>:</strong> Maintaining the five daily <a class="inline-search-link" href="../rituals/salat.html">salat</a></li>
+<li><strong>Wudu (Ablution):</strong> Being in a state of ritual purity</li>
+<li><strong>Dhikr:</strong> Constant remembrance of <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a></li>
+</ul>
+<h3 style="color: var(--color-secondary); margin-top: var(--space-6);">Forbidden <a data-term="Practices" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View practices in ancient texts">Practices</a></h3>
+<p>
+                Islam strictly prohibits seeking help from <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> through sorcery,
+                fortune-telling, or making pacts. Such <a data-term="Practices" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View practices in ancient texts">practices</a> are considered major sins, as they involve shirk (associating partners with Allah).
+                The <a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a> condemns those who "seek refuge in men from the <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a>" (72:6), as true refuge is only with Allah.
+        </p></section>
+<div class="codex-search-section">
+<div class="codex-search-header" onclick="toggleCodexSearch(this)">
+<h3>📚 <a data-term="Primary" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View primary in ancient texts">Primary</a> Sources: Protection from Evil <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">Jinn</a></h3>
+<span class="expand-icon">▼</span>
+</div>
+<div class="codex-search-content">
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 113:1-5
+                    </div>
+<div class="verse-text">
+                        "Say, 'I seek refuge in the Lord of daybreak From the evil of that which He created And from the evil of darkness when it settles
+                        And from the evil of the blowers in knots And from the evil of an envier when he envies.'"
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Al-Falaq (The Daybreak), verses 1-5
+                    </div>
+</div>
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+                        Sahih Bukhari:Book 61:<a class="corpus-link" data-term="Hadith" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Hadith'">Hadith</a> 535
+                    </div>
+<div class="verse-text">
+                        "The <a data-term="Prophet" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet in ancient texts">Prophet</a> said: 'Whoever recites Ayat al-Kursi at night before sleeping, Allah will send a guardian to protect him, and no <a class="corpus-link" data-term="Satan" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Satan'">Satan</a> will come near him until morning.'"
+                    </div>
+<div class="book-reference">
+                        Source: Sahih Al-Bukhari, Book of Virtues of the <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, <a class="corpus-link" data-term="Hadith" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Hadith'">Hadith</a> 535
+                    </div>
+</div>
+</div>
+</div>
+<section style="margin-top: var(--space-8);">
+<h2 style="color: var(--color-primary);"><a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">Jinn</a> in <a data-term="Islamic" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View islamic in ancient texts">Islamic</a> History</h2>
+<h3 style="color: var(--color-secondary);">Sulayman's Kingdom</h3>
+<p>
+<a data-term="Prophet" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet in ancient texts">Prophet</a> Sulayman (<a class="corpus-link" data-term="Solomon" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Solomon'">Solomon</a>) was granted unique authority over <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a>,
+                wind, and animals as a miracle from <a class="inline-search-link" href="../deities/allah.html">Allah</a>. <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">Jinn</a> worked on his construction projects, created art, and served in his kingdom.
+                The <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> describes them building palaces, making statues, and diving for pearls (34:12-13). When Sulayman died leaning on his staff,
+                the <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> continued working, unaware of his death until termites ate through the staff and he collapsed - proving <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> don't know the unseen.
+            </p>
+<h3 style="color: var(--color-secondary); margin-top: var(--space-6);">The Night of <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a></h3>
+<p>
+                During <a class="inline-search-link" href="../deities/muhammad.html">Prophet Muhammad</a>'s time, a delegation of <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> came to listen to him recite the <a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a> in a valley. This encounter is recorded
+                in Surah Al-<a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">Jinn</a> (72) and Surah Al-Ahqaf (46:29-32). The <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> returned to their people as warners, spreading the message of Islam
+                among their kind. This demonstrates that <a data-term="Muhammad" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View muhammad in ancient texts">Muhammad</a>'s message was universal, extending beyond humanity to all sentient beings.
+        </p></section>
+<section style="margin-top: var(--space-8);">
+<h2 style="color: var(--color-primary);"><a data-term="Connections To Islamic Cosmology" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View connections to islamic cosmology in ancient texts">Connections to Islamic Cosmology</a></h2>
+<p>
+                The <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a> occupy a unique place in Islamic <a data-term="Cosmology" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View cosmology in ancient texts">cosmology</a>. Created before humans from smokeless fire, they inhabit a parallel dimension
+                and possess free will like humans. They are bound by the same divine law and will face judgment in the <a class="inline-search-link" href="../cosmology/afterlife.html">afterlife</a>.
+                The <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a>'s interaction with <a class="inline-search-link" href="../deities/muhammad.html">Prophet Muhammad</a> and other <a data-term="Prophets" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophets in ancient texts">prophets</a> demonstrates
+                the universal nature of <a class="inline-search-link" href="../cosmology/tawhid.html">Tawhid</a> (<a class="corpus-link" data-term="Monotheism" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Monotheism'">monotheism</a>). They are mentioned alongside
+                angels like <a class="inline-search-link" href="../deities/jibreel.html">Jibreel</a> in the hierarchy of creation, and their stories appear
+                throughout the <a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a> in connection with <a data-term="Prophets" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophets in ancient texts">prophets</a> like <a class="inline-search-link" href="../heroes/ibrahim.html">Ibrahim</a> and
+                <a class="inline-search-link" href="../heroes/musa.html">Musa</a>.
+        </p></section>
+<section class="related-concepts" style="margin-top: var(--space-12);">
+<h2>🔗 <a data-term="Related Concepts" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View related concepts in ancient texts">Related Concepts</a></h2>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+<div class="related-card">
+<h3 style="color: var(--color-secondary);"><a data-term="Within Islamic Tradition" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View within islamic tradition in ancient texts">Within Islamic Tradition</a></h3>
+<ul style="line-height: var(--leading-loose);">
+<li><a href="../deities/allah.html">Allah</a> - Creator of <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a></li>
+<li><a href="../deities/muhammad.html">Muhammad</a> - <a data-term="Prophet" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet in ancient texts">Prophet</a> to humans and <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">jinn</a></li>
+<li><a href="../deities/jibreel.html">Jibreel</a> - Angels vs. <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a> hierarchy</li>
+<li><a href="../heroes/ibrahim.html">Prophet Ibrahim</a> - <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a> witnessed his trials</li>
+<li><a href="../heroes/musa.html">Prophet Musa</a> - Interacted with <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a></li>
+<li><a href="../rituals/salat.html">Salat</a> - Protection through <a class="corpus-link" data-term="Prayer" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Prayer'">prayer</a></li>
+<li><a href="../cosmology/creation.html">Creation</a> - <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a> created before humans</li>
+<li><a href="../cosmology/afterlife.html">Afterlife</a> - Judgment for <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a></li>
+</ul>
+</div>
+<div class="related-card">
+<h3 style="color: var(--color-secondary);"><a data-term="Theological" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View theological in ancient texts">Theological</a> Concepts</h3>
+<ul style="line-height: var(--leading-loose);">
+<li><a href="../cosmology/tawhid.html">Tawhid</a> - <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a> and <a class="corpus-link" data-term="Monotheism" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Monotheism'">monotheism</a></li>
+<li><a href="../cosmology/afterlife.html">Jannah &amp; Jahannam</a> - <a class="corpus-link" data-term="Paradise" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Paradise'">Paradise</a> and <a class="corpus-link" data-term="Hell" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Hell'">Hell</a> for <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a></li>
+<li><a href="../index.html">Islamic Tradition</a> - Overview</li>
+<li><a href="../cosmology/creation.html">Creation Order</a> - <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a>'s place in cosmos</li>
+</ul></div></div></section>
+<section style="margin-top: var(--space-8); background: var(--color-surface); backdrop-filter: blur(10px); padding: var(--space-6); border-radius: var(--radius-xl);">
+<h3 style="color: var(--color-primary);">Sources</h3>
+<ul style="margin: 0.5rem 0 0 2rem; line-height: var(--leading-relaxed);">
+<li>The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> - Surah Al-<a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">Jinn</a> (72), Ar-Rahman (55), Al-Hijr (15), An-Nas (114), Al-Falaq (113)</li>
+<li>Sahih Al-Bukhari - Book of Beginning of <a data-term="Creation" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View creation in ancient texts">Creation</a></li>
+<li>Sahih Muslim - Book of Salutations and Greetings</li>
+<li>The World of the <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">Jinn</a> and Devils by Dr. Umar al-Ashqar</li>
+<li>Tafsir Ibn Kathir - Commentary on verses about <a data-term="Jinn" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View jinn in ancient texts">jinn</a></li>
+<li><a data-term="Islamic" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View islamic in ancient texts">Islamic</a> Creed Series - Volume on the Unseen World</li>
+</ul></section>
+
+<!-- Interlink Panel Section -->
+<section class="interlink-panel" style="margin-top: 3rem;">
+    <h3 class="interlink-header">
+        <span class="interlink-icon">🔗</span>
+        Related Across the Mythos
+    </h3>
+
+    <div class="interlink-grid">
+        <div class="interlink-section">
+            <div class="interlink-section-title">Core Archetype</div>
+            <a href="../../../archetypes/celestial/index.html" class="archetype-link-card">
+                <div class="archetype-badge">🔥 BEINGS OF SMOKELESS FIRE</div>
+                <p class="archetype-context">The Jinn are sentient beings created from smokeless fire before humanity, possessing free will and moral accountability. Like humans, they face judgment and can enter Paradise or Hell.</p>
+                <span class="see-parallels">See parallels: Invisible Beings, Parallel Creation →</span>
+            </a>
+        </div>
+
+        <div class="interlink-section">
+            <div class="interlink-section-title">Their Master</div>
+            <a href="../heroes/index.html" class="item-link-card">
+                <div class="item-icon">👑</div>
+                <div class="item-info">
+                    <h4>Sulayman (AS)</h4>
+                    <p class="item-type">Prophet-King</p>
+                    <p class="item-context">Commanded the Jinn</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="interlink-section">
+            <div class="interlink-section-title">Protection</div>
+            <a href="../rituals/salat.html" class="place-link-card">
+                <div class="place-visual">
+                    <span class="place-icon">🕌</span>
+                    <span class="place-type">Ritual</span>
+                </div>
+                <div class="place-info">
+                    <h4>Salat & Dhikr</h4>
+                    <p>Divine protection</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="parallel-traditions glass-card" style="margin-top: var(--spacing-lg);">
+        <h4>🌍 Spirit Beings Across Traditions</h4>
+        <div class="parallel-grid">
+            <a href="../../../index.html" class="parallel-card">
+                <span class="tradition-flag">✡️</span>
+                <span class="parallel-name">Shedim</span>
+                <span class="tradition-label">Jewish Spirits</span>
+            </a>
+            <a href="../../christian/creatures/index.html" class="parallel-card">
+                <span class="tradition-flag">✝️</span>
+                <span class="parallel-name">Demons</span>
+                <span class="tradition-label">Christian View</span>
+            </a>
+            <a href="../../persian/creatures/index.html" class="parallel-card">
+                <span class="tradition-flag">🔥</span>
+                <span class="parallel-name">Divs</span>
+                <span class="tradition-label">Persian Spirits</span>
+            </a>
+            <a href="../cosmology/tawhid.html" class="parallel-card">
+                <span class="tradition-flag">☪️</span>
+                <span class="parallel-name">Tawhid</span>
+                <span class="tradition-label">Jinn worship Allah</span>
+            </a>
+        </div>
+    </div>
+</section>
+</main>
+<footer>
+<p>
+<strong>The <a class="corpus-link" data-term="Jinn" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Jinn'">Jinn</a></strong> - Islamic <a data-term="Theology" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View theology in ancient texts">Theology</a><br/>
+<a href="../../../mythos/index.html">World Mythos Home</a> |
+            <a href="../index.html">Islamic Tradition</a> |
+            <a href="index.html">Browse All Creatures</a>
+</p>
+</footer>
+<script>
+        function toggleCodexSearch(header) {
+            const section = header.parentElement;
+            const content = section.querySelector('.codex-search-content');
+            section.classList.toggle('expanded');
+            content.classList.toggle('show');
+        }
+        function toggleVerse(citation) {
+            const verseText = citation.nextElementSibling;
+            verseText.classList.toggle('show');
+        }
+        function performCodexSearch(event, searchTerm) {
+            event.preventDefault();
+            console.log('Searching codex for:', searchTerm);
+        }
+    </script>
+</body>
+</html>
