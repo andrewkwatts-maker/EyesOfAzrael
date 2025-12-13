@@ -502,6 +502,64 @@ service cloud.firestore {
                         || request.auth.token.email == 'andrewkwatts@gmail.com');
     }
 
+    // ===== SUBMISSIONS COLLECTION =====
+    // Path: /submissions/{submissionId}
+    // User submissions/appendments to existing content
+
+    match /submissions/{submissionId} {
+      function isValidSubmission() {
+        return request.resource.data.keys().hasAll(['title', 'content', 'parentCollection', 'parentDocumentId', 'contentType', 'submittedBy', 'status'])
+               && request.resource.data.title is string
+               && request.resource.data.title.size() >= 3
+               && request.resource.data.title.size() <= 200
+               && request.resource.data.content is string
+               && request.resource.data.content.size() >= 10
+               && request.resource.data.content.size() <= 5000
+               && request.resource.data.parentCollection is string
+               && request.resource.data.parentDocumentId is string
+               && request.resource.data.contentType is string
+               && request.resource.data.submittedBy == request.auth.uid
+               && request.resource.data.status in ['pending', 'approved', 'rejected'];
+      }
+
+      // Anyone can read approved submissions
+      allow get: if resource.data.status == 'approved';
+      allow list: if resource.data.status == 'approved'
+                  && request.query.limit <= 50;
+
+      // Users can read their own submissions regardless of status
+      allow read: if isAuthenticated()
+                  && resource.data.submittedBy == request.auth.uid;
+
+      // Admin can read all submissions
+      allow read: if isAdminEmail();
+
+      // Authenticated users can create submissions
+      allow create: if isAuthenticated()
+                    && isValidSubmission()
+                    && request.resource.data.status == 'pending';
+
+      // Users can update their own pending submissions
+      allow update: if isAuthenticated()
+                    && resource.data.submittedBy == request.auth.uid
+                    && resource.data.status == 'pending'
+                    && request.resource.data.submittedBy == request.auth.uid
+                    && request.resource.data.status == 'pending'
+                    && isValidSubmission();
+
+      // Admin can approve/reject submissions
+      allow update: if isAdminEmail()
+                    && request.resource.data.submittedBy == resource.data.submittedBy;
+
+      // Users can delete their own pending submissions
+      allow delete: if isAuthenticated()
+                    && resource.data.submittedBy == request.auth.uid
+                    && resource.data.status == 'pending';
+
+      // Admin can delete any submission
+      allow delete: if isAdminEmail();
+    }
+
     // ===== SYSTEM COLLECTION =====
     // Path: /system/{document}
     // Rate limiting, blocked IPs, security logs
