@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Book of Thoth - Divine Wisdom of Egypt</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-relaxed);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--spacing-4xl) var(--spacing-xl);
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .text-icon {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            margin-bottom: var(--spacing-md);
+            color: white;
+        }
+
+        .subtitle {
+            font-size: var(--font-size-2xl);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: var(--spacing-lg);
+            font-weight: var(--font-light);
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-lg);
+        }
+
+        .tradition-tag {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+        }
+
+        .breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-lg);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .breadcrumb a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: white;
+        }
+
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        h2 {
+            color: var(--color-primary);
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-lg);
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: var(--spacing-md);
+        }
+
+        h3 {
+            color: var(--color-secondary);
+            font-size: var(--font-size-2xl);
+            margin: var(--spacing-xl) 0 var(--spacing-md);
+        }
+
+        h4 {
+            color: var(--color-accent);
+            font-size: var(--font-size-xl);
+            margin: var(--spacing-lg) 0 var(--spacing-sm);
+        }
+
+        p {
+            margin-bottom: var(--spacing-md);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin: var(--spacing-md) 0 var(--spacing-md) var(--spacing-2xl);
+            line-height: var(--leading-relaxed);
+        }
+
+        li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .quote-box {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.15),
+                rgba(var(--color-secondary-rgb), 0.15));
+            border-left: 4px solid var(--color-primary);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+            border-radius: var(--radius-md);
+            font-family: var(--font-heading);
+            font-size: var(--font-size-lg);
+            line-height: var(--leading-loose);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-secondary-rgb), 0.15);
+            border: 2px solid var(--color-secondary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .legend-box {
+            background: linear-gradient(135deg,
+                rgba(218, 165, 32, 0.2),
+                rgba(184, 134, 11, 0.2));
+            border: 2px solid rgba(218, 165, 32, 0.6);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .source-card {
+            background: rgba(var(--color-accent-rgb, 139, 127, 255), 0.1);
+            border: 1px solid var(--color-border);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-md) 0;
+            border-radius: var(--radius-md);
+        }
+
+        .source-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .cross-ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .cross-ref-card {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 2px solid var(--color-border);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .cross-ref-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--color-primary);
+            box-shadow: 0 5px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .cross-ref-icon {
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .cross-ref-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-3xl);
+        }
+
+        .nav-button {
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+            display: inline-block;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .tarot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .tarot-card {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.2),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border: 2px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+        }
+
+        .tarot-number {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-bold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .tarot-name {
+            font-weight: var(--font-semibold);
+            color: var(--color-secondary);
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .attribute-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .attribute-card {
+            background: rgba(var(--color-accent-rgb, 139, 127, 255), 0.15);
+            border: 2px solid var(--color-accent);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+
+        .attribute-title {
+            font-weight: var(--font-bold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        strong {
+            color: var(--color-primary);
+        }
+
+        /* Interlink Panel Styles */
+        .interlink-panel { background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-2xl); margin: var(--spacing-3xl) 0; }
+        .interlink-panel h3 { color: var(--color-primary); font-size: var(--font-size-2xl); margin-bottom: var(--spacing-lg); }
+        .interlink-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-md); }
+        .archetype-link-card, .parallel-card { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); background: rgba(var(--color-primary-rgb), 0.1); border: 1px solid var(--color-border); border-radius: var(--radius-lg); text-decoration: none; transition: all var(--transition-base); }
+        .archetype-link-card:hover, .parallel-card:hover { background: rgba(var(--color-primary-rgb), 0.2); transform: translateY(-2px); }
+        .card-icon { font-size: var(--font-size-2xl); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-primary-rgb), 0.2); border-radius: var(--radius-lg); }
+        .card-content h4 { color: var(--color-text-primary); font-size: var(--font-size-base); margin-bottom: var(--spacing-xs); }
+        .card-content span { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+    </style>
+</head>
+<body>
+    
+    <div id="theme-picker-container"></div>
+<div class="container">
+        <header>
+    <div class="header-content">
+        <h1>The Book of Thoth</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Magical Systems</a> →
+                <a href="../index.html#texts">Sacred Texts</a> →
+                <span>Book of Thoth</span>
+</nav>
+
+        <section>
+            <h2>Overview: Legend & Reality</h2>
+            <p>
+                The <strong>Book of Thoth</strong> occupies a unique position in esoteric literature - it is simultaneously
+                a legendary Egyptian text of divine wisdom that may never have existed in physical form, and a living
+                tradition expressed through various historical texts, most notably the Tarot. Unlike the other grimoires
+                and sacred texts in this collection, the Book of Thoth exists primarily as an ideal, a symbolic repository
+                of all knowledge attributed to <strong>Thoth</strong> (Egyptian: Djehuty), the ibis-headed god of wisdom,
+                writing, magic, and the moon.
+            </p>
+
+            <h3>Thoth: The Divine Author</h3>
+            <p>
+                In Egyptian theology, Thoth held supreme importance as the deity of:
+            </p>
+
+            <div class="attribute-grid">
+                <div class="attribute-card">
+                    <div class="attribute-title">Writing & Language</div>
+                    <p>Inventor of hieroglyphs, scribe of the gods, recorder of divine decrees</p>
+                </div>
+
+                <div class="attribute-card">
+                    <div class="attribute-title">Magic & Heka</div>
+                    <p>Master of magical words of power, guardian of sacred formulas</p>
+                </div>
+
+                <div class="attribute-card">
+                    <div class="attribute-title">Wisdom & Knowledge</div>
+                    <p>Keeper of all learning, patron of scribes and scholars</p>
+                </div>
+
+                <div class="attribute-card">
+                    <div class="attribute-title">Time & Astronomy</div>
+                    <p>Lunar deity, measurer of time, calculator of celestial movements</p>
+                </div>
+
+                <div class="attribute-card">
+                    <div class="attribute-title">Justice & Truth</div>
+                    <p>Witness at the weighing of the heart, arbiter of cosmic law</p>
+                </div>
+
+                <div class="attribute-card">
+                    <div class="attribute-title">Divine Messenger</div>
+                    <p>Mediator between gods and humans, guide of souls</p>
+                </div>
+            </div>
+
+            <p>
+                When Greek culture encountered Egypt, Thoth was identified with <strong>Hermes</strong>, creating the
+                syncretic figure <strong>Hermes Trismegistus</strong> ("Thrice-Great Hermes") - legendary author of
+                the Hermetic texts including the Corpus Hermeticum and Emerald Tablet.
+            </p>
+        </section>
+
+        <section>
+            <h2>The Egyptian Legend</h2>
+
+            <div class="legend-box">
+                <h3>The Tale of Setne Khamwas</h3>
+                <p>
+                    The most famous Egyptian story about the Book of Thoth appears in the "Tales of Setne Khamwas," a cycle
+                    of stories from Ptolemaic Egypt (c. 3rd-1st century BCE). In these tales, Prince Setne Khamwas, son
+                    of Ramesses II and a historical figure known as a scholar and magician, seeks the legendary book:
+                </p>
+
+                <p style="margin-top: var(--spacing-md);">
+                    The Book was said to contain <strong>two powerful spells</strong>:
+                </p>
+                <ul>
+                    <li>The first spell allowed one to understand the speech of all animals and to perceive the gods themselves</li>
+                    <li>The second spell enabled one to see the sun at dawn with its surrounding gods, the moon with its
+                        attendant stars, and to perceive the forms of all the gods</li>
+                </ul>
+
+                <p style="margin-top: var(--spacing-md);">
+                    However, the Book was guarded by serpents and scorpions, and its previous possessors had all met tragic
+                    ends. When Setne finally obtained the book and read it, he gained immense magical power but also brought
+                    disaster upon himself and his family, illustrating the dangerous nature of forbidden knowledge.
+                </p>
+            </div>
+
+            <h3>Egyptian Magical Texts</h3>
+            <p>
+                While the specific "Book of Thoth" of legend may be mythical, ancient Egypt produced numerous texts
+                attributed to Thoth or containing his wisdom:
+            </p>
+
+            <ul>
+                <li><strong>The Book of the Dead:</strong> Funerary texts including spells and formulas, parts attributed
+                    to Thoth's authorship</li>
+                <li><strong>The Book of Gates:</strong> Describing the twelve divisions of the Duat (underworld)</li>
+                <li><strong>The Book of Caverns:</strong> Another underworld text with cosmological significance</li>
+                <li><strong>Medical and Magical Papyri:</strong> Including the Ebers Papyrus and magical spells attributed
+                    to Thoth</li>
+                <li><strong>Astronomical Texts:</strong> Star charts and celestial knowledge associated with Thoth as
+                    lunar deity</li>
+            </ul>
+
+            <div class="quote-box">
+                "I have come to you, O Lord of the Gods, Thoth who is in Hermopolis, the Great God. I am the Scribe of
+                Truth. Bring me the writing palette and the water pot which are in Nun [the primeval waters]. Behold,
+                I am a scribe. Bring me the god's writings of Thoth, these secret incantations."
+                <br><br><em>- Book of the Dead, Spell for Becoming Thoth</em>
+            </div>
+
+            <h3>Greco-Roman Interpretations</h3>
+            <p>
+                In the Hellenistic period, the concept of Thoth's book evolved:
+            </p>
+
+            <ul>
+                <li><strong>Clement of Alexandria (c. 150-215 CE):</strong> Described 42 books of Thoth carried in
+                    Egyptian religious processions, containing all sacred knowledge</li>
+                <li><strong>Iamblichus (c. 245-325 CE):</strong> Mentioned 20,000 books of Hermes and 36,525 books
+                    containing all Egyptian wisdom</li>
+                <li><strong>Hermetic Literature:</strong> The Corpus Hermeticum and related texts became the actual
+                    "books of Thoth" for Greco-Roman audiences</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>The Tarot as Book of Thoth</h2>
+
+            <h3>The Esoteric Theory</h3>
+            <p>
+                Beginning in the 18th century, occultists proposed that the <strong>Tarot</strong> - particularly the 22
+                Major Arcana cards - preserved the wisdom of the ancient Book of Thoth in pictorial form:
+            </p>
+
+            <div class="highlight-box">
+                <h4>The Tarot Theory of Origins</h4>
+                <p>
+                    According to esoteric tradition (though not supported by historical evidence):
+                </p>
+                <ul>
+                    <li><strong>Ancient Egyptian priests</strong> foresaw the destruction of their civilization and
+                        encoded their wisdom in symbolic images</li>
+                    <li>These images could survive where written texts would be destroyed, preserved through the seemingly
+                        innocent medium of a game</li>
+                    <li>The <strong>22 Major Arcana</strong> correspond to the 22 letters of the Hebrew alphabet, the 22
+                        paths on the Kabbalistic Tree of Life, and the stages of spiritual initiation</li>
+                    <li>The <strong>56 Minor Arcana</strong> encode elemental, numerical, and astrological correspondences</li>
+                    <li>Together, the 78 cards form a complete system of esoteric knowledge - the Book of Thoth in
+                        disguised form</li>
+                </ul>
+            </div>
+
+            <h3>Key Figures in Tarot-Thoth Connection</h3>
+
+            <h4>Court de Gébelin (1719-1784)</h4>
+            <p>
+                French scholar who first proposed (without evidence) that Tarot originated in ancient Egypt as "The Book
+                of Thoth." His 1781 essay in <em>Le Monde Primitif</em> claimed the cards preserved Egyptian hieroglyphic
+                wisdom. Though historically incorrect, this theory profoundly influenced all subsequent esoteric Tarot.
+            </p>
+
+            <h4>Éliphas Lévi (1810-1875)</h4>
+            <p>
+                French occultist who systematized the correspondences between Tarot and Kabbalah, asserting:
+            </p>
+            <ul>
+                <li>The 22 Major Arcana correspond to the 22 Hebrew letters</li>
+                <li>Each card represents a path on the Tree of Life</li>
+                <li>The Tarot is a pictorial alphabet encoding all magical and spiritual knowledge</li>
+                <li>Mastery of Tarot leads to mastery of ceremonial magic</li>
+            </ul>
+
+            <h4>The Hermetic Order of the Golden Dawn (1888-1903)</h4>
+            <p>
+                British magical order that created an elaborate system integrating Tarot with Kabbalah, astrology,
+                alchemy, and ceremonial magic. Their innovations included:
+            </p>
+            <ul>
+                <li>Detailed attributions of each card to astrological signs, planets, and elements</li>
+                <li>Color scales for magical artwork based on Kabbalistic correspondences</li>
+                <li>Tarot pathworking as meditative technique for exploring the Tree of Life</li>
+                <li>The creation of new Tarot decks embodying these correspondences</li>
+            </ul>
+
+            <h4>Aleister Crowley (1875-1947)</h4>
+            <p>
+                Former Golden Dawn member who created the most explicit "Book of Thoth" in 1944:
+            </p>
+
+            <div class="quote-box">
+                "The Tarot is a pack of 78 cards. The pictures on them are representations of universal forces, and
+                the student must familiarize himself with them as if they were living things... The Book of Thoth is
+                the textbook of all knowledge - not only of this world, but of all the worlds."
+                <br><br><em>- Aleister Crowley, The Book of Thoth</em>
+            </div>
+
+            <p>
+                Crowley's <em>Book of Thoth</em> (the book about Tarot, not an ancient Egyptian text) remains one of the
+                most influential works on esoteric Tarot, presenting the Thoth Tarot deck (painted by Lady Frieda Harris)
+                with comprehensive explanations of its symbolism.
+            </p>
+
+            <h3>The Major Arcana as Initiatory Path</h3>
+            <p>
+                In the Hermetic tradition, the 22 Major Arcana represent stages of spiritual development:
+            </p>
+
+            <div class="tarot-grid">
+                <div class="tarot-card">
+                    <div class="tarot-number">0</div>
+                    <div class="tarot-name">The Fool</div>
+                    <p><strong>Hebrew Letter:</strong> Aleph (א) | <strong>Element:</strong> Air<br>
+                    The innocent soul beginning the journey, infinite potential</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">I</div>
+                    <div class="tarot-name">The Magician</div>
+                    <p><strong>Hebrew Letter:</strong> Beth (ב) | <strong>Planet:</strong> Mercury<br>
+                    Will, skill, the power to manifest - "As above, so below"</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">II</div>
+                    <div class="tarot-name">The High Priestess</div>
+                    <p><strong>Hebrew Letter:</strong> Gimel (ג) | <strong>Body:</strong> Moon<br>
+                    Hidden knowledge, intuition, the veil between worlds</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">III</div>
+                    <div class="tarot-name">The Empress</div>
+                    <p><strong>Hebrew Letter:</strong> Daleth (ד) | <strong>Planet:</strong> Venus<br>
+                    Abundance, creation, nature, the Divine Feminine</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">IV</div>
+                    <div class="tarot-name">The Emperor</div>
+                    <p><strong>Hebrew Letter:</strong> Heh (ה) | <strong>Sign:</strong> Aries<br>
+                    Authority, structure, order, the Divine Masculine</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">V</div>
+                    <div class="tarot-name">The Hierophant</div>
+                    <p><strong>Hebrew Letter:</strong> Vav (ו) | <strong>Sign:</strong> Taurus<br>
+                    Traditional wisdom, spiritual authority, esoteric teaching</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">VI</div>
+                    <div class="tarot-name">The Lovers</div>
+                    <p><strong>Hebrew Letter:</strong> Zayin (ז) | <strong>Sign:</strong> Gemini<br>
+                    Choice, union of opposites, sacred marriage</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">VII</div>
+                    <div class="tarot-name">The Chariot</div>
+                    <p><strong>Hebrew Letter:</strong> Cheth (ח) | <strong>Sign:</strong> Cancer<br>
+                    Victory through will, controlled power, the journey</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">VIII</div>
+                    <div class="tarot-name">Strength/Lust</div>
+                    <p><strong>Hebrew Letter:</strong> Teth (ט) | <strong>Sign:</strong> Leo<br>
+                    Courage, passion, spiritual strength overcoming base nature</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">IX</div>
+                    <div class="tarot-name">The Hermit</div>
+                    <p><strong>Hebrew Letter:</strong> Yod (י) | <strong>Sign:</strong> Virgo<br>
+                    Solitude, introspection, the light of inner wisdom</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">X</div>
+                    <div class="tarot-name">Wheel of Fortune</div>
+                    <p><strong>Hebrew Letter:</strong> Kaph (כ) | <strong>Planet:</strong> Jupiter<br>
+                    Cycles, fate, the turning of cosmic law</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">XI</div>
+                    <div class="tarot-name">Justice/Adjustment</div>
+                    <p><strong>Hebrew Letter:</strong> Lamed (ל) | <strong>Sign:</strong> Libra<br>
+                    Balance, karma, universal law and equilibrium</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">XII</div>
+                    <div class="tarot-name">The Hanged Man</div>
+                    <p><strong>Hebrew Letter:</strong> Mem (מ) | <strong>Element:</strong> Water<br>
+                    Sacrifice, surrender, seeing from new perspective</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">XIII</div>
+                    <div class="tarot-name">Death</div>
+                    <p><strong>Hebrew Letter:</strong> Nun (נ) | <strong>Sign:</strong> Scorpio<br>
+                    Transformation, ending and beginning, putrefaction and rebirth</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">XIV</div>
+                    <div class="tarot-name">Temperance/Art</div>
+                    <p><strong>Hebrew Letter:</strong> Samekh (ס) | <strong>Sign:</strong> Sagittarius<br>
+                    Alchemy, balance of opposites, the Great Work</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">XV</div>
+                    <div class="tarot-name">The Devil</div>
+                    <p><strong>Hebrew Letter:</strong> Ayin (ע) | <strong>Sign:</strong> Capricorn<br>
+                    Material bondage, shadow work, Pan/Baphomet</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">XVI</div>
+                    <div class="tarot-name">The Tower</div>
+                    <p><strong>Hebrew Letter:</strong> Peh (פ) | <strong>Planet:</strong> Mars<br>
+                    Destruction of false structures, revelation, breaking through</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">XVII</div>
+                    <div class="tarot-name">The Star</div>
+                    <p><strong>Hebrew Letter:</strong> Tzaddi (צ) | <strong>Sign:</strong> Aquarius<br>
+                    Hope, inspiration, cosmic connection, Nuit</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">XVIII</div>
+                    <div class="tarot-name">The Moon</div>
+                    <p><strong>Hebrew Letter:</strong> Qoph (ק) | <strong>Sign:</strong> Pisces<br>
+                    Illusion, the unconscious, dreams, psychic perception</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">XIX</div>
+                    <div class="tarot-name">The Sun</div>
+                    <p><strong>Hebrew Letter:</strong> Resh (ר) | <strong>Planet:</strong> Sun<br>
+                    Illumination, joy, success, conscious awareness</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">XX</div>
+                    <div class="tarot-name">Judgement/Aeon</div>
+                    <p><strong>Hebrew Letter:</strong> Shin (ש) | <strong>Element:</strong> Fire<br>
+                    Rebirth, awakening, the Aeon of Horus, resurrection</p>
+                </div>
+
+                <div class="tarot-card">
+                    <div class="tarot-number">XXI</div>
+                    <div class="tarot-name">The World/Universe</div>
+                    <p><strong>Hebrew Letter:</strong> Tav (ת) | <strong>Planet:</strong> Saturn<br>
+                    Completion, cosmic consciousness, the dance of creation</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Key Teachings: Hermetic Tarot Wisdom</h2>
+
+            <h3>The Qabalah Connection</h3>
+            <p>
+                The Book of Thoth (as Tarot) becomes a practical tool for exploring the Kabbalistic Tree of Life:
+            </p>
+
+            <ul>
+                <li><strong>The 22 Paths:</strong> Each Major Arcanum represents one of the 22 paths connecting the
+                    10 Sefirot on the Tree of Life</li>
+                <li><strong>Pathworking:</strong> Meditative journeys through Tarot imagery to explore different states
+                    of consciousness</li>
+                <li><strong>The Four Worlds:</strong> The four suits (Wands, Cups, Swords, Pentacles) correspond to the
+                    four Kabbalistic worlds of Atziluth, Briah, Yetzirah, and Assiah</li>
+                <li><strong>The Court Cards:</strong> Represent different aspects of the divine name YHVH and the elements
+                    in their active, receptive, and balanced forms</li>
+            </ul>
+
+            <h3>Alchemical Symbolism</h3>
+            <p>
+                The Tarot encodes the stages of the alchemical Great Work:
+            </p>
+
+            <ul>
+                <li><strong>Nigredo (Blackening):</strong> Death card - putrefaction and dissolution</li>
+                <li><strong>Albedo (Whitening):</strong> Temperance/Art - purification and distillation</li>
+                <li><strong>Citrinitas (Yellowing):</strong> The Sun - solar consciousness emerging</li>
+                <li><strong>Rubedo (Reddening):</strong> The World - the Philosopher's Stone achieved</li>
+            </ul>
+
+            <h3>Astrological Correspondences</h3>
+            <p>
+                Each card connects to specific celestial influences:
+            </p>
+
+            <ul>
+                <li><strong>Planetary Trump Cards:</strong> Magician (Mercury), High Priestess (Moon), Empress (Venus),
+                    Wheel (Jupiter), Tower (Mars), Sun (Sun), World (Saturn)</li>
+                <li><strong>Zodiacal Trump Cards:</strong> Emperor (Aries) through Hermit (Virgo) and beyond</li>
+                <li><strong>Elemental Trump Cards:</strong> Fool (Air), Hanged Man (Water), Judgement (Fire)</li>
+                <li><strong>Decans of the Zodiac:</strong> The numbered pip cards (2-10) correspond to the 36 decans,
+                    each ruled by specific planets</li>
+            </ul>
+
+            <h3>Divination & Spiritual Development</h3>
+            <p>
+                The Book of Thoth serves dual purposes:
+            </p>
+
+            <div class="highlight-box">
+                <h4>Divination (Fortune-Telling)</h4>
+                <p>
+                    Using the cards to reveal hidden knowledge, future possibilities, and present unconscious influences.
+                    The Tarot acts as mirror reflecting deeper truths.
+                </p>
+
+                <h4>Spiritual Initiation</h4>
+                <p>
+                    More importantly, studying and meditating on the cards provides a complete curriculum of esoteric
+                    knowledge. Each card is a glyph encoding multiple levels of meaning - mythological, psychological,
+                    magical, and spiritual.
+                </p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Influence & Legacy</h2>
+
+            <h3>Historical Impact</h3>
+            <p>
+                Though the ancient Egyptian "Book of Thoth" may be legendary, its influence is real:
+            </p>
+
+            <ul>
+                <li><strong>Hermetic Philosophy:</strong> Thoth-Hermes became the patron of all Western esotericism</li>
+                <li><strong>Egyptian Revival:</strong> Napoleon's Egyptian campaign and the Rosetta Stone sparked
+                    19th-century Egyptomania, increasing interest in Egyptian wisdom</li>
+                <li><strong>Tarot as Spiritual Tool:</strong> Transformed from gaming cards to initiatory system</li>
+                <li><strong>Psychological Archetypes:</strong> Carl Jung recognized Tarot as expressing universal
+                    archetypal patterns</li>
+            </ul>
+
+            <h3>Modern Expressions</h3>
+            <p>
+                The "Book of Thoth" continues to manifest in new forms:
+            </p>
+
+            <ul>
+                <li><strong>Hundreds of Tarot Decks:</strong> Each offering unique interpretation of the archetypal images</li>
+                <li><strong>Tarot in Popular Culture:</strong> Cards appearing in films, games, literature</li>
+                <li><strong>Psychological Tool:</strong> Used in therapy and self-exploration</li>
+                <li><strong>Artistic Medium:</strong> Contemporary artists creating Tarot decks as gallery art</li>
+                <li><strong>Digital Adaptations:</strong> Apps and online tools making Tarot accessible globally</li>
+            </ul>
+
+            <h3>The Ongoing Search</h3>
+            <p>
+                Archaeologists and scholars continue searching for historical Egyptian texts that might have inspired
+                the legend:
+            </p>
+
+            <ul>
+                <li><strong>Demotic Magical Papyri:</strong> Greco-Egyptian magical texts showing syncretism</li>
+                <li><strong>Temple Libraries:</strong> Evidence of extensive priestly libraries at major cult centers</li>
+                <li><strong>Hermetic Fragments:</strong> Coptic and Arabic versions of Hermetic texts showing
+                    Egyptian elements</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Primary Sources & Key Works</h2>
+
+            <div class="source-card">
+                <div class="source-title">The Book of Thoth: A Short Essay on the Tarot of the Egyptians - Aleister Crowley (1944)</div>
+                <p>
+                    The definitive modern "Book of Thoth" - Crowley's comprehensive guide to his Thoth Tarot deck.
+                    Dense with Kabbalistic, astrological, and magical symbolism. Essential for understanding Hermetic
+                    Tarot, though challenging for beginners. Beautifully illustrated with Lady Frieda Harris's art.
+                </p>
+                <p><strong>Publisher:</strong> Weiser Books | <strong>ISBN:</strong> 978-0877782520</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Tarot: A Key to the Wisdom of the Ages - Paul Foster Case (1947)</div>
+                <p>
+                    Comprehensive guide to Tarot from the founder of Builders of the Adytum. More accessible than
+                    Crowley, emphasizing Tarot as spiritual development tool. Includes detailed card meanings and
+                    meditations. Reflects Golden Dawn tradition with refinements.
+                </p>
+                <p><strong>Publisher:</strong> Macoy Publishing | <strong>ISBN:</strong> 978-0879478407</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Ancient Egyptian Books of the Afterlife - Erik Hornung (1999)</div>
+                <p>
+                    Scholarly overview of actual Egyptian funerary texts including Book of the Dead, Book of Gates,
+                    Book of Caverns. Essential for understanding the real Egyptian texts that inspired the Thoth legend.
+                    Shows what ancient Egyptians actually believed about divine knowledge and the afterlife.
+                </p>
+                <p><strong>Publisher:</strong> Cornell University Press | <strong>ISBN:</strong> 978-0801485152</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">Thoth: The History of the Ancient Egyptian God of Wisdom - Patrick Boylan (1922/2010)</div>
+                <p>
+                    Comprehensive study of Thoth in Egyptian religion from earliest times through Greco-Roman period.
+                    Shows the evolution of Thoth worship and theology. Essential background for understanding why Thoth
+                    became associated with all wisdom traditions.
+                </p>
+                <p><strong>Publisher:</strong> Routledge (reprint) | <strong>ISBN:</strong> 978-0415561440</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Pictorial Key to the Tarot - Arthur Edward Waite (1910)</div>
+                <p>
+                    Classic guide to the Rider-Waite-Smith Tarot, the most popular deck worldwide. Waite's Golden Dawn
+                    training shines through while making Tarot accessible to general audiences. Essential companion to
+                    understanding how Egyptian-Hermetic symbolism entered mainstream Tarot.
+                </p>
+                <p><strong>Publisher:</strong> Dover Publications | <strong>ISBN:</strong> 978-0486444871</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">Jung and Tarot: An Archetypal Journey - Sallie Nichols (1980)</div>
+                <p>
+                    Jungian analysis of Major Arcana as journey of individuation. Demonstrates how Tarot imagery
+                    expresses universal psychological archetypes. Bridges occult tradition with depth psychology,
+                    making Tarot relevant to therapeutic and spiritual growth.
+                </p>
+                <p><strong>Publisher:</strong> Weiser Books | <strong>ISBN:</strong> 978-0877285151</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Cross-References & Related Texts</h2>
+
+            <div class="cross-ref-grid">
+                <div class="cross-ref-card" onclick="location.href='corpus-hermeticum.html'">
+                    <div class="cross-ref-icon">☿</div>
+                    <div class="cross-ref-title">Corpus Hermeticum</div>
+                    <p>Hermetic texts attributed to Thoth-Hermes, actual "books of Thoth"</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='emerald-tablet.html'">
+                    <div class="cross-ref-icon">💎</div>
+                    <div class="cross-ref-title">Emerald Tablet</div>
+                    <p>Hermetic wisdom attributed to Hermes Trismegistus (Thoth)</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='sefer-yetzirah.html'">
+                    <div class="cross-ref-icon">✡️</div>
+                    <div class="cross-ref-title">Sefer Yetzirah</div>
+                    <p>Kabbalistic text underlying Tarot's connection to Hebrew letters and Tree of Life</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../divination/tarot.html'">
+                    <div class="cross-ref-icon">🃏</div>
+                    <div class="cross-ref-title">Tarot</div>
+                    <p>The modern expression of the Book of Thoth in card form</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../../mythos/egyptian/deities/thoth.html'">
+                    <div class="cross-ref-icon">𓁟</div>
+                    <div class="cross-ref-title">Thoth</div>
+                    <p>Egyptian god of wisdom, magic, and writing - legendary author</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../../mythos/greek/deities/hermes.html'">
+                    <div class="cross-ref-icon">☿</div>
+                    <div class="cross-ref-title">Hermes</div>
+                    <p>Greek god identified with Thoth creating Hermes Trismegistus</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../ritual/alchemy.html'">
+                    <div class="cross-ref-icon">⚗️</div>
+                    <div class="cross-ref-title">Alchemy</div>
+                    <p>Alchemical stages encoded in Tarot's archetypal journey</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../../archetypes/index.html'">
+                    <div class="cross-ref-icon">🎭</div>
+                    <div class="cross-ref-title">Universal Archetypes</div>
+                    <p>The Tarot trumps as archetypal forces in human consciousness</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel">
+            <h3>Explore Related Content</h3>
+
+            <h4 style="color: var(--color-secondary); margin: var(--spacing-md) 0;">Archetype Connections</h4>
+            <div class="interlink-grid">
+                <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128302;</div>
+                    <div class="card-content"><h4>The Magician</h4><span>Thoth as divine magician and master of wisdom</span></div>
+                </a>
+                <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128218;</div>
+                    <div class="card-content"><h4>The Sage</h4><span>Keeper of all knowledge and sacred mysteries</span></div>
+                </a>
+                <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#127769;</div>
+                    <div class="card-content"><h4>The Psychopomp</h4><span>Guide of souls and recorder of the dead</span></div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--spacing-lg) 0 var(--spacing-md) 0;">Cross-Cultural Parallels</h4>
+            <div class="interlink-grid">
+                <a href="../../mythos/egyptian/deities/thoth.html" class="parallel-card">
+                    <div class="card-icon">&#66335;</div>
+                    <div class="card-content"><h4>Thoth</h4><span>Egyptian god of wisdom, writing, and magic</span></div>
+                </a>
+                <a href="../../mythos/greek/deities/hermes.html" class="parallel-card">
+                    <div class="card-icon">&#9790;</div>
+                    <div class="card-content"><h4>Hermes</h4><span>Greek messenger god merged with Thoth</span></div>
+                </a>
+                <a href="../divination/tarot.html" class="parallel-card">
+                    <div class="card-icon">&#127183;</div>
+                    <div class="card-content"><h4>Tarot</h4><span>Modern manifestation of Thothian wisdom</span></div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--spacing-lg) 0 var(--spacing-md) 0;">See Also</h4>
+            <div class="interlink-grid">
+                <a href="corpus-hermeticum.html" class="parallel-card">
+                    <div class="card-icon">&#9790;</div>
+                    <div class="card-content"><h4>Corpus Hermeticum</h4><span>Hermetic teachings of Thoth-Hermes</span></div>
+                </a>
+                <a href="emerald-tablet.html" class="parallel-card">
+                    <div class="card-icon">&#128142;</div>
+                    <div class="card-content"><h4>Emerald Tablet</h4><span>Foundation of Hermetic philosophy</span></div>
+                </a>
+                <a href="../ritual/alchemy.html" class="parallel-card">
+                    <div class="card-icon">&#9879;</div>
+                    <div class="card-content"><h4>Alchemy</h4><span>Transformative art attributed to Thoth</span></div>
+                </a>
+            </div>
+        </section>
+
+        <div class="nav-buttons">
+            <a href="corpus-hermeticum.html" class="nav-button">⬅ Previous: Corpus Hermeticum</a>
+            <a href="sefer-yetzirah.html" class="nav-button">First Text: Sefer Yetzirah ➡</a>
+            <a href="../index.html" class="nav-button">📚 Sacred Texts</a>
+            <a href="../../index.html" class="nav-button">🏠 Home</a>
+        </div>
+    </div>
+
+    <!-- Theme Picker UI -->
+</body>
+</html>

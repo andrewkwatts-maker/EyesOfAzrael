@@ -1,0 +1,467 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinese Corpus Search - Chinese Mythology</title>
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+
+    <link rel="stylesheet" href="../../styles.css">
+        <link rel="stylesheet" href="../../themes/corpus-links.css">
+<link rel="stylesheet" href="../../themes/smart-links.css">
+<script defer src="../../themes/smart-links.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+<script defer src="../../themes/theme-picker.js"></script>
+    <style>
+        :root {
+            --mythos-primary: #DC143C;
+            --mythos-secondary: #FF4500;
+        }
+
+        .search-header {
+            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
+            color: white;
+            padding: 2rem;
+            border-radius: var(--radius-lg, 15px);
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid var(--mythos-primary);
+            border-radius: var(--radius-sm, 8px);
+            font-size: 1.1rem;
+        }
+
+        .search-button {
+            padding: 0.75rem 2rem;
+            background: var(--mythos-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm, 8px);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .search-button:hover {
+            background: var(--mythos-secondary);
+        }
+
+        .search-options {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .option-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .result-card {
+            background: white;
+            border: 2px solid rgba(220, 20, 60, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 20, 60, 0.2);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid rgba(220, 20, 60, 0.2);
+            padding-bottom: 0.5rem;
+        }
+
+        .result-title {
+            color: var(--mythos-primary);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .result-citation {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .result-corpus {
+            background: rgba(220, 20, 60, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            color: var(--mythos-primary);
+        }
+
+        .chinese-text {
+            font-size: 1.3rem;
+            line-height: 2;
+            margin: 1rem 0;
+            color: #000000;
+        }
+
+        .pinyin-text {
+            font-size: 1rem;
+            color: #555;
+            font-style: italic;
+            margin: 0.5rem 0;
+        }
+
+        .translation-text {
+            background: rgba(220, 20, 60, 0.05);
+            padding: 1rem;
+            border-left: 4px solid var(--mythos-primary);
+            margin: 1rem 0;
+            font-style: italic;
+        }
+
+        .context-marker {
+            color: var(--mythos-primary);
+            font-weight: bold;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--mythos-primary);
+            font-size: 1.1rem;
+        }
+
+        .corpus-note {
+            background: rgba(255, 165, 0, 0.1);
+            border: 2px solid rgba(255, 165, 0, 0.5);
+            padding: 1rem;
+            border-radius: var(--radius-sm, 8px);
+            margin-bottom: 1.5rem;
+        }
+
+        .corpus-note h4 {
+            color: #FF8C00;
+            margin-top: 0;
+        }
+
+        .example-searches {
+            background: rgba(220, 20, 60, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .example-tag {
+            display: inline-block;
+            background: white;
+            border: 1px solid var(--mythos-primary);
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            border-radius: var(--radius-xl, 20px);
+            cursor: pointer;
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .example-tag:hover {
+            background: var(--mythos-primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+    <header>
+    <div class="header-content">
+        <h1>🔍 Chinese Corpus Search</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../mythos/index.html">Home</a> →
+                <a href="index.html">Chinese</a> →
+                <span>Corpus Search</span>
+</nav>
+
+    <main>
+        <section class="search-header">
+            <h2>Search Chinese Texts</h2>
+            <p>Search historical Chinese texts for references to deities, concepts, and mythological elements.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.95rem;">Supports both Chinese characters (简体/繁體) and Pinyin romanization</p>
+        </section>
+
+        <div class="corpus-note">
+            <h4>📚 Available Corpora</h4>
+            <p><strong>Buddhist Sutras Corpus:</strong> 17 Mahayana Buddhist sutras and mantras with Chinese text and Pinyin. Includes the Heart Sutra (心经), Great Compassion Mantra (大悲咒), and other devotional texts featuring Buddhist deities like Guanyin (观音) and concepts like emptiness (空) and dharma (法).</p>
+            <p style="margin-top: 0.5rem;"><strong>Historical Uyghur-Chinese Corpus:</strong> 279 bilingual documents from the Qing dynasty to modern era. Contains administrative and legal texts with cultural references to imperial authority (皇, 帝), heaven (天), and traditional concepts.</p>
+            <p >Note: Classical Chinese mythology texts (Daodejing, Zhuangzi, Shan Hai Jing, I Ching) are not yet available in our corpus collection. The Buddhist texts provide the most relevant mythological content, particularly for Guanyin and Buddhist-Daoist syncretism.</p>
+        </div>
+
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text"
+                       id="searchInput"
+                       class="search-input"
+                       placeholder="Enter Chinese characters or Pinyin (e.g., 观音, guan yin, 佛, 道)"
+                       onkeypress="if(event.key === 'Enter') performSearch()">
+                <button class="search-button" onclick="performSearch()">Search 搜索</button>
+            </div>
+
+            <div class="search-options">
+                <div class="option-group">
+                    <input type="radio" id="versionBoth" name="version" value="both" checked>
+                    <label for="versionBoth">Both Versions</label>
+                </div>
+                <div class="option-group">
+                    <input type="radio" id="versionSimplified" name="version" value="Simplified">
+                    <label for="versionSimplified">Simplified (简体)</label>
+                </div>
+                <div class="option-group">
+                    <input type="radio" id="versionTraditional" name="version" value="Traditional">
+                    <label for="versionTraditional">Traditional (繁體)</label>
+                </div>
+                <div class="option-group">
+                    <input type="checkbox" id="includeUyghur" checked>
+                    <label for="includeUyghur">Include Uyghur-Chinese Corpus</label>
+                </div>
+                <div class="option-group">
+                    <label for="maxResults">Max Results:</label>
+                    <select id="maxResults">
+                        <option value="10">10</option>
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="example-searches">
+            <h3 style="color: var(--mythos-primary);">Example Searches</h3>
+            <p><strong>Buddhist Deities & Concepts:</strong></p>
+            <div>
+                <span class="example-tag" onclick="searchFor('观音')">观音 Guanyin</span>
+                <span class="example-tag" onclick="searchFor('佛')">佛 Buddha</span>
+                <span class="example-tag" onclick="searchFor('菩萨')">菩萨 Bodhisattva</span>
+                <span class="example-tag" onclick="searchFor('般若')">般若 Prajna</span>
+                <span class="example-tag" onclick="searchFor('空')">空 Emptiness</span>
+                <span class="example-tag" onclick="searchFor('法')">法 Dharma</span>
+                <span class="example-tag" onclick="searchFor('涅槃')">涅槃 Nirvana</span>
+            </div>
+            <p style="margin-top: 1rem;"><strong>Traditional Concepts:</strong></p>
+            <div>
+                <span class="example-tag" onclick="searchFor('天')">天 Heaven</span>
+                <span class="example-tag" onclick="searchFor('道')">道 Dao/Tao</span>
+                <span class="example-tag" onclick="searchFor('德')">德 Virtue</span>
+                <span class="example-tag" onclick="searchFor('龍')">龍 Dragon</span>
+                <span class="example-tag" onclick="searchFor('鳳')">鳳 Phoenix</span>
+            </div>
+            <p style="margin-top: 1rem;"><strong>Famous Texts:</strong></p>
+            <div>
+                <span class="example-tag" onclick="searchFor('心经')">心经 Heart Sutra</span>
+                <span class="example-tag" onclick="searchFor('大悲咒')">大悲咒 Great Compassion Mantra</span>
+                <span class="example-tag" onclick="searchFor('六字真言')">六字真言 Om Mani Padme Hum</span>
+            </div>
+        </div>
+
+        <div id="resultsContainer"></div>
+    </main>
+
+    <footer>
+        <p>
+            <strong>Chinese Corpus Search</strong> - Chinese Mythology<br>
+            <a href="../../mythos/index.html">World Mythos Home</a> |
+            <a href="index.html">Chinese Tradition</a> |
+            <a href="deities/index.html">Browse Deities</a>
+        </p>
+    </footer>
+
+    <script>
+        // Parse URL parameters
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Initialize with URL parameters
+        window.addEventListener('DOMContentLoaded', () => {
+            const term = getUrlParameter('term');
+            const version = getUrlParameter('version');
+
+            if (term) {
+                document.getElementById('searchInput').value = term;
+
+                if (version && version !== 'both') {
+                    if (version === 'Simplified') {
+                        document.getElementById('versionSimplified').checked = true;
+                    } else if (version === 'Traditional') {
+                        document.getElementById('versionTraditional').checked = true;
+                    }
+                }
+
+                performSearch();
+            }
+        });
+
+        function searchFor(term) {
+            document.getElementById('searchInput').value = term;
+            performSearch();
+        }
+
+        async function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+
+            if (!searchTerm) {
+                alert('Please enter a search term');
+                return;
+            }
+
+            const version = document.querySelector('input[name="version"]:checked').value;
+            const includeUyghur = document.getElementById('includeUyghur').checked;
+            const maxResults = parseInt(document.getElementById('maxResults').value);
+
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = '<div class="loading">🔍 Searching Chinese corpora...</div>';
+
+            try {
+                // Call Python interface through backend API
+                const results = await searchCorpora(searchTerm, version, includeUyghur, maxResults);
+                displayResults(results, searchTerm);
+            } catch (error) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <h3>⚠️ Search Error</h3>
+                        <p>Unable to search corpora. This page requires a backend server running the Python corpus interfaces.</p>
+                        <p style="margin-top: 1rem; font-size: 0.9rem;">To enable search functionality:</p>
+                        <ol style="text-align: left; display: inline-block; margin-top: 0.5rem;">
+                            <li>Set up the Flask/FastAPI backend in the corpus-search-interface directory</li>
+                            <li>Run: python app.py (or equivalent backend server)</li>
+                            <li>Ensure BuddhistSutrasInterface and HistoricalUyghurChineseCorpusInterface are loaded</li>
+                        </ol>
+                        <p >Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function searchCorpora(term, version, includeUyghur, maxResults) {
+            // This would call a backend API endpoint
+            // For now, return mock results to demonstrate structure
+
+            // In production, this would be:
+            // const response = await fetch(`/api/corpus/search?term=${encodeURIComponent(term)}&version=${version}&includeUyghur=${includeUyghur}&max=${maxResults}`);
+            // return await response.json();
+
+            throw new Error('Backend API not configured. See corpus-search-interface documentation.');
+        }
+
+        function displayResults(results, searchTerm) {
+            const resultsContainer = document.getElementById('resultsContainer');
+
+            if (!results || results.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <h3>No results found</h3>
+                        <p>No matches for "${searchTerm}" in the selected corpora.</p>
+                        <p style="margin-top: 1rem;">Try:</p>
+                        <ul style="text-align: left; display: inline-block;">
+                            <li>Using different character variants (simplified vs traditional)</li>
+                            <li>Searching with Pinyin romanization</li>
+                            <li>Using broader search terms</li>
+                            <li>Enabling all corpora</li>
+                        </ul>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `<h3 style="color: var(--mythos-primary); margin-bottom: 1.5rem;">Found ${results.length} results for "${searchTerm}"</h3>`;
+
+            results.forEach(result => {
+                html += createResultCard(result);
+            });
+
+            resultsContainer.innerHTML = html;
+        }
+
+        function createResultCard(result) {
+            const hasPinyin = result.metadata && result.metadata.pinyin;
+            const hasChinese = result.metadata && result.metadata.chinese;
+            const hasTranslation = result.translation;
+
+            return `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div>
+                            <div class="result-title">${escapeHtml(result.text_name)}</div>
+                            <div class="result-citation">${result.book || 'Unknown'}${result.verse ? ' - Line ' + result.verse : ''}</div>
+                        </div>
+                        <div class="result-corpus">${escapeHtml(result.corpus_name)}</div>
+                    </div>
+
+                    ${hasPinyin ? `<div class="pinyin-text">${escapeHtml(result.metadata.pinyin)}</div>` : ''}
+                    ${hasChinese ? `<div class="chinese-text">${escapeHtml(result.metadata.chinese)}</div>` : ''}
+
+                    ${!hasPinyin && !hasChinese ? `
+                        <div class="chinese-text">
+                            ${escapeHtml(result.context).replace(new RegExp(escapeRegex(result.matched_term), 'gi'),
+                                '<span class="context-marker">$&</span>')}
+                        </div>
+                    ` : ''}
+
+                    ${hasTranslation ? `
+                        <div class="translation-text">
+                            <strong>Translation:</strong> ${escapeHtml(result.translation)}
+                        </div>
+                    ` : ''}
+
+                    ${result.url ? `
+                        <div style="margin-top: 1rem;">
+                            <a href="../../index.html" target="_blank" style="color: var(--mythos-primary);">
+                                View source →
+                            </a>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+    </script>
+</body>
+</html>

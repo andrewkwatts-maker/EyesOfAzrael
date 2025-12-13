@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magical Systems - Cross-Cultural Practices</title>
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../themes/corpus-links.css">
+    <script defer src="../themes/theme-animations.js"></script>
+    <link rel="stylesheet" href="../styles.css">
+    <script src="../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../themes/smart-links.css">
+    <script defer src="../themes/smart-links.js"></script>
+
+    <style>
+        :root {
+            --mythos-primary: #8B4789;
+            --mythos-primary-rgb: 139, 71, 137;
+            --mythos-secondary: #A855F7;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--mythos-primary-rgb), 0.9),
+                rgba(168, 85, 247, 0.8));
+            color: var(--color-text-primary);
+            padding: var(--spacing-4xl) var(--spacing-xl);
+            text-align: center;
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-3xl);
+            border: 2px solid var(--color-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-section h2 {
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-md);
+            color: white;
+        }
+
+        .hero-section p {
+            font-size: var(--font-size-xl);
+            max-width: 800px;
+            margin: 1rem auto;
+            line-height: var(--line-height-relaxed);
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .category-section {
+            margin: var(--spacing-3xl) 0;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: rgba(var(--color-surface-rgb, 255, 255, 255), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .category-icon {
+            font-size: var(--font-size-5xl);
+        }
+
+        .category-title {
+            font-size: var(--font-size-4xl);
+            color: var(--mythos-primary);
+            margin: 0;
+        }
+
+        .magic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .magic-card {
+            background: rgba(var(--color-surface-rgb, 255, 255, 255), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .magic-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(var(--mythos-primary-rgb), 0.15), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .magic-card:hover::before {
+            opacity: 1;
+        }
+
+        .magic-card:hover {
+            background: rgba(var(--mythos-primary-rgb), 0.15);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow:
+                0 15px 40px rgba(var(--mythos-primary-rgb), 0.4),
+                0 0 30px rgba(var(--mythos-primary-rgb), 0.2),
+                inset 0 0 20px rgba(var(--mythos-primary-rgb), 0.05);
+            border-color: var(--mythos-primary);
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(var(--mythos-primary-rgb), 0.3); }
+            50% { box-shadow: 0 0 35px rgba(var(--mythos-primary-rgb), 0.5); }
+        }
+
+        .magic-card:hover .magic-icon {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .magic-icon {
+            font-size: var(--font-size-5xl);
+            margin-bottom: var(--spacing-md);
+            text-align: center;
+        }
+
+        .magic-title {
+            font-size: var(--font-size-2xl);
+            color: var(--mythos-primary);
+            margin-bottom: var(--spacing-md);
+            text-align: center;
+            font-weight: var(--font-semibold);
+        }
+
+        .magic-description {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-md);
+            line-height: var(--line-height-relaxed);
+            text-align: center;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: var(--spacing-md);
+        }
+
+        .tradition-tag {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: rgba(var(--mythos-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        header {
+            background: rgba(var(--color-surface-rgb, 255, 255, 255), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--color-border);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .header-content h1 {
+            color: var(--color-text-primary);
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--color-primary);
+        }
+
+        .footer-cta {
+            background: rgba(var(--color-surface-rgb, 255, 255, 255), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            margin-top: var(--spacing-4xl);
+            text-align: center;
+            color: var(--color-text-secondary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .footer-cta h2 {
+            color: var(--mythos-primary);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .footer-cta p {
+            margin-bottom: var(--spacing-lg);
+            line-height: var(--line-height-relaxed);
+        }
+
+        .related-links {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-lg);
+        }
+
+        .related-links a {
+            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
+            color: white;
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+        }
+
+        .related-links a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(var(--mythos-primary-rgb), 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+        <div class="header-content">
+            <h1>Magical Systems</h1>
+        </div>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Home</a> →
+        <span>Magical Systems</span>
+    </nav>
+
+    <main>
+        <div class="hero-section">
+            <h2>Comparative Magical Practices Across World Traditions</h2>
+            <p>
+                Explore the diverse practices, rituals, and mystical techniques humanity has developed to interact with the divine,
+                manipulate reality, and access hidden knowledge across cultures and millennia.
+            </p>
+        </div>
+
+        <!-- INTERLINK PANEL: Quick Navigation -->
+        <section class="interlink-panel" style="margin-bottom: var(--spacing-3xl);">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Quick Navigation by Category
+            </h3>
+
+            <div class="interlink-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-lg);">
+                <!-- Traditions -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--mythos-primary); margin-bottom: var(--spacing-md); display: flex; justify-content: space-between; align-items: center;">
+                        <span>🌍 Tradition-Specific Magic</span>
+                        <a href="traditions/index.html" style="font-size: var(--font-size-sm); color: var(--mythos-secondary); text-decoration: none;">View All &rarr;</a>
+                    </div>
+                    <div class="quick-links-grid" style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                        <a href="traditions/seidr.html" class="quick-link" data-smart style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">🔮</span> Seidr (Norse)
+                        </a>
+                        <a href="traditions/heka.html" class="quick-link" style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">𓋹</span> Heka (Egyptian)
+                        </a>
+                        <a href="traditions/theurgy.html" class="quick-link" data-smart style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">⚡</span> Theurgy (Greek)
+                        </a>
+                        <a href="traditions/practical-kabbalah.html" class="quick-link" data-smart style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">✡️</span> Kabbalah (Jewish)
+                        </a>
+                        <a href="traditions/vedic-magic.html" class="quick-link" style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">🕉️</span> Vedic Magic (Hindu)
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Divination -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--mythos-primary); margin-bottom: var(--spacing-md); display: flex; justify-content: space-between; align-items: center;">
+                        <span>🔮 Divination Systems</span>
+                        <a href="divination/index.html" style="font-size: var(--font-size-sm); color: var(--mythos-secondary); text-decoration: none;">View All &rarr;</a>
+                    </div>
+                    <div class="quick-links-grid" style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                        <a href="divination/tarot.html" class="quick-link" data-smart style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">🃏</span> Tarot
+                        </a>
+                        <a href="divination/runes.html" class="quick-link" style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">ᚱ</span> Runes
+                        </a>
+                        <a href="divination/i-ching.html" class="quick-link" style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">☯️</span> I Ching
+                        </a>
+                        <a href="divination/astrology.html" class="quick-link" data-smart style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">♈</span> Astrology
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Energy Work -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--mythos-primary); margin-bottom: var(--spacing-md); display: flex; justify-content: space-between; align-items: center;">
+                        <span>⚡ Energy Work</span>
+                        <a href="energy/index.html" style="font-size: var(--font-size-sm); color: var(--mythos-secondary); text-decoration: none;">View All &rarr;</a>
+                    </div>
+                    <div class="quick-links-grid" style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                        <a href="energy/chakra-work.html" class="quick-link" data-smart style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">🧘</span> Chakra Work
+                        </a>
+                        <a href="energy/qigong.html" class="quick-link" style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">☯️</span> Qigong
+                        </a>
+                        <a href="energy/reiki.html" class="quick-link" style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">👐</span> Reiki
+                        </a>
+                        <a href="energy/kundalini.html" class="quick-link" style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">🐍</span> Kundalini
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Ritual Magic -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--mythos-primary); margin-bottom: var(--spacing-md); display: flex; justify-content: space-between; align-items: center;">
+                        <span>🕯️ Ritual Magic</span>
+                        <a href="ritual/index.html" style="font-size: var(--font-size-sm); color: var(--mythos-secondary); text-decoration: none;">View All &rarr;</a>
+                    </div>
+                    <div class="quick-links-grid" style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                        <a href="ritual/ceremonial-magic.html" class="quick-link" data-smart style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">🔯</span> Ceremonial Magic
+                        </a>
+                        <a href="ritual/shamanism.html" class="quick-link" data-smart style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">🪶</span> Shamanism
+                        </a>
+                        <a href="ritual/alchemy.html" class="quick-link" data-smart style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">⚗️</span> Alchemy
+                        </a>
+                        <a href="ritual/tantra.html" class="quick-link" style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary);">
+                            <span class="quick-link-icon">🕉️</span> Tantra
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Source Mythologies Panel -->
+            <div class="parallel-traditions glass-card" style="margin-top: var(--spacing-xl); padding: var(--spacing-lg); background: rgba(var(--color-surface-rgb, 255, 255, 255), 0.6); border-radius: var(--radius-xl); border: 2px solid var(--color-border);">
+                <h4 style="color: var(--mythos-primary); margin-bottom: var(--spacing-md);">🌍 Explore Source Mythologies</h4>
+                <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg);">Each magical tradition emerges from its cultural mythology. Explore the divine sources:</p>
+                <div class="parallel-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--spacing-md);">
+                    <a href="../mythos/norse/index.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-lg); text-decoration: none; transition: all var(--transition-base);">
+                        <span class="tradition-flag" style="font-size: 1.5rem;">⚔️</span>
+                        <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Norse</span>
+                        <span class="tradition-label" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">Seidr, Runes</span>
+                    </a>
+                    <a href="../mythos/egyptian/index.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-lg); text-decoration: none; transition: all var(--transition-base);">
+                        <span class="tradition-flag" style="font-size: 1.5rem;">☀️</span>
+                        <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Egyptian</span>
+                        <span class="tradition-label" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">Heka</span>
+                    </a>
+                    <a href="../mythos/greek/index.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-lg); text-decoration: none; transition: all var(--transition-base);">
+                        <span class="tradition-flag" style="font-size: 1.5rem;">🏛️</span>
+                        <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Greek</span>
+                        <span class="tradition-label" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">Theurgy</span>
+                    </a>
+                    <a href="../mythos/jewish/index.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-lg); text-decoration: none; transition: all var(--transition-base);">
+                        <span class="tradition-flag" style="font-size: 1.5rem;">✡️</span>
+                        <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Jewish</span>
+                        <span class="tradition-label" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">Kabbalah</span>
+                    </a>
+                    <a href="../mythos/hindu/index.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-lg); text-decoration: none; transition: all var(--transition-base);">
+                        <span class="tradition-flag" style="font-size: 1.5rem;">🕉️</span>
+                        <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Hindu</span>
+                        <span class="tradition-label" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">Vedic, Tantra</span>
+                    </a>
+                    <a href="../mythos/chinese/index.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-lg); text-decoration: none; transition: all var(--transition-base);">
+                        <span class="tradition-flag" style="font-size: 1.5rem;">🐉</span>
+                        <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Chinese</span>
+                        <span class="tradition-label" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">Qigong, I Ching</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- DIVINATION SYSTEMS -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🔮</span>
+                <h2 class="category-title">Divination Systems</h2>
+            </div>
+            <div class="magic-grid">
+                <div class="magic-card" onclick="location.href='../mythos/tarot/index.html'">
+                    <div class="magic-icon">🃏</div>
+                    <h3 class="magic-title">Tarot</h3>
+                    <p class="magic-description">
+                        78-card symbolic system combining Kabbalistic, alchemical, and archetypal imagery for divination and spiritual insight
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Medieval Europe</span>
+                        <span class="tradition-tag">Hermetic</span>
+                        <span class="tradition-tag">Kabbalah</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='divination/i-ching.html'">
+                    <div class="magic-icon">☯️</div>
+                    <h3 class="magic-title">I Ching</h3>
+                    <p class="magic-description">
+                        Ancient Chinese hexagram system using 64 combinations to divine cosmic patterns and guide decision-making
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Chinese</span>
+                        <span class="tradition-tag">Taoism</span>
+                        <span class="tradition-tag">Confucianism</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='divination/runes.html'">
+                    <div class="magic-icon">ᚱ</div>
+                    <h3 class="magic-title">Runes</h3>
+                    <p class="magic-description">
+                        Nordic alphabet system imbued with magical power, used for divination, spellcasting, and communication with the divine
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Norse</span>
+                        <span class="tradition-tag">Germanic</span>
+                        <span class="tradition-tag">Celtic</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='divination/astrology.html'">
+                    <div class="magic-icon">♈</div>
+                    <h3 class="magic-title">Astrology</h3>
+                    <p class="magic-description">
+                        Study of celestial bodies' influence on earthly events, character, and destiny through zodiacal and planetary systems
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Babylonian</span>
+                        <span class="tradition-tag">Greek</span>
+                        <span class="tradition-tag">Vedic</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='divination/oracle-bones.html'">
+                    <div class="magic-icon">🦴</div>
+                    <h3 class="magic-title">Oracle Bones</h3>
+                    <p class="magic-description">
+                        Ancient Chinese practice of inscribing questions on bones or shells, heating them, and interpreting the resulting cracks
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Chinese</span>
+                        <span class="tradition-tag">Shang Dynasty</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='divination/geomancy.html'">
+                    <div class="magic-icon">⛰️</div>
+                    <h3 class="magic-title">Geomancy</h3>
+                    <p class="magic-description">
+                        Divination by interpreting markings in earth, sand, or stones; includes Feng Shui and Arabic sand divination
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Chinese</span>
+                        <span class="tradition-tag">Arabic</span>
+                        <span class="tradition-tag">African</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RITUAL MAGIC SYSTEMS -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🕯️</span>
+                <h2 class="category-title">Ritual Magic Systems</h2>
+            </div>
+            <div class="magic-grid">
+                <div class="magic-card" onclick="location.href='ritual/ceremonial-magic.html'">
+                    <div class="magic-icon">🔯</div>
+                    <h3 class="magic-title">Ceremonial Magic</h3>
+                    <p class="magic-description">
+                        Western esoteric tradition using complex rituals, sacred geometry, divine names, and angelic invocation
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hermetic</span>
+                        <span class="tradition-tag">Golden Dawn</span>
+                        <span class="tradition-tag">Thelema</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='ritual/tantra.html'">
+                    <div class="magic-icon">🕉️</div>
+                    <h3 class="magic-title">Tantra</h3>
+                    <p class="magic-description">
+                        Hindu and Buddhist esoteric practices using mantras, mudras, mandalas, and ritual to awaken divine energy
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                        <span class="tradition-tag">Buddhist</span>
+                        <span class="tradition-tag">Tibetan</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='ritual/hoodoo.html'">
+                    <div class="magic-icon">🕯️</div>
+                    <h3 class="magic-title">Hoodoo/Rootwork</h3>
+                    <p class="magic-description">
+                        African-American folk magic tradition combining African, Native American, and European practices with Biblical elements
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">African-American</span>
+                        <span class="tradition-tag">Southern US</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='ritual/shamanism.html'">
+                    <div class="magic-icon">🪶</div>
+                    <h3 class="magic-title">Shamanism</h3>
+                    <p class="magic-description">
+                        Spirit journey practices using altered states to communicate with spirits, heal, and access otherworldly knowledge
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Siberian</span>
+                        <span class="tradition-tag">Native American</span>
+                        <span class="tradition-tag">Universal</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='ritual/alchemy.html'">
+                    <div class="magic-icon">⚗️</div>
+                    <h3 class="magic-title">Alchemy</h3>
+                    <p class="magic-description">
+                        Spiritual and physical transmutation practices seeking to perfect matter and spirit, creating the Philosopher's Stone
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hermetic</span>
+                        <span class="tradition-tag">Chinese</span>
+                        <span class="tradition-tag">Islamic</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='ritual/chaos-magic.html'">
+                    <div class="magic-icon">🌀</div>
+                    <h3 class="magic-title">Chaos Magic</h3>
+                    <p class="magic-description">
+                        Postmodern magical paradigm emphasizing belief as a tool, pragmatic results, and paradigm-shifting techniques
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Modern</span>
+                        <span class="tradition-tag">Eclectic</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SACRED TEXTS & GRIMOIRES -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">📖</span>
+                <h2 class="category-title">Sacred Texts & Grimoires</h2>
+                <a href="texts/index.html" style="margin-left: auto; font-size: var(--font-size-sm); color: var(--mythos-secondary); text-decoration: none; padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md);">View All &rarr;</a>
+            </div>
+            <div class="magic-grid">
+                <div class="magic-card" onclick="location.href='texts/sefer-yetzirah.html'">
+                    <div class="magic-icon">✡️</div>
+                    <h3 class="magic-title">Sefer Yetzirah</h3>
+                    <p class="magic-description">
+                        Ancient Kabbalistic text describing creation through 32 paths of wisdom: 10 Sefirot and 22 Hebrew letters
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Jewish</span>
+                        <span class="tradition-tag">Kabbalah</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='texts/emerald-tablet.html'">
+                    <div class="magic-icon">💎</div>
+                    <h3 class="magic-title">Emerald Tablet</h3>
+                    <p class="magic-description">
+                        Cryptic Hermetic text attributed to Hermes Trismegistus, foundation of Western alchemy and magic
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hermetic</span>
+                        <span class="tradition-tag">Egyptian</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='texts/picatrix.html'">
+                    <div class="magic-icon">🌟</div>
+                    <h3 class="magic-title">Picatrix</h3>
+                    <p class="magic-description">
+                        Medieval Arabic grimoire of astrological magic, talismans, and planetary rituals translated into Latin
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Islamic</span>
+                        <span class="tradition-tag">Hermetic</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='texts/key-of-solomon.html'">
+                    <div class="magic-icon">🔑</div>
+                    <h3 class="magic-title">Key of Solomon</h3>
+                    <p class="magic-description">
+                        Medieval grimoire of ceremonial magic with detailed instructions for spirit evocation and magical operations
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Medieval</span>
+                        <span class="tradition-tag">Christian</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='texts/corpus-hermeticum.html'">
+                    <div class="magic-icon">☿</div>
+                    <h3 class="magic-title">Corpus Hermeticum</h3>
+                    <p class="magic-description">
+                        Collection of Greco-Egyptian wisdom texts foundational to Hermetic philosophy and Western esotericism
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hermetic</span>
+                        <span class="tradition-tag">Greek</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='texts/book-of-thoth.html'">
+                    <div class="magic-icon">𓁟</div>
+                    <h3 class="magic-title">Book of Thoth</h3>
+                    <p class="magic-description">
+                        Legendary Egyptian text of divine wisdom attributed to Thoth, basis for Tarot and Hermetic teachings
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Egyptian</span>
+                        <span class="tradition-tag">Hermetic</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRACTICAL MAGIC -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🪄</span>
+                <h2 class="category-title">Practical Magic</h2>
+                <a href="practical/index.html" style="margin-left: auto; font-size: var(--font-size-sm); color: var(--mythos-secondary); text-decoration: none; padding: var(--spacing-sm) var(--spacing-md); background: rgba(var(--mythos-primary-rgb), 0.1); border-radius: var(--radius-md);">View All &rarr;</a>
+            </div>
+            <div class="magic-grid">
+                <div class="magic-card" onclick="location.href='practical/sigil-magic.html'">
+                    <div class="magic-icon">⚝</div>
+                    <h3 class="magic-title">Sigil Magic</h3>
+                    <p class="magic-description">
+                        Creation and activation of symbolic glyphs to encode and manifest intention through visual representation
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Chaos Magic</span>
+                        <span class="tradition-tag">Ceremonial</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='practical/candle-magic.html'">
+                    <div class="magic-icon">🕯️</div>
+                    <h3 class="magic-title">Candle Magic</h3>
+                    <p class="magic-description">
+                        Use of colored candles, oils, and inscription to focus intention and manifest desires through flame
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hoodoo</span>
+                        <span class="tradition-tag">Wicca</span>
+                        <span class="tradition-tag">Folk Magic</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='practical/talismans.html'">
+                    <div class="magic-icon">🧿</div>
+                    <h3 class="magic-title">Talismans & Amulets</h3>
+                    <p class="magic-description">
+                        Creation of charged objects inscribed with symbols, prayers, or materials to attract or repel specific energies
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Universal</span>
+                        <span class="tradition-tag">Hermetic</span>
+                        <span class="tradition-tag">Folk Magic</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='practical/spirit-work.html'">
+                    <div class="magic-icon">👻</div>
+                    <h3 class="magic-title">Spirit Work</h3>
+                    <p class="magic-description">
+                        Communication, evocation, and collaboration with spirits, ancestors, angels, demons, and other non-corporeal entities
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Ceremonial</span>
+                        <span class="tradition-tag">Shamanism</span>
+                        <span class="tradition-tag">Hoodoo</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='practical/herbalism.html'">
+                    <div class="magic-icon">🌿</div>
+                    <h3 class="magic-title">Magical Herbalism</h3>
+                    <p class="magic-description">
+                        Use of plants for spellwork, potions, incense, and remedies based on sympathetic correspondences and traditional lore
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Universal</span>
+                        <span class="tradition-tag">Wicca</span>
+                        <span class="tradition-tag">Folk Magic</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='practical/knot-magic.html'">
+                    <div class="magic-icon">🪢</div>
+                    <h3 class="magic-title">Knot Magic</h3>
+                    <p class="magic-description">
+                        Binding and releasing energy through cord work, sailor's knots, and ritual tying with intention
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Folk Magic</span>
+                        <span class="tradition-tag">Wicca</span>
+                        <span class="tradition-tag">Nordic</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ENERGY WORK & MEDITATION -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">⚡</span>
+                <h2 class="category-title">Energy Work & Meditation</h2>
+            </div>
+            <div class="magic-grid">
+                <div class="magic-card" onclick="location.href='energy/chakra-work.html'">
+                    <div class="magic-icon">🧘</div>
+                    <h3 class="magic-title">Chakra Work</h3>
+                    <p class="magic-description">
+                        Activating and balancing the seven energy centers along the spine using visualization, breath, and sound
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                        <span class="tradition-tag">Tantra</span>
+                        <span class="tradition-tag">Yoga</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='energy/qigong.html'">
+                    <div class="magic-icon">☯️</div>
+                    <h3 class="magic-title">Qigong</h3>
+                    <p class="magic-description">
+                        Chinese cultivation of vital energy (Qi) through movement, breath, and meditation for health and spiritual development
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Chinese</span>
+                        <span class="tradition-tag">Taoist</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='energy/reiki.html'">
+                    <div class="magic-icon">👐</div>
+                    <h3 class="magic-title">Reiki</h3>
+                    <p class="magic-description">
+                        Japanese healing system channeling universal life force energy through hands for healing and balance
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Japanese</span>
+                        <span class="tradition-tag">Buddhist</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='energy/kundalini.html'">
+                    <div class="magic-icon">🐍</div>
+                    <h3 class="magic-title">Kundalini Yoga</h3>
+                    <p class="magic-description">
+                        Awakening the serpent power coiled at the base of the spine through specific practices to achieve enlightenment
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                        <span class="tradition-tag">Tantra</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='energy/middle-pillar.html'">
+                    <div class="magic-icon">🌳</div>
+                    <h3 class="magic-title">Middle Pillar</h3>
+                    <p class="magic-description">
+                        Kabbalistic energy practice circulating divine light through the Tree of Life centers in the body
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Kabbalah</span>
+                        <span class="tradition-tag">Golden Dawn</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='energy/breathwork.html'">
+                    <div class="magic-icon">🌬️</div>
+                    <h3 class="magic-title">Pranayama</h3>
+                    <p class="magic-description">
+                        Yogic breath control techniques to regulate life force, calm the mind, and prepare for meditation
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                        <span class="tradition-tag">Yoga</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRADITION-SPECIFIC SYSTEMS -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🌍</span>
+                <h2 class="category-title">Tradition-Specific Systems</h2>
+            </div>
+            <div class="magic-grid">
+                <div class="magic-card" onclick="location.href='traditions/seidr.html'">
+                    <div class="magic-icon">🔮</div>
+                    <h3 class="magic-title">Seiðr</h3>
+                    <p class="magic-description">
+                        Norse shamanic practice of prophecy, fate-weaving, and spirit journeying, associated with Freyja and Odin
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Norse</span>
+                        <span class="tradition-tag">Shamanic</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='traditions/heka.html'">
+                    <div class="magic-icon">𓋹</div>
+                    <h3 class="magic-title">Heka</h3>
+                    <p class="magic-description">
+                        Ancient Egyptian magic system using spoken words of power, ritual actions, and divine names to shape reality
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Egyptian</span>
+                        <span class="tradition-tag">Priestly</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='traditions/goetia.html'">
+                    <div class="magic-icon">👹</div>
+                    <h3 class="magic-title">Goetia</h3>
+                    <p class="magic-description">
+                        Medieval system of summoning and commanding 72 demons from the Lesser Key of Solomon for knowledge and power
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Medieval</span>
+                        <span class="tradition-tag">Solomonic</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='traditions/practical-kabbalah.html'">
+                    <div class="magic-icon">✡️</div>
+                    <h3 class="magic-title">Practical Kabbalah</h3>
+                    <p class="magic-description">
+                        Jewish mystical practice using divine names, angel invocation, amulets, and letter permutations for magical effects
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Jewish</span>
+                        <span class="tradition-tag">Mystical</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='traditions/vedic-magic.html'">
+                    <div class="magic-icon">🕉️</div>
+                    <h3 class="magic-title">Vedic Magic</h3>
+                    <p class="magic-description">
+                        Ancient Hindu practices using Vedic mantras, yajñas (fire rituals), and invocations to influence cosmic forces
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                        <span class="tradition-tag">Vedic</span>
+                    </div>
+                </div>
+
+                <div class="magic-card" onclick="location.href='traditions/theurgy.html'">
+                    <div class="magic-icon">⚡</div>
+                    <h3 class="magic-title">Theurgy</h3>
+                    <p class="magic-description">
+                        Neoplatonic practice of divine communion and soul ascension through ritual invocation of gods and higher powers
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Greek</span>
+                        <span class="tradition-tag">Neoplatonic</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="footer-cta">
+        <h2>Explore the Mysteries</h2>
+        <p>
+            From ancient grimoires to modern chaos magic, from Eastern energy cultivation to Western ceremonial tradition,
+            discover the tools and techniques used across cultures to touch the divine and transform reality.
+        </p>
+        <div class="related-links">
+            <a href="../mythos/index.html">World Mythologies</a>
+            <a href="../archetypes/index.html">Universal Archetypes</a>
+            <a href="../herbalism/index.html">Sacred Herbalism</a>
+            <a href="../spiritual-items/index.html">Sacred Items</a>
+            <a href="../spiritual-places/index.html">Sacred Places</a>
+            <a href="../index.html">Home</a>
+        </div>
+    </footer>
+
+    <footer style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-secondary); border-top: 1px solid var(--color-border); margin-top: var(--spacing-xl);">
+        <p>World Mythos Explorer - Magical Systems</p>
+        <p style="margin-top: var(--spacing-sm);">
+            <a href="../index.html" style="color: var(--mythos-primary); text-decoration: none;">Home</a> |
+            <a href="../mythos/index.html" style="color: var(--mythos-primary); text-decoration: none;">Mythologies</a> |
+            <a href="../archetypes/index.html" style="color: var(--mythos-primary); text-decoration: none;">Archetypes</a> |
+            <a href="../herbalism/index.html" style="color: var(--mythos-primary); text-decoration: none;">Herbalism</a> |
+            <a href="../spiritual-items/index.html" style="color: var(--mythos-primary); text-decoration: none;">Items</a> |
+            <a href="../spiritual-places/index.html" style="color: var(--mythos-primary); text-decoration: none;">Places</a>
+        </p>
+    </footer>
+</body>
+</html>

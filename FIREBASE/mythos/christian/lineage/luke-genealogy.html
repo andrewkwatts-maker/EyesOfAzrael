@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Luke's Genealogy - The Universal Line - Christian Mythology</title>
+<link href="../../../themes/theme-base.css" rel="stylesheet"/>
+<link href="../../../styles.css" rel="stylesheet"/>
+<link href="../../../themes/corpus-links.css" rel="stylesheet"/>
+<link rel="stylesheet" href="../../../themes/smart-links.css">
+<script defer src="../../../themes/smart-links.js"></script>
+<script defer src="../../../themes/theme-animations.js"></script>
+<script defer src="../../../themes/theme-picker.js"></script>
+<style>
+        /* Glass UI Styling - Consistent with Matthew page */
+        h1, h2, h3, h4 {
+            color: var(--color-primary);
+        }
+
+        .breadcrumb {
+            position: sticky;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(var(--color-surface-rgb), 0.9);
+            backdrop-filter: blur(12px);
+            padding: var(--spacing-xs) var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
+        }
+
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        /* Genealogy Display */
+        .genealogy-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.08),
+                rgba(var(--color-secondary-rgb), 0.05));
+            border: 2px solid rgba(var(--color-primary-rgb), 0.25);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+        }
+
+        .genealogy-section h3 {
+            color: var(--color-primary);
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .generation-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .generation-entry {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            border-left: 3px solid var(--color-primary);
+            border-radius: var(--radius-md);
+            padding: 0.5rem 0.75rem;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+        }
+
+        .generation-entry:hover {
+            transform: translateX(5px);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .gen-num {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            padding: 0.15rem 0.5rem;
+            border-radius: var(--radius-full);
+            font-weight: 700;
+            font-size: 0.85rem;
+            min-width: 40px;
+            text-align: center;
+            margin-right: 0.75rem;
+        }
+
+        .gen-name {
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .gen-name a {
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        .gen-name a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        .scripture-quote {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 3px solid var(--color-primary);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            border-radius: var(--radius-md);
+            line-height: 1.8;
+        }
+
+        .scripture-quote cite {
+            display: block;
+            margin-top: 1rem;
+            font-style: normal;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .theological-box {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.15),
+                rgba(var(--color-secondary-rgb), 0.15));
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+        }
+
+        .theological-box h4 {
+            color: var(--color-primary);
+            margin-top: 0;
+        }
+
+        .highlight-entry {
+            background: linear-gradient(135deg,
+                rgba(var(--color-secondary-rgb), 0.15),
+                rgba(var(--color-primary-rgb), 0.1));
+            border-left: 4px solid var(--color-secondary);
+        }
+
+        .reverse-direction {
+            text-align: center;
+            color: var(--color-primary);
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+<div id="theme-picker"></div>
+
+<header>
+    <div class="header-content">
+        <h1>✝️ Christian Mythology</h1>
+    </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../../mythos/index.html">Home</a> →
+    <a href="../index.html">Christian</a> →
+    <a href="index.html">Lineage of the Messiah</a> →
+    <span>Luke's Genealogy</span>
+</nav>
+
+<main>
+<div class="hero-section">
+<div style="font-size: 3.5rem; margin-bottom: 1rem;">🌍🌳</div>
+<h2>Luke's Genealogy: The Universal Line</h2>
+<p style="font-size: 1.2rem; max-width: 800px; margin: 1rem auto; line-height: 1.7;">
+                The biological descent from <a class="corpus-link" data-term="Jesus Christ" data-tradition="christian" href="../corpus-search.html?term=jesus">Jesus</a> back through <a class="corpus-link" data-term="David" data-tradition="jewish" href="../../jewish/corpus-search.html?term=david">David</a>, through <a class="corpus-link" data-term="Nathan" data-tradition="jewish" href="../../jewish/corpus-search.html?term=nathan">Nathan</a> (not Solomon), all the way to <a class="corpus-link" data-term="Adam" data-tradition="jewish" href="../../jewish/corpus-search.html?term=adam">Adam</a>, "son of God." Seventy-seven generations demonstrating Jesus as the Second Adam, the Savior of all humanity, connecting divinity to every person who has ever lived.
+            </p>
+</div>
+
+<!-- Introduction -->
+<section>
+<div class="glass-card">
+<h2 style="margin-top: 0;">📖 Luke 3:23-38: The Reverse Genealogy</h2>
+<p style="line-height: 1.8; margin-bottom: 1.5rem;">
+                    Unlike Matthew's forward-moving genealogy (from Abraham to Jesus), Luke traces Jesus's ancestry <strong>backward</strong> - from Jesus to Adam to God. This reverse structure emphasizes that Jesus is not merely the culmination of Jewish history, but the redemption of <em>all</em> humanity from the very beginning.
+                </p>
+
+<div class="theological-box">
+<h4>Why Luke's Genealogy Matters</h4>
+<ul style="line-height: 1.8;">
+<li><strong>Universal Scope:</strong> Goes beyond Abraham to Adam, showing Jesus as Savior of all people, not just Jews</li>
+<li><strong>Biological Line:</strong> Likely traces through Mary (though Joseph is named as per custom), proving Jesus's actual blood descent from David</li>
+<li><strong>Through Nathan:</strong> Avoids the curse on Jeconiah (Jeremiah 22:30) by going through David's son Nathan, not Solomon</li>
+<li><strong>77 Generations:</strong> Symbolic number (7×11) representing completeness and divine perfection</li>
+<li><strong>Second Adam:</strong> Connects Jesus to the first Adam, establishing Him as the new head of humanity</li>
+<li><strong>Son of God:</strong> Ends with "Adam, son of God," linking humanity's origin directly to the divine</li>
+</ul>
+</div>
+
+<div class="scripture-quote">
+                    "And Jesus himself began to be about thirty years of age, being (as was supposed) the son of Joseph, which was the son of Heli..."
+                    <cite>— Luke 3:23 (KJV)</cite>
+</div>
+
+<p style="line-height: 1.8; font-style: italic; color: var(--color-text-secondary);">
+                    Note: "As was supposed" indicates Joseph was Jesus's legal but not biological father. Many scholars believe Heli was Mary's father, making this Mary's genealogy through her father's line.
+                </p>
+</div>
+</section>
+
+<!-- The 77 Generations -->
+<section>
+<div class="genealogy-section">
+<h3>🌳 The Complete Genealogy: 77 Generations</h3>
+<div class="reverse-direction">↑ Reading from Jesus UP to God ↑</div>
+
+<!-- Jesus to David (1-41) -->
+<h4 style="color: var(--color-secondary); margin-top: 1.5rem;">Jesus to King David (Generations 1-41)</h4>
+<div class="generation-list">
+<div class="generation-entry highlight-entry">
+<span class="gen-num">1</span>
+<span class="gen-name"><a href="../deities/jesus-christ.html">Jesus</a></span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">2</span>
+<span class="gen-name">Joseph (supposed father)</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">3</span>
+<span class="gen-name">Heli (Mary's father)</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">4</span>
+<span class="gen-name">Matthat</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">5</span>
+<span class="gen-name">Levi</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">6</span>
+<span class="gen-name">Melchi</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">7</span>
+<span class="gen-name">Jannai</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">8</span>
+<span class="gen-name">Joseph</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">9</span>
+<span class="gen-name">Mattathias</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">10</span>
+<span class="gen-name">Amos</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">11</span>
+<span class="gen-name">Nahum</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">12</span>
+<span class="gen-name">Esli</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">13</span>
+<span class="gen-name">Naggai</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">14</span>
+<span class="gen-name">Maath</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">15</span>
+<span class="gen-name">Mattathias</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">16</span>
+<span class="gen-name">Semein</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">17</span>
+<span class="gen-name">Josech</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">18</span>
+<span class="gen-name">Joda</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">19</span>
+<span class="gen-name">Joanan</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">20</span>
+<span class="gen-name">Rhesa</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">21</span>
+<span class="gen-name"><a href="ancestors/zerubbabel.html">Zerubbabel</a></span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">22</span>
+<span class="gen-name">Shealtiel</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">23</span>
+<span class="gen-name">Neri</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">24</span>
+<span class="gen-name">Melchi</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">25</span>
+<span class="gen-name">Addi</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">26</span>
+<span class="gen-name">Cosam</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">27</span>
+<span class="gen-name">Elmadam</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">28</span>
+<span class="gen-name">Er</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">29</span>
+<span class="gen-name">Joshua</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">30</span>
+<span class="gen-name">Eliezer</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">31</span>
+<span class="gen-name">Jorim</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">32</span>
+<span class="gen-name">Matthat</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">33</span>
+<span class="gen-name">Levi</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">34</span>
+<span class="gen-name">Simeon</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">35</span>
+<span class="gen-name">Judah</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">36</span>
+<span class="gen-name">Joseph</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">37</span>
+<span class="gen-name">Jonam</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">38</span>
+<span class="gen-name">Eliakim</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">39</span>
+<span class="gen-name">Melea</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">40</span>
+<span class="gen-name">Menna</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">41</span>
+<span class="gen-name">Mattatha</span>
+</div>
+<div class="generation-entry highlight-entry">
+<span class="gen-num">42</span>
+<span class="gen-name"><a href="ancestors/nathan.html">Nathan</a></span>
+</div>
+<div class="generation-entry highlight-entry">
+<span class="gen-num">43</span>
+<span class="gen-name"><a href="ancestors/david.html">David</a> (the King)</span>
+</div>
+</div>
+
+<!-- David to Abraham (44-56) -->
+<h4 style="color: var(--color-secondary); margin-top: 2rem;">King David to Abraham (Generations 44-56)</h4>
+<div class="generation-list">
+<div class="generation-entry">
+<span class="gen-num">44</span>
+<span class="gen-name">Jesse</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">45</span>
+<span class="gen-name">Obed</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">46</span>
+<span class="gen-name">Boaz</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">47</span>
+<span class="gen-name">Salmon</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">48</span>
+<span class="gen-name">Nahshon</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">49</span>
+<span class="gen-name">Amminadab</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">50</span>
+<span class="gen-name">Admin</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">51</span>
+<span class="gen-name">Arni</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">52</span>
+<span class="gen-name">Hezron</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">53</span>
+<span class="gen-name">Perez</span>
+</div>
+<div class="generation-entry highlight-entry">
+<span class="gen-num">54</span>
+<span class="gen-name"><a href="ancestors/judah.html">Judah</a></span>
+</div>
+<div class="generation-entry highlight-entry">
+<span class="gen-num">55</span>
+<span class="gen-name"><a href="ancestors/jacob.html">Jacob</a> (Israel)</span>
+</div>
+<div class="generation-entry highlight-entry">
+<span class="gen-num">56</span>
+<span class="gen-name"><a href="ancestors/isaac.html">Isaac</a></span>
+</div>
+<div class="generation-entry highlight-entry">
+<span class="gen-num">57</span>
+<span class="gen-name"><a href="ancestors/abraham.html">Abraham</a></span>
+</div>
+</div>
+
+<!-- Abraham to Noah (58-67) -->
+<h4 style="color: var(--color-secondary); margin-top: 2rem;">Abraham to Noah (Generations 58-67)</h4>
+<div class="generation-list">
+<div class="generation-entry">
+<span class="gen-num">58</span>
+<span class="gen-name">Terah</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">59</span>
+<span class="gen-name">Nahor</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">60</span>
+<span class="gen-name">Serug</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">61</span>
+<span class="gen-name">Reu</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">62</span>
+<span class="gen-name">Peleg</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">63</span>
+<span class="gen-name">Eber</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">64</span>
+<span class="gen-name">Shelah</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">65</span>
+<span class="gen-name">Cainan</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">66</span>
+<span class="gen-name">Arphaxad</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">67</span>
+<span class="gen-name">Shem</span>
+</div>
+<div class="generation-entry highlight-entry">
+<span class="gen-num">68</span>
+<span class="gen-name">Noah</span>
+</div>
+</div>
+
+<!-- Noah to Adam (69-77) -->
+<h4 style="color: var(--color-secondary); margin-top: 2rem;">Noah to Adam to God (Generations 69-77)</h4>
+<div class="generation-list">
+<div class="generation-entry">
+<span class="gen-num">69</span>
+<span class="gen-name">Lamech</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">70</span>
+<span class="gen-name">Methuselah</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">71</span>
+<span class="gen-name">Enoch</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">72</span>
+<span class="gen-name">Jared</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">73</span>
+<span class="gen-name">Mahalaleel</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">74</span>
+<span class="gen-name">Cainan</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">75</span>
+<span class="gen-name">Enos</span>
+</div>
+<div class="generation-entry">
+<span class="gen-num">76</span>
+<span class="gen-name">Seth</span>
+</div>
+<div class="generation-entry highlight-entry">
+<span class="gen-num">77</span>
+<span class="gen-name">Adam</span>
+</div>
+<div class="generation-entry" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(218, 165, 32, 0.2)); border-left: 4px solid #FFD700;">
+<span class="gen-num" style="background: linear-gradient(135deg, #FFD700, #DAA520);">∞</span>
+<span class="gen-name" style="font-weight: 700; font-size: 1.1rem;">God (the Father)</span>
+</div>
+</div>
+
+<div style="text-align: center; margin-top: 2rem; padding: 1.5rem; background: rgba(var(--color-primary-rgb), 0.08); border-radius: var(--radius-lg);">
+<p style="font-size: 1.2rem; color: var(--color-primary); font-weight: 600; margin: 0;">
+                        "Jesus → Joseph → ... → David → ... → Abraham → ... → Noah → ... → Adam → GOD"
+                    </p>
+<p style="margin-top: 0.5rem; font-style: italic; color: var(--color-text-secondary);">
+                        Every human being traces back to Adam, and Adam to God. Through Jesus, the Second Adam, all humanity is redeemed.
+                    </p>
+</div>
+</div>
+</section>
+
+<!-- Theological Significance -->
+<section>
+<div class="glass-card">
+<h2 style="margin-top: 0;">📖 Theological Significance</h2>
+
+<div class="theological-box">
+<h4>Jesus as the Second Adam</h4>
+<p style="line-height: 1.7;">
+                        By tracing the lineage all the way back to Adam, Luke establishes Jesus as the <strong>Second Adam</strong> (1 Corinthians 15:45-47). Where the first Adam brought sin and death to all humanity, the Second Adam brings righteousness and life. This universal scope demonstrates that Jesus came to save all people, not just the descendants of Abraham.
+                    </p>
+</div>
+
+<div class="scripture-quote">
+                    "The first man Adam became a living being; the last Adam, a life-giving spirit... The first man was of the dust of the earth; the second man is of heaven."
+                    <cite>— 1 Corinthians 15:45, 47 (NIV)</cite>
+</div>
+
+<div class="theological-box">
+<h4>Through Nathan, Not Solomon</h4>
+<p style="line-height: 1.7;">
+                        Unlike Matthew's genealogy which goes through Solomon (the royal line), Luke's goes through <strong>Nathan</strong>, another son of David. This is crucial because:
+                    </p>
+<ul style="line-height: 1.8;">
+<li>It avoids the curse on Jeconiah's line (Jeremiah 22:30)</li>
+<li>It proves Jesus's biological descent from David through Mary</li>
+<li>It shows Jesus qualifies both legally (through Joseph/Solomon) and biologically (through Mary/Nathan)</li>
+</ul>
+</div>
+
+<div class="theological-box">
+<h4>The Number 77: Perfect Completion</h4>
+<p style="line-height: 1.7;">
+                        The 77 generations (7 × 11) symbolize divine completeness and perfection. In Matthew 18:22, Jesus tells Peter to forgive "seventy times seven" - unlimited forgiveness. Here, 77 generations represent the complete scope of God's redemptive plan from creation to Christ.
+                    </p>
+</div>
+
+<div class="scripture-quote">
+                    "For as in Adam all die, so in Christ all will be made alive."
+                    <cite>— 1 Corinthians 15:22 (NIV)</cite>
+</div>
+
+<div class="theological-box">
+<h4>Universal Salvation: All Humanity Redeemed</h4>
+<p style="line-height: 1.7;">
+                        By connecting Jesus to every human through Adam, Luke demonstrates the universal scope of salvation. Every person who has ever lived is a descendant of Adam, "son of God." Through Jesus, the Second Adam, God's plan is to restore all of Adam's descendants - all humanity - to Himself.
+                    </p>
+</div>
+</div>
+</section>
+
+<!-- Mary's Line Explanation -->
+<section>
+<div class="glass-card">
+<h2 style="margin-top: 0;">👸 Mary's Lineage: The Biological Line</h2>
+<p style="line-height: 1.8; margin-bottom: 1.5rem;">
+                    While the text says "son of Joseph," most scholars believe Luke is actually tracing <strong>Mary's genealogy</strong> through her father Heli. Here's why:
+                </p>
+
+<div class="theological-box">
+<h4>Evidence for Mary's Line</h4>
+<ul style="line-height: 1.8;">
+<li><strong>"As was supposed":</strong> Luke 3:23 says Jesus was "as was supposed" the son of Joseph - indicating he was not actually Joseph's biological son</li>
+<li><strong>Heli as Mary's father:</strong> Ancient tradition identifies Heli as Mary's father, not Joseph's (Joseph's father was Jacob per Matthew 1:16)</li>
+<li><strong>Levirate custom:</strong> In cases where no male heir existed, the genealogy would be traced through the daughter's husband</li>
+<li><strong>Biological necessity:</strong> Jesus needed to be David's biological descendant to fulfill prophecy, which He could only be through Mary</li>
+<li><strong>Different from Matthew:</strong> The two genealogies diverge after David, suggesting one is Joseph's and one is Mary's</li>
+</ul>
+</div>
+
+<div class="theological-box">
+<h4>Why This Matters</h4>
+<p style="line-height: 1.7;">
+                        Jesus needed to be both:
+                    </p>
+<ul style="line-height: 1.8;">
+<li><strong>Legal heir to David's throne:</strong> Through Joseph's adoption (Matthew's genealogy via Solomon)</li>
+<li><strong>Biological descendant of David:</strong> Through Mary's bloodline (Luke's genealogy via Nathan)</li>
+</ul>
+<p style="line-height: 1.7; margin-top: 1rem;">
+                        Both qualifications are necessary to fulfill the messianic prophecies. Matthew establishes the legal right; Luke establishes the blood right.
+                    </p>
+</div>
+
+<div class="scripture-quote">
+                    "Concerning his Son Jesus Christ our Lord, which was made of the seed of David according to the flesh; And declared to be the Son of God with power, according to the spirit of holiness, by the resurrection from the dead."
+                    <cite>— Romans 1:3-4 (KJV)</cite>
+</div>
+</div>
+</section>
+
+<!-- Related Links -->
+<section class="interlink-panel" style="margin-top: 3rem;">
+    <h3 class="interlink-header">
+        <span class="interlink-icon">🔗</span>
+        Related Pages
+    </h3>
+
+    <div class="see-also-section">
+        <h4>📚 See Also</h4>
+        <div class="see-also-links">
+            <a href="index.html" class="see-also-link">
+                <span>📜</span> Lineage Overview
+            </a>
+            <a href="matthew-genealogy.html" class="see-also-link">
+                <span>👑</span> Matthew's Genealogy
+            </a>
+            <a href="davidic-line.html" class="see-also-link">
+                <span>⚔️</span> Davidic Line
+            </a>
+            <a href="../deities/virgin_mary.html" class="see-also-link">
+                <span>👸</span> Virgin Mary
+            </a>
+            <a href="key-ancestors.html" class="see-also-link">
+                <span>⭐</span> Key Ancestors
+            </a>
+            <a href="../cosmology/incarnation.html" class="see-also-link">
+                <span>✝️</span> The Incarnation
+            </a>
+        </div>
+    </div>
+</section>
+</main>
+
+<footer>
+<p>
+<strong>Luke's Genealogy - The Universal Line</strong><br/>
+        Luke 3:23-38 - 77 Generations from Jesus to Adam to God<br/>
+<a href="index.html">Back to Lineage of the Messiah</a> |
+        <a href="../index.html">Christian Mythology</a>
+</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,624 @@
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Greek Mythology - World Mythos Explorer</title>
+<link href="../../themes/theme-base.css" rel="stylesheet"/>
+<link href="../../styles.css" rel="stylesheet"/>
+<link href="../../themes/corpus-links.css" rel="stylesheet"/>
+<script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+    <!-- Submission Link System -->
+    <script src="../../js/submission-context.js"></script>
+    <script src="../../js/components/submission-link.js"></script>
+    <link rel="stylesheet" href="../../css/submission-link.css">
+
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../css/user-auth.css">
+    <script src="../../js/firebase-auth.js"></script>
+    <script src="../../js/auth-guard.js"></script>
+    <script src="../../js/components/google-signin-button.js"></script>
+<style>
+        /* ============================================
+           MODERN GLASS UI TEMPLATE - Greek Mythos
+           Based on Christian reference with full theme support
+           ============================================ */
+
+        /* Breadcrumb - Full-width bar attached below header */
+        .breadcrumb {
+            position: sticky;
+            top: 60px; /* Below the sticky header */
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(var(--color-surface-rgb), 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: var(--spacing-xs) var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
+        }
+
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        /* Hero Section - Modern Glass Styling */
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon-display {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 1rem auto;
+            line-height: 1.7;
+        }
+
+        /* Glass Card - With Hover Animation */
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+            border-color: rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        /* Subsection Card - Hover Effects */
+        .subsection-card {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .subsection-card:hover {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            transform: translateX(5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .subsection-card h3 {
+            color: var(--color-primary);
+            margin-top: 0;
+        }
+
+        .subsection-card p {
+            line-height: 1.7;
+        }
+
+        /* Grid Layouts */
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .section-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        /* Deity Cards - Modern Glass Pattern */
+        .deity-card {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-base, 0.3s ease);
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+
+        .deity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg), 0 0 15px rgba(var(--color-primary-rgb), 0.2);
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            text-decoration: none;
+        }
+
+        .deity-card h3 {
+            color: var(--color-primary);
+            margin-top: 0.5rem;
+        }
+
+        .deity-card p {
+            line-height: 1.7;
+        }
+
+        .deity-icon {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        /* Section Headers */
+        .section-header {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .card-title {
+            color: var(--color-primary);
+            margin-top: 0;
+        }
+
+        /* Clickable Card - Modern Styling */
+        .clickable-card {
+            cursor: pointer;
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .clickable-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+            border-color: rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .clickable-card:active {
+            transform: translateY(-2px);
+        }
+
+        .button-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+
+        .styled-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .styled-list li {
+            padding: var(--spacing-md) 0;
+            border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
+        }
+
+        .styled-list li:last-child {
+            border-bottom: none;
+        }
+
+        main {
+            max-width: var(--container-xl);
+            margin: 0 auto;
+            padding: var(--spacing-lg);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+
+            .deity-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .hero-icon-display {
+                font-size: 3rem;
+            }
+
+            .breadcrumb {
+                font-size: var(--font-size-xs);
+                padding: var(--spacing-xs) var(--spacing-md);
+                top: 50px; /* Smaller header on mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Theme Picker Container -->
+<div id="theme-picker"></div>
+
+<div id="theme-picker-container"></div>
+<header>
+    <div class="header-content">
+        <h1>⚡ Greek Mythology</h1>
+        <div id="user-auth-nav"></div>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../mythos/index.html">Home</a> →
+            <span aria-current="page">Greek <a class="corpus-link" data-corpus="greek" href="../index.html" title="View mythology in ancient texts">Mythology</a></span>
+</nav>
+<main>
+<div class="hero-section">
+<div class="hero-icon-display">⚡</div>
+<h2><a href="index.html" data-smart data-mythos="greek">Greek Mythology</a> &amp; the Olympian Pantheon</h2>
+<p class="hero-description">
+                Explore the rich tapestry of Greek <a class="corpus-link" href="../index.html" title="View mythology in ancient texts">mythology</a>, from the heights of <a href="cosmology/mount-olympus.html">Mount Olympus</a> to the depths of <a href="cosmology/underworld.html">Tartarus</a>.
+                Discover the twelve <a href="deities/index.html">Olympians</a>, legendary heroes, fearsome creatures, and the mysteries that shaped
+                Western civilization for over a millennium.
+            </p>
+</div>
+<section style="margin-top: var(--spacing-xl, 3rem);">
+<h2 class="section-header">⚡ The <a class="corpus-link" data-term="Olympian" data-tradition="greek" href="../../mythos/greek/corpus-search.html?term=zeus" title="Search corpus for 'Olympian'">Olympian</a> Pantheon</h2>
+<p style="margin-bottom: var(--space-6); line-height: var(--leading-relaxed);">
+                The twelve great gods who dwelt upon <a href="cosmology/mount-olympus.html" style="color: var(--color-primary);">Mount Olympus</a>, ruling over the cosmos and interfering in the affairs
+                of mortals. Each <a class="corpus-link" data-term="Olympian" data-tradition="greek" href="../../mythos/greek/corpus-search.html?term=zeus" title="Search corpus for 'Olympian'">Olympian</a> commanded unique <a class="corpus-link" href="../index.html" title="View domains in ancient texts">domains</a> and wielded divine powers that shaped the Greek world.
+            </p>
+<div class="glass-card" style="margin-bottom: var(--space-6);">
+<h3 class="card-title">👑 <a href="deities/index.html" data-smart data-mythos="greek" style="color: var(--color-primary);">The Twelve Olympians</a></h3>
+<p class="card-description">The principal deities of the Greek pantheon, dwelling atop <a class="corpus-link" href="../index.html" title="View mount olympus in ancient texts">Mount Olympus</a> and ruling over all creation.
+                   From <a href="deities/zeus.html" style="color: var(--color-primary);">Zeus</a> the Sky Father to <a href="deities/dionysus.html" style="color: var(--color-primary);">Dionysus</a> the God of Ecstasy, each brings unique powers and personality.</p>
+<div class="deity-grid">
+<a class="btn btn-secondary" href="deities/zeus.html" style="text-align: center;">⚡ Zeus (King)</a>
+<a class="btn btn-secondary" href="deities/hera.html" style="text-align: center;">👑 Hera (Queen)</a>
+<a class="btn btn-secondary" href="deities/poseidon.html" style="text-align: center;">🌊 Poseidon (Sea)</a>
+<a class="btn btn-secondary" href="deities/athena.html" style="text-align: center;">🦉 Athena (Wisdom)</a>
+<a class="btn btn-secondary" href="deities/apollo.html" style="text-align: center;">☀️ Apollo (Sun)</a>
+<a class="btn btn-secondary" href="deities/artemis.html" style="text-align: center;">🏹 Artemis (Hunt)</a>
+<a class="btn btn-secondary" href="deities/ares.html" style="text-align: center;">⚔️ Ares (War)</a>
+<a class="btn btn-secondary" href="deities/aphrodite.html" style="text-align: center;">💘 Aphrodite (Love)</a>
+<a class="btn btn-secondary" href="deities/hephaestus.html" style="text-align: center;">🔨 Hephaestus (Forge)</a>
+<a class="btn btn-secondary" href="deities/hermes.html" style="text-align: center;">📨 Hermes (Messenger)</a>
+<a class="btn btn-secondary" href="deities/demeter.html" style="text-align: center;">🌾 Demeter (Harvest)</a>
+<a class="btn btn-secondary" href="deities/dionysus.html" style="text-align: center;">🍇 Dionysus (Wine)</a>
+</div>
+</div>
+<div class="glass-card" style="margin-bottom: var(--space-6);">
+<h3 class="card-title">🏛️ <a href="deities/hades.html" data-smart data-mythos="greek" style="color: var(--color-primary);">Hades - Lord of the Underworld</a></h3>
+<p class="card-description">Though not counted among the Twelve Olympians (he dwells in the <a href="cosmology/underworld.html" style="color: var(--color-primary);">Underworld</a>, not <a class="corpus-link" data-term="Olympus" data-tradition="greek" href="../../mythos/greek/corpus-search.html?term=olympus" title="Search corpus for 'Olympus'">Olympus</a>), <a href="deities/hades.html" style="color: var(--color-primary);">Hades</a> is
+                   one of the three great brothers who divided the <a class="corpus-link" href="../index.html" title="View cosmos in ancient texts">cosmos</a>. Ruler of the dead and keeper of hidden wealth.</p>
+</div>
+<div class="glass-card" style="margin-bottom: var(--space-6);">
+<h3 class="card-title">🌍 <a href="cosmology/titans.html" data-smart data-mythos="greek" style="color: var(--color-primary);">The Titans - Elder Gods</a></h3>
+<p class="card-description">The generation of <a class="corpus-link" href="../index.html" title="View deities in ancient texts">deities</a> before the Olympians. Born of <a href="cosmology/primordials.html#gaia" style="color: var(--color-primary);">Gaia</a> (Earth) and <a href="cosmology/primordials.html#uranus" style="color: var(--color-primary);">Uranus</a> (Sky), they ruled
+                   during the <a class="corpus-link" data-term="Golden" data-tradition="greek" href="../../mythos/greek/corpus-search.html?term=aphrodite" title="Search corpus for 'Golden'">Golden</a> Age before being overthrown by <a href="deities/zeus.html" style="color: var(--color-primary);">Zeus</a> and his siblings in the Titanomachy.</p>
+<div class="button-grid" style="margin-top: var(--space-4);">
+<a class="btn btn-secondary" href="cosmology/titans.html#kronos">Kronos (Time)</a>
+<a class="btn btn-secondary" href="cosmology/titans.html#rhea">Rhea (Mother)</a>
+<a class="btn btn-secondary" href="cosmology/titans.html#prometheus">Prometheus (Forethought)</a>
+<a class="btn btn-secondary" href="cosmology/titans.html#atlas">Atlas (Endurance)</a>
+</div>
+</div>
+<div class="glass-card">
+<h3 class="card-title">🌌 <a href="cosmology/primordials.html" data-smart data-mythos="greek" style="color: var(--color-primary);">The Primordial Deities</a></h3>
+<p class="card-description">The first beings to emerge from the void - <a class="corpus-link" href="../index.html" title="View chaos in ancient texts">Chaos</a>, <a href="cosmology/primordials.html#gaia" style="color: var(--color-primary);">Gaia</a> (Earth), <a class="corpus-link" href="../index.html" title="View tartarus in ancient texts">Tartarus</a> (Abyss), Eros (Love),
+                   <a class="corpus-link" data-term="Erebus" data-tradition="greek" href="../../mythos/greek/corpus-search.html?term=underworld" title="Search corpus for 'Erebus'">Erebus</a> (Darkness), and Nyx (Night). The fundamental forces that birthed all existence.</p>
+</div>
+</section>
+<section style="margin-top: var(--spacing-xl, 3rem);">
+<h2 class="section-header">🌌 <a class="corpus-link" href="../index.html" title="View cosmology in ancient texts">Cosmology</a> &amp; the Structure of Reality</h2>
+<div class="glass-card" style="margin-bottom: var(--space-6);">
+<h3 class="card-title">🌍 <a href="cosmology/index.html" style="color: var(--color-primary);">Greek Cosmology Overview</a></h3>
+<p class="card-description">The three-tiered structure of the <a class="corpus-link" href="../index.html" title="View greek in ancient texts">Greek</a> universe: <a href="cosmology/mount-olympus.html" style="color: var(--color-primary);">Olympus</a> (realm of gods), Earth (realm of mortals),
+                   and the <a href="cosmology/underworld.html" style="color: var(--color-primary);">Underworld</a> (<a class="corpus-link" data-term="Realm of the Dead" data-tradition="greek" href="../../mythos/greek/corpus-search.html?term=underworld" title="Search corpus for 'Realm of the Dead'">realm of the dead</a>).</p>
+</div>
+<div class="glass-card" style="margin-bottom: var(--space-6);">
+<h3 class="card-title">🌀 <a href="cosmology/creation.html" style="color: var(--color-primary);">Creation Myth - From Chaos to Cosmos</a></h3>
+<p class="card-description">The birth of the universe from <a class="corpus-link" href="../index.html" title="View primordial in ancient texts">primordial</a> Chaos. How <a href="cosmology/primordials.html#gaia" style="color: var(--color-primary);">Gaia</a> birthed the <a class="corpus-link" href="../index.html" title="View titans in ancient texts">Titans</a>, who birthed the Olympians,
+                   and how <a href="deities/zeus.html" style="color: var(--color-primary);">Zeus</a> overthrew his father <a href="cosmology/titans.html#kronos" style="color: var(--color-primary);">Kronos</a> to establish the current cosmic order.</p>
+</div>
+<div class="glass-card" style="margin-bottom: var(--space-6);">
+<h3 class="card-title">💀 <a href="cosmology/afterlife.html" style="color: var(--color-primary);">The Afterlife - Journey to Hades</a></h3>
+<p class="card-description">What happens when mortals die: crossing the River Styx, judgment before the three judges, and
+                   eternal residence in <a class="corpus-link" data-term="Elysium" data-tradition="greek" href="../../mythos/greek/corpus-search.html?term=elysium" title="Search corpus for 'Elysium'">Elysium</a> (<a class="corpus-link" data-term="Paradise" data-tradition="greek" href="../../mythos/greek/corpus-search.html?term=elysium" title="Search corpus for 'Paradise'">paradise</a>), <a class="corpus-link" data-term="Asphodel Meadows" data-tradition="greek" href="../../mythos/greek/corpus-search.html?term=underworld" title="Search corpus for 'Asphodel Meadows'">Asphodel Meadows</a> (neutrality), or <a href="cosmology/underworld.html#tartarus" style="color: var(--color-primary);">Tartarus</a> (punishment).</p>
+</div>
+<div class="glass-card" style="margin-bottom: var(--space-6);">
+<h3 class="card-title">🏔️ <a href="cosmology/mount-olympus.html" style="color: var(--color-primary);">Mount Olympus - Home of the Gods</a></h3>
+<p class="card-description">The divine mountain where the Olympians dwell in <a class="corpus-link" data-term="Golden" data-tradition="greek" href="../../mythos/greek/corpus-search.html?term=aphrodite" title="Search corpus for 'Golden'">golden</a> palaces, feasting on ambrosia and nectar,
+                   and watching over the mortal world below.</p>
+</div>
+<div class="glass-card">
+<h3 class="card-title">🏛️ <a href="cosmology/underworld.html" style="color: var(--color-primary);">The Underworld - Realm of Hades</a></h3>
+<p class="card-description">The dark realm beneath the earth, ruled by <a href="deities/hades.html" style="color: var(--color-primary);">Hades</a> and <a href="deities/persephone.html" style="color: var(--color-primary);">Persephone</a>. Rivers of fire and sorrow,
+                   fields of eternal rest, and the deepest pit of <a class="corpus-link" href="../index.html" title="View tartarus in ancient texts">Tartarus</a> where the wicked and the Titans suffer.</p>
+</div>
+</section>
+<section style="margin-top: var(--spacing-xl, 3rem);">
+<h2 class="section-header">🦸 Heroes &amp; Legendary Mortals</h2>
+<div class="glass-card">
+<h3 class="card-title">⚡ <a href="heroes/index.html" data-smart data-mythos="greek" style="color: var(--color-primary);">The Great Heroes</a></h3>
+<p class="card-description" style="margin-bottom: var(--space-4);">Legendary mortals who performed impossible deeds, often with divine parentage or aid. Their <a class="corpus-link" href="../index.html" title="View stories in ancient texts">stories</a>
+                   of <a class="corpus-link" data-term="Courage" data-tradition="roman" href="../../mythos/roman/corpus-search.html?term=virtus" title="Search corpus for 'Courage'">courage</a>, cunning, and tragic flaws have inspired millennia of literature and art.</p>
+<div class="button-grid">
+<a class="btn btn-secondary" href="heroes/heracles.html">Heracles (12 Labors)</a>
+<a class="btn btn-secondary" href="heroes/perseus.html">Perseus (Medusa Slayer)</a>
+<a class="btn btn-secondary" href="heroes/theseus.html">Theseus (Minotaur Slayer)</a>
+<a class="btn btn-secondary" href="heroes/odysseus.html">Odysseus (Cunning)</a>
+<a class="btn btn-secondary" href="heroes/achilles.html">Achilles (Warrior)</a>
+<a class="btn btn-secondary" href="heroes/jason.html">Jason (Argonauts)</a>
+<a class="btn btn-secondary" href="heroes/orpheus.html">Orpheus (Musician)</a>
+</div>
+</div>
+</section>
+<section style="margin-top: var(--spacing-xl, 3rem);">
+<h2 class="section-header">🐉 Creatures &amp; Monsters</h2>
+<div class="glass-card">
+<h3 class="card-title">🦁 <a href="creatures/index.html" data-smart data-mythos="greek" style="color: var(--color-primary);">Mythical Beasts</a></h3>
+<p class="card-description" style="margin-bottom: var(--space-4);">The fearsome monsters and magical creatures that populate <a class="corpus-link" href="../index.html" title="View greek in ancient texts">Greek</a> myth - from the Gorgons to the <a class="corpus-link" data-term="Chimera" data-tradition="greek" href="../../mythos/greek/corpus-search.html?term=chimera" title="Search corpus for 'Chimera'">Chimera</a>,
+                   from <a class="corpus-link" data-term="Pegasus" data-tradition="greek" href="../../mythos/greek/corpus-search.html?term=pegasus" title="Search corpus for 'Pegasus'">Pegasus</a> to the <a class="corpus-link" data-term="Hydra" data-tradition="greek" href="../../mythos/greek/corpus-search.html?term=hydra" title="Search corpus for 'Hydra'">Hydra</a>. Challenges for heroes and warnings to mortals.</p>
+<div class="button-grid">
+<a class="btn btn-secondary" href="creatures/medusa.html">Medusa (Gorgon)</a>
+<a class="btn btn-secondary" href="creatures/minotaur.html">Minotaur (Bull-Man)</a>
+<a class="btn btn-secondary" href="creatures/hydra.html">Hydra (Serpent)</a>
+<a class="btn btn-secondary" href="creatures/chimera.html">Chimera (Hybrid)</a>
+<a class="btn btn-secondary" href="creatures/pegasus.html">Pegasus (Winged Horse)</a>
+<a class="btn btn-secondary" href="creatures/sphinx.html">Sphinx (Riddle)</a>
+</div>
+</div>
+</section>
+<section style="margin-top: var(--spacing-xl, 3rem);">
+<h2 class="section-header">🌿 <a class="corpus-link" href="../index.html" title="View sacred in ancient texts">Sacred</a> Plants &amp; Herbalism</h2>
+<div class="glass-card">
+<h3 class="card-title">🍃 <a href="herbs/index.html" data-smart data-mythos="greek" style="color: var(--color-primary);">Sacred &amp; Medicinal Plants</a></h3>
+<p class="card-description" style="margin-bottom: var(--space-4);">The plants <a class="corpus-link" href="../index.html" title="View sacred in ancient texts">sacred</a> to the gods and used in ritual, healing, and magic. Each deity has their favored
+                   herbs, and many myths tell of botanical transformations and divine gardens.</p>
+<div class="button-grid">
+<a class="btn btn-secondary" href="herbs/laurel.html">Laurel (Apollo)</a>
+<a class="btn btn-secondary" href="herbs/olive.html">Olive (Athena)</a>
+<a class="btn btn-secondary" href="herbs/myrtle.html">Myrtle (Aphrodite)</a>
+<a class="btn btn-secondary" href="herbs/oak.html">Oak (Zeus)</a>
+<a class="btn btn-secondary" href="herbs/pomegranate.html">Pomegranate (Persephone)</a>
+<!-- <a class="btn btn-secondary" href="../buddhist/herbs/preparations.html">Preparation Methods</a> -->
+</div>
+</div>
+</section>
+<section style="margin-top: var(--spacing-xl, 3rem);">
+<h2 class="section-header">🔮 Mysteries, <a class="corpus-link" href="../index.html" title="View rituals in ancient texts">Rituals</a> &amp; Magic</h2>
+<div class="glass-card" style="margin-bottom: var(--space-6);">
+<h3 class="card-title">🕯️ <a href="rituals/index.html" data-smart data-mythos="greek" style="color: var(--color-primary);">Ritual Practices</a></h3>
+<p class="card-description" style="margin-bottom: var(--space-4);">The ceremonies, <a class="corpus-link" href="../index.html" title="View festivals in ancient texts">festivals</a>, and sacred rites that connected mortals with the divine. From the
+                   Olympic Games to the Eleusinian Mysteries, ritual was the heart of Greek religion.</p>
+<div class="button-grid">
+<a class="btn btn-secondary" href="rituals/eleusinian-mysteries.html">Eleusinian Mysteries</a>
+<a class="btn btn-secondary" href="rituals/dionysian-rites.html">Dionysian Rites</a>
+<a class="btn btn-secondary" href="rituals/olympic-games.html">Olympic Games</a>
+<!-- <a class="btn btn-secondary" href="rituals/index.html">Oracle of Delphi</a> -->
+<!-- <a class="btn btn-secondary" href="../buddhist/rituals/calendar.html">Festival Calendar</a> -->
+<a class="btn btn-secondary" href="rituals/offerings.html">Offerings &amp; Sacrifices</a>
+</div>
+</div>
+<div class="glass-card" style="margin-bottom: var(--space-6);">
+<h3 class="card-title">✨ <a href="magic/index.html" data-smart data-mythos="greek" style="color: var(--color-primary);">Magical Traditions</a></h3>
+<p class="card-description" style="margin-bottom: var(--space-4);">The esoteric arts of Greek magic - from Orphic mysteries to Hermetic wisdom, from necromancy
+                   to the magical use of <a class="corpus-link" href="../index.html" title="View sacred in ancient texts">sacred</a> plants (pharmakeia).</p>
+<div class="button-grid">
+<a class="btn btn-secondary" href="magic/index.html">Explore Magical Traditions</a>
+<!-- <a class="btn btn-secondary" href="magic/index.html">Orphic Mysteries</a> -->
+<!-- <a class="btn btn-secondary" href="magic/index.html">Hermeticism</a> -->
+<!-- <a class="btn btn-secondary" href="../../magic/traditions/necromancy.html">Necromancy</a> -->
+<!-- <a class="btn btn-secondary" href="magic/index.html">Herb Magic</a> -->
+</div>
+</div>
+<div class="glass-card">
+<h3 class="card-title">🪜 <a href="path/index.html" style="color: var(--color-primary);">The Mystery Path - Spiritual Ascension</a></h3>
+<p class="card-description" style="margin-bottom: var(--space-4);">The 6-stage journey from initiate (Mystes) to master (Mystagogos), following the progression
+                   used in the Eleusinian and <a class="corpus-link" href="../index.html" title="View other in ancient texts">other</a> mystery cults. A 20-30 year path of spiritual transformation.</p>
+<div class="button-grid">
+<a class="btn btn-secondary" href="path/index.html">Explore the Mystery Path</a>
+<!-- <a class="btn btn-secondary" href="path/index.html">Stage 1: Mystes</a> -->
+<!-- <a class="btn btn-secondary" href="path/index.html">Stage 2: Neophyte</a> -->
+<!-- <a class="btn btn-secondary" href="path/index.html">Stage 3: Epoptes</a> -->
+<!-- <a class="btn btn-secondary" href="path/index.html">Stage 4: Hiereus</a> -->
+<!-- <a class="btn btn-secondary" href="path/index.html">Stage 5: Hierophantes</a> -->
+<!-- <a class="btn btn-secondary" href="path/index.html">Stage 6: Mystagogos</a> -->
+</div>
+</div>
+</section>
+<section style="margin-top: var(--spacing-xl, 3rem);">
+<h2 class="section-header">📚 Other <a class="corpus-link" href="../index.html" title="View greek in ancient texts">Greek</a> Sections</h2>
+<div class="section-grid">
+<div class="glass-card clickable-card" onclick="window.location.href='texts/index.html'" role="button" tabindex="0" onkeypress="if(event.key==='Enter')window.location.href='texts/index.html'">
+<h3 class="card-title">📜 <a class="corpus-link" href="../index.html" title="View sacred in ancient texts">Sacred</a> Texts</h3>
+<p class="card-description">Homer's Iliad &amp; Odyssey, Hesiod's Theogony, Homeric Hymns, Orphic Hymns, and the works of the great tragedians.</p>
+</div>
+<div class="glass-card clickable-card" onclick="window.location.href='symbols/index.html'" role="button" tabindex="0" onkeypress="if(event.key==='Enter')window.location.href='symbols/index.html'">
+<h3 class="card-title">🔱 <a class="corpus-link" href="../index.html" title="View sacred in ancient texts">Sacred</a> Symbols</h3>
+<p class="card-description"><a href="deities/zeus.html" style="color: var(--color-primary);">Zeus's</a> thunderbolt, <a href="deities/poseidon.html" style="color: var(--color-primary);">Poseidon's</a> trident, <a href="deities/athena.html" style="color: var(--color-primary);">Athena's</a> owl, <a href="deities/apollo.html" style="color: var(--color-primary);">Apollo's</a> lyre, and <a class="corpus-link" href="../index.html" title="View other in ancient texts">other</a> divine emblems.</p>
+</div>
+</div>
+</section>
+<section style="margin-top: var(--spacing-xl, 3rem);">
+<h2 class="section-header">📖 <a class="corpus-link" href="../index.html" title="View primary sources in ancient texts">Primary Sources</a></h2>
+<ul class="styled-list">
+<li><strong><a href="texts/index.html">Homer's Iliad &amp; Odyssey</a></strong> - Epic poems of the Trojan War and Odysseus's journey (8th century BCE)</li>
+<li><strong><a href="texts/index.html">Hesiod's Theogony</a></strong> - The genealogy of the gods and creation of the cosmos (8th-7th century BCE)</li>
+<li><strong><a href="texts/index.html">Hesiod's Works and Days</a></strong> - Agricultural wisdom and the Five Ages of Man (8th-7th century BCE)</li>
+<li><strong><a href="texts/index.html">Homeric Hymns</a></strong> - Sacred hymns to the Olympian deities (7th-6th century BCE)</li>
+<li><strong><a href="texts/index.html">Orphic Hymns</a></strong> - Mystery tradition hymns to gods and cosmic forces (3rd century BCE - 2nd century CE)</li>
+<li><strong><a href="texts/index.html">Greek Tragedies</a></strong> - Works of Aeschylus, Sophocles, and Euripides (5th century BCE)</li>
+<li><strong><a href="texts/index.html">Apollodorus's Bibliotheca</a></strong> - Comprehensive mythological handbook (1st-2nd century CE)</li>
+<li><strong><a href="texts/index.html">Ovid's Metamorphoses</a></strong> - Roman retelling of Greek myths (1st century CE)</li>
+</ul>
+</section>
+<!-- Cross-Cultural Parallels Panel -->
+<section class="interlink-panel" style="margin-top: var(--spacing-xl, 3rem);">
+    <h3 class="interlink-header">
+        <span class="interlink-icon">🌍</span>
+        Cross-Cultural Parallels: Thunder Gods
+    </h3>
+    <p style="margin-bottom: var(--spacing-lg); color: var(--color-text-secondary);">
+        Zeus belongs to a universal pattern of supreme sky/thunder deities found across Indo-European and world mythologies. These gods share themes of cosmic sovereignty, weather control, and paternal authority.
+    </p>
+    <div class="parallel-grid">
+        <a href="deities/zeus.html" class="parallel-card">
+            <span class="tradition-flag">🏛️</span>
+            <span class="parallel-name">Zeus</span>
+            <span class="tradition-label">Greek</span>
+        </a>
+        <a href="../roman/deities/jupiter.html" class="parallel-card">
+            <span class="tradition-flag">🦅</span>
+            <span class="parallel-name">Jupiter</span>
+            <span class="tradition-label">Roman</span>
+        </a>
+        <a href="../norse/deities/thor.html" class="parallel-card">
+            <span class="tradition-flag">⚔️</span>
+            <span class="parallel-name">Thor</span>
+            <span class="tradition-label">Norse</span>
+        </a>
+        <a href="../hindu/deities/indra.html" class="parallel-card">
+            <span class="tradition-flag">🕉️</span>
+            <span class="parallel-name">Indra</span>
+            <span class="tradition-label">Hindu</span>
+        </a>
+        <!-- <a href="../celtic/deities/index.html" class="parallel-card">
+            <span class="tradition-flag">☘️</span>
+            <span class="parallel-name">Taranis</span>
+            <span class="tradition-label">Celtic</span>
+        </a> -->
+        <a href="../celtic/deities/dagda.html" class="parallel-card">
+            <span class="tradition-flag">☘️</span>
+            <span class="parallel-name">Dagda</span>
+            <span class="tradition-label">Celtic</span>
+        </a>
+        <!-- <a href="../../index.html" class="parallel-card">
+            <span class="tradition-flag">🌲</span>
+            <span class="parallel-name">Perun</span>
+            <span class="tradition-label">Slavic</span>
+        </a> -->
+    </div>
+</section>
+
+<!-- Quick Links Grid -->
+<section class="glass-card" style="margin-top: var(--spacing-xl, 3rem);">
+    <h3 class="card-title">🔗 Explore Connected Content</h3>
+    <div class="quick-links-grid" style="margin-top: var(--spacing-lg);">
+        <a href="../../archetypes/sky-father/index.html" class="quick-link">
+            <span class="quick-link-icon">⚡</span> Sky Father Archetype
+        </a>
+        <!-- <a href="../../archetypes/celestial/index.html" class="quick-link">
+            <span class="quick-link-icon">🌊</span> Sea God Archetype
+        </a> -->
+        <a href="../../archetypes/celestial/index.html" class="quick-link">
+            <span class="quick-link-icon">🦉</span> Wisdom Archetype
+        </a>
+        <a href="../../archetypes/death/index.html" class="quick-link">
+            <span class="quick-link-icon">💀</span> Death Archetype
+        </a>
+        <a href="../../spiritual-places/mountains/mount-olympus.html" class="quick-link">
+            <span class="quick-link-icon">🏔️</span> Mount Olympus
+        </a>
+        <a href="cosmology/underworld.html" class="quick-link">
+            <span class="quick-link-icon">🏛️</span> The Underworld
+        </a>
+        <a href="../../spiritual-items/weapons/zeus-lightning.html" class="quick-link">
+            <span class="quick-link-icon">⚡</span> Zeus's Thunderbolt
+        </a>
+        <!-- <a href="../../index.html" class="quick-link">
+            <span class="quick-link-icon">🔱</span> Poseidon's Trident
+        </a> -->
+    </div>
+</section>
+
+<section style="margin-top: var(--spacing-xl, 3rem);">
+<h2 class="section-header">🔗 Related <a class="corpus-link" href="../index.html" title="View traditions in ancient texts">Traditions</a></h2>
+<div class="grid-2col">
+<div class="glass-card">
+<h3>Cross-Cultural Connections</h3>
+<ul class="styled-list">
+<li><a href="../roman/index.html">Roman Mythology</a> - Direct adaptation with Latin names (Zeus→Jupiter, Athena→Minerva, etc.)</li>
+<li><a href="../egyptian/index.html">Egyptian Mythology</a> - Shared concepts of divine kingship and elaborate afterlife beliefs</li>
+<li><a href="../norse/index.html">Norse Mythology</a> - Similar pantheon structures, heroic traditions, and apocalyptic prophecies</li>
+<li><a href="../celtic/index.html">Celtic Mythology</a> - Parallel themes of nature deities, otherworldly realms, and hero quests</li>
+<li><a href="../hindu/index.html">Hindu Mythology</a> - Indo-European mythological roots and similar divine family structures</li>
+</ul>
+</div>
+<div class="glass-card">
+<h3>Similar Concepts Across <a class="corpus-link" href="../index.html" title="View traditions in ancient texts">Traditions</a></h3>
+<ul class="styled-list">
+<li><strong>Sky Father:</strong> <a href="deities/zeus.html">Zeus</a> (Greek) ↔ <a href="../roman/deities/jupiter.html">Jupiter</a> (Roman) ↔ <a href="../norse/deities/odin.html">Odin</a> (Norse) ↔ <a href="../hindu/deities/indra.html">Indra</a> (Hindu)</li>
+<li><strong>War Deity:</strong> <a href="deities/ares.html">Ares</a> (Greek) ↔ <a href="../roman/deities/mars.html">Mars</a> (Roman) ↔ <a href="../norse/deities/tyr.html">Týr</a> (Norse) ↔ <a href="../hindu/deities/kartikeya.html">Kartikeya</a> (Hindu)</li>
+<li><strong>Wisdom Goddess:</strong> <a href="deities/athena.html">Athena</a> (Greek) ↔ <a href="../roman/deities/minerva.html">Minerva</a> (Roman) ↔ <a href="../egyptian/deities/thoth.html">Thoth</a> (Egyptian) ↔ <a href="../celtic/deities/brigid.html">Brigid</a> (Celtic)</li>
+<li><strong>Underworld Ruler:</strong> <a href="deities/hades.html">Hades</a> (Greek) ↔ <a href="../roman/deities/pluto.html">Pluto</a> (Roman) ↔ <a href="../norse/deities/hel.html">Hel</a> (Norse) ↔ <a href="../egyptian/deities/osiris.html">Osiris</a> (Egyptian)</li>
+<li><strong>Hero's Journey:</strong> <a href="heroes/heracles.html">Heracles</a> (Greek) ↔ <a href="../norse/heroes/sigurd.html">Sigurd</a> (Norse) ↔ <a href="../celtic/heroes/index.html">Cú Chulainn</a> (Celtic)</li>
+</ul>
+</div>
+</div>
+</section>
+</main>
+<footer>
+<p>
+<strong>Greek <a class="corpus-link" href="../index.html" title="View mythology in ancient texts">Mythology</a></strong> - World Mythos Explorer<br/>
+<a href="../../mythos/index.html">Back to World Mythos Home</a> |
+            <a href="../../index.html">Main Site</a> |
+            <a href="http://www.perseus.tufts.edu/hopper/" rel="noopener noreferrer" target="_blank">Perseus Digital Library</a>
+</p>
+</footer>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
+<!-- Firebase SDK (CDN) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../../firebase-config.js"></script>
+
+<!-- Initialize Auth UI -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize Google Sign-In button in header
+        if (window.GoogleSignInButton) {
+            const authNav = document.getElementById('user-auth-nav');
+            if (authNav) {
+                window.GoogleSignInButton.injectIntoElement(authNav, {
+                    showUserInfo: true,
+                    showAvatar: true,
+                    compact: true
+                });
+            }
+        }
+    });
+</script>
+</body>
+</html>

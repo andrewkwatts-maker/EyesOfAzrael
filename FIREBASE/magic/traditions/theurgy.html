@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theurgy - Neoplatonic Divine Ascent</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--space-5);
+        }
+
+        .container {
+            max-width: var(--container-lg);
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--space-16) var(--space-5);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-10);
+            border: 2px solid var(--color-border);
+        }
+
+        .header-icon {
+            font-size: 5rem;
+            margin-bottom: var(--space-4);
+        }
+
+        h1 {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-5);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: var(--text-xl);
+            color: var(--color-text-secondary);
+            margin: var(--space-5) 0;
+            font-style: italic;
+        }
+
+        .section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+        }
+
+        h2 {
+            font-size: var(--text-3xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-6);
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: var(--space-3);
+        }
+
+        h3 {
+            font-size: var(--text-2xl);
+            color: var(--color-secondary);
+            margin: var(--space-6) 0 var(--space-4) 0;
+        }
+
+        h4 {
+            font-size: var(--text-xl);
+            color: var(--color-primary);
+            margin: var(--space-5) 0 var(--space-3) 0;
+        }
+
+        p {
+            margin-bottom: var(--space-4);
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin: var(--space-4) 0;
+            padding-left: var(--space-8);
+        }
+
+        li {
+            margin-bottom: var(--space-3);
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--space-5);
+            margin: var(--space-5) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .practice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .practice-card {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            transition: all var(--transition-base);
+        }
+
+        .practice-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .tools-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-5);
+            margin: var(--space-5) 0;
+        }
+
+        .tool-item {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+        }
+
+        .tool-name {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .source-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 3px solid var(--color-secondary);
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
+            border-radius: var(--radius-md);
+        }
+
+        .source-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .source-author {
+            font-style: italic;
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+        }
+
+        .cross-ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-5) 0;
+        }
+
+        .cross-ref-link {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            text-align: center;
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+            display: block;
+        }
+
+        .cross-ref-link:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .nav-section {
+            display: flex;
+            gap: var(--space-4);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--space-8);
+        }
+
+        .nav-button {
+            padding: var(--space-4) var(--space-6);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        blockquote {
+            font-style: italic;
+            border-left: 4px solid var(--color-primary);
+            padding-left: var(--space-5);
+            margin: var(--space-5) 0;
+            color: var(--color-text-secondary);
+        }
+
+        .sphere-ladder {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: var(--space-4);
+            margin: var(--space-6) 0;
+            padding: var(--space-6);
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-radius: var(--radius-lg);
+        }
+
+        .sphere-item {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            transition: all var(--transition-base);
+        }
+
+        .sphere-item:hover {
+            border-color: var(--color-primary);
+            transform: translateX(5px);
+        }
+
+        .sphere-name {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+            font-size: var(--text-lg);
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="theme-picker-container"></div>
+<div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Theurgy</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> → <a href="../index.html">Magic</a> → <a href="index.html">Traditions</a> → <span>Theurgy</span>
+</nav>
+
+        <!-- OVERVIEW SECTION -->
+        <section class="section">
+            <h2>Overview</h2>
+            <p>
+                Theurgy (from Greek θεουργία, "god-work" or "divine-work") represents the ritual and magical dimension of
+                Neoplatonism - the philosophical and spiritual system that dominated late antiquity (3rd-6th centuries CE)
+                and profoundly influenced Western esotericism, Christian mysticism, and Islamic philosophy. Unlike "goetia"
+                (low magic, sorcery) which manipulates lesser spirits for material ends, theurgy aims at nothing less than
+                union with the divine One, the source and summit of all reality, through ritual ascent up the cosmic hierarchy.
+            </p>
+
+            <div class="highlight-box">
+                <h4>Philosophy Made Operative</h4>
+                <p>
+                    Theurgy transforms Neoplatonic metaphysics into practical spiritual technology. The Neoplatonic cosmos is
+                    structured as a great chain of being descending from the One (ultimate reality beyond being and thought)
+                    through levels of manifestation: Nous (divine intellect), World Soul, planetary spheres, elemental realms,
+                    and finally matter. Theurgic practice reverses this descent, providing ritual means to ascend back toward
+                    the source. This wasn't merely symbolic but ontologically real - practitioners believed their purified
+                    souls could literally rise through the spheres to achieve henosis (union with the One).
+                </p>
+            </div>
+
+            <h3>Historical Origins and Cultural Context</h3>
+            <p>
+                Theurgy emerged in the 2nd-3rd centuries CE within the broader Neoplatonic movement founded by Plotinus
+                (204-270 CE). While Plotinus himself emphasized contemplative philosophy, his student Porphyry (234-305 CE)
+                and especially Iamblichus (245-325 CE) developed the theurgic dimension, arguing that intellectual contemplation
+                alone was insufficient - ritual action was necessary to activate divine powers and facilitate the soul's ascent.
+            </p>
+
+            <p>
+                The practice synthesized multiple streams: Greek mystery religions (especially the Eleusinian and Orphic
+                mysteries), Chaldean oracular traditions (preserved in the "Chaldean Oracles"), Egyptian temple rituals
+                (particularly Hermetic practices), and Platonic philosophy. This created a sophisticated magical system with
+                strong philosophical justification, distinguishing it from "mere" sorcery through its lofty aims and
+                theoretical foundations.
+            </p>
+
+            <p>
+                Theurgy flourished in late Roman paganism as an intellectual defense against rising Christianity. When Emperor
+                Julian the Apostate (361-363 CE) briefly attempted to restore paganism, he championed Neoplatonic theurgy as
+                a philosophically respectable alternative to Christian revelation. After Christianity's triumph, theurgic
+                concepts survived by influencing Christian mysticism (Pseudo-Dionysius the Areopagite), Byzantine philosophy,
+                and later Renaissance Hermeticism.
+            </p>
+
+            <h3>Core Principles</h3>
+
+            <h4>The Great Chain of Being</h4>
+            <p>
+                Neoplatonic cosmology envisions reality as emanating from the One in descending levels of manifestation, like
+                light radiating from a source. Each level contains all below it in higher, more unified form. The practitioner's
+                task is to recognize their true nature as belonging to higher levels and to rise through increasing purification
+                and unification back toward the source.
+            </p>
+
+            <h4>Sympathetic Connection (Sympatheia)</h4>
+            <p>
+                All levels of reality are connected through cosmic sympathy - correspondences linking earthly materials,
+                planetary powers, divine ideas, and the One. By manipulating lower symbols (stones, plants, words, gestures)
+                according to their correspondences, theurgists activate connections to higher realities. This isn't arbitrary
+                association but ontological relationship rooted in the emanative structure of reality itself.
+            </p>
+
+            <h4>Divine Names and Voces Magicae</h4>
+            <p>
+                Certain words, especially "barbarous names" (sacred sounds in ancient languages), embody divine powers. The
+                Chaldean Oracles emphasized that these aren't arbitrary labels but participations in divine reality. When
+                correctly intoned with proper understanding and in ritual context, they invoke actual divine presence, not
+                merely human concepts of divinity.
+            </p>
+
+            <h4>The Role of Purity (Katharsis)</h4>
+            <p>
+                Ascending toward the divine requires progressive purification - ethical, intellectual, and spiritual. Lower
+                attachments must be released to allow the soul to rise. This wasn't moralistic guilt but ontological necessity:
+                the soul weighed down by material attachments cannot ascend to immaterial realities. Ritual purifications,
+                dietary restrictions, and ethical living prepare the vessel for divine contact.
+            </p>
+        </section>
+
+        <!-- CORE PRACTICES -->
+        <section class="section">
+            <h2>Core Practices</h2>
+
+            <div class="practice-grid">
+                <div class="practice-card">
+                    <h4>Invocation of Divine Powers</h4>
+                    <p>
+                        Theurgists invoke gods, daimones, angels, and other spiritual beings not to command them (as in goetia)
+                        but to create communion and facilitate the soul's ascent. Prayers, hymns, and sacred names call divine
+                        presence into ritual space. The Orphic Hymns, for instance, address specific divine powers with their
+                        proper epithets and attributes. The practitioner doesn't control these beings but petitions them as a
+                        devotee seeking alignment with divine will.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Animation of Statues (Telestic Art)</h4>
+                    <p>
+                        One of the most distinctive theurgic practices involved animating statues to serve as vessels for divine
+                        presence. Iamblichus describes constructing statues using materials corresponding to particular deities,
+                        then performing elaborate consecrations to invite gods to inhabit them. These weren't idols in the
+                        crude sense but focal points for divine-human interaction. The statue becomes a "sympathetic link"
+                        allowing the god to manifest in material form.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Planetary Invocations and Ascent</h4>
+                    <p>
+                        The seven classical planets (Moon, Mercury, Venus, Sun, Mars, Jupiter, Saturn) represent stages of
+                        reality and consciousness. Theurgic practice involves ascending through planetary spheres, each
+                        requiring specific purifications and invocations. Practitioners call upon planetary angels or divine
+                        powers ruling each sphere, shedding aspects of personality until achieving the starry realm beyond
+                        planets where the purified soul approaches the intelligible world.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Use of Symbols (Synthemata)</h4>
+                    <p>
+                        Synthemata are sacred symbols, tokens, or passwords given by gods to humans through oracles and visions.
+                        These might be specific stones, herbs, words, gestures, or geometric patterns corresponding to divine
+                        realities. By using proper synthemata in ritual, theurgists create sympathetic links to higher realms.
+                        The Chaldean Oracles speak of "threading" oneself to the divine through these symbols, creating a
+                        lifeline for the soul's ascent.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Contemplative Philosophy</h4>
+                    <p>
+                        While theurgy emphasizes ritual, it's inseparable from philosophical contemplation. Practitioners
+                        study Platonic dialogues, Neoplatonic commentaries, and sacred texts to understand the metaphysical
+                        structure they navigate ritually. Intellectual comprehension of the emanative cosmos, the nature of
+                        the soul, and the path of return provides the conceptual map for experiential journey. Philosophy
+                        illuminates the mind while ritual purifies the entire being.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Chaldean Oracle Meditation</h4>
+                    <p>
+                        The Chaldean Oracles (2nd century CE) - fragmentary verses of uncertain origin claiming divine
+                        revelation - provided core theurgic teachings. Practitioners meditate on these cryptic utterances,
+                        seeking to decode their wisdom about cosmic structure, divine names, ritual procedures, and the soul's
+                        journey. The Oracles speak of "intellectual fire," "paternal fire," and the "flower of fire" - poetic
+                        language requiring interpretive contemplation and ritual experimentation to unlock.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Dietary and Lifestyle Purifications</h4>
+                    <p>
+                        Serious theurgists adopted rigorous lifestyle practices: vegetarianism (or at least avoiding certain
+                        meats), sexual abstinence or moderation, avoidance of pollution, regular bathing, wearing clean white
+                        garments, and retreat from worldly affairs. These weren't arbitrary rules but methods for lightening
+                        the soul's material burden. Pythagoras, Plotinus, and other philosopher-mystics modeled lives of
+                        disciplined simplicity supporting spiritual practice.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Ritual Timing and Astrological Considerations</h4>
+                    <p>
+                        Theurgic operations require proper timing according to planetary hours, days, lunar phases, and
+                        astrological configurations. Each deity has specific times of accessibility. Invoking a solar deity
+                        during the Sun's hour on Sunday in appropriate zodiacal conditions creates optimal sympathetic
+                        conditions. The Hermetic principle "as above, so below" means earthly timing must align with celestial
+                        patterns for effective ritual.
+                    </p>
+                </div>
+            </div>
+
+            <blockquote>
+                "The theurgist, through the power of arcane symbols, commands things that are natural, but acts upon
+                supernatural things... For the tokens that summon the gods have not been invented by human thought, but...
+                the very first of them were sent down by the gods as symbols of their presence."
+                <br><em>- Iamblichus, De Mysteriis</em>
+            </blockquote>
+        </section>
+
+        <!-- PLANETARY SPHERES -->
+        <section class="section">
+            <h2>The Planetary Ladder of Ascent</h2>
+            <p>
+                Theurgic practice involves ascending through the planetary spheres, each representing both a cosmic region
+                and a level of consciousness. The practitioner sheds material attachments and planetary influences to rise
+                toward the divine source.
+            </p>
+
+            <div class="sphere-ladder">
+                <div class="sphere-item">
+                    <div class="sphere-name">1. Moon (Luna) - Gateway of Generation</div>
+                    <p>
+                        The lowest sphere, governing generation, flux, and material change. Associated with the goddess Selene,
+                        fertility, and the rhythms of embodied life. The practitioner must transcend lunar fluctuation and
+                        material attachment to proceed upward.
+                    </p>
+                </div>
+
+                <div class="sphere-item">
+                    <div class="sphere-name">2. Mercury (Hermes) - Divine Messenger</div>
+                    <p>
+                        Sphere of communication, intellect, and mediation between realms. Mercury guides souls between worlds,
+                        carries divine messages, and rules eloquence. The practitioner develops discernment and mental clarity.
+                    </p>
+                </div>
+
+                <div class="sphere-item">
+                    <div class="sphere-name">3. Venus (Aphrodite) - Divine Beauty and Love</div>
+                    <p>
+                        Governing attraction, harmony, and aesthetic experience. Venus represents the soul's longing for beauty
+                        and unity. The practitioner transforms erotic desire into spiritual eros - love for the Good and
+                        Beautiful themselves.
+                    </p>
+                </div>
+
+                <div class="sphere-item">
+                    <div class="sphere-name">4. Sun (Helios) - Divine Intellect</div>
+                    <p>
+                        The central sphere, source of light and life. The Sun represents divine Nous (intellect/mind), the
+                        demiurge who orders the cosmos. This is a critical threshold - passage through the solar sphere
+                        transforms the soul from material to intellectual being.
+                    </p>
+                </div>
+
+                <div class="sphere-item">
+                    <div class="sphere-name">5. Mars (Ares) - Divine Will and Strength</div>
+                    <p>
+                        Sphere of courage, willpower, and transformative struggle. Mars energy, properly directed, becomes
+                        spiritual warrior virtue - the strength to overcome attachment and resist regression. The practitioner
+                        develops adamantine determination.
+                    </p>
+                </div>
+
+                <div class="sphere-item">
+                    <div class="sphere-name">6. Jupiter (Zeus) - Divine Law and Justice</div>
+                    <p>
+                        Governing wisdom, rulership, and cosmic order. Jupiter represents divine providence and the just
+                        ordering of all things. The practitioner aligns with cosmic law and assumes perspective of universal
+                        mind rather than individual ego.
+                    </p>
+                </div>
+
+                <div class="sphere-item">
+                    <div class="sphere-name">7. Saturn (Kronos) - Divine Boundary</div>
+                    <p>
+                        The outermost planetary sphere, boundary between temporal cosmos and eternal realm. Saturn represents
+                        time, limitation, and the threshold to timelessness. Passing through Saturn means transcending temporal
+                        existence entirely, entering the starry vault beyond planets.
+                    </p>
+                </div>
+
+                <div class="sphere-item" style="background: rgba(var(--color-primary-rgb), 0.2); border-color: var(--color-primary);">
+                    <div class="sphere-name">Beyond the Spheres - The Intelligible Realm</div>
+                    <p>
+                        Past the planetary spheres lies the realm of pure intellect (Nous), then the One itself. These cannot
+                        be "reached" through discursive thought or ritual movement but require transformation of consciousness
+                        beyond subject-object duality. The prepared soul, having shed all limitation, achieves henosis -
+                        mystical union with the divine source.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TOOLS & MATERIALS -->
+        <section class="section">
+            <h2>Tools & Materials</h2>
+
+            <div class="tools-list">
+                <div class="tool-item">
+                    <div class="tool-name">Philosophical Texts</div>
+                    <p>
+                        Plato's dialogues (especially Phaedrus, Symposium, Republic, Timaeus), Plotinus' Enneads, Iamblichus'
+                        De Mysteriis, Proclus' commentaries, and the Chaldean Oracles. These aren't mere references but
+                        spiritual manuals requiring contemplative study. Understanding Neoplatonic metaphysics is essential
+                        for effective theurgic practice.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Statues and Sacred Images</div>
+                    <p>
+                        Representations of gods, daimones, or cosmic principles, crafted from appropriate materials according
+                        to correspondences. These serve as focal points for divine presence when properly consecrated. Unlike
+                        crude idol worship, these are understood as sympathetic links - the statue participates in the divine
+                        reality it represents.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Precious Stones and Minerals</div>
+                    <p>
+                        Specific stones correspond to planetary and divine powers: lapis lazuli for Jupiter, emerald for Venus,
+                        ruby for Sun, sapphire for Saturn, etc. These aren't arbitrary but reflect metaphysical principles -
+                        the stone's nature participates in the planetary essence. Stones are worn, placed on altars, or used
+                        in talismanic constructions.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Herbs and Incenses</div>
+                    <p>
+                        Plants corresponding to deities and planets: frankincense for solar rites, myrrh for Saturn, rose for
+                        Venus, laurel for Apollo. Burned as offerings, these create sympathetic atmosphere conducive to divine
+                        presence. The Neoplatonists understood plants as embodying specific cosmic principles accessible through
+                        proper ritual use.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Sacred Vowels and Barbarous Names</div>
+                    <p>
+                        Sequences of vowel sounds (alpha, epsilon, eta, iota, omicron, upsilon, omega) chanted in specific
+                        patterns, plus "barbarous names" - divine names in ancient languages (Egyptian, Chaldean, Hebrew) whose
+                        meaning may be obscure but whose sonic power remains. These aren't translatable but operative sounds
+                        embodying divine powers.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Geometric Figures</div>
+                    <p>
+                        Sacred geometry - circles, triangles, squares, pentagrams, hexagrams - represents metaphysical
+                        principles. The circle symbolizes unity and eternity, the triangle the triad (One-Intellect-Soul),
+                        geometric progressions the emanative descent from unity to multiplicity. Ritual spaces incorporate
+                        these forms to align earthly practice with cosmic structure.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Planetary Talismans</div>
+                    <p>
+                        Objects inscribed with planetary symbols, divine names, and astrological signatures, created at
+                        appropriate times to capture and hold planetary influences. These function as batteries storing
+                        celestial power for later use. The Picatrix and other medieval grimoires preserve elaborate talisman
+                        constructions deriving from theurgic principles.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Ritual Purity Requirements</div>
+                    <p>
+                        Clean white linen garments, ritual bathing, fasting or specific diets, sexual abstinence, and
+                        purification of ritual space. These aren't moral requirements but ontological necessities - impurity
+                        blocks sympathetic connection to higher realities. The practitioner becomes a purified vessel capable
+                        of receiving and transmitting divine energies.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- LINEAGES & SCHOOLS -->
+        <section class="section">
+            <h2>Lineages & Schools</h2>
+
+            <h3>Ancient Theurgic Schools</h3>
+
+            <h4>Iamblichean Theurgy (3rd-4th centuries)</h4>
+            <p>
+                Iamblichus of Chalcis systematized theurgic practice in opposition to Porphyry's more intellectualist approach.
+                His "De Mysteriis" (On the Mysteries) defends Egyptian temple practices and ritual theurgy as necessary
+                complements to philosophy. Iamblichus emphasized that intellectual contemplation alone couldn't achieve union
+                with the One - ritual action working through the entire being was required. His school at Apamea trained
+                students in both philosophy and ritual practice.
+            </p>
+
+            <h4>Athenian School (5th-6th centuries)</h4>
+            <p>
+                Proclus (412-485 CE), head of the Platonic Academy in Athens, developed sophisticated theurgic theology.
+                His massive commentaries on Plato integrate theurgic practices with rigorous philosophical analysis. Proclus
+                himself was renowned as a wonder-worker, credited with rainmaking, healing, and receiving divine visions.
+                The Academy continued until Emperor Justinian closed it in 529 CE, ending institutional pagan philosophy.
+            </p>
+
+            <h4>Alexandrian Synthesis</h4>
+            <p>
+                Alexandria's intellectual environment fostered synthesis of Neoplatonic philosophy, Christian theology,
+                Hermetic practices, and Egyptian temple traditions. Figures like Hypatia (370-415 CE) taught mathematics,
+                astronomy, and philosophy with mystical dimensions, though her murder by Christian mobs symbolizes the violent
+                transition from pagan to Christian dominance.
+            </p>
+
+            <h3>Medieval Transmission</h3>
+
+            <h4>Pseudo-Dionysius the Areopagite (5th-6th century)</h4>
+            <p>
+                This anonymous Christian author disguised as a New Testament figure adapted Neoplatonic theurgy into Christian
+                mystical theology. His hierarchies of angels, emphasis on divine names, and ritual theology deeply influenced
+                medieval Christianity while preserving theurgic concepts in baptized form. Pseudo-Dionysius allowed theurgic
+                principles to survive Christianity's triumph.
+            </p>
+
+            <h4>Islamic Philosophers</h4>
+            <p>
+                Islamic thinkers like Al-Kindi, Al-Farabi, and Avicenna studied and transmitted Neoplatonic texts, preserving
+                philosophical foundations. Hermetic and talismanic traditions in Arabic incorporated theurgic principles,
+                which returned to Europe through translations and Moorish Spain.
+            </p>
+
+            <h4>Byzantine Scholars</h4>
+            <p>
+                Byzantine intellectuals like Michael Psellus (11th century) preserved and studied ancient theurgic texts while
+                officially adhering to Christianity. Psellus' commentaries on the Chaldean Oracles transmitted this knowledge
+                to Renaissance scholars who would revive pagan theurgy.
+            </p>
+
+            <h3>Renaissance Revival</h3>
+
+            <h4>Marsilio Ficino (1433-1499)</h4>
+            <p>
+                Florentine priest and philosopher Ficino translated the complete Plato, Plotinus, and Hermetic Corpus into
+                Latin, making Neoplatonic theurgy accessible to European intellectuals. His "De Vita" (On Life) contains
+                practical instructions for drawing down planetary influences through music, scent, imagery, and lifestyle -
+                essentially theurgic practice in Renaissance dress.
+            </p>
+
+            <h4>Giovanni Pico della Mirandola (1463-1494)</h4>
+            <p>
+                Pico integrated Neoplatonism with Kabbalah and Christian theology in his syncretistic project. Though his
+                thesis was condemned by the Pope, his work established the template for Christian Cabala and Renaissance
+                magic - essentially theurgy combined with Jewish letter mysticism.
+            </p>
+
+            <h3>Modern Practice</h3>
+
+            <h4>Academic Study</h4>
+            <p>
+                20th-21st century scholars like E.R. Dodds, Hans Lewy, Gregory Shaw, and Crystal Addey have examined theurgy
+                historically and philosophically, distinguishing authentic ancient practice from later medieval and Renaissance
+                adaptations.
+            </p>
+
+            <h4>Practical Revival</h4>
+            <p>
+                Contemporary practitioners attempt to reconstruct theurgic rituals based on ancient sources. Groups like the
+                Prometheus Trust publish Neoplatonic texts and promote contemplative practice. Individual practitioners
+                combine philosophical study with experimental ritual, though claiming "authentic" lineage to ancient schools
+                is problematic given the 1,500-year gap.
+            </p>
+        </section>
+
+        <!-- PRIMARY SOURCES -->
+        <section class="section">
+            <h2>Primary Sources</h2>
+
+            <div class="source-item">
+                <div class="source-title">The Enneads</div>
+                <div class="source-author">Plotinus (c. 270 CE); trans. Stephen MacKenna, Penguin Classics, 1991</div>
+                <p>
+                    Foundation text of Neoplatonism by its founder. While Plotinus emphasizes contemplative philosophy over
+                    ritual, his metaphysical system provides the intellectual framework for theurgy. The treatises on the One,
+                    Intellect, Soul, and the return journey are essential for understanding theurgic cosmology.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">De Mysteriis (On the Mysteries)</div>
+                <div class="source-author">Iamblichus (c. 300 CE); trans. Emma C. Clarke et al., Society of Biblical Literature, 2003</div>
+                <p>
+                    The definitive ancient text defending theurgy against Porphyry's criticisms. Iamblichus explains how ritual
+                    invocation works, the nature of divine possession, types of spiritual beings, and why theurgic practice is
+                    necessary for salvation. Essential primary source for understanding classical theurgy.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Chaldean Oracles</div>
+                <div class="source-author">2nd century CE (authorship uncertain); various editions including Ruth Majercik, Brill, 1989</div>
+                <p>
+                    Fragmentary verses claiming divine origin, providing core theurgic teachings. Cryptic and poetic, requiring
+                    philosophical commentary to decode. Neoplatonists treated these as revealed truth complementing Platonic
+                    philosophy. Contains teachings on divine fire, symbols (synthemata), and the soul's ascent.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">Elements of Theology</div>
+                <div class="source-author">Proclus (c. 450 CE); trans. E.R. Dodds, Oxford University Press, 1963</div>
+                <p>
+                    Systematic exposition of Neoplatonic metaphysics in geometric format - definitions, axioms, propositions,
+                    proofs. Provides rigorous philosophical framework underlying theurgic practice. Dodds' edition includes
+                    extensive commentary connecting Proclus to earlier Neoplatonists and explaining technical concepts.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">Theurgy and the Soul: The Neoplatonism of Iamblichus</div>
+                <div class="source-author">Gregory Shaw, Pennsylvania State University Press, 1995</div>
+                <p>
+                    Modern scholarly analysis of Iamblichean theurgy examining its philosophical coherence and ritual practice.
+                    Shaw argues theurgy wasn't irrational magic grafted onto philosophy but integral to Iamblichus' understanding
+                    of salvation. Essential for contemporary understanding of what ancient theurgists were actually doing and why.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Greek and the Gods: Polytheism and Philosophy in Plato and Plotinus</div>
+                <div class="source-author">Edward Butler, published online and in various articles</div>
+                <p>
+                    Contemporary philosophical defense of polytheistic Platonism and theurgic practice. Butler argues ancient
+                    Neoplatonists were genuine polytheists whose ritual practices follow coherently from their metaphysics.
+                    Challenges dismissals of theurgy as superstition, showing its philosophical sophistication.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">Theurgic Metaphysics: The Theology of the Chaldean Oracles</div>
+                <div class="source-author">Crystal Addey, Brill, forthcoming</div>
+                <p>
+                    Academic examination of how the Chaldean Oracles functioned within Neoplatonic theurgy, their theological
+                    content, and their role in ritual practice. Part of renewed scholarly interest in taking theurgy seriously
+                    as philosophical-religious practice rather than mere late-antique superstition.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Philosophy of the Chaldean Oracles</div>
+                <div class="source-author">John F. Finamore & Sarah Iles Johnston (eds.), Brill, 2019</div>
+                <p>
+                    Collection of scholarly essays examining various aspects of the Chaldean Oracles - their philosophy,
+                    soteriology, daemonology, and influence on later thought. Represents current academic understanding of
+                        these enigmatic texts central to ancient theurgy.
+                </p>
+            </div>
+        </section>
+
+        <!-- CROSS-REFERENCES -->
+        <section class="section">
+            <h2>Cross-References & Related Traditions</h2>
+
+            <div class="cross-ref-grid">
+                <a href="../../mythos/greek/beings/index.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">⚡</div>
+                    <div><strong>Greek Mythology</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Gods and philosophical theology</div>
+                </a>
+
+                <a href="../texts/corpus-hermeticum.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">☿</div>
+                    <div><strong>Corpus Hermeticum</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Hermetic philosophy</div>
+                </a>
+
+                <a href="../ritual/ceremonial-magic.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">🔯</div>
+                    <div><strong>Ceremonial Magic</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Western ritual traditions</div>
+                </a>
+
+                <a href="goetia.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">👁️</div>
+                    <div><strong>Goetia</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Contrasting magical approach</div>
+                </a>
+
+                <a href="../divination/astrology.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">♈</div>
+                    <div><strong>Astrology</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Planetary correspondences</div>
+                </a>
+
+                <a href="practical-kabbalah.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">✡️</div>
+                    <div><strong>Practical Kabbalah</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Parallel mystical system</div>
+                </a>
+            </div>
+
+            <h3 style="margin-top: var(--space-8);">Related Magical Traditions</h3>
+            <ul>
+                <li><strong>Hermetic Tradition:</strong> Later development incorporating theurgic principles with Egyptian elements</li>
+                <li><strong>Renaissance Magic:</strong> Ficino, Pico, and others reviving theurgic practices in Christian context</li>
+                <li><strong>Christian Mysticism:</strong> Pseudo-Dionysius and others adapting Neoplatonic concepts</li>
+                <li><strong>Islamic Neoplatonism:</strong> Al-Farabi, Avicenna transmitting philosophical foundations</li>
+                <li><strong>Golden Dawn System:</strong> Modern ceremonial magic incorporating Neoplatonic hierarchies</li>
+                <li><strong>Orphic and Eleusinian Mysteries:</strong> Ancient Greek mystery traditions influencing theurgy</li>
+            </ul>
+        </section>
+
+        <!-- INTERLINK PANEL -->
+        <section class="section">
+            <section class="interlink-panel">
+                <h3 class="interlink-header" style="display: flex; align-items: center; gap: var(--space-3); color: var(--color-primary); margin-bottom: var(--space-6);">
+                    <span class="interlink-icon">🔗</span>
+                    Related Across the Mythos
+                </h3>
+
+                <div class="interlink-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-6);">
+                    <!-- Source Tradition -->
+                    <div class="interlink-section">
+                        <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--color-secondary); margin-bottom: var(--space-4);">Source Tradition</div>
+                        <a href="../../mythos/greek/index.html" class="cross-ref-link" style="display: block; padding: var(--space-5); background: rgba(var(--color-primary-rgb), 0.1); border: 2px solid var(--color-border); border-radius: var(--radius-lg); text-decoration: none;">
+                            <div style="font-size: 2rem; margin-bottom: var(--space-2); text-align: center;">🏛️</div>
+                            <div style="text-align: center;"><strong style="color: var(--color-primary);">Greek Mythology</strong></div>
+                            <div style="font-size: var(--text-sm); color: var(--color-text-secondary); text-align: center;">Olympian gods and Neoplatonic philosophy</div>
+                        </a>
+                    </div>
+
+                    <!-- Associated Deities -->
+                    <div class="interlink-section">
+                        <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--color-secondary); margin-bottom: var(--space-4);">Associated Deities</div>
+                        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                            <a href="../../mythos/greek/deities/zeus.html" class="cross-ref-link" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none;">
+                                <span style="font-size: 1.5rem;">⚡</span>
+                                <div>
+                                    <strong style="color: var(--color-primary);">Zeus</strong>
+                                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">King of gods; symbol of divine law</div>
+                                </div>
+                            </a>
+                            <a href="../../mythos/greek/deities/apollo.html" class="cross-ref-link" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none;">
+                                <span style="font-size: 1.5rem;">☀️</span>
+                                <div>
+                                    <strong style="color: var(--color-primary);">Apollo</strong>
+                                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Solar deity; prophecy and illumination</div>
+                                </div>
+                            </a>
+                            <a href="../../mythos/greek/deities/index.html" class="cross-ref-link" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none;">
+                                <span style="font-size: 1.5rem;">🌟</span>
+                                <div>
+                                    <strong style="color: var(--color-primary);">Helios</strong>
+                                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">The Sun; central to planetary ascent</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Related Practices -->
+                    <div class="interlink-section">
+                        <div class="interlink-section-title" style="font-weight: var(--font-semibold); color: var(--color-secondary); margin-bottom: var(--space-4);">Related Practices</div>
+                        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                            <a href="../texts/corpus-hermeticum.html" class="cross-ref-link" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none;">
+                                <span style="font-size: 1.5rem;">☿</span>
+                                <div>
+                                    <strong style="color: var(--color-primary);">Corpus Hermeticum</strong>
+                                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Hermetic philosophy texts</div>
+                                </div>
+                            </a>
+                            <a href="../ritual/ceremonial-magic.html" class="cross-ref-link" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none;">
+                                <span style="font-size: 1.5rem;">🔯</span>
+                                <div>
+                                    <strong style="color: var(--color-primary);">Ceremonial Magic</strong>
+                                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Western ritual traditions</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cross-Cultural Parallels -->
+                <div class="parallel-traditions" style="margin-top: var(--space-8); padding: var(--space-6); background: rgba(var(--color-primary-rgb), 0.05); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+                    <h4 style="color: var(--color-primary); margin-bottom: var(--space-4);">🌍 Cross-Cultural Parallel Practices</h4>
+                    <p style="color: var(--color-text-secondary); margin-bottom: var(--space-4); font-size: var(--text-sm);">Divine communion and ascent practices across traditions:</p>
+                    <div class="parallel-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-4);">
+                        <a href="seidr.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; transition: all var(--transition-base);">
+                            <span class="tradition-flag" style="font-size: 1.5rem;">🔮</span>
+                            <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Seidr</span>
+                            <span class="tradition-label" style="font-size: var(--text-sm); color: var(--color-text-secondary);">Norse</span>
+                        </a>
+                        <a href="heka.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; transition: all var(--transition-base);">
+                            <span class="tradition-flag" style="font-size: 1.5rem;">𓋹</span>
+                            <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Heka</span>
+                            <span class="tradition-label" style="font-size: var(--text-sm); color: var(--color-text-secondary);">Egyptian</span>
+                        </a>
+                        <a href="practical-kabbalah.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; transition: all var(--transition-base);">
+                            <span class="tradition-flag" style="font-size: 1.5rem;">✡️</span>
+                            <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Kabbalah</span>
+                            <span class="tradition-label" style="font-size: var(--text-sm); color: var(--color-text-secondary);">Jewish</span>
+                        </a>
+                        <a href="vedic-magic.html" class="parallel-card" style="display: flex; flex-direction: column; align-items: center; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; transition: all var(--transition-base);">
+                            <span class="tradition-flag" style="font-size: 1.5rem;">🕉️</span>
+                            <span class="parallel-name" style="font-weight: var(--font-semibold); color: var(--color-text-primary);">Vedic Magic</span>
+                            <span class="tradition-label" style="font-size: var(--text-sm); color: var(--color-text-secondary);">Hindu</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- See Also -->
+                <div class="see-also-section" style="margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--color-border);">
+                    <h4 style="color: var(--color-primary); margin-bottom: var(--space-4);">📚 See Also</h4>
+                    <div class="see-also-links" style="display: flex; flex-wrap: wrap; gap: var(--space-3);">
+                        <a href="../../archetypes/celestial/index.html" class="see-also-link" style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-full); text-decoration: none; font-size: var(--text-sm); color: var(--color-text-primary);">
+                            <span>📚</span> Sage Archetype
+                        </a>
+                        <a href="../../spiritual-places/groves/delphi.html" class="see-also-link" style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-full); text-decoration: none; font-size: var(--text-sm); color: var(--color-text-primary);">
+                            <span>🏛️</span> Oracle of Delphi
+                        </a>
+                        <a href="../../index.html" class="see-also-link" style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-full); text-decoration: none; font-size: var(--text-sm); color: var(--color-text-primary);">
+                            <span>🔥</span> Eleusinian Mysteries
+                        </a>
+                        <a href="goetia.html" class="see-also-link" style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: rgba(var(--color-primary-rgb), 0.1); border-radius: var(--radius-full); text-decoration: none; font-size: var(--text-sm); color: var(--color-text-primary);">
+                            <span>👁️</span> Goetia (Contrast)
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- NAVIGATION -->
+        <nav class="nav-section">
+            <a href="../index.html" class="nav-button">Return to Magic Index</a>
+            <a href="../../mythos/greek/index.html" class="nav-button">Greek Mythology</a>
+            <a href="../../index.html" class="nav-button">Home</a>
+        </nav>
+    </div>
+
+    <!-- Theme Picker UI -->
+</body>
+</html>

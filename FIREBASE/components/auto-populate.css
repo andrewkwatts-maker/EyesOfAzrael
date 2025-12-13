@@ -1,0 +1,433 @@
+/**
+ * Entity Auto-Populate System Styles
+ *
+ * Styling for automatically populated entity grids and panels
+ */
+
+/* ===========================================
+   Auto-Populate Container Styles
+   =========================================== */
+
+.auto-populate-count {
+    text-align: center;
+    color: var(--color-text-secondary);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.entity-auto-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+@media (max-width: 768px) {
+    .entity-auto-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+.entity-auto-panel {
+    position: relative;
+}
+
+/* ===========================================
+   Empty & Error States
+   =========================================== */
+
+.auto-populate-empty {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--color-text-secondary);
+    background: rgba(var(--color-surface-rgb), 0.3);
+    border: 2px dashed rgba(var(--color-primary-rgb), 0.2);
+    border-radius: var(--radius-lg);
+    font-size: 1.1rem;
+}
+
+.auto-populate-error {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(255, 0, 0, 0.1);
+    border: 2px solid rgba(255, 0, 0, 0.3);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-primary);
+}
+
+.error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.error-details {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+/* ===========================================
+   Fallback Card (when EntityPanel unavailable)
+   =========================================== */
+
+.entity-card-fallback {
+    background: rgba(var(--color-surface-rgb), 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-md);
+}
+
+.entity-card-fallback:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--color-primary);
+}
+
+.entity-card-fallback .entity-icon {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 2px 8px rgba(var(--color-primary-rgb), 0.3));
+}
+
+.entity-card-fallback h3 {
+    margin: 0 0 0.75rem 0;
+    color: var(--color-primary);
+    font-size: 1.3rem;
+}
+
+.entity-card-fallback h3 a {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.entity-card-fallback h3 a:hover {
+    color: var(--color-secondary);
+}
+
+.entity-card-fallback .entity-description {
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.entity-card-fallback .entity-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.entity-card-fallback .entity-type,
+.entity-card-fallback .entity-category {
+    background: rgba(var(--color-primary-rgb), 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.entity-card-fallback .myth-badge {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: var(--color-text-primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* ===========================================
+   Mini Display Mode
+   =========================================== */
+
+.entity-card-fallback.mini {
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.entity-card-fallback.mini .entity-icon {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.entity-card-fallback.mini h3 {
+    font-size: 1rem;
+    margin: 0;
+    flex: 1;
+}
+
+.entity-card-fallback.mini .entity-description,
+.entity-card-fallback.mini .entity-meta {
+    display: none;
+}
+
+/* ===========================================
+   Archetype Filter Styles
+   =========================================== */
+
+.archetype-filter-system {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+@media (max-width: 1024px) {
+    .archetype-filter-system {
+        grid-template-columns: 1fr;
+    }
+}
+
+.archetype-filters {
+    position: sticky;
+    top: 80px;
+    height: fit-content;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.archetype-filters h3 {
+    margin-top: 0;
+    color: var(--color-primary);
+    border-bottom: 2px solid rgba(var(--color-primary-rgb), 0.3);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Filter Controls */
+
+.filter-group {
+    margin-bottom: 1.5rem;
+}
+
+.filter-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.filter-input,
+.filter-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+    border-radius: var(--radius-md);
+    background: rgba(var(--color-surface-rgb), 0.6);
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+    transition: all var(--transition-base);
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.filter-slider {
+    width: 100%;
+    margin: 0.5rem 0;
+    accent-color: var(--color-primary);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+
+.score-value {
+    font-weight: bold;
+    color: var(--color-primary);
+}
+
+/* Archetype Description */
+
+.archetype-description {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(var(--color-primary-rgb), 0.08);
+    border-left: 3px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    display: none;
+}
+
+.archetype-info {
+    display: flex;
+    gap: 1rem;
+}
+
+.archetype-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.archetype-text strong {
+    display: block;
+    color: var(--color-primary);
+    margin-bottom: 0.25rem;
+}
+
+.archetype-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+/* Results Section */
+
+.archetype-results {
+    min-height: 400px;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(var(--color-primary-rgb), 0.2);
+}
+
+.results-header h3 {
+    margin: 0;
+    color: var(--color-primary);
+}
+
+.results-count {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: var(--color-text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: var(--shadow-sm);
+}
+
+/* No Results State */
+
+.no-results {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--color-text-secondary);
+}
+
+.no-results-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.no-results-text {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Archetype Score Badge */
+
+.archetype-result-card {
+    position: relative;
+}
+
+.archetype-score-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: var(--color-text-primary);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-weight: bold;
+    font-size: 0.85rem;
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+}
+
+/* ===========================================
+   Loading States
+   =========================================== */
+
+.auto-populate-loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--color-text-secondary);
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===========================================
+   Responsive Design
+   =========================================== */
+
+@media (max-width: 640px) {
+    .entity-auto-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .archetype-filters {
+        position: static;
+        max-height: none;
+    }
+
+    .results-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+}
+
+/* ===========================================
+   Print Styles
+   =========================================== */
+
+@media print {
+    .archetype-filters,
+    .auto-populate-count {
+        display: none;
+    }
+
+    .entity-auto-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .archetype-score-badge {
+        position: static;
+        display: inline-block;
+        margin-left: 0.5rem;
+    }
+}

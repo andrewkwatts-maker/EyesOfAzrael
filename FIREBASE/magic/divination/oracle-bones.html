@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oracle Bones - Divination Systems</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--space-5);
+        }
+
+        .container {
+            max-width: var(--container-lg);
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--space-16) var(--space-5);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-10);
+            border: 2px solid var(--color-border);
+        }
+
+        .header-icon {
+            font-size: 5rem;
+            margin-bottom: var(--space-4);
+        }
+
+        h1 {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-5);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: var(--text-xl);
+            color: var(--color-text-secondary);
+            margin: var(--space-3) 0;
+            font-style: italic;
+        }
+
+        .section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+        }
+
+        h2 {
+            font-size: var(--text-3xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-3);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        h3 {
+            font-size: var(--text-2xl);
+            color: var(--color-secondary);
+            margin-top: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+
+        h4 {
+            font-size: var(--text-xl);
+            color: var(--color-primary);
+            margin-top: var(--space-4);
+            margin-bottom: var(--space-3);
+        }
+
+        p {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-4);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin-left: var(--space-6);
+            margin-bottom: var(--space-4);
+            color: var(--color-text-secondary);
+        }
+
+        li {
+            margin-bottom: var(--space-2);
+            line-height: var(--leading-relaxed);
+        }
+
+        .source-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .source-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 3px solid var(--color-primary);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+            border-radius: var(--radius-md);
+        }
+
+        .cross-ref {
+            display: inline-block;
+            padding: var(--space-2) var(--space-4);
+            background: rgba(var(--color-secondary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            margin: var(--space-2);
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+        }
+
+        .cross-ref:hover {
+            background: rgba(var(--color-secondary-rgb), 0.4);
+            transform: translateY(-2px);
+        }
+
+        .nav-section {
+            text-align: center;
+            margin-top: var(--space-10);
+            padding: var(--space-6);
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: var(--space-4) var(--space-8);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+            margin: var(--space-2);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-accent-rgb), 0.1);
+            border-left: 4px solid var(--color-accent);
+            padding: var(--space-4);
+            margin: var(--space-4) 0;
+            border-radius: var(--radius-md);
+        }
+
+        .process-steps {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .step {
+            display: flex;
+            gap: var(--space-4);
+            margin-bottom: var(--space-4);
+            align-items: flex-start;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            background: var(--color-primary);
+            color: var(--color-background);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--font-bold);
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-4) 0;
+        }
+
+        th, td {
+            padding: var(--space-3);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            color: var(--color-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        .example-box {
+            background: rgba(var(--color-secondary-rgb), 0.05);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .example-title {
+            font-size: var(--text-xl);
+            color: var(--color-secondary);
+            font-weight: var(--font-semibold);
+            margin-bottom: var(--space-4);
+        }
+
+        .inscription {
+            font-family: monospace;
+            background: rgba(var(--color-primary-rgb), 0.1);
+            padding: var(--space-4);
+            border-radius: var(--radius-md);
+            margin: var(--space-3) 0;
+            white-space: pre-wrap;
+        }
+
+        /* Interlink Panel Styles */
+        .interlink-panel {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin: var(--space-10) 0;
+        }
+
+        .interlink-panel h3 {
+            color: var(--color-primary);
+            font-size: var(--text-2xl);
+            margin-bottom: var(--space-6);
+        }
+
+        .interlink-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .archetype-link-card, .parallel-card {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            padding: var(--space-4);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            transition: all var(--transition-base);
+        }
+
+        .archetype-link-card:hover, .parallel-card:hover {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            transform: translateY(-2px);
+        }
+
+        .card-icon {
+            font-size: var(--text-2xl);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+        }
+
+        .card-content h4 {
+            color: var(--color-text-primary);
+            font-size: var(--text-base);
+            margin-bottom: var(--space-1);
+        }
+
+        .card-content span {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="theme-picker-container"></div>
+<div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Oracle Bones (Jiaguwen)</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> → <a href="../index.html">Magic</a> → <a href="index.html">Divination</a> → <span>Oracle Bones</span>
+</nav>
+
+        <!-- OVERVIEW -->
+        <section class="section">
+            <h2>Overview & Historical Origins</h2>
+
+            <p>
+                Oracle bone divination, known as "jiaguwen" (甲骨文, literally "shell-bone script"), represents
+                the earliest systematically documented form of Chinese divination and the oldest substantial
+                corpus of Chinese writing. Practiced primarily during the late Shang Dynasty (c. 1600-1046 BCE),
+                this method involved inscribing questions on animal bones or turtle plastrons (lower shells),
+                applying heat to create cracks, and interpreting the resulting patterns as answers from
+                ancestral spirits and deities.
+            </p>
+
+            <p>
+                The discovery of oracle bones represents one of the most significant archaeological finds in
+                Chinese history. In 1899, scholar Wang Yirong noticed ancient script on "dragon bones" sold
+                as traditional medicine in Beijing pharmacies. Recognizing these as ancient writing, he traced
+                them to the village of Xiaotun near Anyang in Henan Province—the site of Yin, the last Shang
+                capital. Subsequent excavations have unearthed over 150,000 oracle bone fragments, providing
+                extraordinary insight into Shang Dynasty religion, politics, daily life, and the development
+                of Chinese writing.
+            </p>
+
+            <div class="highlight-box">
+                <h4>Historical Significance</h4>
+                <p>
+                    Oracle bones serve triple significance in Chinese studies: they provide the earliest examples
+                    of Chinese writing (precursor to modern characters), they document actual Shang Dynasty
+                    events enabling historical verification, and they reveal religious and divinatory practices
+                    at the foundation of Chinese civilization. The inscriptions transformed the legendary Shang
+                    Dynasty from myth to confirmed history, validating ancient texts like the <em>Records of
+                    the Grand Historian</em>.
+                </p>
+            </div>
+
+            <h3>Materials and Preparation</h3>
+
+            <h4>Turtle Plastrons</h4>
+            <p>
+                Turtle shells, particularly the lower shell (plastron), were highly prized for divination.
+                The turtle's association with longevity, stability, and cosmic order made it spiritually
+                significant. The most common species used was the Chinese softshell turtle (<em>Pelodiscus
+                sinensis</em>), though rarer species were also employed for important divinations.
+            </p>
+
+            <p>
+                Turtle plastrons required extensive preparation: cleaning, smoothing the surface, and creating
+                hollow depressions (known as "zans") on the underside where heat would be applied. The shell's
+                structure—naturally divided into sections—provided a framework for organizing multiple
+                divinations on a single plastron.
+            </p>
+
+            <h4>Cattle Scapulae</h4>
+            <p>
+                Shoulder blades (scapulae) from cattle were the most common oracle bones, particularly oxen
+                and water buffalo. These large, flat bones provided ample surface area for inscriptions and
+                created dramatic cracks when heated. The bones underwent similar preparation: cleaning,
+                smoothing, and creating depressions for heat application.
+            </p>
+
+            <p>
+                Other materials occasionally used included deer antlers, pig bones, and sheep scapulae, though
+                these were less common and typically reserved for specific types of questions or less formal
+                divinations.
+            </p>
+
+            <h3>Purpose and Scope of Divination</h3>
+            <p>
+                Oracle bone divination served as the primary method for Shang royal decision-making and
+                communication with the spirit world. Questions addressed:
+            </p>
+            <ul>
+                <li><strong>Military Affairs:</strong> Campaign timing, battlefield strategy, likelihood of victory</li>
+                <li><strong>Agriculture:</strong> Rainfall predictions, harvest outcomes, planting timing</li>
+                <li><strong>Hunting:</strong> Propitious days, likely catch, safety of the hunt</li>
+                <li><strong>Sacrifice:</strong> Appropriate offerings, ritual timing, deity preferences</li>
+                <li><strong>Royal Health:</strong> Illness causes, treatment success, childbirth outcomes</li>
+                <li><strong>Dreams:</strong> Interpretation of royal dreams and omens</li>
+                <li><strong>Ancestral Communication:</strong> Requests for blessing or clarification of ancestral will</li>
+                <li><strong>Construction:</strong> Building timing, architectural decisions</li>
+                <li><strong>Astronomy:</strong> Interpretation of celestial phenomena</li>
+            </ul>
+        </section>
+
+        <!-- PRACTICE & METHODS -->
+        <section class="section">
+            <h2>Practice & Methods</h2>
+
+            <h3>The Divination Process</h3>
+
+            <div class="process-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Question Formulation</h4>
+                        <p>
+                            The diviner (often called a "wu" or "zhen") received the question from the king or
+                            high official. Questions were typically formulated as binary propositions that could
+                            receive affirmative or negative answers. Often, both positive and negative versions
+                            were asked to confirm the response.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Inscription of the Charge</h4>
+                        <p>
+                            The question (called the "charge" or "prognostication") was carved into the prepared
+                            bone or shell before the heat application. This inscription typically included:
+                        </p>
+                        <ul>
+                            <li>The cyclical date (using the 60-day ganzhi cycle)</li>
+                            <li>The diviner's name</li>
+                            <li>The actual question or proposition</li>
+                            <li>Sometimes the topic or category of divination</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Heat Application (Pyromancy)</h4>
+                        <p>
+                            A heated bronze rod or burning piece of wood was applied to the prepared hollows on
+                            the underside of the bone or shell. The sudden application of intense heat caused the
+                            material to crack on the upper surface, creating distinctive patterns—typically a
+                            vertical crack with shorter horizontal branches, resembling the Chinese character 卜
+                            (bu, meaning "divination").
+                        </p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Crack Interpretation</h4>
+                        <p>
+                            The diviner examined the resulting cracks, interpreting their direction, length,
+                            clarity, and pattern. While specific interpretation rules remain partially unclear,
+                            factors considered included:
+                        </p>
+                        <ul>
+                            <li>Crack straightness versus irregularity</li>
+                            <li>Length and prominence of main crack lines</li>
+                            <li>Number and position of branch cracks</li>
+                            <li>Sound produced during cracking</li>
+                            <li>Relationship between multiple cracks on the same bone</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>Prognostication Inscription</h4>
+                        <p>
+                            After interpreting the cracks, the diviner inscribed the answer or interpretation
+                            alongside the original question. This "prognostication" represented the spiritual
+                            communication received through the cracks.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">6</div>
+                    <div class="step-content">
+                        <h4>Verification Inscription</h4>
+                        <p>
+                            In many cases, after the predicted event occurred or failed to occur, a verification
+                            statement was added to record the actual outcome. This practice created a historical
+                            record and helped maintain the credibility of the divinatory system.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Reading Oracle Bone Inscriptions</h3>
+
+            <h4>Script Characteristics</h4>
+            <p>
+                Oracle bone script represents the earliest stage of Chinese writing, featuring:
+            </p>
+            <ul>
+                <li><strong>Pictographic elements:</strong> Many characters clearly depict the objects they represent</li>
+                <li><strong>Directional flexibility:</strong> Text could be read left-to-right, right-to-left, or
+                    vertically, depending on bone orientation</li>
+                <li><strong>Character variation:</strong> Same words often written with different character forms</li>
+                <li><strong>Abbreviated forms:</strong> Complex concepts sometimes simplified for carving ease</li>
+                <li><strong>Ritual language:</strong> Formal, ritualized phrasing following established conventions</li>
+            </ul>
+
+            <div class="example-box">
+                <div class="example-title">Example Inscription Format</div>
+                <div class="inscription">Preface: "Crack-making on [day], [diviner's name] asked:"
+
+Charge: "The king will hunt at [location]; will there be catches?"
+
+Prognostication: "Auspicious. The king followed this. He indeed caught [number] deer."
+
+Verification: "The tenth moon. The king actually caught three foxes, one wildcat."</div>
+                <p style="margin-top: var(--space-3); font-size: var(--text-sm);">
+                    This format demonstrates the complete cycle from question to verification, creating both a
+                    divinatory record and historical document.
+                </p>
+            </div>
+
+            <h3>Types of Divination Questions</h3>
+
+            <h4>Paired Propositions</h4>
+            <p>
+                To test the reliability of the oracle and eliminate ambiguity, diviners often asked both positive
+                and negative versions of the same question:
+            </p>
+            <ul>
+                <li>"The harvest will be good" paired with "The harvest will not be good"</li>
+                <li>"Rain will come in ten days" paired with "Rain will not come in ten days"</li>
+            </ul>
+
+            <h4>Sequential Divinations</h4>
+            <p>
+                Complex situations required multiple related questions in sequence, building understanding
+                through successive inquiries:
+            </p>
+            <ol>
+                <li>"Is the king's illness caused by Ancestor [name]?"</li>
+                <li>"Should we sacrifice ten oxen to Ancestor [name]?"</li>
+                <li>"Will the sacrifice on [date] be acceptable?"</li>
+            </ol>
+
+            <h4>Dream Divinations</h4>
+            <p>
+                Royal dreams were considered communications from spirits requiring interpretation through
+                oracle bones. Questions asked whether dreams were auspicious, which deity sent them, and
+                what action they required.
+            </p>
+        </section>
+
+        <!-- TRADITIONS & VARIATIONS -->
+        <section class="section">
+            <h2>Cultural Context & Royal Practice</h2>
+
+            <h3>The Divination Bureaucracy</h3>
+
+            <p>
+                Oracle bone divination was not a casual practice but a highly organized state institution.
+                The Shang court maintained:
+            </p>
+            <ul>
+                <li><strong>Specialized Diviners:</strong> Professional class trained in bone preparation,
+                    heat application, and crack interpretation</li>
+                <li><strong>Scribes:</strong> Experts in oracle bone script who carved the inscriptions</li>
+                <li><strong>Bone Workshops:</strong> Facilities for preparing turtle shells and animal bones</li>
+                <li><strong>Archives:</strong> Storage of used oracle bones for reference and record-keeping</li>
+                <li><strong>Hierarchical Access:</strong> Different ranks could ask different types of questions</li>
+            </ul>
+
+            <h3>Royal Monopoly</h3>
+            <p>
+                During the Shang Dynasty, oracle bone divination was primarily a royal prerogative. The king
+                personally participated in major divinations, sometimes applying the heat himself for critical
+                questions. This exclusive access reinforced royal authority as the intermediary between the
+                human and spiritual realms.
+            </p>
+
+            <p>
+                Lesser nobility and regional lords might conduct simpler bone divinations, but the elaborate
+                system of inscription and verification found at Anyang represented the pinnacle of the practice,
+                reserved for the royal court.
+            </p>
+
+            <h3>Decline and Transformation</h3>
+
+            <h4>Zhou Dynasty Shift</h4>
+            <p>
+                When the Zhou Dynasty overthrew the Shang (c. 1046 BCE), oracle bone divination gradually
+                declined in importance. The Zhou preferred yarrow stalk divination using the <em>I Ching</em>
+                system, which they promoted as more sophisticated and aligned with their philosophical emphasis
+                on virtue and moral order rather than simple spirit communication.
+            </p>
+
+            <h4>Continuity in Popular Practice</h4>
+            <p>
+                Despite elite abandonment, simplified forms of bone divination continued among common people
+                for centuries. Crack divination using various heated materials persisted in folk tradition,
+                though without the elaborate inscriptions and verification system of Shang royal practice.
+            </p>
+
+            <h3>Archaeological Discoveries</h3>
+
+            <h4>Major Finds</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Period</th>
+                        <th>Significance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Xiaotun, Anyang</td>
+                        <td>Late Shang (c. 1250-1046 BCE)</td>
+                        <td>Largest deposit; over 100,000 pieces; royal divinations</td>
+                    </tr>
+                    <tr>
+                        <td>Huanbei</td>
+                        <td>Middle Shang</td>
+                        <td>Earlier examples showing practice development</td>
+                    </tr>
+                    <tr>
+                        <td>Zhengzhou</td>
+                        <td>Early-Middle Shang</td>
+                        <td>Simpler inscriptions; proto-oracle bones</td>
+                    </tr>
+                    <tr>
+                        <td>Zhou Period Sites</td>
+                        <td>Early Zhou</td>
+                        <td>Transitional practices; declining inscription complexity</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Research Challenges</h4>
+            <p>
+                Studying oracle bones presents unique challenges:
+            </p>
+            <ul>
+                <li><strong>Fragmentary State:</strong> Most bones are broken, requiring reconstruction</li>
+                <li><strong>Character Identification:</strong> Many characters remain undeciphered or disputed</li>
+                <li><strong>Context Loss:</strong> Many bones removed from original context before scientific study</li>
+                <li><strong>Interpretation Ambiguity:</strong> Exact crack-reading rules partially unknown</li>
+                <li><strong>Dating Precision:</strong> Some inscriptions difficult to date precisely within Shang period</li>
+            </ul>
+
+            <h3>Connection to Chinese Writing</h3>
+            <p>
+                Oracle bone script represents a fully developed writing system, suggesting earlier evolution
+                whose traces have not survived. Approximately 5,000 different characters appear in oracle bone
+                inscriptions, of which about 1,500 have been reliably identified and connected to later Chinese
+                characters.
+            </p>
+
+            <p>
+                The continuity from oracle bone script to modern Chinese characters demonstrates remarkable
+                linguistic stability. Many fundamental characters—numbers, kinship terms, celestial bodies,
+                common animals—remain recognizable after 3,000 years of evolution.
+            </p>
+        </section>
+
+        <!-- PRIMARY SOURCES -->
+        <section class="section">
+            <h2>Primary Sources & Further Reading</h2>
+
+            <h3>Primary Collections and Catalogues</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong><em>Jiaguwen Heji</em> (甲骨文合集, Collection of Oracle Bone Inscriptions)
+                    Edited by Guo Moruo et al. (1978-1983)</strong><br>
+                    The most comprehensive collection of oracle bone rubbings and transcriptions, containing
+                    41,956 inscribed pieces across 13 volumes. Standard reference for oracle bone research,
+                    though in Chinese. Essential for serious study.
+                </li>
+                <li class="source-item">
+                    <strong>Keightley, David N. <em>Sources of Shang History: The Oracle-Bone Inscriptions
+                    of Bronze Age China</em> (1978)</strong><br>
+                    Foundational English-language work analyzing oracle bone inscriptions as historical sources.
+                    Examines the divination process, content of inscriptions, and what they reveal about Shang
+                    society, politics, and religion.
+                </li>
+                <li class="source-item">
+                    <strong>Royal Ontario Museum Collection (Toronto)</strong><br>
+                    Significant collection of oracle bones outside China, with published catalogues and studies.
+                    Accessible to Western researchers and includes detailed documentation.
+                </li>
+                <li class="source-item">
+                    <strong>Institute of History and Philology, Academia Sinica (Taiwan)</strong><br>
+                    Major repository of oracle bones excavated during 1928-1937 Republican-era excavations.
+                    Published numerous scholarly catalogues and research papers.
+                </li>
+            </ul>
+
+            <h3>Historical and Analytical Studies</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Keightley, David N. <em>The Ancestral Landscape: Time, Space, and Community in
+                    Late Shang China</em> (2000)</strong><br>
+                    Comprehensive analysis of Shang worldview, religion, and social structure as revealed
+                    through oracle bone inscriptions. Examines ancestor worship, concepts of time, and the
+                    role of divination in creating cosmic order.
+                </li>
+                <li class="source-item">
+                    <strong>Shaughnessy, Edward L. (ed.). <em>New Sources of Early Chinese History: An
+                    Introduction to the Reading of Inscriptions and Manuscripts</em> (1997)</strong><br>
+                    Scholarly volume including chapters on oracle bone inscriptions, bronze inscriptions,
+                    and early manuscripts. Provides methodology for reading and interpreting early Chinese
+                    texts.
+                </li>
+                <li class="source-item">
+                    <strong>Flad, Rowan K. "Divination and Power: A Multiregional View of the Development
+                    of Oracle Bone Divination in Early China" <em>Current Anthropology</em> Vol. 49, No. 3
+                    (2008)</strong><br>
+                    Archaeological and anthropological analysis of oracle bone divination's development,
+                    distribution, and relationship to political authority in ancient China.
+                </li>
+                <li class="source-item">
+                    <strong>Chang, Kwang-chih. <em>Shang Civilization</em> (1980)</strong><br>
+                    Comprehensive study of Shang Dynasty archaeology and culture, with extensive discussion
+                    of oracle bones as both divination tools and historical records. Integrates material
+                    culture with inscriptional evidence.
+                </li>
+            </ul>
+
+            <h3>Linguistic and Paleographic Studies</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Boltz, William G. <em>The Origin and Early Development of the Chinese Writing
+                    System</em> (1994)</strong><br>
+                    Linguistic analysis of early Chinese script, including extensive examination of oracle
+                    bone characters, their structure, and evolution into later forms of Chinese writing.
+                </li>
+                <li class="source-item">
+                    <strong>Qiu Xigui. <em>Chinese Writing</em> (translated by Gilbert L. Mattos and Jerry
+                    Norman, 2000)</strong><br>
+                    Authoritative work by leading Chinese paleographer on the history and development of
+                    Chinese writing, beginning with oracle bone script. Detailed character analysis and
+                    historical context.
+                </li>
+            </ul>
+
+            <h3>Religious and Philosophical Context</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Eno, Robert. "The Background of the Shang and Early Zhou Ritual Revolution"
+                    in <em>The Magnitude of Ming: Command, Allotment, and Fate in Chinese Culture</em>
+                    (1990)</strong><br>
+                    Analysis of Shang religious thought and divinatory practices in context of early Chinese
+                    concepts of destiny, divine command, and cosmic order.
+                </li>
+                <li class="source-item">
+                    <strong>Allan, Sarah. <em>The Shape of the Turtle: Myth, Art, and Cosmos in Early China</em>
+                    (1991)</strong><br>
+                    Explores the symbolic significance of turtles in Chinese cosmology and why turtle shells
+                    were considered ideal for divination. Connects oracle bone practice to broader mythological
+                    and cosmological frameworks.
+                </li>
+                <li class="source-item">
+                    <strong>Pankenier, David W. <em>Astrology and Cosmology in Early China: Conforming Earth
+                    to Heaven</em> (2013)</strong><br>
+                    Examines astronomical and cosmological references in oracle bone inscriptions, showing how
+                    divination connected earthly events with celestial patterns.
+                </li>
+            </ul>
+
+            <h3>Accessible Introductions</h3>
+            <ul class="source-list">
+                <li class="source-item">
+                    <strong>Childs-Johnson, Elizabeth. "The Ghost Head Mask and Metamorphic Shang Imagery"
+                    <em>Early China</em> Vol. 23-24 (1998-1999)</strong><br>
+                    Accessible scholarly article examining Shang religious imagery including representations
+                    found on oracle bones, explaining symbolic systems to non-specialists.
+                </li>
+                <li class="source-item">
+                    <strong>Smith, Adam Daniel. "Divination and Chinese Statecraft: The Department of
+                    Astrological and Meteorological Observation in Western Han China" in <em>Time and
+                    Eternity</em> (2011)</strong><br>
+                    Traces the evolution of state divination from Shang oracle bones through later imperial
+                    bureaucratic forms, showing historical continuity and transformation.
+                </li>
+            </ul>
+        </section>
+
+        <!-- CROSS-REFERENCES -->
+        <section class="section">
+            <h2>Cross-References & Related Practices</h2>
+
+            <h3>Related Chinese Divination Systems</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="i-ching.html" class="cross-ref">I Ching - Successor System</a>
+                <a href="geomancy.html" class="cross-ref">Feng Shui - Geomantic Divination</a>
+                <a href="astrology.html" class="cross-ref">Chinese Astrology</a>
+            </div>
+
+            <h3>Comparative Divination Methods</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="runes.html" class="cross-ref">Runes - Inscribed Divination</a>
+                <a href="tarot.html" class="cross-ref">Tarot - Symbolic Reading</a>
+                <a href="../ritual/shamanism.html" class="cross-ref">Shamanic Divination</a>
+            </div>
+
+            <h3>Chinese Religious Traditions</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../energy/qigong.html" class="cross-ref">Qigong - Energy Practice</a>
+                <a href="../ritual/alchemy.html" class="cross-ref">Chinese Alchemy</a>
+                <a href="../../index.html" class="cross-ref">Ancestor Veneration</a>
+                <a href="../../index.html" class="cross-ref">Shangdi - Supreme Deity</a>
+            </div>
+
+            <h3>Writing and Language</h3>
+            <div style="margin: var(--space-4) 0;">
+                <a href="../../index.html" class="cross-ref">Chinese Classical Texts</a>
+                <a href="../../mythos/chinese/cosmology/creation.html" class="cross-ref">Chinese Creation Myths</a>
+            </div>
+
+            <h3>Archaeological Connections</h3>
+            <p>
+                Oracle bones provide evidence for:
+            </p>
+            <ul>
+                <li><strong>Shang Dynasty Kings:</strong> Verifying historical records with contemporary inscriptions</li>
+                <li><strong>Bronze Age Technology:</strong> References to bronze casting and metallurgy</li>
+                <li><strong>Agricultural Practices:</strong> Crop types, planting schedules, weather patterns</li>
+                <li><strong>Warfare:</strong> Military campaigns, enemy tribes, battle strategies</li>
+                <li><strong>Astronomy:</strong> Eclipse records, planetary observations, calendar systems</li>
+                <li><strong>Social Structure:</strong> Evidence of hierarchy, gender roles, occupational specialization</li>
+            </ul>
+        </section>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel">
+            <h3>Explore Related Content</h3>
+
+            <h4 style="color: var(--color-secondary); margin: var(--space-4) 0;">Archetype Connections</h4>
+            <div class="interlink-grid">
+                <a href="../../archetypes/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128218;</div>
+                    <div class="card-content">
+                        <h4>The Sage / Diviner</h4>
+                        <span>Ancient royal advisors</span>
+                    </div>
+                </a>
+                <a href="../../archetypes/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128081;</div>
+                    <div class="card-content">
+                        <h4>The Ruler</h4>
+                        <span>Shang kings and divine mandate</span>
+                    </div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--space-6) 0 var(--space-4) 0;">Cross-Cultural Parallels</h4>
+            <div class="interlink-grid">
+                <a href="../../mythos/chinese/index.html" class="parallel-card">
+                    <div class="card-icon">&#128009;</div>
+                    <div class="card-content">
+                        <h4>Chinese Mythology</h4>
+                        <span>Shang cosmology and ancestors</span>
+                    </div>
+                </a>
+                <a href="i-ching.html" class="parallel-card">
+                    <div class="card-icon">&#9776;</div>
+                    <div class="card-content">
+                        <h4>I Ching</h4>
+                        <span>Successor divination system</span>
+                    </div>
+                </a>
+                <a href="runes.html" class="parallel-card">
+                    <div class="card-icon">&#5765;</div>
+                    <div class="card-content">
+                        <h4>Runic Inscriptions</h4>
+                        <span>Western inscribed divination</span>
+                    </div>
+                </a>
+                <a href="../../mythos/greek/index.html" class="parallel-card">
+                    <div class="card-icon">&#127981;</div>
+                    <div class="card-content">
+                        <h4>Greek Oracles</h4>
+                        <span>Delphi and divine prophecy</span>
+                    </div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--space-6) 0 var(--space-4) 0;">See Also</h4>
+            <div class="interlink-grid">
+                <a href="../ritual/shamanism.html" class="parallel-card">
+                    <div class="card-icon">&#127795;</div>
+                    <div class="card-content">
+                        <h4>Shamanic Divination</h4>
+                        <span>Spirit communication methods</span>
+                    </div>
+                </a>
+                <a href="../practical/spirit-work.html" class="parallel-card">
+                    <div class="card-icon">&#128123;</div>
+                    <div class="card-content">
+                        <h4>Ancestor Veneration</h4>
+                        <span>Spirit communication</span>
+                    </div>
+                </a>
+                <a href="geomancy.html" class="parallel-card">
+                    <div class="card-icon">&#127760;</div>
+                    <div class="card-content">
+                        <h4>Chinese Geomancy</h4>
+                        <span>Feng Shui traditions</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- NAVIGATION -->
+        <div class="nav-section">
+            <h3 style="color: var(--color-primary); margin-bottom: var(--space-5);">Continue Exploring</h3>
+            <a href="../index.html" class="nav-button">Magical Systems Index</a>
+            <a href="i-ching.html" class="nav-button">I Ching</a>
+            <a href="geomancy.html" class="nav-button">Geomancy</a>
+            <a href="../../index.html" class="nav-button">Home</a>
+        </div>
+    </div>
+
+    <!-- Theme Picker UI -->
+</body>
+</html>

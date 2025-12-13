@@ -1,0 +1,611 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Prophet</title>
+<link href="../../../styles.css" rel="stylesheet"/>
+<link href="../../../themes/theme-base.css" rel="stylesheet"/>
+
+<link href="../../../themes/corpus-links.css" rel="stylesheet"/>
+<link rel="stylesheet" href="../../../themes/smart-links.css">
+<script defer src="../../../themes/smart-links.js"></script>
+    <script defer src="../../../themes/theme-animations.js"></script>
+<script defer="None" src="../../../themes/theme-picker.js"></script>
+<style>
+        :root {
+            --mythos-primary: #008000;
+            --mythos-secondary: #00CED1;
+        }
+        .deity-header {
+            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
+            color: var(--color-text-primary);
+            padding: var(--space-12) var(--space-8);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-8);
+            text-align: center;
+        }
+        .deity-icon { font-size: var(--text-5xl); margin-bottom: var(--space-4); }
+        .attribute-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-6) 0;
+        }
+        .attribute-card {
+            background: var(--color-surface); backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            padding: var(--space-4);
+            border-radius: var(--radius-xl);
+        }
+        .attribute-label {
+            color: var(--color-primary);
+            font-weight: var(--font-bold);
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .attribute-value { font-size: var(--text-lg); }
+        .codex-search-section {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: var(--radius-lg);
+            background: #f9f9f9;
+        }
+        .codex-search-header {
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            border-radius: var(--radius-lg) 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+        .codex-search-header:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
+        }
+        .codex-search-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .expand-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+        .expanded .expand-icon { transform: rotate(180deg); }
+        .codex-search-content {
+            display: none;
+            padding: 15px;
+            background: white;
+            border-radius: 0 0 8px 8px;
+        }
+        .codex-search-content.show { display: block; }
+        .search-result-item {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 3px solid #667eea;
+            background: #f5f7ff;
+        }
+        .citation {
+            font-weight: 600;
+            color: #667eea;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        .citation:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        .verse-text {
+            display: none;
+            margin-top: 8px;
+            padding: 10px;
+            background: white;
+            border-left: 2px solid #764ba2;
+            font-style: italic;
+            color: #333;
+        }
+        .verse-text.show { display: block; }
+        .book-reference {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 5px;
+        }
+        .inline-search-link {
+            color: #667eea;
+            text-decoration: none;
+            border-bottom: 1px dashed #667eea;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .inline-search-link:hover {
+            color: #764ba2;
+            border-bottom-color: #764ba2;
+        }
+        .related-card {
+            background: var(--color-surface); backdrop-filter: blur(10px);
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+        }
+    </style>
+</head>
+<body>
+<div id="theme-picker-container"></div>
+<header>
+    <div class="header-content">
+        <h1>🕌 <a data-term="Prophet Musa" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet musa in ancient texts">Prophet Musa</a> (<a class="corpus-link" data-term="Moses" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Moses'">Moses</a>)</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../../mythos/index.html">Home</a> →
+                <a href="../index.html">Islamic</a> →
+                <a href="index.html">Heroes &amp; Prophets</a> →
+                <span><a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a></span>
+</nav>
+<main>
+<section class="deity-header">
+<div class="deity-icon">🕌</div>
+<h2><a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> ibn Imran (<a data-term="Moses" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View moses in ancient texts">Moses</a>)</h2>
+<p class="subtitle" style="font-size: var(--text-2xl); margin: 0.5rem 0;">موسى - Kalimullah (One Who Spoke to <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a>)</p>
+<p style="font-size: var(--text-lg); margin-top: var(--space-4);">
+                The <a class="corpus-link" data-term="Liberator" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=savior" title="Search corpus for 'Liberator'">liberator</a> of the Israelites and recipient of the <a class="inline-search-link" data-search-term="Torah" href="#" onclick="performCodexSearch(event, 'Torah')">Torah</a>,
+                <a data-term="Musa" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View musa in ancient texts">Musa</a> is honored as <a class="inline-search-link" data-search-term="Kalimullah" href="#" onclick="performCodexSearch(event, 'Kalimullah')">Kalimullah</a>
+                (the one who spoke directly to Allah). His story is the most frequently mentioned <a data-term="Prophet" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet in ancient texts">prophet</a> narrative in the <a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a>,
+                appearing in over 30 chapters with lessons of <a class="corpus-link" data-term="Faith" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=faith" title="Search corpus for 'Faith'">faith</a>, perseverance, and divine justice.
+        </p></section>
+<section>
+<h2 style="color: var(--color-primary);"><a data-term="Core Attributes" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View core attributes in ancient texts">Core Attributes</a></h2>
+<div class="attribute-grid">
+<div class="attribute-card">
+<div class="attribute-label">Title</div>
+<div class="attribute-value">Kalimullah (One Who Spoke to <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a>)</div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label"><a class="corpus-link" data-term="Father" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=god_father" title="Search corpus for 'Father'">Father</a></div>
+<div class="attribute-value">Imran (Amram)</div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label">Brother</div>
+<div class="attribute-value">Harun (Aaron)</div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label">Known For</div>
+<div class="attribute-value">Parting the Red Sea, Receiving the <a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a></div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label">Adversary</div>
+<div class="attribute-value">Fir'awn (Pharaoh)</div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label">Scripture Received</div>
+<div class="attribute-value">Al-Tawrat (<a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a>)</div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label">Miracles</div>
+<div class="attribute-value">Staff, Shining Hand, Ten Plagues</div>
+</div>
+<div class="attribute-card">
+<div class="attribute-label">Mentioned in <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a></div>
+<div class="attribute-value">136 times (most mentioned <a data-term="Prophet" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet in ancient texts">prophet</a>)</div>
+</div></div></section>
+<section style="margin-top: var(--space-8);">
+<h2 style="color: var(--color-primary);">Birth and Early Life</h2>
+<h3 style="color: var(--color-secondary);">The Tyrant's Decree</h3>
+<p>
+<a data-term="Musa" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View musa in ancient texts">Musa</a> was born during a time of oppression when <a class="inline-search-link" data-search-term="Pharaoh" href="#" onclick="performCodexSearch(event, 'Pharaoh')">Fir'awn</a>
+                (Pharaoh) ruled Egypt with tyranny. A prophecy warned that a child from the Israelites would overthrow him, so Pharaoh decreed
+                that all newborn Israelite boys be killed. <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a> inspired <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>'s mother to place her infant son in a basket and set him adrift
+                on the Nile River, with the promise that he would be returned to her.
+            </p>
+<h3 style="color: var(--color-secondary); margin-top: var(--space-6);">Raised in the Palace</h3>
+<p>
+                The basket was found by Pharaoh's wife <a class="inline-search-link" data-search-term="Asiya" href="#" onclick="performCodexSearch(event, 'Asiya')">Asiya</a>,
+                one of the four perfect women in <a data-term="Islamic Tradition" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View islamic tradition in ancient texts">Islamic tradition</a>. She convinced Pharaoh to adopt the child, saying "A comfort of the eye for me and for you.
+                Do not kill him; perhaps he may benefit us, or we may adopt him as a son" (<a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a> 28:9). Miraculously, baby <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> refused all wet nurses
+                until his own mother was brought to nurse him, reuniting mother and child while fulfilling Allah's promise.
+        </p></section>
+<div class="codex-search-section">
+<div class="codex-search-header" onclick="toggleCodexSearch(this)">
+<h3>📚 <a data-term="Primary" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View primary in ancient texts">Primary</a> Sources: <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>'s Miraculous Birth and Rescue</h3>
+<span class="expand-icon">▼</span>
+</div>
+<div class="codex-search-content">
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 28:7-13
+                    </div>
+<div class="verse-text">
+                        "And We inspired to the mother of <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>, 'Suckle him; but when you fear for him, cast him into the river and do not fear and do not grieve.
+                        Indeed, We will return him to you and will make him [one] of the messengers.' And the family of Pharaoh picked him up [out of the river]
+                        so that he would become to them an enemy and a [source of] grief. Indeed, Pharaoh and Haman and their soldiers were deliberate sinners.
+                        And the wife of Pharaoh said, '[He will be] a comfort of the eye for me and for you. Do not kill him; perhaps he may benefit us,
+                        or we may adopt him as a son.' And they perceived not. And the heart of <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>'s mother became empty [of all else]. She was about to disclose
+                        [the matter concerning] him had We not bound fast her heart that she would be of the believers. And she said to his sister,
+                        'Follow him'; so she watched him from a distance while they perceived not. And We had prevented from him [all] wet nurses before,
+                        so she said, 'Shall I direct you to a household that will be responsible for him for you while they are to him [for his upbringing] sincere?'
+                        So We restored him to his mother that she might be content and not grieve and that she would know that the promise of <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a> is true.
+                        But most of the people do not know."
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Al-Qasas (The Stories), verses 7-13
+                    </div>
+</div>
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 20:38-40
+                    </div>
+<div class="verse-text">
+                        "When We inspired to your mother what is revealed, [saying], 'Cast him into the chest and cast it into the river, and the river will throw it
+                        onto the bank; there will take him an enemy to Me and an enemy to him.' And I bestowed upon you love from Me that you would be brought up
+                        under My eye. [And We favored you] when your sister went and said, 'Shall I direct you to someone who will be responsible for him?'
+                        So We restored you to your mother that she might be content and not grieve."
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Ta-Ha, verses 38-40
+                    </div>
+</div>
+</div>
+</div>
+<section style="margin-top: var(--space-8);">
+<h2 style="color: var(--color-primary);">The Accidental Killing and Flight</h2>
+<p>
+                As a young man in Pharaoh's palace, <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> witnessed an Egyptian oppressing an Israelite. When <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> intervened, he struck the Egyptian,
+                accidentally killing him. Filled with remorse, <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> prayed: "My Lord, indeed I have wronged myself, so forgive me" (<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 28:16).
+                Allah forgave him, but when the incident became known, <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> fled Egypt to the land of <a class="inline-search-link" data-search-term="Madyan" href="#" onclick="performCodexSearch(event, 'Madyan')">Madyan</a>.
+            </p>
+<h3 style="color: var(--color-secondary); margin-top: var(--space-6);">Meeting <a data-term="Prophet" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet in ancient texts">Prophet</a> Shu'ayb</h3>
+<p>
+                In Madyan, <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> helped two women water their flocks, displaying the noble character that would mark his prophethood. The women's <a class="corpus-link" data-term="Father" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=god_father" title="Search corpus for 'Father'">father</a>,
+                the <a data-term="Prophet" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet in ancient texts">prophet</a> Shu'ayb (Jethro), offered <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> marriage to one of his daughters in exchange
+                for eight years of service. <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> accepted, spent the years in humble work, and matured into the man who would confront Pharaoh.
+        </p></section>
+<div class="codex-search-section">
+<div class="codex-search-header" onclick="toggleCodexSearch(this)">
+<h3>📚 <a data-term="Primary" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View primary in ancient texts">Primary</a> Sources: The Divine Call at <a class="corpus-link" data-term="Mount Sinai" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Mount Sinai'">Mount Sinai</a></h3>
+<span class="expand-icon">▼</span>
+</div>
+<div class="codex-search-content">
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 20:9-24
+                    </div>
+<div class="verse-text">
+                        "And has the story of <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> reached you? When he saw a fire and said to his family, 'Stay here; indeed, I have perceived a fire;
+                        perhaps I can bring you a torch or find at the fire some guidance.' And when he came to it, he was called, 'O <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>, indeed, I am your Lord,
+                        so remove your sandals. Indeed, you are in the sacred valley of Tuwa. And I have chosen you, so listen to what is revealed [to you].
+                        Indeed, I am <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a>. There is no deity except Me, so worship Me and establish <a class="corpus-link" data-term="Prayer" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Prayer'">prayer</a> for My remembrance... Go to Pharaoh. Indeed, he has transgressed.'
+                        [<a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>] said, 'My Lord, expand for me my breast [with assurance] and ease for me my task and untie the knot from my tongue that they may understand
+                        my speech. And appoint for me a minister from my family - Harun, my brother. Increase through him my strength and let him share my task
+                        that we may exalt You much and remember You much. Indeed, You are of us ever Seeing.' [Allah] said, 'You have been granted your request, O <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>.'"
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Ta-Ha, verses 9-36 (condensed)
+                    </div>
+</div>
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 27:7-12
+                    </div>
+<div class="verse-text">
+                        "[Mention] when <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> said to his family, 'Indeed, I have perceived a fire. I will bring you from there information or will bring you
+                        a burning torch that you may warm yourselves.' But when he came to it, he was called, 'Blessed is whoever is at the fire and whoever is around it.
+                        And exalted is Allah, Lord of the worlds. O <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>, indeed it is I - Allah, the Exalted in Might, the Wise...' [Allah said], 'And throw down your staff.'
+                        But when he saw it writhing as if it was a snake, he turned in flight and did not return. [Allah said], 'O <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>, do not fear. Indeed, in My presence
+                        the messengers do not fear... And put your hand into the opening of your garment [at the breast]; it will come out white without disease.
+                        [These are] among the nine <a data-term="Signs" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View signs in ancient texts">signs</a> [you will take] to Pharaoh and his people. Indeed, they have been a people defiantly disobedient.'"
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah An-Naml (The Ant), verses 7-12
+                    </div>
+</div>
+</div>
+</div>
+<section style="margin-top: var(--space-8);">
+<h2 style="color: var(--color-primary);">Confrontation with Pharaoh</h2>
+<h3 style="color: var(--color-secondary);">The Two <a data-term="Signs" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View signs in ancient texts">Signs</a></h3>
+<p>
+                Allah equipped <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> with two miraculous signs: his staff that turned into a serpent, and his hand that shone with divine <a class="corpus-link" data-term="Light" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=light_of_the_world" title="Search corpus for 'Light'">light</a> when placed
+                in his garment. These signs demonstrated Allah's power over <a data-term="Creation" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View creation in ancient texts">creation</a> - the staff showing dominion over life, the shining hand representing
+                divine knowledge and authority.
+            </p>
+<h3 style="color: var(--color-secondary); margin-top: var(--space-6);">The Contest with the Magicians</h3>
+<p>
+                Pharaoh gathered his best magicians to challenge <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>. They threw down their ropes
+                and staffs, creating illusions of serpents. When <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> threw down his staff, it became a real serpent that swallowed all their illusions.
+                The magicians, recognizing true <a data-term="Divine" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View divine in ancient texts">divine</a> power, immediately prostrated in <a class="corpus-link" data-term="Belief" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=faith" title="Search corpus for 'Belief'">belief</a>, declaring: "We believe in the Lord of Harun and <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>" (<a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a> 20:70).
+                Despite Pharaoh's threats of <a class="corpus-link" data-term="Crucifixion" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=cross" title="Search corpus for 'Crucifixion'">crucifixion</a>, they remained steadfast, choosing eternal truth over temporal power.
+        </p></section>
+<div class="codex-search-section">
+<div class="codex-search-header" onclick="toggleCodexSearch(this)">
+<h3>📚 <a data-term="Primary" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View primary in ancient texts">Primary</a> Sources: The Plagues and Exodus</h3>
+<span class="expand-icon">▼</span>
+</div>
+<div class="codex-search-content">
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 7:133-136
+                    </div>
+<div class="verse-text">
+                        "So We sent upon them the flood and locusts and lice and frogs and blood as distinct <a data-term="Signs" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View signs in ancient texts">signs</a>, but they were arrogant and were a criminal people.
+                        And when the punishment descended upon them, they said, 'O <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>, invoke for us your Lord by what He has promised you. If you [can] remove
+                        the punishment from us, we will surely believe you, and we will send with you the Children of <a class="corpus-link" data-term="Israel" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=jacob" title="Search corpus for 'Israel'">Israel</a>.' But when We removed the punishment from them
+                        until a term which they were to reach, then at once they broke their word. So We took retribution from them, and We drowned them in the sea
+                        because they denied Our signs and were heedless of them."
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Al-A'raf (The Heights), verses 133-136
+                    </div>
+</div>
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 26:60-68
+                    </div>
+<div class="verse-text">
+                        "So they pursued them at sunrise. And when the two companies saw one another, the companions of <a data-term="Musa" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View musa in ancient texts">Musa</a> said, 'Indeed, we are to be overtaken!'
+                        [<a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>] said, 'No! Indeed, with me is my Lord; He will guide me.' Then We inspired to <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>, 'Strike with your staff the sea,' and it parted,
+                        and each portion was like a great towering mountain. And We advanced thereto the pursuers. And We saved <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> and those with him, all together.
+                        Then We drowned the others. Indeed in that is a sign, but most of them were not to be believers."
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Ash-Shu'ara (The Poets), verses 60-68
+                    </div>
+</div>
+</div>
+</div>
+<section style="margin-top: var(--space-8);">
+<h2 style="color: var(--color-primary);">Receiving the <a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a> at <a class="corpus-link" data-term="Mount Sinai" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Mount Sinai'">Mount Sinai</a></h2>
+<p>
+                After the exodus, <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a> appointed <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> for a meeting at <a class="inline-search-link" data-search-term="Mount Sinai" href="#" onclick="performCodexSearch(event, 'Mount Sinai')">Mount Tur</a>
+                (Sinai). <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> asked to see Allah directly, and was told: "You will not see Me, but look at the mountain; if it should remain in place, then you will see Me"
+                (<a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a> 7:143). When Allah manifested His glory to the mountain, it crumbled to dust, and <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> fell unconscious, realizing the impossibility of perceiving
+                the <a data-term="Divine" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View divine in ancient texts">Divine</a> Essence in this world.
+            </p>
+<h3 style="color: var(--color-secondary); margin-top: var(--space-6);">The Golden Calf Incident</h3>
+<p>
+                During <a data-term="Musa" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View musa in ancient texts">Musa</a>'s absence on the mountain, a man named <a class="inline-search-link" data-search-term="Samiri" href="#" onclick="performCodexSearch(event, 'Samiri')">Samiri</a>
+                fashioned a golden calf from the people's jewelry. The calf made a lowing sound, and some Israelites began worshipping it, breaking their <a class="corpus-link" data-term="Covenant" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=covenant" title="Search corpus for 'Covenant'">covenant</a> with <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a>.
+                When <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> returned with the <a class="inline-search-link" data-search-term="Torah" href="#" onclick="performCodexSearch(event, 'Torah')">Tawrat</a> (<a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a>),
+                he was enraged. His brother <a class="inline-search-link" href="../../../index.html">Harun</a> had tried to stop them but was unsuccessful. <a data-term="Musa" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View musa in ancient texts">Musa</a> destroyed the idol
+                and led his people in repentance.
+        </p></section>
+<div class="codex-search-section">
+<div class="codex-search-header" onclick="toggleCodexSearch(this)">
+<h3>📚 <a data-term="Primary" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View primary in ancient texts">Primary</a> Sources: The Revelation at <a class="corpus-link" data-term="Mount Sinai" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Mount Sinai'">Mount Sinai</a></h3>
+<span class="expand-icon">▼</span>
+</div>
+<div class="codex-search-content">
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 7:142-145
+                    </div>
+<div class="verse-text">
+                        "And We made an appointment with <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> for thirty nights and perfected them by [the addition of] ten; so the term of his Lord was completed as forty nights.
+                        And <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> said to his brother Harun, 'Take my place among my people, do right [by them], and do not follow the way of the corrupters.'
+                        And when <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> arrived at Our appointed time and his Lord spoke to him, he said, 'My Lord, show me [Yourself] that I may look at You.'
+                        [<a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a>] said, 'You will not see Me, but look at the mountain; if it should remain in place, then you will see Me.' But when his Lord appeared to the mountain,
+                        He rendered it level, and <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> fell unconscious. And when he awoke, he said, 'Exalted are You! I have repented to You, and I am the first of the believers.'
+                        [Allah] said, 'O <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>, I have chosen you over the people with My messages and My words [to you]. So take what I have given you and be among the grateful.'
+                        And We wrote for him on the tablets [something] of all things - instruction and explanation for all things, [saying], 'Take them with determination
+                        and order your people to take the best of it. I will show you the home of the defiantly disobedient.'"
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Al-A'raf (The Heights), verses 142-145
+                    </div>
+</div>
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 20:83-98
+                    </div>
+<div class="verse-text">
+                        "[<a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a> said], 'And what made you hasten from your people, O <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>?' He said, 'They are close upon my tracks, and I hastened to You, my Lord,
+                        that You be pleased.' [Allah] said, 'But indeed, We have tried your people after you [departed], and the Samiri has led them astray.'
+                        So <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> returned to his people, angry and grieved... [<a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>] said, 'O Samiri, what was your case?' He said, 'I saw what they did not see,
+                        so I took a handful [of dust] from the track of the <a class="corpus-link" data-term="Messenger" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=gabriel" title="Search corpus for 'Messenger'">messenger</a> and threw it, and thus did my soul entice me.' [<a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>] said, 'Then go.
+                        And indeed, it is [decreed] for you in [this] life to say, "No contact." And indeed, you have an appointment [in the Hereafter] you will not fail to keep.
+                        And look at your "god" to which you remained devoted. We will surely burn it and blow it into the sea with a blast.'"
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Ta-Ha, verses 83-98 (condensed)
+                    </div>
+</div>
+</div>
+</div>
+<section style="margin-top: var(--space-8);">
+<h2 style="color: var(--color-primary);">The <a data-term="Journey" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View journey in ancient texts">Journey</a> with Al-Khidr</h2>
+<p>
+                In a profound lesson on divine wisdom, <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> encountered Al-Khidr,
+                a mysterious servant of Allah possessing special knowledge. <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> asked to accompany him to learn, but Al-Khidr warned that <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> would not have patience
+                with things he did not understand. During their <a data-term="Journey" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View journey in ancient texts">journey</a>, Al-Khidr performed three seemingly unjust acts: damaging a boat, killing a young boy,
+                and repairing a wall for ungrateful people.
+            </p>
+<p>
+                Each time, <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> objected, breaking his promise of patience. Finally, Al-Khidr explained: the boat belonged to poor people and he damaged it
+                to save it from a tyrannical <a class="corpus-link" data-term="King" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=king_of_kings" title="Search corpus for 'King'">king</a> seizing every boat; the boy would have grieved his righteous parents with disbelief and disobedience,
+                and Allah would replace him with a better child; the wall belonged to orphaned boys whose righteous <a class="corpus-link" data-term="Father" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=god_father" title="Search corpus for 'Father'">father</a> had buried treasure beneath it,
+                and Allah willed it preserved until they matured. This story teaches that <a data-term="Divine" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View divine in ancient texts">divine</a> wisdom operates beyond human comprehension.
+        </p></section>
+<div class="codex-search-section">
+<div class="codex-search-header" onclick="toggleCodexSearch(this)">
+<h3>📚 <a data-term="Primary" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View primary in ancient texts">Primary</a> Sources: The Journey with Al-Khidr</h3>
+<span class="expand-icon">▼</span>
+</div>
+<div class="codex-search-content">
+<div class="search-result-item">
+<div class="citation" onclick="toggleVerse(this)">
+<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 18:60-82
+                    </div>
+<div class="verse-text">
+                        "And [mention] when <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> said to his servant, 'I will not cease [traveling] until I reach the junction of the two seas or continue for a long period.'
+                        But when they reached the junction between them, they forgot their fish, and it took its course into the sea, slipping away... [They met Al-Khidr]
+                        [<a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>] said to him, 'May I follow you on [the condition] that you teach me from what you have been taught of sound judgement?'
+                        He said, 'Indeed, with me you will never be able to have patience. And how can you have patience for what you do not encompass in knowledge?'
+                        [<a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>] said, 'You will find me, if <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a> wills, patient, and I will not disobey you in [any] order.'... [After the three incidents and explanations]
+                        [Al-Khidr] said, 'This is parting between me and you. I will inform you of the interpretation of that about which you could not have patience.'"
+                    </div>
+<div class="book-reference">
+                        Source: The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a>, Surah Al-Kahf (The Cave), verses 60-82 (condensed)
+                    </div>
+</div>
+</div>
+</div>
+<section style="margin-top: var(--space-8);">
+<h2 style="color: var(--color-primary);">Legacy and <a data-term="Significance" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View significance in ancient texts">Significance</a></h2>
+<h3 style="color: var(--color-secondary);">Parallels with <a data-term="Muhammad" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View muhammad in ancient texts">Muhammad</a></h3>
+<p>
+<a data-term="Islamic" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View islamic in ancient texts">Islamic</a> scholars note many parallels between <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> and <a class="inline-search-link" href="../deities/muhammad.html">Prophet Muhammad</a>:
+                both were orphaned, raised in privilege, called to prophethood at Mount (Tur/Hira), persecuted by their people, made migration (hijrah),
+                achieved victory after years of struggle, and brought divine law. The <a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a> frequently addresses <a data-term="Prophet Muhammad" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet muhammad in ancient texts">Prophet Muhammad</a> through stories of <a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>,
+                providing comfort during persecution and guidance for leadership.
+            </p>
+<h3 style="color: var(--color-secondary); margin-top: var(--space-6);">The Tawrat (<a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a>)</h3>
+<p>
+<a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a> received the Tawrat, one of the four major scriptures in Islam
+                (along with Zabur/Psalms, Injil/Gospel, and <a class="corpus-link" data-term="Quran" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Quran'">Quran</a>). While the original <a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a> has been altered according to <a data-term="Islamic" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View islamic in ancient texts">Islamic</a> <a class="corpus-link" data-term="Belief" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=faith" title="Search corpus for 'Belief'">belief</a>,
+                Muslims respect it as divine revelation containing guidance and <a class="corpus-link" data-term="Light" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=light_of_the_world" title="Search corpus for 'Light'">light</a> for the Children of <a class="corpus-link" data-term="Israel" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=jacob" title="Search corpus for 'Israel'">Israel</a>.
+        </p></section>
+<section style="margin-top: var(--space-8);">
+<h2 style="color: var(--color-primary);"><a data-term="Connections To Islamic Cosmology" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View connections to islamic cosmology in ancient texts">Connections to Islamic Cosmology</a></h2>
+<p>
+<a class="corpus-link" data-term="Musa" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Musa'">Musa</a>'s story embodies key Islamic <a data-term="Concepts" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View concepts in ancient texts">concepts</a>. His direct communication with <a class="inline-search-link" href="../deities/allah.html">Allah</a>
+                demonstrates the prophetic relationship, while his struggle with Pharaoh illustrates the battle between <a class="inline-search-link" href="../cosmology/tawhid.html">Tawhid</a>
+                (<a class="corpus-link" data-term="Monotheism" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Monotheism'">monotheism</a>) and tyranny. The <a class="inline-search-link" href="../creatures/jinn.html">Jinn</a> worked under authority during <a class="corpus-link" data-term="Solomon" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Solomon'">Solomon</a>'s time,
+                and <a class="inline-search-link" href="../deities/jibreel.html">Jibreel</a> (<a class="corpus-link" data-term="Gabriel" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=gabriel" title="Search corpus for 'Gabriel'">Gabriel</a>) revealed the <a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a> to him on <a class="corpus-link" data-term="Mount Sinai" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Mount Sinai'">Mount Sinai</a>.
+                His <a data-term="Journey" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View journey in ancient texts">journey</a> demonstrates the reality of prophetic vision and his place in <a class="inline-search-link" href="../cosmology/afterlife.html">Jannah</a> (<a class="corpus-link" data-term="Paradise" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Paradise'">Paradise</a>).
+        </p></section>
+<section class="related-concepts" style="margin-top: var(--space-12);">
+<h2>🔗 <a data-term="Related Concepts" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View related concepts in ancient texts">Related Concepts</a></h2>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+<div class="related-card">
+<h3 style="color: var(--color-secondary);"><a data-term="Within Islamic Tradition" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View within islamic tradition in ancient texts">Within Islamic Tradition</a></h3>
+<ul style="line-height: var(--leading-loose);">
+<li><a href="../deities/allah.html">Allah</a> - The One who spoke to <a data-term="Musa" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View musa in ancient texts">Musa</a></li>
+<li><a href="../deities/muhammad.html">Muhammad</a> - Final <a data-term="Prophet" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet in ancient texts">prophet</a> with many parallels</li>
+<li><a href="../deities/jibreel.html">Jibreel</a> - Angel of revelation</li>
+<li><a href="ibrahim.html">Prophet Ibrahim</a> - <a class="corpus-link" data-term="Father" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=god_father" title="Search corpus for 'Father'">Father</a> of <a class="corpus-link" data-term="Monotheism" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Monotheism'">monotheism</a></li>
+<li><a href="../rituals/salat.html">Salat</a> - Five prayers reduced from fifty</li>
+<li><a href="../cosmology/tawhid.html">Tawhid</a> - <a class="corpus-link" data-term="Monotheism" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Monotheism'">Monotheism</a> <a data-term="Musa" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View musa in ancient texts">Musa</a> preached</li>
+<li><a href="../cosmology/creation.html">Creation</a> - <a class="corpus-link" data-term="Mount Sinai" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Mount Sinai'">Mount Sinai</a> revelation</li>
+<li><a href="../cosmology/afterlife.html">Afterlife</a> - <a data-term="Musa" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View musa in ancient texts">Musa</a>'s reward in <a class="corpus-link" data-term="Paradise" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Paradise'">Paradise</a></li>
+</ul>
+</div>
+<div class="related-card">
+<h3 style="color: var(--color-secondary);"><a class="corpus-link" data-term="Cross" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=cross" title="Search corpus for 'Cross'">Cross</a>-Cultural References</h3>
+<ul style="line-height: var(--leading-loose);">
+<li><a href="../deities/allah.html">Allah</a> - The One God</li>
+<li><a href="../index.html">Islamic Tradition</a> - Overview</li>
+<li><a href="../creatures/jinn.html">Jinn</a> - Supernatural <a data-term="Beings" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View beings in ancient texts">beings</a></li>
+<li><a href="../cosmology/tawhid.html">Tawhid</a> - Pure <a class="corpus-link" data-term="Monotheism" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Monotheism'">monotheism</a></li>
+</ul></div></div></section>
+<section style="margin-top: var(--space-8); background: var(--color-surface); backdrop-filter: blur(10px); padding: var(--space-6); border-radius: var(--radius-xl);">
+<h3 style="color: var(--color-primary);">Sources</h3>
+<ul style="margin: 0.5rem 0 0 2rem; line-height: var(--leading-relaxed);">
+<li>The Holy <a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> - Surah Al-Baqarah (2), Al-A'raf (7), Ta-Ha (20), Al-Qasas (28), and many others</li>
+<li>Sahih Al-Bukhari - Book of <a data-term="Prophets" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophets in ancient texts">Prophets</a> (Kitab al-Anbiya)</li>
+<li>Sahih Muslim - <a class="corpus-link" data-term="Hadith" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Hadith'">Hadith</a> about <a data-term="Musa" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View musa in ancient texts">Musa</a> and Al-Khidr</li>
+<li>Tafsir Ibn Kathir - Comprehensive commentary on <a data-term="Musa" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View musa in ancient texts">Musa</a>'s story</li>
+<li>Stories of the <a data-term="Prophets" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophets in ancient texts">Prophets</a> by Ibn Kathir</li>
+<li>The Life of the Prophet by Ibn Hisham (comparisons with <a data-term="Muhammad" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View muhammad in ancient texts">Muhammad</a>)</li>
+</ul></section>
+
+<!-- Interlink Panel Section -->
+<section class="interlink-panel" style="margin-top: 3rem;">
+    <h3 class="interlink-header">
+        <span class="interlink-icon">🔗</span>
+        Related Across the Mythos
+    </h3>
+
+    <div class="interlink-grid">
+        <div class="interlink-section">
+            <div class="interlink-section-title">Core Archetype</div>
+            <a href="../../../archetypes/celestial/index.html" class="archetype-link-card">
+                <div class="archetype-badge">🕌 KALIMULLAH</div>
+                <p class="archetype-context">Musa (peace be upon him) is Kalimullah - the one to whom Allah spoke directly. The most frequently mentioned prophet in the Quran, his story teaches patience and divine justice.</p>
+                <span class="see-parallels">See parallels: Divine Communication →</span>
+            </a>
+        </div>
+
+        <div class="interlink-section">
+            <div class="interlink-section-title">Revelation</div>
+            <a href="../cosmology/tawhid.html" class="item-link-card">
+                <div class="item-icon">📜</div>
+                <div class="item-info">
+                    <h4>The Tawrat</h4>
+                    <p class="item-type">Divine Scripture</p>
+                    <p class="item-context">Revelation at Mount Sinai</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="interlink-section">
+            <div class="interlink-section-title">Related Prophets</div>
+            <a href="ibrahim.html" class="place-link-card">
+                <div class="place-visual">
+                    <span class="place-icon">🕌</span>
+                    <span class="place-type">Prophet</span>
+                </div>
+                <div class="place-info">
+                    <h4>Ibrahim (AS)</h4>
+                    <p>Father of monotheism</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="parallel-traditions glass-card" style="margin-top: var(--spacing-lg);">
+        <h4>🌍 Abrahamic Parallels</h4>
+        <div class="parallel-grid">
+            <a href="../../jewish/heroes/moses.html" class="parallel-card">
+                <span class="tradition-flag">✡️</span>
+                <span class="parallel-name">Moshe Rabbeinu</span>
+                <span class="tradition-label">Jewish Tradition</span>
+            </a>
+            <a href="../../christian/heroes/moses.html" class="parallel-card">
+                <span class="tradition-flag">✝️</span>
+                <span class="parallel-name">Moses</span>
+                <span class="tradition-label">Christian Tradition</span>
+            </a>
+            <a href="../../egyptian/cosmology/index.html" class="parallel-card">
+                <span class="tradition-flag">𓂀</span>
+                <span class="parallel-name">Pharaonic Egypt</span>
+                <span class="tradition-label">Historical Context</span>
+            </a>
+            <a href="isa.html" class="parallel-card">
+                <span class="tradition-flag">☪️</span>
+                <span class="parallel-name">Isa (AS)</span>
+                <span class="tradition-label">Fellow Prophet</span>
+            </a>
+        </div>
+    </div>
+</section>
+</main>
+<footer>
+<p>
+<strong><a data-term="Prophet Musa" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View prophet musa in ancient texts">Prophet Musa</a> (<a class="corpus-link" data-term="Moses" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Moses'">Moses</a>)</strong> - Islamic <a data-term="Theology" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View theology in ancient texts">Theology</a><br/>
+<a href="../../../mythos/index.html">World Mythos Home</a> |
+            <a href="../index.html">Islamic Tradition</a> |
+            <a href="index.html">Browse All Heroes &amp; Prophets</a>
+</p>
+</footer>
+<script>
+        function toggleCodexSearch(header) {
+            const section = header.parentElement;
+            const content = section.querySelector('.codex-search-content');
+            section.classList.toggle('expanded');
+            content.classList.toggle('show');
+        }
+
+        function toggleVerse(citation) {
+            const verseText = citation.nextElementSibling;
+            verseText.classList.toggle('show');
+        }
+
+        function performCodexSearch(event, searchTerm) {
+            event.preventDefault();
+            console.log('Searching codex for:', searchTerm);
+        }
+    </script>
+</body>
+</html>

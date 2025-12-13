@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sacred Places - World Mythos Explorer</title>
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../themes/corpus-links.css">
+    <link rel="stylesheet" href="../styles.css">
+    <script defer src="../themes/theme-picker.js"></script>
+    <script defer src="../themes/theme-animations.js"></script>
+    <link rel="stylesheet" href="../themes/smart-links.css">
+    <script defer src="../themes/smart-links.js"></script>
+
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .category-section {
+            margin: var(--space-12) 0;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+            padding: var(--space-6);
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .category-icon {
+            font-size: var(--text-5xl);
+        }
+
+        .category-title {
+            font-size: var(--text-3xl);
+            color: var(--color-primary);
+        }
+
+        .places-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--space-6);
+        }
+
+        .place-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .place-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(var(--color-primary-rgb), 0.15), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .place-card:hover::before {
+            opacity: 1;
+        }
+
+        .place-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--color-primary);
+            box-shadow:
+                0 15px 40px rgba(var(--color-primary-rgb), 0.4),
+                0 0 30px rgba(var(--color-primary-rgb), 0.2),
+                inset 0 0 20px rgba(var(--color-primary-rgb), 0.05);
+            background: rgba(var(--color-primary-rgb), 0.15);
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.3); }
+            50% { box-shadow: 0 0 35px rgba(var(--color-primary-rgb), 0.5); }
+        }
+
+        .place-card:hover .place-icon {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .place-icon {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-4);
+            text-align: center;
+        }
+
+        .place-title {
+            font-size: var(--text-2xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-3);
+            text-align: center;
+        }
+
+        .place-location {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+            text-align: center;
+            margin-bottom: var(--space-4);
+            font-style: italic;
+        }
+
+        .place-description {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-5);
+            line-height: var(--leading-relaxed);
+            text-align: center;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: var(--space-4);
+        }
+
+        .tradition-tag {
+            padding: var(--space-1) var(--space-3);
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+        <div class="header-content">
+            <h1>Sacred Places & Spiritual Sites</h1>
+        </div>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Home</a> →
+        <span>Sacred Places</span>
+    </nav>
+
+    <main>
+        <div class="hero-section">
+            <h2>Journey to the World's Most Sacred Sites</h2>
+            <p style="font-size: 1.2rem; max-width: 800px; margin: 1rem auto;">
+                Explore temples, mountains, groves, and holy sites that have served as gateways between the human and divine realms
+                across cultures and millennia. From ancient stone circles to living pilgrimage destinations, discover the places
+                where heaven touches earth.
+            </p>
+        </div>
+
+        <!-- TEMPLES & SACRED STRUCTURES -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🏛️</span>
+                <h2 class="category-title">Temples & Sacred Structures</h2>
+            </div>
+            <div class="places-grid">
+                <div class="place-card" onclick="location.href='temples/solomons-temple.html'">
+                    <div class="place-icon">✡️</div>
+                    <h3 class="place-title">Solomon's Temple</h3>
+                    <p class="place-location">Jerusalem, Israel</p>
+                    <p class="place-description">
+                        The First Temple built by King Solomon, dwelling place of the Ark of the Covenant and the Holy of Holies
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Jewish</span>
+                        <span class="tradition-tag">Christian</span>
+                        <span class="tradition-tag">Islamic</span>
+                    </div>
+                </div>
+
+                <div class="place-card" onclick="location.href='temples/parthenon.html'">
+                    <div class="place-icon">🏛️</div>
+                    <h3 class="place-title">The Parthenon</h3>
+                    <p class="place-location">Athens, Greece</p>
+                    <p class="place-description">
+                        Temple of Athena Parthenos on the Acropolis, masterpiece of classical architecture and center of Athenian worship
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Greek</span>
+                    </div>
+                </div>
+
+                <div class="place-card" onclick="location.href='temples/angkor-wat.html'">
+                    <div class="place-icon">🕉️</div>
+                    <h3 class="place-title">Angkor Wat</h3>
+                    <p class="place-location">Cambodia</p>
+                    <p class="place-description">
+                        Largest religious monument in the world, Hindu-Buddhist temple complex representing Mount Meru
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                        <span class="tradition-tag">Buddhist</span>
+                    </div>
+                </div>
+
+                <div class="place-card" onclick="location.href='temples/karnak.html'">
+                    <div class="place-icon">𓂀</div>
+                    <h3 class="place-title">Karnak Temple</h3>
+                    <p class="place-location">Luxor, Egypt</p>
+                    <p class="place-description">
+                        Vast temple complex dedicated to Amun-Ra, one of Egypt's most important religious sites
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Egyptian</span>
+                    </div>
+                </div>
+
+                <div class="place-card" onclick="location.href='temples/borobudur.html'">
+                    <div class="place-icon">☸️</div>
+                    <h3 class="place-title">Borobudur</h3>
+                    <p class="place-location">Java, Indonesia</p>
+                    <p class="place-description">
+                        Massive Buddhist stupa and pilgrimage site representing the Buddhist cosmology and path to enlightenment
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Buddhist</span>
+                    </div>
+                </div>
+
+                <div class="place-card" onclick="location.href='temples/mahabodhi.html'">
+                    <div class="place-icon">🌳</div>
+                    <h3 class="place-title">Mahabodhi Temple</h3>
+                    <p class="place-location">Bodh Gaya, India</p>
+                    <p class="place-description">
+                        Site of Buddha's enlightenment under the Bodhi Tree, most sacred Buddhist pilgrimage destination
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Buddhist</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MOUNTAINS & NATURAL SITES -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">⛰️</span>
+                <h2 class="category-title">Sacred Mountains & Natural Sites</h2>
+            </div>
+            <div class="places-grid">
+                <div class="place-card" onclick="location.href='mountains/mount-sinai.html'">
+                    <div class="place-icon">⛰️</div>
+                    <h3 class="place-title">Mount Sinai</h3>
+                    <p class="place-location">Sinai Peninsula, Egypt</p>
+                    <p class="place-description">
+                        Mountain where Moses received the Ten Commandments, sacred to Judaism, Christianity, and Islam
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Jewish</span>
+                        <span class="tradition-tag">Christian</span>
+                        <span class="tradition-tag">Islamic</span>
+                    </div>
+                </div>
+
+                <div class="place-card" onclick="location.href='mountains/mount-olympus.html'">
+                    <div class="place-icon">⚡</div>
+                    <h3 class="place-title">Mount Olympus</h3>
+                    <p class="place-location">Greece</p>
+                    <p class="place-description">
+                        Home of the Greek gods, throne of Zeus, highest mountain in Greece
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Greek</span>
+                    </div>
+                </div>
+
+                <div class="place-card" onclick="location.href='mountains/mount-kailash.html'">
+                    <div class="place-icon">🏔️</div>
+                    <h3 class="place-title">Mount Kailash</h3>
+                    <p class="place-location">Tibet</p>
+                    <p class="place-description">
+                        Sacred to Hinduism, Buddhism, Jainism, and Bon - home of Shiva, center of the universe
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                        <span class="tradition-tag">Buddhist</span>
+                        <span class="tradition-tag">Tibetan</span>
+                    </div>
+                </div>
+
+                <div class="place-card" onclick="location.href='mountains/mount-fuji.html'">
+                    <div class="place-icon">🗻</div>
+                    <h3 class="place-title">Mount Fuji</h3>
+                    <p class="place-location">Japan</p>
+                    <p class="place-description">
+                        Sacred Shinto mountain, home to the goddess Konohanasakuya-hime, symbol of Japan
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Shinto</span>
+                        <span class="tradition-tag">Buddhist</span>
+                    </div>
+                </div>
+
+                <!-- BROKEN LINK: mountains/uluru.html does not exist -->
+                <!-- <div class="place-card" onclick="location.href='mountains/uluru.html'">
+                    <div class="place-icon">🪨</div>
+                    <h3 class="place-title">Uluru (Ayers Rock)</h3>
+                    <p class="place-location">Australia</p>
+                    <p class="place-description">
+                        Sacred to the Anangu people, Dreamtime creation site, living cultural landscape
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Aboriginal</span>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+
+        <!-- PILGRIMAGE SITES -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🚶</span>
+                <h2 class="category-title">Pilgrimage Destinations</h2>
+            </div>
+            <div class="places-grid">
+                <div class="place-card" onclick="location.href='pilgrimage/mecca.html'">
+                    <div class="place-icon">🕋</div>
+                    <h3 class="place-title">Mecca & the Kaaba</h3>
+                    <p class="place-location">Saudi Arabia</p>
+                    <p class="place-description">
+                        Holiest site in Islam, direction of prayer, destination of Hajj pilgrimage
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Islamic</span>
+                    </div>
+                </div>
+
+                <div class="place-card" onclick="location.href='pilgrimage/varanasi.html'">
+                    <div class="place-icon">🕉️</div>
+                    <h3 class="place-title">Varanasi (Kashi)</h3>
+                    <p class="place-location">India</p>
+                    <p class="place-description">
+                        City of Shiva, oldest living city, most sacred place for Hindu cremation and moksha
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                    </div>
+                </div>
+
+                <div class="place-card" onclick="location.href='pilgrimage/jerusalem.html'">
+                    <div class="place-icon">✨</div>
+                    <h3 class="place-title">Jerusalem</h3>
+                    <p class="place-location">Israel</p>
+                    <p class="place-description">
+                        Holy city for Judaism, Christianity, and Islam - Temple Mount, Western Wall, Church of Holy Sepulchre
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Jewish</span>
+                        <span class="tradition-tag">Christian</span>
+                        <span class="tradition-tag">Islamic</span>
+                    </div>
+                </div>
+
+                <!-- BROKEN LINK: pilgrimage/santiago.html does not exist -->
+                <!-- <div class="place-card" onclick="location.href='../index.html'">
+                    <div class="place-icon">✝️</div>
+                    <h3 class="place-title">Santiago de Compostela</h3>
+                    <p class="place-location">Spain</p>
+                    <p class="place-description">
+                        End of the Camino de Santiago pilgrimage, burial site of Saint James the Apostle
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Christian</span>
+                    </div>
+                </div> -->
+
+                <!-- BROKEN LINK: pilgrimage/ganges.html does not exist -->
+                <!-- <div class="place-card" onclick="location.href='../index.html'">
+                    <div class="place-icon">🌊</div>
+                    <h3 class="place-title">River Ganges</h3>
+                    <p class="place-location">India</p>
+                    <p class="place-description">
+                        Sacred river goddess, purification, liberation, spiritual cleansing
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+
+        <!-- SACRED GROVES & NATURAL SHRINES -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🌲</span>
+                <h2 class="category-title">Sacred Groves & Natural Shrines</h2>
+            </div>
+            <div class="places-grid">
+                <div class="place-card" onclick="location.href='groves/dodona.html'">
+                    <div class="place-icon">🌳</div>
+                    <h3 class="place-title">Dodona Oracle</h3>
+                    <p class="place-location">Greece</p>
+                    <p class="place-description">
+                        Ancient oracle of Zeus, sacred oak grove where priests interpreted rustling leaves
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Greek</span>
+                    </div>
+                </div>
+
+                <div class="place-card" onclick="location.href='groves/delphi.html'">
+                    <div class="place-icon">🔮</div>
+                    <h3 class="place-title">Delphi Oracle</h3>
+                    <p class="place-location">Greece</p>
+                    <p class="place-description">
+                        Oracle of Apollo, Pythia's prophetic seat, naval of the world (omphalos)
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Greek</span>
+                    </div>
+                </div>
+
+                <div class="place-card" onclick="location.href='groves/glastonbury.html'">
+                    <div class="place-icon">🍎</div>
+                    <h3 class="place-title">Glastonbury Tor</h3>
+                    <p class="place-location">England</p>
+                    <p class="place-description">
+                        Ancient Celtic sacred site, Isle of Avalon, Arthurian legend, ley line intersection
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Celtic</span>
+                        <span class="tradition-tag">Christian</span>
+                    </div>
+                </div>
+
+                <!-- BROKEN LINK: groves/ise-shrine.html does not exist -->
+                <!-- <div class="place-card" onclick="location.href='../index.html'">
+                    <div class="place-icon">⛩️</div>
+                    <h3 class="place-title">Ise Grand Shrine</h3>
+                    <p class="place-location">Japan</p>
+                    <p class="place-description">
+                        Most sacred Shinto shrine, dedicated to Amaterasu, rebuilt every 20 years
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Shinto</span>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+
+        <!-- STONE CIRCLES & MEGALITHS -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🗿</span>
+                <h2 class="category-title">Stone Circles & Megalithic Sites</h2>
+            </div>
+            <div class="places-grid">
+                <!-- BROKEN LINK: megaliths/stonehenge.html does not exist (megaliths directory doesn't exist) -->
+                <!-- <div class="place-card" onclick="location.href='../index.html'">
+                    <div class="place-icon">🗿</div>
+                    <h3 class="place-title">Stonehenge</h3>
+                    <p class="place-location">England</p>
+                    <p class="place-description">
+                        Neolithic stone circle aligned with solstices, ancient ceremonial and astronomical site
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Celtic</span>
+                        <span class="tradition-tag">Prehistoric</span>
+                    </div>
+                </div> -->
+
+                <!-- BROKEN LINK: megaliths/newgrange.html does not exist (megaliths directory doesn't exist) -->
+                <!-- <div class="place-card" onclick="location.href='../index.html'">
+                    <div class="place-icon">☀️</div>
+                    <h3 class="place-title">Newgrange</h3>
+                    <p class="place-location">Ireland</p>
+                    <p class="place-description">
+                        Neolithic passage tomb aligned with winter solstice sunrise, older than pyramids
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Celtic</span>
+                        <span class="tradition-tag">Prehistoric</span>
+                    </div>
+                </div> -->
+
+                <!-- BROKEN LINK: megaliths/carnac.html does not exist (megaliths directory doesn't exist) -->
+                <!-- <div class="place-card" onclick="location.href='../index.html'">
+                    <div class="place-icon">🪨</div>
+                    <h3 class="place-title">Carnac Stones</h3>
+                    <p class="place-location">France</p>
+                    <p class="place-description">
+                        Thousands of megalithic standing stones arranged in mysterious alignments
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Celtic</span>
+                        <span class="tradition-tag">Prehistoric</span>
+                    </div>
+                </div> -->
+
+                <!-- BROKEN LINK: megaliths/easter-island.html does not exist (megaliths directory doesn't exist) -->
+                <!-- <div class="place-card" onclick="location.href='../index.html'">
+                    <div class="place-icon">🗿</div>
+                    <h3 class="place-title">Easter Island (Rapa Nui)</h3>
+                    <p class="place-location">Chile</p>
+                    <p class="place-description">
+                        Moai statues representing ancestors, sacred ceremonial sites
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Polynesian</span>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+
+        <!-- Quick Links by Type -->
+        <section class="interlink-panel glass-card">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Quick Links by Type
+            </h3>
+            <div class="interlink-grid">
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Sacred Mountains</div>
+                    <div class="quick-links-grid">
+                        <a href="mountains/mount-olympus.html" class="quick-link">
+                            <span class="quick-link-icon">⚡</span> Mount Olympus
+                        </a>
+                        <a href="mountains/mount-kailash.html" class="quick-link">
+                            <span class="quick-link-icon">🏔️</span> Mount Kailash
+                        </a>
+                        <a href="mountains/mount-sinai.html" class="quick-link">
+                            <span class="quick-link-icon">⛰️</span> Mount Sinai
+                        </a>
+                        <a href="mountains/mount-fuji.html" class="quick-link">
+                            <span class="quick-link-icon">🗻</span> Mount Fuji
+                        </a>
+                    </div>
+                </div>
+
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Temples & Sanctuaries</div>
+                    <div class="quick-links-grid">
+                        <a href="temples/karnak.html" class="quick-link">
+                            <span class="quick-link-icon">𓂀</span> Karnak Temple
+                        </a>
+                        <a href="temples/parthenon.html" class="quick-link">
+                            <span class="quick-link-icon">🏛️</span> The Parthenon
+                        </a>
+                        <a href="temples/angkor-wat.html" class="quick-link">
+                            <span class="quick-link-icon">🕉️</span> Angkor Wat
+                        </a>
+                        <a href="temples/solomons-temple.html" class="quick-link">
+                            <span class="quick-link-icon">✡️</span> Solomon's Temple
+                        </a>
+                    </div>
+                </div>
+
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Sacred Groves & Oracles</div>
+                    <div class="quick-links-grid">
+                        <a href="groves/delphi.html" class="quick-link">
+                            <span class="quick-link-icon">🔮</span> Delphi Oracle
+                        </a>
+                        <a href="groves/dodona.html" class="quick-link">
+                            <span class="quick-link-icon">🌳</span> Dodona Oracle
+                        </a>
+                        <a href="groves/glastonbury.html" class="quick-link">
+                            <span class="quick-link-icon">🍎</span> Glastonbury Tor
+                        </a>
+                    </div>
+                </div>
+
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Pilgrimage Sites</div>
+                    <div class="quick-links-grid">
+                        <a href="pilgrimage/jerusalem.html" class="quick-link">
+                            <span class="quick-link-icon">✨</span> Jerusalem
+                        </a>
+                        <a href="pilgrimage/mecca.html" class="quick-link">
+                            <span class="quick-link-icon">🕋</span> Mecca
+                        </a>
+                        <a href="pilgrimage/varanasi.html" class="quick-link">
+                            <span class="quick-link-icon">🕉️</span> Varanasi
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Archetype Connections -->
+        <section class="interlink-panel glass-card">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🎭</span>
+                Sacred Place Archetypes
+            </h3>
+            <p style="color: var(--color-text-secondary); margin-bottom: var(--space-6);">
+                Explore the universal patterns that connect sacred places across cultures and traditions.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-6);">
+                <a href="../archetypes/place-archetypes/sacred-mountain/" class="archetype-link-card">
+                    <div class="archetype-badge">🏔️ SACRED MOUNTAIN</div>
+                    <p class="archetype-context">Mountains as axis mundi connecting heaven and earth, dwelling places of gods and sites of divine revelation.</p>
+                    <span class="see-parallels">Olympus, Kailash, Sinai, Fuji →</span>
+                </a>
+
+                <!-- BROKEN LINK: ../archetypes/temple-complex/ does not exist -->
+                <!-- <a href="../archetypes/index.html" class="archetype-link-card">
+                    <div class="archetype-badge">🏛️ TEMPLE COMPLEX</div>
+                    <p class="archetype-context">Sacred architecture as microcosm of the universe, houses of gods, and centers of religious power.</p>
+                    <span class="see-parallels">Karnak, Angkor Wat, Parthenon →</span>
+                </a> -->
+
+                <!-- BROKEN LINK: ../archetypes/oracle-site/ does not exist -->
+                <!-- <a href="../archetypes/index.html" class="archetype-link-card">
+                    <div class="archetype-badge">🔮 ORACLE SITE</div>
+                    <p class="archetype-context">Places where the veil between worlds is thin, enabling divine communication and prophecy.</p>
+                    <span class="see-parallels">Delphi, Dodona, Siwa →</span>
+                </a> -->
+
+                <!-- BROKEN LINK: ../archetypes/pilgrimage-center/ does not exist -->
+                <!-- <a href="../archetypes/index.html" class="archetype-link-card">
+                    <div class="archetype-badge">🚶 PILGRIMAGE CENTER</div>
+                    <p class="archetype-context">Destinations of sacred journeys where transformation and spiritual merit are attained.</p>
+                    <span class="see-parallels">Jerusalem, Mecca, Varanasi →</span>
+                </a> -->
+
+                <!-- BROKEN LINK: ../archetypes/sacred-grove/ does not exist -->
+                <!-- <a href="../archetypes/index.html" class="archetype-link-card">
+                    <div class="archetype-badge">🌳 SACRED GROVE</div>
+                    <p class="archetype-context">Natural sanctuaries where nature worship and divine presence intersect in untouched wilderness.</p>
+                    <span class="see-parallels">Dodona, Glastonbury, Ise →</span>
+                </a> -->
+
+                <!-- BROKEN LINK: ../archetypes/world-center/ does not exist -->
+                <!-- <a href="../archetypes/index.html" class="archetype-link-card">
+                    <div class="archetype-badge">🌍 WORLD CENTER</div>
+                    <p class="archetype-context">The omphalos or navel of the world, cosmic axis points believed to be the center of creation.</p>
+                    <span class="see-parallels">Delphi, Jerusalem, Kailash →</span>
+                </a> -->
+            </div>
+        </section>
+
+        <div class="glass-card">
+            <h2 style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">Explore More</h2>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+                <a href="../mythos/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">World Mythologies</a>
+                <a href="../archetypes/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Universal Archetypes</a>
+                <a href="../magic/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Magical Systems</a>
+                <a href="../herbalism/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Sacred Herbalism</a>
+                <a href="../spiritual-items/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Sacred Items</a>
+                <a href="../index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Home</a>
+            </div>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-secondary); border-top: 1px solid var(--color-border); margin-top: var(--spacing-xl);">
+        <p>World Mythos Explorer - Sacred Places</p>
+        <p style="margin-top: var(--spacing-sm);">
+            <a href="../index.html" style="color: var(--color-primary); text-decoration: none;">Home</a> |
+            <a href="../mythos/index.html" style="color: var(--color-primary); text-decoration: none;">Mythologies</a> |
+            <a href="../archetypes/index.html" style="color: var(--color-primary); text-decoration: none;">Archetypes</a> |
+            <a href="../magic/index.html" style="color: var(--color-primary); text-decoration: none;">Magic</a> |
+            <a href="../herbalism/index.html" style="color: var(--color-primary); text-decoration: none;">Herbalism</a> |
+            <a href="../spiritual-items/index.html" style="color: var(--color-primary); text-decoration: none;">Items</a>
+        </p>
+    </footer>
+</body>
+</html>

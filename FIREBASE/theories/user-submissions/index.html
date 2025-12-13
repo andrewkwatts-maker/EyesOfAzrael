@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Theory Submissions - Community Research</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+        <script defer src="../../themes/smart-links.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+
+    <style>
+        :root {
+            --theory-primary: #9333ea;
+            --theory-primary-rgb: 147, 51, 234;
+            --theory-secondary: #c084fc;
+            --theory-accent: #a855f7;
+            --cosmic-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: #0a0a1a;
+            background-image:
+                radial-gradient(ellipse at 20% 30%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(192, 132, 252, 0.1) 0%, transparent 50%);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-2xl);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        nav.breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            flex-wrap: wrap;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        nav.breadcrumb a {
+            color: var(--theory-secondary);
+            text-decoration: none;
+        }
+
+        nav.breadcrumb a:hover {
+            color: var(--theory-primary);
+        }
+
+        /* Header */
+        .page-header {
+            background: var(--cosmic-gradient);
+            border: 2px solid var(--theory-primary);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            text-align: center;
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .header-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        h1 {
+            font-size: var(--font-size-4xl);
+            background: linear-gradient(135deg, var(--theory-secondary), #f0abfc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .page-description {
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: var(--leading-relaxed);
+        }
+
+        /* Coming Soon Banner */
+        .coming-soon-banner {
+            background: linear-gradient(135deg, rgba(251, 146, 60, 0.2), rgba(245, 158, 11, 0.2));
+            border: 2px solid rgba(251, 146, 60, 0.5);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            text-align: center;
+            margin: var(--spacing-3xl) 0;
+        }
+
+        .coming-soon-banner h2 {
+            color: #fb923c;
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+        }
+
+        .coming-soon-banner p {
+            color: var(--color-text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Submission Form Placeholder */
+        .form-section {
+            background: rgba(30, 27, 75, 0.6);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(147, 51, 234, 0.4);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin: var(--spacing-3xl) 0;
+        }
+
+        .form-section h2 {
+            color: var(--theory-secondary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-2xl);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--color-text-primary);
+            margin-bottom: var(--spacing-sm);
+            font-weight: var(--font-medium);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: var(--spacing-md);
+            background: rgba(30, 27, 75, 0.8);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: var(--radius-lg);
+            color: var(--color-text-primary);
+            font-family: var(--font-primary);
+            font-size: var(--font-size-base);
+            transition: all var(--transition-fast);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--theory-primary);
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.3);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--color-text-secondary);
+            opacity: 0.7;
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .form-group small {
+            display: block;
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-xs);
+            font-size: var(--font-size-sm);
+        }
+
+        .submit-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md) var(--spacing-2xl);
+            background: linear-gradient(135deg, var(--theory-primary), var(--theory-secondary));
+            border: none;
+            border-radius: var(--radius-lg);
+            color: white;
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-semibold);
+            cursor: not-allowed;
+            opacity: 0.6;
+            transition: all var(--transition-base);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(147, 51, 234, 0.4);
+        }
+
+        /* Guidelines Section */
+        .guidelines-section {
+            background: rgba(30, 27, 75, 0.5);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin: var(--spacing-3xl) 0;
+        }
+
+        .guidelines-section h2 {
+            color: var(--theory-secondary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-2xl);
+        }
+
+        .guideline-list {
+            list-style: none;
+        }
+
+        .guideline-list li {
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            background: rgba(147, 51, 234, 0.1);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--theory-primary);
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        .guideline-list li strong {
+            color: var(--theory-secondary);
+            display: block;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        /* Categories Section */
+        .categories-section {
+            margin: var(--spacing-3xl) 0;
+        }
+
+        .categories-section h2 {
+            color: var(--theory-secondary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-2xl);
+            text-align: center;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .category-card {
+            background: rgba(30, 27, 75, 0.5);
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+
+        .category-card:hover {
+            border-color: var(--theory-primary);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(147, 51, 234, 0.2);
+        }
+
+        .category-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .category-title {
+            color: var(--theory-secondary);
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .category-desc {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            line-height: var(--leading-relaxed);
+        }
+
+        /* Quick Navigation */
+        .quick-nav {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: var(--spacing-2xl) 0;
+        }
+
+        .nav-link {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: rgba(147, 51, 234, 0.2);
+            border: 1px solid rgba(147, 51, 234, 0.4);
+            border-radius: var(--radius-lg);
+            color: var(--theory-secondary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .nav-link:hover {
+            background: rgba(147, 51, 234, 0.4);
+            transform: translateY(-2px);
+        }
+
+        footer {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            margin-top: var(--spacing-5xl);
+            border-top: 1px solid rgba(147, 51, 234, 0.3);
+            color: var(--color-text-secondary);
+        }
+
+        footer a {
+            color: var(--theory-secondary);
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: var(--font-size-3xl);
+            }
+
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+    <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="../../index.html">Home</a> <span>/</span>
+            <a href="../index.html">Theories</a> <span>/</span>
+            <span>User Submissions</span>
+        </nav>
+
+        <header class="page-header">
+            <span class="header-icon">📝</span>
+            <h1>User Theory Submissions</h1>
+            <p class="page-description">
+                Share your discoveries of cross-cultural patterns, propose new mythological
+                connections, and contribute to our collective understanding of ancient wisdom.
+            </p>
+        </header>
+
+        <!-- Featured Author Theories -->
+        <section class="categories-section" style="margin-top: 2rem;">
+            <h2 style="color: var(--theory-primary); margin-bottom: 1.5rem;">📚 Featured Author Theories</h2>
+            <div class="categories-grid">
+                <a href="egyptian-scientific-encoding.html" class="category-card" style="text-decoration: none; transition: transform 0.2s; cursor: pointer;">
+                    <span class="category-icon">⚛️</span>
+                    <h3 class="category-title">Egyptian Scientific Encoding</h3>
+                    <p class="category-desc">
+                        Exploring connections between Egyptian deities and scientific concepts—particularly
+                        radioactive isotopes, chemical compounds, and physical processes encoded in mythology.
+                    </p>
+                    <p style="color: var(--theory-secondary); margin-top: 1rem; font-style: italic;">
+                        Covers: Ra (Radium-228), Thoth (Thorium-232), Neith (Neon-Iodine), and more...
+                    </p>
+                </a>
+
+                <a href="kabbalah-physics-integration.html" class="category-card" style="text-decoration: none; transition: transform 0.2s; cursor: pointer;">
+                    <span class="category-icon">🌌</span>
+                    <h3 class="category-title">Kabbalah-Physics Integration</h3>
+                    <p class="category-desc">
+                        Connecting Kabbalistic mysticism to modern theoretical physics—including string theory,
+                        M-theory, Calabi-Yau manifolds, and dimensional hierarchies.
+                    </p>
+                    <p style="color: var(--theory-secondary); margin-top: 1rem; font-style: italic;">
+                        Covers: 72 Names, 10 Sefirot, 4 Worlds, 288 Sparks, dimensional cascade...
+                    </p>
+                </a>
+            </div>
+        </section>
+
+        <!-- Coming Soon Banner -->
+        <div class="coming-soon-banner">
+            <h2><span>🚧</span> Community Submissions Coming Soon</h2>
+            <p>
+                The community user submission system is currently under development. Soon you'll be able
+                to submit your own theories, vote on submissions, and engage in scholarly
+                discussion with others exploring mythological patterns.
+            </p>
+        </div>
+
+        <!-- Categories Section -->
+        <section class="categories-section">
+            <h2>Submission Categories</h2>
+            <div class="categories-grid">
+                <div class="category-card">
+                    <span class="category-icon">🔗</span>
+                    <h3 class="category-title">Pattern Connections</h3>
+                    <p class="category-desc">
+                        Identify recurring themes, symbols, or narratives that appear
+                        across multiple unrelated cultures.
+                    </p>
+                </div>
+
+                <div class="category-card">
+                    <span class="category-icon">🏛️</span>
+                    <h3 class="category-title">Archaeological Correlations</h3>
+                    <p class="category-desc">
+                        Connect mythological accounts with archaeological discoveries,
+                        geological events, or astronomical phenomena.
+                    </p>
+                </div>
+
+                <div class="category-card">
+                    <span class="category-icon">📖</span>
+                    <h3 class="category-title">Textual Analysis</h3>
+                    <p class="category-desc">
+                        Deep analysis of specific texts, translations, or linguistic
+                        connections between mythological traditions.
+                    </p>
+                </div>
+
+                <div class="category-card">
+                    <span class="category-icon">🧬</span>
+                    <h3 class="category-title">Alternative Interpretations</h3>
+                    <p class="category-desc">
+                        Novel interpretations of traditional myths, including
+                        psychological, astronomical, or interdisciplinary approaches.
+                    </p>
+                </div>
+
+                <div class="category-card">
+                    <span class="category-icon">🗺️</span>
+                    <h3 class="category-title">Geographic Correlations</h3>
+                    <p class="category-desc">
+                        Map mythological sites, migration patterns, or geographic
+                        features mentioned in ancient texts.
+                    </p>
+                </div>
+
+                <div class="category-card">
+                    <span class="category-icon">⏳</span>
+                    <h3 class="category-title">Timeline Analysis</h3>
+                    <p class="category-desc">
+                        Chronological analysis of myth evolution, transmission
+                        patterns, and historical dating of narratives.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Submission Form (Placeholder) -->
+        <section class="form-section">
+            <h2><span>📤</span> Submit Your Theory</h2>
+
+            <form action="#" method="post" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="theory-title">Theory Title *</label>
+                    <input type="text" id="theory-title" name="title"
+                           placeholder="Enter a descriptive title for your theory" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label for="theory-category">Category *</label>
+                    <select id="theory-category" name="category" disabled>
+                        <option value="">Select a category...</option>
+                        <option value="pattern">Pattern Connections</option>
+                        <option value="archaeological">Archaeological Correlations</option>
+                        <option value="textual">Textual Analysis</option>
+                        <option value="alternative">Alternative Interpretations</option>
+                        <option value="geographic">Geographic Correlations</option>
+                        <option value="timeline">Timeline Analysis</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="theory-summary">Summary *</label>
+                    <textarea id="theory-summary" name="summary"
+                              placeholder="Provide a brief summary of your theory (2-3 sentences)" disabled></textarea>
+                    <small>Maximum 300 characters</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="theory-content">Full Theory *</label>
+                    <textarea id="theory-content" name="content" style="min-height: 250px;"
+                              placeholder="Present your theory in detail. Include evidence, sources, and reasoning." disabled></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="theory-sources">Sources & References</label>
+                    <textarea id="theory-sources" name="sources"
+                              placeholder="List your sources: books, academic papers, archaeological reports, etc." disabled></textarea>
+                    <small>Please include links or full citations where possible</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="related-myths">Related Mythologies</label>
+                    <input type="text" id="related-myths" name="myths"
+                           placeholder="e.g., Greek, Egyptian, Hindu, Norse" disabled>
+                    <small>Comma-separated list of mythologies your theory relates to</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="author-name">Your Name (optional)</label>
+                    <input type="text" id="author-name" name="author"
+                           placeholder="How you'd like to be credited" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label for="author-email">Email (optional)</label>
+                    <input type="email" id="author-email" name="email"
+                           placeholder="For submission updates only, never shared" disabled>
+                </div>
+
+                <button type="submit" class="submit-btn" disabled>
+                    <span>🔒</span> Submissions Coming Soon
+                </button>
+            </form>
+        </section>
+
+        <!-- Guidelines Section -->
+        <section class="guidelines-section">
+            <h2>Submission Guidelines</h2>
+            <ul class="guideline-list">
+                <li>
+                    <strong>Evidence-Based Reasoning</strong>
+                    Support your theory with specific textual references, archaeological
+                    findings, or scholarly sources. Speculation should be clearly labeled as such.
+                </li>
+                <li>
+                    <strong>Respect Multiple Perspectives</strong>
+                    Acknowledge alternative interpretations and mainstream academic views.
+                    Present your theory as one possible interpretation, not absolute truth.
+                </li>
+                <li>
+                    <strong>Clear Attribution</strong>
+                    Give credit to other researchers whose work you build upon. Plagiarism
+                    or uncredited borrowing of ideas will not be accepted.
+                </li>
+                <li>
+                    <strong>Cultural Sensitivity</strong>
+                    Treat all mythological traditions with respect. Avoid dismissive language
+                    about any culture's beliefs or practices.
+                </li>
+                <li>
+                    <strong>Constructive Discourse</strong>
+                    Engage thoughtfully with other theories and submissions. Criticism should
+                    be constructive and focused on ideas, not individuals.
+                </li>
+                <li>
+                    <strong>Original Content</strong>
+                    Submissions should represent your own analysis and synthesis. Direct quotes
+                    should be properly cited and comprise a minority of your submission.
+                </li>
+            </ul>
+        </section>
+
+        <!-- Quick Navigation -->
+        <div class="quick-nav">
+            <a href="../index.html" class="nav-link">Back to Theories</a>
+            <a href="../ai-analysis/index.html" class="nav-link">AI Analysis</a>
+            <a href="../../archetypes/index.html" class="nav-link" data-smart>Archetypes</a>
+            <a href="../../mythos/index.html" class="nav-link" data-smart>Mythologies</a>
+        </div>
+
+        <footer>
+            <p>User Theory Submissions - Community Research</p>
+            <p style="margin-top: var(--spacing-sm);">
+                <a href="../../index.html">Home</a> |
+                <a href="../index.html">Theories</a> |
+                <a href="../../archetypes/index.html">Archetypes</a> |
+                <a href="../../mythos/index.html">Mythologies</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

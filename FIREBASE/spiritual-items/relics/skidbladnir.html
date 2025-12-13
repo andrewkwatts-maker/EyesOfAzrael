@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skíðblaðnir - Divine Relics - World Mythos Explorer</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-text-primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            color: var(--color-primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .subsection-title {
+            color: var(--color-primary);
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .info-item {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-value {
+            color: var(--color-text-primary);
+            font-size: 1.1rem;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+            justify-content: center;
+        }
+
+        .tradition-tag {
+            background: var(--color-primary);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .related-link {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .related-link:hover {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border-color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .quote-box {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border-left: 4px solid var(--color-secondary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        }
+
+        .content-text {
+            line-height: 1.8;
+            color: var(--color-text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .content-text p {
+            margin-bottom: 1rem;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.2),
+                rgba(var(--color-secondary-rgb), 0.2));
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+            color: var(--color-text-secondary);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .bibliography {
+            background: rgba(var(--color-surface-rgb), 0.4);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            margin-top: 3rem;
+        }
+
+        .bibliography ol {
+            list-style-type: decimal;
+        }
+
+        .bibliography li {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+        }
+
+        .power-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .power-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .power-item strong {
+            color: var(--color-primary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+    <div class="header-content">
+        <h1>Skíðblaðnir - The Best of Ships</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Sacred Items</a> →
+                <a href="../../archetypes/celestial/index.html">Relics</a> →
+                <span>Skíðblaðnir</span>
+</nav>
+
+    <main>
+        <!-- HERO SECTION -->
+        <div class="hero-section" data-item="skidbladnir" data-tradition="Norse,Viking" data-type="relic">
+            <div class="hero-icon">⛵</div>
+            <h2 class="hero-title">Skíðblaðnir</h2>
+            <p class="hero-subtitle">The Magical Ship That Folds Into a Pocket, Always with Favorable Wind</p>
+            <div class="tradition-tags">
+                <span class="tradition-tag">Norse</span>
+                <span class="tradition-tag">Viking</span>
+                <span class="tradition-tag">Vanir</span>
+                <span class="tradition-tag">Dwarven-Forged</span>
+            </div>
+        </div>
+
+        <!-- QUICK INFO -->
+        <div class="glass-card">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Item Type</div>
+                    <div class="info-value">Magical Ship</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Owner</div>
+                    <div class="info-value">Freyr of the Vanir</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Crafted By</div>
+                    <div class="info-value">The Sons of Ivaldi (Dwarven Smiths)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Primary Power</div>
+                    <div class="info-value">Always favorable winds, folds to pocket size</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="glass-card">
+            <h3 class="section-title">Description and Appearance</h3>
+            <div class="content-text">
+                <p>
+                    Skíðblaðnir (Old Norse: Skíðblaðnir, meaning "assembled from thin pieces of wood" or possibly
+                    "wooden-bladed") stands as one of the most remarkable treasures in Norse mythology—a ship that
+                    combined practical perfection with magical convenience in ways that captured the seafaring
+                    imagination of the Vikings. Created by the legendary dwarven craftsmen known as the Sons of
+                    Ivaldi, Skíðblaðnir embodied the ideal vessel: spacious enough to carry all the gods when
+                    needed, fast enough to outrun any pursuer, blessed with eternally favorable winds, yet capable
+                    of folding up small enough to fit in a pocket or pouch when not in use.
+                </p>
+                <p>
+                    The ship belonged to Freyr, the Vanir god of fertility, prosperity, and fair weather. This
+                    ownership was deeply appropriate—Freyr's domains included favorable conditions for travel and
+                    trade, and Skíðblaðnir represented these blessings made tangible. As a god associated with
+                    peace and abundance, Freyr required transportation that reflected these qualities: elegant,
+                    efficient, and beneficial rather than warlike or intimidating.
+                </p>
+                <p>
+                    The Prose Edda's Gylfaginning describes Skíðblaðnir as "the best of ships," a title that
+                    encompassed both its practical superiority and its magical properties. In a culture as
+                    thoroughly maritime as the Vikings', where ships represented not just transportation but
+                    livelihood, exploration, warfare, and cultural identity, the concept of a perfect ship held
+                    immense significance. Skíðblaðnir embodied every seafarer's dream—a vessel that never failed,
+                    never faced contrary winds, and could be stored with impossible convenience.
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <h4 class="subsection-title">Physical Characteristics:</h4>
+                <ul>
+                    <li><strong>Size (expanded):</strong> Large enough to carry all the Aesir and Vanir gods
+                    together when fully deployed, suggesting extraordinary spatial capacity</li>
+                    <li><strong>Size (folded):</strong> Small enough to fold up and fit into a pocket or small
+                    pouch, demonstrating reality-defying transformation abilities</li>
+                    <li><strong>Construction:</strong> Built from "thin pieces of wood" (according to name
+                    etymology), suggesting sophisticated assembly techniques and lightweight materials</li>
+                    <li><strong>Appearance:</strong> Undoubtedly magnificent, befitting a gift for gods, likely
+                    adorned with intricate carvings and precious materials typical of dwarven craftsmanship</li>
+                    <li><strong>Sail:</strong> Always filled with favorable wind, never slack, never torn by
+                    storms—a sail that defied natural limitations</li>
+                    <li><strong>Speed:</strong> Described as the swiftest of all ships, capable of outpacing any
+                    mundane vessel regardless of wind conditions</li>
+                    <li><strong>Durability:</strong> Proof against storms, waves, and damage—dwarven construction
+                    ensured it would never sink, break apart, or need repair</li>
+                    <li><strong>Navigation:</strong> Automatically traveled to desired destinations, requiring
+                    minimal crew effort; the ship "knew" where its owner wished to go</li>
+                </ul>
+            </div>
+
+            <div class="content-text">
+                <p>
+                    The ship's name has generated scholarly discussion regarding its precise etymology and meaning.
+                    "Skíð" relates to wood, planks, or thin pieces, while "blaðnir" might derive from "blade" or
+                    "leaf," giving possible translations like "assembled from thin planks," "wooden-bladed," or
+                    even "assembled from leaf-thin pieces." This naming suggests sophisticated construction
+                    techniques—the ship was not crudely hammered together but carefully assembled from precisely
+                    cut components, each piece fitting perfectly with others.
+                </p>
+                <p>
+                    Viking Age ships were indeed constructed from overlapping strakes (planks) carefully fitted and
+                    fastened, making them flexible enough to ride waves without breaking. Skíðblaðnir's name might
+                    honor and idealize this actual shipbuilding tradition, imagining dwarven smiths taking the
+                    principles of Norse shipwrights to supernatural perfection—planks so thin yet strong they
+                    defied normal material properties, assembly so precise it enabled magical folding.
+                </p>
+                <p>
+                    When fully deployed, Skíðblaðnir would have presented a magnificent sight: a vessel of generous
+                    proportions with elegant lines, its sail perpetually full regardless of actual wind conditions,
+                    moving swiftly and gracefully across any waters. The ship likely featured the characteristic
+                    clinker-built construction of Viking vessels—overlapping planks creating flexibility and
+                    strength—but perfected beyond mortal capability. Carved dragon-heads or other decorative
+                    elements typical of prestigious Norse ships would certainly adorn Skíðblaðnir, though executed
+                    with dwarven artistry surpassing human craft.
+                </p>
+                <p>
+                    The folding mechanism represents perhaps the ship's most fantastical feature. The Prose Edda
+                    simply states that Skíðblaðnir "always has a favorable breeze as soon as the sail is raised"
+                    and "can be folded together like cloth and kept in one's purse" if desired. This suggests not
+                    a rigid mechanical folding (like origami) but something more magical—the ship could somehow
+                    compress or transform itself, its massive structure becoming soft and pliable, shrinking to
+                    pocket size while retaining its essential nature, ready to expand again when deployed.
+                </p>
+            </div>
+        </div>
+
+        <!-- CREATION MYTH -->
+        <div class="glass-card">
+            <h3 class="section-title">Creation Myth and Crafting</h3>
+            <div class="content-text">
+                <p>
+                    Skíðblaðnir's creation is intimately connected to one of Norse mythology's most important
+                    episodes: the crafting contest that produced many of the gods' greatest treasures. This story
+                    reveals the ship to be not merely a useful object but one of several interconnected divine
+                    items that shaped the cosmic order itself.
+                </p>
+
+                <h4 class="subsection-title">Loki's Mischief and the Cutting of Sif's Hair</h4>
+                <p>
+                    The chain of events leading to Skíðblaðnir's creation began with one of Loki's characteristic
+                    acts of malicious mischief. The trickster god, for reasons the myths don't fully explain (pure
+                    spite, some accounts suggest), crept into Thor's dwelling while the thunder god and his wife
+                    Sif slept. There, Loki cut off all of Sif's magnificent golden hair—hair that was evidently
+                    naturally golden, not merely blonde, and one of her defining features.
+                </p>
+                <p>
+                    When Thor awoke and discovered the outrage, his fury was terrible. He seized Loki and would
+                    have broken every bone in his body had the trickster not desperately sworn to obtain replacement
+                    hair for Sif from the dwarves—hair made of real gold that would grow like natural hair. To
+                    fulfill this oath and save his own skin, Loki journeyed to Svartalfheim, the realm of the
+                    dwarves.
+                </p>
+
+                <h4 class="subsection-title">The Sons of Ivaldi - Master Craftsmen</h4>
+                <p>
+                    Loki approached a group of dwarven smiths known as the Sons of Ivaldi, renowned as among the
+                    greatest craftsmen in all the Nine Worlds. These dwarves possessed knowledge of materials,
+                    magic, and manufacture that exceeded even divine understanding. They worked with gold, iron,
+                    precious stones, and more exotic substances, imbuing their creations with properties that
+                    transcended normal physical laws.
+                </p>
+                <p>
+                    Loki commissioned the replacement hair for Sif, but the Sons of Ivaldi, once inspired to
+                    creative work, went far beyond this single task. They forged not just the golden hair but two
+                    additional treasures, each one a masterpiece:
+                </p>
+                <ul>
+                    <li><strong>Sif's Golden Hair:</strong> Living gold that would grow like natural hair once
+                    attached to Sif's head, restoring her beauty and appeasing Thor's wrath</li>
+                    <li><strong>Gungnir:</strong> The spear for Odin that would never miss its target once thrown,
+                    symbolizing the Allfather's power and wisdom</li>
+                    <li><strong>Skíðblaðnir:</strong> The perfect ship, initially intended as a gift to demonstrate
+                    the Sons of Ivaldi's supreme skill</li>
+                </ul>
+                <p>
+                    These three items together represented different aspects of divine power: beauty and natural
+                    forces (the hair), war and fate (the spear), and travel and prosperity (the ship). The dwarves
+                    apparently worked according to their own inspiration, creating gifts worthy of gods even beyond
+                    what was commissioned.
+                </p>
+
+                <h4 class="subsection-title">The Crafting Contest</h4>
+                <p>
+                    Loki, characteristically unable to leave well enough alone, encountered two other dwarf brothers,
+                    Brokkr and Eitri (sometimes called Sindri), and boasted that the Sons of Ivaldi were the
+                    greatest craftsmen in existence. He wagered his own head that these brothers could not create
+                    three items as fine as those made by the Sons of Ivaldi.
+                </p>
+                <p>
+                    Brokkr and Eitri accepted the challenge. Eitri worked the forge while Brokkr operated the
+                    bellows, and Eitri made Brokkr swear not to stop pumping no matter what happened. As they
+                    worked, Loki transformed himself into a fly and bit Brokkr repeatedly, trying to disrupt the
+                    process. Despite these disruptions, the brothers produced three magnificent treasures:
+                </p>
+                <ul>
+                    <li><strong>Gullinbursti:</strong> A golden boar that glowed in the dark and could run faster
+                    than any horse, through air and sea</li>
+                    <li><strong>Draupnir:</strong> A golden ring from which eight equally beautiful rings would
+                    drip every ninth night</li>
+                    <li><strong>Mjölnir:</strong> Thor's hammer, though Loki's interference caused the handle to
+                    be shorter than intended—still, the gods judged it the finest treasure created</li>
+                </ul>
+
+                <h4 class="subsection-title">The Judgment and Distribution</h4>
+                <p>
+                    The six treasures were brought before the gods in Asgard for judgment. Each item was presented
+                    and its properties explained. The gods had to decide which set of three treasures was superior.
+                </p>
+                <p>
+                    While Skíðblaðnir was declared "the best of ships" and greatly admired, and while Gungnir and
+                    Sif's hair were similarly praised, the gods ultimately judged that Mjölnir—Thor's hammer, the
+                    weapon with which he would defend Asgard against giants—was the most valuable treasure. Thus
+                    Brokkr and Eitri won the contest, though Loki escaped having his head taken through a
+                    technicality (they could have his head but not his neck, making the collection impossible).
+                </p>
+                <p>
+                    The distribution of the six treasures established much of the divine order's material foundation:
+                </p>
+                <ul>
+                    <li>Sif received her golden hair, restoring her beauty</li>
+                    <li>Odin received Gungnir and Draupnir, enhancing his power and wealth</li>
+                    <li>Thor received Mjölnir, gaining his iconic weapon</li>
+                    <li>Freyr received both Skíðblaðnir and Gullinbursti, making him one of the most treasure-rich
+                    gods</li>
+                </ul>
+
+                <h4 class="subsection-title">The Significance of Dwarven Craftsmanship</h4>
+                <p>
+                    Skíðblaðnir's creation by the Sons of Ivaldi reflects Norse understanding of the relationship
+                    between gods and dwarves. The gods possessed power, authority, and divine nature, but dwarves
+                    possessed technical knowledge that even gods could not match. The greatest divine treasures
+                    required dwarven manufacture—the gods themselves could not create items like Skíðblaðnir.
+                </p>
+                <p>
+                    This created a relationship of mutual dependence and occasional tension. The gods needed dwarven
+                    craftsmanship to maintain their supremacy (Mjölnir defended Asgard, Gungnir symbolized Odin's
+                    authority, Skíðblaðnir enabled divine travel). The dwarves, dwelling in darkness beneath
+                    mountains, gained honor and sometimes payment for their work, but they also created weapons
+                    and tools that could be used against them if the gods chose.
+                </p>
+                <p>
+                    The ship itself represents perhaps the most "civilian" of the major divine treasures—unlike
+                    weapons (Mjölnir, Gungnir) or items of direct power (Draupnir, Odin's ring), Skíðblaðnir was
+                    fundamentally a vehicle. Yet its perfect functionality and magical convenience made it no less
+                    valuable. In Viking culture, ships were absolutely central to life—a perfect ship was as
+                    valuable as a perfect weapon, perhaps more so, as it enabled trade, exploration, communication,
+                    and raids that weapons alone could not accomplish.
+                </p>
+            </div>
+
+            <div class="quote-box">
+                "Then he gave the ship to Freyr and said that it would always get a favorable wind, whenever the
+                sail was hoisted, wherever it needed to go; and it could be folded together like a cloth and kept
+                in a purse, if one wished."
+                <br><br>— Snorri Sturluson, Prose Edda, Gylfaginning
+            </div>
+        </div>
+
+        <!-- POWERS AND ABILITIES -->
+        <div class="glass-card">
+            <h3 class="section-title">Powers and Abilities</h3>
+            <div class="content-text">
+                <p>
+                    Skíðblaðnir's powers combined practical perfection of nautical function with reality-defying
+                    magical properties. The ship represented not just a better vessel but an ideal that transcended
+                    normal physical constraints, embodying every advantage a seafaring culture could imagine.
+                </p>
+            </div>
+
+            <div class="power-list">
+                <div class="power-item">
+                    <strong>Eternally Favorable Wind</strong>
+                    Once the sail was raised, Skíðblaðnir always enjoyed favorable wind, regardless of actual
+                    weather conditions. This wasn't merely good luck but a fundamental property of the ship—the
+                    wind itself cooperated with the vessel's purpose. Storms, calms, and contrary winds that
+                    plagued normal ships had no effect on Skíðblaðnir. This made it perfectly reliable for any
+                    journey, removing the uncertainty that plagued all maritime travel.
+                </div>
+                <div class="power-item">
+                    <strong>Miraculous Folding</strong>
+                    The ship could fold up "like cloth" and fit into a pocket or small purse. This transformative
+                    ability defied all normal understanding of matter and space. A vessel large enough to carry
+                    all the gods could become small enough to carry in one's pocket, yet retain its essential
+                    nature, ready to deploy again when needed. This made storage and transport impossibly
+                    convenient—Freyr could carry his ship anywhere, never needing to dock or guard it.
+                </div>
+                <div class="power-item">
+                    <strong>Extraordinary Capacity</strong>
+                    When fully deployed, Skíðblaðnir possessed space sufficient to carry all the Aesir and Vanir
+                    gods together, suggesting not just physical size but perhaps magical expansion of interior
+                    space. This capacity meant the ship could serve as transport for divine gatherings, carry
+                    entire expeditions, or accommodate any practical need regardless of how many passengers or
+                    how much cargo was required.
+                </div>
+                <div class="power-item">
+                    <strong>Supreme Speed</strong>
+                    Described as the fastest of all ships, Skíðblaðnir could outpace any other vessel. Combined
+                    with its eternally favorable wind, this speed meant the ship could make any journey in minimal
+                    time. Distance became almost meaningless—the ship traveled swiftly to wherever its owner
+                    wished to go, turning weeks-long voyages into brief trips.
+                </div>
+                <div class="power-item">
+                    <strong>Perfect Navigation</strong>
+                    The ship possessed inherent knowledge of how to reach its intended destination. It didn't
+                    require extensive crew skill or navigation equipment—the vessel itself "knew" where to go
+                    once its owner's intention was clear. This autonomous navigation meant even a single person
+                    could sail Skíðblaðnir to any destination across the Nine Worlds.
+                </div>
+                <div class="power-item">
+                    <strong>Immunity to Maritime Hazards</strong>
+                    Being dwarven-crafted and magical, Skíðblaðnir could not sink, capsize, or be damaged by
+                    storms, rocks, or any other nautical danger. The ship's integrity was absolute—it would never
+                    leak, never break apart in heavy seas, never require bailing or repair. This invulnerability
+                    made every voyage perfectly safe, eliminating the risks that made sea travel dangerous even
+                    for skilled sailors.
+                </div>
+                <div class="power-item">
+                    <strong>Minimal Crew Requirements</strong>
+                    Unlike normal vessels that required numerous crew members to sail, handle lines, navigate, and
+                    maintain the ship, Skíðblaðnir could apparently be operated by Freyr alone if needed. The
+                    ship's magical properties did the work that normally required many hands, making it practical
+                    for solo travel or small groups while still capable of carrying large numbers when desired.
+                </div>
+                <div class="power-item">
+                    <strong>All-Terrain Capability</strong>
+                    While explicitly a ship, Skíðblaðnir could travel across any waters—sea, lake, river—without
+                    regard for depth, currents, or other navigational obstacles. The eternal favorable wind worked
+                    even in constrained waterways where normal sailing would be impossible. Some interpretations
+                    suggest it could even sail through air or across land if needed, though this is not explicitly
+                    stated in sources.
+                </div>
+                <div class="power-item">
+                    <strong>Perfect Construction</strong>
+                    Every aspect of the ship's construction was flawless—every plank precisely fitted, every joint
+                    perfect, every component ideal for its purpose. This represented dwarven craftsmanship at its
+                    absolute peak, where the physical object became almost a platonic ideal of "ship-ness." No
+                    human-built vessel could match even one aspect of Skíðblaðnir's perfection, let alone combine
+                    them all.
+                </div>
+                <div class="power-item">
+                    <strong>Divine Transportation</strong>
+                    As a vehicle belonging to a god and capable of carrying all the gods, Skíðblaðnir could
+                    presumably travel between the Nine Worlds, crossing boundaries that would restrict mundane
+                    vessels. It could sail to Asgard, Midgard, Jotunheim, and other realms as needed, making it
+                    not just a ship but a means of inter-realm travel for divine beings.
+                </div>
+                <div class="power-item">
+                    <strong>Instant Deployment</strong>
+                    When removed from pocket and deployed, Skíðblaðnir presumably expanded instantaneously or
+                    very rapidly, ready for immediate use. There was no lengthy process of unfurling or setup—
+                    the ship went from pocket-size to full size immediately, allowing for rapid response to any
+                    need for maritime transportation.
+                </div>
+                <div class="power-item">
+                    <strong>Symbol of Prosperity</strong>
+                    As a possession of Freyr, god of fertility, prosperity, and good harvests, Skíðblaðnir carried
+                    symbolic power beyond its practical abilities. The ship represented successful trade,
+                    prosperous voyages, good fortune at sea—all aspects of Freyr's blessings. Its presence brought
+                    favorable conditions for maritime activity, making it a talisman of success as well as a
+                    practical vessel.
+                </div>
+            </div>
+
+            <div class="content-text">
+                <h4 class="subsection-title">Practical Implications</h4>
+                <p>
+                    For a maritime culture like the Vikings, Skíðblaðnir represented the ultimate ideal. Every
+                    practical problem associated with sea travel was solved: contrary winds, storms, damage,
+                    navigation difficulties, crew requirements, and storage. The ship embodied everything a
+                    seafarer could wish for, transforming maritime travel from dangerous uncertainty to guaranteed
+                    success.
+                </p>
+                <p>
+                    The folding ability particularly captured imagination—ships were among the largest, most
+                    expensive, and most difficult-to-maintain possessions in Viking society. A longship required
+                    secure storage when not in use, constant maintenance, and protection from theft or damage.
+                    The idea of simply folding it up and putting it in one's pocket solved every storage and
+                    security problem imaginable.
+                </p>
+                <p>
+                    Moreover, the eternal favorable wind represented divine favor made manifest and permanent.
+                    Viking sailors made sacrifices and offerings for good winds; with Skíðblaðnir, Freyr possessed
+                    a vessel where favorable winds were guaranteed, not requested. This symbolized the god's power
+                    over natural forces—he didn't need to ask for good conditions; his ship created them.
+                </p>
+
+                <h4 class="subsection-title">Limitations and Context</h4>
+                <p>
+                    Despite its perfection, Skíðblaðnir was notably not a warship. It appears in myths primarily
+                    as transportation, not as a weapon or military vessel. This reflects Freyr's nature—he was
+                    associated with peace and prosperity, not warfare. The ship enabled travel, trade, and movement
+                    but was not described as carrying weapons or participating in naval battles.
+                </p>
+                <p>
+                    The ship also remained bound to its owner—it served Freyr specifically and wouldn't necessarily
+                    function the same way for others. This personal attunement was typical of divine treasures;
+                    they were gifts for specific gods and optimized for those owners' needs and natures.
+                </p>
+            </div>
+        </div>
+
+        <!-- ASSOCIATED DEITY AND MYTHS -->
+        <div class="glass-card">
+            <h3 class="section-title">Associated Deity and Myths</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Freyr - God of Fertility and Prosperity</h4>
+                <p>
+                    Freyr (Old Norse: Freyr, meaning "Lord") was one of the most important gods in Norse paganism,
+                    despite being Vanir rather than Aesir. He was the son of Njörðr (god of the sea and seafaring)
+                    and brother of Freyja (goddess of love and seiðr magic). Freyr's domains included fertility,
+                    prosperity, fair weather, peace, good harvests, and male virility. He was one of the most
+                    widely worshipped gods, particularly among farmers and those seeking agricultural success.
+                </p>
+                <p>
+                    Freyr came to Asgard as part of the peace settlement following the Aesir-Vanir War, serving
+                    as both hostage and honored guest. The Aesir recognized his importance and gave him Alfheim
+                    (realm of the light elves) to rule. His possession of treasures like Skíðblaðnir and
+                    Gullinbursti (the golden boar) marked him as one of the wealthiest and most powerful gods.
+                </p>
+                <p>
+                    Freyr's character was fundamentally benevolent and generous. Unlike Odin's cunning or Thor's
+                    aggressive protection of the gods, Freyr represented the blessings of peace and plenty. He
+                    gave good seasons, successful crops, wealth from trade—the foundations of prosperity. His ship
+                    reflected this nature: it was not a warship but a means of peaceful travel and prosperous trade.
+                </p>
+
+                <h4 class="subsection-title">Freyr's Fatal Love for Gerðr</h4>
+                <p>
+                    The most significant myth involving Freyr and Skíðblaðnir relates to his courtship of Gerðr,
+                    a beautiful giantess, told in the Eddic poem "Skírnismál" (The Lay of Skírnir). This story
+                    reveals both Freyr's nature and the eventual consequence of his treasures.
+                </p>
+
+                <div class="highlight-box">
+                    <p>
+                        One day, Freyr sat in Odin's high seat Hliðskjálf, from which one could see into all the
+                        Nine Worlds. Looking north into Jotunheim (realm of the giants), Freyr saw an incredibly
+                        beautiful woman entering her father's hall. Her arms shone so brightly that they illuminated
+                        both air and sea. This was Gerðr, daughter of the giant Gymir.
+                    </p>
+                    <p>
+                        Freyr immediately fell desperately in love but recognized the situation's difficulty—she
+                        was a giant, he a god, and her family would not favor the match. He became consumed with
+                        lovesickness, refusing to speak and wasting away. His father Njörðr sent Freyr's servant
+                        Skírnir to discover what troubled him.
+                    </p>
+                    <p>
+                        When Freyr finally explained, Skírnir agreed to travel to Jotunheim and woo Gerðr on Freyr's
+                        behalf. But Skírnir demanded payment: Freyr's magnificent sword (which could fight by itself
+                        and never failed) and his horse (or, in some versions, Skíðblaðnir itself for the journey).
+                    </p>
+                    <p>
+                        Freyr, desperate with love, agreed. He gave Skírnir his sword (or use of his ship), losing
+                        one of his greatest treasures. Skírnir rode to Jotunheim, overcame various obstacles, and
+                        eventually convinced (or threatened) Gerðr to agree to meet Freyr and become his bride,
+                        though she demanded nine nights' delay before the wedding.
+                    </p>
+                    <p>
+                        The marriage eventually took place, and Gerðr became Freyr's wife. However, the cost was
+                        severe: Freyr had given away his sword (or possibly compromised his ship's availability).
+                        This sacrifice would prove fatal at Ragnarök, when Freyr would face the fire giant Surtr
+                        without his greatest weapon and fall in that confrontation.
+                    </p>
+                </div>
+
+                <h4 class="subsection-title">Freyr's Role in Norse Religion</h4>
+                <p>
+                    Archaeological and textual evidence suggests Freyr was extensively worshipped throughout
+                    Scandinavia, particularly in Sweden where the temple at Uppsala honored him alongside Odin
+                    and Thor. Sacrifices to Freyr sought good harvests, peace, and prosperity. His association
+                    with fertility extended to human sexuality and reproduction—marriages and unions might be
+                    conducted with Freyr's blessing.
+                </p>
+                <p>
+                    The ship Skíðblaðnir fit naturally into Freyr's worship. As a god who enabled prosperity through
+                    good conditions, he would naturally possess the perfect vessel for trade and travel. The ship's
+                    eternal favorable wind reflected Freyr's power over weather and seasons—he provided the
+                    conditions for successful voyages just as he provided good growing conditions for crops.
+                </p>
+
+                <h4 class="subsection-title">Ship Mythology in Norse Culture</h4>
+                <p>
+                    Understanding Skíðblaðnir requires understanding the profound importance of ships in Norse
+                    culture. Ships were not merely transportation but central to Norse identity, economy, and
+                    mythology:
+                </p>
+                <ul>
+                    <li>Ships enabled the Viking Age expansion across Europe and beyond</li>
+                    <li>Important dead were buried in ships or ship-shaped stone settings</li>
+                    <li>Ships symbolized journeys—both literal voyages and metaphorical travels to the afterlife</li>
+                    <li>The gods themselves owned legendary ships: Skíðblaðnir for Freyr, Naglfar (made from
+                    dead men's nails) would carry the forces of chaos at Ragnarök</li>
+                    <li>Ships represented community effort—building a longship required cooperation of many
+                    skilled workers</li>
+                </ul>
+                <p>
+                    In this context, Skíðblaðnir represented the ideal ship carried to its logical extreme. Where
+                    real ships were expensive, required maintenance, and faced nautical dangers, the magical ship
+                    solved every problem. It embodied the dream of perfect maritime mastery—complete control over
+                    the sea and freedom from all its hazards.
+                </p>
+
+                <h4 class="subsection-title">Skíðblaðnir at Ragnarök</h4>
+                <p>
+                    Unlike some divine treasures that play specific roles at Ragnarök, Skíðblaðnir is not
+                    prominently mentioned in the final battle. This absence is somewhat mysterious—a ship capable
+                    of carrying all the gods could presumably transport the divine armies, yet sources focus on
+                    other aspects of the apocalyptic conflict.
+                </p>
+                <p>
+                    Possibly, as an item associated with peace and prosperity rather than war, Skíðblaðnir simply
+                    had no role in the ultimate battle. Or perhaps Freyr's earlier sacrifice of his treasures to
+                    win Gerðr meant he no longer possessed the ship when Ragnarök came. The sources remain unclear,
+                    but the ship's absence from Ragnarök narratives suggests it belonged to the age of peace and
+                    prosperity, not to the final catastrophic war.
+                </p>
+            </div>
+        </div>
+
+        <!-- SYMBOLISM -->
+        <div class="glass-card">
+            <h3 class="section-title">Symbolism and Spiritual Meaning</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Perfect Functionality</h4>
+                <p>
+                    Skíðblaðnir symbolizes the ideal of perfect functionality—an object so well-designed and
+                    crafted that it transcends all limitations. In a practical sense, the ship solved every problem
+                    associated with its purpose. Symbolically, it represents human aspirations toward perfection
+                    in craft and design, the dream of creating something that works flawlessly in all circumstances.
+                </p>
+                <p>
+                    This resonates beyond nautical contexts. The ship embodies the craftsman's ideal: creating
+                    something so well-made that it never fails, never needs repair, and performs beyond all
+                    expectations. For Vikings, whose lives often depended on the quality of their ships, tools,
+                    and weapons, this ideal held immense cultural significance.
+                </p>
+
+                <h4 class="subsection-title">Divine Convenience</h4>
+                <p>
+                    The folding ability represents more than practical storage—it symbolizes divine power over
+                    reality itself. Gods were not bound by physical constraints that limited mortals. Skíðblaðnir's
+                    ability to fold into a pocket demonstrated that divine possessions operated by different rules,
+                    transcending mundane limitations of space, weight, and physical law.
+                </p>
+                <p>
+                    This reflects broader Norse understanding of divine nature. Gods resembled humans in many ways—
+                    they had personalities, emotions, conflicts—but they also possessed fundamental differences.
+                    They could shapeshift, travel between worlds, own impossible objects. Skíðblaðnir's folding
+                    ability marked it as clearly divine, something no mortal could ever possess or replicate.
+                </p>
+
+                <h4 class="subsection-title">Favorable Conditions</h4>
+                <p>
+                    The eternal favorable wind symbolizes divine blessing and providence. Normal sailors had to
+                    accept whatever weather conditions existed, making sacrifices and prayers for favorable winds.
+                    Skíðblaðnir's perpetual fair wind represented Freyr's intrinsic power to create good conditions—
+                    he didn't need to ask for favorable circumstances; he generated them naturally.
+                </p>
+                <p>
+                    This extends metaphorically beyond sailing. Freyr's blessings created "favorable winds" in all
+                    endeavors—good harvests, successful trade, prosperous communities. The ship's magical property
+                    manifested physically what Freyr provided spiritually: conditions conducive to success and
+                    prosperity.
+                </p>
+
+                <h4 class="subsection-title">Travel and Mobility</h4>
+                <p>
+                    Ships symbolized freedom of movement, ability to explore, and connection between distant places.
+                    Skíðblaðnir represented these values perfected—absolute mobility without constraint. The ship
+                    could go anywhere, at any time, without delay or difficulty. This symbolizes the ideal of
+                    perfect freedom, unhindered by practical obstacles.
+                </p>
+                <p>
+                    In spiritual terms, this relates to journeys of transformation and discovery. Ships carry
+                    people to new lands, new experiences, new possibilities. Skíðblaðnir, capable of traveling
+                    between worlds, represents the ultimate transformative journey—movement between fundamentally
+                    different states of being, crossing boundaries that normally separate realms of existence.
+                </p>
+
+                <h4 class="subsection-title">Prosperity and Trade</h4>
+                <p>
+                    As Freyr's possession, Skíðblaðnir symbolized prosperous trade and successful commerce. Ships
+                    were essential for Viking trade networks, connecting Scandinavia with distant markets. A perfect
+                    ship that always arrived safely and swiftly represented the ideal of profitable trade—goods
+                    reaching their destinations without loss, generating wealth and prosperity.
+                </p>
+                <p>
+                    This commercial symbolism complemented Freyr's agricultural associations. He provided good
+                    harvests (goods to trade) and good conditions for travel (ability to conduct trade). Together,
+                    these aspects enabled the prosperity he represented—successful agriculture and successful
+                    commerce working in harmony.
+                </p>
+
+                <h4 class="subsection-title">The Price of Love</h4>
+                <p>
+                    Freyr's sacrifice of his treasures to win Gerðr carries profound symbolic meaning. Even gods
+                    must pay prices for what they desire most. Love and passion can override practical wisdom,
+                    leading to choices with long-term consequences. Freyr's willingness to give up his sword (or
+                    compromise his ship's use) for love demonstrates that even divine beings will sacrifice power
+                    for emotional fulfillment.
+                </p>
+                <p>
+                    This made Freyr's character more relatable—he was not coldly calculating but capable of
+                    overwhelming passion that overrode good judgment. His fate at Ragnarök (dying weaponless against
+                    Surtr) resulted directly from this choice, showing that personal decisions shape even divine
+                    destinies. Skíðblaðnir, as part of what Freyr risked or sacrificed for love, symbolizes the
+                    tension between practical power and emotional desire.
+                </p>
+
+                <h4 class="subsection-title">Modern Symbolic Relevance</h4>
+                <p>
+                    Skíðblaðnir continues to resonate symbolically:
+                </p>
+                <ul>
+                    <li><strong>Perfect design:</strong> The ideal of creating something that works flawlessly,
+                    relevant to modern engineering and design philosophy</li>
+                    <li><strong>Portability:</strong> The folding ship anticipates modern desires for portable,
+                    convenient technology (smartphones, laptops, etc.)</li>
+                    <li><strong>Sustainable travel:</strong> A ship with eternal favorable wind suggests travel
+                    without fuel or environmental cost, relevant to green technology</li>
+                    <li><strong>Reliability:</strong> The guarantee that Skíðblaðnir never fails represents modern
+                    desires for dependable technology and transportation</li>
+                    <li><strong>Freedom of movement:</strong> Unrestricted travel across all boundaries remains
+                    an ideal in an age of borders, passports, and travel restrictions</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- MODERN DEPICTIONS -->
+        <div class="glass-card">
+            <h3 class="section-title">Modern Depictions in Culture</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Literature and Fantasy</h4>
+                <ul>
+                    <li><strong>Neil Gaiman's "Norse Mythology":</strong> Retells the story of Skíðblaðnir's
+                    creation in the crafting contest between the dwarven smiths</li>
+                    <li><strong>Rick Riordan's "Magnus Chase" series:</strong> References Norse artifacts including
+                    Freyr's ship in young adult fantasy context</li>
+                    <li><strong>Various fantasy novels:</strong> The concept of a folding or pocket-sized ship
+                    appears frequently, often inspired by Skíðblaðnir</li>
+                    <li><strong>Gaming fiction:</strong> Magical ships with impossible properties often draw on
+                    Skíðblaðnir's example</li>
+                </ul>
+
+                <h4 class="subsection-title">Video Games</h4>
+                <ul>
+                    <li><strong>Final Fantasy series:</strong> "Skidbladnir" appears as an airship or vehicle in
+                    several games, maintaining the theme of magical transportation</li>
+                    <li><strong>Tales series (JRPGs):</strong> Features the Skidbladnir as a magical flying ship
+                    in "Tales of Symphonia"</li>
+                    <li><strong>Fire Emblem series:</strong> References to Freyr's treasures appear in Norse-inspired
+                    content</li>
+                    <li><strong>Valkyrie Profile:</strong> Norse mythology-based game that references various divine
+                    artifacts</li>
+                    <li><strong>Age of Mythology:</strong> Norse campaign features references to mythological
+                    treasures</li>
+                    <li><strong>Various RPGs:</strong> Magical ships with favorable-wind properties or folding
+                    abilities appear as legendary items</li>
+                </ul>
+
+                <h4 class="subsection-title">Anime and Manga</h4>
+                <ul>
+                    <li><strong>Various Norse-inspired anime:</strong> Magical ships with properties similar to
+                    Skíðblaðnir appear in fantasy contexts</li>
+                    <li><strong>"Vinland Saga":</strong> While primarily historical, the manga's Viking Age setting
+                    includes references to Norse mythology</li>
+                    <li>The concept of impossibly convenient or magical vehicles appears frequently, often with
+                    Skíðblaðnir-like properties</li>
+                </ul>
+
+                <h4 class="subsection-title">Maritime and Nautical References</h4>
+                <ul>
+                    <li><strong>Ship names:</strong> "Skidbladnir" or variations have been used as names for actual
+                    vessels, honoring the legendary ship</li>
+                    <li><strong>Maritime museums:</strong> Norse mythology exhibits often feature Skíðblaðnir in
+                    discussions of legendary vessels</li>
+                    <li><strong>Viking ship reconstructions:</strong> Educational materials about Viking ships
+                    reference Skíðblaðnir as the mythological ideal</li>
+                </ul>
+
+                <h4 class="subsection-title">Comics and Graphic Novels</h4>
+                <ul>
+                    <li><strong>Marvel Comics:</strong> Freyr appears occasionally with references to his
+                    mythological possessions including the magical ship</li>
+                    <li><strong>Various Norse mythology adaptations:</strong> Graphic novel retellings of Norse
+                    myths include the crafting contest and Skíðblaðnir's creation</li>
+                </ul>
+
+                <h4 class="subsection-title">Role-Playing Games</h4>
+                <ul>
+                    <li><strong>Dungeons & Dragons:</strong> Norse-inspired settings feature magical ships,
+                    sometimes explicitly named after Skíðblaðnir</li>
+                    <li><strong>Various RPG systems:</strong> The folding ship concept appears as a magical item,
+                    usually at very high power levels</li>
+                    <li><strong>Tabletop gaming:</strong> Norse-themed campaigns often include Skíðblaðnir or
+                    similar legendary vessels as plot elements or achievable treasures</li>
+                </ul>
+
+                <h4 class="subsection-title">Modern Paganism and Norse Revivalism</h4>
+                <ul>
+                    <li><strong>Asatru and Heathenry:</strong> Freyr worship includes honoring his mythological
+                    possessions including Skíðblaðnir</li>
+                    <li><strong>Symbolic art:</strong> Modern Norse religious art sometimes depicts Freyr with his
+                    ship and other treasures</li>
+                    <li><strong>Ritual significance:</strong> Some practitioners invoke Freyr's blessings for
+                    travel and safe journeys, referencing his perfect ship</li>
+                </ul>
+
+                <h4 class="subsection-title">Technology and Design</h4>
+                <ul>
+                    <li><strong>Portable technology:</strong> The concept of folding or collapsible devices echoes
+                    Skíðblaðnir's magical property</li>
+                    <li><strong>Design philosophy:</strong> The ship represents ideals of perfect functionality and
+                    elegant problem-solving that influence modern design thinking</li>
+                    <li><strong>Engineering discussions:</strong> Skíðblaðnir sometimes appears in discussions about
+                    optimal design and overcoming physical constraints</li>
+                </ul>
+
+                <h4 class="subsection-title">Popular Culture</h4>
+                <ul>
+                    <li><strong>Metal music:</strong> Viking and folk metal bands reference Norse treasures including
+                    Skíðblaðnir in songs about mythology</li>
+                    <li><strong>Fantasy art:</strong> Depictions of magnificent ships with impossible properties
+                    often draw on Skíðblaðnir as inspiration</li>
+                    <li><strong>Educational content:</strong> Discussions of Viking Age shipbuilding often mention
+                    Skíðblaðnir as the mythological ideal that real ships aspired toward</li>
+                </ul>
+
+                <h4 class="subsection-title">Academic Interest</h4>
+                <ul>
+                    <li>Norse mythology courses discuss Skíðblaðnir in context of the crafting contest and divine
+                    treasures</li>
+                    <li>Maritime history examines how mythological ships like Skíðblaðnir reflected Viking Age
+                    nautical ideals and aspirations</li>
+                    <li>Material culture studies analyze what the folding ship myth reveals about Norse values
+                    regarding craftsmanship and convenience</li>
+                    <li>Comparative mythology examines Skíðblaðnir alongside other legendary vessels from world
+                    mythologies</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- RELATED ITEMS -->
+        <div class="glass-card">
+            <h3 class="section-title">Related Weapons and Items</h3>
+            <div class="content-text">
+                <h4 class="subsection-title">Other Treasures from the Crafting Contest</h4>
+                <ul>
+                    <li><strong>Gungnir:</strong> Odin's spear that never missed, crafted by the Sons of Ivaldi
+                    alongside Skíðblaðnir</li>
+                    <li><strong>Sif's Golden Hair:</strong> The living gold hair that prompted the entire crafting
+                    contest</li>
+                    <li><strong>Mjölnir:</strong> Thor's hammer, created by Brokkr and Eitri, judged the finest
+                    treasure</li>
+                    <li><strong>Gullinbursti:</strong> The golden boar also given to Freyr, could run through air
+                    and sea</li>
+                    <li><strong>Draupnir:</strong> Odin's ring that dripped eight equally beautiful rings every
+                    ninth night</li>
+                </ul>
+
+                <h4 class="subsection-title">Freyr's Other Possessions</h4>
+                <ul>
+                    <li><strong>Gullinbursti:</strong> The golden boar that glowed in darkness and could run faster
+                    than any horse</li>
+                    <li><strong>Freyr's Sword:</strong> A sword that could fight by itself, which he gave up to
+                    win Gerðr</li>
+                    <li><strong>Álfheim:</strong> The realm of light elves given to Freyr to rule</li>
+                </ul>
+
+                <h4 class="subsection-title">Other Legendary Ships in Norse Mythology</h4>
+                <ul>
+                    <li><strong>Naglfar:</strong> The ship made from dead men's fingernails and toenails that would
+                    carry the forces of chaos at Ragnarök</li>
+                    <li><strong>Hringhorni:</strong> Baldr's ship, the largest ever built, used for his funeral pyre</li>
+                    <li><strong>Ellida:</strong> A magical ship from later Norse sagas with its own legends</li>
+                </ul>
+
+                <h4 class="subsection-title">Magical Vehicles from Other Traditions</h4>
+                <ul>
+                    <li><strong>Pushpaka Vimana (Hindu):</strong> Flying vehicle that could travel anywhere and
+                    resize itself</li>
+                    <li><strong>Flying Carpet (Arabian):</strong> Magical transportation that defied normal physical
+                    limits</li>
+                    <li><strong>Sun Chariot (Greek):</strong> Helios' chariot that carried the sun across the sky</li>
+                    <li><strong>Cloud-Trapeze (Chinese):</strong> Magical clouds that immortals rode through the sky</li>
+                </ul>
+
+                <h4 class="subsection-title">The Sons of Ivaldi</h4>
+                <p>
+                    The dwarven smiths who created Skíðblaðnir deserve special recognition. While we know less about
+                    them individually than about some other dwarves, their collective work shaped the divine order.
+                    Their three creations—Sif's hair, Gungnir, and Skíðblaðnir—represented beauty, power, and
+                    functionality perfected.
+                </p>
+                <p>
+                    The Sons of Ivaldi represented the highest tier of craftsmanship in Norse cosmology. That they
+                    created multiple treasures spontaneously, beyond what was commissioned, suggests their creative
+                    spirit and pride in their work. They weren't merely fulfilling contracts but demonstrating
+                    mastery, creating objects so perfect they became defining possessions of major gods.
+                </p>
+            </div>
+        </div>
+
+        <!-- RELATED LINKS -->
+        <div class="glass-card">
+            <h3 class="section-title">Related Articles</h3>
+            <div class="related-links">
+                <a href="../weapons/mjolnir.html" class="related-link">Mjölnir - Thor's Hammer</a>
+                <a href="../weapons/gungnir.html" class="related-link">Gungnir - Odin's Spear</a>
+                <a href="../../index.html" class="related-link">Gullinbursti - Golden Boar</a>
+                <a href="draupnir.html" class="related-link">Draupnir - Odin's Ring</a>
+                <a href="../../index.html" class="related-link">Freyr - Lord of Alfheim</a>
+                <a href="../../index.html" class="related-link">The Dwarves</a>
+                <a href="../../mythos/norse/deities/loki.html" class="related-link">Loki - Trickster God</a>
+                <a href="../../index.html" class="related-link">The Vanir</a>
+            </div>
+        </div>
+
+        <!-- BIBLIOGRAPHY -->
+        <div class="bibliography glass-card">
+            <h3 class="section-title">Bibliography and Further Reading</h3>
+            <ol>
+                <li>Sturluson, Snorri. <em>The Prose Edda</em>. Trans. Jesse L. Byock. Penguin Classics, 2005.</li>
+                <li><em>The Poetic Edda</em>. Trans. Carolyne Larrington. Oxford World's Classics, 2014.</li>
+                <li>Lindow, John. <em>Norse Mythology: A Guide to the Gods, Heroes, Rituals, and Beliefs</em>.
+                Oxford University Press, 2001.</li>
+                <li>Simek, Rudolf. <em>Dictionary of Northern Mythology</em>. Trans. Angela Hall. D.S. Brewer, 1993.</li>
+                <li>Orchard, Andy. <em>Dictionary of Norse Myth and Legend</em>. Cassell, 1997.</li>
+                <li>Turville-Petre, E.O.G. <em>Myth and Religion of the North: The Religion of Ancient Scandinavia</em>.
+                Holt, Rinehart and Winston, 1964.</li>
+                <li>Davidson, H.R. Ellis. <em>Gods and Myths of Northern Europe</em>. Penguin, 1964.</li>
+                <li>Crumlin-Pedersen, Ole. <em>Viking-Age Ships and Shipbuilding in Hedeby/Haithabu and Schleswig</em>.
+                Viking Ship Museum, 1997.</li>
+                <li>Jesch, Judith. <em>Ships and Men in the Late Viking Age: The Vocabulary of Runic Inscriptions and
+                Skaldic Verse</em>. Boydell Press, 2001.</li>
+                <li>Bill, Jan and Birthe L. Clausen, eds. <em>Maritime Landscape in the Ribe Area c. AD 700-1600</em>.
+                Museum Tusculanum Press, 2012.</li>
+                <li>Foote, Peter G. and David M. Wilson. <em>The Viking Achievement</em>. Sidgwick & Jackson, 1970.</li>
+                <li>DuBois, Thomas A. <em>Nordic Religions in the Viking Age</em>. University of Pennsylvania Press,
+                1999.</li>
+                <li>Clunies Ross, Margaret. <em>Prolonged Echoes: Old Norse Myths in Medieval Northern Society</em>.
+                2 vols. Viking Society for Northern Research, 1994-1998.</li>
+                <li>Jakobsson, Ármann. <em>The Troll Inside You: Paranormal Activity in the Medieval North</em>.
+                punctum books, 2017.</li>
+                <li>Faulkes, Anthony, ed. <em>Snorri Sturluson: Edda: Prologue and Gylfaginning</em>. Viking Society
+                for Northern Research, 2005.</li>
+            </ol>
+        </div>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel glass-card">
+            <h3 class="interlink-header">Explore Connections</h3>
+            <div class="interlink-grid">
+                <div class="interlink-section">
+                    <h4 class="interlink-section-title">Owner/Wielder</h4>
+                    <a href="../../index.html" class="item-link-card">
+                        <span class="link-icon">god</span>
+                        <span class="link-name">Freyr</span>
+                        <span class="link-desc">Vanir god of fertility and prosperity</span>
+                    </a>
+                </div>
+                <div class="interlink-section">
+                    <h4 class="interlink-section-title">Source Tradition</h4>
+                    <a href="../../herbalism/traditions/norse/index.html" class="item-link-card">
+                        <span class="link-icon">tradition</span>
+                        <span class="link-name">Norse Mythology</span>
+                        <span class="link-desc">Germanic heroic tradition</span>
+                    </a>
+                    <a href="../../index.html" class="item-link-card">
+                        <span class="link-icon">creator</span>
+                        <span class="link-name">Sons of Ivaldi</span>
+                        <span class="link-desc">Master dwarf craftsmen</span>
+                    </a>
+                </div>
+            </div>
+            <div class="parallel-traditions">
+                <h4 class="interlink-section-title">Cross-Cultural Parallels</h4>
+                <div class="parallel-grid">
+                    <a href="../../index.html" class="parallel-card">
+                        <span class="parallel-tradition">Greek</span>
+                        <span class="parallel-name">Argo</span>
+                        <span class="parallel-desc">Magical ship of Jason</span>
+                    </a>
+                    <a href="../../index.html" class="parallel-card">
+                        <span class="parallel-tradition">Celtic</span>
+                        <span class="parallel-name">Prydwen</span>
+                        <span class="parallel-desc">Arthur's magical ship</span>
+                    </a>
+                </div>
+            </div>
+            <div class="see-also-section">
+                <h4 class="interlink-section-title">See Also</h4>
+                <div class="see-also-links">
+                    <a href="draupnir.html" class="see-also-link">Draupnir</a>
+                    <a href="../weapons/mjolnir.html" class="see-also-link">Mjolnir</a>
+                    <a href="brisingamen.html" class="see-also-link">Brisingamen</a>
+                    <a href="../index.html" class="see-also-link">All Sacred Items</a>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

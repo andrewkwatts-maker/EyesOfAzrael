@@ -1,26 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Apocryphal & Enochian Mythology - World Mythos Explorer</title>
-    <link href="../../themes/theme-base.css" rel="stylesheet"/>
-    <link href="../../styles.css" rel="stylesheet"/>
-    <link href="../../themes/corpus-links.css" rel="stylesheet"/>
-<link rel="stylesheet" href="../../themes/smart-links.css">
-<script defer src="../../themes/smart-links.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apocryphal Mythology - World Mythos Explorer</title>
+
+    <!-- Base Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+
+    <!-- Firebase Theme System -->
+    <link rel="stylesheet" href="../../FIREBASE/css/firebase-themes.css">
+
+    <!-- Theme Scripts -->
     <script defer src="../../themes/theme-picker.js"></script>
     <script defer src="../../themes/theme-animations.js"></script>
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <!-- Submission Link System -->
+    <script src="../../js/submission-context.js"></script>
+    <script src="../../js/components/submission-link.js"></script>
+    <link rel="stylesheet" href="../../css/submission-link.css">
+
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../css/user-auth.css">
+    <script src="../../js/firebase-auth.js"></script>
+    <script src="../../js/auth-guard.js"></script>
+    <script src="../../js/components/google-signin-button.js"></script>
+
     <style>
         /* ============================================
-           MODERN GLASS UI TEMPLATE - Apocryphal Mythos
-           Based on Christian reference with full theme support
+           FIREBASE-ENHANCED MYTHOLOGY INDEX TEMPLATE
+           Combines existing styles with Firebase integration
            ============================================ */
 
         /* Breadcrumb - Full-width bar attached below header */
         .breadcrumb {
             position: sticky;
-            top: 60px; /* Below the sticky header */
+            top: 60px;
             left: 0;
             width: 100%;
             z-index: 999;
@@ -92,125 +111,70 @@
             border-color: rgba(var(--color-primary-rgb), 0.4);
         }
 
-        /* Subsection Card - Hover Effects */
-        .subsection-card {
-            background: rgba(var(--color-primary-rgb), 0.05);
-            border-left: 4px solid var(--color-primary);
-            padding: var(--spacing-lg);
-            margin: var(--spacing-lg) 0;
-            border-radius: var(--radius-md);
-            transition: all var(--transition-base, 0.3s ease);
+        /* Firebase Content Sections */
+        .firebase-section {
+            margin: 3rem 0;
         }
 
-        .subsection-card:hover {
-            background: rgba(var(--color-primary-rgb), 0.1);
-            transform: translateX(5px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .subsection-card h3 {
-            color: var(--color-primary);
-            margin-top: 0;
-        }
-
-        .subsection-card p {
-            line-height: 1.7;
-        }
-
-        /* Grid Layouts */
-        .deity-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--spacing-lg);
-            margin: var(--spacing-lg) 0;
-        }
-
-        .grid-2col {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--spacing-lg);
-        }
-
-        /* Deity Cards - Modern Glass Pattern with Glow Hover */
-        .deity-card {
-            background: rgba(var(--color-primary-rgb), 0.05);
-            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-lg);
-            transition: all var(--transition-base, 0.3s ease);
-            cursor: pointer;
-            text-decoration: none;
-            display: block;
-            color: inherit;
-            overflow: hidden;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-
-        .deity-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg), 0 0 15px rgba(var(--color-primary-rgb), 0.2);
-            border-color: var(--color-primary);
-            background: rgba(var(--color-primary-rgb), 0.1);
-            text-decoration: none;
-        }
-
-        .deity-card h3 {
-            color: var(--color-primary);
-            margin-top: 0.5rem;
-        }
-
-        .deity-card p {
-            line-height: 1.7;
-        }
-
-        /* Ensure text doesn't overflow card boundaries */
-        .deity-card p,
-        .deity-card h3 {
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .deity-icon {
-            font-size: 2.5rem;
-            text-align: center;
-        }
-
-        /* Section Headers */
         .section-header {
             color: var(--color-primary);
             margin-bottom: var(--spacing-lg);
+            font-size: 2rem;
+            font-weight: 700;
         }
 
-        .card-title {
-            color: var(--color-primary);
-            margin-top: 0;
+        /* Grid Layouts */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
         }
 
-        /* Styled List */
-        .styled-list {
-            line-height: 1.8;
-            padding-left: var(--spacing-lg);
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
         }
 
-        .styled-list li {
-            margin-bottom: var(--spacing-sm);
+        /* Loading States */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            gap: var(--spacing-md);
         }
 
-        .styled-list a {
-            color: var(--color-primary);
-            text-decoration: none;
-            transition: all var(--transition-fast);
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--theme-primary, var(--color-primary));
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .styled-list a:hover {
-            color: var(--color-secondary);
-            text-decoration: underline;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        /* Static Content (preserved from original) */
+        .static-content {
+            margin: 2rem 0;
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .grid-2col {
+            .content-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -229,323 +193,319 @@
             .breadcrumb {
                 font-size: var(--font-size-xs);
                 padding: var(--spacing-xs) var(--spacing-md);
-                top: 50px; /* Smaller header on mobile */
+                top: 50px;
             }
         }
     </style>
 </head>
-<body>
-<div id="theme-picker-container"></div>
-<header>
-    <div class="header-content">
-        <h1>📖 Apocryphal & Enochian Mythology</h1>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../mythos/index.html">Home</a> →
-            <span aria-current="page">Apocryphal Mythology</span>
-</nav>
+<body data-theme="apocryphal">
+    <!-- Theme Picker Container -->
+    <div id="theme-picker"></div>
+    <div id="theme-picker-container"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>📜 Apocryphal Mythology</h1>
+            <div id="user-auth-nav"></div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../mythos/index.html">Home</a> →
+        <span aria-current="page">Apocryphal Mythology</span>
+    </nav>
+
     <main>
+        <!-- Hero Section -->
         <div class="hero-section">
-            <div class="hero-icon-display">📖✨</div>
-            <h2>Hidden Wisdom of the Apocryphal & Enochian Traditions</h2>
+            <div class="hero-icon-display">📜</div>
+            <h2>Apocryphal Mythology</h2>
             <p class="hero-description">
-                Explore the hidden wisdom of apocryphal texts and Enochian mysteries. Discover the Books of Enoch,
-                the Watchers who fell from heaven, the Nephilim giants, and the angelic hierarchies revealed to
-                the prophet Enoch. Journey through the seven heavens, learn the secret names of angels and demons,
-                and uncover the esoteric knowledge forbidden from canonical scripture. These ancient texts preserve
-                traditions of celestial rebellion, divine judgment, and secret wisdom that shaped Jewish mysticism,
-                early Christianity, and Western esotericism for millennia.
+                Explore the hidden texts and alternative scriptures excluded from canonical Bibles. From the Book of Enoch to Gnostic gospels, uncover the mysterious teachings and divine secrets known only to the initiated.
             </p>
         </div>
 
-        <section style="margin-top: var(--spacing-xl);">
-            <h2 class="section-header">✨ Core Concepts</h2>
-            <div class="deity-grid">
-                <div class="glass-card">
-                    <div class="deity-icon">👁️</div>
-                    <h3 class="card-title">The Watchers</h3>
-                    <p style="line-height: 1.7;">The fallen angels who descended to Earth and taught forbidden knowledge to humanity.</p>
-                </div>
-                <div class="glass-card">
-                    <div class="deity-icon">⚔️</div>
-                    <h3 class="card-title">Nephilim</h3>
-                    <p style="line-height: 1.7;">The giant offspring of angels and humans, heroes of old and mighty warriors.</p>
-                </div>
-                <div class="glass-card">
-                    <div class="deity-icon">🌌</div>
-                    <h3 class="card-title">Seven Heavens</h3>
-                    <p style="line-height: 1.7;">The celestial realms through which Enoch journeyed to witness divine mysteries.</p>
-                </div>
-                <div class="glass-card">
-                    <div class="deity-icon">📜</div>
-                    <h3 class="card-title">Hidden Wisdom</h3>
-                    <p style="line-height: 1.7;">Secret knowledge of astronomy, herbalism, divination, and the nature of reality.</p>
-                </div>
-                <div class="glass-card">
-                    <div class="deity-icon">⚡</div>
-                    <h3 class="card-title">Angelic Names</h3>
-                    <p style="line-height: 1.7;">The sacred names and offices of angels, archangels, and celestial beings.</p>
-                </div>
-                <div class="glass-card">
-                    <div class="deity-icon">🔥</div>
-                    <h3 class="card-title">Divine Judgment</h3>
-                    <p style="line-height: 1.7;">Prophecies of the end times, the final judgment, and the fate of the wicked.</p>
-                </div>
+        <!-- ============================================
+             FIREBASE-LOADED DYNAMIC CONTENT SECTIONS
+             These sections load from Firestore
+             ============================================ -->
+
+        <!-- Deities Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">⚡ Deities</h2>
+            <div id="deities-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading deities from Firebase...</p>
             </div>
+            <div id="deities-container" class="content-grid" style="display: none;"></div>
         </section>
 
-        <section style="margin-top: var(--spacing-xl);">
-            <h2 class="section-header">📚 Explore Apocryphal Traditions</h2>
-            <div class="deity-grid">
-                <a class="deity-card" href="angels/index.html">
-                    <div class="deity-icon">👼</div>
-                    <h3>Angels & Watchers</h3>
-                    <p>Metatron, Uriel, Azazel, Samyaza, and the celestial hierarchies</p>
-                </a>
-                <a class="deity-card" href="cosmology/index.html">
-                    <div class="deity-icon">🌠</div>
-                    <h3>Cosmology</h3>
-                    <p>The structure of heaven, the throne of God, and the celestial temple</p>
-                </a>
-                <a class="deity-card" href="heroes/index.html">
-                    <div class="deity-icon">📿</div>
-                    <h3>Prophets & Seers</h3>
-                    <p>Enoch, Elijah, and those who walked with God</p>
-                </a>
-                <a class="deity-card" href="creatures/index.html">
-                    <div class="deity-icon">🐉</div>
-                    <h3>Creatures & Giants</h3>
-                    <p>Nephilim, Leviathan, Behemoth, and the beasts of apocalypse</p>
-                </a>
-                <a class="deity-card" href="magic/index.html">
-                    <div class="deity-icon">✨</div>
-                    <h3>Forbidden Knowledge</h3>
-                    <p>The arts taught by the Watchers: astrology, metallurgy, enchantments</p>
-                </a>
-                <a class="deity-card" href="texts/index.html">
-                    <div class="deity-icon">📖</div>
-                    <h3>Sacred Texts</h3>
-                    <p>Books of Enoch, Jubilees, Testament of Solomon, and other apocrypha</p>
-                </a>
+        <!-- Heroes Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🦸 Heroes & Legendary Mortals</h2>
+            <div id="heroes-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading heroes from Firebase...</p>
             </div>
+            <div id="heroes-container" class="content-grid" style="display: none;"></div>
         </section>
 
-        <section style="margin-top: var(--spacing-xl);">
-            <h2 class="section-header">🎨 Interactive Visualizations</h2>
-            <div class="glass-card" style="margin-bottom: var(--spacing-lg);">
-                <h3 class="card-title" style="text-align: center; margin-bottom: var(--spacing-md);">Explore Enochian Knowledge Visually</h3>
-                <p style="text-align: center; margin-bottom: var(--spacing-lg); line-height: 1.7;">
-                    Journey through interactive diagrams and visualizations that make the complex mysteries of Enochian
-                    cosmology, angelology, and sacred texts easier to understand. Experience the seven heavens, explore
-                    dimensional portals, and discover the celestial temple architecture.
-                </p>
-                <div class="deity-grid">
-                    <a class="deity-card" href="enoch-visualizations.html">
-                        <div class="deity-icon">🌟</div>
-                        <h3>Seven Heavens Journey</h3>
-                        <p>Interactive ascent through all seven heavens, Watchers' fall, and Nephilim family tree</p>
-                    </a>
-                    <a class="deity-card" href="cosmology-map.html">
-                        <div class="deity-icon">🗺️</div>
-                        <h3>3D Cosmology Map</h3>
-                        <p>Explore the Merkabah throne, storehouses, judgment locations, and vertical cosmic structure</p>
-                    </a>
-                    <a class="deity-card" href="portals-and-gates.html">
-                        <div class="deity-icon">🚪</div>
-                        <h3>Portals & Gates</h3>
-                        <p>Timeline of heavenly gates, access requirements, journey paths, and dimensional portals</p>
-                    </a>
-                    <a class="deity-card" href="temple-mysteries.html">
-                        <div class="deity-icon">🏛️</div>
-                        <h3>Temple & Mysteries</h3>
-                        <p>Celestial temple floor plan, angelic hierarchy, forbidden knowledge, and mysteries explained</p>
-                    </a>
-                </div>
+        <!-- Creatures Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🐉 Creatures & Monsters</h2>
+            <div id="creatures-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading creatures from Firebase...</p>
             </div>
+            <div id="creatures-container" class="content-grid" style="display: none;"></div>
         </section>
 
-        <section style="margin-top: var(--spacing-xl);">
-            <h2 class="section-header">📖 Primary Sources</h2>
-            <div class="glass-card">
-                <ul class="styled-list">
-                    <li><strong>1 Enoch (Ethiopic Enoch)</strong> - The most complete Enochian text, detailing the Watchers and celestial journeys (3rd-1st century BCE)</li>
-                    <li><strong>2 Enoch (Slavonic Enoch)</strong> - Account of Enoch's ascent through the heavens (1st century CE)</li>
-                    <li><strong>3 Enoch (Hebrew Enoch)</strong> - Transformation of Enoch into the angel Metatron (5th-6th century CE)</li>
-                    <li><strong>Book of Jubilees</strong> - Retelling of Genesis with expanded angelology (2nd century BCE)</li>
-                    <li><strong>Book of Giants</strong> - Dead Sea Scroll fragments about the Nephilim (2nd-1st century BCE)</li>
-                    <li><strong>Testament of Solomon</strong> - King Solomon's mastery over demons (1st-3rd century CE)</li>
-                    <li><strong>Apocalypse of Abraham</strong> - Visions of creation and the end times (1st-2nd century CE)</li>
-                </ul>
+        <!-- Cosmology Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🌌 Cosmology & Sacred Places</h2>
+            <div id="cosmology-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading cosmology from Firebase...</p>
             </div>
+            <div id="cosmology-container" class="content-grid" style="display: none;"></div>
         </section>
 
-        <section style="margin-top: var(--spacing-xl);">
-            <h2 class="section-header">🔗 Related Traditions</h2>
-            <div class="grid-2col">
-                <div class="glass-card">
-                    <h3 class="card-title">Cross-Cultural Connections</h3>
-                    <ul class="styled-list">
-                        <li><a href="../jewish/index.html">Jewish Mythology</a> - Foundation for Enochian traditions and Kabbalah</li>
-                        <li><a href="../christian/index.html">Christian Mythology</a> - Early Christian apocalyptic literature and angelology</li>
-                        <li><a href="../christian/gnostic/christ-redeemer/index.html">Gnostic Traditions</a> - Shared themes of hidden knowledge and archons</li>
-                        <li><a href="../sumerian/index.html">Sumerian Mythology</a> - Ancient parallels to the Watchers narrative</li>
-                    </ul>
-                </div>
-                <div class="glass-card">
-                    <h3 class="card-title">Similar Concepts Across Traditions</h3>
-                    <ul class="styled-list">
-                        <li><strong>Divine Rebellion:</strong> Watchers (Apocryphal) ↔ Titans (Greek) ↔ Asuras (Hindu)</li>
-                        <li><strong>Giant Offspring:</strong> Nephilim (Apocryphal) ↔ Titans (Greek) ↔ Jotnar (Norse)</li>
-                        <li><strong>Heavenly Ascent:</strong> Enoch (Apocryphal) ↔ Elijah (Jewish) ↔ Muhammad (Islamic)</li>
-                        <li><strong>Secret Knowledge:</strong> Watchers' teachings ↔ Prometheus's gift (Greek) ↔ Oannes (Sumerian)</li>
-                    </ul>
-                </div>
+        <!-- Texts Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">📚 Sacred Texts</h2>
+            <div id="texts-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading texts from Firebase...</p>
             </div>
+            <div id="texts-container" class="content-grid" style="display: none;"></div>
         </section>
-        <!-- Interlink Panel Section -->
-        <section class="interlink-panel" style="margin-top: 3rem;">
+
+        <!-- Herbs Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🌿 Sacred Plants & Herbalism</h2>
+            <div id="herbs-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading herbs from Firebase...</p>
+            </div>
+            <div id="herbs-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Rituals Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🔮 Rituals & Practices</h2>
+            <div id="rituals-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading rituals from Firebase...</p>
+            </div>
+            <div id="rituals-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Symbols Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🔱 Sacred Symbols</h2>
+            <div id="symbols-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading symbols from Firebase...</p>
+            </div>
+            <div id="symbols-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Concepts Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">💭 Mystical Concepts</h2>
+            <div id="concepts-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading concepts from Firebase...</p>
+            </div>
+            <div id="concepts-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Myths Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">📖 Myths & Legends</h2>
+            <div id="myths-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading myths from Firebase...</p>
+            </div>
+            <div id="myths-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- ============================================
+             STATIC CUSTOM CONTENT (PRESERVED)
+             Add any mythology-specific static content here
+             ============================================ -->
+        <div class="static-content">
+            <!-- Add custom static content here -->
+        </div>
+
+        <!-- Cross-Cultural Parallels Section -->
+        <section class="interlink-panel" style="margin-top: var(--spacing-xl, 3rem);">
             <h3 class="interlink-header">
-                <span class="interlink-icon">🔗</span>
-                Related Across the Mythos
+                <span class="interlink-icon">🌍</span>
+                Cross-Cultural Parallels
             </h3>
-
-            <div class="interlink-grid">
-                <!-- Archetype Section -->
-                <div class="interlink-section">
-                    <div class="interlink-section-title">Archetypes</div>
-                    <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
-                        <div class="archetype-badge">👁️ FALLEN REBEL</div>
-                        <p class="archetype-context">The Watchers embody the Fallen Rebel archetype - celestial beings who transgress divine law for forbidden knowledge or desire.</p>
-                        <span class="see-parallels">See parallels: Prometheus, Lucifer, Azazel</span>
-                    </a>
-                    <a href="../../archetypes/celestial/index.html" class="archetype-link-card" style="margin-top: var(--spacing-sm);">
-                        <div class="archetype-badge">📯 DIVINE MESSENGER</div>
-                        <p class="archetype-context">Archangels like Michael and Gabriel serve as Divine Messengers bridging heaven and earth.</p>
-                        <span class="see-parallels">See parallels: Hermes, Mercury, Thoth</span>
-                    </a>
-                </div>
-
-                <!-- Related Traditions Section -->
-                <div class="interlink-section">
-                    <div class="interlink-section-title">Related Traditions</div>
-                    <a href="../jewish/index.html" class="item-link-card">
-                        <div class="item-icon">✡️</div>
-                        <div class="item-info">
-                            <h4>Jewish Kabbalah</h4>
-                            <p class="item-type">Mystical Foundation</p>
-                            <p class="item-context">Source of Merkabah mysticism</p>
-                        </div>
-                    </a>
-                    <a href="../christian/index.html" class="item-link-card" style="margin-top: var(--spacing-sm);">
-                        <div class="item-icon">✝️</div>
-                        <div class="item-info">
-                            <h4>Christian Angelology</h4>
-                            <p class="item-type">Canonical Connection</p>
-                            <p class="item-context">Shared angelic hierarchies</p>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Sacred Texts Section -->
-                <div class="interlink-section">
-                    <div class="interlink-section-title">Key Texts</div>
-                    <a href="texts/index.html" class="magic-link-card">
-                        <div class="magic-icon">📜</div>
-                        <div class="magic-info">
-                            <h4>Books of Enoch</h4>
-                            <p class="magic-type">Primary Sources</p>
-                        </div>
-                        <span class="tradition-badge apocryphal">Enochian</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Cross-Cultural Parallels -->
-            <div class="parallel-traditions glass-card" style="margin-top: var(--spacing-lg);">
-                <h4>🌍 Cross-Cultural Parallels</h4>
-                <div class="parallel-grid">
-                    <a href="../../herbalism/traditions/jewish/index.html" class="parallel-card">
-                        <span class="tradition-flag">✡️</span>
-                        <span class="parallel-name">Malachim</span>
-                        <span class="tradition-label">Jewish Angels</span>
-                    </a>
-                    <a href="angels/index.html" class="parallel-card">
-                        <span class="tradition-flag">☪️</span>
-                        <span class="parallel-name">Mala'ika</span>
-                        <span class="tradition-label">Islamic Angels</span>
-                    </a>
-                    <a href="../../archetypes/celestial/index.html" class="parallel-card">
-                        <span class="tradition-flag">🔥</span>
-                        <span class="parallel-name">Yazatas</span>
-                        <span class="tradition-label">Zoroastrian</span>
-                    </a>
-                    <a href="../christian/gnostic/christ-redeemer/index.html" class="parallel-card">
-                        <span class="tradition-flag">🌟</span>
-                        <span class="parallel-name">Archons</span>
-                        <span class="tradition-label">Gnostic</span>
-                    </a>
-                    <a href="../greek/beings/index.html" class="parallel-card">
-                        <span class="tradition-flag">⚡</span>
-                        <span class="parallel-name">Titans</span>
-                        <span class="tradition-label">Greek Rebels</span>
-                    </a>
-                </div>
+            <p style="margin-bottom: var(--spacing-lg); color: var(--color-text-secondary);">
+                Explore how Apocryphal mythology connects with other world traditions through shared themes and archetypes.
+            </p>
+            <div class="parallel-grid">
+                <!-- Parallel mythology links will be added here -->
             </div>
         </section>
 
-        <!-- See Also Section -->
-        <div class="see-also-section">
-            <h4>📚 See Also</h4>
-            <div class="see-also-links">
-                <a href="../jewish/kabbalah/index.html" class="see-also-link">
-                    <span>🕎</span> Kabbalah
-                </a>
-                <a href="../../index.html" class="see-also-link">
-                    <span>🔥</span> Merkabah Mysticism
-                </a>
-                <a href="angels/index.html" class="see-also-link">
-                    <span>👼</span> Christian Angels
-                </a>
-                <a href="../islamic/cosmology/index.html" class="see-also-link">
-                    <span>🌙</span> Islamic Jinn
-                </a>
-                <a href="../christian/gnostic/christ-redeemer/index.html" class="see-also-link">
-                    <span>✨</span> Gnostic Aeons
-                </a>
-                <a href="../sumerian/cosmology/index.html" class="see-also-link">
-                    <span>🏛️</span> Anunnaki
-                </a>
-                <a href="../../archetypes/celestial/index.html" class="see-also-link">
-                    <span>🌌</span> Cosmic Order
-                </a>
-                <a href="../../archetypes/celestial/index.html" class="see-also-link">
-                    <span>🔮</span> Western Esotericism
-                </a>
-            </div>
-        </div>
-
-        <!-- USER THEORIES SECTION -->
-        <section style="margin-top: var(--spacing-2xl);">
-            <h2 class="section-header" style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">🔬 User-Submitted Theories: Enochian Cosmology & Physics</h2>
-            <p style="margin-bottom: var(--spacing-lg); line-height: var(--leading-relaxed); color: var(--color-text-secondary);">
-                Explore speculative theories connecting the Book of Enoch cosmology with modern dimensional physics frameworks. These are user-contributed explorations of potential correlations between ancient apocryphal texts and contemporary physics.
-            </p>
-            <div class="glass-card" style="margin-bottom: var(--spacing-lg);">
-                <h3 style="color: var(--color-primary); margin-top: 0;">🌌 <a href="../../theories/user-submissions/enoch-cosmology-physics.html" style="color: var(--color-primary);">Book of Enoch: 10 Heavens as Dimensional Cascade</a></h3>
-                <p style="margin-bottom: var(--spacing-md); line-height: var(--leading-relaxed);">
-                    A comprehensive exploration mapping the 10 Heavens described in the Book of Enoch to the dimensional cascade from 26D bulk spacetime down to 4D reality. Includes correlations between the Watchers and higher-dimensional beings, the four archangels as the 1+3 brane portal pattern, and the Nephilim as cross-brane condensates. Features analysis of the 1+3 brane structure with α₄, α₅ asymmetry.
-                </p>
-                <a href="../../theories/user-submissions/enoch-cosmology-physics.html" class="btn btn-primary">Read Full Theory →</a>
+        <!-- Related Traditions -->
+        <section style="margin-top: var(--spacing-xl, 3rem);">
+            <h2 class="section-header">🔗 Related Traditions</h2>
+            <div class="glass-card">
+                <h3>Explore Other Mythologies</h3>
+                <div class="button-grid" style="display: flex; flex-wrap: wrap; gap: var(--spacing-md);">
+                    <a class="btn btn-secondary" href="../greek/index.html">Greek</a>
+                    <a class="btn btn-secondary" href="../roman/index.html">Roman</a>
+                    <a class="btn btn-secondary" href="../norse/index.html">Norse</a>
+                    <a class="btn btn-secondary" href="../egyptian/index.html">Egyptian</a>
+                    <a class="btn btn-secondary" href="../hindu/index.html">Hindu</a>
+                    <a class="btn btn-secondary" href="../buddhist/index.html">Buddhist</a>
+                    <a class="btn btn-secondary" href="../celtic/index.html">Celtic</a>
+                    <a class="btn btn-secondary" href="../christian/index.html">Christian</a>
+                    <a class="btn btn-secondary" href="../islamic/index.html">Islamic</a>
+                    <a class="btn btn-secondary" href="../jewish/index.html">Jewish</a>
+                </div>
             </div>
         </section>
     </main>
+
+    <!-- Footer -->
     <footer>
         <p>
-            <strong>Apocryphal & Enochian Mythology</strong> - World Mythos Explorer<br>
+            <strong>Apocryphal Mythology</strong> - World Mythos Explorer<br>
             <a href="../../mythos/index.html">Back to World Mythos Home</a> |
             <a href="../../index.html">Main Site</a>
         </p>
     </footer>
+
+    <!-- Auto-inject submission button -->
+    <script>
+        if (window.SubmissionLink) {
+            window.SubmissionLink.autoInject();
+        }
+    </script>
+
+    <!-- Firebase SDK (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script src="../../firebase-config.js"></script>
+
+    <!-- Firebase Content Loader (Module) -->
+    <script type="module">
+        import { FirebaseContentLoader } from '../../FIREBASE/js/firebase-content-loader.js';
+
+        // Wait for Firebase to initialize
+        window.addEventListener('load', async () => {
+            try {
+                // Check if Firebase is initialized
+                if (!window.firebaseApp || !window.firebaseDb) {
+                    console.error('[Index] Firebase not initialized');
+                    showGlobalError('Firebase is not configured. Please check firebase-config.js');
+                    return;
+                }
+
+                console.log('[Index] Initializing Firebase Content Loader for apocryphal');
+
+                // Create content loader instance
+                const loader = new FirebaseContentLoader(window.firebaseApp);
+                const mythology = 'apocryphal'; // e.g., 'greek', 'norse', 'egyptian'
+
+                // Content types to load
+                const contentTypes = [
+                    { type: 'deities', container: 'deities-container', loading: 'deities-loading' },
+                    { type: 'heroes', container: 'heroes-container', loading: 'heroes-loading' },
+                    { type: 'creatures', container: 'creatures-container', loading: 'creatures-loading' },
+                    { type: 'cosmology', container: 'cosmology-container', loading: 'cosmology-loading' },
+                    { type: 'texts', container: 'texts-container', loading: 'texts-loading' },
+                    { type: 'herbs', container: 'herbs-container', loading: 'herbs-loading' },
+                    { type: 'rituals', container: 'rituals-container', loading: 'rituals-loading' },
+                    { type: 'symbols', container: 'symbols-container', loading: 'symbols-loading' },
+                    { type: 'concepts', container: 'concepts-container', loading: 'concepts-loading' },
+                    { type: 'myths', container: 'myths-container', loading: 'myths-loading' }
+                ];
+
+                // Load each content type
+                for (const { type, container, loading } of contentTypes) {
+                    try {
+                        console.log(`[Index] Loading ${type} for ${mythology}...`);
+
+                        // Load content filtered by mythology
+                        await loader.loadContent(type, { mythology: mythology });
+
+                        // Hide loading, show container
+                        const loadingEl = document.getElementById(loading);
+                        const containerEl = document.getElementById(container);
+
+                        if (loadingEl) loadingEl.style.display = 'none';
+                        if (containerEl) containerEl.style.display = 'grid';
+
+                        // Render content
+                        loader.renderContent(container, type);
+
+                        console.log(`[Index] ✓ ${type} loaded successfully`);
+
+                    } catch (error) {
+                        console.error(`[Index] Error loading ${type}:`, error);
+
+                        // Hide loading, show error
+                        const loadingEl = document.getElementById(loading);
+                        const containerEl = document.getElementById(container);
+
+                        if (loadingEl) {
+                            loadingEl.innerHTML = `
+                                <div class="error-container">
+                                    <div class="error-title">Failed to load ${type}</div>
+                                    <div class="error-message">${error.message}</div>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+
+                console.log('[Index] All content loaded successfully');
+
+            } catch (error) {
+                console.error('[Index] Fatal error:', error);
+                showGlobalError('Failed to load content: ' + error.message);
+            }
+        });
+
+        function showGlobalError(message) {
+            document.querySelectorAll('.loading-container').forEach(el => {
+                el.innerHTML = `
+                    <div class="error-container">
+                        <div class="error-title">Error</div>
+                        <div class="error-message">${message}</div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>

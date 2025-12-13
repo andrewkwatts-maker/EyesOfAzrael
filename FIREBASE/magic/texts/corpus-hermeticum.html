@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corpus Hermeticum - Hermetic Dialogues</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-relaxed);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--spacing-4xl) var(--spacing-xl);
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .text-icon {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            margin-bottom: var(--spacing-md);
+            color: white;
+        }
+
+        .subtitle {
+            font-size: var(--font-size-2xl);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: var(--spacing-lg);
+            font-weight: var(--font-light);
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-lg);
+        }
+
+        .tradition-tag {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+        }
+
+        .breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-lg);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .breadcrumb a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: white;
+        }
+
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        h2 {
+            color: var(--color-primary);
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-lg);
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: var(--spacing-md);
+        }
+
+        h3 {
+            color: var(--color-secondary);
+            font-size: var(--font-size-2xl);
+            margin: var(--spacing-xl) 0 var(--spacing-md);
+        }
+
+        h4 {
+            color: var(--color-accent);
+            font-size: var(--font-size-xl);
+            margin: var(--spacing-lg) 0 var(--spacing-sm);
+        }
+
+        p {
+            margin-bottom: var(--spacing-md);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin: var(--spacing-md) 0 var(--spacing-md) var(--spacing-2xl);
+            line-height: var(--leading-relaxed);
+        }
+
+        li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .quote-box {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.15),
+                rgba(var(--color-secondary-rgb), 0.15));
+            border-left: 4px solid var(--color-primary);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+            border-radius: var(--radius-md);
+            font-family: var(--font-heading);
+            font-size: var(--font-size-lg);
+            line-height: var(--leading-loose);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-secondary-rgb), 0.15);
+            border: 2px solid var(--color-secondary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .source-card {
+            background: rgba(var(--color-accent-rgb, 139, 127, 255), 0.1);
+            border: 1px solid var(--color-border);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-md) 0;
+            border-radius: var(--radius-md);
+        }
+
+        .source-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .cross-ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .cross-ref-card {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 2px solid var(--color-border);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .cross-ref-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--color-primary);
+            box-shadow: 0 5px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .cross-ref-icon {
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .cross-ref-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-3xl);
+        }
+
+        .nav-button {
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+            display: inline-block;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .treatise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .treatise-card {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.15),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border: 2px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+        }
+
+        .treatise-number {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-bold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .treatise-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-secondary);
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        strong {
+            color: var(--color-primary);
+        }
+
+        /* Interlink Panel Styles */
+        .interlink-panel { background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-2xl); margin: var(--spacing-3xl) 0; }
+        .interlink-panel h3 { color: var(--color-primary); font-size: var(--font-size-2xl); margin-bottom: var(--spacing-lg); }
+        .interlink-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-md); }
+        .archetype-link-card, .parallel-card { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); background: rgba(var(--color-primary-rgb), 0.1); border: 1px solid var(--color-border); border-radius: var(--radius-lg); text-decoration: none; transition: all var(--transition-base); }
+        .archetype-link-card:hover, .parallel-card:hover { background: rgba(var(--color-primary-rgb), 0.2); transform: translateY(-2px); }
+        .card-icon { font-size: var(--font-size-2xl); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-primary-rgb), 0.2); border-radius: var(--radius-lg); }
+        .card-content h4 { color: var(--color-text-primary); font-size: var(--font-size-base); margin-bottom: var(--spacing-xs); }
+        .card-content span { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+    </style>
+</head>
+<body>
+    
+    <div id="theme-picker-container"></div>
+<div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Corpus Hermeticum</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Magical Systems</a> →
+                <a href="../index.html#texts">Sacred Texts</a> →
+                <span>Corpus Hermeticum</span>
+</nav>
+
+        <section>
+            <h2>Overview</h2>
+            <p>
+                The <strong>Corpus Hermeticum</strong> is a collection of Greek texts presenting the wisdom teachings of
+                <strong>Hermes Trismegistus</strong> ("Thrice-Great Hermes"), a legendary sage combining the Greek god
+                Hermes with the Egyptian god Thoth. These dialogues between Hermes and his students explore the nature of
+                the divine, the cosmos, humanity, and the path to spiritual enlightenment through gnosis (direct knowledge).
+                For over a millennium, these texts shaped Western philosophy, religion, and magic as foundational documents
+                of the Hermetic tradition.
+            </p>
+
+            <h3>Historical Context & Composition</h3>
+            <p>
+                The texts were composed in Greco-Roman Egypt between the <strong>1st and 3rd centuries CE</strong>, during
+                a period of intense religious and philosophical syncretism:
+            </p>
+
+            <ul>
+                <li><strong>Cultural Context:</strong> Alexandria and other Egyptian cities were centers where Greek
+                    philosophy (Platonism, Stoicism, Pythagoreanism), Egyptian religion, Jewish mysticism, and Persian
+                    ideas mingled freely</li>
+                <li><strong>Authorship:</strong> While attributed to a single legendary author (Hermes Trismegistus), the
+                    texts were likely written by multiple Greek-speaking Egyptian intellectuals over several generations</li>
+                <li><strong>Original Collection:</strong> The surviving Greek corpus consists of 17 tractates (treatises),
+                    though many more Hermetic texts existed in antiquity</li>
+                <li><strong>Related Texts:</strong> The <em>Asclepius</em> (Latin), <em>Stobaean Fragments</em> (preserved
+                    by Stobaeus), and other Hermetic writings complement the core corpus</li>
+            </ul>
+
+            <h3>Rediscovery in the Renaissance</h3>
+            <p>
+                The Corpus Hermeticum's impact on European thought was incalculable after its dramatic rediscovery:
+            </p>
+
+            <ul>
+                <li><strong>1460 CE:</strong> A Byzantine monk brings a Greek manuscript of the Corpus to Florence</li>
+                <li><strong>1463 CE:</strong> Cosimo de' Medici commands Marsilio Ficino to halt his Plato translation and
+                    immediately translate the Hermetic texts instead - showing their perceived importance</li>
+                <li><strong>Ficino's Translation:</strong> Published as <em>Pimander</em> (after the first treatise), it
+                    became one of the most influential books of the Renaissance</li>
+                <li><strong>Presumed Antiquity:</strong> Renaissance scholars believed Hermes was a contemporary of Moses,
+                    or even earlier, making these texts the most ancient wisdom - older than Plato and rivaling scripture</li>
+                <li><strong>1614 CE:</strong> Isaac Casaubon's philological analysis correctly dated the texts to the early
+                    Christian era, though their influence continued</li>
+            </ul>
+
+            <div class="quote-box">
+                "If then you do not make yourself equal to God, you cannot apprehend God; for like is known by like.
+                Leap clear of all that is corporeal, and make yourself grow to a like expanse with that greatness
+                which is beyond all measure; rise above all time and become eternal; then you will apprehend God.
+                Think that for you too nothing is impossible; deem that you too are immortal, and that you are able
+                to grasp all things in your thought, to know every craft and science; find your home in the haunts
+                of every living creature; make yourself higher than all heights and lower than all depths; bring
+                together in yourself all opposites of quality, heat and cold, dryness and fluidity; think that you
+                are everywhere at once, on land, at sea, in heaven; think that you are not yet begotten, that you
+                are in the womb, that you are young, that you are old, that you have died, that you are in the
+                world beyond the grave; grasp in your thought all of this at once, all times and places, all
+                substances and qualities and magnitudes together; then you can apprehend God."
+                <br><br><em>- Corpus Hermeticum XI:20</em>
+            </div>
+        </section>
+
+        <section>
+            <h2>Key Teachings</h2>
+
+            <h3>The Nature of the Divine</h3>
+            <p>
+                The Hermetic texts present a distinctive theology combining monotheism with Neoplatonic emanationism:
+            </p>
+
+            <div class="highlight-box">
+                <h4>The Supreme God</h4>
+                <ul>
+                    <li><strong>Transcendence:</strong> God is utterly beyond human comprehension, ineffable, eternal,
+                        without beginning or end</li>
+                    <li><strong>Immanence:</strong> Paradoxically, God is also present in all things - "God is all that is,
+                        and all that is is God"</li>
+                    <li><strong>Mind (Nous):</strong> God is primarily Mind or Intelligence, and the cosmos is His thought
+                        made manifest</li>
+                    <li><strong>The Good:</strong> God is identified with the absolute Good, the source of all beauty,
+                        truth, and virtue</li>
+                </ul>
+            </div>
+
+            <h3>The Process of Creation</h3>
+            <p>
+                The Corpus describes creation through a hierarchical emanation from God:
+            </p>
+
+            <ol>
+                <li><strong>The Supreme God:</strong> The unmanifest source, beyond being and non-being</li>
+                <li><strong>Nous (Divine Mind):</strong> The first emanation, the Demiurge or craftsman of the cosmos</li>
+                <li><strong>Logos (Word/Reason):</strong> The divine plan or blueprint of creation</li>
+                <li><strong>The Heavens:</strong> The realm of eternal forms and divine intelligences</li>
+                <li><strong>The Seven Governors:</strong> Planetary powers administering fate and cosmic law</li>
+                <li><strong>Nature (Physis):</strong> The feminine creative principle that generates material forms</li>
+                <li><strong>The Material World:</strong> The realm of generation and corruption, matter and time</li>
+            </ol>
+
+            <h3>The Divine Anthropos</h3>
+            <p>
+                The first treatise, <em>Poimandres</em>, presents a distinctive creation myth centered on the
+                <strong>Anthropos</strong> (primordial human):
+            </p>
+
+            <div class="quote-box">
+                The Nous-Father, being Light and Life, brought forth the Anthropos (Man) in his own image.
+                This divine Man, beholding the beautiful form of the Demiurge reflected in Nature's watery mirror,
+                fell in love with his own image and descended through the seven spheres. Each planetary governor
+                contributed something to his nature. United with Nature, humanity became both divine and mortal,
+                partaking of eternity and time, subject to fate yet capable of liberation through knowledge.
+                <br><br><em>- Summarized from Poimandres (CH I)</em>
+            </div>
+
+            <p>
+                This myth explains humanity's dual nature - we are spiritual beings (the divine Anthropos) trapped in
+                material bodies, yet retaining the capacity for divine knowledge and return to our source.
+            </p>
+
+            <h3>The Path of Gnosis</h3>
+            <p>
+                The central soteriology (doctrine of salvation) in the Corpus is through <strong>gnosis</strong> -
+                direct experiential knowledge of the divine:
+            </p>
+
+            <ul>
+                <li><strong>Ignorance as Sin:</strong> The primary human problem is ignorance (agnoia) of our divine
+                    nature and source</li>
+                <li><strong>Self-Knowledge:</strong> "Know thyself" - understanding that the divine dwells within leads
+                    to liberation</li>
+                <li><strong>Regeneration (Palingenesia):</strong> Through gnosis, one undergoes spiritual rebirth,
+                    putting off the material nature and being reborn in Nous</li>
+                <li><strong>Ascent Through the Spheres:</strong> The enlightened soul ascends back through the planetary
+                    spheres, surrendering to each its characteristic vice, until pure divine essence reunites with God</li>
+                <li><strong>Deification (Theosis):</strong> The ultimate goal is becoming god-like, not through pride
+                    but through recognizing one's essential divine nature</li>
+            </ul>
+
+            <h3>Hermetic Psychology & Ethics</h3>
+            <p>
+                The texts present a sophisticated psychology and ethical system:
+            </p>
+
+            <div class="highlight-box">
+                <h4>The Faculties of the Soul</h4>
+                <ul>
+                    <li><strong>Nous (Mind):</strong> The divine spark within, capable of knowing God</li>
+                    <li><strong>Logos (Reason):</strong> The rational faculty that should govern the lower nature</li>
+                    <li><strong>Thymos (Passion/Spirit):</strong> The emotional nature, which can support reason or sink
+                        to irrationality</li>
+                    <li><strong>Epithymia (Desire):</strong> The appetitive soul oriented toward material satisfactions</li>
+                </ul>
+
+                <h4>The Hermetic Virtues</h4>
+                <p>The texts advocate a life of philosophical and spiritual discipline:</p>
+                <ul>
+                    <li><strong>Gnosis:</strong> Seeking knowledge of divine things through contemplation and philosophy</li>
+                    <li><strong>Silence:</strong> Controlling speech and practicing inner stillness</li>
+                    <li><strong>Continence:</strong> Mastering bodily desires and passions</li>
+                    <li><strong>Endurance:</strong> Accepting life's trials with equanimity</li>
+                    <li><strong>Justice:</strong> Living virtuously and harmoniously with divine law</li>
+                    <li><strong>Piety:</strong> Proper reverence toward the divine and gratitude for existence</li>
+                </ul>
+            </div>
+
+            <h3>Cosmological Principles</h3>
+            <p>
+                Several key principles govern the Hermetic understanding of reality:
+            </p>
+
+            <ul>
+                <li><strong>Correspondence:</strong> "As above, so below" - the microcosm mirrors the macrocosm</li>
+                <li><strong>Universal Mind:</strong> All of reality is fundamentally mental - matter is condensed thought</li>
+                <li><strong>Sympathy:</strong> All parts of the cosmos are interconnected through invisible bonds</li>
+                <li><strong>Emanation & Return:</strong> All things flow from God and ultimately return to God</li>
+                <li><strong>The Living Universe:</strong> The cosmos is a living being, ensouled and divine</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Structure & Contents: The Seventeen Treatises</h2>
+
+            <div class="treatise-grid">
+                <div class="treatise-card">
+                    <div class="treatise-number">I</div>
+                    <div class="treatise-title">Poimandres (The Shepherd of Men)</div>
+                    <p>Vision of creation, the divine Anthropos, the fall into matter, and the path of return through gnosis.
+                    The most famous and influential treatise.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">II</div>
+                    <div class="treatise-title">To Asclepius</div>
+                    <p>Universal Discourse - The cosmos as God's second emanation, the importance of understanding divine
+                    works, and the role of humanity as cosmic priest.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">III</div>
+                    <div class="treatise-title">Sacred Discourse</div>
+                    <p>Meditation on God as source of all being, the creative Word, and the hierarchical generation of
+                    the cosmos through divine powers.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">IV</div>
+                    <div class="treatise-title">The Mixing Bowl (Krater)</div>
+                    <p>God sends down a bowl filled with Nous for those who seek immortality. Only those who immerse
+                    themselves in Mind can achieve gnosis.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">V</div>
+                    <div class="treatise-title">That God is Invisible and Most Manifest</div>
+                    <p>Paradoxical teaching that God is simultaneously invisible to the material senses yet supremely
+                    visible to the eye of Nous.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">VI</div>
+                    <div class="treatise-title">The Good is in God Alone</div>
+                    <p>Only God is truly good; all earthly goods are relative and impermanent. True goodness is
+                    participation in the divine nature.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">VII</div>
+                    <div class="treatise-title">Ignorance of God is the Greatest Evil</div>
+                    <p>Evil results from ignorance of the divine. Knowledge of God naturally leads to virtue and
+                    liberation from material bondage.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">VIII</div>
+                    <div class="treatise-title">No Being Perishes</div>
+                    <p>Nothing truly dies; what seems like death is merely transformation. The cosmos is eternal,
+                    and all changes are modifications within divine Mind.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">IX</div>
+                    <div class="treatise-title">Understanding and Sensation</div>
+                    <p>Distinction between sensory knowledge (unreliable, material) and intellectual understanding
+                    (reliable, divine). Only Nous grasps truth.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">X</div>
+                    <div class="treatise-title">The Key</div>
+                    <p>Dialogue on the nature of God, the cosmos, and humanity. God is both transcendent and immanent,
+                    knowable only through analogical understanding.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">XI</div>
+                    <div class="treatise-title">Mind to Hermes</div>
+                    <p>Nous itself speaks to Hermes about how to apprehend God by becoming like God. Source of the
+                    famous meditation on divine omnipresence.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">XII</div>
+                    <div class="treatise-title">Discourse of Hermes to Tat: On the Common Mind</div>
+                    <p>Not all humans possess Nous; only those who cultivate it through philosophy and virtue can
+                    achieve true knowledge and salvation.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">XIII</div>
+                    <div class="treatise-title">Secret Discourse on Regeneration</div>
+                    <p>Initiatory teaching on spiritual rebirth (palingenesia). Tat undergoes mystical transformation,
+                    putting off the twelve vices and assuming ten divine powers.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">XIV</div>
+                    <div class="treatise-title">Health of Mind</div>
+                    <p>Letter to Asclepius on the importance of mental health and proper understanding for spiritual
+                    progress. Includes mystical interpretations of illness.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">XV</div>
+                    <div class="treatise-title">(Lost)</div>
+                    <p>This treatise is missing from the manuscripts. Only the title is preserved.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">XVI</div>
+                    <div class="treatise-title">Definitions to Asclepius</div>
+                    <p>Technical philosophical definitions of key Hermetic concepts including God, cosmos, time,
+                    eternity, matter, soul, and body.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">XVII</div>
+                    <div class="treatise-title">(Fragment)</div>
+                    <p>Brief fragment preserved discussing the relationship between truth and physical manifestation.</p>
+                </div>
+
+                <div class="treatise-card">
+                    <div class="treatise-number">XVIII</div>
+                    <div class="treatise-title">On the Soul Hindered by the Body's Passions</div>
+                    <p>Found separately in some manuscripts. Discusses how bodily desires imprison the soul and
+                    prevent its ascent to God.</p>
+                </div>
+            </div>
+
+            <h3>Related Hermetic Texts</h3>
+            <ul>
+                <li><strong>Asclepius (Perfect Discourse):</strong> Preserved only in Latin, discusses theurgy, the
+                    creation of animated statues, and Egypt as the image of heaven</li>
+                <li><strong>Stobaean Fragments:</strong> Extracts preserved by John Stobaeus (5th century CE) in his
+                    <em>Anthology</em>, including important cosmological and ethical teachings</li>
+                <li><strong>Armenian and Coptic Fragments:</strong> Additional Hermetic material in other languages,
+                    showing the tradition's geographic spread</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Influence & Legacy</h2>
+
+            <h3>Renaissance Philosophy & Magic</h3>
+            <p>
+                The rediscovered Corpus transformed European intellectual life:
+            </p>
+
+            <ul>
+                <li><strong>Marsilio Ficino (1433-1499):</strong> His translation made Hermeticism central to Renaissance
+                    Neoplatonism. Ficino's entire philosophical project built on Hermetic foundations</li>
+                <li><strong>Pico della Mirandola (1463-1494):</strong> Integrated Hermeticism with Kabbalah and
+                    Christian theology in his syncretistic philosophy</li>
+                <li><strong>Giordano Bruno (1548-1600):</strong> Developed a Hermetic philosophy of infinite worlds,
+                    universal animation, and magical memory systems</li>
+                <li><strong>Natural Magic:</strong> The Corpus provided philosophical justification for natural magic
+                    as manipulation of cosmic sympathies</li>
+                <li><strong>Heliocentrism:</strong> Some scholars argue Hermetic sun-worship influenced Copernicus's
+                    willingness to place the Sun at the cosmic center</li>
+            </ul>
+
+            <h3>Scientific Revolution</h3>
+            <p>
+                Hermetic ideas influenced early modern science in complex ways:
+            </p>
+
+            <ul>
+                <li><strong>Active Matter:</strong> The Hermetic concept of living, ensouled matter encouraged
+                    experimental investigation of nature's hidden powers</li>
+                <li><strong>Mathematical Cosmos:</strong> The idea that God created through number and measure supported
+                    mathematical approaches to nature</li>
+                <li><strong>Robert Fludd (1574-1637):</strong> Developed elaborate Hermetic-Rosicrucian cosmology
+                    blending mysticism with proto-scientific inquiry</li>
+                <li><strong>Isaac Newton (1643-1727):</strong> While primarily known for physics, Newton was deeply
+                    engaged with Hermetic alchemy and prisca theologia</li>
+            </ul>
+
+            <h3>Religious & Theological Impact</h3>
+            <p>
+                The Corpus influenced Christian theology and heterodox spiritual movements:
+            </p>
+
+            <ul>
+                <li><strong>Prisca Theologia:</strong> Renaissance theory that all ancient wisdom derived from a
+                    single original revelation, with Hermes as key prophet</li>
+                <li><strong>Christian Hermeticism:</strong> Integration of Hermetic philosophy with Christian theology,
+                    seeing them as mutually illuminating</li>
+                <li><strong>Rosicrucianism:</strong> The 17th-century Rosicrucian manifestos draw heavily on Hermetic
+                    imagery and concepts</li>
+                <li><strong>Freemasonry:</strong> Hermetic ideas influenced Masonic symbolism and degree systems</li>
+                <li><strong>Theosophy & New Thought:</strong> 19th-century esoteric movements revived Hermetic teachings</li>
+            </ul>
+
+            <h3>Modern Occultism</h3>
+            <p>
+                Contemporary magical and spiritual movements continue Hermetic lineages:
+            </p>
+
+            <ul>
+                <li><strong>Hermetic Order of the Golden Dawn:</strong> Late 19th-century magical order synthesizing
+                    Hermetic philosophy with Kabbalah, tarot, and ritual magic</li>
+                <li><strong>The Kybalion (1908):</strong> Anonymous work claiming to present Hermetic principles,
+                    though its relationship to the ancient texts is disputed</li>
+                <li><strong>New Age Movement:</strong> Hermetic concepts like "as above, so below" became New Age staples</li>
+                <li><strong>Perennial Philosophy:</strong> Aldous Huxley and others presented Hermeticism as expression
+                    of universal mystical truth</li>
+            </ul>
+
+            <h3>Academic Study</h3>
+            <p>
+                Modern scholarship has produced sophisticated understanding of Hermeticism:
+            </p>
+
+            <ul>
+                <li><strong>Frances Yates (1899-1981):</strong> Groundbreaking work on Hermeticism's Renaissance influence
+                    in <em>Giordano Bruno and the Hermetic Tradition</em></li>
+                <li><strong>A.J. Festugière (1898-1982):</strong> Definitive French edition and study of the Greek texts</li>
+                <li><strong>Garth Fowden:</strong> <em>The Egyptian Hermes</em> (1986) examined the tradition's continuity
+                    from ancient Egypt through late antiquity</li>
+                <li><strong>Wouter Hanegraaff:</strong> Contemporary scholar analyzing Hermeticism's role in Western esotericism</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Primary Sources & Editions</h2>
+
+            <div class="source-card">
+                <div class="source-title">Hermetica: The Greek Corpus Hermeticum and the Latin Asclepius - Brian Copenhaver (trans.) (1992)</div>
+                <p>
+                    The standard modern English translation with facing Greek/Latin text. Copenhaver's introduction
+                    provides essential historical and philosophical context. Excellent scholarly apparatus with notes
+                    on textual variants and interpretive issues.
+                </p>
+                <p><strong>Publisher:</strong> Cambridge University Press | <strong>ISBN:</strong> 978-0521425438</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Way of Hermes: New Translations of The Corpus Hermeticum - Clement Salaman, Dorine van Oyen, William D. Wharton (trans.) (2000)</div>
+                <p>
+                    Fresh translation emphasizing the spiritual and initiatory dimension of the texts. More accessible
+                    than Copenhaver for general readers while maintaining scholarly rigor. Includes useful commentary
+                    on Hermetic practice.
+                </p>
+                <p><strong>Publisher:</strong> Inner Traditions | <strong>ISBN:</strong> 978-0892815685</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">Giordano Bruno and the Hermetic Tradition - Frances Yates (1964)</div>
+                <p>
+                    Revolutionary study demonstrating Hermeticism's central role in Renaissance thought and the
+                    Scientific Revolution. Essential for understanding the historical impact of the Corpus. Changed
+                    how scholars view the relationship between magic and science.
+                </p>
+                <p><strong>Publisher:</strong> University of Chicago Press | <strong>ISBN:</strong> 978-0226950075</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Egyptian Hermes: A Historical Approach to the Late Pagan Mind - Garth Fowden (1986)</div>
+                <p>
+                    Comprehensive historical study tracing Hermeticism from Pharaonic Egypt through late antiquity.
+                    Examines the texts' relationship to Egyptian religion, Greek philosophy, and early Christianity.
+                    Essential for understanding the tradition's development.
+                </p>
+                <p><strong>Publisher:</strong> Princeton University Press | <strong>ISBN:</strong> 978-0691024981</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Theology of Arithmetic - Robin Waterfield (trans.) (1988)</div>
+                <p>
+                    Though not part of the Corpus Hermeticum, this Pythagorean text attributed to Iamblichus shows
+                    the mathematical mysticism parallel to Hermetic thought. Illuminates the broader philosophical
+                    context in which Hermeticism developed.
+                </p>
+                <p><strong>Publisher:</strong> Phanes Press | <strong>ISBN:</strong> 978-093399972</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">Gnosis: The Nature and History of Gnosticism - Kurt Rudolph (1983)</div>
+                <p>
+                    Comprehensive study of Gnostic movements including Hermeticism. Places the Corpus in context of
+                    other Gnostic texts like Nag Hammadi library. Essential for understanding Hermetic gnosis in
+                    relation to Christian and Jewish Gnosticism.
+                </p>
+                <p><strong>Publisher:</strong> HarperSanFrancisco | <strong>ISBN:</strong> 978-0060670184</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Cross-References & Related Texts</h2>
+
+            <div class="cross-ref-grid">
+                <div class="cross-ref-card" onclick="location.href='emerald-tablet.html'">
+                    <div class="cross-ref-icon">💎</div>
+                    <div class="cross-ref-title">Emerald Tablet</div>
+                    <p>Concise expression of Hermetic principles attributed to Hermes Trismegistus</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='book-of-thoth.html'">
+                    <div class="cross-ref-icon">𓁟</div>
+                    <div class="cross-ref-title">Book of Thoth</div>
+                    <p>Egyptian wisdom tradition underlying Hermetic philosophy</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='picatrix.html'">
+                    <div class="cross-ref-icon">🌟</div>
+                    <div class="cross-ref-title">Picatrix</div>
+                    <p>Medieval application of Hermetic philosophy in astrological magic</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='sefer-yetzirah.html'">
+                    <div class="cross-ref-icon">✡️</div>
+                    <div class="cross-ref-title">Sefer Yetzirah</div>
+                    <p>Parallel Jewish mystical cosmology and emanationism</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../ritual/alchemy.html'">
+                    <div class="cross-ref-icon">⚗️</div>
+                    <div class="cross-ref-title">Alchemy</div>
+                    <p>Practical application of Hermetic principles in material transformation</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../../mythos/egyptian/deities/thoth.html'">
+                    <div class="cross-ref-icon">𓁟</div>
+                    <div class="cross-ref-title">Thoth</div>
+                    <p>Egyptian deity identified with Hermes Trismegistus</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../../mythos/greek/deities/hermes.html'">
+                    <div class="cross-ref-icon">☿</div>
+                    <div class="cross-ref-title">Hermes</div>
+                    <p>Greek deity combined with Thoth to create Hermes Trismegistus</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../../archetypes/celestial/index.html'">
+                    <div class="cross-ref-icon">🎭</div>
+                    <div class="cross-ref-title">Wisdom Traditions</div>
+                    <p>Hermetic gnosis as path to divine wisdom and self-knowledge</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel">
+            <h3>Explore Related Content</h3>
+
+            <h4 style="color: var(--color-secondary); margin: var(--spacing-md) 0;">Archetype Connections</h4>
+            <div class="interlink-grid">
+                <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128218;</div>
+                    <div class="card-content"><h4>The Sage</h4><span>Hermes Trismegistus as teacher of wisdom</span></div>
+                </a>
+                <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#10024;</div>
+                    <div class="card-content"><h4>Divine Child</h4><span>The Anthropos - primordial divine human</span></div>
+                </a>
+                <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128300;</div>
+                    <div class="card-content"><h4>Transformation</h4><span>Gnosis as spiritual rebirth</span></div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--spacing-lg) 0 var(--spacing-md) 0;">Cross-Cultural Parallels</h4>
+            <div class="interlink-grid">
+                <a href="../../mythos/egyptian/deities/thoth.html" class="parallel-card">
+                    <div class="card-icon">&#66335;</div>
+                    <div class="card-content"><h4>Thoth</h4><span>Egyptian wisdom god behind Hermes</span></div>
+                </a>
+                <a href="../../mythos/greek/deities/hermes.html" class="parallel-card">
+                    <div class="card-icon">&#9790;</div>
+                    <div class="card-content"><h4>Hermes</h4><span>Greek god merged with Thoth</span></div>
+                </a>
+                <a href="../../mythos/christian/gnostic/texts/index.html" class="parallel-card">
+                    <div class="card-icon">&#128220;</div>
+                    <div class="card-content"><h4>Gnostic Texts</h4><span>Parallel paths to divine knowledge</span></div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--spacing-lg) 0 var(--spacing-md) 0;">See Also</h4>
+            <div class="interlink-grid">
+                <a href="emerald-tablet.html" class="parallel-card">
+                    <div class="card-icon">&#128142;</div>
+                    <div class="card-content"><h4>Emerald Tablet</h4><span>Hermetic principles in brief form</span></div>
+                </a>
+                <a href="book-of-thoth.html" class="parallel-card">
+                    <div class="card-icon">&#66335;</div>
+                    <div class="card-content"><h4>Book of Thoth</h4><span>Egyptian origins of Hermeticism</span></div>
+                </a>
+                <a href="../ritual/alchemy.html" class="parallel-card">
+                    <div class="card-icon">&#9879;</div>
+                    <div class="card-content"><h4>Alchemy</h4><span>Hermetic philosophy in practice</span></div>
+                </a>
+            </div>
+        </section>
+
+        <div class="nav-buttons">
+            <a href="key-of-solomon.html" class="nav-button">⬅ Previous: Key of Solomon</a>
+            <a href="book-of-thoth.html" class="nav-button">Next: Book of Thoth ➡</a>
+            <a href="../index.html" class="nav-button">📚 Sacred Texts</a>
+            <a href="../../index.html" class="nav-button">🏠 Home</a>
+        </div>
+    </div>
+
+    <!-- Theme Picker UI -->
+</body>
+</html>

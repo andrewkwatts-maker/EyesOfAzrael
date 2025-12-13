@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avalon - Isle of Apples - Sacred Realms</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .location {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            color: var(--color-primary);
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            color: var(--color-primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-icon {
+            font-size: 2.5rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all var(--transition-base);
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .feature-title {
+            color: var(--color-primary);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .tradition-tag {
+            padding: 0.5rem 1rem;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            color: var(--color-text-primary);
+        }
+
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .related-link {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            text-align: center;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .related-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .quote-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        }
+
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .deity-card {
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all var(--transition-base);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .deity-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .list-styled {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .list-styled li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .list-styled li::before {
+            content: '\1F34E';
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+        <div class="header-content">
+            <h1>Avalon</h1>
+        </div>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../index.html">Home</a> &rarr;
+        <a href="../index.html">Sacred Places</a> &rarr;
+        <a href="./index.html">Mythic Realms</a> &rarr;
+        <span>Avalon</span>
+    </nav>
+
+    <main>
+        <div class="hero-section">
+            <div class="hero-icon">\uD83C\uDF4E</div>
+            <h2>Avalon (Ynys Afallach)</h2>
+            <p class="location">The Otherworld - Celtic Britain</p>
+            <p class="subtitle">The Isle of Apples - Where King Arthur Awaits</p>
+            <div class="tradition-tags">
+                <span class="tradition-tag">Celtic</span>
+                <span class="tradition-tag">Arthurian</span>
+                <span class="tradition-tag">Welsh</span>
+                <span class="tradition-tag">British</span>
+            </div>
+        </div>
+
+        <!-- Description and Appearance -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83C\uDFDD\uFE0F</span>
+                Description & Appearance
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                Avalon (Welsh: Ynys Afallach, meaning "Isle of Apples" or "Isle of Afallach") is the legendary
+                island of Celtic and Arthurian mythology, a mystical otherworld where time flows differently,
+                wounds heal miraculously, and the greatest heroes rest until they are needed again. Shrouded
+                in mist and accessible only to those who know the way, Avalon represents the Celtic concept
+                of a blessed otherworld existing alongside but separate from mortal reality.
+            </p>
+
+            <div class="quote-box">
+                "The island of apples which men call 'The Fortunate Isle' is so named because it produces
+                all things of itself; the fields there have no need of farmers to plough them, and Nature alone
+                provides all cultivation. Grain and grapes are produced without tending, and apple trees grow
+                in the woods from the close-clipped grass."
+                - Geoffrey of Monmouth, Vita Merlini
+            </div>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDF4E The Isle of Apples</h3>
+                    <ul class="list-styled">
+                        <li>Endless orchards of magical apple trees</li>
+                        <li>Fruit grants healing and immortality</li>
+                        <li>Trees bear fruit year-round</li>
+                        <li>Golden apples of eternal youth</li>
+                        <li>Air sweet with apple blossom scent</li>
+                        <li>Similar to Greek Hesperides</li>
+                        <li>Celtic otherworld abundance</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDF2B\uFE0F Veiled in Mist</h3>
+                    <ul class="list-styled">
+                        <li>Perpetual mists surround the isle</li>
+                        <li>Hidden from mortal eyes</li>
+                        <li>Visible only to the worthy</li>
+                        <li>Mists part for sacred barges</li>
+                        <li>Located "beyond the sunset"</li>
+                        <li>Neither fully in this world nor the next</li>
+                        <li>Gateway between realms</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\u2728 Eternal Spring</h3>
+                    <ul class="list-styled">
+                        <li>Climate of perpetual mild weather</li>
+                        <li>No harsh winters or scorching summers</li>
+                        <li>Flowers bloom eternally</li>
+                        <li>Green meadows never fade</li>
+                        <li>Crystal clear streams and springs</li>
+                        <li>Birdsong fills the air always</li>
+                        <li>Perfect harmony with nature</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDFF0 Sacred Structures</h3>
+                    <ul class="list-styled">
+                        <li>The Hall of the Nine Priestesses</li>
+                        <li>Healing sanctuaries and gardens</li>
+                        <li>Ancient stone circles</li>
+                        <li>Crystal towers in some versions</li>
+                        <li>Sacred wells of wisdom</li>
+                        <li>Burial mounds of ancient kings</li>
+                        <li>Temple to the Great Goddess</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mythology and Stories -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83D\uDCDC</span>
+                Mythology & Stories
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">\u2694\uFE0F Arthur's Final Voyage</h3>
+                    <p style="margin-bottom: 1rem;">
+                        The most famous legend of Avalon concerns King Arthur's journey there
+                        after his final battle at Camlann.
+                    </p>
+                    <ul class="list-styled">
+                        <li>Mortally wounded fighting Mordred</li>
+                        <li>Sir Bedivere returns Excalibur to the Lady</li>
+                        <li>Three queens arrive in a black barge</li>
+                        <li>Morgan le Fay among the queens</li>
+                        <li>Arthur carried to Avalon for healing</li>
+                        <li>"The Once and Future King"</li>
+                        <li>Will return in Britain's darkest hour</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDDE1\uFE0F Forging of Excalibur</h3>
+                    <p style="margin-bottom: 1rem;">
+                        Some traditions hold that the legendary sword Excalibur was forged
+                        on Avalon by its mystical inhabitants.
+                    </p>
+                    <ul class="list-styled">
+                        <li>Crafted by the fae smiths of Avalon</li>
+                        <li>Imbued with otherworldly magic</li>
+                        <li>The Lady of the Lake guards it</li>
+                        <li>Given to Arthur for his reign</li>
+                        <li>Must return to Avalon when done</li>
+                        <li>Scabbard heals all wounds</li>
+                        <li>Symbol of rightful sovereignty</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83E\uDDD9\u200D\u2640\uFE0F Morgan le Fay</h3>
+                    <p style="margin-bottom: 1rem;">
+                        Morgan le Fay, Arthur's half-sister, is closely associated with Avalon
+                        as both student and eventually ruler.
+                    </p>
+                    <ul class="list-styled">
+                        <li>Trained in magic on Avalon</li>
+                        <li>Became Queen of Avalon</li>
+                        <li>Complex figure: healer and enchantress</li>
+                        <li>Sometimes helps, sometimes opposes Arthur</li>
+                        <li>Brings Arthur to Avalon for healing</li>
+                        <li>Associated with the goddess Morrigan</li>
+                        <li>Embodies Avalon's dual nature</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDCA7 The Lady of the Lake</h3>
+                    <ul class="list-styled">
+                        <li>Guardian spirit of Avalon's waters</li>
+                        <li>Gives Excalibur to Arthur</li>
+                        <li>Raises Lancelot (hence "du Lac")</li>
+                        <li>Various names: Nimue, Viviane, Niniane</li>
+                        <li>Powerful enchantress</li>
+                        <li>Imprisoned Merlin in some tales</li>
+                        <li>Receives Excalibur back after Arthur falls</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDC51 The Nine Priestesses</h3>
+                    <ul class="list-styled">
+                        <li>Nine sisters rule Avalon</li>
+                        <li>Morgan le Fay eldest and chief</li>
+                        <li>Each possesses unique magical gift</li>
+                        <li>Can shapeshift and fly</li>
+                        <li>Heal any wound or illness</li>
+                        <li>Control weather and elements</li>
+                        <li>Guardians of sacred knowledge</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDCDA Literary Evolution</h3>
+                    <ul class="list-styled">
+                        <li><strong>Welsh Tradition:</strong> Annwfn, the otherworld</li>
+                        <li><strong>Geoffrey of Monmouth:</strong> Insula Pomorum</li>
+                        <li><strong>Chr&eacute;tien de Troyes:</strong> Arthurian romance</li>
+                        <li><strong>Layamon's Brut:</strong> Anglo-Norman version</li>
+                        <li><strong>Malory:</strong> Le Morte d'Arthur</li>
+                        <li><strong>Tennyson:</strong> Idylls of the King</li>
+                        <li><strong>Modern:</strong> Marion Zimmer Bradley's Mists</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Associated Figures -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83D\uDC51</span>
+                Associated Figures
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                Avalon is connected to numerous figures from Celtic mythology and Arthurian legend,
+                representing the intersection of ancient goddess worship and medieval romance.
+            </p>
+
+            <div class="deity-grid">
+                <a href="../../mythos/celtic/figures/index.html" class="deity-card">
+                    <div style="font-size: 3rem;">\uD83E\uDDD9\u200D\u2640\uFE0F</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Morgan le Fay</h3>
+                    <p>Queen of Avalon, Arthur's half-sister, powerful enchantress. Trained on
+                    the isle and rules its sisterhood.</p>
+                </a>
+
+                <a href="../../mythos/celtic/figures/index.html" class="deity-card">
+                    <div style="font-size: 3rem;">\u2694\uFE0F</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">King Arthur</h3>
+                    <p>The Once and Future King, brought to Avalon after Camlann. Sleeps
+                    until Britain needs him again.</p>
+                </a>
+
+                <a href="../../mythos/celtic/figures/index.html" class="deity-card">
+                    <div style="font-size: 3rem;">\uD83D\uDCA7</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Lady of the Lake</h3>
+                    <p>Guardian of Excalibur, foster mother of Lancelot. Water goddess
+                    connected to Avalon's lakes.</p>
+                </a>
+
+                <a href="../../mythos/celtic/figures/index.html" class="deity-card">
+                    <div style="font-size: 3rem;">\uD83E\uDDD9</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Merlin</h3>
+                    <p>The great wizard, connected to Avalon through the Lady of the Lake.
+                    In some versions, imprisoned nearby.</p>
+                </a>
+
+                <a href="../../mythos/celtic/deities/morrigan.html" class="deity-card">
+                    <div style="font-size: 3rem;">\uD83E\uDD86</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">The Morrigan</h3>
+                    <p>Irish war goddess, sometimes identified with Morgan le Fay.
+                    Represents the older Celtic goddess behind Avalon.</p>
+                </a>
+
+                <a href="../../mythos/celtic/figures/index.html" class="deity-card">
+                    <div style="font-size: 3rem;">\uD83D\uDC51</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Guinevere</h3>
+                    <p>In some versions, retires to Avalon or a convent associated with
+                    Glastonbury after Arthur's passing.</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Cultural Significance -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83C\uDFDB\uFE0F</span>
+                Cultural Significance
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">\u2618\uFE0F Celtic Otherworld Tradition</h3>
+                    <ul class="list-styled">
+                        <li>Connected to Irish Tir na nOg</li>
+                        <li>Welsh Annwfn (otherworld)</li>
+                        <li>Islands of the Blessed concept</li>
+                        <li>Realm beyond the western sea</li>
+                        <li>Pre-Christian paradise mythology</li>
+                        <li>Sacred feminine spirituality</li>
+                        <li>Nature-based mysticism</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\u26EA Glastonbury Connection</h3>
+                    <ul class="list-styled">
+                        <li>Glastonbury Tor identified as Avalon</li>
+                        <li>Once an island surrounded by marshes</li>
+                        <li>Monks "discovered" Arthur's grave (1191)</li>
+                        <li>Chalice Well as sacred spring</li>
+                        <li>Ley line convergence point</li>
+                        <li>Still pilgrimage destination today</li>
+                        <li>New Age spiritual center</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDCDA Literary Legacy</h3>
+                    <ul class="list-styled">
+                        <li>Central to Arthurian literature</li>
+                        <li>Symbol of hope and return</li>
+                        <li>Inspires fantasy genre</li>
+                        <li>The Mists of Avalon (Bradley)</li>
+                        <li>Numerous films and TV adaptations</li>
+                        <li>Video game settings</li>
+                        <li>Ongoing creative inspiration</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDF1F Spiritual Movements</h3>
+                    <ul class="list-styled">
+                        <li>Neo-pagan goddess worship</li>
+                        <li>Wiccan traditions honor Avalon</li>
+                        <li>Druid revival connections</li>
+                        <li>Feminist spirituality icon</li>
+                        <li>Sacred feminine reclamation</li>
+                        <li>Avalon retreats and pilgrimages</li>
+                        <li>Modern priestess training programs</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDDEC\uD83C\uDDE7 British National Myth</h3>
+                    <ul class="list-styled">
+                        <li>Symbol of British identity</li>
+                        <li>"Matter of Britain" tradition</li>
+                        <li>Arthur as messianic figure</li>
+                        <li>Promise of return and renewal</li>
+                        <li>Used by various British monarchs</li>
+                        <li>Welsh national mythology</li>
+                        <li>Cornish heritage claims</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDF3F Environmental Symbolism</h3>
+                    <ul class="list-styled">
+                        <li>Represents harmony with nature</li>
+                        <li>Apple as symbol of knowledge</li>
+                        <li>Sacred landscape concept</li>
+                        <li>Ecological awareness themes</li>
+                        <li>Contrasts with industrial world</li>
+                        <li>Green spirituality connections</li>
+                        <li>Sustainable living inspiration</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- How to Reach Avalon -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83D\uDEE4\uFE0F</span>
+                How to Reach Avalon (Mythologically)
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                Avalon exists between worlds, accessible not through ordinary travel but through
+                mystical means, spiritual practice, or the intervention of its inhabitants.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">\u26F5 The Sacred Barge</h3>
+                    <ul class="list-styled">
+                        <li>Magical boat crosses the mists</li>
+                        <li>Piloted by Avalon's priestesses</li>
+                        <li>Only comes for the chosen</li>
+                        <li>Arthur carried by three queens</li>
+                        <li>No oars needed - moves by magic</li>
+                        <li>Black barge traditional vessel</li>
+                        <li>Music accompanies the journey</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDF2B\uFE0F Parting the Mists</h3>
+                    <ul class="list-styled">
+                        <li>Sacred ritual to see through mists</li>
+                        <li>Requires training by priestesses</li>
+                        <li>Involves visualization and will</li>
+                        <li>Calling upon the Goddess</li>
+                        <li>Special times when mists thin</li>
+                        <li>Beltane and Samhain most accessible</li>
+                        <li>Blood of Avalon may ease passage</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDD2E Called by the Lady</h3>
+                    <ul class="list-styled">
+                        <li>The Lady of the Lake summons worthy</li>
+                        <li>Dreams and visions call seekers</li>
+                        <li>Healers called for training</li>
+                        <li>Heroes called in times of need</li>
+                        <li>Cannot force entry</li>
+                        <li>Must be deemed worthy</li>
+                        <li>Invitation required</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83D\uDEA7 Who May Enter</h3>
+                    <ul class="list-styled">
+                        <li>Wounded heroes for healing</li>
+                        <li>Women called to priestesshood</li>
+                        <li>Those with sight (second sight)</li>
+                        <li>Royalty with legitimate claim</li>
+                        <li>Souls transitioning at death</li>
+                        <li>Those pure of heart</li>
+                        <li>Some never return to mortal world</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\uD83C\uDFDB\uFE0F Modern Pilgrimage</h3>
+                    <ul class="list-styled">
+                        <li>Visit Glastonbury Tor</li>
+                        <li>Drink from Chalice Well</li>
+                        <li>Walk the Tor labyrinth path</li>
+                        <li>Meditate in the sacred landscape</li>
+                        <li>Attend Avalon-focused retreats</li>
+                        <li>Study with modern priestess traditions</li>
+                        <li>Connect with the land spiritually</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">\u26A0\uFE0F Warnings</h3>
+                    <ul class="list-styled">
+                        <li>Time flows differently in Avalon</li>
+                        <li>Days there may be years here</li>
+                        <li>May be unable to return</li>
+                        <li>Eating Avalon's food binds you</li>
+                        <li>The uninvited may be lost in mists</li>
+                        <li>Not all who seek will find</li>
+                        <li>Return changed, if at all</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Archetype Connection -->
+        <section class="interlink-panel glass-card">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">\uD83D\uDD17</span>
+                Related Across the Mythos
+            </h3>
+
+            <div class="interlink-grid">
+                <!-- Archetype Section -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Archetypes</div>
+                    <div style="display: grid; gap: var(--spacing-md, 1rem);">
+                        <a href="../../archetypes/otherworld-island/" class="archetype-link-card">
+                            <div class="archetype-badge">\uD83C\uDFDD\uFE0F OTHERWORLD ISLAND</div>
+                            <p class="archetype-context">Avalon as the mystical island beyond the western sea where heroes rest and time stands still.</p>
+                            <span class="see-parallels">See parallels: Tir na nOg, Elysium, Hy-Brasil &rarr;</span>
+                        </a>
+                        <a href="../../archetypes/index.html" class="archetype-link-card">
+                            <div class="archetype-badge">\uD83C\uDF19 SACRED FEMININE</div>
+                            <p class="archetype-context">A realm ruled by priestesses and associated with goddess worship and feminine spiritual power.</p>
+                            <span class="see-parallels">See parallels: Temple of Artemis, Brigid's Kildare &rarr;</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Associated Figures Section -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Key Figures</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--spacing-sm, 0.5rem);">
+                        <a href="../../mythos/celtic/figures/index.html" class="deity-card" style="padding: 1rem;">
+                            <div style="font-size: 2rem;">\uD83E\uDDD9\u200D\u2640\uFE0F</div>
+                            <h4 style="color: var(--color-primary); margin: 0.5rem 0 0.25rem;">Morgan</h4>
+                            <p style="font-size: 0.8rem; margin: 0;">Queen of Avalon</p>
+                        </a>
+                        <a href="../../mythos/celtic/figures/index.html" class="deity-card" style="padding: 1rem;">
+                            <div style="font-size: 2rem;">\u2694\uFE0F</div>
+                            <h4 style="color: var(--color-primary); margin: 0.5rem 0 0.25rem;">Arthur</h4>
+                            <p style="font-size: 0.8rem; margin: 0;">Sleeping King</p>
+                        </a>
+                        <a href="../../mythos/celtic/figures/index.html" class="deity-card" style="padding: 1rem;">
+                            <div style="font-size: 2rem;">\uD83D\uDCA7</div>
+                            <h4 style="color: var(--color-primary); margin: 0.5rem 0 0.25rem;">Lady of Lake</h4>
+                            <p style="font-size: 0.8rem; margin: 0;">Guardian Spirit</p>
+                        </a>
+                        <a href="../../mythos/celtic/figures/index.html" class="deity-card" style="padding: 1rem;">
+                            <div style="font-size: 2rem;">\uD83E\uDDD9</div>
+                            <h4 style="color: var(--color-primary); margin: 0.5rem 0 0.25rem;">Merlin</h4>
+                            <p style="font-size: 0.8rem; margin: 0;">The Wizard</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cross-Cultural Parallel Places -->
+            <div class="parallel-traditions" style="margin-top: var(--spacing-lg, 1.5rem);">
+                <h4>\uD83C\uDF0D Cross-Cultural Otherworld Isles</h4>
+                <div class="parallel-grid">
+                    <a href="./tir-na-nog.html" class="parallel-card" data-smart>
+                        <span class="tradition-flag">\u2618\uFE0F</span>
+                        <span class="parallel-name">Tir na nOg</span>
+                        <span class="tradition-label">Irish</span>
+                    </a>
+                    <a href="./index.html" class="parallel-card" data-smart>
+                        <span class="tradition-flag">\uD83C\uDFDB\uFE0F</span>
+                        <span class="parallel-name">Elysium</span>
+                        <span class="tradition-label">Greek</span>
+                    </a>
+                    <a href="./valhalla.html" class="parallel-card" data-smart>
+                        <span class="tradition-flag">\u2694\uFE0F</span>
+                        <span class="parallel-name">Valhalla</span>
+                        <span class="tradition-label">Norse</span>
+                    </a>
+                    <a href="../../mythos/celtic/index.html" class="parallel-card" data-smart>
+                        <span class="tradition-flag">\uD83C\uDFDD\uFE0F</span>
+                        <span class="parallel-name">Hy-Brasil</span>
+                        <span class="tradition-label">Irish</span>
+                    </a>
+                    <a href="../groves/glastonbury.html" class="parallel-card" data-smart>
+                        <span class="tradition-flag">\uD83C\uDF4E</span>
+                        <span class="parallel-name">Glastonbury</span>
+                        <span class="tradition-label">Britain</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- See Also Section -->
+            <div class="see-also-section" style="margin-top: var(--spacing-lg, 1.5rem);">
+                <h4>\uD83D\uDCDA See Also</h4>
+                <div class="see-also-links">
+                    <a href="../../mythos/celtic/index.html" class="see-also-link">
+                        <span>\u2618\uFE0F</span> Celtic Mythology
+                    </a>
+                    <a href="../groves/glastonbury.html" class="see-also-link">
+                        <span>\uD83C\uDF4E</span> Glastonbury Tor
+                    </a>
+                    <a href="../../spiritual-items/relics/excalibur.html" class="see-also-link">
+                        <span>\uD83D\uDDE1\uFE0F</span> Excalibur
+                    </a>
+                    <a href="../../magic/traditions/index.html" class="see-also-link">
+                        <span>\uD83C\uDF3F</span> Druid Magic
+                    </a>
+                    <a href="./tir-na-nog.html" class="see-also-link">
+                        <span>\u2618\uFE0F</span> Tir na nOg
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related Links -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83D\uDD17</span>
+                Related Topics & Further Exploration
+            </h2>
+
+            <div class="related-links">
+                <a href="./tir-na-nog.html" class="related-link">
+                    \u2618\uFE0F Tir na nOg - Land of Youth
+                </a>
+                <a href="../groves/glastonbury.html" class="related-link">
+                    \uD83C\uDF4E Glastonbury Tor
+                </a>
+                <a href="./valhalla.html" class="related-link">
+                    \u2694\uFE0F Valhalla
+                </a>
+                <a href="../../mythos/celtic/index.html" class="related-link">
+                    \u2618\uFE0F Celtic Mythology
+                </a>
+                <a href="../index.html" class="related-link">
+                    \uD83D\uDDFA\uFE0F All Sacred Places
+                </a>
+                <a href="../../index.html" class="related-link">
+                    \uD83C\uDFE0 Home
+                </a>
+            </div>
+        </div>
+
+        <!-- Sources -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">\uD83D\uDCDA</span>
+                Sources & Further Reading
+            </h2>
+
+            <div style="line-height: 2; font-size: 1rem;">
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Medieval Sources:</h3>
+                <ul class="list-styled">
+                    <li>Geoffrey of Monmouth. <em>Historia Regum Britanniae</em> (c. 1136)</li>
+                    <li>Geoffrey of Monmouth. <em>Vita Merlini</em> (c. 1150)</li>
+                    <li>Chr&eacute;tien de Troyes. Arthurian Romances</li>
+                    <li>Layamon. <em>Brut</em> (c. 1190)</li>
+                    <li>Thomas Malory. <em>Le Morte d'Arthur</em> (1485)</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Welsh Sources:</h3>
+                <ul class="list-styled">
+                    <li><em>The Mabinogion</em> - Welsh mythology collection</li>
+                    <li><em>Preiddeu Annwfn</em> - The Spoils of Annwn (Taliesin)</li>
+                    <li>Welsh Triads</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Modern Scholarship:</h3>
+                <ul class="list-styled">
+                    <li>Loomis, Roger Sherman. <em>Celtic Myth and Arthurian Romance</em></li>
+                    <li>Ashe, Geoffrey. <em>Avalonian Quest</em></li>
+                    <li>Green, Thomas. <em>Concepts of Arthur</em></li>
+                    <li>Matthews, John. <em>The Grail: Quest for the Eternal</em></li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Modern Fiction:</h3>
+                <ul class="list-styled">
+                    <li>Bradley, Marion Zimmer. <em>The Mists of Avalon</em></li>
+                    <li>Tennyson, Alfred Lord. <em>Idylls of the King</em></li>
+                    <li>White, T.H. <em>The Once and Future King</em></li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

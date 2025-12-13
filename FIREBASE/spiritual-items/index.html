@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sacred Items & Relics - World Mythos Explorer</title>
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../themes/corpus-links.css">
+    <link rel="stylesheet" href="../styles.css">
+    <script defer src="../themes/theme-picker.js"></script>
+    <script defer src="../themes/theme-animations.js"></script>
+    <link rel="stylesheet" href="../themes/smart-links.css">
+    <script defer src="../themes/smart-links.js"></script>
+
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .search-bar {
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-4);
+            margin: 2rem 0;
+            display: flex;
+            gap: var(--space-4);
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            background: rgba(var(--color-background-rgb), 0.5);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-3) var(--space-5);
+            color: var(--color-text-primary);
+            font-size: var(--text-lg);
+        }
+
+        .search-input::placeholder {
+            color: var(--color-text-secondary);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+            margin: var(--space-4) 0;
+        }
+
+        .filter-btn {
+            padding: var(--space-2) var(--space-4);
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--color-primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .category-section {
+            margin: var(--space-12) 0;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+            padding: var(--space-6);
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--color-border);
+        }
+
+        .category-icon {
+            font-size: var(--text-5xl);
+        }
+
+        .category-title {
+            font-size: var(--text-3xl);
+            color: var(--color-primary);
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-5);
+        }
+
+        .item-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(var(--color-primary-rgb), 0.15), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .item-card:hover::before {
+            opacity: 1;
+        }
+
+        .item-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--color-primary);
+            box-shadow:
+                0 15px 40px rgba(var(--color-primary-rgb), 0.4),
+                0 0 30px rgba(var(--color-primary-rgb), 0.2),
+                inset 0 0 20px rgba(var(--color-primary-rgb), 0.05);
+            background: rgba(var(--color-primary-rgb), 0.15);
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.3); }
+            50% { box-shadow: 0 0 35px rgba(var(--color-primary-rgb), 0.5); }
+        }
+
+        .item-card:hover .item-icon {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .item-icon {
+            font-size: var(--text-4xl);
+            margin-bottom: var(--space-3);
+            text-align: center;
+        }
+
+        .item-title {
+            font-size: var(--text-xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+            text-align: center;
+        }
+
+        .item-description {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+            line-height: var(--leading-relaxed);
+            text-align: center;
+            margin-bottom: var(--space-3);
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: var(--space-3);
+        }
+
+        .tradition-tag {
+            padding: 0.25rem 0.6rem;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+        }
+
+        .item-card.hidden {
+            display: none;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: var(--space-10);
+            color: var(--color-text-secondary);
+            font-size: var(--text-xl);
+            display: none;
+        }
+
+        .no-results.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+        <div class="header-content">
+            <h1>Sacred Items & Relics</h1>
+        </div>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Home</a> →
+        <span>Sacred Items</span>
+    </nav>
+
+    <main>
+        <div class="hero-section">
+            <h2>Discover Sacred Objects Across World Traditions</h2>
+            <p style="font-size: 1.2rem; max-width: 800px; margin: 1rem auto;">
+                From legendary weapons and holy relics to ritual objects and divine artifacts, explore the sacred items
+                that have shaped religious practice, myth, and spiritual tradition across cultures.
+            </p>
+        </div>
+
+        <!-- SEARCH AND FILTER -->
+        <div class="search-bar">
+            <span style="font-size: var(--text-2xl);">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search for sacred items...">
+        </div>
+
+        <div class="glass-card">
+            <h3 style="color: var(--color-primary); margin-bottom: var(--space-3);">Filter by Tradition:</h3>
+            <div class="filter-buttons" id="filterButtons">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="Jewish">Jewish</button>
+                <button class="filter-btn" data-filter="Christian">Christian</button>
+                <button class="filter-btn" data-filter="Islamic">Islamic</button>
+                <button class="filter-btn" data-filter="Hindu">Hindu</button>
+                <button class="filter-btn" data-filter="Buddhist">Buddhist</button>
+                <button class="filter-btn" data-filter="Norse">Norse</button>
+                <button class="filter-btn" data-filter="Greek">Greek</button>
+                <button class="filter-btn" data-filter="Egyptian">Egyptian</button>
+                <button class="filter-btn" data-filter="Celtic">Celtic</button>
+                <button class="filter-btn" data-filter="Chinese">Chinese</button>
+            </div>
+        </div>
+
+        <div class="no-results" id="noResults">
+            No items found matching your search.
+        </div>
+
+        <!-- HOLY RELICS & ARTIFACTS -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">✨</span>
+                <h2 class="category-title">Holy Relics & Divine Artifacts</h2>
+            </div>
+            <div class="items-grid" id="itemsContainer">
+                <div class="item-card" data-traditions="Jewish,Christian" onclick="location.href='relics/ark-of-covenant.html'">
+                    <div class="item-icon">📦</div>
+                    <h3 class="item-title">Ark of the Covenant</h3>
+                    <p class="item-description">
+                        Gold-covered chest containing the Ten Commandments tablets, dwelling place of God's presence
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Jewish</span>
+                        <span class="tradition-tag">Christian</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Christian" onclick="location.href='relics/holy-grail.html'">
+                    <div class="item-icon">🏆</div>
+                    <h3 class="item-title">Holy Grail</h3>
+                    <p class="item-description">
+                        Cup used by Jesus at Last Supper, sought by Arthurian knights, symbol of divine grace
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Christian</span>
+                        <span class="tradition-tag">Celtic</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Christian" onclick="location.href='relics/true-cross.html'">
+                    <div class="item-icon">✝️</div>
+                    <h3 class="item-title">True Cross</h3>
+                    <p class="item-description">
+                        Cross upon which Jesus was crucified, fragments venerated across Christendom
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Christian</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Islamic" onclick="location.href='relics/black-stone.html'">
+                    <div class="item-icon">🪨</div>
+                    <h3 class="item-title">Black Stone (Hajar al-Aswad)</h3>
+                    <p class="item-description">
+                        Sacred stone embedded in Kaaba, touched during Hajj pilgrimage
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Islamic</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Buddhist" onclick="location.href='relics/tooth-relic.html'">
+                    <div class="item-icon">🦷</div>
+                    <h3 class="item-title">Buddha's Tooth Relic</h3>
+                    <p class="item-description">
+                        Sacred tooth of Buddha housed in Temple of the Tooth, Sri Lanka
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Buddhist</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Hindu" onclick="location.href='relics/shiva-lingam.html'">
+                    <div class="item-icon">🕉️</div>
+                    <h3 class="item-title">Shiva Lingam</h3>
+                    <p class="item-description">
+                        Abstract representation of Shiva, cosmic pillar of light, creative force
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                    </div>
+                </div>
+
+                <!-- WEAPONS & TOOLS -->
+                <div class="item-card" data-traditions="Norse" onclick="location.href='weapons/mjolnir.html'">
+                    <div class="item-icon">🔨</div>
+                    <h3 class="item-title">Mjölnir</h3>
+                    <p class="item-description">
+                        Thor's hammer, returns when thrown, symbol of protection and consecration
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Norse</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Norse" onclick="location.href='weapons/gungnir.html'">
+                    <div class="item-icon">🗡️</div>
+                    <h3 class="item-title">Gungnir</h3>
+                    <p class="item-description">
+                        Odin's spear crafted by dwarves, never misses its target
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Norse</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Greek" onclick="location.href='weapons/zeus-lightning.html'">
+                    <div class="item-icon">⚡</div>
+                    <h3 class="item-title">Zeus's Lightning Bolt</h3>
+                    <p class="item-description">
+                        Divine thunderbolt forged by Cyclopes, weapon of the sky god
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Greek</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Greek" onclick="location.href='weapons/poseidon-trident.html'">
+                    <div class="item-icon">🔱</div>
+                    <h3 class="item-title">Poseidon's Trident</h3>
+                    <p class="item-description">
+                        Three-pronged spear controlling seas, earthquakes, and horses
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Greek</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Hindu" onclick="location.href='weapons/trishula.html'">
+                    <div class="item-icon">🔱</div>
+                    <h3 class="item-title">Trishula</h3>
+                    <p class="item-description">
+                        Shiva's trident representing creation, preservation, destruction
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Hindu" onclick="location.href='weapons/sudarshana-chakra.html'">
+                    <div class="item-icon">☸️</div>
+                    <h3 class="item-title">Sudarshana Chakra</h3>
+                    <p class="item-description">
+                        Vishnu's discus weapon, spinning wheel of cosmic order
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Chinese" onclick="location.href='weapons/ruyi-jingu-bang.html'">
+                    <div class="item-icon">🥢</div>
+                    <h3 class="item-title">Ruyi Jingu Bang</h3>
+                    <p class="item-description">
+                        Sun Wukong's magical staff, can change size at will
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Chinese</span>
+                        <span class="tradition-tag">Buddhist</span>
+                    </div>
+                </div>
+
+                <!-- RITUAL OBJECTS -->
+                <div class="item-card" data-traditions="Jewish" onclick="location.href='ritual/menorah.html'">
+                    <div class="item-icon">🕎</div>
+                    <h3 class="item-title">Menorah</h3>
+                    <p class="item-description">
+                        Seven-branched candelabrum from Temple, symbol of divine light
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Jewish</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Buddhist" onclick="location.href='ritual/vajra.html'">
+                    <div class="item-icon">💎</div>
+                    <h3 class="item-title">Vajra (Dorje)</h3>
+                    <p class="item-description">
+                        Ritual thunderbolt, indestructible diamond, symbol of enlightenment
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Buddhist</span>
+                        <span class="tradition-tag">Hindu</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Buddhist,Hindu" onclick="location.href='ritual/prayer-wheel.html'">
+                    <div class="item-icon">☸️</div>
+                    <h3 class="item-title">Prayer Wheel</h3>
+                    <p class="item-description">
+                        Spinning cylinder containing mantras, each rotation equals recitation
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Buddhist</span>
+                        <span class="tradition-tag">Tibetan</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Islamic" onclick="location.href='../index.html'">
+                    <div class="item-icon">📿</div>
+                    <h3 class="item-title">Misbaha/Tasbih</h3>
+                    <p class="item-description">
+                        Islamic prayer beads for dhikr, remembrance of Allah's names
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Islamic</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Hindu" onclick="location.href='../index.html'">
+                    <div class="item-icon">📿</div>
+                    <h3 class="item-title">Mala Beads</h3>
+                    <p class="item-description">
+                        108 prayer beads for mantra meditation and japa practice
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Hindu</span>
+                        <span class="tradition-tag">Buddhist</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Egyptian" onclick="location.href='relics/ankh.html'">
+                    <div class="item-icon">☥</div>
+                    <h3 class="item-title">Ankh</h3>
+                    <p class="item-description">
+                        Symbol of eternal life, held by gods, key to afterlife
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Egyptian</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Egyptian" onclick="location.href='../index.html'">
+                    <div class="item-icon">🪄</div>
+                    <h3 class="item-title">Was Scepter</h3>
+                    <p class="item-description">
+                        Staff of power and dominion held by gods and pharaohs
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Egyptian</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Celtic" onclick="location.href='../index.html'">
+                    <div class="item-icon">🍲</div>
+                    <h3 class="item-title">Cauldron of the Dagda</h3>
+                    <p class="item-description">
+                        Inexhaustible cauldron providing endless sustenance
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Celtic</span>
+                    </div>
+                </div>
+
+                <!-- SACRED STONES -->
+                <div class="item-card" data-traditions="Celtic" onclick="location.href='../index.html'">
+                    <div class="item-icon">🪨</div>
+                    <h3 class="item-title">Stone of Scone</h3>
+                    <p class="item-description">
+                        Stone of Destiny used in coronation of Scottish and British monarchs
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Celtic</span>
+                        <span class="tradition-tag">Christian</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Jewish" onclick="location.href='../index.html'">
+                    <div class="item-icon">🪨</div>
+                    <h3 class="item-title">Foundation Stone</h3>
+                    <p class="item-description">
+                        Rock at Temple Mount, first solid matter created, center of the world
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Jewish</span>
+                        <span class="tradition-tag">Islamic</span>
+                    </div>
+                </div>
+
+                <div class="item-card" data-traditions="Greek" onclick="location.href='../index.html'">
+                    <div class="item-icon">🥚</div>
+                    <h3 class="item-title">Omphalos Stone</h3>
+                    <p class="item-description">
+                        Navel of the world at Delphi, center of Gaia's realm
+                    </p>
+                    <div class="tradition-tags">
+                        <span class="tradition-tag">Greek</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTERLINK PANEL: Quick Links by Type -->
+        <section class="interlink-panel glass-card">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Quick Links by Type
+            </h3>
+
+            <div class="interlink-grid">
+                <!-- Weapons Section -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Divine Weapons</div>
+                    <div class="quick-links-grid">
+                        <a href="weapons/mjolnir.html" class="quick-link" data-smart="weapon">
+                            <span class="quick-link-icon">🔨</span> Mjolnir
+                        </a>
+                        <a href="weapons/gungnir.html" class="quick-link" data-smart="weapon">
+                            <span class="quick-link-icon">🗡️</span> Gungnir
+                        </a>
+                        <a href="weapons/kusanagi.html" class="quick-link" data-smart="weapon">
+                            <span class="quick-link-icon">⚔️</span> Kusanagi
+                        </a>
+                        <a href="weapons/zeus-lightning.html" class="quick-link" data-smart="weapon">
+                            <span class="quick-link-icon">⚡</span> Zeus's Bolt
+                        </a>
+                        <a href="weapons/gae-bolg.html" class="quick-link">
+                            <span class="quick-link-icon">🗡️</span> Gae Bolg
+                        </a>
+                        <a href="weapons/zulfiqar.html" class="quick-link">
+                            <span class="quick-link-icon">⚔️</span> Zulfiqar
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Ritual Objects Section -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Ritual Objects</div>
+                    <div class="quick-links-grid">
+                        <a href="ritual/menorah.html" class="quick-link" data-smart="ritual">
+                            <span class="quick-link-icon">🕎</span> Menorah
+                        </a>
+                        <a href="ritual/vajra.html" class="quick-link" data-smart="ritual">
+                            <span class="quick-link-icon">💎</span> Vajra
+                        </a>
+                        <a href="ritual/prayer-wheel.html" class="quick-link" data-smart="ritual">
+                            <span class="quick-link-icon">☸️</span> Prayer Wheel
+                        </a>
+                        <a href="ritual/eye-of-horus.html" class="quick-link">
+                            <span class="quick-link-icon">👁️</span> Eye of Horus
+                        </a>
+                        <a href="ritual/gjallarhorn.html" class="quick-link">
+                            <span class="quick-link-icon">📯</span> Gjallarhorn
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Relics Section -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Sacred Relics</div>
+                    <div class="quick-links-grid">
+                        <a href="relics/ark-of-covenant.html" class="quick-link" data-smart="relic">
+                            <span class="quick-link-icon">📦</span> Ark of Covenant
+                        </a>
+                        <a href="relics/holy-grail.html" class="quick-link" data-smart="relic">
+                            <span class="quick-link-icon">🏆</span> Holy Grail
+                        </a>
+                        <a href="relics/brisingamen.html" class="quick-link" data-smart="relic">
+                            <span class="quick-link-icon">📿</span> Brisingamen
+                        </a>
+                        <a href="relics/shiva-lingam.html" class="quick-link">
+                            <span class="quick-link-icon">🕉️</span> Shiva Lingam
+                        </a>
+                        <a href="relics/yata-no-kagami.html" class="quick-link">
+                            <span class="quick-link-icon">🪞</span> Yata no Kagami
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- INTERLINK PANEL: Items by Divine Owners -->
+        <section class="interlink-panel glass-card">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">👑</span>
+                Items by Divine Owners
+            </h3>
+
+            <div class="interlink-grid">
+                <!-- Norse Deities -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Norse Tradition</div>
+                    <a href="../mythos/norse/deities/thor.html" class="item-link-card" data-smart="deity">
+                        <div class="item-icon">⚡</div>
+                        <div class="item-info">
+                            <h4>Thor</h4>
+                            <p class="item-type">Thunder God</p>
+                            <p class="item-context">Mjolnir, Megingjord</p>
+                        </div>
+                    </a>
+                    <a href="../mythos/norse/deities/odin.html" class="item-link-card" data-smart="deity" style="margin-top: var(--spacing-sm);">
+                        <div class="item-icon">👁️</div>
+                        <div class="item-info">
+                            <h4>Odin</h4>
+                            <p class="item-type">All-Father</p>
+                            <p class="item-context">Gungnir, Draupnir</p>
+                        </div>
+                    </a>
+                    <a href="../mythos/norse/deities/freya.html" class="item-link-card" style="margin-top: var(--spacing-sm);">
+                        <div class="item-icon">💎</div>
+                        <div class="item-info">
+                            <h4>Freya</h4>
+                            <p class="item-type">Love Goddess</p>
+                            <p class="item-context">Brisingamen</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Greek Deities -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Greek Tradition</div>
+                    <a href="../mythos/greek/deities/zeus.html" class="item-link-card" data-smart="deity">
+                        <div class="item-icon">⚡</div>
+                        <div class="item-info">
+                            <h4>Zeus</h4>
+                            <p class="item-type">King of Gods</p>
+                            <p class="item-context">Thunderbolt, Aegis</p>
+                        </div>
+                    </a>
+                    <a href="../mythos/greek/deities/poseidon.html" class="item-link-card" data-smart="deity" style="margin-top: var(--spacing-sm);">
+                        <div class="item-icon">🔱</div>
+                        <div class="item-info">
+                            <h4>Poseidon</h4>
+                            <p class="item-type">Sea God</p>
+                            <p class="item-context">Trident</p>
+                        </div>
+                    </a>
+                    <a href="../mythos/greek/deities/athena.html" class="item-link-card" style="margin-top: var(--spacing-sm);">
+                        <div class="item-icon">🦉</div>
+                        <div class="item-info">
+                            <h4>Athena</h4>
+                            <p class="item-type">Wisdom Goddess</p>
+                            <p class="item-context">Aegis Shield</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Hindu Deities -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Hindu Tradition</div>
+                    <a href="../mythos/hindu/deities/shiva.html" class="item-link-card">
+                        <div class="item-icon">🔱</div>
+                        <div class="item-info">
+                            <h4>Shiva</h4>
+                            <p class="item-type">Destroyer</p>
+                            <p class="item-context">Trishula, Damaru</p>
+                        </div>
+                    </a>
+                    <a href="../mythos/hindu/deities/vishnu.html" class="item-link-card" style="margin-top: var(--spacing-sm);">
+                        <div class="item-icon">☸️</div>
+                        <div class="item-info">
+                            <h4>Vishnu</h4>
+                            <p class="item-type">Preserver</p>
+                            <p class="item-context">Sudarshana Chakra</p>
+                        </div>
+                    </a>
+                    <a href="../mythos/hindu/deities/indra.html" class="item-link-card" style="margin-top: var(--spacing-sm);">
+                        <div class="item-icon">💎</div>
+                        <div class="item-info">
+                            <h4>Indra</h4>
+                            <p class="item-type">Thunder God</p>
+                            <p class="item-context">Vajra</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Japanese Tradition -->
+                <div class="interlink-section">
+                    <div class="interlink-section-title">Japanese Tradition</div>
+                    <a href="../mythos/japanese/deities/susanoo.html" class="item-link-card">
+                        <div class="item-icon">🌊</div>
+                        <div class="item-info">
+                            <h4>Susanoo</h4>
+                            <p class="item-type">Storm God</p>
+                            <p class="item-context">Kusanagi (discovered)</p>
+                        </div>
+                    </a>
+                    <a href="../mythos/japanese/deities/amaterasu.html" class="item-link-card" style="margin-top: var(--spacing-sm);">
+                        <div class="item-icon">☀️</div>
+                        <div class="item-info">
+                            <h4>Amaterasu</h4>
+                            <p class="item-type">Sun Goddess</p>
+                            <p class="item-context">Three Sacred Treasures</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <div class="glass-card">
+            <h2 style="color: var(--color-primary); margin-bottom: var(--spacing-lg);">Explore More</h2>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+                <a href="../mythos/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">World Mythologies</a>
+                <a href="../archetypes/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Universal Archetypes</a>
+                <a href="../magic/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Magical Systems</a>
+                <a href="../herbalism/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Sacred Herbalism</a>
+                <a href="../spiritual-places/index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Sacred Places</a>
+                <a href="../index.html" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all var(--transition-base);">Home</a>
+            </div>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-secondary); border-top: 1px solid var(--color-border); margin-top: var(--spacing-xl);">
+        <p>World Mythos Explorer - Sacred Items & Relics</p>
+        <p style="margin-top: var(--spacing-sm);">
+            <a href="../index.html" style="color: var(--color-primary); text-decoration: none;">Home</a> |
+            <a href="../mythos/index.html" style="color: var(--color-primary); text-decoration: none;">Mythologies</a> |
+            <a href="../archetypes/index.html" style="color: var(--color-primary); text-decoration: none;">Archetypes</a> |
+            <a href="../magic/index.html" style="color: var(--color-primary); text-decoration: none;">Magic</a> |
+            <a href="../herbalism/index.html" style="color: var(--color-primary); text-decoration: none;">Herbalism</a> |
+            <a href="../spiritual-places/index.html" style="color: var(--color-primary); text-decoration: none;">Places</a>
+        </p>
+    </footer>
+
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const itemCards = document.querySelectorAll('.item-card');
+        const noResults = document.getElementById('noResults');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        let currentFilter = 'all';
+
+        searchInput.addEventListener('input', filterItems);
+
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                filterItems();
+            });
+        });
+
+        function filterItems() {
+            const searchTerm = searchInput.value.toLowerCase();
+            let visibleCount = 0;
+
+            itemCards.forEach(card => {
+                const title = card.querySelector('.item-title').textContent.toLowerCase();
+                const description = card.querySelector('.item-description').textContent.toLowerCase();
+                const traditions = card.dataset.traditions.toLowerCase();
+
+                const matchesSearch = title.includes(searchTerm) || description.includes(searchTerm);
+                const matchesFilter = currentFilter === 'all' || traditions.includes(currentFilter.toLowerCase());
+
+                if (matchesSearch && matchesFilter) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            if (visibleCount === 0) {
+                noResults.classList.add('show');
+            } else {
+                noResults.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sefer Yetzirah - The Book of Formation</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-relaxed);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--spacing-4xl) var(--spacing-xl);
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .text-icon {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            margin-bottom: var(--spacing-md);
+            color: white;
+        }
+
+        .subtitle {
+            font-size: var(--font-size-2xl);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: var(--spacing-lg);
+            font-weight: var(--font-light);
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-lg);
+        }
+
+        .tradition-tag {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+        }
+
+        .breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-lg);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .breadcrumb a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: white;
+        }
+
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        h2 {
+            color: var(--color-primary);
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-lg);
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: var(--spacing-md);
+        }
+
+        h3 {
+            color: var(--color-secondary);
+            font-size: var(--font-size-2xl);
+            margin: var(--spacing-xl) 0 var(--spacing-md);
+        }
+
+        h4 {
+            color: var(--color-accent);
+            font-size: var(--font-size-xl);
+            margin: var(--spacing-lg) 0 var(--spacing-sm);
+        }
+
+        p {
+            margin-bottom: var(--spacing-md);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin: var(--spacing-md) 0 var(--spacing-md) var(--spacing-2xl);
+            line-height: var(--leading-relaxed);
+        }
+
+        li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .quote-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-md);
+            font-style: italic;
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-secondary-rgb), 0.15);
+            border: 2px solid var(--color-secondary);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .source-card {
+            background: rgba(var(--color-accent-rgb, 139, 127, 255), 0.1);
+            border: 1px solid var(--color-border);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-md) 0;
+            border-radius: var(--radius-md);
+        }
+
+        .source-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .cross-ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .cross-ref-card {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 2px solid var(--color-border);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .cross-ref-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--color-primary);
+            box-shadow: 0 5px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .cross-ref-icon {
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .cross-ref-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-3xl);
+        }
+
+        .nav-button {
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+            display: inline-block;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .sefirot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .sefirah-card {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.2),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border: 2px solid var(--color-primary);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+
+        .sefirah-name {
+            font-weight: var(--font-bold);
+            color: var(--color-primary);
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .sefirah-meaning {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+        }
+
+        strong {
+            color: var(--color-primary);
+        }
+
+        /* Interlink Panel Styles */
+        .interlink-panel { background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-2xl); margin: var(--spacing-3xl) 0; }
+        .interlink-panel h3 { color: var(--color-primary); font-size: var(--font-size-2xl); margin-bottom: var(--spacing-lg); }
+        .interlink-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-md); }
+        .archetype-link-card, .parallel-card { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); background: rgba(var(--color-primary-rgb), 0.1); border: 1px solid var(--color-border); border-radius: var(--radius-lg); text-decoration: none; transition: all var(--transition-base); }
+        .archetype-link-card:hover, .parallel-card:hover { background: rgba(var(--color-primary-rgb), 0.2); transform: translateY(-2px); }
+        .card-icon { font-size: var(--font-size-2xl); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-primary-rgb), 0.2); border-radius: var(--radius-lg); }
+        .card-content h4 { color: var(--color-text-primary); font-size: var(--font-size-base); margin-bottom: var(--spacing-xs); }
+        .card-content span { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+    </style>
+</head>
+<body>
+    
+    <div id="theme-picker-container"></div>
+<div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Sefer Yetzirah</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Magical Systems</a> →
+                <a href="../index.html#texts">Sacred Texts</a> →
+                <span>Sefer Yetzirah</span>
+</nav>
+
+        <section>
+            <h2>Overview</h2>
+            <p>
+                The <strong>Sefer Yetzirah</strong> (Book of Formation or Book of Creation) stands as one of the earliest and most
+                influential texts of Jewish mysticism, laying the conceptual foundation for all subsequent Kabbalistic thought.
+                This enigmatic work describes the creation of the cosmos through divine speech, establishing a framework in which
+                the Hebrew letters and the ten sefirot serve as the fundamental building blocks of reality.
+            </p>
+
+            <h3>Historical Context & Authorship</h3>
+            <p>
+                The exact origins of the Sefer Yetzirah remain shrouded in mystery. Traditional attribution ascribes the text
+                to the patriarch <strong>Abraham</strong>, though modern scholarship dates its composition between the 2nd and
+                6th centuries CE, likely in Palestine or Babylon. The text shows influences from:
+            </p>
+            <ul>
+                <li><strong>Neoplatonic philosophy:</strong> Particularly concepts of emanation and the structure of reality</li>
+                <li><strong>Gnostic cosmology:</strong> The role of primordial letters and divine names in creation</li>
+                <li><strong>Early Jewish mysticism:</strong> Merkavah (chariot) mysticism and angelology</li>
+                <li><strong>Greek mathematical and astronomical thought:</strong> Geometric and numerical cosmology</li>
+            </ul>
+
+            <div class="quote-box">
+                "With thirty-two mystical paths of Wisdom engraved Yah, the Lord of Hosts, the God of Israel,
+                the Living God, King of the Universe, El Shaddai, Merciful and Gracious, High and Exalted,
+                dwelling in eternity, whose name is Holy - He is lofty and holy - and He created His universe
+                with three books (Sepharim), with text (Sepher), with number (Sephar), and with communication (Sippur)."
+                <br><br><em>- Sefer Yetzirah, Chapter 1:1 (Short Version)</em>
+            </div>
+
+            <h3>Manuscript Tradition</h3>
+            <p>
+                The Sefer Yetzirah exists in multiple recensions, reflecting centuries of transmission and commentary:
+            </p>
+            <ul>
+                <li><strong>Short Version (Gra):</strong> Approximately 1,300 words, favored by the Vilna Gaon and considered
+                    by many to preserve the most authentic text</li>
+                <li><strong>Long Version (Saadia):</strong> Expanded text with additional explanations and elaborations,
+                    commented upon by Saadia Gaon (882-942 CE)</li>
+                <li><strong>Extended Version:</strong> Further expanded with mystical and philosophical additions</li>
+            </ul>
+            <p>
+                The text's brevity and cryptic nature have generated an enormous corpus of commentaries spanning over a millennium,
+                from the 10th-century commentary of Saadia Gaon to modern interpretations by scholars like Aryeh Kaplan.
+            </p>
+        </section>
+
+        <section>
+            <h2>Key Teachings</h2>
+
+            <h3>The Thirty-Two Paths of Wisdom</h3>
+            <p>
+                The central teaching of the Sefer Yetzirah is that God created the universe through <strong>thirty-two mystical
+                paths of wisdom</strong>, consisting of:
+            </p>
+
+            <div class="highlight-box">
+                <h4>The Ten Sefirot Belimah (Ineffable Emanations)</h4>
+                <p>
+                    Ten primordial numbers or emanations representing different aspects of divine creative power.
+                    The term "belimah" suggests "without anything" or "ineffable," indicating these sefirot exist
+                    as pure abstractions beyond material reality.
+                </p>
+            </div>
+
+            <div class="sefirot-grid">
+                <div class="sefirah-card">
+                    <div class="sefirah-name">1. Primordial Spirit</div>
+                    <div class="sefirah-meaning">Ruach Elohim Chaim - Spirit of the Living God</div>
+                </div>
+                <div class="sefirah-card">
+                    <div class="sefirah-name">2. Spirit from Spirit</div>
+                    <div class="sefirah-meaning">Air - The breath of creation</div>
+                </div>
+                <div class="sefirah-card">
+                    <div class="sefirah-name">3. Water from Spirit</div>
+                    <div class="sefirah-meaning">Primordial matter and chaos</div>
+                </div>
+                <div class="sefirah-card">
+                    <div class="sefirah-name">4. Fire from Water</div>
+                    <div class="sefirah-meaning">The Throne of Glory and angelic hosts</div>
+                </div>
+                <div class="sefirah-card">
+                    <div class="sefirah-name">5-10. Six Directions</div>
+                    <div class="sefirah-meaning">Height, Depth, East, West, North, South - Sealing space</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h4>The Twenty-Two Foundation Letters</h4>
+                <p>
+                    The twenty-two letters of the Hebrew alphabet, divided into three categories based on their
+                    phonetic and mystical properties:
+                </p>
+                <ul>
+                    <li><strong>Three Mothers (Imot):</strong> Aleph (א), Mem (מ), Shin (ש) - corresponding to Air, Water, Fire</li>
+                    <li><strong>Seven Doubles (Kefelot):</strong> Bet, Gimel, Dalet, Kaf, Peh, Resh, Tav (ב ג ד כ פ ר ת) -
+                        each with hard and soft pronunciations, associated with the seven planets, days of the week,
+                        and openings of the human head</li>
+                    <li><strong>Twelve Simples (Peshutot):</strong> The remaining letters, associated with the twelve
+                        zodiacal signs, months, and human organs</li>
+                </ul>
+            </div>
+
+            <h3>The Process of Creation</h3>
+            <p>
+                The Sefer Yetzirah describes creation as occurring through divine speech - specifically through the
+                manipulation and combination of the Hebrew letters. God "engraved," "carved," "combined," and "weighed"
+                the letters to create all existence. This process establishes several key principles:
+            </p>
+
+            <div class="quote-box">
+                "He engraved them, carved them, weighed them, and exchanged them, and with them He formed
+                the soul of all creation and the soul of all that would be formed in the future."
+                <br><br><em>- Sefer Yetzirah 2:2</em>
+            </div>
+
+            <ul>
+                <li><strong>Letter Combinations (Tzerufim):</strong> Reality is created through specific combinations
+                    of Hebrew letters, each combination producing different aspects of creation</li>
+                <li><strong>231 Gates:</strong> The text describes 231 gates or possible combinations of letter pairs,
+                    representing pathways of divine creative power</li>
+                <li><strong>Linguistic Cosmology:</strong> Language is not merely descriptive but constitutive -
+                    the letters don't just name things, they create them</li>
+                <li><strong>Correspondence Systems:</strong> Each letter corresponds to specific cosmic phenomena
+                    (planets, constellations, elements), parts of the human body, time periods, and qualities</li>
+            </ul>
+
+            <h3>The Three Books</h3>
+            <p>
+                The Sefer Yetzirah introduces the concept of creation through three "books" or modes:
+            </p>
+            <ul>
+                <li><strong>Sepher (Text/Writing):</strong> The letters as written symbols, the visual-spatial dimension</li>
+                <li><strong>Sephar (Number/Counting):</strong> The mathematical-quantitative dimension, gematria</li>
+                <li><strong>Sippur (Communication/Telling):</strong> The spoken-temporal dimension, pronunciation and vibration</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Structure & Contents</h2>
+
+            <p>
+                The Sefer Yetzirah is remarkably concise, consisting of six chapters (or five in some versions)
+                that systematically unfold the mechanics of creation:
+            </p>
+
+            <h3>Chapter 1: The Ten Sefirot</h3>
+            <p>
+                Establishes the framework of the ten sefirot belimah, describing their nature as ineffable emanations.
+                The chapter emphasizes:
+            </p>
+            <ul>
+                <li>The ineffable nature of the sefirot - "Their end is embedded in their beginning, and their beginning in their end"</li>
+                <li>The first four sefirot as Spirit, Air, Water, and Fire</li>
+                <li>The final six as the six spatial directions that "seal" the universe</li>
+                <li>Warnings against excessive speculation: "Restrain your mouth from speaking and your heart from thinking"</li>
+            </ul>
+
+            <h3>Chapter 2: The Twenty-Two Foundation Letters</h3>
+            <p>
+                Introduces the Hebrew letters as creative forces, describing:
+            </p>
+            <ul>
+                <li>The engraving, carving, weighing, and exchanging of letters</li>
+                <li>The 231 Gates formed by letter combinations</li>
+                <li>The formation of all creation through these combinations</li>
+                <li>The relationship between letters and the breath of speech</li>
+            </ul>
+
+            <h3>Chapter 3: The Three Mother Letters</h3>
+            <p>
+                Explores Aleph, Mem, and Shin in detail:
+            </p>
+            <ul>
+                <li><strong>Cosmic level:</strong> Air (Aleph), Water (Mem), Fire (Shin) - the primal elements</li>
+                <li><strong>Temporal level:</strong> Spring/balance (Aleph), Winter/cold (Mem), Summer/heat (Shin)</li>
+                <li><strong>Human level:</strong> Chest/breath (Aleph), Belly/cold (Mem), Head/heat (Shin)</li>
+                <li>The eternal conflict and balance between opposing forces</li>
+            </ul>
+
+            <h3>Chapter 4: The Seven Double Letters</h3>
+            <p>
+                Details the seven letters with dual pronunciations:
+            </p>
+            <ul>
+                <li><strong>Cosmic correspondences:</strong> Saturn, Jupiter, Mars, Sun, Venus, Mercury, Moon</li>
+                <li><strong>Temporal:</strong> The seven days of the week</li>
+                <li><strong>Human:</strong> The seven openings of the head (two eyes, two ears, two nostrils, mouth)</li>
+                <li><strong>Qualities:</strong> Wisdom/Folly, Wealth/Poverty, Fertility/Desolation, Life/Death,
+                    Dominion/Subjugation, Peace/War, Beauty/Ugliness</li>
+            </ul>
+
+            <h3>Chapter 5: The Twelve Simple Letters</h3>
+            <p>
+                Assigns the remaining letters to:
+            </p>
+            <ul>
+                <li><strong>Zodiacal signs:</strong> Aries through Pisces</li>
+                <li><strong>Months:</strong> Nisan through Adar</li>
+                <li><strong>Human organs:</strong> Specific bodily organs and functions</li>
+                <li><strong>Qualities:</strong> Sight, hearing, smell, speech, taste, sexual love, action,
+                    movement, anger, laughter, thought, sleep</li>
+            </ul>
+
+            <h3>Chapter 6: Summary & Practical Application</h3>
+            <p>
+                Concludes with:
+            </p>
+            <ul>
+                <li>Summary of the creation hierarchy: World, Year, Soul (Olam, Shanah, Nefesh)</li>
+                <li>The establishment of witnesses and covenant in all three realms</li>
+                <li>Attribution to Abraham: "When our father Abraham perceived, investigated, and understood,
+                    engraved, carved, combined, and formed, he succeeded in creation"</li>
+                <li>The revelation of divine secrets and covenant-making with Abraham</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Influence & Legacy</h2>
+
+            <h3>Foundation of Kabbalah</h3>
+            <p>
+                The Sefer Yetzirah established concepts that became fundamental to all subsequent Jewish mysticism:
+            </p>
+            <ul>
+                <li><strong>The Sefirot:</strong> While the Sefer Yetzirah's ten sefirot differ from the later Kabbalistic
+                    Tree of Life, they established the basic framework of divine emanations</li>
+                <li><strong>Letter Mysticism:</strong> The idea that Hebrew letters possess creative power became central
+                    to practical Kabbalah and magical practices</li>
+                <li><strong>Correspondence Systems:</strong> The systematic correlation of letters with cosmic, temporal,
+                    and human phenomena influenced all later Kabbalistic thought</li>
+                <li><strong>Linguistic Creation:</strong> The concept that language creates reality rather than merely
+                    describing it became foundational to Jewish mystical philosophy</li>
+            </ul>
+
+            <h3>Medieval Kabbalah</h3>
+            <p>
+                The text profoundly influenced the development of medieval Kabbalistic schools:
+            </p>
+            <ul>
+                <li><strong>Gerona School (13th century):</strong> Azriel of Gerona and Nachmanides drew heavily on
+                    Sefer Yetzirah for their cosmological teachings</li>
+                <li><strong>The Zohar (13th century):</strong> Incorporates and expands upon Sefer Yetzirah's letter
+                    mysticism and sefirot concepts</li>
+                <li><strong>Lurianic Kabbalah (16th century):</strong> Isaac Luria's system of cosmic contraction
+                    (tzimtzum) and repair (tikkun) builds upon the creative process described in Sefer Yetzirah</li>
+                <li><strong>Practical Kabbalah:</strong> Techniques of letter combination (tzeruf) and divine names
+                    derive directly from Sefer Yetzirah's methods</li>
+            </ul>
+
+            <h3>Influence on Western Esotericism</h3>
+            <p>
+                Beyond Judaism, the Sefer Yetzirah shaped Western magical and mystical traditions:
+            </p>
+            <ul>
+                <li><strong>Christian Kabbalah (Renaissance):</strong> Scholars like Pico della Mirandola and Johannes
+                    Reuchlin incorporated Sefer Yetzirah into Christian mystical theology</li>
+                <li><strong>Hermetic Order of the Golden Dawn:</strong> Made Sefer Yetzirah central to their system,
+                    particularly the correspondence between Hebrew letters and tarot trumps</li>
+                <li><strong>Modern Ceremonial Magic:</strong> The text's emphasis on divine names and letter combinations
+                    influenced ritual magic practices</li>
+                <li><strong>Tarot:</strong> The correspondence of 22 letters to the Major Arcana became standard in
+                    esoteric tarot interpretation</li>
+            </ul>
+
+            <h3>Golem Legend</h3>
+            <p>
+                The Sefer Yetzirah became associated with the creation of the golem - an artificial being created through
+                the manipulation of Hebrew letters, particularly by inscribing the word "emet" (truth, אמת) on its forehead.
+                This legend, most famously connected to Rabbi Judah Loew of Prague (16th century), derives from the text's
+                statement that Abraham "succeeded in creation" through mastering its teachings.
+            </p>
+
+            <h3>Modern Scholarship</h3>
+            <p>
+                Contemporary scholars have recognized the Sefer Yetzirah's importance in multiple fields:
+            </p>
+            <ul>
+                <li><strong>Philosophy of Language:</strong> As an early exploration of language as constitutive rather
+                    than representative</li>
+                <li><strong>Semiotics:</strong> The systematic study of signs and their creative power</li>
+                <li><strong>Computational Theory:</strong> Some scholars draw parallels between letter combinations and
+                    algorithms or programming languages</li>
+                <li><strong>Cognitive Science:</strong> The text's exploration of how mind structures reality through
+                    symbolic systems</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Primary Sources & Editions</h2>
+
+            <div class="source-card">
+                <div class="source-title">Sefer Yetzirah: The Book of Creation - Aryeh Kaplan (1997)</div>
+                <p>
+                    The definitive English translation and commentary, providing the Hebrew text of multiple versions
+                    with extensive notes explaining Kabbalistic concepts, historical context, and practical applications.
+                    Kaplan's introduction traces the text's influence through Jewish mysticism and includes diagrams
+                    and tables of correspondences. Essential for serious study.
+                </p>
+                <p><strong>Publisher:</strong> Jason Aronson, Inc. | <strong>ISBN:</strong> 978-1571054616</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">Sefer Yezirah - A. Peter Hayman (2004)</div>
+                <p>
+                    Critical scholarly edition presenting the Short Version with comprehensive philological analysis.
+                    Hayman provides detailed comparison of manuscript variants and explores the text's relationship to
+                    Neoplatonic and Gnostic sources. Includes Hebrew text with facing English translation.
+                </p>
+                <p><strong>Publisher:</strong> Mohr Siebeck | <strong>ISBN:</strong> 978-3161483189</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Book Bahir - Aryeh Kaplan (1989)</div>
+                <p>
+                    While primarily a translation of the Sefer Bahir, this volume provides crucial context for
+                    understanding how the Sefer Yetzirah was interpreted in early medieval Kabbalah. The Bahir
+                    extensively references and expands upon Sefer Yetzirah's concepts.
+                </p>
+                <p><strong>Publisher:</strong> Jason Aronson | <strong>ISBN:</strong> 978-0877286189</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Contemplative Practice of Yihudim in Lurianic Kabbalah - J.H. Chajes (2003)</div>
+                <p>
+                    Explores the practical application of Sefer Yetzirah's letter combination techniques in
+                    Lurianic meditation practices. Shows how the theoretical framework became embodied spiritual practice.
+                </p>
+                <p><strong>Publisher:</strong> Oxford University Press (in Mysticism, Magic and Kabbalah)</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">The Early Kabbalah - Joseph Dan (1986)</div>
+                <p>
+                    Places the Sefer Yetzirah in the context of early Jewish mysticism, including translations of
+                    medieval commentaries by Saadia Gaon, Shabbetai Donnolo, and the Pseudo-Saadia commentary.
+                    Essential for understanding the text's reception history.
+                </p>
+                <p><strong>Publisher:</strong> Paulist Press | <strong>ISBN:</strong> 978-0809103805</p>
+            </div>
+
+            <div class="source-card">
+                <div class="source-title">Language, Eros, Being: Kabbalistic Hermeneutics and Poetic Imagination - Elliot Wolfson (2005)</div>
+                <p>
+                    Sophisticated philosophical analysis of the Sefer Yetzirah's theory of language and creation,
+                    exploring how letters serve as the ontological ground of being. Examines the erotic dimension
+                    of letter combinations in Kabbalistic thought.
+                </p>
+                <p><strong>Publisher:</strong> Fordham University Press | <strong>ISBN:</strong> 978-0823224722</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Cross-References & Related Texts</h2>
+
+            <div class="cross-ref-grid">
+                <div class="cross-ref-card" onclick="location.href='corpus-hermeticum.html'">
+                    <div class="cross-ref-icon">☿</div>
+                    <div class="cross-ref-title">Corpus Hermeticum</div>
+                    <p>Parallel cosmological speculation and the creative power of divine speech</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='emerald-tablet.html'">
+                    <div class="cross-ref-icon">💎</div>
+                    <div class="cross-ref-title">Emerald Tablet</div>
+                    <p>Correspondence between macrocosm and microcosm, "as above, so below"</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../../mythos/jewish/texts/index.html'">
+                    <div class="cross-ref-icon">✡️</div>
+                    <div class="cross-ref-title">Sefer ha-Zohar</div>
+                    <p>Elaborate expansion of Sefer Yetzirah's letter mysticism and sefirot</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../../mythos/jewish/texts/index.html'">
+                    <div class="cross-ref-icon">📜</div>
+                    <div class="cross-ref-title">Sefer Bahir</div>
+                    <p>Early Kabbalistic text building on Sefer Yetzirah's foundations</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../../archetypes/index.html'">
+                    <div class="cross-ref-icon">🎭</div>
+                    <div class="cross-ref-title">Archetypal Patterns</div>
+                    <p>The sefirot as archetypal divine attributes manifesting in creation</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../divination/tarot.html'">
+                    <div class="cross-ref-icon">🃏</div>
+                    <div class="cross-ref-title">Tarot</div>
+                    <p>22 Major Arcana corresponding to 22 Hebrew letters of Sefer Yetzirah</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../ritual/ceremonial-magic.html'">
+                    <div class="cross-ref-icon">🔯</div>
+                    <div class="cross-ref-title">Ceremonial Magic</div>
+                    <p>Use of divine names and letter combinations in magical practice</p>
+                </div>
+
+                <div class="cross-ref-card" onclick="location.href='../../mythos/christian/texts/index.html'">
+                    <div class="cross-ref-icon">📖</div>
+                    <div class="cross-ref-title">Book of Revelation</div>
+                    <p>Alpha and Omega - letters as divine creative and apocalyptic power</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel">
+            <h3>Explore Related Content</h3>
+
+            <h4 style="color: var(--color-secondary); margin: var(--spacing-md) 0;">Archetype Connections</h4>
+            <div class="interlink-grid">
+                <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#10024;</div>
+                    <div class="card-content"><h4>The Creator</h4><span>God creating through divine speech and letters</span></div>
+                </a>
+                <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128302;</div>
+                    <div class="card-content"><h4>The Magician</h4><span>Abraham mastering creative letter combinations</span></div>
+                </a>
+                <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
+                    <div class="card-icon">&#128218;</div>
+                    <div class="card-content"><h4>The Sage</h4><span>Thirty-two paths of wisdom</span></div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--spacing-lg) 0 var(--spacing-md) 0;">Cross-Cultural Parallels</h4>
+            <div class="interlink-grid">
+                <a href="corpus-hermeticum.html" class="parallel-card">
+                    <div class="card-icon">&#9790;</div>
+                    <div class="card-content"><h4>Corpus Hermeticum</h4><span>Parallel cosmology and divine speech</span></div>
+                </a>
+                <a href="../../mythos/jewish/texts/index.html" class="parallel-card">
+                    <div class="card-icon">&#10017;</div>
+                    <div class="card-content"><h4>Zohar</h4><span>Expansion of Sefer Yetzirah's concepts</span></div>
+                </a>
+                <a href="emerald-tablet.html" class="parallel-card">
+                    <div class="card-icon">&#128142;</div>
+                    <div class="card-content"><h4>Emerald Tablet</h4><span>Hermetic correspondence principles</span></div>
+                </a>
+            </div>
+
+            <h4 style="color: var(--color-secondary); margin: var(--spacing-lg) 0 var(--spacing-md) 0;">See Also</h4>
+            <div class="interlink-grid">
+                <a href="../divination/tarot.html" class="parallel-card">
+                    <div class="card-icon">&#127183;</div>
+                    <div class="card-content"><h4>Tarot</h4><span>22 Major Arcana and Hebrew letters</span></div>
+                </a>
+                <a href="../ritual/ceremonial-magic.html" class="parallel-card">
+                    <div class="card-icon">&#128303;</div>
+                    <div class="card-content"><h4>Ceremonial Magic</h4><span>Divine names and letter combinations</span></div>
+                </a>
+                <a href="../../mythos/jewish/index.html" class="parallel-card">
+                    <div class="card-icon">&#10017;</div>
+                    <div class="card-content"><h4>Kabbalah</h4><span>Jewish mystical tradition</span></div>
+                </a>
+            </div>
+        </section>
+
+        <div class="nav-buttons">
+            <a href="../index.html" class="nav-button">⬅ Back to Magical Systems</a>
+            <a href="emerald-tablet.html" class="nav-button">Next: Emerald Tablet ➡</a>
+            <a href="../../index.html" class="nav-button">🏠 Home</a>
+        </div>
+    </div>
+
+    <!-- Theme Picker UI -->
+</body>
+</html>

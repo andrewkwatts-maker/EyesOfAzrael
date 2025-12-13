@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entity Browser - World Mythos Explorer</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../themes/corpus-links.css">
+    <link rel="stylesheet" href="../components/panels/panels.css">
+    <script defer src="../themes/theme-picker.js"></script>
+    <script defer src="../themes/theme-animations.js"></script>
+
+    <!-- Entity System -->
+    <script defer src="../scripts/entity-loader.js"></script>
+    <script defer src="../js/components/entity-card.js"></script>
+
+    <style>
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, rgba(var(--color-primary-rgb, 139, 127, 255), 0.2), rgba(var(--color-secondary-rgb, 255, 126, 182), 0.2));
+            border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+            border-radius: var(--radius-xl, 20px);
+            margin: 2rem 0;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 1rem auto;
+            line-height: 1.6;
+        }
+
+        .search-section {
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 1.2rem 2rem;
+            font-size: 1.2rem;
+            background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
+            border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+            border-radius: var(--radius-lg, 15px);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 20px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
+            border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+            border-radius: var(--radius-lg, 15px);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .browse-section {
+            margin: 3rem 0;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .filter-btn {
+            background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
+            border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+            border-radius: var(--radius-md, 10px);
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-primary);
+            display: block;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 4px 16px rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, rgba(var(--color-primary-rgb, 139, 127, 255), 0.3), rgba(var(--color-secondary-rgb, 255, 126, 182), 0.3));
+            border-color: var(--accent-primary);
+        }
+
+        .filter-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .filter-count {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .entity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+
+        .view-btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
+            border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+            border-radius: var(--radius-md, 10px);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn:hover,
+        .view-btn.active {
+            border-color: var(--accent-primary);
+            background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .entity-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+        <div class="header-content">
+            <h1>🌍 World Mythos Explorer</h1>
+        </div>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Home</a>
+        <span>/</span>
+        <span>Entity Browser</span>
+    </nav>
+
+    <main>
+        <div class="hero">
+            <h1>📚 Entity Browser</h1>
+            <p>
+                Explore 265+ entities from 15+ mythological traditions.
+                Discover deities, sacred items, mythical places, and profound concepts
+                that have shaped human spirituality for millennia.
+            </p>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <input type="text"
+                   id="entity-search"
+                   class="search-box"
+                   placeholder="🔍 Search entities by name, tag, or description..."
+                   aria-label="Search entities">
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-entities">-</div>
+                <div class="stat-label">Total Entities</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-types">-</div>
+                <div class="stat-label">Entity Types</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-mythologies">-</div>
+                <div class="stat-label">Mythologies</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="cross-mythology">-</div>
+                <div class="stat-label">Cross-Mythology</div>
+            </div>
+        </div>
+
+        <!-- Browse by Type -->
+        <div class="browse-section">
+            <h2 class="section-title">🏛️ Browse by Type</h2>
+            <div class="filter-grid" id="type-filters">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Browse by Mythology -->
+        <div class="browse-section">
+            <h2 class="section-title">🌏 Browse by Mythology</h2>
+            <div class="filter-grid" id="mythology-filters">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <!-- View Toggle -->
+        <div class="view-toggle">
+            <button class="view-btn active" data-view="grid">Grid View</button>
+            <button class="view-btn" data-view="list">List View</button>
+            <button class="view-btn" data-view="random">Random Discovery</button>
+        </div>
+
+        <!-- Entity Grid -->
+        <div id="entity-container">
+            <div class="loading">Loading entities</div>
+        </div>
+    </main>
+
+    <footer style="margin-top: 4rem; padding: 2rem; text-align: center; color: var(--text-secondary); border-top: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);">
+        <p>Entity System v2.0 | 265+ entities across 15+ traditions</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+            <a href="../index.html" style="color: var(--accent-primary);">Home</a> |
+            <a href="browse-by-type.html" style="color: var(--accent-primary);">Browse by Type</a> |
+            <a href="browse-by-mythology.html" style="color: var(--accent-primary);">Browse by Mythology</a>
+        </p>
+    </footer>
+
+    <script>
+        (async function() {
+            'use strict';
+
+            // Initialize entity loader
+            const loader = new EntityLoader();
+            await loader.initialize();
+            window.entityLoader = loader;
+
+            const entities = loader.getAllEntitiesLight();
+
+            // Update statistics
+            updateStats(entities);
+
+            // Populate filters
+            populateTypeFilters(entities);
+            populateMythologyFilters(entities);
+
+            // Display entities
+            let currentFilter = { type: null, mythology: null };
+            displayEntities(entities);
+
+            // Setup search
+            setupSearch(entities);
+
+            // Setup view toggle
+            setupViewToggle();
+
+            // Setup filters
+            setupFilters();
+
+            function updateStats(entities) {
+                document.getElementById('total-entities').textContent = entities.length;
+
+                const types = new Set(entities.map(e => e.type));
+                document.getElementById('total-types').textContent = types.size;
+
+                const mythologies = new Set();
+                entities.forEach(e => {
+                    if (e.mythologies) {
+                        e.mythologies.forEach(m => mythologies.add(m));
+                    }
+                });
+                document.getElementById('total-mythologies').textContent = mythologies.size;
+
+                const crossMyth = entities.filter(e => e.mythologies && e.mythologies.length > 1);
+                document.getElementById('cross-mythology').textContent = crossMyth.length;
+            }
+
+            function populateTypeFilters(entities) {
+                const types = {};
+                entities.forEach(e => {
+                    if (!types[e.type]) {
+                        types[e.type] = 0;
+                    }
+                    types[e.type]++;
+                });
+
+                const typeIcons = {
+                    deity: '👑',
+                    item: '⚔️',
+                    place: '🏛️',
+                    concept: '💭',
+                    magic: '✨',
+                    creature: '🐉',
+                    hero: '🦸'
+                };
+
+                const container = document.getElementById('type-filters');
+                container.innerHTML = Object.entries(types)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([type, count]) => `
+                        <button class="filter-btn" data-filter-type="${type}">
+                            <div class="filter-icon">${typeIcons[type] || '📌'}</div>
+                            <div class="filter-label">${capitalize(type)}</div>
+                            <div class="filter-count">${count} entities</div>
+                        </button>
+                    `).join('');
+            }
+
+            function populateMythologyFilters(entities) {
+                const mythologies = {};
+                entities.forEach(e => {
+                    if (e.mythologies) {
+                        e.mythologies.forEach(m => {
+                            if (!mythologies[m]) {
+                                mythologies[m] = 0;
+                            }
+                            mythologies[m]++;
+                        });
+                    }
+                });
+
+                const mythIcons = {
+                    greek: '🏛️',
+                    norse: '⚔️',
+                    egyptian: '𓂀',
+                    hindu: '🕉️',
+                    buddhist: '☸️',
+                    japanese: '⛩️',
+                    chinese: '☯️',
+                    celtic: '🍀',
+                    jewish: '✡️'
+                };
+
+                const container = document.getElementById('mythology-filters');
+                container.innerHTML = Object.entries(mythologies)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([myth, count]) => `
+                        <button class="filter-btn" data-filter-mythology="${myth}">
+                            <div class="filter-icon">${mythIcons[myth] || '🌍'}</div>
+                            <div class="filter-label">${capitalize(myth)}</div>
+                            <div class="filter-count">${count} entities</div>
+                        </button>
+                    `).join('');
+            }
+
+            function displayEntities(entitiesToShow, mode = 'grid') {
+                const container = document.getElementById('entity-container');
+
+                if (entitiesToShow.length === 0) {
+                    container.innerHTML = '<div class="loading">No entities found</div>';
+                    return;
+                }
+
+                // Limit to first 50 for performance
+                const limited = entitiesToShow.slice(0, 50);
+
+                if (mode === 'random') {
+                    // Shuffle
+                    const shuffled = [...limited].sort(() => Math.random() - 0.5).slice(0, 12);
+                    limited.length = 0;
+                    limited.push(...shuffled);
+                }
+
+                container.innerHTML = '<div class="entity-grid" id="entity-grid"></div>';
+                const grid = document.getElementById('entity-grid');
+
+                limited.forEach(entity => {
+                    const cardContainer = document.createElement('div');
+                    cardContainer.className = 'entity-card-container';
+                    grid.appendChild(cardContainer);
+
+                    const card = new EntityCard({
+                        entityId: entity.id,
+                        entityType: entity.type,
+                        displayMode: 'compact',
+                        container: cardContainer,
+                        loader: loader
+                    });
+
+                    card.render().catch(console.error);
+                });
+
+                if (entitiesToShow.length > 50) {
+                    const more = document.createElement('div');
+                    more.className = 'loading';
+                    more.textContent = `Showing first 50 of ${entitiesToShow.length} entities`;
+                    container.appendChild(more);
+                }
+            }
+
+            function setupSearch(entities) {
+                const searchBox = document.getElementById('entity-search');
+                let debounceTimer;
+
+                searchBox.addEventListener('input', (e) => {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        const query = e.target.value.toLowerCase().trim();
+
+                        if (!query) {
+                            displayEntities(filterEntities(entities));
+                            return;
+                        }
+
+                        const results = entities.filter(entity => {
+                            const searchText = [
+                                entity.name,
+                                entity.shortDescription,
+                                ...(entity.tags || [])
+                            ].join(' ').toLowerCase();
+
+                            return searchText.includes(query);
+                        });
+
+                        displayEntities(filterEntities(results));
+                    }, 300);
+                });
+            }
+
+            function setupViewToggle() {
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+
+                        const view = btn.dataset.view;
+                        const filtered = filterEntities(entities);
+
+                        if (view === 'random') {
+                            displayEntities(filtered, 'random');
+                        } else {
+                            displayEntities(filtered, view);
+                        }
+                    });
+                });
+            }
+
+            function setupFilters() {
+                // Type filters
+                document.querySelectorAll('[data-filter-type]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const type = btn.dataset.filterType;
+
+                        if (currentFilter.type === type) {
+                            currentFilter.type = null;
+                            btn.classList.remove('active');
+                        } else {
+                            document.querySelectorAll('[data-filter-type]').forEach(b => b.classList.remove('active'));
+                            currentFilter.type = type;
+                            btn.classList.add('active');
+                        }
+
+                        displayEntities(filterEntities(entities));
+                    });
+                });
+
+                // Mythology filters
+                document.querySelectorAll('[data-filter-mythology]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const myth = btn.dataset.filterMythology;
+
+                        if (currentFilter.mythology === myth) {
+                            currentFilter.mythology = null;
+                            btn.classList.remove('active');
+                        } else {
+                            document.querySelectorAll('[data-filter-mythology]').forEach(b => b.classList.remove('active'));
+                            currentFilter.mythology = myth;
+                            btn.classList.add('active');
+                        }
+
+                        displayEntities(filterEntities(entities));
+                    });
+                });
+            }
+
+            function filterEntities(entities) {
+                let filtered = entities;
+
+                if (currentFilter.type) {
+                    filtered = filtered.filter(e => e.type === currentFilter.type);
+                }
+
+                if (currentFilter.mythology) {
+                    filtered = filtered.filter(e =>
+                        e.mythologies && e.mythologies.includes(currentFilter.mythology)
+                    );
+                }
+
+                return filtered;
+            }
+
+            function capitalize(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            }
+        })();
+    </script>
+</body>
+</html>

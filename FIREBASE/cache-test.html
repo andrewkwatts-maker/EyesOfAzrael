@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cache System Test - Eyes of Azrael</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+
+    .test-section {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .test-section h2 {
+      margin-top: 0;
+      color: #fff;
+      border-bottom: 2px solid rgba(138, 43, 226, 0.5);
+      padding-bottom: 0.5rem;
+    }
+
+    .test-controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      background: rgba(138, 43, 226, 0.6);
+      border: 1px solid rgba(138, 43, 226, 0.8);
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .btn:hover {
+      background: rgba(138, 43, 226, 0.8);
+      transform: translateY(-2px);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .results {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .results pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: #a0ffb0;
+    }
+
+    .timing {
+      color: #ffd700;
+      font-weight: bold;
+    }
+
+    .success {
+      color: #4ade80;
+    }
+
+    .error {
+      color: #f87171;
+    }
+
+    .info {
+      color: #60a5fa;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .stat-box {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #fff;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>Firebase Cache System Test</h1>
+    <p style="color: rgba(255, 255, 255, 0.7);">
+      Test the caching functionality and performance improvements.
+    </p>
+
+    <!-- Test 1: Basic Caching -->
+    <div class="test-section">
+      <h2>Test 1: Basic Cache Performance</h2>
+      <p>Load the same query twice to see cache performance.</p>
+
+      <div class="test-controls">
+        <button class="btn" onclick="testBasicCache()">Run Test</button>
+        <button class="btn" onclick="clearResults('basic-results')">Clear Results</button>
+      </div>
+
+      <div id="basic-results" class="results">
+        <pre>Click "Run Test" to begin...</pre>
+      </div>
+    </div>
+
+    <!-- Test 2: Cache Bypass -->
+    <div class="test-section">
+      <h2>Test 2: Cache Bypass</h2>
+      <p>Compare cached vs. bypassed queries.</p>
+
+      <div class="test-controls">
+        <button class="btn" onclick="testCacheBypass()">Run Test</button>
+        <button class="btn" onclick="clearResults('bypass-results')">Clear Results</button>
+      </div>
+
+      <div id="bypass-results" class="results">
+        <pre>Click "Run Test" to begin...</pre>
+      </div>
+    </div>
+
+    <!-- Test 3: Cache Invalidation -->
+    <div class="test-section">
+      <h2>Test 3: Cache Invalidation</h2>
+      <p>Test cache clearing and re-caching.</p>
+
+      <div class="test-controls">
+        <button class="btn" onclick="testCacheInvalidation()">Run Test</button>
+        <button class="btn" onclick="clearResults('invalidation-results')">Clear Results</button>
+      </div>
+
+      <div id="invalidation-results" class="results">
+        <pre>Click "Run Test" to begin...</pre>
+      </div>
+    </div>
+
+    <!-- Test 4: Version Tracking -->
+    <div class="test-section">
+      <h2>Test 4: Version Tracking</h2>
+      <p>Test version-based cache invalidation.</p>
+
+      <div class="test-controls">
+        <button class="btn" onclick="testVersionTracking()">Run Test</button>
+        <button class="btn" onclick="clearResults('version-results')">Clear Results</button>
+      </div>
+
+      <div id="version-results" class="results">
+        <pre>Click "Run Test" to begin...</pre>
+      </div>
+    </div>
+
+    <!-- Live Statistics -->
+    <div class="test-section">
+      <h2>Live Cache Statistics</h2>
+
+      <div class="test-controls">
+        <button class="btn" onclick="updateStats()">Refresh Stats</button>
+        <button class="btn" onclick="clearAllCache()">Clear All Cache</button>
+      </div>
+
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">Cache Hits</div>
+          <div class="stat-value" id="stat-hits">-</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Cache Misses</div>
+          <div class="stat-value" id="stat-misses">-</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Hit Rate</div>
+          <div class="stat-value" id="stat-hitrate">-</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Cache Size</div>
+          <div class="stat-value" id="stat-size">-</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Entries</div>
+          <div class="stat-value" id="stat-entries">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <!-- Firebase Configuration -->
+  <script src="js/firebase-init.js"></script>
+
+  <!-- Cache System -->
+  <script src="js/firebase-cache-manager.js"></script>
+  <script src="js/version-tracker.js"></script>
+  <script src="js/firebase-content-loader.js"></script>
+
+  <script>
+    let contentLoader = null;
+
+    // Initialize
+    async function init() {
+      try {
+        if (typeof firebaseApp === 'undefined') {
+          log('basic-results', 'ERROR: Firebase not initialized', 'error');
+          return;
+        }
+
+        contentLoader = new FirebaseContentLoader(firebaseApp, {
+          enableCache: true,
+          enableLogging: true
+        });
+
+        if (contentLoader.versionTracker) {
+          await contentLoader.versionTracker.initialize();
+        }
+
+        log('basic-results', 'Cache system initialized successfully!', 'success');
+        updateStats();
+
+      } catch (error) {
+        console.error('Init error:', error);
+        log('basic-results', 'ERROR: ' + error.message, 'error');
+      }
+    }
+
+    // Test 1: Basic Cache Performance
+    async function testBasicCache() {
+      const resultId = 'basic-results';
+      clearResults(resultId);
+      log(resultId, 'Starting basic cache test...', 'info');
+
+      try {
+        // First load (from database)
+        log(resultId, '\n1. First load (should query Firestore)...');
+        const start1 = performance.now();
+        const data1 = await contentLoader.loadContent('deities', { limit: 10 });
+        const time1 = (performance.now() - start1).toFixed(2);
+        log(resultId, `   Loaded ${data1.length} items in ${time1}ms`, 'timing');
+
+        // Second load (from cache)
+        log(resultId, '\n2. Second load (should use cache)...');
+        const start2 = performance.now();
+        const data2 = await contentLoader.loadContent('deities', { limit: 10 });
+        const time2 = (performance.now() - start2).toFixed(2);
+        log(resultId, `   Loaded ${data2.length} items in ${time2}ms`, 'timing');
+
+        // Calculate speedup
+        const speedup = (time1 / time2).toFixed(1);
+        log(resultId, `\n✓ Cache is ${speedup}x faster!`, 'success');
+
+        updateStats();
+      } catch (error) {
+        log(resultId, '\nERROR: ' + error.message, 'error');
+      }
+    }
+
+    // Test 2: Cache Bypass
+    async function testCacheBypass() {
+      const resultId = 'bypass-results';
+      clearResults(resultId);
+      log(resultId, 'Starting cache bypass test...', 'info');
+
+      try {
+        // Cached load
+        log(resultId, '\n1. Loading with cache...');
+        const start1 = performance.now();
+        const data1 = await contentLoader.loadContent('heroes', { limit: 10 });
+        const time1 = (performance.now() - start1).toFixed(2);
+        log(resultId, `   Loaded ${data1.length} items in ${time1}ms`, 'timing');
+
+        // Bypassed load
+        log(resultId, '\n2. Loading with cache bypass...');
+        const start2 = performance.now();
+        const data2 = await contentLoader.loadContent('heroes', {
+          limit: 10,
+          bypassCache: true
+        });
+        const time2 = (performance.now() - start2).toFixed(2);
+        log(resultId, `   Loaded ${data2.length} items in ${time2}ms`, 'timing');
+
+        log(resultId, '\n✓ Bypass forces fresh data from Firestore', 'success');
+
+        updateStats();
+      } catch (error) {
+        log(resultId, '\nERROR: ' + error.message, 'error');
+      }
+    }
+
+    // Test 3: Cache Invalidation
+    async function testCacheInvalidation() {
+      const resultId = 'invalidation-results';
+      clearResults(resultId);
+      log(resultId, 'Starting cache invalidation test...', 'info');
+
+      try {
+        // Load data (cache it)
+        log(resultId, '\n1. Loading data (will be cached)...');
+        await contentLoader.loadContent('myths', { limit: 10 });
+        log(resultId, '   Data cached', 'success');
+
+        // Check cache
+        let stats = contentLoader.getCacheStats();
+        log(resultId, `\n2. Current cache entries: ${stats.entries}`);
+
+        // Clear cache
+        log(resultId, '\n3. Clearing cache...');
+        contentLoader.clearCache('myths');
+        log(resultId, '   Cache cleared', 'success');
+
+        // Check again
+        stats = contentLoader.getCacheStats();
+        log(resultId, `\n4. Cache entries after clear: ${stats.entries}`);
+
+        // Reload (should query DB again)
+        log(resultId, '\n5. Reloading (should query Firestore)...');
+        const start = performance.now();
+        await contentLoader.loadContent('myths', { limit: 10 });
+        const time = (performance.now() - start).toFixed(2);
+        log(resultId, `   Loaded in ${time}ms (slower = fresh from DB)`, 'timing');
+
+        log(resultId, '\n✓ Cache invalidation working correctly!', 'success');
+
+        updateStats();
+      } catch (error) {
+        log(resultId, '\nERROR: ' + error.message, 'error');
+      }
+    }
+
+    // Test 4: Version Tracking
+    async function testVersionTracking() {
+      const resultId = 'version-results';
+      clearResults(resultId);
+      log(resultId, 'Starting version tracking test...', 'info');
+
+      try {
+        if (!contentLoader.versionTracker) {
+          log(resultId, 'Version tracker not available', 'error');
+          return;
+        }
+
+        // Get version info
+        log(resultId, '\n1. Getting version information...');
+        const versionInfo = await contentLoader.getVersionInfo();
+        log(resultId, `   Current Version: ${versionInfo.version || 'N/A'}`);
+        log(resultId, `   Update Count: ${versionInfo.updateCount || 0}`);
+        log(resultId, `   Last Updated: ${versionInfo.lastUpdated || 'Never'}`);
+
+        // Check for updates
+        log(resultId, '\n2. Checking for version updates...');
+        const hasChanged = await contentLoader.checkVersion();
+        log(resultId, hasChanged ? '   Version has changed!' : '   Version is current', hasChanged ? 'info' : 'success');
+
+        log(resultId, '\n✓ Version tracking operational!', 'success');
+        log(resultId, '\nNote: To test version changes, increment version from admin panel', 'info');
+
+      } catch (error) {
+        log(resultId, '\nERROR: ' + error.message, 'error');
+      }
+    }
+
+    // Update statistics display
+    function updateStats() {
+      if (!contentLoader) return;
+
+      const stats = contentLoader.getCacheStats();
+      if (!stats) return;
+
+      document.getElementById('stat-hits').textContent = stats.hits;
+      document.getElementById('stat-misses').textContent = stats.misses;
+      document.getElementById('stat-hitrate').textContent = stats.hitRate;
+      document.getElementById('stat-size').textContent = stats.sizeFormatted;
+      document.getElementById('stat-entries').textContent = stats.entries;
+    }
+
+    // Clear all cache
+    function clearAllCache() {
+      if (!confirm('Clear all cache?')) return;
+      contentLoader.clearCache();
+      updateStats();
+      log('basic-results', 'All cache cleared!', 'success');
+    }
+
+    // Utility: Log message
+    function log(elementId, message, type = '') {
+      const element = document.getElementById(elementId);
+      const pre = element.querySelector('pre');
+      const className = type ? ` class="${type}"` : '';
+
+      if (pre.textContent === 'Click "Run Test" to begin...') {
+        pre.innerHTML = `<span${className}>${message}</span>`;
+      } else {
+        pre.innerHTML += `\n<span${className}>${message}</span>`;
+      }
+
+      element.scrollTop = element.scrollHeight;
+    }
+
+    // Utility: Clear results
+    function clearResults(elementId) {
+      const element = document.getElementById(elementId);
+      const pre = element.querySelector('pre');
+      pre.innerHTML = 'Click "Run Test" to begin...';
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

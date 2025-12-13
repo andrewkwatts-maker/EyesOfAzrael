@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glastonbury Tor - Sacred Groves</title>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .location {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            color: var(--color-primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-icon {
+            font-size: 2.5rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all var(--transition-base);
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .feature-title {
+            color: var(--color-primary);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tradition-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .tradition-tag {
+            padding: 0.5rem 1rem;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            color: var(--color-text-primary);
+        }
+
+        .related-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .related-link {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            text-align: center;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .related-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .timeline-item {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '•';
+            position: absolute;
+            left: -2.5rem;
+            color: var(--color-primary);
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .timeline-date {
+            color: var(--color-primary);
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .quote-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        }
+
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .deity-card {
+            background: rgba(var(--color-surface-rgb), 0.8);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+
+        .deity-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .list-styled {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .list-styled li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .list-styled li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+    <div class="header-content">
+        <h1>Glastonbury Tor</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> →
+                <a href="../index.html">Sacred Places</a> →
+                <a href="../index.html#groves">Sacred Groves</a> →
+                <span>Glastonbury</span>
+</nav>
+
+    <main>
+        <div class="hero-section">
+            <div class="hero-icon">⛰️</div>
+            <h2>Glastonbury Tor - Gateway to Avalon</h2>
+            <p class="location">Somerset, England</p>
+            <div class="tradition-tags">
+                <span class="tradition-tag">Celtic</span>
+                <span class="tradition-tag">Arthurian</span>
+                <span class="tradition-tag">Christian</span>
+                <span class="tradition-tag">Pagan</span>
+            </div>
+        </div>
+
+        <!-- Historical Overview -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📜</span>
+                Historical Overview
+            </h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                Glastonbury Tor rises dramatically from the Somerset Levels, a striking conical hill topped by
+                the ruined tower of St. Michael's Church. At 518 feet (158 meters), this ancient landmark has
+                drawn pilgrims, mystics, and seekers for millennia. The Tor is steeped in layers of legend: it
+                is identified with the mystical Isle of Avalon, burial place of King Arthur; associated with
+                early Christian traditions surrounding Joseph of Arimathea and the Holy Grail; and connected to
+                pre-Christian Celtic beliefs about the Otherworld and fairy realms. This remarkable convergence
+                of pagan, Arthurian, and Christian sacred geography makes Glastonbury one of Britain's most
+                spiritually significant sites.
+            </p>
+
+            <div class="quote-box">
+                "The Island of Avalon, greedy for burials, received the nobles, and among them Arthur, the
+                flower of kings, because of the merits of the Virgin."
+                - William of Malmesbury, De Antiquitate Glastonie Ecclesie (c. 1129-1135)
+            </div>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-top: 1.5rem;">
+                The name "Glastonbury" may derive from Old English "Glæstingaburg" (fortress of the Glæstingas
+                people) or from Celtic roots suggesting "green hollow" or "blue-green glass." The Tor's unusual
+                shape and the terraced paths spiraling around it have prompted theories ranging from natural
+                erosion to deliberate Neolithic labyrinth construction. Before drainage in medieval times, the
+                surrounding Somerset Levels were marshland and lakes, making Glastonbury an actual island -
+                perhaps inspiring Avalon legends. The site shows evidence of human activity from Neolithic times
+                through the present day, accumulating meanings across cultures and epochs.
+            </p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 3000 BCE</div>
+                    <p>Neolithic activity; possible ritual landscape around Tor</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 300-500 CE</div>
+                    <p>Late Roman/Early Medieval settlement; Celtic Christian presence possible</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 63 CE (legend)</div>
+                    <p>Joseph of Arimathea allegedly brings Holy Grail; founds first British church</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 7th-8th Century</div>
+                    <p>Early wooden church on Tor summit; monastic settlement established</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1184</div>
+                    <p>Great fire destroys abbey buildings; reconstruction begins</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1191</div>
+                    <p>Monks claim to discover tomb of King Arthur and Guinevere</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">c. 1360-1368</div>
+                    <p>St. Michael's Tower built on Tor summit (current ruins)</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1539</div>
+                    <p>Dissolution of Monasteries; last abbot Richard Whiting executed on Tor</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1908</div>
+                    <p>National Trust acquires Tor; preservation efforts begin</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1960s-Present</div>
+                    <p>New Age spiritual revival; Glastonbury becomes alternative spirituality center</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Archaeological Evidence -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🏺</span>
+                Archaeological Evidence & Dating
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                Archaeological investigations at Glastonbury Tor have revealed evidence of human activity
+                spanning thousands of years, though much remains enigmatic. The site's layered history reflects
+                changing religious practices from prehistoric rituals through Christian monasticism to modern
+                spiritual revival.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🗿 Prehistoric Evidence</h3>
+                    <ul class="list-styled">
+                        <li>Neolithic and Bronze Age artifacts found on slopes</li>
+                        <li>Flint tools and pottery fragments</li>
+                        <li>Possible ritual landscape from 3000-1500 BCE</li>
+                        <li>Lake village settlements (Iron Age) nearby</li>
+                        <li>Tor may have been ceremonial center</li>
+                        <li>Astronomical alignments suggested but debated</li>
+                        <li>Natural landscape modified by human activity</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌀 The Terraces</h3>
+                    <ul class="list-styled">
+                        <li>Seven-tier spiral path around Tor</li>
+                        <li>Origin hotly debated: natural or artificial?</li>
+                        <li>Some scholars propose Neolithic labyrinth</li>
+                        <li>Others attribute to medieval agriculture (terracing)</li>
+                        <li>Geological processes also suggested</li>
+                        <li>If artificial, represents massive undertaking</li>
+                        <li>Spiral patterns common in Celtic art and ritual</li>
+                        <li>No definitive archaeological proof either way</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⛪ St. Michael's Tower</h3>
+                    <ul class="list-styled">
+                        <li>Current ruins date to 1360-1368</li>
+                        <li>Replaced earlier church destroyed by earthquake (1275)</li>
+                        <li>Built in Perpendicular Gothic style</li>
+                        <li>Originally part of larger church structure</li>
+                        <li>Dedicated to St. Michael the Archangel</li>
+                        <li>Typical of churches built on high places</li>
+                        <li>May occupy site of earlier pagan shrine</li>
+                        <li>Only tower survived after church's destruction</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ Earlier Structures</h3>
+                    <ul class="list-styled">
+                        <li>Evidence of Dark Age timber buildings</li>
+                        <li>Post holes suggest 5th-6th century structures</li>
+                        <li>Possible early Christian hermitage</li>
+                        <li>Mediterranean pottery from 5th-7th centuries</li>
+                        <li>Suggests trade connections or high-status site</li>
+                        <li>Metal-working evidence found</li>
+                        <li>Settlement likely religious in nature</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚱️ "Arthur's Tomb"</h3>
+                    <ul class="list-styled">
+                        <li>1191: Monks excavated claimed tomb of Arthur</li>
+                        <li>Found oak coffin 16 feet underground</li>
+                        <li>Lead cross inscribed: "Here lies King Arthur in the Isle of Avalon"</li>
+                        <li>Bones of tall man and woman recovered</li>
+                        <li>Widely regarded as medieval forgery/fundraising</li>
+                        <li>Cross disappeared in 18th century</li>
+                        <li>Bones reburied 1278; lost after Dissolution</li>
+                        <li>Modern consensus: elaborate hoax, but debate continues</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏰 Glastonbury Abbey</h3>
+                    <ul class="list-styled">
+                        <li>Major Benedictine abbey at Tor's base</li>
+                        <li>Claimed foundation by Joseph of Arimathea</li>
+                        <li>Historically documented from 7th century</li>
+                        <li>One of wealthiest abbeys in England</li>
+                        <li>Extensive ruins remain after Dissolution</li>
+                        <li>Lady Chapel (1184-1186) on ancient church site</li>
+                        <li>Excavations reveal Roman-era structures beneath</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌊 Isle of Avalon Geography</h3>
+                    <ul class="list-styled">
+                        <li>Before medieval drainage, area was wetlands</li>
+                        <li>Glastonbury was genuine island in Somerset Levels</li>
+                        <li>Tor visible for miles across marshes</li>
+                        <li>Lake village settlements confirm watery landscape</li>
+                        <li>Strategic and symbolic importance as island</li>
+                        <li>Geography fits Avalon descriptions</li>
+                        <li>Drainage in medieval period changed landscape</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌿 The Holy Thorn</h3>
+                    <ul class="list-styled">
+                        <li>Hawthorn tree blooms in winter (Crataegus monogyna 'Biflora')</li>
+                        <li>Legend: grew from Joseph of Arimathea's staff</li>
+                        <li>Original tree destroyed by Puritans (1647)</li>
+                        <li>Cuttings preserved and replanted</li>
+                        <li>Genetic analysis shows Middle Eastern origin possible</li>
+                        <li>Flowers sent to monarch at Christmas annually</li>
+                        <li>Modern vandalism and preservation efforts ongoing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mythological Associations -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📖</span>
+                Myths, Legends & Associated Figures
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                Glastonbury Tor sits at the intersection of multiple mythological traditions, each adding layers
+                of meaning to this sacred hill. The site has accumulated legends from Celtic paganism, Arthurian
+                romance, Christian hagiography, and modern esoteric traditions.
+            </p>
+
+            <div class="deity-grid">
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">👑</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">King Arthur</h3>
+                    <p>Legendary British king said to be buried at Glastonbury. Wounded at Battle of Camlann,
+                    taken to Avalon for healing. Associated with Isle of Avalon identification</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🏆</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Joseph of Arimathea</h3>
+                    <p>Biblical figure who allegedly brought Holy Grail to Britain (63 CE). Founded first church
+                    at Glastonbury. His staff became Holy Thorn tree</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🌸</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Guinevere</h3>
+                    <p>Arthur's queen, allegedly buried beside him at Glastonbury. Medieval tomb discovery claimed
+                    to find her bones alongside Arthur's</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">✨</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Morgan le Fay</h3>
+                    <p>Sorceress and Arthur's half-sister. One of nine queens who bore Arthur to Avalon. Associated
+                    with fairy realm beneath Tor</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🌟</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">Gwyn ap Nudd</h3>
+                    <p>Welsh Celtic deity, king of Tylwyth Teg (fairy folk) and ruler of Annwn (Otherworld).
+                    Glastonbury Tor identified as entrance to his realm</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">⚔️</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">St. Michael</h3>
+                    <p>Archangel to whom Tor's church is dedicated. Often associated with high places. Defeats
+                    dragon, paralleling pre-Christian dragon legends</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🌿</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">St. Patrick</h3>
+                    <p>Early Christian saint allegedly visited Glastonbury. Some legends say he established
+                    Christian community there before going to Ireland</p>
+                </div>
+
+                <div class="deity-card">
+                    <div style="font-size: 3rem;">🐉</div>
+                    <h3 style="color: var(--color-primary); margin: 1rem 0;">The Glastonbury Dragon</h3>
+                    <p>Local legends speak of dragon living beneath or within Tor. Slain by St. Michael or
+                    St. Collen. Represents pre-Christian chthonic powers</p>
+                </div>
+            </div>
+
+            <div class="content-grid" style="margin-top: 2rem;">
+                <div class="feature-box">
+                    <h3 class="feature-title">🏝️ Avalon - The Apple Isle</h3>
+                    <ul class="list-styled">
+                        <li>Avalon means "Isle of Apples" in Celtic tradition</li>
+                        <li>Magical island where Arthur was taken after wounding</li>
+                        <li>Land of eternal youth and healing</li>
+                        <li>Ruled by Morgan le Fay and fairy queens</li>
+                        <li>Arthur sleeps there until Britain's greatest need</li>
+                        <li>"Once and Future King" will return</li>
+                        <li>Geoffrey of Monmouth (1136) first clearly identified with Glastonbury</li>
+                        <li>Welsh tradition (Ynys Afallon) predates Geoffrey</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🍷 The Holy Grail</h3>
+                    <ul class="list-styled">
+                        <li>Joseph of Arimathea brought Grail to Britain</li>
+                        <li>Cup that caught Christ's blood at crucifixion</li>
+                        <li>Allegedly buried at Glastonbury or hidden nearby</li>
+                        <li>Chalice Well said to flow with Grail waters</li>
+                        <li>Red spring water from iron content</li>
+                        <li>Arthur's knights quested for Grail</li>
+                        <li>Connection to Arthurian and Christian traditions</li>
+                        <li>Medieval romance merged pagan and Christian themes</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌀 The Otherworld Gateway</h3>
+                    <ul class="list-styled">
+                        <li>Celtic belief: Tor is entrance to Annwn (Otherworld)</li>
+                        <li>Hollow hill inhabited by fairy folk</li>
+                        <li>Gwyn ap Nudd's palace beneath Tor</li>
+                        <li>Time moves differently in fairy realm</li>
+                        <li>Mortals can be lured inside and lost</li>
+                        <li>St. Collen legend: confronted Gwyn in hall beneath Tor</li>
+                        <li>Spiral path represents journey between worlds</li>
+                        <li>Samhain and Beltane: veils between worlds thinnest</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚡ Energy & Ley Lines</h3>
+                    <ul class="list-styled">
+                        <li>Modern esoteric tradition: Tor on major ley lines</li>
+                        <li>Michael and Mary lines intersect at Tor</li>
+                        <li>Alignment with Stonehenge, Avebury, St. Michael's Mount</li>
+                        <li>Dowsers detect energy currents</li>
+                        <li>Geomantic significance in New Age thought</li>
+                        <li>Earth mysteries movement from 1960s onward</li>
+                        <li>Scientific evidence lacking; spiritual significance remains</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎵 St. Collen & Gwyn</h3>
+                    <ul class="list-styled">
+                        <li>7th century Welsh saint St. Collen hermit on Tor</li>
+                        <li>Summoned into hollow hill by Gwyn ap Nudd</li>
+                        <li>Found magnificent fairy court inside</li>
+                        <li>Sprinkled holy water; palace vanished</li>
+                        <li>Left alone on cold hillside</li>
+                        <li>Story represents Christian triumph over paganism</li>
+                        <li>Also acknowledges power of pre-Christian beliefs</li>
+                        <li>Recorded in medieval hagiography</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💀 Richard Whiting's Martyrdom</h3>
+                    <ul class="list-styled">
+                        <li>Last Abbot of Glastonbury (1525-1539)</li>
+                        <li>Resisted Henry VIII's Dissolution of Monasteries</li>
+                        <li>Arrested on trumped-up charges of treason</li>
+                        <li>Dragged on hurdle to Tor summit</li>
+                        <li>Hanged, drawn, and quartered (November 15, 1539)</li>
+                        <li>Head displayed on Abbey gate</li>
+                        <li>Body quartered and distributed</li>
+                        <li>Beatified by Catholic Church (1895)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ritual & Spiritual Uses -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🎭</span>
+                Ritual Uses & Ceremonies
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">⛪ Christian Pilgrimage</h3>
+                    <ul class="list-styled">
+                        <li>Medieval pilgrims visited abbey and Tor</li>
+                        <li>Claimed relics: Holy Grail, Arthur's bones</li>
+                        <li>St. Michael's Day (September 29) celebrations</li>
+                        <li>Processions up Tor to tower church</li>
+                        <li>Healing miracles attributed to site</li>
+                        <li>Second only to Canterbury as English pilgrimage site</li>
+                        <li>Modern Christian pilgrimages continue</li>
+                        <li>Ecumenical services at abbey ruins</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌸 Pagan Observances</h3>
+                    <ul class="list-styled">
+                        <li>Modern druids and pagans gather at Tor</li>
+                        <li>Beltane (May 1) and Samhain (October 31) celebrations</li>
+                        <li>Summer and winter solstice gatherings</li>
+                        <li>Handfasting (pagan weddings) ceremonies</li>
+                        <li>Goddess worship (Glastonbury as sacred feminine site)</li>
+                        <li>Earth-based spirituality rituals</li>
+                        <li>Dancing, drumming, and fire ceremonies</li>
+                        <li>Chalice Well gardens used for meditation</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌕 Full Moon Ceremonies</h3>
+                    <ul class="list-styled">
+                        <li>Vigils and meditations at Tor summit</li>
+                        <li>Moon gazing and lunar observations</li>
+                        <li>Women's circles and goddess rituals</li>
+                        <li>Sound healing: singing bowls and drums</li>
+                        <li>Candle processions up spiral path</li>
+                        <li>Energy work and chakra balancing</li>
+                        <li>Connection to cyclical time and nature</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔮 New Age Practices</h3>
+                    <ul class="list-styled">
+                        <li>Crystal grids and stone circles</li>
+                        <li>Dowsing for earth energies and ley lines</li>
+                        <li>Meditation and yoga groups</li>
+                        <li>Shamanic journeying workshops</li>
+                        <li>Past life regression sessions</li>
+                        <li>Reiki and energy healing</li>
+                        <li>Vision quests and personal retreats</li>
+                        <li>Crop circle enthusiasts gather nearby</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎪 Glastonbury Festival</h3>
+                    <ul class="list-styled">
+                        <li>Major music festival since 1970</li>
+                        <li>Tor visible from festival site (Worthy Farm)</li>
+                        <li>Spiritual dimension alongside music</li>
+                        <li>Green Fields area for alternative spirituality</li>
+                        <li>Healing fields and sacred spaces</li>
+                        <li>Counter-culture and alternative lifestyle celebration</li>
+                        <li>Reinforces Glastonbury's mystical reputation</li>
+                        <li>Environmental and social consciousness themes</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🚶 Personal Pilgrimage</h3>
+                    <ul class="list-styled">
+                        <li>Thousands climb Tor annually seeking meaning</li>
+                        <li>Spiral walk as moving meditation</li>
+                        <li>Sunrise and sunset vigils</li>
+                        <li>Life transitions marked (birthdays, memorials)</li>
+                        <li>Ashes scattered from summit</li>
+                        <li>Vision quests and spiritual breakthroughs</li>
+                        <li>Offerings left at tower: flowers, crystals, notes</li>
+                        <li>Site of personal transformation for many</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💧 Chalice Well Rituals</h3>
+                    <ul class="list-styled">
+                        <li>Sacred spring at Tor's base</li>
+                        <li>Red water (iron-rich) flows continuously</li>
+                        <li>Vesica Piscis symbol on well cover</li>
+                        <li>Pilgrims drink and bottle water</li>
+                        <li>Healing properties attributed</li>
+                        <li>Gardens maintained for contemplation</li>
+                        <li>Interfaith sanctuary space</li>
+                        <li>Baptisms and blessing ceremonies</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎨 Artistic & Creative Rituals</h3>
+                    <ul class="list-styled">
+                        <li>Painters, writers, musicians seek inspiration</li>
+                        <li>Poetry readings and storytelling</li>
+                        <li>Land art and temporary installations</li>
+                        <li>Photography pilgrimages</li>
+                        <li>Music sessions at summit (respectfully)</li>
+                        <li>Creative visualization exercises</li>
+                        <li>Artistic community drawn to mystical atmosphere</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cultural Significance -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🌍</span>
+                Cultural & Religious Significance
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                Glastonbury Tor occupies a unique place in British culture, serving as a focal point for
+                multiple spiritual traditions while also functioning as a national symbol. Its meaning has
+                evolved across millennia, yet it retains power to move and inspire visitors from all backgrounds.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🇬🇧 National Identity</h3>
+                    <ul class="list-styled">
+                        <li>Symbol of British mysticism and heritage</li>
+                        <li>Connection to King Arthur myth fundamental to British identity</li>
+                        <li>Represents "ancient Britain" before Roman conquest</li>
+                        <li>Iconic landscape feature recognized nationally</li>
+                        <li>Featured in tourism marketing and media</li>
+                        <li>Protected as scheduled ancient monument</li>
+                        <li>National Trust guardianship since 1908</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔮 Alternative Spirituality Capital</h3>
+                    <ul class="list-styled">
+                        <li>Town of Glastonbury: highest concentration of alternative practitioners in UK</li>
+                        <li>Over 100 spiritual/healing businesses</li>
+                        <li>Goddess Temple, Tarot readers, crystal shops</li>
+                        <li>Attracts spiritual seekers worldwide</li>
+                        <li>Counter-culture community since 1960s</li>
+                        <li>"New Avalon" for modern mystics</li>
+                        <li>Interfaith dialogue and religious pluralism</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📚 Literary & Artistic Influence</h3>
+                    <ul class="list-styled">
+                        <li>Inspired countless Arthurian romances</li>
+                        <li>Tennyson's "Idylls of the King"</li>
+                        <li>T.S. Eliot's "The Waste Land" (Grail Quest)</li>
+                        <li>William Blake's "Jerusalem" (mythical geography)</li>
+                        <li>Dion Fortune's occult novels set in Glastonbury</li>
+                        <li>Marion Zimmer Bradley's "Mists of Avalon"</li>
+                        <li>Fantasy literature frequently references site</li>
+                        <li>Film and TV location for mystical scenes</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌿 Environmental Sacred Site</h3>
+                    <ul class="list-styled">
+                        <li>Natural beauty combined with human meaning</li>
+                        <li>Somerset Levels ecology preserved</li>
+                        <li>Rare plants and wildlife habitat</li>
+                        <li>Environmental activism connected to site</li>
+                        <li>Climate change concerns for preservation</li>
+                        <li>Sustainable tourism initiatives</li>
+                        <li>Sacred landscape consciousness</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚖️ Religious Pluralism</h3>
+                    <ul class="list-styled">
+                        <li>Multiple religions claim significance</li>
+                        <li>Christians, pagans, New Agers coexist</li>
+                        <li>Sometimes tense interfaith relations</li>
+                        <li>Generally respectful sharing of sacred space</li>
+                        <li>Model for post-secular spirituality</li>
+                        <li>Challenges traditional religious boundaries</li>
+                        <li>Reflects modern spiritual seeking</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎓 Academic Interest</h3>
+                    <ul class="list-styled">
+                        <li>Archaeology: ongoing excavations and analysis</li>
+                        <li>Religious studies: lived religion and pilgrimage</li>
+                        <li>Folklore studies: legend formation and transmission</li>
+                        <li>Tourism studies: sacred site management</li>
+                        <li>Literary criticism: Arthurian matter</li>
+                        <li>Anthropology: contemporary paganism</li>
+                        <li>Interdisciplinary conferences and publications</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modern Research & Preservation -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🔬</span>
+                Modern Research & Preservation
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🏺 Archaeological Investigations</h3>
+                    <ul class="list-styled">
+                        <li>1960s: Philip Rahtz excavated Tor summit</li>
+                        <li>Found Dark Age metalworking and pottery</li>
+                        <li>Evidence of high-status/religious settlement</li>
+                        <li>Geophysical surveys ongoing</li>
+                        <li>Non-invasive techniques to map subsurface</li>
+                        <li>Protecting site while investigating</li>
+                        <li>Climate change threatens preservation</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌳 Environmental Management</h3>
+                    <ul class="list-styled">
+                        <li>National Trust manages Tor and 500+ acres</li>
+                        <li>Grassland habitat maintained through grazing</li>
+                        <li>Erosion control on popular paths</li>
+                        <li>Native tree planting programs</li>
+                        <li>Wildlife conservation (rare butterflies, orchids)</li>
+                        <li>Balancing access with conservation</li>
+                        <li>Climate adaptation strategies</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🏛️ St. Michael's Tower Conservation</h3>
+                    <ul class="list-styled">
+                        <li>English Heritage monitors structure</li>
+                        <li>Weather damage from exposed position</li>
+                        <li>Stone consolidation and repointing</li>
+                        <li>Lightning protection installed</li>
+                        <li>Preventing vandalism and graffiti</li>
+                        <li>Balancing preservation with spiritual use</li>
+                        <li>Regular structural assessments</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">👥 Visitor Management</h3>
+                    <ul class="list-styled">
+                        <li>Over 250,000 visitors annually climb Tor</li>
+                        <li>Path maintenance and erosion control</li>
+                        <li>Safety concerns (steep slopes, weather)</li>
+                        <li>Emergency access for medical incidents</li>
+                        <li>Balancing crowds with sacred atmosphere</li>
+                        <li>Educational signage and interpretation</li>
+                        <li>Respect campaigns for religious diversity</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🔬 Geological Studies</h3>
+                    <ul class="list-styled">
+                        <li>Tor composed of hard sandstone cap</li>
+                        <li>Softer clays eroded leaving conical hill</li>
+                        <li>Natural formation shaped by ice age processes</li>
+                        <li>Terraces: geological vs. human-made debate continues</li>
+                        <li>Seismic studies of subsurface structure</li>
+                        <li>Groundwater flow and spring sources</li>
+                        <li>Climate change impact modeling</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📖 Historical Research</h3>
+                    <ul class="list-styled">
+                        <li>Critical analysis of Arthurian claims</li>
+                        <li>Medieval sources re-examined</li>
+                        <li>Joseph of Arimathea legends traced</li>
+                        <li>Distinguishing history from legend</li>
+                        <li>Understanding medieval forgeries and motivations</li>
+                        <li>Importance regardless of literal truth</li>
+                        <li>Archive of oral histories and contemporary accounts</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🌐 Digital Documentation</h3>
+                    <ul class="list-styled">
+                        <li>3D scanning and modeling of tower</li>
+                        <li>Virtual reality reconstructions</li>
+                        <li>Online archives of artifacts and documents</li>
+                        <li>Social media presence and interpretation</li>
+                        <li>Webcams and live streaming</li>
+                        <li>Digital humanities projects</li>
+                        <li>Citizen science opportunities</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🤝 Community Engagement</h3>
+                    <ul class="list-styled">
+                        <li>Local voices in site management</li>
+                        <li>Interfaith councils for ritual coordination</li>
+                        <li>Educational programs for schools</li>
+                        <li>Volunteer conservation days</li>
+                        <li>Oral history projects with residents</li>
+                        <li>Economic impact studies for tourism</li>
+                        <li>Balancing local life with visitor influx</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Esoteric & Alternative Theories -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🔮</span>
+                Esoteric Traditions & Alternative Theories
+            </h2>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 2rem;">
+                Beyond mainstream archaeological and historical interpretations, Glastonbury has attracted numerous
+                esoteric and alternative theories that view the site as part of larger sacred geometries and energy
+                systems. While controversial in academic circles, these perspectives have profoundly shaped modern
+                spiritual engagement with Glastonbury.
+            </p>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🌌 The Glastonbury Zodiac</h3>
+                    <ul class="list-styled">
+                        <li>Proposed by Katherine Maltwood (1929)</li>
+                        <li>Ten-mile diameter landscape zodiac</li>
+                        <li>Natural and human-made features form figures</li>
+                        <li>Hills, roads, streams outline zodiac signs</li>
+                        <li>Aquarius figure allegedly includes Tor</li>
+                        <li>Connects to Arthurian round table legends</li>
+                        <li>Academic consensus: pareidolia (seeing patterns)</li>
+                        <li>Inspired artistic and mystical movements</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">⚡ Ley Lines Theory</h3>
+                    <ul class="list-styled">
+                        <li>Alfred Watkins coined 'ley lines' (1921)</li>
+                        <li>St. Michael line: Cornwall to Norfolk coast</li>
+                        <li>Passes through Glastonbury Tor, Avebury, Stonehenge</li>
+                        <li>Mary line runs parallel to Michael line</li>
+                        <li>Two lines said to intersect at Tor</li>
+                        <li>Dowsers claim to detect energy currents</li>
+                        <li>No scientific validation of energy lines</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visitor Information -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🗺️</span>
+                Visiting Glastonbury - Practical Information
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🎫 Access & Hours</h3>
+                    <ul class="list-styled">
+                        <li><strong>Glastonbury Tor:</strong> National Trust, open 24/7, free access</li>
+                        <li><strong>Walk to summit:</strong> 15-20 minutes, steep climb</li>
+                        <li><strong>Abbey:</strong> Daily 9am-6pm (summer); ticket required</li>
+                        <li><strong>Chalice Well:</strong> Daily 10am-6pm (summer), 10am-4:30pm (winter)</li>
+                        <li><strong>Time needed:</strong> Full day minimum for main sites</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">💡 Practical Tips</h3>
+                    <ul class="list-styled">
+                        <li>Wear sturdy shoes for Tor climb</li>
+                        <li>Weather can change quickly; bring layers</li>
+                        <li>Summit can be windy</li>
+                        <li>Sunrise and sunset particularly atmospheric</li>
+                        <li>Respect sacred nature of sites</li>
+                        <li>Don't leave offerings that damage environment</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🚗 Getting There</h3>
+                    <ul class="list-styled">
+                        <li><strong>From London:</strong> 125 miles, 2.5-3 hours by car</li>
+                        <li><strong>From Bristol:</strong> 30 miles, 1 hour</li>
+                        <li><strong>Train:</strong> Castle Cary station (12 miles)</li>
+                        <li><strong>Bus:</strong> Regular services from Bristol, Bath</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">📅 Annual Events</h3>
+                    <ul class="list-styled">
+                        <li><strong>Beltane</strong> (May 1): Major pagan festival</li>
+                        <li><strong>Summer Solstice</strong> (June 21): Dawn vigils</li>
+                        <li><strong>Samhain</strong> (October 31): Otherworld focus</li>
+                        <li><strong>Glastonbury Pilgrimage</strong> (June): Catholic pilgrimage</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Links -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">🔗</span>
+                Related Topics & Further Exploration
+            </h2>
+
+            <div class="related-links">
+                <a href="../../index.html" class="related-link">
+                    🗿 Stonehenge
+                </a>
+                <a href="../../mythos/celtic/index.html" class="related-link">
+                    👑 King Arthur
+                </a>
+                <a href="../../mythos/celtic/index.html" class="related-link">
+                    🍀 Celtic Mythology
+                </a>
+                <a href="../../index.html" class="related-link">
+                    ⛩️ Ise Grand Shrine
+                </a>
+                <a href="dodona.html" class="related-link">
+                    🌳 Dodona Oracle
+                </a>
+                <a href="../index.html" class="related-link">
+                    🌍 All Sacred Places
+                </a>
+            </div>
+        </div>
+
+        <!-- Bibliography -->
+        <div class="glass-card">
+            <h2 class="section-title">
+                <span class="section-icon">📚</span>
+                Sources & Further Reading
+            </h2>
+
+            <div style="line-height: 2; font-size: 1rem;">
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Medieval Sources:</h3>
+                <ul class="list-styled">
+                    <li>Geoffrey of Monmouth: <em>Historia Regum Britanniae</em> (c. 1136)</li>
+                    <li>William of Malmesbury: <em>De Antiquitate Glastonie Ecclesie</em> (c. 1129-1135)</li>
+                    <li>Gerald of Wales: <em>Speculum Ecclesiae</em> (c. 1216)</li>
+                    <li>Chrétien de Troyes: <em>Perceval, the Story of the Grail</em> (c. 1190)</li>
+                    <li>Sir Thomas Malory: <em>Le Morte d'Arthur</em> (1485)</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Modern Scholarship:</h3>
+                <ul class="list-styled">
+                    <li>Carley, James P. <em>Glastonbury Abbey: The Holy House at the Head of the Moors Adventurous</em>. Boydell, 1988.</li>
+                    <li>Rahtz, Philip and Lorna Watts. <em>Glastonbury: Myth and Archaeology</em>. Tempus, 2003.</li>
+                    <li>Ashe, Geoffrey. <em>King Arthur's Avalon: The Story of Glastonbury</em>. Collins, 1957.</li>
+                    <li>Benham, Patrick. <em>The Avalonians</em>. Gothic Image, 1993.</li>
+                    <li>Hopkinson-Ball, Tim. <em>The Rediscovery of Glastonbury</em>. Sutton, 2007.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Archaeology & Landscape:</h3>
+                <ul class="list-styled">
+                    <li>Rahtz, Philip. <em>Excavations on Glastonbury Tor, Somerset</em>. Reports, 1971.</li>
+                    <li>Aston, Mick and Ian Burrow. <em>The Archaeology of Somerset</em>. Somerset County Council, 1982.</li>
+                    <li>Mann, Nicholas R. <em>The Isle of Avalon: Sacred Mysteries of Arthur and Glastonbury</em>. Green Magic, 2001.</li>
+                    <li>Howard-Davis, Christine. <em>Glastonbury Tor: An Early Medieval Monastic Settlement?</em> Oxford Archaeology, 2004.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Religious & Cultural Studies:</h3>
+                <ul class="list-styled">
+                    <li>Bowman, Marion. "Drawn to Glastonbury." In <em>Pilgrimage in Popular Culture</em>, eds. Reijnders et al., 1998.</li>
+                    <li>Ivakhiv, Adrian. <em>Claiming Sacred Ground: Pilgrims and Politics at Glastonbury and Sedona</em>. Indiana, 2001.</li>
+                    <li>Prince, Ruth and David Riches. <em>The New Age in Glastonbury</em>. Berghahn, 2000.</li>
+                    <li>Hutton, Ronald. "The New Age of Avalon." In <em>Witches, Druids and King Arthur</em>. Hambledon, 2003.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Arthurian Legend:</h3>
+                <ul class="list-styled">
+                    <li>Barber, Richard. <em>The Holy Grail: Imagination and Belief</em>. Harvard, 2004.</li>
+                    <li>Ashe, Geoffrey. <em>The Discovery of King Arthur</em>. Holt, 1985.</li>
+                    <li>Loomis, Roger Sherman. <em>The Grail: From Celtic Myth to Christian Symbol</em>. Columbia, 1963.</li>
+                    <li>Malory, Sir Thomas. <em>Le Morte d'Arthur</em>. Penguin Classics, 1485/1969.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Esoteric & Alternative Traditions:</h3>
+                <ul class="list-styled">
+                    <li>Maltwood, Katherine. <em>A Guide to Glastonbury's Temple of the Stars</em>. Clarke, 1929.</li>
+                    <li>Fortune, Dion. <em>Avalon of the Heart</em>. Thoth Publications, 1934.</li>
+                    <li>Fortune, Dion. <em>The Sea Priestess</em>. Samuel Weiser, 1938.</li>
+                    <li>Michell, John. <em>The New View Over Atlantis</em>. Thames & Hudson, 1983.</li>
+                    <li>Mann, Nicholas R. <em>Glastonbury Tor: A Guide to the History and Legends</em>. Annenterprise, 1993.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Earth Mysteries & Ley Lines:</h3>
+                <ul class="list-styled">
+                    <li>Watkins, Alfred. <em>The Old Straight Track</em>. Methuen, 1925.</li>
+                    <li>Miller, Hamish and Paul Broadhurst. <em>The Sun and the Serpent</em>. Pendragon Press, 1989.</li>
+                    <li>Devereux, Paul. <em>The New Ley Hunter's Guide</em>. Gothic Image, 1994.</li>
+                    <li>Screeton, Paul. <em>Quicksilver Heritage: The Mystic Leys</em>. Thorsons, 1974.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">Sacred Feminine & Goddess Studies:</h3>
+                <ul class="list-styled">
+                    <li>Jones, Kathy. <em>The Ancient British Goddess</em>. Ariadne Publications, 1991.</li>
+                    <li>Jones, Kathy. <em>Priestess of Avalon, Priestess of the Goddess</em>. Ariadne, 2006.</li>
+                    <li>Bradley, Marion Zimmer. <em>The Mists of Avalon</em>. Knopf, 1983.</li>
+                    <li>Ralls, Karen. <em>The Templars and the Grail</em>. Quest Books, 2003.</li>
+                </ul>
+
+                <h3 style="color: var(--color-primary); margin-top: 1.5rem;">General & Cultural Impact:</h3>
+                <ul class="list-styled">
+                    <li>Zaleski, Philip and Carol Zaleski. <em>The Fellowship: The Literary Lives of the Inklings</em>. Farrar, Straus and Giroux, 2015.</li>
+                    <li>Cooper, James Fenimore. <em>The Druidical Temples of the County of Wilts</em>. 1800.</li>
+                    <li>Webb, James. <em>The Occult Establishment</em>. Open Court, 1976.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Interlink Panel -->
+        <div class="glass-card interlink-panel">
+            <h2 class="section-title">
+                <span class="section-icon">🔗</span>
+                Explore Connected Topics
+            </h2>
+
+            <div class="content-grid">
+                <div class="feature-box">
+                    <h3 class="feature-title">🌍 Related Sacred Places</h3>
+                    <div class="related-links" style="margin-top: 1rem;">
+                        <a href="../realms/avalon.html" class="related-link">
+                            🏝️ Avalon - Isle of Apples
+                        </a>
+                        <a href="delphi.html" class="related-link">
+                            🔮 Delphi - Oracle of Apollo
+                        </a>
+                        <a href="dodona.html" class="related-link">
+                            🌳 Dodona - Speaking Oak of Zeus
+                        </a>
+                    </div>
+                </div>
+
+                <div class="feature-box">
+                    <h3 class="feature-title">🎭 Related Archetypes</h3>
+                    <div class="related-links" style="margin-top: 1rem;">
+                        <a href="../../archetypes/index.html" class="related-link">
+                            🌲 Sacred Grove
+                        </a>
+                        <a href="../../archetypes/index.html" class="related-link">
+                            🚪 Otherworld Gate
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

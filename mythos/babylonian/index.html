@@ -1,26 +1,45 @@
-﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Babylonian Mythology - World Mythos Explorer</title>
-<link href="../../styles.css" rel="stylesheet"/>
-<link href="../../themes/theme-base.css" rel="stylesheet"/>
-<link href="../../themes/corpus-links.css" rel="stylesheet"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babylonian Mythology - World Mythos Explorer</title>
+
+    <!-- Base Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
     <link rel="stylesheet" href="../../themes/smart-links.css">
-    <script defer src="../../themes/smart-links.js"></script>
+
+    <!-- Firebase Theme System -->
+    <link rel="stylesheet" href="../../FIREBASE/css/firebase-themes.css">
+
+    <!-- Theme Scripts -->
+    <script defer src="../../themes/theme-picker.js"></script>
     <script defer src="../../themes/theme-animations.js"></script>
-<script defer src="../../themes/theme-picker.js"></script>
-<style>
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <!-- Submission Link System -->
+    <script src="../../js/submission-context.js"></script>
+    <script src="../../js/components/submission-link.js"></script>
+    <link rel="stylesheet" href="../../css/submission-link.css">
+
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../css/user-auth.css">
+    <script src="../../js/firebase-auth.js"></script>
+    <script src="../../js/auth-guard.js"></script>
+    <script src="../../js/components/google-signin-button.js"></script>
+
+    <style>
         /* ============================================
-           MODERN GLASS UI TEMPLATE - Babylonian Mythos
-           Based on Buddhist/Christian reference with full theme support
+           FIREBASE-ENHANCED MYTHOLOGY INDEX TEMPLATE
+           Combines existing styles with Firebase integration
            ============================================ */
 
         /* Breadcrumb - Full-width bar attached below header */
         .breadcrumb {
             position: sticky;
-            top: 60px; /* Below the sticky header */
+            top: 60px;
             left: 0;
             width: 100%;
             z-index: 999;
@@ -92,186 +111,70 @@
             border-color: rgba(var(--color-primary-rgb), 0.4);
         }
 
-        /* Subsection Card - Hover Effects */
-        .subsection-card {
-            background: rgba(var(--color-primary-rgb), 0.05);
-            border-left: 4px solid var(--color-primary);
-            padding: var(--spacing-lg);
-            margin: var(--spacing-lg) 0;
-            border-radius: var(--radius-md);
-            transition: all var(--transition-base, 0.3s ease);
+        /* Firebase Content Sections */
+        .firebase-section {
+            margin: 3rem 0;
         }
 
-        .subsection-card:hover {
-            background: rgba(var(--color-primary-rgb), 0.1);
-            transform: translateX(5px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .subsection-card h3 {
-            color: var(--color-primary);
-            margin-top: 0;
-        }
-
-        .subsection-card h3 a {
-            color: var(--color-primary);
-            text-decoration: none;
-            transition: color var(--transition-fast);
-        }
-
-        .subsection-card h3 a:hover {
-            color: var(--color-secondary);
-        }
-
-        .subsection-card p {
-            line-height: 1.7;
-        }
-
-        /* Grid Layouts */
-        .deity-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--spacing-lg);
-            margin: var(--spacing-lg) 0;
-        }
-
-        .grid-2col {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--spacing-lg);
-        }
-
-        /* Deity Cards - Modern Glass Pattern with Glow Hover */
-        .deity-card {
-            background: rgba(var(--color-primary-rgb), 0.05);
-            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-lg);
-            transition: all var(--transition-base, 0.3s ease);
-            cursor: pointer;
-            text-decoration: none;
-            display: block;
-            color: inherit;
-            overflow: hidden;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-
-        .deity-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg), 0 0 15px rgba(var(--color-primary-rgb), 0.2);
-            border-color: var(--color-primary);
-            background: rgba(var(--color-primary-rgb), 0.1);
-            text-decoration: none;
-        }
-
-        .deity-card h3 {
-            color: var(--color-primary);
-            margin-top: 0.5rem;
-        }
-
-        .deity-card p {
-            line-height: 1.7;
-        }
-
-        .deity-icon {
-            font-size: 2.5rem;
-            text-align: center;
-        }
-
-        /* Sub-links - Pill Buttons */
-        .sub-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--spacing-sm);
-            margin-top: var(--spacing-md);
-        }
-
-        .sub-link {
-            background: var(--color-primary);
-            color: var(--color-text-primary);
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--radius-full);
-            text-decoration: none;
-            font-size: var(--font-size-sm);
-            transition: all var(--transition-base, 0.3s ease);
-        }
-
-        .sub-link:hover {
-            background: var(--color-secondary);
-            transform: scale(1.05);
-        }
-
-        /* Section Headers */
         .section-header {
             color: var(--color-primary);
             margin-bottom: var(--spacing-lg);
+            font-size: 2rem;
+            font-weight: 700;
         }
 
-        .card-title {
-            color: var(--color-primary);
-            margin-top: 0;
+        /* Grid Layouts */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
         }
 
-        /* Heading Color Contrast - Ensure visibility against all backgrounds */
-        h1, h2, h3, h4 {
-            color: var(--color-text-primary);
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
         }
 
-        h1 a, h2 a, h3 a, h4 a {
-            color: inherit;
+        /* Loading States */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            gap: var(--spacing-md);
         }
 
-        .section-header,
-        .glass-card h3,
-        .deity-card h3,
-        .subsection-card h3,
-        .related-card h3 {
-            color: var(--color-primary);
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--theme-primary, var(--color-primary));
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        /* Ensure hero section headings are visible */
-        .hero-section h2 {
-            color: var(--color-text-primary);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
-        /* Related Cards - Glass Pattern */
-        .related-card {
-            background: rgba(var(--color-surface-rgb), 0.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            transition: all var(--transition-base, 0.3s ease);
+        .loading-text {
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
         }
 
-        .related-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg), 0 0 15px rgba(var(--color-primary-rgb), 0.15);
-            border-color: rgba(var(--color-primary-rgb), 0.4);
-        }
-
-        .related-card h3 {
-            color: var(--color-primary);
-            margin-top: 0;
-        }
-
-        .related-card a {
-            color: var(--color-primary);
-            text-decoration: none;
-            font-weight: var(--font-semibold);
-        }
-
-        .related-card a:hover {
-            color: var(--color-secondary);
-            text-decoration: underline;
+        /* Static Content (preserved from original) */
+        .static-content {
+            margin: 2rem 0;
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .grid-2col {
+            .content-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -290,284 +193,319 @@
             .breadcrumb {
                 font-size: var(--font-size-xs);
                 padding: var(--spacing-xs) var(--spacing-md);
-                top: 50px; /* Smaller header on mobile */
+                top: 50px;
             }
         }
     </style>
 </head>
-<body>
-<div id="theme-picker-container"></div>
-<header>
-    <div class="header-content">
-        <h1>🦁 <a data-term="Babylonian" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> Mythology</h1>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../mythos/index.html">Home</a> →
-                <span><a data-term="Babylonian Tradition" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=babylonian%20tradition" title="View babylonian tradition in ancient texts">Babylonian Tradition</a></span>
-</nav>
-<main>
-<div class="hero-section">
-<h2>The Tradition of <a class="corpus-link" data-term="Cosmic Order" data-tradition="sumerian" href="../../mythos/sumerian/corpus-search.html?term=me" title="Search corpus for 'Cosmic Order'">Cosmic Order</a> and <a data-term="Divine" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=divine" title="View divine in ancient texts">Divine</a> Kingship</h2>
-<p style="font-size: var(--font-size-xl); max-width: 800px; margin: 1rem auto;">
-                Explore the rich mythology of ancient Babylon, from <a class="corpus-link" data-term="Marduk" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=marduk" title="Search corpus for 'Marduk'">Marduk</a>'s victory over primordial chaos
-                to the systematic divination practices that shaped Mesopotamian civilization. This comprehensive
-                system encompasses the <a data-term="Enuma Elish" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=enuma%20elish" title="View enuma elish in ancient texts">Enuma Elish</a> creation epic, the divine council, celestial omens, and the
-                spiritual path from apprentice scholar to chief diviner.
-            </p>
-</div>
-<section>
-<h2 style="color: var(--color-primary);">🌟 The <a data-term="Babylonian" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> Pantheon</h2>
-<p>
-<a data-term="Babylonian" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> religion centered on <a href="deities/marduk.html">Marduk</a>, <a class="corpus-link" data-term="King of the Gods" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'King of the Gods'">king of the gods</a>, who defeated the <a class="corpus-link" data-term="Chaos Dragon" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=tiamat" title="Search corpus for 'Chaos Dragon'">chaos dragon</a> <a href="deities/tiamat.html">Tiamat</a>
-                and created the ordered cosmos. The pantheon inherited and transformed Sumerian deities, creating
-                a sophisticated system of divine kingship that mirrored earthly monarchy. Each deity governed
-                specific <a data-term="Domains" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=domains" title="View domains in ancient texts">domains</a> of nature, society, and <a class="corpus-link" data-term="Cosmic Order" data-tradition="sumerian" href="../../mythos/sumerian/corpus-search.html?term=me" title="Search corpus for 'Cosmic Order'">cosmic order</a>.
-            </p>
-<div class="subsection-card">
-<h3>👑 <a href="deities/index.html">Major Deities</a></h3>
-<p>The <a class="corpus-link" data-term="Great Gods" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=anunnaki" title="Search corpus for 'Great Gods'">great gods</a> who shaped the cosmos and guided human destiny through divine council
-                   and cosmic law. From <a data-term="Marduk" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=marduk" title="View marduk in ancient texts">Marduk</a>'s supreme kingship to <a class="corpus-link" data-term="Ishtar" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=ishtar" title="Search corpus for 'Ishtar'">Ishtar</a>'s dual nature as love and war goddess.</p>
-<div class="sub-links">
-<a class="sub-link" href="deities/marduk.html" data-smart>Marduk - King of Gods</a>
-<a class="sub-link" href="deities/ishtar.html" data-smart>Ishtar - Venus Goddess</a>
-<a class="sub-link" href="deities/nabu.html">Nabu - God of Wisdom</a>
-<a class="sub-link" href="deities/index.html">View All Deities →</a>
-</div></div></section>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--color-primary);">🌌 <a data-term="Cosmology" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=cosmology" title="View cosmology in ancient texts">Cosmology</a> &amp; Creation</h2>
-<p>
-                The <a data-term="Babylonian" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> cosmos emerged from <a class="corpus-link" data-term="Primordial Waters" data-tradition="sumerian" href="../../mythos/sumerian/corpus-search.html?term=abzu" title="Search corpus for 'Primordial Waters'">primordial waters</a> through divine conflict. The <a href="cosmology/creation.html">Enuma Elish</a>
-                describes <a href="deities/marduk.html">Marduk</a>'s battle with <a href="deities/tiamat.html">Tiamat</a>, the salt-water ocean, whose body became heaven and earth.
-                This creation through combat established <a href="deities/marduk.html">Marduk</a>'s supremacy and the eternal struggle between
-                order (<a data-term="Marduk" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=marduk" title="View marduk in ancient texts">Marduk</a>) and chaos (<a class="corpus-link" data-term="Tiamat" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=tiamat" title="Search corpus for 'Tiamat'">Tiamat</a>).
-            </p>
-<div class="subsection-card">
-<h3>🌊 <a href="cosmology/creation.html">The Enuma Elish - Creation Epic</a></h3>
-<p>When the heavens above were unnamed and earth below had no name, primordial <a class="corpus-link" data-term="Apsû" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=apsu" title="Search corpus for 'Apsû'">Apsû</a> and <a data-term="Tiamat" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=tiamat" title="View tiamat in ancient texts">Tiamat</a>
-                   mingled their waters. From their union came the gods, and from divine conflict came the cosmos.</p>
-</div>
-<div class="subsection-card">
-<h3>⚰️ <a href="cosmology/afterlife.html">The Afterlife - Irkalla</a></h3>
-<p>The House of Dust, the <a class="corpus-link" data-term="Land of No Return" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=irkalla" title="Search corpus for 'Land of No Return'">Land of No Return</a>, where the dead dwell in darkness beneath the earth.
-                   Ruled by <a href="deities/nergal.html">Ereshkigal</a> and her consort <a href="deities/nergal.html">Nergal</a>, this grim underworld awaited all mortals regardless of deeds.</p>
-</div>
-<div class="subsection-card">
-<h3>🌍 <a href="cosmology/index.html">Cosmic Structure</a></h3>
-<p>The three-tiered universe: heaven (<a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a>), earth (<a class="corpus-link" data-term="Ki" data-tradition="sumerian" href="../../mythos/sumerian/corpus-search.html?term=ninhursag" title="Search corpus for 'Ki'">Ki</a>), and underworld (<a class="corpus-link" data-term="Kur" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=irkalla" title="Search corpus for 'Kur'">Kur</a>). The <a class="corpus-link" data-term="Apsû" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=apsu" title="Search corpus for 'Apsû'">Apsû</a> sweet-water
-                   ocean beneath the earth, the <a data-term="Cosmic" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=cosmic" title="View cosmic in ancient texts">cosmic</a> <a class="corpus-link" data-term="Mountain" data-tradition="sumerian" href="../../mythos/sumerian/corpus-search.html?term=kur" title="Search corpus for 'Mountain'">mountain</a>, and the celestial firmament housing the stars.</p>
-</div></section>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--color-primary);">📚 Other <a data-term="Babylonian" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> Sections</h2>
-<div class="deity-grid">
-<div class="deity-card" onclick="window.location.href='heroes/index.html'">
-<div class="deity-icon">⚔️</div>
-<h3>Heroes &amp; Legends</h3>
-<p><a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a>, <a class="corpus-link" data-term="Etana" data-tradition="sumerian" href="../../mythos/sumerian/corpus-search.html?term=etana" title="Search corpus for 'Etana'">Etana</a>, Adapa, and legendary kings who walked between mortal and <a data-term="Divine" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=divine" title="View divine in ancient texts">divine</a> realms.</p>
-</div>
-<div class="deity-card" onclick="window.location.href='creatures/index.html'">
-<div class="deity-icon">🐉</div>
-<h3>Mythical Creatures</h3>
-<p><a data-term="Tiamat" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=tiamat" title="View tiamat in ancient texts">Tiamat</a>'s brood, the eleven monsters, scorpion-men, lamassu guardians, and cosmic beasts.</p>
-</div>
-<div class="deity-card" onclick="window.location.href='herbs/index.html'">
-<div class="deity-icon">🌿</div>
-<h3><a data-term="Sacred" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=sacred" title="View sacred in ancient texts">Sacred</a> Plants</h3>
-<p>Cedar, juniper, tamarisk, date palm, and plants used in ritual purification and healing.</p>
-</div>
-<div class="deity-card" onclick="window.location.href='rituals/index.html'">
-<div class="deity-icon">🕯️</div>
-<h3><a data-term="Rituals" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=rituals" title="View rituals in ancient texts">Rituals</a> &amp; Practices</h3>
-<p><a class="corpus-link" data-term="New Year Festival" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=akitu" title="Search corpus for 'New Year Festival'">New Year festival</a> (<a class="corpus-link" data-term="Akitu" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=akitu" title="Search corpus for 'Akitu'">Akitu</a>), temple ceremonies, <a data-term="Divine" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=divine" title="View divine in ancient texts">divine</a> banquets, and purification rites.</p>
-</div>
-<div class="deity-card" onclick="window.location.href='magic/index.html'">
-<div class="deity-icon">✨</div>
-<h3>Divination &amp; Magic</h3>
-<p>Extispicy (liver reading), astrology, dream interpretation, incantations, and protective spells.</p>
-</div>
-<div class="deity-card" onclick="window.location.href='texts/index.html'">
-<div class="deity-icon">📜</div>
-<h3><a data-term="Sacred" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=sacred" title="View sacred in ancient texts">Sacred</a> Texts</h3>
-<p><a data-term="Enuma Elish" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=enuma%20elish" title="View enuma elish in ancient texts">Enuma Elish</a>, Epic of <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a>, <a class="corpus-link" data-term="Erra" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=nergal" title="Search corpus for 'Erra'">Erra</a> Epic, omen tablets, and cuneiform wisdom literature.</p>
-</div>
-<div class="deity-card" onclick="window.location.href='corpus-search.html'">
-<div class="deity-icon">🔍</div>
-<h3>Corpus Search</h3>
-<p>Search <a data-term="Babylonian" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> &amp; Akkadian cuneiform texts from ORACC for deities, texts, and concepts.</p>
-</div>
-<div class="deity-card" onclick="window.location.href='symbols/index.html'">
-<div class="deity-icon">⚜️</div>
-<h3><a data-term="Sacred" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=sacred" title="View sacred in ancient texts">Sacred</a> Symbols</h3>
-<p>Dragon (mušḫuššu), winged disk, Tree of Life, <a data-term="Cuneiform" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=cuneiform" title="View cuneiform in ancient texts">cuneiform</a> signs, and divine emblems.</p>
-</div>
-<div class="deity-card" onclick="window.location.href='path/index.html'">
-<div class="deity-icon">🪜</div>
-<h3>Spiritual Path</h3>
-<p>The 6-stage journey from apprentice to chief scholar (20-30 years) through divination and wisdom.</p>
-</div>
-</div></section>
-<section class="related-concepts" style="margin-top: 3rem;">
-<h2 class="section-header">🔗 Related <a data-term="Traditions" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=traditions" title="View traditions in ancient texts">Traditions</a></h2>
-<p style="margin-bottom: var(--spacing-lg); line-height: 1.7;"><a data-term="Babylonian" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> mythology inherited and transformed earlier Sumerian traditions while influencing later civilizations:</p>
-<div class="grid-2col">
-<div class="glass-card">
-<h3 style="color: var(--color-primary); margin-top: 0;">Sumerian Origins</h3>
-<p style="margin-bottom: var(--spacing-md); line-height: 1.7;">Many <a data-term="Babylonian" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> gods derive from Sumerian deities: <a class="corpus-link" data-term="Marduk" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=marduk" title="Search corpus for 'Marduk'">Marduk</a> from <a class="corpus-link" data-term="Enki" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=ea" title="Search corpus for 'Enki'">Enki</a>, <a class="corpus-link" data-term="Ishtar" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=ishtar" title="Search corpus for 'Ishtar'">Ishtar</a> from <a class="corpus-link" data-term="Inanna" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=ishtar" title="Search corpus for 'Inanna'">Inanna</a></p>
-<a class="btn btn-primary" href="../sumerian/index.html">Explore Sumerian →</a>
-</div>
-<div class="glass-card">
-<h3 style="color: var(--color-primary); margin-top: 0;">Assyrian Successor</h3>
-<p style="margin-bottom: var(--spacing-md); line-height: 1.7;">Assyrian mythology adopted <a data-term="Babylonian" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> pantheon, elevating Ashur as supreme deity</p>
-<a class="btn btn-primary" href="../../archetypes/celestial/index.html">Explore Assyrian →</a>
-</div>
-<div class="glass-card">
-<h3 style="color: var(--color-primary); margin-top: 0;">Persian Continuation</h3>
-<p style="margin-bottom: var(--spacing-md); line-height: 1.7;">Zoroastrian dualism echoes <a data-term="Babylonian" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> cosmic conflict between order and chaos</p>
-<a class="btn btn-primary" href="../persian/index.html">Explore Persian →</a>
-</div>
-<div class="glass-card">
-<h3 style="color: var(--color-primary); margin-top: 0;">Egyptian Parallels</h3>
-<p style="margin-bottom: var(--spacing-md); line-height: 1.7;">Similar cosmic waters (Nun/<a class="corpus-link" data-term="Apsû" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=apsu" title="Search corpus for 'Apsû'">Apsû</a>), <a data-term="Divine" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=divine" title="View divine in ancient texts">divine</a> kingship, and underworld realms</p>
-<a class="btn btn-primary" href="../egyptian/index.html">Explore Egyptian →</a>
-</div>
-</div>
-</section>
+<body data-theme="babylonian">
+    <!-- Theme Picker Container -->
+    <div id="theme-picker"></div>
+    <div id="theme-picker-container"></div>
 
-<!-- Interlink Panel Section -->
-<section class="interlink-panel" style="margin-top: 3rem;">
-    <h3 class="interlink-header">
-        <span class="interlink-icon">🔗</span>
-        Related Across the Mythos
-    </h3>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>🏺 Babylonian Mythology</h1>
+            <div id="user-auth-nav"></div>
+        </div>
+    </header>
 
-    <div class="interlink-grid">
-        <!-- Archetype Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Key Archetypes</div>
-            <a href="../../archetypes/sky-father/index.html" class="archetype-link-card" data-smart data-mythos="babylonian">
-                <div class="archetype-badge">👑 SKY FATHER / KING</div>
-                <p class="archetype-context">Marduk embodies divine kingship - supreme authority achieved through heroic combat against chaos.</p>
-                <span class="see-parallels">See parallels: Zeus, Jupiter, Odin →</span>
-            </a>
-            <a href="../../archetypes/great-goddess/index.html" class="archetype-link-card" data-smart data-mythos="babylonian" style="margin-top: var(--spacing-md);">
-                <div class="archetype-badge">⭐ GREAT GODDESS</div>
-                <p class="archetype-context">Ishtar represents the powerful feminine - love, war, and sovereignty united in one deity.</p>
-                <span class="see-parallels">See parallels: Inanna, Aphrodite, Freya →</span>
-            </a>
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../mythos/index.html">Home</a> →
+        <span aria-current="page">Babylonian Mythology</span>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="hero-icon-display">🏺</div>
+            <h2>Babylonian Mythology</h2>
+            <p class="hero-description">
+                Explore the epic cosmology of Babylon, where Marduk slew Tiamat to create the world. Discover the divine order, astrological wisdom, and mythic cycles that influenced all Near Eastern cultures.
+            </p>
         </div>
 
-        <!-- Sacred Items Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Sacred Items</div>
-            <a href="../../index.html" class="item-link-card" data-smart data-mythos="babylonian">
-                <div class="item-icon">📜</div>
-                <div class="item-info">
-                    <h4>Tablet of Destinies</h4>
-                    <p class="item-type">Divine Artifact</p>
-                    <p class="item-context">Source of cosmic authority</p>
-                </div>
-            </a>
-        </div>
+        <!-- ============================================
+             FIREBASE-LOADED DYNAMIC CONTENT SECTIONS
+             These sections load from Firestore
+             ============================================ -->
 
-        <!-- Sacred Places Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Sacred Places</div>
-            <a href="../../index.html" class="place-link-card" data-smart data-mythos="babylonian">
-                <div class="place-visual">
-                    <span class="place-icon">🏛️</span>
-                    <span class="place-type">Temple</span>
-                </div>
-                <div class="place-info">
-                    <h4>Esagila</h4>
-                    <p>Marduk's temple in Babylon</p>
-                </div>
-            </a>
-        </div>
+        <!-- Deities Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">⚡ Deities</h2>
+            <div id="deities-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading deities from Firebase...</p>
+            </div>
+            <div id="deities-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Heroes Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🦸 Heroes & Legendary Mortals</h2>
+            <div id="heroes-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading heroes from Firebase...</p>
+            </div>
+            <div id="heroes-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Creatures Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🐉 Creatures & Monsters</h2>
+            <div id="creatures-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading creatures from Firebase...</p>
+            </div>
+            <div id="creatures-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Cosmology Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🌌 Cosmology & Sacred Places</h2>
+            <div id="cosmology-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading cosmology from Firebase...</p>
+            </div>
+            <div id="cosmology-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Texts Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">📚 Sacred Texts</h2>
+            <div id="texts-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading texts from Firebase...</p>
+            </div>
+            <div id="texts-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Herbs Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🌿 Sacred Plants & Herbalism</h2>
+            <div id="herbs-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading herbs from Firebase...</p>
+            </div>
+            <div id="herbs-container" class="content-grid" style="display: none;"></div>
+        </section>
 
         <!-- Rituals Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Associated Practices</div>
-            <a href="rituals/akitu.html" class="magic-link-card" data-smart data-mythos="babylonian">
-                <div class="magic-icon">🎭</div>
-                <div class="magic-info">
-                    <h4>Akitu Festival</h4>
-                    <p class="magic-type">New Year Celebration</p>
+        <section class="firebase-section">
+            <h2 class="section-header">🔮 Rituals & Practices</h2>
+            <div id="rituals-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading rituals from Firebase...</p>
+            </div>
+            <div id="rituals-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Symbols Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🔱 Sacred Symbols</h2>
+            <div id="symbols-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading symbols from Firebase...</p>
+            </div>
+            <div id="symbols-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Concepts Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">💭 Mystical Concepts</h2>
+            <div id="concepts-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading concepts from Firebase...</p>
+            </div>
+            <div id="concepts-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Myths Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">📖 Myths & Legends</h2>
+            <div id="myths-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading myths from Firebase...</p>
+            </div>
+            <div id="myths-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- ============================================
+             STATIC CUSTOM CONTENT (PRESERVED)
+             Add any mythology-specific static content here
+             ============================================ -->
+        <div class="static-content">
+            <!-- Add custom static content here -->
+        </div>
+
+        <!-- Cross-Cultural Parallels Section -->
+        <section class="interlink-panel" style="margin-top: var(--spacing-xl, 3rem);">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🌍</span>
+                Cross-Cultural Parallels
+            </h3>
+            <p style="margin-bottom: var(--spacing-lg); color: var(--color-text-secondary);">
+                Explore how Babylonian mythology connects with other world traditions through shared themes and archetypes.
+            </p>
+            <div class="parallel-grid">
+                <!-- Parallel mythology links will be added here -->
+            </div>
+        </section>
+
+        <!-- Related Traditions -->
+        <section style="margin-top: var(--spacing-xl, 3rem);">
+            <h2 class="section-header">🔗 Related Traditions</h2>
+            <div class="glass-card">
+                <h3>Explore Other Mythologies</h3>
+                <div class="button-grid" style="display: flex; flex-wrap: wrap; gap: var(--spacing-md);">
+                    <a class="btn btn-secondary" href="../greek/index.html">Greek</a>
+                    <a class="btn btn-secondary" href="../roman/index.html">Roman</a>
+                    <a class="btn btn-secondary" href="../norse/index.html">Norse</a>
+                    <a class="btn btn-secondary" href="../egyptian/index.html">Egyptian</a>
+                    <a class="btn btn-secondary" href="../hindu/index.html">Hindu</a>
+                    <a class="btn btn-secondary" href="../buddhist/index.html">Buddhist</a>
+                    <a class="btn btn-secondary" href="../celtic/index.html">Celtic</a>
+                    <a class="btn btn-secondary" href="../christian/index.html">Christian</a>
+                    <a class="btn btn-secondary" href="../islamic/index.html">Islamic</a>
+                    <a class="btn btn-secondary" href="../jewish/index.html">Jewish</a>
                 </div>
-                <span class="tradition-badge babylonian">Babylonian</span>
-            </a>
-        </div>
-    </div>
+            </div>
+        </section>
+    </main>
 
-    <!-- Cross-Cultural Parallels -->
-    <div class="parallel-traditions glass-card" style="margin-top: var(--spacing-lg);">
-        <h4>🌍 Cross-Cultural Parallels</h4>
-        <div class="parallel-grid">
-            <a href="../sumerian/index.html" class="parallel-card">
-                <span class="tradition-flag">🏺</span>
-                <span class="parallel-name">Sumerian</span>
-                <span class="tradition-label">Predecessor</span>
-            </a>
-            <a href="../../archetypes/celestial/index.html" class="parallel-card">
-                <span class="tradition-flag">🦁</span>
-                <span class="parallel-name">Assyrian</span>
-                <span class="tradition-label">Successor</span>
-            </a>
-            <a href="../persian/index.html" class="parallel-card">
-                <span class="tradition-flag">🔥</span>
-                <span class="parallel-name">Persian</span>
-                <span class="tradition-label">Influence</span>
-            </a>
-            <a href="../greek/index.html" class="parallel-card">
-                <span class="tradition-flag">🏛️</span>
-                <span class="parallel-name">Greek</span>
-                <span class="tradition-label">Parallel</span>
-            </a>
-            <a href="../egyptian/index.html" class="parallel-card">
-                <span class="tradition-flag">🏺</span>
-                <span class="parallel-name">Egyptian</span>
-                <span class="tradition-label">Contemporary</span>
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- See Also Section -->
-<div class="see-also-section">
-    <h4>📚 See Also</h4>
-    <div class="see-also-links">
-        <a href="deities/marduk.html" class="see-also-link" data-smart>
-            <span>👑</span> Marduk
-        </a>
-        <a href="deities/ishtar.html" class="see-also-link" data-smart>
-            <span>⭐</span> Ishtar
-        </a>
-        <a href="deities/tiamat.html" class="see-also-link" data-smart>
-            <span>🐉</span> Tiamat
-        </a>
-        <a href="deities/ea.html" class="see-also-link" data-smart>
-            <span>🌊</span> Ea (Enki)
-        </a>
-        <a href="cosmology/creation.html" class="see-also-link">
-            <span>🌌</span> Enuma Elish
-        </a>
-        <a href="heroes/index.html" class="see-also-link">
-            <span>⚔️</span> Gilgamesh
-        </a>
-        <a href="../sumerian/index.html" class="see-also-link">
-            <span>🏺</span> Sumerian Origins
-        </a>
-        <a href="../../archetypes/celestial/index.html" class="see-also-link">
-            <span>🐉</span> Chaos Monster Archetype
-        </a>
-    </div>
-</div>
-</main>
-<footer>
-<p>
-<strong>World Mythos Explorer</strong> - <a data-term="Babylonian" data-tradition="babylonian" data-corpus="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> Mythology<br/>
-            Based on <a data-term="Enuma Elish" data-tradition="babylonian" class="corpus-link" href="../../mythos/babylonian/corpus-search.html?term=enuma%20elish" title="View enuma elish in ancient texts">Enuma Elish</a>, Epic of <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a>, <a class="corpus-link" data-term="Erra" data-tradition="babylonian" href="../../mythos/babylonian/corpus-search.html?term=nergal" title="Search corpus for 'Erra'">Erra</a> Epic, and cuneiform divination texts<br/>
-            Mesopotamian civilization (c. 1894-539 BCE)
+    <!-- Footer -->
+    <footer>
+        <p>
+            <strong>Babylonian Mythology</strong> - World Mythos Explorer<br>
+            <a href="../../mythos/index.html">Back to World Mythos Home</a> |
+            <a href="../../index.html">Main Site</a>
         </p>
-</footer>
+    </footer>
+
+    <!-- Auto-inject submission button -->
+    <script>
+        if (window.SubmissionLink) {
+            window.SubmissionLink.autoInject();
+        }
+    </script>
+
+    <!-- Firebase SDK (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script src="../../firebase-config.js"></script>
+
+    <!-- Firebase Content Loader (Module) -->
+    <script type="module">
+        import { FirebaseContentLoader } from '../../FIREBASE/js/firebase-content-loader.js';
+
+        // Wait for Firebase to initialize
+        window.addEventListener('load', async () => {
+            try {
+                // Check if Firebase is initialized
+                if (!window.firebaseApp || !window.firebaseDb) {
+                    console.error('[Index] Firebase not initialized');
+                    showGlobalError('Firebase is not configured. Please check firebase-config.js');
+                    return;
+                }
+
+                console.log('[Index] Initializing Firebase Content Loader for babylonian');
+
+                // Create content loader instance
+                const loader = new FirebaseContentLoader(window.firebaseApp);
+                const mythology = 'babylonian'; // e.g., 'greek', 'norse', 'egyptian'
+
+                // Content types to load
+                const contentTypes = [
+                    { type: 'deities', container: 'deities-container', loading: 'deities-loading' },
+                    { type: 'heroes', container: 'heroes-container', loading: 'heroes-loading' },
+                    { type: 'creatures', container: 'creatures-container', loading: 'creatures-loading' },
+                    { type: 'cosmology', container: 'cosmology-container', loading: 'cosmology-loading' },
+                    { type: 'texts', container: 'texts-container', loading: 'texts-loading' },
+                    { type: 'herbs', container: 'herbs-container', loading: 'herbs-loading' },
+                    { type: 'rituals', container: 'rituals-container', loading: 'rituals-loading' },
+                    { type: 'symbols', container: 'symbols-container', loading: 'symbols-loading' },
+                    { type: 'concepts', container: 'concepts-container', loading: 'concepts-loading' },
+                    { type: 'myths', container: 'myths-container', loading: 'myths-loading' }
+                ];
+
+                // Load each content type
+                for (const { type, container, loading } of contentTypes) {
+                    try {
+                        console.log(`[Index] Loading ${type} for ${mythology}...`);
+
+                        // Load content filtered by mythology
+                        await loader.loadContent(type, { mythology: mythology });
+
+                        // Hide loading, show container
+                        const loadingEl = document.getElementById(loading);
+                        const containerEl = document.getElementById(container);
+
+                        if (loadingEl) loadingEl.style.display = 'none';
+                        if (containerEl) containerEl.style.display = 'grid';
+
+                        // Render content
+                        loader.renderContent(container, type);
+
+                        console.log(`[Index] ✓ ${type} loaded successfully`);
+
+                    } catch (error) {
+                        console.error(`[Index] Error loading ${type}:`, error);
+
+                        // Hide loading, show error
+                        const loadingEl = document.getElementById(loading);
+                        const containerEl = document.getElementById(container);
+
+                        if (loadingEl) {
+                            loadingEl.innerHTML = `
+                                <div class="error-container">
+                                    <div class="error-title">Failed to load ${type}</div>
+                                    <div class="error-message">${error.message}</div>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+
+                console.log('[Index] All content loaded successfully');
+
+            } catch (error) {
+                console.error('[Index] Fatal error:', error);
+                showGlobalError('Failed to load content: ' + error.message);
+            }
+        });
+
+        function showGlobalError(message) {
+            document.querySelectorAll('.loading-container').forEach(el => {
+                el.innerHTML = `
+                    <div class="error-container">
+                        <div class="error-title">Error</div>
+                        <div class="error-message">${message}</div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>

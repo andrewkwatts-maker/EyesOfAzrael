@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Divine Smith - Universal Archetype</title>
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        /* Divine Smith Archetype Custom Theme Colors */
+        :root {
+            --archetype-primary: #dc2626;
+            --archetype-primary-light: #ef4444;
+            --archetype-primary-dark: #b91c1c;
+            --archetype-primary-darker: #991b1b;
+            --archetype-accent: #fca5a5;
+            --archetype-surface: rgba(220, 38, 38, 0.05);
+            --archetype-border: rgba(220, 38, 38, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Breadcrumb Navigation */
+        .nav-breadcrumb {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-md);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-md);
+            flex-wrap: wrap;
+            font-size: var(--font-size-sm);
+        }
+
+        .nav-breadcrumb a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-breadcrumb a:hover {
+            color: var(--archetype-primary-light);
+        }
+
+        /* Hero Section */
+        header {
+            text-align: center;
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            background: var(--archetype-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--spacing-2xl);
+            border: 2px solid var(--archetype-border);
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            font-family: var(--font-heading);
+            margin-bottom: var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary), var(--archetype-primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .archetype-definition {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            margin: var(--spacing-lg) 0;
+            padding: var(--spacing-lg);
+            background: var(--archetype-surface);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--archetype-primary);
+        }
+
+        /* Glass Card Sections */
+        section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            border: 2px solid var(--color-border);
+            transition: all var(--transition-base);
+        }
+
+        section:hover {
+            background: var(--color-surface-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        h2 {
+            color: var(--archetype-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-3xl);
+            font-family: var(--font-heading);
+            border-bottom: 2px solid var(--archetype-border);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        h3 {
+            color: var(--archetype-accent);
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-xl);
+            font-family: var(--font-heading);
+        }
+
+        /* Styled Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-lg) 0;
+        }
+
+        th, td {
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--archetype-border);
+        }
+
+        th {
+            background: var(--archetype-surface);
+            color: var(--archetype-primary);
+            font-weight: var(--font-semibold);
+        }
+
+        tr {
+            transition: background var(--transition-fast);
+        }
+
+        tr:hover {
+            background: var(--archetype-surface);
+        }
+
+        td a {
+            color: var(--archetype-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        td a:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        /* Icon List */
+        .characteristics ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .characteristics li {
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin: var(--spacing-sm) 0;
+            background: var(--archetype-surface);
+            border-left: 3px solid var(--archetype-primary);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .characteristics li:hover {
+            background: rgba(220, 38, 38, 0.1);
+            transform: translateX(4px);
+        }
+
+        .characteristics li:before {
+            content: "&#x1F528; ";
+            color: var(--archetype-primary);
+            font-weight: var(--font-bold);
+            margin-right: var(--spacing-sm);
+        }
+
+        /* Expandable Sections */
+        .codex-search-section {
+            margin: var(--spacing-lg) 0;
+            border: 2px solid var(--archetype-border);
+            border-radius: var(--radius-md);
+            background: var(--archetype-surface);
+            overflow: hidden;
+        }
+
+        .codex-search-header {
+            padding: var(--spacing-md) var(--spacing-md);
+            background: linear-gradient(135deg, var(--archetype-primary-dark) 0%, var(--archetype-primary-darker) 100%);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background var(--transition-base);
+        }
+
+        .codex-search-header:hover {
+            background: linear-gradient(135deg, var(--archetype-primary) 0%, var(--archetype-primary-dark) 100%);
+        }
+
+        .codex-search-header h3 {
+            margin: 0;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-semibold);
+            color: white;
+        }
+
+        .expand-icon {
+            font-size: var(--font-size-xl);
+            transition: transform var(--transition-base);
+        }
+
+        .expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .codex-search-content {
+            display: none;
+            padding: var(--spacing-md);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .codex-search-content.show {
+            display: block;
+        }
+
+        .search-result-item {
+            margin: var(--spacing-sm) 0;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-left: 3px solid var(--archetype-primary);
+            background: rgba(220, 38, 38, 0.08);
+            border-radius: var(--radius-sm);
+        }
+
+        .citation {
+            font-weight: var(--font-semibold);
+            color: var(--archetype-primary);
+            cursor: pointer;
+            margin-bottom: var(--spacing-xs);
+            transition: color var(--transition-fast);
+        }
+
+        .citation:hover {
+            color: var(--archetype-accent);
+            text-decoration: underline;
+        }
+
+        .verse-text {
+            display: none;
+            margin-top: var(--spacing-xs);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 2px solid var(--archetype-accent);
+            font-style: italic;
+            color: var(--color-text-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        .verse-text.show {
+            display: block;
+        }
+
+        .book-reference {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+
+        p {
+            margin-bottom: var(--spacing-md);
+            line-height: var(--leading-relaxed);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+    <div class="container">
+        <div class="nav-breadcrumb">
+            <a href="../../index.html">Home</a> <span>-></span>
+            <a href="../index.html">Universal Archetypes</a> <span>-></span>
+            <span>Divine Smith</span>
+        </div>
+
+        <header>
+            <h1>The Divine Smith Archetype</h1>
+            <div class="archetype-definition">
+                The Divine Smith is the master craftsman of the gods, forging the weapons, armor, and magical
+                artifacts that determine cosmic destiny. This archetype embodies the sacred power of metallurgy
+                and craftsmanship - the transformation of raw earth into instruments of divine power. Often
+                depicted as lame or physically imperfect, the smith compensates through supreme artistry,
+                representing the triumph of skill and intelligence over physical limitation.
+            </div>
+        </header>
+
+        <section class="characteristics">
+            <h2>Universal Characteristics</h2>
+            <ul>
+                <li><strong>Master Craftsman:</strong> Creates the most powerful weapons, armor, and magical objects for gods and heroes</li>
+                <li><strong>Physical Impairment:</strong> Frequently depicted as lame, deformed, or wounded - especially in the legs</li>
+                <li><strong>Fire Mastery:</strong> Commands the transformative power of the forge-fire</li>
+                <li><strong>Underground Association:</strong> Often dwells in caves, mountains, or volcanic depths</li>
+                <li><strong>Creator of Automatons:</strong> Makes magical servants, golden maidens, or self-moving objects</li>
+                <li><strong>Outsider Status:</strong> Despite great skill, often marginalized among the gods</li>
+                <li><strong>Cuckolded Husband:</strong> Frequently married to the goddess of love/beauty, who is unfaithful</li>
+                <li><strong>Volcanic Connection:</strong> Associated with volcanic mountains and subterranean fire</li>
+                <li><strong>Keeper of Secrets:</strong> Possesses hidden knowledge of metals and magical binding</li>
+                <li><strong>Ambiguous Morality:</strong> Creates weapons for both gods and their enemies</li>
+            </ul>
+        </section>
+
+        <section class="cross-tradition-table">
+            <h2>Divine Smiths Across Traditions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tradition</th>
+                        <th>Deity</th>
+                        <th>Famous Creations</th>
+                        <th>Physical Trait</th>
+                        <th>Domain/Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Greek</td>
+                        <td><a href="../../mythos/greek/deities/hephaestus.html">Hephaestus</a></td>
+                        <td>Aegis, Achilles' armor, Pandora, golden automatons</td>
+                        <td>Lame (thrown from Olympus)</td>
+                        <td>Volcanic forge under Lemnos/Etna</td>
+                    </tr>
+                    <tr>
+                        <td>Roman</td>
+                        <td><a href="../../mythos/roman/deities/vulcan.html">Vulcan</a></td>
+                        <td>Jupiter's thunderbolts, Mars's weapons</td>
+                        <td>Lame</td>
+                        <td>Forge under Mount Etna</td>
+                    </tr>
+                    <tr>
+                        <td>Celtic</td>
+                        <td><a href="../../mythos/celtic/deities/index.html">Goibniu</a></td>
+                        <td>Weapons of the Tuatha De Danann, ale of immortality</td>
+                        <td>None recorded</td>
+                        <td>Divine smith of the Otherworld</td>
+                    </tr>
+                    <tr>
+                        <td>Norse</td>
+                        <td><a href="../../mythos/norse/index.html">Wayland/Volundr</a></td>
+                        <td>Magical swords, golden rings, flying machine</td>
+                        <td>Hamstrung by captors</td>
+                        <td>Island prison forge</td>
+                    </tr>
+                    <tr>
+                        <td>Norse</td>
+                        <td><a href="../../mythos/norse/index.html">Dwarven Smiths</a></td>
+                        <td>Mjolnir, Gungnir, Draupnir, Gleipnir</td>
+                        <td>Small stature</td>
+                        <td>Underground forges</td>
+                    </tr>
+                    <tr>
+                        <td>Hindu</td>
+                        <td><a href="../../mythos/hindu/deities/index.html">Vishvakarman</a></td>
+                        <td>Divine weapons, flying machines, Lanka city</td>
+                        <td>None recorded</td>
+                        <td>Celestial workshop</td>
+                    </tr>
+                    <tr>
+                        <td>Hindu</td>
+                        <td><a href="../../mythos/hindu/deities/index.html">Tvastar</a></td>
+                        <td>Indra's thunderbolt, Soma cup</td>
+                        <td>None recorded</td>
+                        <td>Divine artificer</td>
+                    </tr>
+                    <tr>
+                        <td>Egyptian</td>
+                        <td><a href="../../mythos/egyptian/deities/ptah.html">Ptah</a></td>
+                        <td>Created universe through thought and speech</td>
+                        <td>Mummiform (wrapped)</td>
+                        <td>Memphis workshop</td>
+                    </tr>
+                    <tr>
+                        <td>Slavic</td>
+                        <td><a href="../../mythos/index.html">Svarog</a></td>
+                        <td>Sun disc, first plow, marriage laws</td>
+                        <td>None recorded</td>
+                        <td>Celestial forge</td>
+                    </tr>
+                    <tr>
+                        <td>Finnish</td>
+                        <td><a href="../../mythos/index.html">Ilmarinen</a></td>
+                        <td>The Sampo, bride of gold, sky dome</td>
+                        <td>None recorded</td>
+                        <td>Northland forge</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/greek/deities/hephaestus.html" style="color: var(--archetype-primary); text-decoration: none;">Hephaestus</a> (Greek Tradition)</h2>
+            <p>
+                Hephaestus is the archetypal divine smith of Western mythology. Cast from Olympus (either by
+                Zeus or Hera), he compensated for his lameness with unparalleled craftsmanship, creating the
+                most wondrous objects in Greek myth.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>The Fall and Lameness of Hephaestus</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Homer, Iliad 18.394-409
+                        </div>
+                        <div class="verse-text">
+                            "My mother Hera threw me from heaven because I was lame. I would have suffered had not
+                            Eurynome, daughter of Ocean, and Thetis received me in their bosoms. Nine years I lived
+                            with them, forging many curious works - brooches, spiral armlets, cups, and necklaces -
+                            in their hollow cave, while the stream of Ocean foamed and murmured around us. No one
+                            knew of my whereabouts, neither god nor mortal man, save only Thetis and Eurynome who
+                            rescued me."
+                        </div>
+                        <div class="book-reference">
+                            Source: Homer, Iliad (c. 750 BCE)
+                        </div>
+                    </div>
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Homer, Iliad 1.590-594
+                        </div>
+                        <div class="verse-text">
+                            "There was a time when I was trying to save my mother, and Zeus caught me by the foot
+                            and hurled me from the heavenly threshold. All day long I fell, and at sunset I came
+                            to ground on Lemnos, with very little life left in me. There the Sintians found me
+                            and tended me."
+                        </div>
+                        <div class="book-reference">
+                            Source: Homer, Iliad (c. 750 BCE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>The Forge of Hephaestus</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Homer, Iliad 18.410-420
+                        </div>
+                        <div class="verse-text">
+                            "He left the bellows and wiped his face, his hands, his massive neck, and his hairy chest
+                            with a sponge. He put on his tunic, took his heavy staff, and limped out of the door,
+                            supported by golden handmaids he had fashioned with intelligence in their hearts and
+                            speech and strength, instructed in handiwork by the immortal gods. These bustled about
+                            to support their master, who moved near to where Thetis sat upon a gleaming chair."
+                        </div>
+                        <div class="book-reference">
+                            Source: Homer, Iliad (c. 750 BCE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>The Shield of Achilles</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Homer, Iliad 18.478-608 (excerpts)
+                        </div>
+                        <div class="verse-text">
+                            "First he fashioned a shield, great and sturdy, adorning it all over, and set around it
+                            a bright triple rim of gleaming metal, and attached a silver baldric. Five were the
+                            layers of the shield itself; and on it he wrought many cunning devices. Therein he set
+                            the earth, and sky, and sea, the tireless sun and the full moon, and all the
+                            constellations that crown the heavens... He made on it two cities of mortal men, both
+                            beautiful. In one there were marriages and feasting... In the other, two armies
+                            besieged the town... He made on it a soft field of rich plowland, broad and thrice
+                            tilled... He made on it a vineyard loaded with grapes... He made on it a herd of
+                            straight-horned cattle... And the lame god made a dancing floor as well..."
+                        </div>
+                        <div class="book-reference">
+                            Source: Homer, Iliad (c. 750 BCE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Primary Sources: <a href="../../mythos/norse/index.html" style="color: var(--archetype-primary); text-decoration: none;">Wayland</a> (Germanic/Norse Tradition)</h2>
+            <p>
+                Wayland (Volundr in Old Norse) is the legendary smith of Germanic mythology, known for his
+                unmatched skill and his terrible revenge upon the king who enslaved him. His story emphasizes
+                the smith's ambiguous power - capable of creation and destruction.
+            </p>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>The Capture and Hamstringing of Wayland</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Volundarkvida, Stanzas 17-21
+                        </div>
+                        <div class="verse-text">
+                            "King Nidud gave to his daughter Bodvild the gold ring he had taken from Volundr's hand,
+                            and he himself wore the sword that had belonged to Volundr. The queen spoke: 'His eyes
+                            gleam like a snake's when the sword is brought before him and he sees Bodvild wearing
+                            the ring. Cut the sinews of his legs and set him on the island Saevarstod.' So they
+                            cut the sinews behind his knees and set him on an island near the shore which was
+                            called Saevarstod. There he forged for the king all kinds of precious things. No man
+                            dared go to him except the king alone."
+                        </div>
+                        <div class="book-reference">
+                            Source: Volundarkvida, Poetic Edda (c. 10th century CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>The Dwarves Forge Treasures for the Gods</h3>
+                    <span class="expand-icon">V</span>
+                </div>
+                <div class="codex-search-content">
+                    <div class="search-result-item">
+                        <div class="citation" onclick="toggleVerse(this)">
+                            Prose Edda, Skaldskaparmal 35
+                        </div>
+                        <div class="verse-text">
+                            "Loki had the hair made by the dwarves called the Sons of Ivaldi, who also made Odin's
+                            spear Gungnir and the ship Skidbladnir for Freyr... Then Loki wagered his head with
+                            the dwarf Brokk that his brother Eitri could not make three treasures as good. Eitri
+                            placed a pig-skin in the forge and told Brokk to work the bellows without stopping...
+                            First came a boar with golden bristles [Gullinbursti], then a gold ring [Draupnir]
+                            from which eight rings of equal weight dropped every ninth night, and finally a hammer
+                            [Mjolnir]. The handle was somewhat short, because Loki as a fly had bitten Brokk's
+                            eyelid, but the gods judged these the best treasures, especially the hammer, as it
+                            would be the greatest defense against the frost giants."
+                        </div>
+                        <div class="book-reference">
+                            Source: Snorri Sturluson, Prose Edda (c. 1220 CE)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Cross-Cultural Analysis</h2>
+
+            <h3>The Lame Smith Pattern</h3>
+            <p>
+                The physical impairment of divine smiths is one of the most consistent features across cultures.
+                Several explanations have been proposed:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Occupational Reality:</strong> Historical smiths often suffered lameness from burns, repetitive stress, or arsenic poisoning from bronze-working</li>
+                <li><strong>Compensation Pattern:</strong> Physical limitation drives development of supreme skill</li>
+                <li><strong>Liminal Status:</strong> Lameness marks the smith as "between" normal society</li>
+                <li><strong>Ritual Binding:</strong> Some cultures deliberately lamed smiths to prevent them from leaving</li>
+                <li><strong>Fire Association:</strong> The smith's legs are "consumed" by forge fire metaphorically</li>
+            </ul>
+
+            <h3>The Smith and the Love Goddess</h3>
+            <p>
+                A recurring pattern pairs the divine smith with the goddess of love and beauty in an unhappy
+                marriage:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Hephaestus & Aphrodite:</strong> She cuckholds him with Ares; he traps them in a golden net</li>
+                <li><strong>Vulcan & Venus:</strong> Roman parallel of the same pattern</li>
+                <li><strong>Interpretation:</strong> Fire (craft, technology) cannot possess Beauty, which must remain free</li>
+            </ul>
+
+            <h3>Volcanic and Subterranean Associations</h3>
+            <p>
+                Divine smiths consistently dwell underground or in volcanic mountains:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Hephaestus:</strong> Forge under Mount Etna (Sicily) and Lemnos</li>
+                <li><strong>Vulcan:</strong> Vulcano island named after him</li>
+                <li><strong>Norse Dwarves:</strong> Underground forges in Svartalfheim</li>
+                <li><strong>Significance:</strong> The earth's fire is the smith's fire; volcanoes are divine forges</li>
+            </ul>
+
+            <h3>The Smith as Demiurge</h3>
+            <p>
+                In some traditions, the smith takes on creator-god characteristics:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Ptah:</strong> Egyptian smith-god who created the world through thought and word</li>
+                <li><strong>Vishvakarman:</strong> Hindu divine architect who builds the universe</li>
+                <li><strong>Ilmarinen:</strong> Forges the sky-dome in Finnish tradition</li>
+                <li><strong>Interpretation:</strong> Creation itself is a craft; the cosmos is divine smithwork</li>
+            </ul>
+
+            <h3>Famous Divine Creations</h3>
+            <p>
+                The works of divine smiths determine cosmic and heroic destiny:
+            </p>
+            <ul style="margin-left: 30px; line-height: 1.8;">
+                <li><strong>Zeus's Thunderbolts:</strong> The weapon of supreme power</li>
+                <li><strong>Thor's Mjolnir:</strong> Hammer that protects the world from chaos</li>
+                <li><strong>Achilles' Armor:</strong> Shield depicting the entire cosmos</li>
+                <li><strong>The Sampo:</strong> Finnish artifact that produces endless wealth</li>
+                <li><strong>Gleipnir:</strong> Chain that binds Fenrir, made from impossible things</li>
+                <li><strong>Pandora:</strong> First woman, crafted by Hephaestus from clay</li>
+            </ul>
+        </section>
+
+        <!-- DEITIES EMBODYING THIS ARCHETYPE - Visual Cards -->
+        <section style="margin-top: var(--spacing-3xl);">
+            <h2 style="text-align: center; margin-bottom: var(--spacing-md);">Divine Smiths Across Traditions</h2>
+            <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: var(--spacing-xl);">
+                Click any deity to explore their full mythology
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--spacing-lg);">
+                <a href="../../mythos/greek/deities/hephaestus.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F525;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Hephaestus</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Greek</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Lame God, Maker of Wonders</div>
+                </a>
+                <a href="../../mythos/roman/deities/vulcan.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F30B;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Vulcan</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Roman</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Fire God, Volcanic Smith</div>
+                </a>
+                <a href="../../mythos/celtic/deities/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F528;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Goibniu</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Celtic</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Smith of the Tuatha De Danann</div>
+                </a>
+                <a href="../../mythos/norse/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x2694;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Wayland</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Germanic/Norse</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Legendary Smith, Avenger</div>
+                </a>
+                <a href="../../mythos/hindu/deities/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); text-align: center; transition: all var(--transition-base);">
+                    <div style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-sm);">&#x1F3DB;</div>
+                    <div style="color: var(--archetype-primary); font-weight: var(--font-bold); font-size: var(--font-size-xl);">Vishvakarman</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Hindu</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary);">Divine Architect, All-Maker</div>
+                </a>
+            </div>
+        </section>
+
+        <!-- RELATED ARCHETYPES -->
+        <section style="margin-top: var(--spacing-3xl);">
+            <h2 style="text-align: center; margin-bottom: var(--spacing-md);">Related Archetypes</h2>
+            <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: var(--spacing-xl);">
+                The Divine Smith connects with these universal patterns
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+                <a href="../culture-hero/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">&#x1F525;</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Culture Hero</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Smiths bring the technology of metallurgy to civilization</p>
+                </a>
+                <a href="../elemental-archetypes/fire/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">&#x1F525;</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Fire Element</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">The forge fire as transformative divine power</p>
+                </a>
+                <a href="../wisdom/wisdom-goddess.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">&#x1F989;</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Wisdom</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">Craft knowledge as sacred wisdom</p>
+                </a>
+                <a href="../love/index.html" style="text-decoration: none; padding: var(--spacing-lg); background: var(--color-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                        <span style="font-size: var(--font-size-2xl);">&#x1F496;</span>
+                        <span style="color: var(--archetype-primary); font-weight: var(--font-semibold);">Love Goddess</span>
+                    </div>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">The smith's unfaithful spouse - craft cannot possess beauty</p>
+                </a>
+            </div>
+        </section>
+
+        <section class="interlink-panel">
+            <h3 class="interlink-title">Related Content</h3>
+            <div class="interlink-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-xl);">
+                <div class="archetype-link-card" style="background: var(--archetype-surface); padding: var(--spacing-lg); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border);">
+                    <h4 style="color: var(--archetype-primary); margin-bottom: var(--spacing-md);">Mythological Examples</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../../mythos/greek/deities/hephaestus.html" style="color: var(--color-text-primary);">Hephaestus</a> - Greek lame god, maker of wonders</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../../mythos/roman/deities/vulcan.html" style="color: var(--color-text-primary);">Vulcan</a> - Roman volcanic smith god</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../../mythos/norse/index.html" style="color: var(--color-text-primary);">Wayland</a> - Germanic legendary smith</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../../mythos/celtic/deities/index.html" style="color: var(--color-text-primary);">Goibniu</a> - Celtic smith of Tuatha De Danann</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../../mythos/hindu/deities/index.html" style="color: var(--color-text-primary);">Vishvakarman</a> - Hindu divine architect</li>
+                    </ul>
+                </div>
+                <div class="archetype-link-card" style="background: var(--archetype-surface); padding: var(--spacing-lg); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border);">
+                    <h4 style="color: var(--archetype-primary); margin-bottom: var(--spacing-md);">Related Archetypes</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../culture-hero/index.html" style="color: var(--color-text-primary);">Culture Hero</a> - Brings metallurgy to civilization</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../war-god/index.html" style="color: var(--color-text-primary);">War God</a> - Receives weapons from smith</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../love/index.html" style="color: var(--color-text-primary);">Love Goddess</a> - Smith's unfaithful spouse pattern</li>
+                        <li style="margin-bottom: var(--spacing-sm);"><a href="../sky-father/index.html" style="color: var(--color-text-primary);">Sky Father</a> - Smith forges divine weapons</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="see-also-section" style="background: var(--archetype-surface); padding: var(--spacing-lg); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border);">
+                <h4 style="color: var(--archetype-primary); margin-bottom: var(--spacing-md);">See Also</h4>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--spacing-md);">
+                    <li><a href="../elemental-archetypes/fire/index.html" style="color: var(--archetype-primary);">Fire Element</a></li>
+                    <li><a href="../elemental-archetypes/earth/index.html" style="color: var(--archetype-primary);">Earth Element</a></li>
+                    <li><a href="../place-archetypes/sacred-mountain/index.html" style="color: var(--archetype-primary);">Sacred Mountain</a></li>
+                    <li><a href="../wisdom/wisdom-goddess.html" style="color: var(--archetype-primary);">Wisdom</a></li>
+                    <li><a href="../cross-reference-matrix.html" style="color: var(--archetype-primary);">Cross-Reference Matrix</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SEE ALSO / EXPLORE RELATED -->
+        <div style="margin-top: var(--spacing-4xl); text-align: center; padding: var(--spacing-xl); background: var(--archetype-surface); border-radius: var(--radius-xl); border: 2px solid var(--archetype-border);">
+            <h3 style="color: var(--archetype-primary); margin-bottom: var(--spacing-lg);">See Also</h3>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap; margin-bottom: var(--spacing-xl);">
+                <a href="../culture-hero/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Culture Hero</a>
+                <a href="../war/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">War God</a>
+                <a href="../love/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Love Goddess</a>
+                <a href="../sky-father/index.html" style="color: var(--archetype-primary); text-decoration: none; padding: 12px 20px; background: var(--archetype-surface); border-radius: var(--radius-lg); border: 2px solid var(--archetype-border); transition: all var(--transition-base);">Sky Father</a>
+            </div>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+                <a href="../elemental-archetypes/fire/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Fire Element</a>
+                <a href="../elemental-archetypes/earth/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Earth Element</a>
+                <a href="../place-archetypes/sacred-mountain/index.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Sacred Mountain</a>
+                <a href="../cross-reference-matrix.html" style="padding: var(--spacing-sm) var(--spacing-lg); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); color: var(--color-text-secondary); text-decoration: none;">Cross-Reference Matrix</a>
+            </div>
+            <div style="margin-top: var(--spacing-xl);">
+                <a href="../index.html" style="display: inline-block; padding: var(--spacing-md) var(--spacing-2xl); background: linear-gradient(135deg, var(--archetype-primary), var(--archetype-primary-dark)); color: white; text-decoration: none; border-radius: var(--radius-lg); font-weight: var(--font-semibold);">All Archetypes</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCodexSearch(header) {
+            const section = header.parentElement;
+            const content = section.querySelector('.codex-search-content');
+            section.classList.toggle('expanded');
+            content.classList.toggle('show');
+        }
+        function toggleVerse(citation) {
+            const verseText = citation.nextElementSibling;
+            verseText.classList.toggle('show');
+        }
+    </script>
+
+</body>
+</html>

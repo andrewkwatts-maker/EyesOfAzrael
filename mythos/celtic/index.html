@@ -1,16 +1,23 @@
-﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Celtic Mythology - Mythos Explorer</title>
-<link href="../../styles.css" rel="stylesheet"/>
-<link href="../../themes/theme-base.css" rel="stylesheet"/>
-<link href="../../themes/corpus-links.css" rel="stylesheet"/>
-<link rel="stylesheet" href="../../themes/smart-links.css">
-<script defer src="../../themes/smart-links.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celtic Mythology - World Mythos Explorer</title>
+
+    <!-- Base Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+
+    <!-- Firebase Theme System -->
+    <link rel="stylesheet" href="../../FIREBASE/css/firebase-themes.css">
+
+    <!-- Theme Scripts -->
+    <script defer src="../../themes/theme-picker.js"></script>
     <script defer src="../../themes/theme-animations.js"></script>
-<script defer="" src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/smart-links.js"></script>
 
     <!-- Submission Link System -->
     <script src="../../js/submission-context.js"></script>
@@ -22,16 +29,17 @@
     <script src="../../js/firebase-auth.js"></script>
     <script src="../../js/auth-guard.js"></script>
     <script src="../../js/components/google-signin-button.js"></script>
-<style>
+
+    <style>
         /* ============================================
-           MODERN GLASS UI TEMPLATE - Celtic Mythos
-           Based on Christian reference with full theme support
+           FIREBASE-ENHANCED MYTHOLOGY INDEX TEMPLATE
+           Combines existing styles with Firebase integration
            ============================================ */
 
         /* Breadcrumb - Full-width bar attached below header */
         .breadcrumb {
             position: sticky;
-            top: 60px; /* Below the sticky header */
+            top: 60px;
             left: 0;
             width: 100%;
             z-index: 999;
@@ -55,47 +63,33 @@
             text-decoration: underline;
         }
 
-        /* Custom Celtic Hero Section */
-        .celtic-hero {
+        /* Hero Section - Modern Glass Styling */
+        .hero-section {
             background: linear-gradient(135deg,
-                rgba(var(--color-primary-rgb), 0.2),
-                rgba(var(--color-secondary-rgb), 0.2));
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 2px solid var(--color-primary);
-            border-radius: var(--radius-2xl);
-            padding: var(--spacing-xs2) var(--spacing-xl);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
             text-align: center;
-            margin: var(--spacing-xl) 0;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
         }
 
-        .celtic-hero h1 {
-            color: var(--color-text-primary);
-            font-family: var(--font-heading);
-            font-size: var(--text-4xl);
+        .hero-icon-display {
+            font-size: 5rem;
             margin-bottom: var(--spacing-md);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
         }
 
-        .celtic-hero p {
-            color: var(--color-text-secondary);
-            font-size: var(--text-lg);
-            line-height: var(--leading-relaxed);
+        .hero-description {
+            font-size: 1.2rem;
             max-width: 800px;
-            margin: var(--spacing-md) auto;
-        }
-
-        .hero-tags {
-            display: flex;
-            gap: var(--spacing-sm);
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: var(--spacing-lg);
-        }
-
-        .tag {
-            background: rgba(var(--color-primary-rgb), 0.3);
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--radius-full);
-            font-size: var(--text-sm);
-            color: var(--color-text-primary);
+            margin: 1rem auto;
+            line-height: 1.7;
         }
 
         /* Glass Card - With Hover Animation */
@@ -117,440 +111,401 @@
             border-color: rgba(var(--color-primary-rgb), 0.4);
         }
 
-        /* Deity Grid Layout */
+        /* Firebase Content Sections */
+        .firebase-section {
+            margin: 3rem 0;
+        }
+
+        .section-header {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        /* Grid Layouts */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
         .deity-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: var(--spacing-lg);
             margin: var(--spacing-lg) 0;
         }
 
-        /* Deity Cards - Modern Glass Pattern with Glow Hover */
-        .deity-card {
-            background: rgba(var(--color-primary-rgb), 0.05);
-            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-lg);
-            transition: all var(--transition-base, 0.3s ease);
-            cursor: pointer;
-            text-decoration: none;
-            display: block;
-            color: inherit;
-            overflow: hidden;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-
-        .deity-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg), 0 0 15px rgba(var(--color-primary-rgb), 0.2);
-            border-color: var(--color-primary);
-            background: rgba(var(--color-primary-rgb), 0.1);
-            text-decoration: none;
-        }
-
-        .deity-card h3 {
-            color: var(--color-primary);
-            margin-top: 0.5rem;
-        }
-
-        .deity-card p {
-            line-height: 1.7;
-        }
-
-        /* Nav Bar Styling */
-        .nav-bar {
+        /* Loading States */
+        .loading-container {
             display: flex;
-            gap: var(--spacing-sm);
-            background: var(--color-surface);
-            backdrop-filter: blur(10px);
-            padding: var(--spacing-md);
-            border-radius: var(--radius-xl);
-            border: 2px solid var(--color-border);
-            flex-wrap: wrap;
-            margin-bottom: var(--spacing-xl);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            gap: var(--spacing-md);
         }
 
-        .nav-link {
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--radius-md);
-            color: var(--color-text-secondary);
-            text-decoration: none;
-            transition: all 0.2s ease;
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--theme-primary, var(--color-primary));
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .nav-link:hover {
-            color: var(--color-primary);
-            background: rgba(var(--color-primary-rgb), 0.1);
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        /* Static Content (preserved from original) */
+        .static-content {
+            margin: 2rem 0;
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
             .deity-grid {
                 grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             }
 
-            .celtic-hero {
+            .hero-section {
                 padding: 2rem 1rem;
             }
 
-            .celtic-hero h1 {
-                font-size: var(--text-2xl);
+            .hero-icon-display {
+                font-size: 3rem;
             }
 
             .breadcrumb {
                 font-size: var(--font-size-xs);
                 padding: var(--spacing-xs) var(--spacing-md);
-                top: 50px; /* Smaller header on mobile */
+                top: 50px;
             }
         }
     </style>
 </head>
-<body>
-<div id="theme-picker-container"></div>
-<header>
-    <div class="header-content">
-        <h1 style="color: var(--color-primary); font-size: var(--text-3xl); margin-bottom: var(--spacing-sm);">🍀 Celtic <a data-term="Mythology" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View mythology in ancient texts">Mythology</a></h1>
-        <div id="user-auth-nav"></div>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../index.html">Home</a> → <a href="../index.html">Mythos</a> → <a href="index.html">Celtic</a>
-</nav>
-<nav class="nav-bar">
-<a class="nav-link" href="../../mythos/index.html">← All Mythologies</a>
-<a class="nav-link" href="deities/index.html">Deities</a>
-<a class="nav-link" href="cosmology/index.html">Cosmology</a>
-<a class="nav-link" href="#herbalism">Herbalism</a>
-<a class="nav-link" href="#rituals">Rituals</a>
-<a class="nav-link" href="#path">Spiritual Path</a>
-</nav>
-<main style="max-width: var(--container-xl); margin: 0 auto; padding: 0 var(--spacing-lg);">
-<div class="celtic-hero">
-<h1>🍀 Celtic <a data-term="Mythology" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View mythology in ancient texts">Mythology</a> &amp; the Druidic Mysteries</h1>
-<p>
-                Celtic mythology encompasses the pre-Christian beliefs of the Celtic peoples across Ireland, Scotland, Wales,
-                Britain, Gaul, and beyond (~1200 BCE - 400 CE). Central to Celtic spirituality were the Druids - priest-philosophers
-                who preserved oral <a data-term="Traditions" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View traditions in ancient texts">traditions</a>, performed rituals in sacred groves, and mediated between worlds. The <a href="deities/index.html" style="color: var(--color-primary); text-decoration: underline;">Tuatha Dé Danann</a>
-                (<a class="corpus-link" data-term="People of the Goddess" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'People of the Goddess'">People of the Goddess</a> <a href="deities/danu.html" style="color: var(--color-primary); text-decoration: underline;">Danu</a>) were the divine race who shaped Irish <a data-term="Cosmology" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View cosmology in ancient texts">cosmology</a>.
+<body data-theme="celtic">
+    <!-- Theme Picker Container -->
+    <div id="theme-picker"></div>
+    <div id="theme-picker-container"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>☘️ Celtic Mythology</h1>
+            <div id="user-auth-nav"></div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../mythos/index.html">Home</a> →
+        <span aria-current="page">Celtic Mythology</span>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="hero-icon-display">☘️</div>
+            <h2>Celtic Mythology</h2>
+            <p class="hero-description">
+                Step into the enchanted otherworld of Celtic mythology, where druids channel ancient magic and heroes quest through mystical lands. From the Tuatha Dé Danann to the legendary warriors of Ireland and Wales.
             </p>
-<div class="hero-tags">
-<span class="tag">🌳 <a data-term="Sacred" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View sacred in ancient texts">Sacred</a> Groves</span>
-<span class="tag">🎵 Oral Tradition</span>
-<span class="tag">🌀 <a data-term="Otherworld" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View otherworld in ancient texts">Otherworld</a></span>
-<span class="tag">☘️ Threefold Nature</span>
-</div>
-</div>
-<section class="glass-card">
-<h2 style="color: var(--color-primary);">Explore Celtic <a data-term="Mythology" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View mythology in ancient texts">Mythology</a></h2>
-<p style="line-height: 1.7;">Dive deep into specific areas of <a data-term="Celtic Tradition" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View celtic tradition in ancient texts">Celtic tradition</a>:</p>
-<div class="deity-grid">
-<div class="deity-card">
-<h3>⚡ <a href="deities/index.html" style="color: var(--color-primary); text-decoration: none;">The Tuatha Dé Danann</a></h3>
-<p>Explore the gods and goddesses of Celtic Ireland - the divine race who dwell in <a data-term="The Otherworld" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View the otherworld in ancient texts">the Otherworld</a>.</p>
-<ul style="margin: var(--spacing-sm) 0 0 var(--spacing-lg); font-size: var(--text-sm); line-height: var(--leading-relaxed);">
-<li><a href="deities/dagda.html" data-smart="celtic" style="color: var(--color-primary);">The Dagda</a> - <a class="corpus-link" data-term="The Good God" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'The Good God'">The Good God</a></li>
-<li><a href="deities/brigid.html" data-smart="celtic" style="color: var(--color-primary);">Brigid</a> - Fire &amp; Poetry</li>
-<li><a href="deities/lugh.html" data-smart="celtic" style="color: var(--color-primary);">Lugh</a> - The Many-Skilled</li>
-<li><a href="deities/index.html" style="color: var(--color-primary);">View All Deities →</a></li>
-</ul>
-</div>
-<div class="deity-card">
-<h3>🌀 <a href="cosmology/index.html" style="color: var(--color-primary); text-decoration: none;">Cosmology &amp; Realms</a></h3>
-<p>Understand the structure of Celtic reality - the Three Realms, <a data-term="The Otherworld" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View the otherworld in ancient texts">the Otherworld</a>, and the boundaries between.</p>
-<ul style="margin: var(--spacing-sm) 0 0 var(--spacing-lg); font-size: var(--text-sm); line-height: var(--leading-relaxed);">
-<li><a href="cosmology/creation.html" style="color: var(--color-primary);">Creation &amp; Invasions</a></li>
-<li><a href="cosmology/afterlife.html" style="color: var(--color-primary);">Death &amp; the Otherworld</a></li>
-<li><a href="cosmology/index.html" style="color: var(--color-primary);">Cosmology Overview →</a></li>
-</ul>
-</div>
-<div class="deity-card" style="opacity: 0.7;">
-<h3>🌿 <a data-term="Sacred" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View sacred in ancient texts">Sacred</a> Herbalism</h3>
-<p>Learn about the <a data-term="Sacred" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View sacred in ancient texts">sacred</a> plants of the Celts - oak, mistletoe, vervain, and the wisdom of the green world.</p>
-<p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm);">Coming soon...</p>
-</div>
-<div class="deity-card" style="opacity: 0.7;">
-<h3>🔥 Rituals &amp; <a data-term="Festivals" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View festivals in ancient texts">Festivals</a></h3>
-<p>Discover the sacred calendar - <a class="corpus-link" data-term="Samhain" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Samhain'">Samhain</a>, <a class="corpus-link" data-term="Imbolc" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Imbolc'">Imbolc</a>, <a class="corpus-link" data-term="Beltane" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Beltane'">Beltane</a>, <a class="corpus-link" data-term="Lughnasadh" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Lughnasadh'">Lughnasadh</a> - and the <a data-term="Rituals" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View rituals in ancient texts">rituals</a> that connect worlds.</p>
-<p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm);">Coming soon...</p>
-</div>
-<div class="deity-card" style="opacity: 0.7;">
-<h3>🎓 The Druidic Path</h3>
-<p>Follow the 20-year journey from Ollaire to Arch-Druid - the training, practices, and mysteries of the ancient Druids.</p>
-<p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm);">Coming soon...</p>
-</div>
-<div class="deity-card" style="opacity: 0.7;">
-<h3>⚔️ Heroes &amp; Legends</h3>
-<p>Meet the legendary heroes - <a class="corpus-link" data-term="Cú Chulainn" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Cú Chulainn'">Cú Chulainn</a>, <a class="corpus-link" data-term="Fionn mac Cumhaill" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Fionn mac Cumhaill'">Fionn mac Cumhaill</a>, and the great champions of <a data-term="Celtic" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View celtic in ancient texts">Celtic</a> myth.</p>
-<p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm);">Coming soon...</p>
-</div>
-</div>
-</section>
-<section class="glass-card" id="pantheon">
-<h2 style="color: var(--color-primary);">The <a data-term="Tuatha Dé Danann" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View tuatha dé danann in ancient texts">Tuatha Dé Danann</a> &amp; Celtic Deities</h2>
-<p style="line-height: 1.7;">The divine race who ruled Ireland before the arrival of the Milesians (humans).</p>
-<h3 style="color: var(--color-primary);">Major <a data-term="Deities" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View deities in ancient texts">Deities</a></h3>
-<div class="deity-grid">
-<div class="deity-card">
-<h3>🌊 <a href="deities/dagda.html" data-smart="celtic" style="color: var(--color-primary); text-decoration: none;">The Dagda</a></h3>
-<p><strong><a class="corpus-link" data-term="The Good God" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'The Good God'">The Good God</a>, <a class="corpus-link" data-term="Father of All" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Father of All'">Father of All</a></strong></p>
-<p>King of <a href="deities/index.html" style="color: var(--color-primary);">Tuatha Dé Danann</a>. Owns magic cauldron (never empty), club (kills with one end, revives with <a data-term="Other" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View other in ancient texts">other</a>), harp that controls seasons.</p>
-<p><em>Symbols:</em> Cauldron, club, harp</p>
-<p><em>Domains:</em> Abundance, protection, magic, time</p>
-</div>
-<div class="deity-card">
-<h3>🔥 <a href="deities/brigid.html" data-smart="celtic" style="color: var(--color-primary); text-decoration: none;">Brigid</a></h3>
-<p><strong>Goddess of Fire &amp; Poetry</strong></p>
-<p>Triple goddess: fire of hearth, fire of forge, fire of inspiration. Healing, smithcraft, poetry. Later Christianized as St. <a href="deities/brigid.html" style="color: var(--color-primary);">Brigid</a>.</p>
-<p><em>Symbols:</em> Eternal flame, <a class="corpus-link" data-term="Brigid" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Brigid'">Brigid</a>'s cross, <a data-term="Sacred" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View sacred in ancient texts">sacred</a> wells</p>
-<p><em>Festival:</em> <a class="corpus-link" data-term="Imbolc" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Imbolc'">Imbolc</a> (Feb 1)</p>
-</div>
-<div class="deity-card">
-<h3>☀️ <a href="deities/lugh.html" data-smart="celtic" style="color: var(--color-primary); text-decoration: none;">Lugh</a></h3>
-<p><strong>The Many-Skilled, Shining One</strong></p>
-<p>Master of all arts. Sun god, warrior, craftsman. Killed Balor with sling stone. Leader of <a href="deities/index.html" style="color: var(--color-primary);">Tuatha Dé Danann</a> in battle.</p>
-<p><em>Symbols:</em> Spear, sling, raven</p>
-<p><em>Festival:</em> <a class="corpus-link" data-term="Lughnasadh" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Lughnasadh'">Lughnasadh</a> (Aug 1)</p>
-</div>
-<div class="deity-card">
-<h3>🌿 <a href="deities/danu.html" data-smart="celtic" style="color: var(--color-primary); text-decoration: none;">Danu</a></h3>
-<p><strong>Mother Goddess</strong></p>
-<p>Primordial mother of <a href="deities/index.html" style="color: var(--color-primary);">Tuatha Dé Danann</a>. Earth mother, fertility, sovereignty. River goddess (Danube named for her).</p>
-<p><em>Symbols:</em> Rivers, hills, earth</p>
-<p><em>Manifestation:</em> The land itself</p>
-</div>
-<div class="deity-card">
-<h3>⚔️ <a href="deities/morrigan.html" data-smart="celtic" style="color: var(--color-primary); text-decoration: none;">The Morrigan</a></h3>
-<p><strong>Phantom Queen, Goddess of War</strong></p>
-<p>Triple goddess (<a class="corpus-link" data-term="Badb" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Badb'">Badb</a>, <a class="corpus-link" data-term="Macha" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Macha'">Macha</a>, <a class="corpus-link" data-term="Nemain" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Nemain'">Nemain</a>). Battle fury, prophecy, fate. Shape-shifter (often crow/raven). Appears before battles.</p>
-<p><em>Symbols:</em> Crow, raven, eel, wolf</p>
-<p><em>Domains:</em> War, fate, death, sovereignty</p>
-</div>
-<div class="deity-card">
-<h3>🌳 <a href="deities/cernunnos.html" data-smart="celtic" style="color: var(--color-primary); text-decoration: none;">Cernunnos</a></h3>
-<p><strong><a class="corpus-link" data-term="The Horned God" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'The Horned God'">The Horned God</a></strong></p>
-<p>Lord of animals, nature, fertility, underworld. Cross-legged figure with antlers. Holds torque and serpent.</p>
-<p><em>Symbols:</em> Antlers, torque, serpent, animals</p>
-<p><em>Depiction:</em> Gundestrup Cauldron</p>
-</div>
-</div>
-<p style="text-align: center; margin-top: var(--spacing-xl);"><a class="btn btn-primary" href="deities/index.html" style="display: inline-block; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all 0.2s ease;">View All Celtic Deities →</a></p>
-</section>
-<section class="glass-card">
-<h2 style="color: var(--color-primary);">Key Texts &amp; <a data-term="Sources" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View sources in ancient texts">Sources</a></h2>
-<ul style="line-height: var(--leading-loose); margin-left: var(--spacing-lg);">
-<li><strong>Lebor Gabála Érenn</strong> - "Book of Invasions" (Irish <a data-term="Mythology" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View mythology in ancient texts">mythology</a> compilation)</li>
-<li><strong>The Mabinogion</strong> - Welsh mythological cycles</li>
-<li><strong>Ulster Cycle</strong> - Táin Bó Cúailnge (Cattle Raid of Cooley), <a class="corpus-link" data-term="Cú Chulainn" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Cú Chulainn'">Cú Chulainn</a> tales</li>
-<li><strong>Fenian Cycle</strong> - <a class="corpus-link" data-term="Fionn mac Cumhaill" data-tradition="celtic" href="../../mythos/celtic/index.html" title="Search corpus for 'Fionn mac Cumhaill'">Fionn mac Cumhaill</a> and the Fianna</li>
-<li><strong>Mythological Cycle</strong> - <a href="deities/index.html" style="color: var(--color-primary);">Tuatha Dé Danann</a> stories</li>
-<li><strong>Classical <a data-term="Sources" data-tradition="celtic" class="corpus-link" href="../../mythos/celtic/index.html" title="View sources in ancient texts">Sources</a></strong> - Julius Caesar (Gallic Wars), Pliny, Strabo on Druids</li>
-<li><strong>Medieval Irish Texts</strong> - Dinnshenchas (place-name lore), Brehon Laws</li>
-<li><strong>Welsh Triads</strong> - Poetic mnemonics preserving lore</li>
-</ul>
-</section>
-
-<!-- Cross-Cultural Parallels Panel -->
-<section class="interlink-panel glass-card">
-    <h3 class="interlink-header">
-        <span class="interlink-icon">🔗</span>
-        Cross-Cultural Parallels
-    </h3>
-    <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg);">Celtic deities share archetypal patterns with gods from other traditions. Explore these connections:</p>
-
-    <div class="parallel-traditions">
-        <h4>🌍 The Dagda - Father God Parallels</h4>
-        <div class="parallel-grid">
-            <a href="../../mythos/greek/deities/zeus.html" class="parallel-card" data-smart="greek">
-                <span class="tradition-flag">🏛️</span>
-                <span class="parallel-name">Zeus</span>
-                <span class="tradition-label">Greek</span>
-            </a>
-            <a href="../../mythos/norse/deities/odin.html" class="parallel-card" data-smart="norse">
-                <span class="tradition-flag">⚔️</span>
-                <span class="parallel-name">Odin</span>
-                <span class="tradition-label">Norse</span>
-            </a>
-            <a href="../../mythos/roman/deities/jupiter.html" class="parallel-card" data-smart="roman">
-                <span class="tradition-flag">🦅</span>
-                <span class="parallel-name">Jupiter</span>
-                <span class="tradition-label">Roman</span>
-            </a>
-        </div>
-    </div>
-
-    <div class="parallel-traditions" style="margin-top: var(--spacing-lg);">
-        <h4>🔥 Brigid - Craft & Wisdom Goddess Parallels</h4>
-        <div class="parallel-grid">
-            <a href="../../mythos/greek/deities/athena.html" class="parallel-card" data-smart="greek">
-                <span class="tradition-flag">🏛️</span>
-                <span class="parallel-name">Athena</span>
-                <span class="tradition-label">Greek</span>
-            </a>
-            <a href="../../mythos/greek/deities/hestia.html" class="parallel-card" data-smart="greek">
-                <span class="tradition-flag">🏛️</span>
-                <span class="parallel-name">Hestia</span>
-                <span class="tradition-label">Greek</span>
-            </a>
-            <a href="../../mythos/roman/deities/vesta.html" class="parallel-card" data-smart="roman">
-                <span class="tradition-flag">🦅</span>
-                <span class="parallel-name">Vesta</span>
-                <span class="tradition-label">Roman</span>
-            </a>
-            <a href="../../mythos/hindu/deities/saraswati.html" class="parallel-card" data-smart="hindu">
-                <span class="tradition-flag">🕉️</span>
-                <span class="parallel-name">Saraswati</span>
-                <span class="tradition-label">Hindu</span>
-            </a>
-        </div>
-    </div>
-
-    <div class="parallel-traditions" style="margin-top: var(--spacing-lg);">
-        <h4>☀️ Lugh - Light & Skill God Parallels</h4>
-        <div class="parallel-grid">
-            <a href="../../mythos/greek/deities/apollo.html" class="parallel-card" data-smart="greek">
-                <span class="tradition-flag">🏛️</span>
-                <span class="parallel-name">Apollo</span>
-                <span class="tradition-label">Greek</span>
-            </a>
-            <a href="../../mythos/norse/deities/odin.html" class="parallel-card" data-smart="norse">
-                <span class="tradition-flag">⚔️</span>
-                <span class="parallel-name">Odin</span>
-                <span class="tradition-label">Norse</span>
-            </a>
-            <a href="../../mythos/roman/deities/mercury.html" class="parallel-card" data-smart="roman">
-                <span class="tradition-flag">🦅</span>
-                <span class="parallel-name">Mercury</span>
-                <span class="tradition-label">Roman</span>
-            </a>
-            <a href="../../mythos/egyptian/deities/horus.html" class="parallel-card" data-smart="egyptian">
-                <span class="tradition-flag">☀️</span>
-                <span class="parallel-name">Horus</span>
-                <span class="tradition-label">Egyptian</span>
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- Quick Links: Sacred Groves & Herbs -->
-<section class="glass-card">
-    <h3 class="interlink-header">
-        <span class="interlink-icon">🌳</span>
-        Sacred Places & Celtic Herbalism
-    </h3>
-
-    <div class="interlink-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg); margin-top: var(--spacing-lg);">
-        <!-- Sacred Places Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title" style="color: var(--color-primary); font-weight: bold; margin-bottom: var(--spacing-md);">Sacred Groves & Sites</div>
-            <a href="../../spiritual-places/groves/glastonbury.html" class="place-link-card">
-                <div class="place-visual">
-                    <span class="place-icon">🌳</span>
-                    <span class="place-type">Sacred Grove</span>
-                </div>
-                <div class="place-info">
-                    <h4>Glastonbury</h4>
-                    <p>Isle of Avalon, ancient druidic sanctuary</p>
-                    <div class="place-tags">
-                        <span class="tag">Celtic</span>
-                        <span class="tag">Otherworld</span>
-                    </div>
-                </div>
-            </a>
-            <a href="../../index.html" class="place-link-card" style="margin-top: var(--spacing-md);">
-                <div class="place-visual">
-                    <span class="place-icon">🌲</span>
-                    <span class="place-type">Sacred Grove</span>
-                </div>
-                <div class="place-info">
-                    <h4>The Nemeton</h4>
-                    <p>Sacred clearing where druids gathered</p>
-                    <div class="place-tags">
-                        <span class="tag">Druidic</span>
-                        <span class="tag">Ritual</span>
-                    </div>
-                </div>
-            </a>
         </div>
 
-        <!-- Sacred Herbs Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title" style="color: var(--color-primary); font-weight: bold; margin-bottom: var(--spacing-md);">Sacred Herbs</div>
-            <a href="../../herbalism/universal/mistletoe.html" class="herb-link-card">
-                <div class="herb-icon">🌿</div>
-                <div class="herb-info">
-                    <h4>Mistletoe</h4>
-                    <p class="herb-uses">Protection • Fertility • Sacred to Druids</p>
-                    <div class="herb-traditions">All-heal, cut with golden sickle</div>
-                </div>
-            </a>
-            <a href="../greek/herbs/oak.html" class="herb-link-card" style="margin-top: var(--spacing-md);">
-                <div class="herb-icon">🌳</div>
-                <div class="herb-info">
-                    <h4>Oak</h4>
-                    <p class="herb-uses">Strength • Wisdom • Divine Connection</p>
-                    <div class="herb-traditions">King of Trees, sacred to the Dagda</div>
-                </div>
-            </a>
-            <a href="../../herbalism/index.html" class="herb-link-card" style="margin-top: var(--spacing-md);">
-                <div class="herb-icon">🍃</div>
-                <div class="herb-info">
-                    <h4>Vervain</h4>
-                    <p class="herb-uses">Prophecy • Purification • Magic</p>
-                    <div class="herb-traditions">Holy herb of the druids</div>
-                </div>
-            </a>
+        <!-- ============================================
+             FIREBASE-LOADED DYNAMIC CONTENT SECTIONS
+             These sections load from Firestore
+             ============================================ -->
+
+        <!-- Deities Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">⚡ Deities</h2>
+            <div id="deities-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading deities from Firebase...</p>
+            </div>
+            <div id="deities-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Heroes Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🦸 Heroes & Legendary Mortals</h2>
+            <div id="heroes-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading heroes from Firebase...</p>
+            </div>
+            <div id="heroes-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Creatures Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🐉 Creatures & Monsters</h2>
+            <div id="creatures-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading creatures from Firebase...</p>
+            </div>
+            <div id="creatures-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Cosmology Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🌌 Cosmology & Sacred Places</h2>
+            <div id="cosmology-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading cosmology from Firebase...</p>
+            </div>
+            <div id="cosmology-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Texts Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">📚 Sacred Texts</h2>
+            <div id="texts-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading texts from Firebase...</p>
+            </div>
+            <div id="texts-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Herbs Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🌿 Sacred Plants & Herbalism</h2>
+            <div id="herbs-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading herbs from Firebase...</p>
+            </div>
+            <div id="herbs-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Rituals Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🔮 Rituals & Practices</h2>
+            <div id="rituals-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading rituals from Firebase...</p>
+            </div>
+            <div id="rituals-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Symbols Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🔱 Sacred Symbols</h2>
+            <div id="symbols-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading symbols from Firebase...</p>
+            </div>
+            <div id="symbols-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Concepts Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">💭 Mystical Concepts</h2>
+            <div id="concepts-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading concepts from Firebase...</p>
+            </div>
+            <div id="concepts-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Myths Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">📖 Myths & Legends</h2>
+            <div id="myths-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading myths from Firebase...</p>
+            </div>
+            <div id="myths-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- ============================================
+             STATIC CUSTOM CONTENT (PRESERVED)
+             Add any mythology-specific static content here
+             ============================================ -->
+        <div class="static-content">
+            <!-- Add custom static content here -->
         </div>
-    </div>
 
-    <div class="quick-links-grid" style="margin-top: var(--spacing-xl);">
-        <a href="herbs/index.html" class="quick-link">
-            <span class="quick-link-icon">🌿</span> All Celtic Herbs
-        </a>
-        <a href="../../index.html" class="quick-link">
-            <span class="quick-link-icon">🌳</span> Sacred Groves
-        </a>
-        <a href="../../index.html" class="quick-link">
-            <span class="quick-link-icon">💧</span> Holy Wells
-        </a>
-        <a href="../../archetypes/" class="quick-link">
-            <span class="quick-link-icon">🎭</span> Archetypes
-        </a>
-    </div>
-</section>
-</main>
-<footer style="background: var(--color-surface); backdrop-filter: blur(10px); padding: var(--spacing-xl); border-top: 2px solid var(--color-border); margin-top: var(--spacing-xs2); text-align: center;">
-<p style="color: var(--color-text-secondary);">© 2025 World Mythos Explorer | <a href="../../mythos/index.html" style="color: var(--color-primary); text-decoration: none;">← Back to All Mythologies</a></p>
-</footer>
+        <!-- Cross-Cultural Parallels Section -->
+        <section class="interlink-panel" style="margin-top: var(--spacing-xl, 3rem);">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🌍</span>
+                Cross-Cultural Parallels
+            </h3>
+            <p style="margin-bottom: var(--spacing-lg); color: var(--color-text-secondary);">
+                Explore how Celtic mythology connects with other world traditions through shared themes and archetypes.
+            </p>
+            <div class="parallel-grid">
+                <!-- Parallel mythology links will be added here -->
+            </div>
+        </section>
 
-<!-- Auto-inject submission button -->
-<script>
-    if (window.SubmissionLink) {
-        window.SubmissionLink.autoInject();
-    }
-</script>
+        <!-- Related Traditions -->
+        <section style="margin-top: var(--spacing-xl, 3rem);">
+            <h2 class="section-header">🔗 Related Traditions</h2>
+            <div class="glass-card">
+                <h3>Explore Other Mythologies</h3>
+                <div class="button-grid" style="display: flex; flex-wrap: wrap; gap: var(--spacing-md);">
+                    <a class="btn btn-secondary" href="../greek/index.html">Greek</a>
+                    <a class="btn btn-secondary" href="../roman/index.html">Roman</a>
+                    <a class="btn btn-secondary" href="../norse/index.html">Norse</a>
+                    <a class="btn btn-secondary" href="../egyptian/index.html">Egyptian</a>
+                    <a class="btn btn-secondary" href="../hindu/index.html">Hindu</a>
+                    <a class="btn btn-secondary" href="../buddhist/index.html">Buddhist</a>
+                    <a class="btn btn-secondary" href="../celtic/index.html">Celtic</a>
+                    <a class="btn btn-secondary" href="../christian/index.html">Christian</a>
+                    <a class="btn btn-secondary" href="../islamic/index.html">Islamic</a>
+                    <a class="btn btn-secondary" href="../jewish/index.html">Jewish</a>
+                </div>
+            </div>
+        </section>
+    </main>
 
-<!-- Firebase SDK (CDN) -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="../../firebase-config.js"></script>
+    <!-- Footer -->
+    <footer>
+        <p>
+            <strong>Celtic Mythology</strong> - World Mythos Explorer<br>
+            <a href="../../mythos/index.html">Back to World Mythos Home</a> |
+            <a href="../../index.html">Main Site</a>
+        </p>
+    </footer>
 
-<!-- Initialize Auth UI -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Initialize Google Sign-In button in header
-        if (window.GoogleSignInButton) {
-            const authNav = document.getElementById('user-auth-nav');
-            if (authNav) {
-                window.GoogleSignInButton.injectIntoElement(authNav, {
-                    showUserInfo: true,
-                    showAvatar: true,
-                    compact: true
-                });
-            }
+    <!-- Auto-inject submission button -->
+    <script>
+        if (window.SubmissionLink) {
+            window.SubmissionLink.autoInject();
         }
-    });
-</script>
+    </script>
+
+    <!-- Firebase SDK (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script src="../../firebase-config.js"></script>
+
+    <!-- Firebase Content Loader (Module) -->
+    <script type="module">
+        import { FirebaseContentLoader } from '../../FIREBASE/js/firebase-content-loader.js';
+
+        // Wait for Firebase to initialize
+        window.addEventListener('load', async () => {
+            try {
+                // Check if Firebase is initialized
+                if (!window.firebaseApp || !window.firebaseDb) {
+                    console.error('[Index] Firebase not initialized');
+                    showGlobalError('Firebase is not configured. Please check firebase-config.js');
+                    return;
+                }
+
+                console.log('[Index] Initializing Firebase Content Loader for celtic');
+
+                // Create content loader instance
+                const loader = new FirebaseContentLoader(window.firebaseApp);
+                const mythology = 'celtic'; // e.g., 'greek', 'norse', 'egyptian'
+
+                // Content types to load
+                const contentTypes = [
+                    { type: 'deities', container: 'deities-container', loading: 'deities-loading' },
+                    { type: 'heroes', container: 'heroes-container', loading: 'heroes-loading' },
+                    { type: 'creatures', container: 'creatures-container', loading: 'creatures-loading' },
+                    { type: 'cosmology', container: 'cosmology-container', loading: 'cosmology-loading' },
+                    { type: 'texts', container: 'texts-container', loading: 'texts-loading' },
+                    { type: 'herbs', container: 'herbs-container', loading: 'herbs-loading' },
+                    { type: 'rituals', container: 'rituals-container', loading: 'rituals-loading' },
+                    { type: 'symbols', container: 'symbols-container', loading: 'symbols-loading' },
+                    { type: 'concepts', container: 'concepts-container', loading: 'concepts-loading' },
+                    { type: 'myths', container: 'myths-container', loading: 'myths-loading' }
+                ];
+
+                // Load each content type
+                for (const { type, container, loading } of contentTypes) {
+                    try {
+                        console.log(`[Index] Loading ${type} for ${mythology}...`);
+
+                        // Load content filtered by mythology
+                        await loader.loadContent(type, { mythology: mythology });
+
+                        // Hide loading, show container
+                        const loadingEl = document.getElementById(loading);
+                        const containerEl = document.getElementById(container);
+
+                        if (loadingEl) loadingEl.style.display = 'none';
+                        if (containerEl) containerEl.style.display = 'grid';
+
+                        // Render content
+                        loader.renderContent(container, type);
+
+                        console.log(`[Index] ✓ ${type} loaded successfully`);
+
+                    } catch (error) {
+                        console.error(`[Index] Error loading ${type}:`, error);
+
+                        // Hide loading, show error
+                        const loadingEl = document.getElementById(loading);
+                        const containerEl = document.getElementById(container);
+
+                        if (loadingEl) {
+                            loadingEl.innerHTML = `
+                                <div class="error-container">
+                                    <div class="error-title">Failed to load ${type}</div>
+                                    <div class="error-message">${error.message}</div>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+
+                console.log('[Index] All content loaded successfully');
+
+            } catch (error) {
+                console.error('[Index] Fatal error:', error);
+                showGlobalError('Failed to load content: ' + error.message);
+            }
+        });
+
+        function showGlobalError(message) {
+            document.querySelectorAll('.loading-container').forEach(el => {
+                el.innerHTML = `
+                    <div class="error-container">
+                        <div class="error-title">Error</div>
+                        <div class="error-message">${message}</div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>

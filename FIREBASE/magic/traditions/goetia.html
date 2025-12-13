@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goetia - Solomonic Demon Summoning</title>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="../../themes/theme-picker.js" defer></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: var(--leading-normal);
+            padding: var(--space-5);
+        }
+
+        .container {
+            max-width: var(--container-lg);
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: var(--space-16) var(--space-5);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-10);
+            border: 2px solid var(--color-border);
+        }
+
+        .header-icon {
+            font-size: 5rem;
+            margin-bottom: var(--space-4);
+        }
+
+        h1 {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-5);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: var(--text-xl);
+            color: var(--color-text-secondary);
+            margin: var(--space-5) 0;
+            font-style: italic;
+        }
+
+        .section {
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+        }
+
+        h2 {
+            font-size: var(--text-3xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-6);
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: var(--space-3);
+        }
+
+        h3 {
+            font-size: var(--text-2xl);
+            color: var(--color-secondary);
+            margin: var(--space-6) 0 var(--space-4) 0;
+        }
+
+        h4 {
+            font-size: var(--text-xl);
+            color: var(--color-primary);
+            margin: var(--space-5) 0 var(--space-3) 0;
+        }
+
+        p {
+            margin-bottom: var(--space-4);
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        ul, ol {
+            margin: var(--space-4) 0;
+            padding-left: var(--space-8);
+        }
+
+        li {
+            margin-bottom: var(--space-3);
+            color: var(--color-text-secondary);
+            line-height: var(--leading-relaxed);
+        }
+
+        .highlight-box {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--space-5);
+            margin: var(--space-5) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .warning-box {
+            background: rgba(255, 100, 100, 0.1);
+            border-left: 4px solid #ff6464;
+            padding: var(--space-5);
+            margin: var(--space-5) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .practice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .practice-card {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            transition: all var(--transition-base);
+        }
+
+        .practice-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .demon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-5);
+            margin: var(--space-6) 0;
+        }
+
+        .demon-card {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            transition: all var(--transition-base);
+        }
+
+        .demon-card:hover {
+            border-color: var(--color-secondary);
+            transform: translateY(-2px);
+        }
+
+        .demon-name {
+            font-size: var(--text-xl);
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .demon-rank {
+            font-size: var(--text-sm);
+            color: var(--color-secondary);
+            margin-bottom: var(--space-3);
+            font-style: italic;
+        }
+
+        .tools-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-5);
+            margin: var(--space-5) 0;
+        }
+
+        .tool-item {
+            background: rgba(var(--color-secondary-rgb), 0.1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+        }
+
+        .tool-name {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .source-item {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-left: 3px solid var(--color-secondary);
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
+            border-radius: var(--radius-md);
+        }
+
+        .source-title {
+            font-weight: var(--font-semibold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .source-author {
+            font-style: italic;
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+        }
+
+        .cross-ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-5) 0;
+        }
+
+        .cross-ref-link {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            text-align: center;
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
+            display: block;
+        }
+
+        .cross-ref-link:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .nav-section {
+            display: flex;
+            gap: var(--space-4);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--space-8);
+        }
+
+        .nav-button {
+            padding: var(--space-4) var(--space-6);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-semibold);
+            transition: all var(--transition-base);
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        blockquote {
+            font-style: italic;
+            border-left: 4px solid var(--color-primary);
+            padding-left: var(--space-5);
+            margin: var(--space-5) 0;
+            color: var(--color-text-secondary);
+        }
+
+        .seal-example {
+            text-align: center;
+            font-size: var(--text-2xl);
+            color: var(--color-primary);
+            margin: var(--space-5) 0;
+            padding: var(--space-5);
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border-radius: var(--radius-lg);
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="theme-picker-container"></div>
+<div class="container">
+        <header>
+    <div class="header-content">
+        <h1>Goetia</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> → <a href="../index.html">Magic</a> → <a href="index.html">Traditions</a> → <span>Goetia</span>
+</nav>
+
+        <!-- OVERVIEW SECTION -->
+        <section class="section">
+            <h2>Overview</h2>
+            <p>
+                Goetia (from Greek γοητεία, "sorcery" or "witchcraft") refers to the practice of summoning and commanding
+                spirits, particularly the 72 demons catalogued in the "Lesser Key of Solomon" (Lemegeton Clavicula Salomonis).
+                This grimoire tradition, crystallized in the medieval and early modern periods, claims descent from King Solomon
+                who, according to legend, received divine authority to command all spirits and demons, binding them to reveal
+                knowledge, perform services, and teach hidden arts.
+            </p>
+
+            <div class="highlight-box">
+                <h4>The Solomonic Legend</h4>
+                <p>
+                    According to Jewish, Christian, and Islamic traditions, King Solomon possessed a magical ring (often
+                    inscribed with the Tetragrammaton or a hexagram) that gave him authority over demons and spirits. He
+                    allegedly used this power to build the Temple of Jerusalem with demonic labor, to acquire wisdom from
+                    spirits, and to bind malevolent entities. This legend, elaborated across centuries, became the foundation
+                    for an entire tradition of magical grimoires claiming to transmit Solomon's techniques.
+                </p>
+            </div>
+
+            <h3>Historical Origins and Cultural Context</h3>
+            <p>
+                The goetic tradition synthesizes multiple streams: ancient Near Eastern exorcism practices, Greco-Roman magic,
+                Jewish mystical texts, medieval Christian demonology, and Renaissance Hermeticism. While the "Lesser Key"
+                manuscripts date from the 17th century, they compile material from much earlier sources, including the
+                "Testament of Solomon" (1st-5th century CE), Byzantine magical texts, and medieval grimoires.
+            </p>
+
+            <p>
+                The practice existed in a complex relationship with Christianity. On one hand, goetic texts are thoroughly
+                Christian in framework, invoking God, angels, and biblical authority to command demons. On the other hand,
+                ecclesiastical authorities condemned goetia as diabolic pact-making and punished practitioners. This tension
+                meant goetia was practiced covertly, often by educated clergy who had access to Latin texts and theological
+                training necessary to understand the complex rituals.
+            </p>
+
+            <div class="warning-box">
+                <h4>Theological and Ethical Considerations</h4>
+                <p>
+                    Goetia presents unique ethical challenges. Traditional theology views demons as irredeemably evil fallen
+                    angels who seek human damnation. The goetic claim to "safely" command such beings through divine authority
+                    was controversial even among magicians. Some Renaissance mages distinguished between "natural magic"
+                    (acceptable) and "demonic magic" (forbidden), while others argued Solomonic techniques were legitimate
+                    theurgy using divine names to compel malevolent spirits. Modern practitioners must grapple with whether
+                    these entities are literal demons, psychological archetypes, or symbolic representations of natural forces.
+                </p>
+            </div>
+
+            <h3>The 72 Spirits: Hierarchy and Organization</h3>
+            <p>
+                The Goetia catalogues exactly 72 demons, each with specific ranks, appearances, abilities, and seals. This
+                number may derive from the 72 angels bearing the name of God in Kabbalistic tradition, the 72 names of God in
+                Jewish mysticism, or astrological systems dividing the zodiac into 72 quinances (5-degree segments). The
+                demons are organized hierarchically:
+            </p>
+
+            <ul>
+                <li><strong>Kings (9):</strong> Highest rank, often associated with cardinal directions or times</li>
+                <li><strong>Dukes (23):</strong> Noble spirits with specific domains of knowledge or power</li>
+                <li><strong>Princes (7):</strong> Powerful spirits, some associated with particular virtues or vices</li>
+                <li><strong>Marquises (13):</strong> Spirits particularly skilled in transformation and knowledge</li>
+                <li><strong>Presidents (11):</strong> Spirits governing particular arts or sciences</li>
+                <li><strong>Earls/Counts (9):</strong> Spirits with mixed attributes and abilities</li>
+            </ul>
+
+            <p>
+                Each spirit commands legions of lesser demons (numbers varying from 2 to 200 legions, each legion traditionally
+                containing 6,666 demons). This military hierarchy reflects medieval feudal structures and angelic hierarchies
+                from Pseudo-Dionysius, inverted into a demonic bureaucracy.
+            </p>
+        </section>
+
+        <!-- CORE PRACTICES -->
+        <section class="section">
+            <h2>Core Practices</h2>
+
+            <div class="practice-grid">
+                <div class="practice-card">
+                    <h4>Ritual Preparation and Purification</h4>
+                    <p>
+                        Goetic operations require extensive preparation. The operator must undergo periods of fasting, prayer,
+                        and sexual abstinence (typically 3-9 days). Ritual baths with consecrated water purify the body. White
+                        linen robes symbolize purity. The operator confesses sins and seeks divine protection, recognizing that
+                        improper preparation leaves one vulnerable to demonic attack or deception.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Construction of the Magic Circle</h4>
+                    <p>
+                        The protective circle is essential - operators stand within it for safety while spirits manifest
+                        outside. Circles are carefully drawn (often 9 feet in diameter) with specific divine names, crosses,
+                        pentacles, and symbols at cardinal points. Some traditions use a triangle of evocation outside the
+                        circle where spirits are commanded to appear. The circle represents sacred space under divine
+                        protection that demons cannot cross without permission.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Conjurations and Commands</h4>
+                    <p>
+                        Spirits are summoned through elaborate verbal formulae combining biblical names, angelic invocations,
+                        and threats of divine punishment. Initial conjurations are gentle, but if spirits don't appear,
+                        increasingly forceful and threatening language is used. The operator speaks with assumed divine
+                        authority, not personal power, commanding "by the names of God" and threatening spirits with torment
+                        if they disobey.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Use of Seals and Sigils</h4>
+                    <p>
+                        Each demon has a unique seal or sigil - geometric designs incorporating letters, symbols, and often the
+                        spirit's name in occult characters. These seals function as spiritual "signatures" or "phone numbers."
+                        Seals may be engraved on metal corresponding to the spirit's planetary attribution, drawn on parchment,
+                        or worn as lamens (pendants). Presenting the seal compels the spirit to manifest and establishes the
+                        operator's knowledge and authority.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>Binding and Constraining</h4>
+                    <p>
+                        Once manifested, spirits must be bound to obedience through oaths sworn by divine names. The operator
+                        extracts promises that the spirit will return when called, perform requested tasks truthfully, cause
+                        no harm, and depart peacefully when dismissed. Some grimoires describe binding spirits into brass
+                        vessels or crystals as Solomon allegedly did, though this is typically reserved for particularly
+                        troublesome entities.
+                    </p>
+                </div>
+
+                <div class="practice-card">
+                    <h4>License to Depart</h4>
+                    <p>
+                        Properly dismissing spirits is crucial. The operator grants "license to depart" - formal permission for
+                        the spirit to leave, often with blessings that it go "without harm to any creature." Failing to
+                        dismiss properly could leave spirits "hanging around," potentially causing problems. The dismissal
+                        recognizes that while commanded, spirits are not destroyed or permanently subjugated, but return to
+                        their natural abodes.
+                    </p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h4>Scrying and Spirit Communication</h4>
+                <p>
+                    Many operators work with assistants (often children, believed to have clearer spiritual vision) who gaze
+                    into crystals, mirrors, or specially prepared "shew-stones" to see spirits manifest. The operator may not
+                    see the spirit directly but communicates through the scryer's descriptions. Other methods include waiting
+                    for spirits to appear in dreams, using divination to receive messages, or in rare cases, direct visible
+                    manifestation to the magician.
+                </p>
+            </div>
+        </section>
+
+        <!-- NOTABLE DEMONS -->
+        <section class="section">
+            <h2>Notable Spirits of the Goetia</h2>
+
+            <div class="demon-grid">
+                <div class="demon-card">
+                    <div class="demon-name">1. Bael</div>
+                    <div class="demon-rank">King commanding 66 legions</div>
+                    <p>
+                        First spirit listed, appearing with three heads (cat, man, toad) or sometimes crowned. Teaches
+                        invisibility and cunning. Rules the eastern direction. Solar and fire associations.
+                    </p>
+                </div>
+
+                <div class="demon-card">
+                    <div class="demon-name">9. Paimon</div>
+                    <div class="demon-rank">King commanding 200 legions</div>
+                    <p>
+                        Appears riding a dromedary, preceded by musicians. One of the most powerful spirits, teaching arts,
+                        sciences, and revealing hidden knowledge. Can bind others to the magician's will. Associated with the
+                        west and watery domains.
+                    </p>
+                </div>
+
+                <div class="demon-card">
+                    <div class="demon-name">13. Beleth</div>
+                    <div class="demon-rank">King commanding 85 legions</div>
+                    <p>
+                        Terrible in appearance, riding a pale horse with trumpets and music. Controls love and desire,
+                        described as initially frightening but obedient when properly constrained. Requires respectful
+                        treatment despite demonic nature.
+                    </p>
+                </div>
+
+                <div class="demon-card">
+                    <div class="demon-name">32. Asmoday (Asmodeus)</div>
+                    <div class="demon-rank">King commanding 72 legions</div>
+                    <p>
+                        Appears with three heads (bull, man, ram), riding a dragon, breathing fire. Teaches arithmetic,
+                        astronomy, geometry, and handicrafts. Reveals treasures and makes one invisible. Famous from the Book
+                        of Tobit as a demon of lust.
+                    </p>
+                </div>
+
+                <div class="demon-card">
+                    <div class="demon-name">44. Shax (Shaz)</div>
+                    <div class="demon-rank">Marquis commanding 30 legions</div>
+                    <p>
+                        Appears as a stock dove with a hoarse voice. Steals money, horses, and other goods (though can be
+                        compelled to return them). Discovers hidden things and provides familiars. Noted as a liar unless
+                        constrained in a triangle.
+                    </p>
+                </div>
+
+                <div class="demon-card">
+                    <div class="demon-name">55. Orobas</div>
+                    <div class="demon-rank">Prince commanding 20 legions</div>
+                    <p>
+                        Appears as a horse but takes human form when commanded. Reveals past, present, and future. Gives
+                        dignities and protection from deception by other spirits. Described as truthful and benevolent,
+                        faithful to the exorcist.
+                    </p>
+                </div>
+
+                <div class="demon-card">
+                    <div class="demon-name">61. Zagan</div>
+                    <div class="demon-rank">King and President commanding 33 legions</div>
+                    <p>
+                        Appears as a bull with griffin wings, transforming to human shape. Turns water into wine, wine into
+                        water, blood into wine. Transmutes metals and makes fools wise. Associated with transformation and
+                        alchemy.
+                    </p>
+                </div>
+
+                <div class="demon-card">
+                    <div class="demon-name">72. Andromalius</div>
+                    <div class="demon-rank">Earl commanding 36 legions</div>
+                    <p>
+                        Final spirit listed, appearing as a man holding a serpent. Returns stolen goods, discovers thieves,
+                        and reveals hidden treasure. Punishes wickedness and deceit. Associated with justice and recovery of
+                        lost things.
+                    </p>
+                </div>
+            </div>
+
+            <p style="margin-top: var(--space-6);">
+                Each spirit has specific days and hours when they're most easily contacted (based on planetary hours and days),
+                particular metals and materials for their seals, incenses that please them, and detailed appearance descriptions
+                helping operators confirm proper manifestation versus impostor spirits.
+            </p>
+        </section>
+
+        <!-- TOOLS & MATERIALS -->
+        <section class="section">
+            <h2>Tools & Materials</h2>
+
+            <div class="tools-list">
+                <div class="tool-item">
+                    <div class="tool-name">The Magic Circle</div>
+                    <p>
+                        Drawn with chalk, charcoal, or painted on cloth/wood. Contains divine names (Tetragrammaton, El,
+                        Adonai, etc.), crosses at cardinal points, and protective symbols. Some traditions use double or triple
+                        circles. Must be large enough for the operator to move within comfortably. Often prepared with
+                        consecrated water and incense.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">The Triangle of Solomon</div>
+                    <p>
+                        Placed outside the circle (often to the east), where spirits are commanded to appear. Contains a circle
+                        at center with the spirit's seal, surrounded by the names Michael, Gabriel, and Uriel (or other divine
+                        names). Some versions include additional protective symbols. Constrains the spirit to visible
+                        manifestation.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">The Lamen (Hexagram Pendant)</div>
+                    <p>
+                        Worn on the operator's breast, usually depicting the seal of Solomon (hexagram/Star of David) with
+                        divine names. Made of silver or gold. Identifies the operator as working under Solomonic authority.
+                        Different from individual spirit seals, this represents the magician's general authority.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">The Magic Wand/Rod</div>
+                    <p>
+                        Staff of hazel or other specified woods, often tipped with iron or marked with divine names. Used to
+                        trace circles, point at spirits, and gesture during conjurations. Some traditions distinguish between
+                        a wand (wooden) and rod (metal). Represents extension of the operator's will and authority.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">The Magic Sword</div>
+                    <p>
+                        Consecrated blade used to trace circles, banish spirits, and defend against spiritual attack. Must be
+                        new or specially forged, inscribed with divine names. Some grimoires specify complex consecration
+                        rituals involving planetary hours, fumigations, and sprinkling with holy water. Symbolizes divine
+                        power to cut through spiritual opposition.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Seals and Sigils</div>
+                    <p>
+                        Each spirit's unique seal, drawn on parchment or engraved on metal (lead, tin, copper, silver, gold,
+                        iron) corresponding to planetary associations. Seals must be drawn accurately and consecrated. Worn as
+                        lamens, placed in the triangle, or used to compel obedience. Function as spiritual "calling cards."
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">Incense and Fumigations</div>
+                    <p>
+                        Specific incenses attract or please different spirits. Frankincense, myrrh, and benzoin are commonly
+                        used. Some demons have particular fumigations they prefer. Incense purifies space, creates atmosphere
+                        conducive to manifestation, and serves as offerings. Noxious fumigations (sulfur, asafoetida) may be
+                        used to torment disobedient spirits.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">The Brass Vessel</div>
+                    <p>
+                        According to legend, Solomon imprisoned rebellious demons in brass vessels sealed with his ring and
+                        cast them into a lake (later recovered by Babylonians). Some grimoires describe binding troublesome
+                        spirits in brass containers. More commonly, a brass or copper vessel holds consecrated water for
+                        sprinkling and purification.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">The Crystal or Scrying Mirror</div>
+                    <p>
+                        Used for spirits to manifest visibly to the scryer. May be natural crystal, polished obsidian, or
+                        specially prepared black mirror. Often placed within the triangle of evocation. Provides focus for
+                        spiritual vision and allows spirits to communicate through visual symbols and appearances.
+                    </p>
+                </div>
+
+                <div class="tool-item">
+                    <div class="tool-name">The Book of Spirits</div>
+                    <p>
+                        Grimoire containing spirit descriptions, seals, conjurations, and procedures. Traditionally hand-copied
+                        by the magician (copying is itself a preparatory meditation). Must be consulted during operations to
+                        ensure correct protocols. Some traditions require the book be bound in specific materials and
+                        consecrated before use.
+                    </p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h4>Timing and Astrological Considerations</h4>
+                <p>
+                    Goetic operations are carefully timed according to planetary hours (each hour of day and night ruled by a
+                    planet), days of the week (each governed by a planetary power), and sometimes lunar phases. Spirits have
+                    specific times when they're most accessible based on their planetary rulers. Mercury spirits favor
+                    Wednesday and Mercury hours, martial spirits favor Tuesday and Mars hours, etc. Some grimoires also
+                    consider zodiacal positions and avoid inauspicious astrological configurations.
+                </p>
+            </div>
+        </section>
+
+        <!-- LINEAGES & SCHOOLS -->
+        <section class="section">
+            <h2>Lineages & Schools</h2>
+
+            <h3>Historical Development</h3>
+            <p>
+                The goetic tradition doesn't represent a single lineage but a converging stream of practices and texts
+                developing over nearly two millennia.
+            </p>
+
+            <h4>Ancient Precedents</h4>
+            <p>
+                Jewish texts like the "Testament of Solomon" (1st-5th century CE) established the narrative of Solomon's
+                power over demons. Greek magical papyri demonstrated binding and constraining spiritual entities. Byzantine
+                exorcism rituals developed elaborate conjuration formulae. These streams merged in medieval Europe where
+                Arabic, Jewish, and Christian magical traditions cross-pollinated.
+            </p>
+
+            <h4>Medieval Grimoire Tradition</h4>
+            <p>
+                The 13th-15th centuries saw proliferation of grimoires claiming Solomonic authority: "Key of Solomon,"
+                "Sworn Book of Honorius," "Book of Abramelin," and others. These texts circulated in manuscript form among
+                educated clergy, scholars, and nobility. Different regional traditions developed - Italian, Germanic, French,
+                and English goetic practices showed local variations while maintaining core structures.
+            </p>
+
+            <h4>The Lemegeton (Lesser Key of Solomon)</h4>
+            <p>
+                Compiled in the 17th century, the Lemegeton contains five books:
+            </p>
+            <ol>
+                <li><strong>Ars Goetia:</strong> The 72 demons, their seals, and conjurations</li>
+                <li><strong>Ars Theurgia Goetia:</strong> Conjurations of aerial spirits organized by cardinal directions</li>
+                <li><strong>Ars Paulina:</strong> Angels of the hours and zodiacal signs</li>
+                <li><strong>Ars Almadel:</strong> Angels of the altitudes contacted through a wax altar</li>
+                <li><strong>Ars Notoria:</strong> Prayers and meditations for divine knowledge</li>
+            </ol>
+            <p>
+                Only the first book specifically deals with demonic evocation, though all claim Solomonic origins.
+            </p>
+
+            <h3>Modern Revival and Practice</h3>
+
+            <h4>Golden Dawn and Ceremonial Magic Orders</h4>
+            <p>
+                The Hermetic Order of the Golden Dawn (late 19th century) systematized goetic practices within their elaborate
+                Kabbalistic framework. S.L. MacGregor Mathers translated the Goetia (published 1904), making it accessible to
+                modern audiences. Aleister Crowley experimented with goetic evocation, famously working the Ars Goetia in 1901
+                with poet Victor Neuburg as scryer.
+            </p>
+
+            <h4>Chaos Magic and Psychological Approaches</h4>
+            <p>
+                Late 20th century chaos magicians reinterpreted goetic spirits as psychological complexes, archetypal patterns,
+                or "thought-forms" rather than literal demons. This approach removes theological concerns while maintaining
+                practical techniques. Practitioners treat evocations as methods for accessing subconscious knowledge and
+                actualizing personal will rather than commanding external entities.
+            </p>
+
+            <h4>Traditional/Reconstructionist Approaches</h4>
+            <p>
+                Some modern magicians attempt to practice goetia as closely as possible to historical methods, using period
+                tools, following complex purification regimens, and maintaining theological frameworks (whether Christian,
+                Jewish, or other). These practitioners argue that psychological reductionism strips the practice of its power
+                and that spirits are genuinely external intelligences requiring traditional protocols.
+            </p>
+
+            <div class="warning-box">
+                <h4>Contemporary Ethical Debates</h4>
+                <p>
+                    Modern practitioners debate extensively about ethics of goetic practice. Issues include: Is it ethical to
+                    command spirits (regardless of their nature)? Do these practices pose psychological/spiritual dangers? How
+                    does one reconcile commanding "demons" with contemporary religious or ethical frameworks? Can goetic
+                    techniques be adapted to work with other spiritual beings (ancestors, land spirits, etc.) or are the
+                    protocols specifically designed for rebellious entities requiring forceful constraint? There is no consensus,
+                    and individual practitioners must navigate these questions according to their own understanding and ethics.
+                </p>
+            </div>
+        </section>
+
+        <!-- PRIMARY SOURCES -->
+        <section class="section">
+            <h2>Primary Sources</h2>
+
+            <div class="source-item">
+                <div class="source-title">The Lesser Key of Solomon (Lemegeton Clavicula Salomonis)</div>
+                <div class="source-author">17th century manuscripts; ed. Joseph Peterson, Weiser Books, 2001</div>
+                <p>
+                    The foundational text of goetic practice. Peterson's edition provides the complete five-book Lemegeton with
+                    scholarly apparatus, variant readings from different manuscripts, and historical context. Essential primary
+                    source containing the 72 spirits, their seals, conjurations, and ritual procedures.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Goetia: The Lesser Key of Solomon the King</div>
+                <div class="source-author">Trans. S.L. MacGregor Mathers, ed. Aleister Crowley, 1904; multiple modern editions</div>
+                <p>
+                    The first widely published English translation, bringing goetia to modern occult revival. Crowley's edition
+                    includes his preliminary invocation to the "Bornless One" and interpretive essays. While sometimes criticized
+                    for liberties with translation, historically influential in shaping modern goetic practice.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Testament of Solomon</div>
+                <div class="source-author">1st-5th century CE; trans. F.C. Conybeare, in Jewish Quarterly Review, 1898</div>
+                <p>
+                    Ancient Jewish pseudepigraphical text describing Solomon's building of the Temple using demons bound by a
+                    magical ring. Catalogues demons, their activities, and the angels who constrain them. Primary source for
+                    Solomonic legend underlying later grimoires, though not a practical manual itself.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Key of Solomon the King (Clavicula Salomonis)</div>
+                <div class="source-author">14th-15th century; trans. S.L. MacGregor Mathers, 1889; Peterson edition, 2004</div>
+                <p>
+                    Earlier Solomonic grimoire focusing more on general ceremonial magic than specifically goetia. Contains
+                    detailed instructions for creating magical tools, timing operations, and working with angels and spirits.
+                    Important for understanding broader Solomonic tradition of which goetia is one branch.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Book of Abramelin</div>
+                <div class="source-author">15th century; trans. Georg Dehn, Ibis Press, 2006</div>
+                <p>
+                    Grimoire describing six-month preparatory operation to contact one's Holy Guardian Angel, who then grants
+                    authority over demons. Second part provides "word squares" for commanding spirits to perform various tasks.
+                    Influential on Golden Dawn and modern ceremonial magic despite different approach from direct goetic evocation.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">Summoning Spirits: The Art of Magical Evocation</div>
+                <div class="source-author">Konstantinos, Llewellyn Publications, 1995</div>
+                <p>
+                    Modern practical manual explaining evocation techniques for contemporary practitioners. Covers traditional
+                    goetic methods alongside broader spirit work. Includes safety protocols, psychological preparation, and
+                    troubleshooting. Good introduction to modern practice, though represents personal interpretation rather than
+                    historical reconstruction.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Grimoire of Armadel</div>
+                <div class="source-author">17th century; trans. S.L. MacGregor Mathers, published posthumously 1980</div>
+                <p>
+                    Grimoire focusing on angelic rather than demonic spirits, but using similar evocation techniques. Provides
+                    interesting contrast showing how Solomonic methods adapted for different classes of spirits. Demonstrates
+                    that circle-and-conjuration methodology wasn't exclusively "dark" but part of broader ceremonial framework.
+                </p>
+            </div>
+
+            <div class="source-item">
+                <div class="source-title">The Sorcerer's Secrets: Strategies in Practical Magick</div>
+                <div class="source-author">Jason Miller, New Page Books, 2009</div>
+                <p>
+                    Contemporary perspective on practical spirit work including goetic techniques. Miller discusses integration
+                    of traditional grimoire methods with modern pragmatic approach. Addresses questions about belief, results,
+                    and ethics in contemporary magical practice. Accessible introduction to practical considerations beyond
+                    mere historical study.
+                </p>
+            </div>
+        </section>
+
+        <!-- CROSS-REFERENCES -->
+        <section class="section">
+            <h2>Cross-References & Related Traditions</h2>
+
+            <div class="cross-ref-grid">
+                <a href="practical-kabbalah.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">✡️</div>
+                    <div><strong>Practical Kabbalah</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Jewish magical tradition</div>
+                </a>
+
+                <a href="../texts/key-of-solomon.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">🔑</div>
+                    <div><strong>Key of Solomon</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Foundational grimoire</div>
+                </a>
+
+                <a href="../ritual/ceremonial-magic.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">🔯</div>
+                    <div><strong>Ceremonial Magic</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Western ritual traditions</div>
+                </a>
+
+                <a href="../practical/spirit-work.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">👻</div>
+                    <div><strong>Spirit Work</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">General spirit communication</div>
+                </a>
+
+                <a href="../../herbalism/traditions/jewish/index.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">✡️</div>
+                    <div><strong>Jewish Mythology</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Solomon legends, demonology</div>
+                </a>
+
+                <a href="../divination/astrology.html" class="cross-ref-link">
+                    <div style="font-size: 2rem; margin-bottom: var(--space-2);">♈</div>
+                    <div><strong>Astrology</strong></div>
+                    <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">Timing and correspondences</div>
+                </a>
+            </div>
+
+            <h3 style="margin-top: var(--space-8);">Related Magical Traditions</h3>
+            <ul>
+                <li><strong>Theurgy:</strong> Angelic/divine evocation using similar ritual structures but different entities</li>
+                <li><strong>Necromancy:</strong> Medieval practices for summoning and questioning the dead</li>
+                <li><strong>Arabic/Islamic Spirit Magic:</strong> Djinn evocation practices with some shared techniques</li>
+                <li><strong>Greek Magical Papyri:</strong> Ancient precedents for binding and commanding spirits</li>
+                <li><strong>Medieval Exorcism:</strong> Catholic Church rituals sharing terminology and authority structures</li>
+                <li><strong>Hoodoo/African-American Folk Magic:</strong> Some crossover in spirit work and commanding techniques</li>
+            </ul>
+        </section>
+
+        <!-- NAVIGATION -->
+        <nav class="nav-section">
+            <a href="../index.html" class="nav-button">Return to Magic Index</a>
+            <a href="../ritual/ceremonial-magic.html" class="nav-button">Ceremonial Magic</a>
+            <a href="../../index.html" class="nav-button">Home</a>
+        </nav>
+
+        <!-- Interlink Panel -->
+        <section class="interlink-panel" style="margin-top: var(--space-10); background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-8);">
+            <h3 style="font-size: var(--text-2xl); color: var(--color-primary); margin-bottom: var(--space-6); border-bottom: 2px solid var(--color-border); padding-bottom: var(--space-3);">Related Content</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-6);">
+                <div class="archetype-link-card" style="background: rgba(var(--color-primary-rgb), 0.05); border-radius: var(--radius-lg); padding: var(--space-5);">
+                    <h4 style="color: var(--color-secondary); margin-bottom: var(--space-4);">Cross-Cultural Parallels</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--space-3);"><a href="enochian.html" style="color: var(--color-text-secondary); text-decoration: none;">Enochian Magic</a> - Angelic language system from John Dee</li>
+                        <li style="margin-bottom: var(--space-3);"><a href="../texts/key-of-solomon.html" style="color: var(--color-text-secondary); text-decoration: none;">Solomonic Magic</a> - Broader tradition of Solomonic practice</li>
+                        <li style="margin-bottom: var(--space-3);"><a href="../texts/key-of-solomon.html" style="color: var(--color-text-secondary); text-decoration: none;">Key of Solomon</a> - Foundational grimoire text</li>
+                    </ul>
+                </div>
+                <div class="archetype-link-card" style="background: rgba(var(--color-primary-rgb), 0.05); border-radius: var(--radius-lg); padding: var(--space-5);">
+                    <h4 style="color: var(--color-secondary); margin-bottom: var(--space-4);">Related Archetypes</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--space-3);"><a href="../../archetypes/index.html" style="color: var(--color-text-secondary); text-decoration: none;">The Magician</a> - Master of ritual and transformation</li>
+                        <li style="margin-bottom: var(--space-3);"><a href="../../archetypes/index.html" style="color: var(--color-text-secondary); text-decoration: none;">The Shadow</a> - Confronting dark forces and the unconscious</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--color-border);">
+                <h4 style="color: var(--color-secondary); margin-bottom: var(--space-4);">See Also</h4>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-4);">
+                    <li><a href="practical-kabbalah.html" style="color: var(--color-text-secondary); text-decoration: none;">Practical Kabbalah</a></li>
+                    <li><a href="../ritual/ceremonial-magic.html" style="color: var(--color-text-secondary); text-decoration: none;">Ceremonial Magic</a></li>
+                    <li><a href="../../herbalism/traditions/jewish/index.html" style="color: var(--color-text-secondary); text-decoration: none;">Jewish Mythology</a></li>
+                    <li><a href="../divination/astrology.html" style="color: var(--color-text-secondary); text-decoration: none;">Astrological Timing</a></li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <!-- Theme Picker UI -->
+</body>
+</html>

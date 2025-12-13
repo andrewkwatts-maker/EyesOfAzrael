@@ -1,0 +1,613 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Eyes of Azrael Entity Schema v2.0",
+  "description": "Enhanced universal schema with geographical, temporal, and linguistic metadata",
+  "version": "2.0.0",
+
+  "definitions": {
+    "entityBase": {
+      "type": "object",
+      "required": ["id", "type", "name", "mythologies"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier (kebab-case)",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["item", "place", "deity", "concept", "archetype", "magic", "creature", "hero"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name in English"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Unicode emoji or icon identifier"
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-friendly slug (auto-generated from id)"
+        },
+        "mythologies": {
+          "type": "array",
+          "description": "List of mythologies this entity appears in",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "primaryMythology": {
+          "type": "string",
+          "description": "Primary mythology where this entity originates"
+        },
+        "shortDescription": {
+          "type": "string",
+          "description": "One-sentence description (max 200 chars)",
+          "maxLength": 200
+        },
+        "longDescription": {
+          "type": "string",
+          "description": "Complete description (markdown supported)"
+        },
+
+        "linguistic": {
+          "$ref": "#/definitions/linguisticData"
+        },
+
+        "geographical": {
+          "$ref": "#/definitions/geographicalData"
+        },
+
+        "temporal": {
+          "$ref": "#/definitions/temporalData"
+        },
+
+        "cultural": {
+          "$ref": "#/definitions/culturalData"
+        },
+
+        "metaphysicalProperties": {
+          "$ref": "#/definitions/metaphysicalProperties"
+        },
+
+        "colors": {
+          "type": "object",
+          "properties": {
+            "primary": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+            "secondary": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+            "accent": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"}
+          }
+        },
+
+        "tags": {
+          "type": "array",
+          "description": "Searchable tags",
+          "items": {"type": "string"}
+        },
+
+        "archetypes": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/archetypeScore"}
+        },
+
+        "relatedEntities": {
+          "$ref": "#/definitions/relatedEntities"
+        },
+
+        "sources": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/source"}
+        },
+
+        "mediaReferences": {
+          "$ref": "#/definitions/mediaReferences"
+        }
+      }
+    },
+
+    "linguisticData": {
+      "type": "object",
+      "description": "Linguistic information about the entity name",
+      "properties": {
+        "originalName": {
+          "type": "string",
+          "description": "Name in original language/script",
+          "examples": ["Ζεύς", "יהוה", "ब्रह्मा", "オオクニヌシ"]
+        },
+        "originalScript": {
+          "type": "string",
+          "description": "Writing system",
+          "enum": ["latin", "greek", "hebrew", "arabic", "devanagari", "chinese", "japanese", "runic", "hieroglyphic", "cuneiform"]
+        },
+        "transliteration": {
+          "type": "string",
+          "description": "Romanized version of original name",
+          "examples": ["Zeus", "YHWH", "Brahmā", "Ōkuninushi"]
+        },
+        "pronunciation": {
+          "type": "string",
+          "description": "IPA phonetic pronunciation",
+          "examples": ["/zju:s/", "/ˈbraːhmaː/", "/oːkuninuɕi/"]
+        },
+        "alternativeNames": {
+          "type": "array",
+          "description": "Other names, epithets, titles",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "language": {"type": "string"},
+              "context": {"type": "string"},
+              "meaning": {"type": "string"}
+            },
+            "required": ["name"]
+          }
+        },
+        "etymology": {
+          "type": "object",
+          "properties": {
+            "rootLanguage": {"type": "string"},
+            "meaning": {"type": "string"},
+            "derivation": {"type": "string"}
+          }
+        },
+        "languageCode": {
+          "type": "string",
+          "description": "ISO 639-1 or ISO 639-3 language code",
+          "examples": ["grc", "he", "sa", "egy", "akk"]
+        }
+      }
+    },
+
+    "geographicalData": {
+      "type": "object",
+      "description": "Geographical location and regional information",
+      "properties": {
+        "primaryLocation": {
+          "$ref": "#/definitions/location"
+        },
+        "associatedLocations": {
+          "type": "array",
+          "description": "Other significant locations",
+          "items": {"$ref": "#/definitions/location"}
+        },
+        "region": {
+          "type": "string",
+          "description": "General geographical region",
+          "examples": ["Mediterranean", "Scandinavia", "Indian Subcontinent", "East Asia", "Levant"]
+        },
+        "culturalArea": {
+          "type": "string",
+          "description": "Cultural/religious geography",
+          "examples": ["Hellenistic World", "Viking Age Scandinavia", "Ancient Egypt", "Vedic India"]
+        },
+        "modernCountries": {
+          "type": "array",
+          "description": "Modern countries where entity was significant",
+          "items": {"type": "string"},
+          "examples": [["Greece", "Turkey"], ["Norway", "Sweden", "Denmark", "Iceland"]]
+        },
+        "mapVisualization": {
+          "type": "object",
+          "description": "Data for map visualization",
+          "properties": {
+            "center": {
+              "type": "object",
+              "properties": {
+                "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+                "longitude": {"type": "number", "minimum": -180, "maximum": 180}
+              }
+            },
+            "zoom": {"type": "number", "description": "Suggested map zoom level"},
+            "bounds": {
+              "type": "object",
+              "description": "Bounding box for entity's geographical influence",
+              "properties": {
+                "north": {"type": "number"},
+                "south": {"type": "number"},
+                "east": {"type": "number"},
+                "west": {"type": "number"}
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "location": {
+      "type": "object",
+      "description": "A specific geographical location",
+      "properties": {
+        "name": {"type": "string"},
+        "coordinates": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "longitude": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            },
+            "elevation": {
+              "type": "number",
+              "description": "Elevation in meters (for mountains, etc.)"
+            },
+            "accuracy": {
+              "type": "string",
+              "enum": ["exact", "approximate", "general_area", "speculative"],
+              "description": "Confidence level of coordinates"
+            }
+          },
+          "required": ["latitude", "longitude"]
+        },
+        "modernName": {"type": "string"},
+        "ancientName": {"type": "string"},
+        "type": {
+          "type": "string",
+          "enum": ["temple", "mountain", "river", "city", "battlefield", "sacred_grove", "cave", "island", "region"],
+          "description": "Type of location"
+        },
+        "description": {"type": "string"},
+        "significance": {"type": "string"}
+      },
+      "required": ["name"]
+    },
+
+    "temporalData": {
+      "type": "object",
+      "description": "Temporal/chronological information",
+      "properties": {
+        "mythologicalDate": {
+          "$ref": "#/definitions/dateRange",
+          "description": "When the entity appears in mythological narratives (story time)"
+        },
+        "historicalDate": {
+          "$ref": "#/definitions/dateRange",
+          "description": "When the entity/belief emerged historically (real time)"
+        },
+        "firstAttestation": {
+          "$ref": "#/definitions/attestation",
+          "description": "Earliest known written or archaeological reference"
+        },
+        "peakPopularity": {
+          "$ref": "#/definitions/dateRange",
+          "description": "When worship/belief was most widespread"
+        },
+        "literaryReferences": {
+          "type": "array",
+          "description": "Chronological list of major literary references",
+          "items": {
+            "type": "object",
+            "properties": {
+              "work": {"type": "string"},
+              "author": {"type": "string"},
+              "date": {"$ref": "#/definitions/approximateDate"},
+              "significance": {"type": "string"}
+            }
+          }
+        },
+        "timelineVisualization": {
+          "type": "object",
+          "description": "Data for timeline visualization",
+          "properties": {
+            "displayPeriod": {
+              "$ref": "#/definitions/dateRange",
+              "description": "Primary period to show on timeline"
+            },
+            "relatedEvents": {
+              "type": "array",
+              "description": "Contemporary events for context",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "event": {"type": "string"},
+                  "date": {"$ref": "#/definitions/approximateDate"}
+                }
+              }
+            }
+          }
+        },
+        "culturalPeriod": {
+          "type": "string",
+          "description": "Cultural/historical period classification",
+          "examples": ["Bronze Age", "Iron Age", "Classical Period", "Hellenistic Period", "Viking Age", "Vedic Period"]
+        }
+      }
+    },
+
+    "dateRange": {
+      "type": "object",
+      "description": "A range of dates (supports BCE/CE)",
+      "properties": {
+        "start": {"$ref": "#/definitions/approximateDate"},
+        "end": {"$ref": "#/definitions/approximateDate"},
+        "display": {
+          "type": "string",
+          "description": "Human-readable date range",
+          "examples": ["c. 800-500 BCE", "3rd millennium BCE", "Viking Age (793-1066 CE)"]
+        }
+      }
+    },
+
+    "approximateDate": {
+      "type": "object",
+      "description": "A date with uncertainty",
+      "properties": {
+        "year": {
+          "type": "integer",
+          "description": "Year (negative for BCE)"
+        },
+        "month": {"type": "integer", "minimum": 1, "maximum": 12},
+        "day": {"type": "integer", "minimum": 1, "maximum": 31},
+        "circa": {
+          "type": "boolean",
+          "description": "Approximate date (c.)",
+          "default": false
+        },
+        "uncertainty": {
+          "type": "integer",
+          "description": "Uncertainty range in years (+/-)",
+          "examples": [50, 100, 500]
+        },
+        "display": {
+          "type": "string",
+          "description": "Human-readable date",
+          "examples": ["c. 750 BCE", "8th century BCE", "ca. 1200-1100 BCE"]
+        }
+      },
+      "required": ["year"]
+    },
+
+    "attestation": {
+      "type": "object",
+      "description": "First known reference to entity",
+      "properties": {
+        "date": {"$ref": "#/definitions/approximateDate"},
+        "source": {"type": "string"},
+        "type": {
+          "type": "string",
+          "enum": ["literary", "archaeological", "epigraphic", "iconographic", "oral_tradition"]
+        },
+        "location": {"type": "string"},
+        "description": {"type": "string"},
+        "confidence": {
+          "type": "string",
+          "enum": ["certain", "probable", "possible", "speculative"]
+        }
+      }
+    },
+
+    "culturalData": {
+      "type": "object",
+      "description": "Cultural and sociological context",
+      "properties": {
+        "worshipPractices": {
+          "type": "array",
+          "description": "How entity was worshipped/honored",
+          "items": {"type": "string"}
+        },
+        "festivals": {
+          "type": "array",
+          "description": "Associated festivals and celebrations",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "timing": {"type": "string"},
+              "description": {"type": "string"}
+            }
+          }
+        },
+        "socialRole": {
+          "type": "string",
+          "description": "Role in society",
+          "examples": ["Patron deity of warriors", "Symbol of royal authority", "Agricultural fertility figure"]
+        },
+        "demographicAppeal": {
+          "type": "array",
+          "description": "Which groups primarily venerated this entity",
+          "items": {"type": "string"},
+          "examples": [["warriors", "kings"], ["farmers", "women"], ["priests", "scribes"]]
+        },
+        "taboos": {
+          "type": "array",
+          "description": "Cultural prohibitions related to entity",
+          "items": {"type": "string"}
+        },
+        "modernLegacy": {
+          "type": "object",
+          "properties": {
+            "continuingPractices": {"type": "string"},
+            "culturalImpact": {"type": "string"},
+            "modernAdaptations": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+
+    "metaphysicalProperties": {
+      "type": "object",
+      "description": "Esoteric and metaphysical associations",
+      "properties": {
+        "primaryElement": {
+          "type": "string",
+          "enum": ["fire", "water", "earth", "air", "aether", "wood", "metal"]
+        },
+        "secondaryElements": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "planets": {
+          "type": "array",
+          "description": "Associated celestial bodies",
+          "items": {
+            "type": "string",
+            "enum": ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"]
+          }
+        },
+        "zodiac": {
+          "type": "array",
+          "description": "Associated zodiac signs",
+          "items": {"type": "string"}
+        },
+        "sefirot": {
+          "type": "array",
+          "description": "Associated Kabbalistic Sefirot",
+          "items": {
+            "type": "string",
+            "enum": ["keter", "chokmah", "binah", "chesed", "gevurah", "tiferet", "netzach", "hod", "yesod", "malkhut", "daat"]
+          }
+        },
+        "world": {
+          "type": "string",
+          "description": "Kabbalistic world",
+          "enum": ["atziluth", "beriah", "yetzirah", "assiah"]
+        },
+        "chakras": {
+          "type": "array",
+          "description": "Associated chakras",
+          "items": {
+            "type": "string",
+            "enum": ["muladhara", "svadhisthana", "manipura", "anahata", "vishuddha", "ajna", "sahasrara"]
+          }
+        },
+        "yinYang": {
+          "type": "string",
+          "enum": ["yang", "yin", "balanced"]
+        },
+        "polarity": {
+          "type": "string",
+          "enum": ["positive", "negative", "neutral"]
+        },
+        "numerology": {
+          "type": "object",
+          "properties": {
+            "sacredNumber": {"type": "integer"},
+            "gematria": {"type": "integer"},
+            "significance": {"type": "string"}
+          }
+        }
+      }
+    },
+
+    "archetypeScore": {
+      "type": "object",
+      "properties": {
+        "category": {"type": "string"},
+        "score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "strength": {
+          "type": "string",
+          "enum": ["weak", "moderate", "strong"]
+        },
+        "analysis": {"type": "string"}
+      },
+      "required": ["category", "score"]
+    },
+
+    "entityReference": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "relationship": {"type": "string"}
+      },
+      "required": ["id", "name"]
+    },
+
+    "relatedEntities": {
+      "type": "object",
+      "properties": {
+        "deities": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/entityReference"}
+        },
+        "items": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/entityReference"}
+        },
+        "places": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/entityReference"}
+        },
+        "concepts": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/entityReference"}
+        },
+        "creatures": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/entityReference"}
+        },
+        "heroes": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/entityReference"}
+        },
+        "magic": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/entityReference"}
+        }
+      }
+    },
+
+    "source": {
+      "type": "object",
+      "properties": {
+        "title": {"type": "string"},
+        "author": {"type": "string"},
+        "date": {"$ref": "#/definitions/approximateDate"},
+        "type": {
+          "type": "string",
+          "enum": ["primary", "secondary", "archaeological"]
+        },
+        "relevance": {
+          "type": "string",
+          "enum": ["comprehensive", "significant", "minor"]
+        },
+        "url": {"type": "string", "format": "uri"},
+        "citation": {"type": "string"}
+      },
+      "required": ["title", "type"]
+    },
+
+    "mediaReferences": {
+      "type": "object",
+      "description": "Images, videos, and other media",
+      "properties": {
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "url": {"type": "string"},
+              "caption": {"type": "string"},
+              "credit": {"type": "string"},
+              "license": {"type": "string"}
+            }
+          }
+        },
+        "diagrams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {"type": "string"},
+              "path": {"type": "string"},
+              "description": {"type": "string"}
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "type": "object",
+  "allOf": [{"$ref": "#/definitions/entityBase"}]
+}

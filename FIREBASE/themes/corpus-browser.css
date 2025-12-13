@@ -1,0 +1,358 @@
+/**
+ * GitHub Repository Browser Styles
+ * For corpus search dynamic repository exploration
+ */
+
+.github-browser {
+    background: rgba(var(--color-surface-rgb, 30, 30, 50), 0.8);
+    border-radius: var(--radius-xl, 16px);
+    padding: var(--spacing-xl, 24px);
+    margin: var(--spacing-xl, 24px) 0;
+    border: 2px solid var(--color-border, rgba(255, 255, 255, 0.1));
+}
+
+.browser-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md, 16px);
+    margin-bottom: var(--spacing-lg, 20px);
+}
+
+.browser-header h3 {
+    margin: 0;
+    color: var(--color-primary, #9b59b6);
+    font-size: var(--font-size-xl, 1.25rem);
+}
+
+.browser-controls {
+    display: flex;
+    gap: var(--spacing-sm, 8px);
+}
+
+.repo-input {
+    flex: 1;
+    padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
+    border: 2px solid var(--color-border, rgba(255, 255, 255, 0.2));
+    border-radius: var(--radius-md, 8px);
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--color-text-primary, #fff);
+    font-size: var(--font-size-md, 1rem);
+}
+
+.repo-input:focus {
+    outline: none;
+    border-color: var(--color-primary, #9b59b6);
+    box-shadow: 0 0 10px rgba(155, 89, 182, 0.3);
+}
+
+.repo-input::placeholder {
+    color: var(--color-text-secondary, rgba(255, 255, 255, 0.5));
+}
+
+.browse-btn {
+    padding: var(--spacing-sm, 8px) var(--spacing-lg, 20px);
+    background: linear-gradient(135deg, var(--color-primary, #9b59b6), var(--color-secondary, #8e44ad));
+    color: white;
+    border: none;
+    border-radius: var(--radius-md, 8px);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.browse-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(155, 89, 182, 0.4);
+}
+
+.browse-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Filters */
+.browser-filters {
+    display: flex;
+    gap: var(--spacing-lg, 20px);
+    margin-bottom: var(--spacing-md, 16px);
+    flex-wrap: wrap;
+}
+
+.browser-filters label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm, 8px);
+    color: var(--color-text-secondary, rgba(255, 255, 255, 0.7));
+    font-size: var(--font-size-sm, 0.875rem);
+}
+
+.browser-filters input {
+    padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.2));
+    border-radius: var(--radius-sm, 4px);
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--color-text-primary, #fff);
+    width: 150px;
+}
+
+/* Loading state */
+.browser-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md, 16px);
+    padding: var(--spacing-xl, 24px);
+    color: var(--color-text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.browser-loading.hidden {
+    display: none;
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(155, 89, 182, 0.3);
+    border-top-color: var(--color-primary, #9b59b6);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Error state */
+.browser-error {
+    background: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-radius: var(--radius-md, 8px);
+    padding: var(--spacing-md, 16px);
+    color: #e74c3c;
+    margin-bottom: var(--spacing-md, 16px);
+}
+
+.browser-error.hidden {
+    display: none;
+}
+
+/* File tree */
+.browser-tree {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    border-radius: var(--radius-md, 8px);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.repo-info {
+    padding: var(--spacing-md, 16px);
+    background: rgba(155, 89, 182, 0.1);
+    border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.repo-info strong {
+    color: var(--color-primary, #9b59b6);
+}
+
+.file-count {
+    color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+    font-size: var(--font-size-sm, 0.875rem);
+}
+
+/* Folder structure */
+.tree-folder {
+    border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.05));
+}
+
+.tree-folder.collapsed .folder-contents {
+    display: none;
+}
+
+.folder-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm, 8px);
+    padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.folder-header:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.folder-icon {
+    font-size: 1.2em;
+}
+
+.folder-name {
+    flex: 1;
+    font-weight: 500;
+    color: var(--color-text-primary, #fff);
+}
+
+.folder-count {
+    color: var(--color-text-secondary, rgba(255, 255, 255, 0.5));
+    font-size: var(--font-size-sm, 0.875rem);
+}
+
+.select-folder-btn {
+    padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+    background: rgba(155, 89, 182, 0.2);
+    border: 1px solid rgba(155, 89, 182, 0.3);
+    border-radius: var(--radius-sm, 4px);
+    color: var(--color-primary, #9b59b6);
+    font-size: var(--font-size-xs, 0.75rem);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.select-folder-btn:hover {
+    background: rgba(155, 89, 182, 0.3);
+}
+
+.folder-contents {
+    padding-left: var(--spacing-lg, 20px);
+}
+
+/* File items */
+.tree-file {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm, 8px);
+    padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
+    transition: background 0.2s ease;
+    cursor: pointer;
+}
+
+.tree-file:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tree-file.selected {
+    background: rgba(155, 89, 182, 0.15);
+    border-left: 3px solid var(--color-primary, #9b59b6);
+}
+
+.file-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary, #9b59b6);
+}
+
+.file-icon {
+    font-size: 1em;
+}
+
+.file-name {
+    flex: 1;
+    color: var(--color-text-primary, #fff);
+}
+
+.file-size {
+    color: var(--color-text-secondary, rgba(255, 255, 255, 0.5));
+    font-size: var(--font-size-sm, 0.875rem);
+}
+
+/* Browser actions */
+.browser-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md, 16px);
+    padding: var(--spacing-md, 16px) 0;
+    border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    margin-top: var(--spacing-md, 16px);
+}
+
+.action-btn {
+    padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.2));
+    border-radius: var(--radius-md, 8px);
+    color: var(--color-text-primary, #fff);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#selection-count {
+    color: var(--color-primary, #9b59b6);
+    font-weight: 500;
+}
+
+/* Cache info */
+.cache-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md, 16px);
+    padding-top: var(--spacing-md, 16px);
+    border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+    font-size: var(--font-size-sm, 0.875rem);
+}
+
+.small-btn {
+    padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+    background: transparent;
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.2));
+    border-radius: var(--radius-sm, 4px);
+    color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+    cursor: pointer;
+    font-size: var(--font-size-xs, 0.75rem);
+}
+
+.small-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Scrollbar styling */
+.browser-tree::-webkit-scrollbar {
+    width: 8px;
+}
+
+.browser-tree::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.browser-tree::-webkit-scrollbar-thumb {
+    background: rgba(155, 89, 182, 0.5);
+    border-radius: 4px;
+}
+
+.browser-tree::-webkit-scrollbar-thumb:hover {
+    background: rgba(155, 89, 182, 0.7);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .browser-controls {
+        flex-direction: column;
+    }
+
+    .browser-filters {
+        flex-direction: column;
+    }
+
+    .browser-filters input {
+        width: 100%;
+    }
+
+    .browser-actions {
+        flex-wrap: wrap;
+    }
+}

@@ -1,550 +1,511 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Yoruba/African Mythology - World Mythos Explorer</title>
-<link href="../../themes/theme-base.css" rel="stylesheet"/>
-<link href="../../styles.css" rel="stylesheet"/>
-<link href="../../themes/corpus-links.css" rel="stylesheet"/>
-<link rel="stylesheet" href="../../themes/smart-links.css">
-<script defer src="../../themes/smart-links.js"></script>
-<script defer src="../../themes/theme-picker.js"></script>
-<script defer src="../../themes/theme-animations.js"></script>
-<style>
-    /* ============================================
-       YORUBA MYTHOLOGY - African Theme
-       Earth tones with vibrant reds and yellows
-       ============================================ */
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yoruba Mythology - World Mythos Explorer</title>
 
-    :root {
-        --yoruba-primary: #B8860B;
-        --yoruba-secondary: #CD5C5C;
-        --yoruba-earth: #8B4513;
-        --yoruba-gold: #FFD700;
-        --yoruba-red: #DC143C;
-    }
+    <!-- Base Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../themes/smart-links.css">
 
-    /* Breadcrumb - Full-width bar */
-    .breadcrumb {
-        position: sticky;
-        top: 60px;
-        left: 0;
-        width: 100%;
-        z-index: 999;
-        background: rgba(var(--color-surface-rgb), 0.9);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        padding: var(--spacing-xs) var(--spacing-lg);
-        font-size: var(--font-size-sm);
-        color: var(--color-text-secondary);
-        border-bottom: 1px solid rgba(184, 134, 11, 0.3);
-    }
+    <!-- Firebase Theme System -->
+    <link rel="stylesheet" href="../../FIREBASE/css/firebase-themes.css">
 
-    .breadcrumb a {
-        color: var(--yoruba-primary);
-        text-decoration: none;
-        transition: all var(--transition-fast);
-    }
+    <!-- Theme Scripts -->
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script defer src="../../themes/smart-links.js"></script>
 
-    .breadcrumb a:hover {
-        color: var(--yoruba-gold);
-        text-decoration: underline;
-    }
+    <!-- Submission Link System -->
+    <script src="../../js/submission-context.js"></script>
+    <script src="../../js/components/submission-link.js"></script>
+    <link rel="stylesheet" href="../../css/submission-link.css">
 
-    /* Hero Section - African Sunset Theme */
-    .hero-section {
-        background: linear-gradient(135deg,
-            rgba(184, 134, 11, 0.85),
-            rgba(205, 92, 92, 0.85),
-            rgba(139, 69, 19, 0.85));
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 2px solid var(--yoruba-gold);
-        color: white;
-        padding: 3rem 2rem;
-        text-align: center;
-        border-radius: var(--radius-xl);
-        margin-bottom: 2rem;
-        box-shadow: var(--shadow-xl);
-    }
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../css/user-auth.css">
+    <script src="../../js/firebase-auth.js"></script>
+    <script src="../../js/auth-guard.js"></script>
+    <script src="../../js/components/google-signin-button.js"></script>
 
-    .hero-icon-display {
-        font-size: 5rem;
-        margin-bottom: var(--spacing-md);
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-    }
+    <style>
+        /* ============================================
+           FIREBASE-ENHANCED MYTHOLOGY INDEX TEMPLATE
+           Combines existing styles with Firebase integration
+           ============================================ */
 
-    .hero-description {
-        font-size: 1.2rem;
-        max-width: 800px;
-        margin: 1rem auto;
-        line-height: 1.7;
-    }
-
-    /* Glass Card */
-    .glass-card {
-        background: rgba(var(--color-surface-rgb), 0.6);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(184, 134, 11, 0.3);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-xl);
-        margin: 2rem 0;
-        box-shadow: var(--shadow-lg);
-        transition: all var(--transition-base, 0.3s ease);
-    }
-
-    .glass-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-xl), 0 0 20px rgba(184, 134, 11, 0.2);
-        border-color: rgba(184, 134, 11, 0.5);
-    }
-
-    /* Grid Layouts */
-    .deity-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: var(--spacing-lg);
-        margin: var(--spacing-lg) 0;
-    }
-
-    .grid-2col {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: var(--spacing-lg);
-    }
-
-    /* Deity Cards */
-    .deity-card {
-        background: rgba(184, 134, 11, 0.08);
-        border: 2px solid rgba(184, 134, 11, 0.3);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-lg);
-        transition: all var(--transition-base, 0.3s ease);
-        cursor: pointer;
-        text-decoration: none;
-        display: block;
-        color: inherit;
-    }
-
-    .deity-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-lg), 0 0 15px rgba(184, 134, 11, 0.25);
-        border-color: var(--yoruba-gold);
-        background: rgba(184, 134, 11, 0.15);
-        text-decoration: none;
-    }
-
-    .deity-card h3 {
-        color: var(--yoruba-primary);
-        margin-top: 0.5rem;
-    }
-
-    .deity-card p {
-        line-height: 1.7;
-    }
-
-    .deity-icon {
-        font-size: 2.5rem;
-        text-align: center;
-    }
-
-    /* Section Headers */
-    .section-header {
-        color: var(--yoruba-primary);
-        margin-bottom: var(--spacing-lg);
-    }
-
-    /* Orisha Showcase */
-    .orisha-showcase {
-        background: linear-gradient(135deg, rgba(184, 134, 11, 0.1), rgba(205, 92, 92, 0.1));
-        border-left: 4px solid var(--yoruba-gold);
-        padding: var(--spacing-lg);
-        margin: var(--spacing-lg) 0;
-        border-radius: var(--radius-md);
-    }
-
-    .orisha-showcase h3 {
-        color: var(--yoruba-primary);
-        margin-top: 0;
-    }
-
-    /* Styled List */
-    .styled-list {
-        line-height: 1.8;
-        padding-left: var(--spacing-lg);
-    }
-
-    .styled-list li {
-        margin-bottom: var(--spacing-sm);
-    }
-
-    /* Living Tradition Box */
-    .living-tradition {
-        background: rgba(220, 20, 60, 0.1);
-        border: 2px solid var(--yoruba-red);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-xl);
-        margin-bottom: var(--spacing-xl);
-    }
-
-    /* Heading visibility improvements */
-    h2, h3 {
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .interlink-header {
-        color: var(--color-text-primary);
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .grid-2col {
-            grid-template-columns: 1fr;
+        /* Breadcrumb - Full-width bar attached below header */
+        .breadcrumb {
+            position: sticky;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(var(--color-surface-rgb), 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: var(--spacing-xs) var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
         }
 
-        .deity-grid {
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
         }
 
+        .breadcrumb a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        /* Hero Section - Modern Glass Styling */
         .hero-section {
-            padding: 2rem 1rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
         }
 
         .hero-icon-display {
-            font-size: 3rem;
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
         }
-    }
-</style>
+
+        .hero-description {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 1rem auto;
+            line-height: 1.7;
+        }
+
+        /* Glass Card - With Hover Animation */
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+            border-color: rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        /* Firebase Content Sections */
+        .firebase-section {
+            margin: 3rem 0;
+        }
+
+        .section-header {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        /* Grid Layouts */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .deity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        /* Loading States */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            gap: var(--spacing-md);
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--theme-primary, var(--color-primary));
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        /* Static Content (preserved from original) */
+        .static-content {
+            margin: 2rem 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .deity-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .hero-icon-display {
+                font-size: 3rem;
+            }
+
+            .breadcrumb {
+                font-size: var(--font-size-xs);
+                padding: var(--spacing-xs) var(--spacing-md);
+                top: 50px;
+            }
+        }
+    </style>
 </head>
-<body>
-<!-- Theme Picker Container -->
-<div id="theme-picker"></div>
-<div id="theme-picker-container"></div>
+<body data-theme="yoruba">
+    <!-- Theme Picker Container -->
+    <div id="theme-picker"></div>
+    <div id="theme-picker-container"></div>
 
-<header>
-    <div class="header-content">
-        <h1>West African / Yoruba Mythology</h1>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../mythos/index.html">Home</a> /
-    <span>Yoruba Tradition</span>
-</nav>
-<main>
-<div class="hero-section">
-<div class="hero-icon-display">Ase</div>
-<h2>The Way of the Orisha</h2>
-<p class="hero-description">
-    Explore one of the world's most vibrant and enduring spiritual traditions, originating among the Yoruba people of West Africa (present-day Nigeria, Benin, and Togo). Yoruba religion centers on the worship of the Orisha - divine spirits who serve as intermediaries between humanity and Olodumare, the Supreme Creator. This ancient tradition has spread across the globe through the African diaspora, flourishing as Santeria, Candomble, Vodou, and other syncretic faiths.
-</p>
-</div>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>👑 Yoruba Mythology</h1>
+            <div id="user-auth-nav"></div>
+        </div>
+    </header>
 
-<div class="living-tradition">
-<h3 style="color: var(--yoruba-red); margin-top: 0;">Living Tradition</h3>
-<p style="line-height: var(--leading-relaxed);">
-<strong>Important:</strong> Yoruba religion is a living spiritual tradition practiced by millions of people worldwide - from Nigeria and West Africa to Brazil, Cuba, Haiti, Trinidad, and diaspora communities across the Americas. This content is presented with deep respect for practitioners and their sacred traditions. The information here draws from ethnographic sources, oral traditions, and scholarly research, and should not be considered a substitute for guidance from initiated priests (Babalawo/Iyanifa) and elders.
-</p>
-</div>
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../mythos/index.html">Home</a> →
+        <span aria-current="page">Yoruba Mythology</span>
+    </nav>
 
-<section style="margin-top: var(--spacing-xl);">
-<h2 class="section-header">Core Concepts</h2>
-<div class="deity-grid">
-<div class="glass-card">
-<div class="deity-icon">Olodumare</div>
-<h3>Olodumare - The Supreme Being</h3>
-<p>The almighty, omnipotent creator god who exists beyond the reach of direct human worship. Olodumare (also called Olorun, "Owner of Heaven") created the universe, delegating authority to the Orisha. Unlike the Orisha, Olodumare has no shrines, priests, or direct rituals - approached only through intermediaries.</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">Ase</div>
-<h3>Ase - The Life Force</h3>
-<p>The vital cosmic energy that flows through all things - the power to make things happen, the authority to create change. Ase is found in blood, breath, nature, words, and especially in the Orisha. Priests channel ase through ritual, sacrifice, and prayer. "Ase!" is spoken to affirm and empower intentions.</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">Ori</div>
-<h3>Ori - Personal Destiny</h3>
-<p>The spiritual head/consciousness that each person chooses before birth. Ori represents one's destiny, inner god, and personal divinity. Before incarnation, each soul kneels before Olodumare and selects their Ori - their fate and character. Honoring one's Ori is essential to fulfilling one's purpose.</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">Ifa</div>
-<h3>Ifa - Sacred Divination</h3>
-<p>The complex divination system through which the wisdom of Orunmila (Orisha of wisdom) is accessed. Babalawo (father of secrets) cast palm nuts or opele chains to determine odu (sacred verses) that provide guidance. Ifa contains 256 odu, each with thousands of associated verses, proverbs, and stories.</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">Orun</div>
-<h3>Orun and Aye - Heaven and Earth</h3>
-<p>The cosmos is divided between Orun (the invisible spiritual realm of ancestors and Orisha) and Aye (the visible physical world). The Orisha and ancestors constantly interact between these realms. Death is a transition to Orun; reincarnation within the family line continues the cycle.</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">Egun</div>
-<h3>Egungun - Ancestral Veneration</h3>
-<p>The ancestors (Egun) are honored as intermediaries who continue to guide and protect the living. Annual Egungun festivals feature masquerades representing returned ancestors. Maintaining the ancestral altar and offering prayers keeps the connection between the living and the dead.</p>
-</div>
-</div>
-</section>
-
-<section style="margin-top: var(--spacing-xl);">
-<h2 class="section-header">The Orisha - Divine Spirits</h2>
-
-<div class="orisha-showcase">
-<h3>What Are the Orisha?</h3>
-<p style="line-height: var(--leading-relaxed); margin-bottom: var(--spacing-md);">
-The Orisha are divine spirits who serve as intermediaries between humanity and Olodumare. Some were once human beings who achieved divine status; others are primordial forces of nature. Each Orisha governs specific domains, has characteristic colors, numbers, foods, and receives particular offerings. Devotees may be "claimed" by an Orisha and undergo initiation to become priests (Olorisha). There are said to be 401 Orisha, though a smaller number are widely venerated.
-</p>
-<div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin-top: var(--spacing-md);">
-<a class="btn btn-secondary" href="deities/index.html">Browse All Orisha</a>
-<a class="btn btn-secondary" href="deities/ogun.html">Ogun</a>
-<a class="btn btn-secondary" href="deities/shango.html">Shango</a>
-<a class="btn btn-secondary" href="deities/yemoja.html">Yemoja</a>
-<a class="btn btn-secondary" href="deities/oshun.html">Oshun</a>
-<a class="btn btn-secondary" href="deities/eshu.html">Eshu</a>
-</div>
-</div>
-
-<div class="deity-grid">
-<a class="deity-card" href="deities/ogun.html" style="text-decoration: none;">
-<div class="deity-icon">Ogun</div>
-<h3>Ogun - Iron and War</h3>
-<p>Fierce warrior Orisha of iron, metalwork, and labor. Patron of blacksmiths, hunters, soldiers, and all who work with metal. Ogun cleared the path for the Orisha to descend to earth.</p>
-</a>
-
-<a class="deity-card" href="deities/shango.html" style="text-decoration: none;">
-<div class="deity-icon">Shango</div>
-<h3>Shango - Thunder and Justice</h3>
-<p>Mighty Orisha of thunder, lightning, fire, and justice. Once a powerful king of Oyo, Shango became divine. His double-headed axe symbolizes his power over storms.</p>
-</a>
-
-<a class="deity-card" href="deities/yemoja.html" style="text-decoration: none;">
-<div class="deity-icon">Yemoja</div>
-<h3>Yemoja - Mother of Waters</h3>
-<p>Great Mother Orisha of the ocean and rivers, fertility, and motherhood. Yemoja nurtures and protects, especially women and children. Mother of many Orisha.</p>
-</a>
-
-<a class="deity-card" href="deities/oshun.html" style="text-decoration: none;">
-<div class="deity-icon">Oshun</div>
-<h3>Oshun - Rivers and Love</h3>
-<p>Beautiful Orisha of fresh water, love, fertility, and prosperity. Associated with the Osun River in Nigeria. Her sweetness masks powerful depths.</p>
-</a>
-
-<a class="deity-card" href="deities/eshu.html" style="text-decoration: none;">
-<div class="deity-icon">Eshu</div>
-<h3>Eshu - Crossroads Messenger</h3>
-<p>Trickster Orisha of crossroads, communication, and chance. Divine messenger between humans and Orisha. No ritual begins without first honoring Eshu.</p>
-</a>
-
-<div class="deity-card" style="text-decoration: none;">
-<div class="deity-icon">Obatala</div>
-<h3>Obatala - Creation and Wisdom</h3>
-<p>King of the white cloth, Orisha of creation, purity, and wisdom. Obatala molded human bodies from clay while Olodumare breathed life into them.</p>
-</div>
-
-<div class="deity-card" style="text-decoration: none;">
-<div class="deity-icon">Orunmila</div>
-<h3>Orunmila - Wisdom and Divination</h3>
-<p>Orisha of wisdom, knowledge, and the Ifa divination system. Orunmila witnessed creation and knows all destinies. His priests (Babalawo) interpret his wisdom.</p>
-</div>
-
-<div class="deity-card" style="text-decoration: none;">
-<div class="deity-icon">Oya</div>
-<h3>Oya - Wind and Transformation</h3>
-<p>Fierce warrior Orisha of wind, storms, and transformation. Guardian of the cemetery and guide of souls. Wife of Shango, she commands lightning and tempests.</p>
-</div>
-</div>
-</section>
-
-<section style="margin-top: var(--spacing-xl);">
-<h2 class="section-header">Diaspora Traditions</h2>
-<p style="line-height: var(--leading-relaxed); margin-bottom: var(--spacing-lg);">
-The transatlantic slave trade forcibly brought millions of Yoruba people to the Americas. Despite horrific oppression, they preserved their spiritual traditions by syncretizing Orisha with Catholic saints, creating vibrant new religions that continue to thrive:
-</p>
-<div class="grid-2col">
-<div class="glass-card">
-<h3 style="color: var(--yoruba-primary);">Santeria / Lucumi (Cuba)</h3>
-<p style="line-height: var(--leading-relaxed);">Also called La Regla de Ocha. The Orisha were syncretized with Catholic saints (Shango = Santa Barbara, Yemoja = Our Lady of Regla). Rich tradition of drumming, dance, and animal sacrifice. Spread to the USA, especially Miami and New York.</p>
-</div>
-<div class="glass-card">
-<h3 style="color: var(--yoruba-primary);">Candomble (Brazil)</h3>
-<p style="line-height: var(--leading-relaxed);">Preserved much Yoruba language and practice. Orisha are called Orixa. Major centers in Bahia (Salvador). Various "nations" preserve traditions from different African ethnic groups. Elaborate initiation rituals and yearly festivals.</p>
-</div>
-<div class="glass-card">
-<h3 style="color: var(--yoruba-primary);">Vodou (Haiti)</h3>
-<p style="line-height: var(--leading-relaxed);">Blends Yoruba, Fon (Dahomey), and Kongo traditions with Catholicism. Orisha are called Lwa/Loa. Unique development under French colonial oppression. Central role in Haitian independence and culture.</p>
-</div>
-<div class="glass-card">
-<h3 style="color: var(--yoruba-primary);">Trinidad Orisha / Shango Baptist</h3>
-<p style="line-height: var(--leading-relaxed);">Syncretic tradition blending Yoruba religion with Spiritual Baptist Christianity. Feasts, possession, and drumming ceremonies. Recognition as an official religion in Trinidad and Tobago.</p>
-</div>
-</div>
-</section>
-
-<section style="margin-top: var(--spacing-xl);">
-<h2 class="section-header">Explore Yoruba Mythology</h2>
-<div class="deity-grid">
-<a class="deity-card" href="deities/index.html" style="text-decoration: none;">
-<div class="deity-icon">Orisha</div>
-<h3>Deities / Orisha</h3>
-<p>Ogun, Shango, Yemoja, Oshun, Eshu, Obatala, Orunmila, Oya, and more divine spirits worthy of veneration.</p>
-</a>
-
-<div class="deity-card" style="text-decoration: none;">
-<div class="deity-icon">Odu</div>
-<h3>Sacred Stories (Pataki)</h3>
-<p>Mythological narratives that teach moral lessons and explain the nature of the Orisha and their relationships.</p>
-</div>
-
-<div class="deity-card" style="text-decoration: none;">
-<div class="deity-icon">Ebo</div>
-<h3>Rituals and Offerings</h3>
-<p>Sacred ceremonies, animal sacrifice, offerings (ebo), divination, initiation rites, and ancestor veneration.</p>
-</div>
-
-<div class="deity-card" style="text-decoration: none;">
-<div class="deity-icon">Ewe</div>
-<h3>Sacred Plants (Ewe)</h3>
-<p>Herbs and plants used in healing, purification, and ritual. Each Orisha has associated plants with spiritual properties.</p>
-</div>
-</div>
-</section>
-
-<section style="margin-top: var(--spacing-xl);">
-<h2 class="section-header">Sources and Further Study</h2>
-<ul class="styled-list">
-<li><strong>Oral Tradition:</strong> The Ifa corpus, transmitted by Babalawo for millennia</li>
-<li><strong>Ethnographic Studies:</strong> Works by William Bascom, Pierre Verger, J. Omosade Awolalu</li>
-<li><strong>Wande Abimbola:</strong> Nigerian scholar and Babalawo, major authority on Ifa</li>
-<li><strong>Robert Farris Thompson:</strong> "Flash of the Spirit" - African influence in Americas</li>
-<li><strong>Living Practitioners:</strong> Initiated priests and elders in Nigeria, Cuba, Brazil, Haiti</li>
-</ul>
-</section>
-
-<!-- Interlink Panel Section -->
-<section class="interlink-panel" style="margin-top: 3rem;">
-    <h3 class="interlink-header">
-        <span class="interlink-icon">Links</span>
-        Related Across the Mythos
-    </h3>
-
-    <div class="interlink-grid">
-        <!-- Archetype Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Core Archetypes</div>
-            <a href="../../archetypes/celestial/index.html" class="archetype-link-card">
-                <div class="archetype-badge">DIVINE INTERMEDIARY</div>
-                <p class="archetype-context">The Orisha serve as intermediaries between humanity and the Supreme Being, a pattern found across many traditions.</p>
-                <span class="see-parallels">See parallels: Angels, Bodhisattvas, Saints</span>
-            </a>
+    <main>
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="hero-icon-display">👑</div>
+            <h2>Yoruba Mythology</h2>
+            <p class="hero-description">
+                Discover the powerful Orishas and divine wisdom of Yoruba tradition. From Olodumare's creation to the sacred crossroads, explore the rich spiritual heritage that spread across the Atlantic to the Americas.
+            </p>
         </div>
 
-        <!-- Sacred Items Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Sacred Elements</div>
-            <a href="../../index.html" class="item-link-card">
-                <div class="item-icon">Ase</div>
-                <div class="item-info">
-                    <h4>Ase - Vital Force</h4>
-                    <p class="item-type">Divine Energy</p>
-                    <p class="item-context">The power to create change</p>
+        <!-- ============================================
+             FIREBASE-LOADED DYNAMIC CONTENT SECTIONS
+             These sections load from Firestore
+             ============================================ -->
+
+        <!-- Deities Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">⚡ Deities</h2>
+            <div id="deities-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading deities from Firebase...</p>
+            </div>
+            <div id="deities-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Heroes Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🦸 Heroes & Legendary Mortals</h2>
+            <div id="heroes-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading heroes from Firebase...</p>
+            </div>
+            <div id="heroes-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Creatures Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🐉 Creatures & Monsters</h2>
+            <div id="creatures-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading creatures from Firebase...</p>
+            </div>
+            <div id="creatures-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Cosmology Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🌌 Cosmology & Sacred Places</h2>
+            <div id="cosmology-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading cosmology from Firebase...</p>
+            </div>
+            <div id="cosmology-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Texts Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">📚 Sacred Texts</h2>
+            <div id="texts-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading texts from Firebase...</p>
+            </div>
+            <div id="texts-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Herbs Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🌿 Sacred Plants & Herbalism</h2>
+            <div id="herbs-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading herbs from Firebase...</p>
+            </div>
+            <div id="herbs-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Rituals Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🔮 Rituals & Practices</h2>
+            <div id="rituals-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading rituals from Firebase...</p>
+            </div>
+            <div id="rituals-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Symbols Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🔱 Sacred Symbols</h2>
+            <div id="symbols-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading symbols from Firebase...</p>
+            </div>
+            <div id="symbols-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Concepts Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">💭 Mystical Concepts</h2>
+            <div id="concepts-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading concepts from Firebase...</p>
+            </div>
+            <div id="concepts-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Myths Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">📖 Myths & Legends</h2>
+            <div id="myths-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading myths from Firebase...</p>
+            </div>
+            <div id="myths-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- ============================================
+             STATIC CUSTOM CONTENT (PRESERVED)
+             Add any mythology-specific static content here
+             ============================================ -->
+        <div class="static-content">
+            <!-- Add custom static content here -->
+        </div>
+
+        <!-- Cross-Cultural Parallels Section -->
+        <section class="interlink-panel" style="margin-top: var(--spacing-xl, 3rem);">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🌍</span>
+                Cross-Cultural Parallels
+            </h3>
+            <p style="margin-bottom: var(--spacing-lg); color: var(--color-text-secondary);">
+                Explore how Yoruba mythology connects with other world traditions through shared themes and archetypes.
+            </p>
+            <div class="parallel-grid">
+                <!-- Parallel mythology links will be added here -->
+            </div>
+        </section>
+
+        <!-- Related Traditions -->
+        <section style="margin-top: var(--spacing-xl, 3rem);">
+            <h2 class="section-header">🔗 Related Traditions</h2>
+            <div class="glass-card">
+                <h3>Explore Other Mythologies</h3>
+                <div class="button-grid" style="display: flex; flex-wrap: wrap; gap: var(--spacing-md);">
+                    <a class="btn btn-secondary" href="../greek/index.html">Greek</a>
+                    <a class="btn btn-secondary" href="../roman/index.html">Roman</a>
+                    <a class="btn btn-secondary" href="../norse/index.html">Norse</a>
+                    <a class="btn btn-secondary" href="../egyptian/index.html">Egyptian</a>
+                    <a class="btn btn-secondary" href="../hindu/index.html">Hindu</a>
+                    <a class="btn btn-secondary" href="../buddhist/index.html">Buddhist</a>
+                    <a class="btn btn-secondary" href="../celtic/index.html">Celtic</a>
+                    <a class="btn btn-secondary" href="../christian/index.html">Christian</a>
+                    <a class="btn btn-secondary" href="../islamic/index.html">Islamic</a>
+                    <a class="btn btn-secondary" href="../jewish/index.html">Jewish</a>
                 </div>
-            </a>
-        </div>
+            </div>
+        </section>
+    </main>
 
-        <!-- Sacred Places Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Sacred Places</div>
-            <a href="../../index.html" class="place-link-card">
-                <div class="place-visual">
-                    <span class="place-icon">River</span>
-                    <span class="place-type">Sacred Site</span>
-                </div>
-                <div class="place-info">
-                    <h4>Osun River</h4>
-                    <p>Sacred grove of the Orisha Oshun</p>
-                </div>
-            </a>
-        </div>
+    <!-- Footer -->
+    <footer>
+        <p>
+            <strong>Yoruba Mythology</strong> - World Mythos Explorer<br>
+            <a href="../../mythos/index.html">Back to World Mythos Home</a> |
+            <a href="../../index.html">Main Site</a>
+        </p>
+    </footer>
 
-        <!-- Associated Practices Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Associated Practices</div>
-            <a href="../../index.html" class="magic-link-card">
-                <div class="magic-icon">Ifa</div>
-                <div class="magic-info">
-                    <h4>Ifa Divination</h4>
-                    <p class="magic-type">Sacred Divination System</p>
-                </div>
-                <span class="tradition-badge yoruba">Yoruba</span>
-            </a>
-        </div>
-    </div>
+    <!-- Auto-inject submission button -->
+    <script>
+        if (window.SubmissionLink) {
+            window.SubmissionLink.autoInject();
+        }
+    </script>
 
-    <!-- Cross-Cultural Parallels -->
-    <div class="parallel-traditions glass-card" style="margin-top: var(--spacing-lg);">
-        <h4>Cross-Cultural Parallels</h4>
-        <div class="parallel-grid">
-            <a href="../greek/index.html" class="parallel-card">
-                <span class="tradition-flag">GR</span>
-                <span class="parallel-name">Greek Pantheon</span>
-                <span class="tradition-label">Olympians</span>
-            </a>
-            <a href="../hindu/index.html" class="parallel-card">
-                <span class="tradition-flag">OM</span>
-                <span class="parallel-name">Hindu Devas</span>
-                <span class="tradition-label">Vedic Tradition</span>
-            </a>
-            <a href="../norse/index.html" class="parallel-card">
-                <span class="tradition-flag">NR</span>
-                <span class="parallel-name">Norse Aesir</span>
-                <span class="tradition-label">Germanic</span>
-            </a>
-            <a href="../egyptian/index.html" class="parallel-card">
-                <span class="tradition-flag">EG</span>
-                <span class="parallel-name">Egyptian Netjeru</span>
-                <span class="tradition-label">Kemetic</span>
-            </a>
-        </div>
-    </div>
-</section>
+    <!-- Firebase SDK (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-<!-- See Also Section -->
-<div class="see-also-section">
-    <h4>See Also</h4>
-    <div class="see-also-links">
-        <a href="deities/ogun.html" class="see-also-link" data-smart="true">
-            <span>Ogun</span> Iron and War
-        </a>
-        <a href="deities/shango.html" class="see-also-link" data-smart="true">
-            <span>Shango</span> Thunder
-        </a>
-        <a href="deities/yemoja.html" class="see-also-link" data-smart="true">
-            <span>Yemoja</span> Ocean Mother
-        </a>
-        <a href="deities/oshun.html" class="see-also-link" data-smart="true">
-            <span>Oshun</span> River Goddess
-        </a>
-        <a href="deities/eshu.html" class="see-also-link" data-smart="true">
-            <span>Eshu</span> Trickster
-        </a>
-        <a href="deities/index.html" class="see-also-link">
-            <span>All</span> Browse Orisha
-        </a>
-    </div>
-</div>
-</main>
+    <!-- Firebase Configuration -->
+    <script src="../../firebase-config.js"></script>
 
-<footer>
-<p>
-<strong>Yoruba / West African Mythology</strong> - World Mythos Explorer<br/>
-Based on oral traditions, Ifa corpus, and ethnographic research<br/>
-Presented with respect for this living spiritual tradition<br/>
-<a href="../../mythos/index.html">Back to World Mythos Home</a>
-</p>
-</footer>
+    <!-- Firebase Content Loader (Module) -->
+    <script type="module">
+        import { FirebaseContentLoader } from '../../FIREBASE/js/firebase-content-loader.js';
+
+        // Wait for Firebase to initialize
+        window.addEventListener('load', async () => {
+            try {
+                // Check if Firebase is initialized
+                if (!window.firebaseApp || !window.firebaseDb) {
+                    console.error('[Index] Firebase not initialized');
+                    showGlobalError('Firebase is not configured. Please check firebase-config.js');
+                    return;
+                }
+
+                console.log('[Index] Initializing Firebase Content Loader for yoruba');
+
+                // Create content loader instance
+                const loader = new FirebaseContentLoader(window.firebaseApp);
+                const mythology = 'yoruba'; // e.g., 'greek', 'norse', 'egyptian'
+
+                // Content types to load
+                const contentTypes = [
+                    { type: 'deities', container: 'deities-container', loading: 'deities-loading' },
+                    { type: 'heroes', container: 'heroes-container', loading: 'heroes-loading' },
+                    { type: 'creatures', container: 'creatures-container', loading: 'creatures-loading' },
+                    { type: 'cosmology', container: 'cosmology-container', loading: 'cosmology-loading' },
+                    { type: 'texts', container: 'texts-container', loading: 'texts-loading' },
+                    { type: 'herbs', container: 'herbs-container', loading: 'herbs-loading' },
+                    { type: 'rituals', container: 'rituals-container', loading: 'rituals-loading' },
+                    { type: 'symbols', container: 'symbols-container', loading: 'symbols-loading' },
+                    { type: 'concepts', container: 'concepts-container', loading: 'concepts-loading' },
+                    { type: 'myths', container: 'myths-container', loading: 'myths-loading' }
+                ];
+
+                // Load each content type
+                for (const { type, container, loading } of contentTypes) {
+                    try {
+                        console.log(`[Index] Loading ${type} for ${mythology}...`);
+
+                        // Load content filtered by mythology
+                        await loader.loadContent(type, { mythology: mythology });
+
+                        // Hide loading, show container
+                        const loadingEl = document.getElementById(loading);
+                        const containerEl = document.getElementById(container);
+
+                        if (loadingEl) loadingEl.style.display = 'none';
+                        if (containerEl) containerEl.style.display = 'grid';
+
+                        // Render content
+                        loader.renderContent(container, type);
+
+                        console.log(`[Index] ✓ ${type} loaded successfully`);
+
+                    } catch (error) {
+                        console.error(`[Index] Error loading ${type}:`, error);
+
+                        // Hide loading, show error
+                        const loadingEl = document.getElementById(loading);
+                        const containerEl = document.getElementById(container);
+
+                        if (loadingEl) {
+                            loadingEl.innerHTML = `
+                                <div class="error-container">
+                                    <div class="error-title">Failed to load ${type}</div>
+                                    <div class="error-message">${error.message}</div>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+
+                console.log('[Index] All content loaded successfully');
+
+            } catch (error) {
+                console.error('[Index] Fatal error:', error);
+                showGlobalError('Failed to load content: ' + error.message);
+            }
+        });
+
+        function showGlobalError(message) {
+            document.querySelectorAll('.loading-container').forEach(el => {
+                el.innerHTML = `
+                    <div class="error-container">
+                        <div class="error-title">Error</div>
+                        <div class="error-message">${message}</div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>

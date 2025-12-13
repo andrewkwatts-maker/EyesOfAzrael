@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Place Archetypes - Sacred Cosmic Geography</title>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .breadcrumb {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .breadcrumb a {
+            color: #64b5f6;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: #90caf9;
+        }
+
+        .breadcrumb span {
+            color: #9e9e9e;
+            margin: 0 0.5rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 0;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: #b0bec5;
+            font-style: italic;
+        }
+
+        .intro {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            border-left: 4px solid #64b5f6;
+            backdrop-filter: blur(10px);
+        }
+
+        .intro p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #cfd8dc;
+        }
+
+        .archetypes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .archetype-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .archetype-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--theme-color-1), var(--theme-color-2));
+            opacity: 0.8;
+        }
+
+        .archetype-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .archetype-card h2 {
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            font-size: 1.6rem;
+        }
+
+        .archetype-card .subtitle-small {
+            color: #90a4ae;
+            font-style: italic;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .archetype-card p {
+            color: #b0bec5;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .archetype-card a {
+            display: inline-block;
+            padding: 0.7rem 1.5rem;
+            background: linear-gradient(135deg, var(--theme-color-1), var(--theme-color-2));
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .archetype-card a:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Theme colors for each archetype */
+        .underworld-theme {
+            --theme-color-1: #1a1a1a;
+            --theme-color-2: #4a148c;
+        }
+
+        .sacred-mountain-theme {
+            --theme-color-1: #5d4037;
+            --theme-color-2: #2196f3;
+        }
+
+        .world-tree-theme {
+            --theme-color-1: #2e7d32;
+            --theme-color-2: #6d4c41;
+        }
+
+        .paradise-theme {
+            --theme-color-1: #ffa000;
+            --theme-color-2: #43a047;
+        }
+
+        .primordial-waters-theme {
+            --theme-color-1: #0d47a1;
+            --theme-color-2: #000000000;
+        }
+
+        .heavenly-realm-theme {
+            --theme-color-1: #81d4fa;
+            --theme-color-2: #ffd54f;
+        }
+
+        .note {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+
+        .note strong {
+            color: #ffd54f;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #78909c;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a>
+            <span>/</span>
+            <a href="../index.html">Archetypes</a>
+            <span>/</span>
+            <span>Place Archetypes</span>
+        </nav>
+
+        <header>
+    <div class="header-content">
+        <h1>Place Archetypes</h1>
+    </div>
+</header>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../index.html">Home</a> → <a href="../index.html">Archetypes</a> → <a href="index.html">Place Archetypes</a>
+</nav>
+
+        <section class="intro">
+            <p>
+                Place archetypes represent the universal locations that structure mythological cosmology across world traditions.
+                These sacred spaces transcend individual cultures, appearing in diverse forms yet maintaining core symbolic meanings.
+                From the depths of the underworld to the heights of heaven, from the center of the world tree to the edges of primordial chaos,
+                these archetypal places map the spiritual geography of human consciousness and cosmic order.
+            </p>
+        </section>
+
+        <div class="archetypes-grid">
+            <div class="archetype-card underworld-theme">
+                <h2>Underworld</h2>
+                <span class="subtitle-small">Afterlife & Shadow Realm</span>
+                <p>
+                    The realm of the dead and shadow, where souls journey after death. A place of transformation,
+                    testing, and sometimes return. Dark, mysterious, and often guarded by fearsome beings.
+                </p>
+                <a href="underworld/index.html">Explore the Underworld</a>
+            </div>
+
+            <div class="archetype-card sacred-mountain-theme">
+                <h2>Sacred Mountain</h2>
+                <span class="subtitle-small">Cosmic Axis & Divine Dwelling</span>
+                <p>
+                    The meeting place of earth and sky, where mortals can approach the divine. A vertical axis
+                    connecting the mundane world to higher realms, often the dwelling place of gods.
+                </p>
+                <a href="sacred-mountain/index.html">Ascend the Sacred Mountain</a>
+            </div>
+
+            <div class="archetype-card world-tree-theme">
+                <h2>World Tree</h2>
+                <span class="subtitle-small">Axis Mundi & Cosmic Connection</span>
+                <p>
+                    The cosmic tree that connects all realms of existence, its roots in the underworld,
+                    trunk in the middle world, and branches reaching to heaven. The axis around which the cosmos revolves.
+                </p>
+                <a href="world-tree/index.html">Climb the World Tree</a>
+            </div>
+
+            <div class="archetype-card paradise-theme">
+                <h2>Paradise</h2>
+                <span class="subtitle-small">Golden Age & Lost Eden</span>
+                <p>
+                    The perfect realm of harmony and abundance, often located in the distant past or hidden present.
+                    A place of immortality, peace, and unity with nature and the divine.
+                </p>
+                <a href="paradise/index.html">Enter Paradise</a>
+            </div>
+
+            <div class="archetype-card primordial-waters-theme">
+                <h2>Primordial Waters</h2>
+                <span class="subtitle-small">Chaos & Creation Potential</span>
+                <p>
+                    The formless waters of chaos that existed before creation. The deep, dark abyss from which
+                    all order emerges and to which all may return. The source of both creation and destruction.
+                </p>
+                <a href="primordial-waters/index.html">Dive into Primordial Waters</a>
+            </div>
+
+            <div class="archetype-card heavenly-realm-theme">
+                <h2>Heavenly Realm</h2>
+                <span class="subtitle-small">Divine Abode & Celestial Order</span>
+                <p>
+                    The upper realm of light, order, and divine perfection. Home to gods, angels, and celestial beings.
+                    A place of eternal light, cosmic law, and transcendent beauty.
+                </p>
+                <a href="heavenly-realm/index.html">Ascend to Heaven</a>
+            </div>
+        </div>
+
+        <div class="note">
+            <strong>Note:</strong> This section is currently under development. Each place archetype represents
+            a universal sacred geography found across world mythologies. Content is being actively researched and compiled.
+        </div>
+
+        <!-- INTERLINK PANEL -->
+        <section class="interlink-panel" style="background: rgba(255, 255, 255, 0.05); padding: 30px; border-radius: 12px; margin-top: 40px;">
+            <h3 style="color: #64b5f6; margin-bottom: 20px;">Related Content</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                <div style="background: rgba(100, 181, 246, 0.05); padding: 20px; border-radius: 10px; border: 1px solid rgba(100, 181, 246, 0.3);">
+                    <h4 style="color: #64b5f6; margin-bottom: 15px;">Mythological Examples</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: 8px;"><a href="../../mythos/greek/places/index.html" style="color: #cfd8dc;">Mount Olympus</a> - Greek home of the gods</li>
+                        <li style="margin-bottom: 8px;"><a href="../../mythos/norse/cosmology/yggdrasil.html" style="color: #cfd8dc;">Yggdrasil</a> - Norse world tree</li>
+                        <li style="margin-bottom: 8px;"><a href="../../mythos/hindu/index.html" style="color: #cfd8dc;">Mount Meru</a> - Hindu cosmic mountain</li>
+                        <li style="margin-bottom: 8px;"><a href="../../mythos/greek/places/index.html" style="color: #cfd8dc;">Tartarus</a> - Greek primordial abyss</li>
+                        <li style="margin-bottom: 8px;"><a href="../../spiritual-places/realms/tir-na-nog.html" style="color: #cfd8dc;">Tir na nOg</a> - Celtic otherworld paradise</li>
+                    </ul>
+                </div>
+                <div style="background: rgba(100, 181, 246, 0.05); padding: 20px; border-radius: 10px; border: 1px solid rgba(100, 181, 246, 0.3);">
+                    <h4 style="color: #64b5f6; margin-bottom: 15px;">Related Archetypes</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: 8px;"><a href="../journey-archetypes/index.html" style="color: #cfd8dc;">Journey Archetypes</a> - Paths to sacred places</li>
+                        <li style="margin-bottom: 8px;"><a href="../death/index.html" style="color: #cfd8dc;">Death God</a> - Underworld rulers</li>
+                        <li style="margin-bottom: 8px;"><a href="../cosmic-creator/index.html" style="color: #cfd8dc;">Cosmic Creator</a> - Creators of realms</li>
+                        <li style="margin-bottom: 8px;"><a href="../elemental-archetypes/index.html" style="color: #cfd8dc;">Elemental Archetypes</a> - Primal forces</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="background: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 8px;">
+                <h4 style="color: #64b5f6; margin-bottom: 10px;">See Also</h4>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 15px;">
+                    <li><a href="../sky-father/index.html" style="color: #9e9e9e;">Sky Father</a></li>
+                    <li><a href="../earth-mother/index.html" style="color: #9e9e9e;">Earth Mother</a></li>
+                    <li><a href="../threshold-guardian/index.html" style="color: #9e9e9e;">Threshold Guardian</a></li>
+                    <li><a href="../celestial/index.html" style="color: #9e9e9e;">Celestial Beings</a></li>
+                    <li><a href="../cross-reference-matrix.html" style="color: #9e9e9e;">Cross-Reference Matrix</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 World Mythology Database - Place Archetypes Collection</p>
+        </footer>
+    </div>
+</body>
+</html>

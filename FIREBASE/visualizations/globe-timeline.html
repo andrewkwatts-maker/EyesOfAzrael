@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mythology Globe - Temporal Propagation Visualization</title>
+
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../styles.css">
+
+    <!-- Theme System -->
+    <script defer src="../themes/theme-picker.js"></script>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: var(--font-family-base);
+        }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 100%);
+        }
+
+        #globe-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        #controls-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(var(--color-surface-rgb), 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(var(--color-border-rgb), 0.3);
+            min-width: 300px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        #controls-panel h2 {
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+            color: var(--color-text-primary);
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            font-size: 0.9rem;
+        }
+
+        .timeline-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg,
+                rgba(var(--color-primary-rgb), 0.3),
+                rgba(var(--color-secondary-rgb), 0.3));
+            outline: none;
+            cursor: pointer;
+        }
+
+        .timeline-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .timeline-display {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-top: 0.5rem;
+            font-feature-settings: 'tnum';
+        }
+
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .filter-chip {
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-md);
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid rgba(var(--color-border-rgb), 0.3);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .filter-chip:hover {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            transform: translateY(-1px);
+        }
+
+        .filter-chip.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .play-button {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1rem;
+        }
+
+        .play-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        .speed-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .speed-button {
+            flex: 1;
+            padding: 0.5rem;
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid rgba(var(--color-border-rgb), 0.3);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .speed-button.active {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        #info-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(var(--color-surface-rgb), 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(var(--color-border-rgb), 0.3);
+            max-width: 350px;
+            display: none;
+        }
+
+        #info-panel.visible {
+            display: block;
+        }
+
+        #info-panel h3 {
+            margin: 0 0 0.5rem 0;
+            color: var(--color-text-primary);
+        }
+
+        #info-panel p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(var(--color-border-rgb), 0.2);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #relationship-tooltip {
+            position: fixed;
+            padding: 0.75rem 1rem;
+            background: rgba(var(--color-surface-rgb), 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-border-rgb), 0.5);
+            border-radius: var(--radius-lg);
+            color: var(--color-text-primary);
+            font-size: 0.85rem;
+            pointer-events: none;
+            z-index: 10000;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            display: none;
+            max-width: 300px;
+        }
+
+        #relationship-tooltip .tooltip-type {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--color-primary);
+        }
+
+        #relationship-tooltip .tooltip-strength {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+
+        #relationship-tooltip .tooltip-desc {
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <div id="relationship-tooltip">
+        <div class="tooltip-type"></div>
+        <div class="tooltip-strength"></div>
+        <div class="tooltip-desc"></div>
+    </div>
+
+    <div id="container">
+        <canvas id="globe-canvas"></canvas>
+
+        <div id="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading mythology data...</p>
+        </div>
+
+        <div id="controls-panel">
+            <h2>🌍 Timeline Controls</h2>
+
+            <div class="control-group">
+                <label>Timeline: <span id="current-year">3000 BCE</span></label>
+                <input
+                    type="range"
+                    id="timeline-slider"
+                    class="timeline-slider"
+                    min="-3000"
+                    max="2000"
+                    value="-3000"
+                    step="10">
+            </div>
+
+            <div class="control-group">
+                <label>Animation Speed</label>
+                <div class="speed-control">
+                    <button class="speed-button" data-speed="0.5">Slow</button>
+                    <button class="speed-button active" data-speed="1">Normal</button>
+                    <button class="speed-button" data-speed="2">Fast</button>
+                    <button class="speed-button" data-speed="5">Very Fast</button>
+                </div>
+            </div>
+
+            <button id="play-button" class="play-button">▶️ Play Timeline</button>
+
+            <div class="control-group">
+                <label>Filter by Mythology</label>
+                <div class="filter-group" id="mythology-filters">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Entity Types</label>
+                <div class="filter-group" id="type-filters">
+                    <div class="filter-chip active" data-type="all">All</div>
+                    <div class="filter-chip active" data-type="place">Places</div>
+                    <div class="filter-chip active" data-type="deity">Deities</div>
+                    <div class="filter-chip active" data-type="concept">Concepts</div>
+                    <div class="filter-chip active" data-type="item">Items</div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>🔗 Relationship Types</label>
+                <div class="filter-group" id="relationship-filters">
+                    <div class="filter-chip active" data-rel-type="all">All</div>
+                    <div class="filter-chip active" data-rel-type="cultural">🌿 Cultural</div>
+                    <div class="filter-chip active" data-rel-type="temporal">⏱️ Temporal</div>
+                    <div class="filter-chip active" data-rel-type="geographical">📍 Geographical</div>
+                    <div class="filter-chip active" data-rel-type="parallel">🔀 Parallel</div>
+                    <div class="filter-chip active" data-rel-type="etymological">📖 Etymology</div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>💪 Relationship Strength</label>
+                <div class="filter-group" id="strength-filters">
+                    <div class="filter-chip active" data-strength="all">All</div>
+                    <div class="filter-chip active" data-strength="strong">Strong</div>
+                    <div class="filter-chip active" data-strength="moderate">Moderate</div>
+                    <div class="filter-chip active" data-strength="weak">Weak</div>
+                    <div class="filter-chip active" data-strength="possible">Possible</div>
+                </div>
+            </div>
+
+            <div class="legend">
+                <strong style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Mythology Colors</strong>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4169E1;"></div>
+                    <span>Greek</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #DAA520;"></div>
+                    <span>Egyptian</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4682B4;"></div>
+                    <span>Norse</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FF6B35;"></div>
+                    <span>Hindu</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #228B22;"></div>
+                    <span>Celtic</span>
+                </div>
+            </div>
+
+            <div class="legend" style="margin-top: 1rem;">
+                <strong style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Relationship Colors</strong>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4CAF50;"></div>
+                    <span>Cultural</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FF6B6B;"></div>
+                    <span>Temporal</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #2196F3;"></div>
+                    <span>Geographic</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #9C27B0;"></div>
+                    <span>Parallel</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FFA726;"></div>
+                    <span>Etymology</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FFD700;"></div>
+                    <span>Direct</span>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-visible">0</div>
+                    <div class="stat-label">Visible</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="info-panel">
+            <h3 id="entity-name"></h3>
+            <p id="entity-description"></p>
+            <p><strong>First Attestation:</strong> <span id="entity-date"></span></p>
+            <p><strong>Location:</strong> <span id="entity-location"></span></p>
+            <div id="relationship-stats" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(var(--color-border-rgb), 0.3); display: none;">
+                <strong style="color: var(--color-text-primary);">📊 Relationship Statistics:</strong>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.85rem;">
+                    <div style="padding: 0.5rem; background: rgba(var(--color-primary-rgb), 0.1); border-radius: 6px;">
+                        <div style="font-weight: 600; color: var(--color-primary);" id="stat-total-rel">0</div>
+                        <div style="opacity: 0.7;">Total</div>
+                    </div>
+                    <div style="padding: 0.5rem; background: rgba(139, 0, 0, 0.1); border-radius: 6px;">
+                        <div style="font-weight: 600; color: #8B0000;" id="stat-strong">0</div>
+                        <div style="opacity: 0.7;">Strong</div>
+                    </div>
+                    <div style="padding: 0.5rem; background: rgba(76, 175, 80, 0.1); border-radius: 6px;">
+                        <div style="font-weight: 600; color: #4CAF50;" id="stat-cultural">0</div>
+                        <div style="opacity: 0.7;">Cultural</div>
+                    </div>
+                    <div style="padding: 0.5rem; background: rgba(255, 107, 107, 0.1); border-radius: 6px;">
+                        <div style="font-weight: 600; color: #FF6B6B;" id="stat-temporal">0</div>
+                        <div style="opacity: 0.7;">Temporal</div>
+                    </div>
+                    <div style="padding: 0.5rem; background: rgba(33, 150, 243, 0.1); border-radius: 6px;">
+                        <div style="font-weight: 600; color: #2196F3;" id="stat-geo">0</div>
+                        <div style="opacity: 0.7;">Geographic</div>
+                    </div>
+                    <div style="padding: 0.5rem; background: rgba(156, 39, 176, 0.1); border-radius: 6px;">
+                        <div style="font-weight: 600; color: #9C27B0;" id="stat-parallel">0</div>
+                        <div style="opacity: 0.7;">Parallels</div>
+                    </div>
+                </div>
+            </div>
+            <div id="related-entities" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(var(--color-border-rgb), 0.3);">
+                <strong style="color: var(--color-text-primary);">Related Entities:</strong>
+                <div id="related-list" style="margin-top: 0.5rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./globe-timeline.js"></script>
+</body>
+</html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cache Statistics - Eyes of Azrael</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .cache-dashboard {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-subtitle {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .entries-table {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .entries-table h2 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      color: #fff;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: #fff;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: rgba(138, 43, 226, 0.3);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      margin: 0.125rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      background: rgba(138, 43, 226, 0.6);
+      border: 1px solid rgba(138, 43, 226, 0.8);
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+
+    .btn:hover {
+      background: rgba(138, 43, 226, 0.8);
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: rgba(220, 38, 38, 0.6);
+      border-color: rgba(220, 38, 38, 0.8);
+    }
+
+    .btn-danger:hover {
+      background: rgba(220, 38, 38, 0.8);
+    }
+
+    .btn-success {
+      background: rgba(34, 197, 94, 0.6);
+      border-color: rgba(34, 197, 94, 0.8);
+    }
+
+    .btn-success:hover {
+      background: rgba(34, 197, 94, 0.8);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .alert {
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      border: 1px solid;
+    }
+
+    .alert-info {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.5);
+      color: #93c5fd;
+    }
+
+    .alert-success {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: rgba(34, 197, 94, 0.5);
+      color: #86efac;
+    }
+
+    .alert-warning {
+      background: rgba(251, 146, 60, 0.2);
+      border-color: rgba(251, 146, 60, 0.5);
+      color: #fdba74;
+    }
+
+    .chart-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 30px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #8b5cf6, #ec4899);
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: bold;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="cache-dashboard">
+    <h1>Firebase Cache Statistics</h1>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading cache statistics...</p>
+    </div>
+
+    <div id="dashboard" style="display: none;">
+      <div class="controls">
+        <button class="btn" onclick="refreshStats()">Refresh Stats</button>
+        <button class="btn btn-danger" onclick="clearAllCache()">Clear All Cache</button>
+        <button class="btn btn-success" onclick="cleanupExpired()">Cleanup Expired</button>
+        <button class="btn" onclick="checkVersion()">Check Version</button>
+      </div>
+
+      <div id="alerts"></div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Cache Hits</div>
+          <div class="stat-value" id="stat-hits">0</div>
+          <div class="stat-subtitle">Successful cache retrievals</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Cache Misses</div>
+          <div class="stat-value" id="stat-misses">0</div>
+          <div class="stat-subtitle">Database queries required</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Hit Rate</div>
+          <div class="stat-value" id="stat-hit-rate">0%</div>
+          <div class="stat-subtitle">Cache effectiveness</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Cache Size</div>
+          <div class="stat-value" id="stat-size">0 KB</div>
+          <div class="stat-subtitle" id="stat-entries">0 entries</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Storage Used</div>
+          <div class="stat-value" id="stat-utilization">0%</div>
+          <div class="stat-subtitle" id="stat-max-size">of 5 MB</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Current Version</div>
+          <div class="stat-value" id="stat-version">-</div>
+          <div class="stat-subtitle">Data version number</div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <h2>Storage Utilization</h2>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width: 0%">0%</div>
+        </div>
+      </div>
+
+      <div class="entries-table">
+        <h2>Cache Entries</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Size</th>
+                <th>Created</th>
+                <th>Expires</th>
+                <th>Tags</th>
+              </tr>
+            </thead>
+            <tbody id="entries-tbody">
+              <tr>
+                <td colspan="5" style="text-align: center; color: rgba(255, 255, 255, 0.5);">
+                  No cache entries
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="entries-table">
+        <h2>Version Information</h2>
+        <div id="version-info">
+          <p>Loading version information...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <!-- Firebase Configuration -->
+  <script src="js/firebase-init.js"></script>
+
+  <!-- Cache System -->
+  <script src="js/firebase-cache-manager.js"></script>
+  <script src="js/version-tracker.js"></script>
+  <script src="js/firebase-content-loader.js"></script>
+
+  <script>
+    let contentLoader = null;
+    let cacheManager = null;
+    let versionTracker = null;
+
+    // Initialize
+    async function init() {
+      try {
+        // Initialize Firebase (assumes firebase-init.js exports firebaseApp)
+        if (typeof firebaseApp === 'undefined') {
+          throw new Error('Firebase not initialized');
+        }
+
+        // Initialize content loader with cache
+        contentLoader = new FirebaseContentLoader(firebaseApp, {
+          enableCache: true,
+          enableLogging: true
+        });
+
+        // Get cache manager and version tracker references
+        cacheManager = contentLoader.cacheManager;
+        versionTracker = contentLoader.versionTracker;
+
+        // Initialize version tracker
+        if (versionTracker) {
+          await versionTracker.initialize();
+        }
+
+        // Load stats
+        await loadStats();
+
+        // Hide loading, show dashboard
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+
+        // Auto-refresh every 30 seconds
+        setInterval(refreshStats, 30000);
+
+      } catch (error) {
+        console.error('Initialization error:', error);
+        showAlert('Error initializing cache dashboard: ' + error.message, 'warning');
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    // Load and display statistics
+    async function loadStats() {
+      if (!cacheManager) {
+        return;
+      }
+
+      try {
+        const stats = cacheManager.getStats();
+
+        // Update stat cards
+        document.getElementById('stat-hits').textContent = stats.hits;
+        document.getElementById('stat-misses').textContent = stats.misses;
+        document.getElementById('stat-hit-rate').textContent = stats.hitRate;
+        document.getElementById('stat-size').textContent = stats.sizeFormatted;
+        document.getElementById('stat-entries').textContent = `${stats.entries} entries`;
+        document.getElementById('stat-utilization').textContent = stats.utilization;
+        document.getElementById('stat-max-size').textContent = `of ${stats.maxSizeFormatted}`;
+        document.getElementById('stat-version').textContent = stats.version || 'N/A';
+
+        // Update progress bar
+        const utilization = parseFloat(stats.utilization);
+        const progressFill = document.getElementById('progress-fill');
+        progressFill.style.width = utilization + '%';
+        progressFill.textContent = stats.utilization;
+
+        // Update entries table
+        const entries = cacheManager.getCacheEntries();
+        const tbody = document.getElementById('entries-tbody');
+        tbody.innerHTML = '';
+
+        if (entries.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="5" style="text-align: center; color: rgba(255, 255, 255, 0.5);">
+                No cache entries
+              </td>
+            </tr>
+          `;
+        } else {
+          entries.forEach(entry => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${escapeHtml(entry.key)}</td>
+              <td>${entry.sizeFormatted}</td>
+              <td>${formatDate(entry.created)}</td>
+              <td>${formatDate(entry.expiry)}</td>
+              <td>${entry.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
+
+        // Load version info
+        await loadVersionInfo();
+
+      } catch (error) {
+        console.error('Error loading stats:', error);
+        showAlert('Error loading statistics: ' + error.message, 'warning');
+      }
+    }
+
+    // Load version information
+    async function loadVersionInfo() {
+      if (!contentLoader) {
+        return;
+      }
+
+      try {
+        const versionInfo = await contentLoader.getVersionInfo();
+        const container = document.getElementById('version-info');
+
+        if (!versionInfo) {
+          container.innerHTML = '<p style="color: rgba(255, 255, 255, 0.5);">Version tracking not available</p>';
+          return;
+        }
+
+        container.innerHTML = `
+          <table style="margin: 0;">
+            <tr>
+              <td><strong>Current Version:</strong></td>
+              <td>${versionInfo.version || 'N/A'}</td>
+            </tr>
+            <tr>
+              <td><strong>Update Count:</strong></td>
+              <td>${versionInfo.updateCount}</td>
+            </tr>
+            <tr>
+              <td><strong>Last Updated:</strong></td>
+              <td>${versionInfo.lastUpdated || 'Never'}</td>
+            </tr>
+            <tr>
+              <td><strong>Last Check:</strong></td>
+              <td>${versionInfo.lastCheck || 'Never'}</td>
+            </tr>
+            <tr>
+              <td><strong>Check Interval:</strong></td>
+              <td>${Math.round(versionInfo.checkInterval / 60000)} minutes</td>
+            </tr>
+          </table>
+        `;
+
+      } catch (error) {
+        console.error('Error loading version info:', error);
+      }
+    }
+
+    // Refresh statistics
+    async function refreshStats() {
+      await loadStats();
+      showAlert('Statistics refreshed', 'success');
+    }
+
+    // Clear all cache
+    function clearAllCache() {
+      if (!confirm('Are you sure you want to clear all cache? This cannot be undone.')) {
+        return;
+      }
+
+      if (cacheManager) {
+        cacheManager.invalidateAll();
+        loadStats();
+        showAlert('All cache cleared successfully', 'success');
+      }
+    }
+
+    // Cleanup expired entries
+    function cleanupExpired() {
+      if (cacheManager) {
+        cacheManager.cleanupExpired();
+        loadStats();
+        showAlert('Expired entries cleaned up', 'success');
+      }
+    }
+
+    // Check for version updates
+    async function checkVersion() {
+      if (!contentLoader) {
+        return;
+      }
+
+      try {
+        const hasChanged = await contentLoader.checkVersion();
+        if (hasChanged) {
+          showAlert('New version detected! Cache has been invalidated.', 'info');
+          await loadStats();
+        } else {
+          showAlert('You are on the latest version', 'success');
+        }
+      } catch (error) {
+        showAlert('Error checking version: ' + error.message, 'warning');
+      }
+    }
+
+    // Show alert message
+    function showAlert(message, type = 'info') {
+      const alerts = document.getElementById('alerts');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      alerts.appendChild(alert);
+
+      setTimeout(() => {
+        alert.remove();
+      }, 5000);
+    }
+
+    // Format date
+    function formatDate(isoString) {
+      try {
+        const date = new Date(isoString);
+        return date.toLocaleString();
+      } catch (error) {
+        return isoString;
+      }
+    }
+
+    // Escape HTML
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

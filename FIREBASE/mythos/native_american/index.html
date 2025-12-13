@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Native American Traditions - Mythos Explorer</title>
+    <link href="../../styles.css" rel="stylesheet"/>
+    <link href="../../themes/theme-base.css" rel="stylesheet"/>
+    <link href="../../themes/corpus-links.css" rel="stylesheet"/>
+<link rel="stylesheet" href="../../themes/smart-links.css">
+<script defer src="../../themes/smart-links.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script defer src="../../themes/theme-picker.js"></script>
+    <style>
+        /* ============================================
+           Native American Traditions - Earth Tones Theme
+           ============================================ */
+
+        :root {
+            --mythos-primary: #8B4513;      /* Saddle Brown */
+            --mythos-secondary: #CD853F;    /* Peru/Tan */
+            --mythos-accent: #40E0D0;       /* Turquoise */
+            --mythos-earth: #A0522D;        /* Sienna */
+            --mythos-sky: #87CEEB;          /* Sky Blue */
+        }
+
+        /* Breadcrumb - Full-width bar attached below header */
+        .breadcrumb {
+            position: sticky;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(var(--color-surface-rgb), 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: var(--spacing-xs) var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid rgba(139, 69, 19, 0.3);
+        }
+
+        .breadcrumb a {
+            color: var(--mythos-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--mythos-secondary);
+            text-decoration: underline;
+        }
+
+        /* Custom Native American Hero Section */
+        .native-hero {
+            background: linear-gradient(135deg,
+                rgba(139, 69, 19, 0.2),
+                rgba(205, 133, 63, 0.2),
+                rgba(64, 224, 208, 0.1));
+            border: 2px solid var(--mythos-primary);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-xs2) var(--spacing-xl);
+            text-align: center;
+            margin: var(--spacing-xl) 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .native-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg,
+                var(--mythos-primary),
+                var(--mythos-accent),
+                var(--mythos-secondary),
+                var(--mythos-earth));
+        }
+
+        .native-hero h1 {
+            color: var(--color-text-primary);
+            font-family: var(--font-heading);
+            font-size: var(--text-4xl);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .native-hero p {
+            color: var(--color-text-secondary);
+            font-size: var(--text-lg);
+            line-height: var(--leading-relaxed);
+            max-width: 800px;
+            margin: var(--spacing-md) auto;
+        }
+
+        .hero-tags {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-lg);
+        }
+
+        .tag {
+            background: rgba(139, 69, 19, 0.3);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-full);
+            font-size: var(--text-sm);
+            color: var(--color-text-primary);
+        }
+
+        /* Glass Card - With Hover Animation */
+        .glass-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 69, 19, 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base, 0.3s ease);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(139, 69, 19, 0.15);
+            border-color: rgba(139, 69, 19, 0.4);
+        }
+
+        /* Spirit Grid Layout */
+        .spirit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        /* Spirit Cards */
+        .spirit-card {
+            background: rgba(139, 69, 19, 0.05);
+            border: 2px solid rgba(139, 69, 19, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-base, 0.3s ease);
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+            overflow: hidden;
+        }
+
+        .spirit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg), 0 0 15px rgba(139, 69, 19, 0.2);
+            border-color: var(--mythos-primary);
+            background: rgba(139, 69, 19, 0.1);
+            text-decoration: none;
+        }
+
+        .spirit-card h3 {
+            color: var(--mythos-primary);
+            margin-top: 0.5rem;
+        }
+
+        .spirit-card p {
+            line-height: 1.7;
+        }
+
+        .spirit-card .traditions {
+            font-size: var(--text-sm);
+            color: var(--mythos-secondary);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        /* Nav Bar Styling */
+        .nav-bar {
+            display: flex;
+            gap: var(--spacing-sm);
+            background: var(--color-surface);
+            backdrop-filter: blur(10px);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-xl);
+            border: 2px solid rgba(139, 69, 19, 0.3);
+            flex-wrap: wrap;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .nav-link {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--mythos-primary);
+            background: rgba(139, 69, 19, 0.1);
+        }
+
+        /* Cultural Note Box */
+        .cultural-note {
+            background: linear-gradient(135deg,
+                rgba(64, 224, 208, 0.1),
+                rgba(139, 69, 19, 0.1));
+            border-left: 4px solid var(--mythos-accent);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: var(--radius-sm);
+        }
+
+        .cultural-note h3 {
+            color: var(--mythos-accent);
+            margin-top: 0;
+        }
+
+        /* Heading visibility improvements */
+        h2, h3 {
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .interlink-header {
+            color: var(--color-text-primary);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .spirit-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .native-hero {
+                padding: 2rem 1rem;
+            }
+
+            .native-hero h1 {
+                font-size: var(--text-2xl);
+            }
+
+            .breadcrumb {
+                font-size: var(--font-size-xs);
+                padding: var(--spacing-xs) var(--spacing-md);
+                top: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+    <header>
+        <div class="header-content">
+            <h1 style="color: var(--mythos-primary); font-size: var(--text-3xl); margin-bottom: var(--spacing-sm);">Native American Traditions</h1>
+        </div>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../index.html">Home</a> &rarr; <a href="../index.html">Mythos</a> &rarr; <a href="index.html">Native American</a>
+    </nav>
+    <nav class="nav-bar">
+        <a class="nav-link" href="../../mythos/index.html">&larr; All Mythologies</a>
+        <a class="nav-link" href="spirits/index.html">Spirits &amp; Deities</a>
+        <a class="nav-link" href="#traditions">Traditions</a>
+        <a class="nav-link" href="#teachings">Teachings</a>
+        <a class="nav-link" href="#symbolism">Symbolism</a>
+    </nav>
+    <main style="max-width: var(--container-xl); margin: 0 auto; padding: 0 var(--spacing-lg);">
+        <div class="native-hero">
+            <h1>Native American Spiritual Traditions</h1>
+            <p>
+                The indigenous peoples of North America developed rich, diverse spiritual traditions over thousands of years,
+                each uniquely adapted to their lands and ways of life. From the desert Southwest to the Pacific Northwest,
+                from the Great Plains to the Eastern Woodlands, these traditions share common themes of respect for nature,
+                the interconnectedness of all beings, and the importance of maintaining balance with the spirit world.
+            </p>
+            <div class="hero-tags">
+                <span class="tag">Sacred Circle</span>
+                <span class="tag">Spirit World</span>
+                <span class="tag">Animal Wisdom</span>
+                <span class="tag">Earth Connection</span>
+                <span class="tag">Oral Tradition</span>
+            </div>
+        </div>
+
+        <div class="cultural-note">
+            <h3>A Note on Cultural Respect</h3>
+            <p>
+                Native American spiritual traditions are living practices, not historical artifacts. Many ceremonies and teachings
+                remain sacred and are not shared outside their communities. This exploration presents publicly available knowledge
+                with deep respect for the sovereignty, dignity, and ongoing spiritual practices of indigenous peoples. We encourage
+                learning directly from indigenous voices and supporting Native communities.
+            </p>
+        </div>
+
+        <section class="glass-card">
+            <h2 style="color: var(--mythos-primary);">Explore Native American Traditions</h2>
+            <p style="line-height: 1.7;">Discover the spirits, teachings, and wisdom of indigenous North American cultures:</p>
+            <div class="spirit-grid">
+                <a class="spirit-card" href="spirits/index.html">
+                    <h3>Spirits &amp; Sacred Beings</h3>
+                    <p>Meet the powerful spirits that guide, teach, and protect - from Coyote the Trickster to the mighty Thunderbird.</p>
+                    <ul style="margin: var(--spacing-sm) 0 0 var(--spacing-lg); font-size: var(--text-sm); line-height: var(--leading-relaxed);">
+                        <li><a href="spirits/coyote.html" style="color: var(--mythos-primary);">Coyote</a> - The Trickster</li>
+                        <li><a href="spirits/thunderbird.html" style="color: var(--mythos-primary);">Thunderbird</a> - Sky Spirit</li>
+                        <li><a href="spirits/spider-woman.html" style="color: var(--mythos-primary);">Spider Woman</a> - Creator</li>
+                        <li><a href="spirits/index.html" style="color: var(--mythos-primary);">View All Spirits &rarr;</a></li>
+                    </ul>
+                </a>
+                <div class="spirit-card" style="opacity: 0.7;">
+                    <h3>Creation Stories</h3>
+                    <p>The diverse origin narratives that explain how the world, animals, and people came to be - each unique to its nation.</p>
+                    <p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm);">Coming soon...</p>
+                </div>
+                <div class="spirit-card" style="opacity: 0.7;">
+                    <h3>Sacred Ceremonies</h3>
+                    <p>The rituals and practices that maintain harmony between the human and spirit worlds.</p>
+                    <p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm);">Coming soon...</p>
+                </div>
+                <div class="spirit-card" style="opacity: 0.7;">
+                    <h3>Medicine &amp; Healing</h3>
+                    <p>Traditional healing practices and the sacred plants used in ceremony and medicine.</p>
+                    <p style="font-size: var(--text-sm); font-style: italic; margin-top: var(--spacing-sm);">Coming soon...</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass-card" id="featured-spirits">
+            <h2 style="color: var(--mythos-primary);">Featured Spirits &amp; Deities</h2>
+            <p style="line-height: 1.7;">The sacred beings honored across many traditions, each carrying teachings for humanity.</p>
+            <div class="spirit-grid">
+                <a class="spirit-card" href="spirits/coyote.html">
+                    <h3>Coyote</h3>
+                    <p><strong>The Trickster, Teacher, Creator</strong></p>
+                    <p>A shape-shifting figure who teaches through chaos and humor, bringing fire to humanity and challenging the cosmic order.</p>
+                    <p class="traditions">Navajo, Crow, Shoshone, many Western tribes</p>
+                </a>
+                <a class="spirit-card" href="spirits/thunderbird.html">
+                    <h3>Thunderbird</h3>
+                    <p><strong>Spirit of the Storm</strong></p>
+                    <p>The great supernatural bird whose wings create thunder and whose eyes flash lightning, guardian of the upper world.</p>
+                    <p class="traditions">Plains, Northwest Coast, Great Lakes nations</p>
+                </a>
+                <a class="spirit-card" href="spirits/spider-woman.html">
+                    <h3>Spider Woman</h3>
+                    <p><strong>Weaver of Life, Creator</strong></p>
+                    <p>The ancient grandmother who wove the world into being and continues to guide humanity through her web of wisdom.</p>
+                    <p class="traditions">Navajo, Hopi, Pueblo peoples</p>
+                </a>
+                <a class="spirit-card" href="spirits/white-buffalo-woman.html">
+                    <h3>White Buffalo Calf Woman</h3>
+                    <p><strong>Sacred Messenger</strong></p>
+                    <p>The holy woman who brought the sacred pipe and seven rituals to the Lakota people, teaching the ways of prayer.</p>
+                    <p class="traditions">Lakota, Dakota, Nakota nations</p>
+                </a>
+                <a class="spirit-card" href="spirits/raven.html">
+                    <h3>Raven</h3>
+                    <p><strong>Creator, Transformer, Trickster</strong></p>
+                    <p>The one who stole the sun and brought light to the world, shaping the landscape and teaching through cunning.</p>
+                    <p class="traditions">Tlingit, Haida, Pacific Northwest peoples</p>
+                </a>
+            </div>
+            <p style="text-align: center; margin-top: var(--spacing-xl);">
+                <a class="btn btn-primary" href="spirits/index.html" style="display: inline-block; background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary)); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-semibold); transition: all 0.2s ease;">
+                    View All Spirits &amp; Deities &rarr;
+                </a>
+            </p>
+        </section>
+
+        <section class="glass-card" id="traditions">
+            <h2 style="color: var(--mythos-primary);">Regional Traditions</h2>
+            <p style="line-height: 1.7;">Native American spirituality encompasses hundreds of distinct nations, each with unique traditions shaped by their environment and history:</p>
+            <div class="spirit-grid">
+                <div class="spirit-card">
+                    <h3>Southwest Traditions</h3>
+                    <p>Navajo, Hopi, Pueblo, Apache, and Zuni peoples developed rich traditions in the desert lands, featuring kachinas, emergence stories, and sand painting ceremonies.</p>
+                </div>
+                <div class="spirit-card">
+                    <h3>Plains Traditions</h3>
+                    <p>Lakota, Cheyenne, Blackfoot, and Crow nations followed the buffalo, developing the Sun Dance, vision quests, and the sacred pipe ceremony.</p>
+                </div>
+                <div class="spirit-card">
+                    <h3>Pacific Northwest</h3>
+                    <p>Tlingit, Haida, Kwakiutl, and Salish peoples created elaborate totem traditions, potlatch ceremonies, and transformed animal spirits.</p>
+                </div>
+                <div class="spirit-card">
+                    <h3>Eastern Woodlands</h3>
+                    <p>Iroquois, Cherokee, Ojibwe, and other nations developed the Great Law of Peace, the Green Corn ceremony, and the Midewiwin medicine society.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass-card" id="teachings">
+            <h2 style="color: var(--mythos-primary);">Core Teachings</h2>
+            <ul style="line-height: var(--leading-loose); margin-left: var(--spacing-lg);">
+                <li><strong>All My Relations (Mitakuye Oyasin)</strong> - The interconnectedness of all beings - humans, animals, plants, stones, and spirits are all related</li>
+                <li><strong>The Sacred Hoop</strong> - Life moves in circles; what we do returns to us. The medicine wheel represents this eternal cycle</li>
+                <li><strong>Walking in Balance</strong> - Harmony between the physical and spiritual, between individual and community, between humanity and nature</li>
+                <li><strong>Seven Generations</strong> - Decisions should consider their impact seven generations into the future</li>
+                <li><strong>Respect for Elders</strong> - Wisdom comes through age and experience; elders are the keepers of sacred knowledge</li>
+                <li><strong>Vision and Dreams</strong> - The spirit world communicates through dreams, visions, and encounters with animal spirits</li>
+                <li><strong>Sacred Reciprocity</strong> - Taking from nature requires giving back; offerings honor the spirits of what sustains us</li>
+            </ul>
+        </section>
+
+        <!-- Cross-Cultural Parallels Panel -->
+        <section class="interlink-panel glass-card">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">&#128279;</span>
+                Cross-Cultural Parallels
+            </h3>
+            <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg);">Native American spirit beings share archetypal patterns with figures from other world traditions:</p>
+
+            <div class="parallel-traditions">
+                <h4>Trickster Figures Worldwide</h4>
+                <div class="parallel-grid" style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;">
+                    <a href="../../mythos/norse/deities/loki.html" class="parallel-card" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(139, 69, 19, 0.1); padding: 0.5rem 1rem; border-radius: var(--radius-full); text-decoration: none;">
+                        <span class="tradition-flag">&#9876;</span>
+                        <span class="parallel-name" style="color: var(--color-text-primary); font-weight: 500;">Loki</span>
+                        <span class="tradition-label" style="color: var(--color-text-secondary); font-size: 0.8rem;">Norse</span>
+                    </a>
+                    <a href="../../mythos/greek/deities/hermes.html" class="parallel-card" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(139, 69, 19, 0.1); padding: 0.5rem 1rem; border-radius: var(--radius-full); text-decoration: none;">
+                        <span class="tradition-flag">&#127963;</span>
+                        <span class="parallel-name" style="color: var(--color-text-primary); font-weight: 500;">Hermes</span>
+                        <span class="tradition-label" style="color: var(--color-text-secondary); font-size: 0.8rem;">Greek</span>
+                    </a>
+                    <a href="../../mythos/japanese/index.html" class="parallel-card" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(139, 69, 19, 0.1); padding: 0.5rem 1rem; border-radius: var(--radius-full); text-decoration: none;">
+                        <span class="tradition-flag">&#127471;&#127477;</span>
+                        <span class="parallel-name" style="color: var(--color-text-primary); font-weight: 500;">Kitsune</span>
+                        <span class="tradition-label" style="color: var(--color-text-secondary); font-size: 0.8rem;">Japanese</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="parallel-traditions" style="margin-top: var(--spacing-lg);">
+                <h4>Creator/Weaver Goddesses</h4>
+                <div class="parallel-grid" style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;">
+                    <a href="../../mythos/greek/deities/athena.html" class="parallel-card" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(139, 69, 19, 0.1); padding: 0.5rem 1rem; border-radius: var(--radius-full); text-decoration: none;">
+                        <span class="tradition-flag">&#127963;</span>
+                        <span class="parallel-name" style="color: var(--color-text-primary); font-weight: 500;">Athena</span>
+                        <span class="tradition-label" style="color: var(--color-text-secondary); font-size: 0.8rem;">Greek</span>
+                    </a>
+                    <a href="../../mythos/norse/deities/frigg.html" class="parallel-card" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(139, 69, 19, 0.1); padding: 0.5rem 1rem; border-radius: var(--radius-full); text-decoration: none;">
+                        <span class="tradition-flag">&#9876;</span>
+                        <span class="parallel-name" style="color: var(--color-text-primary); font-weight: 500;">Frigg</span>
+                        <span class="tradition-label" style="color: var(--color-text-secondary); font-size: 0.8rem;">Norse</span>
+                    </a>
+                    <a href="../../mythos/egyptian/deities/neith.html" class="parallel-card" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(139, 69, 19, 0.1); padding: 0.5rem 1rem; border-radius: var(--radius-full); text-decoration: none;">
+                        <span class="tradition-flag">&#9765;</span>
+                        <span class="parallel-name" style="color: var(--color-text-primary); font-weight: 500;">Neith</span>
+                        <span class="tradition-label" style="color: var(--color-text-secondary); font-size: 0.8rem;">Egyptian</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="parallel-traditions" style="margin-top: var(--spacing-lg);">
+                <h4>Storm &amp; Sky Spirits</h4>
+                <div class="parallel-grid" style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;">
+                    <a href="../../mythos/greek/deities/zeus.html" class="parallel-card" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(139, 69, 19, 0.1); padding: 0.5rem 1rem; border-radius: var(--radius-full); text-decoration: none;">
+                        <span class="tradition-flag">&#127963;</span>
+                        <span class="parallel-name" style="color: var(--color-text-primary); font-weight: 500;">Zeus</span>
+                        <span class="tradition-label" style="color: var(--color-text-secondary); font-size: 0.8rem;">Greek</span>
+                    </a>
+                    <a href="../../mythos/norse/deities/thor.html" class="parallel-card" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(139, 69, 19, 0.1); padding: 0.5rem 1rem; border-radius: var(--radius-full); text-decoration: none;">
+                        <span class="tradition-flag">&#9876;</span>
+                        <span class="parallel-name" style="color: var(--color-text-primary); font-weight: 500;">Thor</span>
+                        <span class="tradition-label" style="color: var(--color-text-secondary); font-size: 0.8rem;">Norse</span>
+                    </a>
+                    <a href="../../mythos/hindu/deities/indra.html" class="parallel-card" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(139, 69, 19, 0.1); padding: 0.5rem 1rem; border-radius: var(--radius-full); text-decoration: none;">
+                        <span class="tradition-flag">&#128329;</span>
+                        <span class="parallel-name" style="color: var(--color-text-primary); font-weight: 500;">Indra</span>
+                        <span class="tradition-label" style="color: var(--color-text-secondary); font-size: 0.8rem;">Hindu</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass-card">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">&#128279;</span>
+                Quick Links
+            </h3>
+            <div class="quick-links-grid" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: var(--spacing-lg);">
+                <a href="spirits/index.html" class="quick-link" style="display: flex; align-items: center; gap: 0.5rem; color: var(--mythos-primary); text-decoration: none; padding: 0.5rem 1rem; background: rgba(139, 69, 19, 0.1); border-radius: var(--radius-md);">
+                    <span class="quick-link-icon">&#127752;</span> All Spirits
+                </a>
+                <a href="../../archetypes/trickster/" class="quick-link" style="display: flex; align-items: center; gap: 0.5rem; color: var(--mythos-primary); text-decoration: none; padding: 0.5rem 1rem; background: rgba(139, 69, 19, 0.1); border-radius: var(--radius-md);">
+                    <span class="quick-link-icon">&#127917;</span> Trickster Archetype
+                </a>
+                <a href="../../archetypes/index.html" class="quick-link" style="display: flex; align-items: center; gap: 0.5rem; color: var(--mythos-primary); text-decoration: none; padding: 0.5rem 1rem; background: rgba(139, 69, 19, 0.1); border-radius: var(--radius-md);">
+                    <span class="quick-link-icon">&#127807;</span> Great Mother Archetype
+                </a>
+                <a href="../../mythos/index.html" class="quick-link" style="display: flex; align-items: center; gap: 0.5rem; color: var(--mythos-primary); text-decoration: none; padding: 0.5rem 1rem; background: rgba(139, 69, 19, 0.1); border-radius: var(--radius-md);">
+                    <span class="quick-link-icon">&#127760;</span> All Mythologies
+                </a>
+            </div>
+        </section>
+    </main>
+    <footer style="background: var(--color-surface); backdrop-filter: blur(10px); padding: var(--spacing-xl); border-top: 2px solid rgba(139, 69, 19, 0.3); margin-top: var(--spacing-xs2); text-align: center;">
+        <p style="color: var(--color-text-secondary);">&copy; 2025 World Mythos Explorer | <a href="../../mythos/index.html" style="color: var(--mythos-primary); text-decoration: none;">&larr; Back to All Mythologies</a></p>
+    </footer>
+</body>
+</html>

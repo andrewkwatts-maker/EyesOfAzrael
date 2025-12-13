@@ -1,16 +1,23 @@
-﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Buddhist Mythology - World Mythos Explorer - Buddhist Mythology</title>
-<link href="../../themes/theme-base.css" rel="stylesheet"/>
-<link href="../../styles.css" rel="stylesheet"/>
-<link href="../../themes/corpus-links.css" rel="stylesheet"/>
-<link rel="stylesheet" href="../../themes/smart-links.css">
-<script defer src="../../themes/smart-links.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buddhist Mythology - World Mythos Explorer</title>
+
+    <!-- Base Theme System -->
+    <link rel="stylesheet" href="../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+
+    <!-- Firebase Theme System -->
+    <link rel="stylesheet" href="../../FIREBASE/css/firebase-themes.css">
+
+    <!-- Theme Scripts -->
+    <script defer src="../../themes/theme-picker.js"></script>
     <script defer src="../../themes/theme-animations.js"></script>
-<script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/smart-links.js"></script>
 
     <!-- Submission Link System -->
     <script src="../../js/submission-context.js"></script>
@@ -22,27 +29,47 @@
     <script src="../../js/firebase-auth.js"></script>
     <script src="../../js/auth-guard.js"></script>
     <script src="../../js/components/google-signin-button.js"></script>
-<style>
-        /* Heading Visibility - Ensure all headings are visible */
-        h1, h2, h3, h4 {
+
+    <style>
+        /* ============================================
+           FIREBASE-ENHANCED MYTHOLOGY INDEX TEMPLATE
+           Combines existing styles with Firebase integration
+           ============================================ */
+
+        /* Breadcrumb - Full-width bar attached below header */
+        .breadcrumb {
+            position: sticky;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(var(--color-surface-rgb), 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: var(--spacing-xs) var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
+        }
+
+        .breadcrumb a {
             color: var(--color-primary);
-        }
-
-        h1 a, h2 a, h3 a, h4 a {
-            color: inherit;
             text-decoration: none;
+            transition: all var(--transition-fast);
         }
 
-        h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover {
+        .breadcrumb a:hover {
             color: var(--color-secondary);
             text-decoration: underline;
         }
 
+        /* Hero Section - Modern Glass Styling */
         .hero-section {
             background: linear-gradient(135deg,
                 rgba(var(--color-primary-rgb), 0.8),
                 rgba(var(--color-secondary-rgb), 0.8));
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 2px solid var(--color-primary);
             color: var(--color-text-primary);
             padding: 3rem 2rem;
@@ -52,6 +79,12 @@
             box-shadow: var(--shadow-xl);
         }
 
+        .hero-icon-display {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
         .hero-description {
             font-size: 1.2rem;
             max-width: 800px;
@@ -59,6 +92,7 @@
             line-height: 1.7;
         }
 
+        /* Glass Card - With Hover Animation */
         .glass-card {
             background: rgba(var(--color-surface-rgb), 0.6);
             backdrop-filter: blur(10px);
@@ -77,570 +111,401 @@
             border-color: rgba(var(--color-primary-rgb), 0.4);
         }
 
-        .glass-card h3 {
+        /* Firebase Content Sections */
+        .firebase-section {
+            margin: 3rem 0;
+        }
+
+        .section-header {
             color: var(--color-primary);
-            margin-top: 0;
-            margin-bottom: 0.75rem;
+            margin-bottom: var(--spacing-lg);
+            font-size: 2rem;
+            font-weight: 700;
         }
 
-        .glass-card h3 a {
-            color: var(--color-primary);
-            text-decoration: none;
-        }
-
-        .glass-card h3 a:hover {
-            text-decoration: underline;
-        }
-
-        .subsection-card {
-            background: rgba(var(--color-primary-rgb), 0.05);
-            border-left: 4px solid var(--color-primary);
-            padding: var(--spacing-lg);
-            margin: var(--spacing-lg) 0;
-            border-radius: var(--radius-md);
-            transition: all var(--transition-base, 0.3s ease);
-        }
-
-        .subsection-card:hover {
-            background: rgba(var(--color-primary-rgb), 0.1);
-            transform: translateX(5px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .subsection-card h3 {
-            color: var(--color-primary);
-            margin-top: 0;
-        }
-
-        .subsection-card p {
-            line-height: 1.7;
-        }
-
-        .sub-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--spacing-sm);
-            margin-top: var(--spacing-md);
-        }
-
-        .sub-link {
-            background: var(--color-primary);
-            color: var(--color-text-primary);
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--radius-full);
-            text-decoration: none;
-            font-size: var(--font-size-sm);
-            transition: all var(--transition-base, 0.3s ease);
-        }
-
-        .sub-link:hover {
-            background: var(--color-secondary);
-            transform: scale(1.05);
-            box-shadow: var(--shadow-md);
+        /* Grid Layouts */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
         }
 
         .deity-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: var(--spacing-lg);
             margin: var(--spacing-lg) 0;
         }
 
-        .deity-card {
-            background: rgba(var(--color-primary-rgb), 0.05);
-            border: 2px solid rgba(var(--color-primary-rgb), 0.2);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-lg);
-            transition: all var(--transition-base, 0.3s ease);
-            cursor: pointer;
+        /* Loading States */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            gap: var(--spacing-md);
         }
 
-        .deity-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--color-primary);
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--theme-primary, var(--color-primary));
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .deity-card h3 {
-            color: var(--color-primary);
-            margin-top: 0.5rem;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
-        .deity-card p {
-            line-height: 1.7;
-        }
-
-        .deity-icon {
-            font-size: 2.5rem;
+        .loading-text {
+            color: white;
+            font-size: 1.1rem;
             text-align: center;
+        }
+
+        /* Static Content (preserved from original) */
+        .static-content {
+            margin: 2rem 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .deity-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .hero-icon-display {
+                font-size: 3rem;
+            }
+
+            .breadcrumb {
+                font-size: var(--font-size-xs);
+                padding: var(--spacing-xs) var(--spacing-md);
+                top: 50px;
+            }
         }
     </style>
 </head>
-<body>
-<!-- Theme Picker Container -->
-<div id="theme-picker"></div>
+<body data-theme="buddhist">
+    <!-- Theme Picker Container -->
+    <div id="theme-picker"></div>
+    <div id="theme-picker-container"></div>
 
-<div id="theme-picker-container"></div>
-<header>
-    <div class="header-content">
-        <h1>☸️ Buddhist Mythology</h1>
-        <div id="user-auth-nav"></div>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../mythos/index.html">Home</a> →
-                <span>Buddhist Tradition</span>
-</nav>
-<main>
-<div class="hero-section">
-<h2>The Path to Enlightenment &amp; the Wheel of Dharma</h2>
-<p class="hero-description">
-                Explore the profound wisdom of Buddhist cosmology, from the enlightenment of <a href="deities/gautama_buddha.html">the Buddha</a> to the
-                compassionate Bodhisattvas, from the 31 realms of existence to the eternal <a href="cosmology/samsara.html">cycle of rebirth</a>.
-                Discover the path to liberation from suffering and the realization of ultimate truth.
-            </p>
-</div>
-<section class="glass-card">
-<h2 style="color: var(--color-primary);">🙏 <a href="deities/gautama_buddha.html">The Buddha</a> &amp; Bodhisattvas</h2>
-<p style="line-height: 1.7;">
-                Buddhism centers on the enlightenment of Siddhartha Gautama, who became <a href="deities/gautama_buddha.html">the Buddha</a>, and the
-                Bodhisattvas—beings who delay their own final liberation to help all sentient beings achieve
-                enlightenment. These figures represent different aspects of wisdom, compassion, and liberation.
-            </p>
-<div class="subsection-card">
-<h3>🧘 The Buddha &amp; Enlightened Beings</h3>
-<p>The historical Buddha Shakyamuni, the celestial Buddhas of the ten directions, and the
-                   compassionate Bodhisattvas who guide beings toward liberation from suffering.</p>
-<div class="sub-links">
-<a class="sub-link" href="deities/buddha.html">🧘 Buddha (Enlightened One)</a>
-<a class="sub-link" href="deities/avalokiteshvara.html">🙏 Avalokiteshvara (Compassion)</a>
-<a class="sub-link" href="deities/manjushri.html">📖 Manjushri (Wisdom)</a>
-</div></div></section>
-<section class="glass-card">
-<h2 style="color: var(--color-primary);">🌌 Cosmology &amp; the Structure of Reality</h2>
-<p style="line-height: 1.7; margin-bottom: var(--spacing-lg);">
-                Explore the intricate structure of Buddhist cosmology, from the 31 realms of existence to the profound
-                teachings on the nature of reality and the cycle of rebirth.
-            </p>
-<div class="subsection-card">
-<h3>🏔️ Buddhist Cosmology Overview</h3>
-<p>The 31 realms of existence arranged around Mount Meru, from the lowest hell realms to the
-                   highest formless realms. Understanding the vertical and cyclical nature of Buddhist reality.</p>
-</div>
-<div class="subsection-card">
-<h3>🌀 <a href="cosmology/creation.html">Interdependent Origination - The Nature of Reality</a></h3>
-<p>Buddhism teaches not creation by a deity, but pratityasamutpada—the interdependent arising
-                   of all phenomena. The twelve links of dependent origination explain the cycle of suffering
-                   and rebirth.</p>
-</div>
-<div class="subsection-card">
-<h3>💀 <a href="cosmology/afterlife.html">Death, Bardo &amp; Rebirth - The Cycle Continues</a></h3>
-<p>What happens after death: the intermediate state (bardo), judgment by karma, rebirth in one
-                   of the six realms, and the ultimate goal of escaping <a href="cosmology/samsara.html">samsara</a> to achieve nirvana.</p>
-</div></section>
-<section class="glass-card">
-<h2 style="color: var(--color-primary);">🦸 Legendary Figures &amp; Saints</h2>
-<p style="line-height: 1.7; margin-bottom: var(--spacing-lg);">
-                The realized masters and saints who have achieved enlightenment and dedicated their lives to
-                preserving and transmitting the Dharma.
-            </p>
-<div class="subsection-card">
-<h3>🕉️ Buddhist Saints &amp; Masters</h3>
-<p>The arhats who achieved enlightenment, the great Buddhist kings like Ashoka, legendary monks
-                   and nuns, and the lineage holders who preserved and transmitted the Dharma across millennia.</p>
-</div></section>
-<section class="glass-card">
-<h2 style="color: var(--color-primary);">🐉 Creatures &amp; Spirits</h2>
-<p style="line-height: 1.7; margin-bottom: var(--spacing-lg);">
-                The diverse beings that inhabit the Buddhist cosmos, from celestial devas to fearsome protectors,
-                serpent spirits to hungry ghosts.
-            </p>
-<div class="subsection-card">
-<h3>👹 Mythical Beings</h3>
-<p>The creatures inhabiting Buddhist cosmology—<a href="creatures/nagas.html">nagas</a> (serpent spirits), devas (celestial beings),
-                   asuras (titans), hungry ghosts, guardian spirits, and the fearsome protector deities.</p>
-</div></section>
-<section class="glass-card">
-<h2 style="color: var(--color-primary);">🌿 Sacred Plants &amp; Medicine</h2>
-<p style="line-height: 1.7; margin-bottom: var(--spacing-lg);">
-                The sacred flora of Buddhist tradition, from the Bodhi tree of enlightenment to the lotus of purity,
-                and the medicinal plants used in traditional Buddhist healing practices.
-            </p>
-<div class="subsection-card">
-<h3>🌳 <a href="herbs/index.html">Sacred &amp; Medicinal Plants</a></h3>
-<p>The plants sacred to Buddhist tradition—the Bodhi tree under which Buddha attained enlightenment,
-                   the lotus symbolizing purity, sandalwood for offerings, and herbs used in Tibetan medicine.</p>
-<div class="sub-links">
-<a class="sub-link" href="herbs/bodhi.html">🌳 Bodhi Tree</a>
-<a class="sub-link" href="herbs/lotus.html">🌸 Lotus</a>
-<a class="sub-link" href="herbs/sandalwood.html">🪵 Sandalwood</a>
-<a class="sub-link" href="herbs/preparations.html">Preparation Methods</a>
-</div></div></section>
-<section class="glass-card">
-<h2 style="color: var(--color-primary);">🔮 Practices, Rituals &amp; The Path</h2>
-<p style="line-height: 1.7; margin-bottom: var(--spacing-lg);">
-                The methods, ceremonies, and progressive stages of Buddhist practice that guide practitioners
-                from initial awakening to full enlightenment.
-            </p>
-<div class="subsection-card">
-<h3>🕯️ <a href="rituals/index.html">Ritual Practices</a></h3>
-<p>The ceremonies and practices that connect practitioners to the Dharma—meditation, prostrations,
-                   mantra recitation, mandala offerings, and the great festivals of the Buddhist calendar.</p>
-<div class="sub-links">
-<a class="sub-link" href="rituals/calendar.html">Festival Calendar</a>
-<a class="sub-link" href="rituals/offerings.html">Offerings &amp; Devotions</a>
-</div>
-</div>
-<div class="subsection-card">
-<h3>✨ <a href="magic/index.html">Esoteric Traditions</a></h3>
-<p>The tantric practices of Vajrayana Buddhism—visualization, deity yoga, mantra, mudra, and
-                   the profound methods for transforming consciousness and achieving enlightenment in a single lifetime.</p>
-</div>
-<div class="subsection-card">
-<h3>🪜 The Buddhist Path - Six Stages of Practice</h3>
-<p>The 6-stage journey from lay practitioner to Bodhisattva, following the progressive path of
-                   Buddhist training. A 20-30 year journey of deepening wisdom and compassion.</p>
-<div class="sub-links" style="display: block; line-height: 1.8; margin-top: var(--spacing-md);">
-                    <div>Stage 1: Lay Practitioner</div>
-                    <div>Stage 2: Novice Monk</div>
-                    <div>Stage 3: Monk</div>
-                    <div>Stage 4: Elder</div>
-                    <div>Stage 5: Arahant</div>
-                    <div>Stage 6: Bodhisattva</div>
-</div></div></section>
-<section class="glass-card">
-<h2 style="color: var(--color-primary);">📚 Other Buddhist Sections</h2>
-<p style="line-height: 1.7; margin-bottom: var(--spacing-lg);">
-                Explore the sacred texts, symbols, and resources that form the foundation of Buddhist tradition
-                and practice.
-            </p>
-<div class="deity-grid">
-<div class="deity-card" onclick="window.location.href='texts/index.html'">
-<div class="deity-icon">📜</div>
-<h3>Sacred Texts</h3>
-<p>The Pali Canon (Tipitaka), Mahayana Sutras (Heart Sutra, Lotus Sutra), Tibetan texts
-                       (Book of the Dead), and the commentarial literature that preserves <a href="deities/gautama_buddha.html">the Buddha</a>'s teachings.</p>
-</div>
-<div class="deity-card" onclick="window.location.href='symbols/index.html'">
-<div class="deity-icon">☸️</div>
-<h3>Sacred Symbols</h3>
-<p>The Dharma Wheel, the Eight Auspicious Symbols, mudras (hand gestures), mandalas,
-                       and the symbolic language of Buddhist art and iconography.</p>
-</div>
-<div class="deity-card" onclick="window.location.href='corpus-search.html'">
-<div class="deity-icon">🔍</div>
-<h3>Corpus Search</h3>
-<p>Search Buddhist texts from the Pali Canon, Mahayana Sutras, and Tibetan sources for teachings, concepts, and references.</p>
-</div>
-</div>
-</section>
-<!-- Cross-Cultural Parallels Interlink Panel -->
-<section class="interlink-panel">
-    <h3 class="interlink-header">
-        <span class="interlink-icon">🔗</span>
-        Cross-Cultural Parallels
-    </h3>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>☸️ Buddhist Mythology</h1>
+            <div id="user-auth-nav"></div>
+        </div>
+    </header>
 
-    <div class="interlink-grid">
-        <!-- Teacher Figures Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Divine Teachers</div>
-            <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
-                Buddha as enlightened teacher parallels other traditions' divine teachers and wisdom figures.
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../mythos/index.html">Home</a> →
+        <span aria-current="page">Buddhist Mythology</span>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="hero-icon-display">☸️</div>
+            <h2>Buddhist Mythology</h2>
+            <p class="hero-description">
+                Walk the path of enlightenment through Buddhist cosmology and wisdom. From the Buddha's teachings to celestial bodhisattvas, explore the journey from suffering to liberation across countless realms.
+            </p>
+        </div>
+
+        <!-- ============================================
+             FIREBASE-LOADED DYNAMIC CONTENT SECTIONS
+             These sections load from Firestore
+             ============================================ -->
+
+        <!-- Deities Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">⚡ Deities</h2>
+            <div id="deities-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading deities from Firebase...</p>
+            </div>
+            <div id="deities-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Heroes Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🦸 Heroes & Legendary Mortals</h2>
+            <div id="heroes-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading heroes from Firebase...</p>
+            </div>
+            <div id="heroes-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Creatures Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🐉 Creatures & Monsters</h2>
+            <div id="creatures-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading creatures from Firebase...</p>
+            </div>
+            <div id="creatures-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Cosmology Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🌌 Cosmology & Sacred Places</h2>
+            <div id="cosmology-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading cosmology from Firebase...</p>
+            </div>
+            <div id="cosmology-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Texts Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">📚 Sacred Texts</h2>
+            <div id="texts-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading texts from Firebase...</p>
+            </div>
+            <div id="texts-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Herbs Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🌿 Sacred Plants & Herbalism</h2>
+            <div id="herbs-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading herbs from Firebase...</p>
+            </div>
+            <div id="herbs-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Rituals Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🔮 Rituals & Practices</h2>
+            <div id="rituals-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading rituals from Firebase...</p>
+            </div>
+            <div id="rituals-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Symbols Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">🔱 Sacred Symbols</h2>
+            <div id="symbols-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading symbols from Firebase...</p>
+            </div>
+            <div id="symbols-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Concepts Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">💭 Mystical Concepts</h2>
+            <div id="concepts-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading concepts from Firebase...</p>
+            </div>
+            <div id="concepts-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- Myths Section -->
+        <section class="firebase-section">
+            <h2 class="section-header">📖 Myths & Legends</h2>
+            <div id="myths-loading" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading myths from Firebase...</p>
+            </div>
+            <div id="myths-container" class="content-grid" style="display: none;"></div>
+        </section>
+
+        <!-- ============================================
+             STATIC CUSTOM CONTENT (PRESERVED)
+             Add any mythology-specific static content here
+             ============================================ -->
+        <div class="static-content">
+            <!-- Add custom static content here -->
+        </div>
+
+        <!-- Cross-Cultural Parallels Section -->
+        <section class="interlink-panel" style="margin-top: var(--spacing-xl, 3rem);">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🌍</span>
+                Cross-Cultural Parallels
+            </h3>
+            <p style="margin-bottom: var(--spacing-lg); color: var(--color-text-secondary);">
+                Explore how Buddhist mythology connects with other world traditions through shared themes and archetypes.
             </p>
             <div class="parallel-grid">
-                <a href="../christian/deities/index.html" class="parallel-card">
-                    <span class="tradition-flag">✝️</span>
-                    <span class="parallel-name">Jesus Christ</span>
-                    <span class="tradition-label">Christian</span>
-                </a>
-                <a href="../hindu/deities/krishna.html" class="parallel-card">
-                    <span class="tradition-flag">🕉️</span>
-                    <span class="parallel-name">Krishna</span>
-                    <span class="tradition-label">Hindu</span>
-                </a>
-                <a href="../../index.html" class="parallel-card">
-                    <span class="tradition-flag">☯️</span>
-                    <span class="parallel-name">Laozi</span>
-                    <span class="tradition-label">Taoist</span>
-                </a>
+                <!-- Parallel mythology links will be added here -->
             </div>
-        </div>
+        </section>
 
-        <!-- Compassion Figures Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Compassion Deities</div>
-            <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
-                Avalokiteshvara/Guanyin parallels other mercy and compassion figures across cultures.
-            </p>
-            <div class="parallel-grid">
-                <a href="deities/guanyin.html" class="parallel-card">
-                    <span class="tradition-flag">🌸</span>
-                    <span class="parallel-name">Guanyin</span>
-                    <span class="tradition-label">Chinese Buddhist</span>
-                </a>
-                <a href="../christian/deities/index.html" class="parallel-card">
-                    <span class="tradition-flag">✝️</span>
-                    <span class="parallel-name">Virgin Mary</span>
-                    <span class="tradition-label">Christian</span>
-                </a>
-                <a href="../hindu/deities/vishnu.html" class="parallel-card">
-                    <span class="tradition-flag">🕉️</span>
-                    <span class="parallel-name">Vishnu</span>
-                    <span class="tradition-label">Hindu</span>
-                </a>
-                <a href="../egyptian/deities/isis.html" class="parallel-card">
-                    <span class="tradition-flag">☥</span>
-                    <span class="parallel-name">Isis</span>
-                    <span class="tradition-label">Egyptian</span>
-                </a>
+        <!-- Related Traditions -->
+        <section style="margin-top: var(--spacing-xl, 3rem);">
+            <h2 class="section-header">🔗 Related Traditions</h2>
+            <div class="glass-card">
+                <h3>Explore Other Mythologies</h3>
+                <div class="button-grid" style="display: flex; flex-wrap: wrap; gap: var(--spacing-md);">
+                    <a class="btn btn-secondary" href="../greek/index.html">Greek</a>
+                    <a class="btn btn-secondary" href="../roman/index.html">Roman</a>
+                    <a class="btn btn-secondary" href="../norse/index.html">Norse</a>
+                    <a class="btn btn-secondary" href="../egyptian/index.html">Egyptian</a>
+                    <a class="btn btn-secondary" href="../hindu/index.html">Hindu</a>
+                    <a class="btn btn-secondary" href="../buddhist/index.html">Buddhist</a>
+                    <a class="btn btn-secondary" href="../celtic/index.html">Celtic</a>
+                    <a class="btn btn-secondary" href="../christian/index.html">Christian</a>
+                    <a class="btn btn-secondary" href="../islamic/index.html">Islamic</a>
+                    <a class="btn btn-secondary" href="../jewish/index.html">Jewish</a>
+                </div>
             </div>
-        </div>
+        </section>
+    </main>
 
-        <!-- Wisdom Figures Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Wisdom Deities</div>
-            <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
-                Manjushri, the Bodhisattva of Wisdom, parallels other wisdom deities.
-            </p>
-            <div class="parallel-grid">
-                <a href="../greek/deities/athena.html" class="parallel-card">
-                    <span class="tradition-flag">🏛️</span>
-                    <span class="parallel-name">Athena</span>
-                    <span class="tradition-label">Greek</span>
-                </a>
-                <a href="../hindu/deities/saraswati.html" class="parallel-card">
-                    <span class="tradition-flag">🕉️</span>
-                    <span class="parallel-name">Saraswati</span>
-                    <span class="tradition-label">Hindu</span>
-                </a>
-                <a href="../egyptian/deities/thoth.html" class="parallel-card">
-                    <span class="tradition-flag">☥</span>
-                    <span class="parallel-name">Thoth</span>
-                    <span class="tradition-label">Egyptian</span>
-                </a>
-            </div>
-        </div>
+    <!-- Footer -->
+    <footer>
+        <p>
+            <strong>Buddhist Mythology</strong> - World Mythos Explorer<br>
+            <a href="../../mythos/index.html">Back to World Mythos Home</a> |
+            <a href="../../index.html">Main Site</a>
+        </p>
+    </footer>
 
-        <!-- Key Buddhist Figures with Smart Links -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Key Buddhist Figures</div>
-            <div class="see-also-links" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                <a href="deities/buddha.html" class="see-also-link" data-smart="buddha">
-                    <span>🧘</span> Buddha
-                </a>
-                <a href="deities/avalokiteshvara.html" class="see-also-link" data-smart="avalokiteshvara">
-                    <span>🙏</span> Avalokiteshvara
-                </a>
-                <a href="deities/manjushri.html" class="see-also-link" data-smart="manjushri">
-                    <span>📖</span> Manjushri
-                </a>
-                <a href="deities/index.html" class="see-also-link" data-smart="tara">
-                    <span>🌙</span> Tara
-                </a>
-                <a href="deities/index.html" class="see-also-link" data-smart="maitreya">
-                    <span>🌟</span> Maitreya
-                </a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Sacred Herbs & Plants Interlink Panel -->
-<section class="interlink-panel" style="margin-top: var(--spacing-xl);">
-    <h3 class="interlink-header">
-        <span class="interlink-icon">🌿</span>
-        Sacred Plants of Buddhism
-    </h3>
-
-    <div class="interlink-grid">
-        <div class="interlink-section">
-            <div class="interlink-section-title">Sacred Flora</div>
-            <a href="herbs/lotus.html" class="herb-link-card">
-                <div class="herb-icon">🪷</div>
-                <div class="herb-info">
-                    <h4>Lotus</h4>
-                    <p class="herb-uses">Enlightenment • Purity • Spiritual Rebirth</p>
-                    <div class="herb-traditions">Symbol of Buddha nature rising from samsara</div>
-                </div>
-            </a>
-            <a href="herbs/bodhi.html" class="herb-link-card" style="margin-top: var(--spacing-md);">
-                <div class="herb-icon">🌳</div>
-                <div class="herb-info">
-                    <h4>Bodhi Tree</h4>
-                    <p class="herb-uses">Enlightenment • Awakening • Sacred Shelter</p>
-                    <div class="herb-traditions">Tree under which Buddha attained enlightenment</div>
-                </div>
-            </a>
-            <a href="herbs/sandalwood.html" class="herb-link-card" style="margin-top: var(--spacing-md);">
-                <div class="herb-icon">🪵</div>
-                <div class="herb-info">
-                    <h4>Sandalwood</h4>
-                    <p class="herb-uses">Meditation • Purification • Offerings</p>
-                    <div class="herb-traditions">Sacred incense for Buddhist rituals</div>
-                </div>
-            </a>
-        </div>
-
-        <div class="interlink-section">
-            <div class="interlink-section-title">Cross-Cultural Plant Parallels</div>
-            <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
-                Sacred plants hold symbolic significance across world traditions.
-            </p>
-            <div class="parallel-grid">
-                <a href="../../herbalism/traditions/hindu/tulsi.html" class="parallel-card">
-                    <span class="tradition-flag">🕉️</span>
-                    <span class="parallel-name">Tulsi</span>
-                    <span class="tradition-label">Hindu Sacred</span>
-                </a>
-                <a href="../greek/herbs/oak.html" class="parallel-card">
-                    <span class="tradition-flag">☘️</span>
-                    <span class="parallel-name">Oak</span>
-                    <span class="tradition-label">Celtic Sacred</span>
-                </a>
-                <a href="../norse/cosmology/yggdrasil.html" class="parallel-card">
-                    <span class="tradition-flag">⚔️</span>
-                    <span class="parallel-name">Yggdrasil</span>
-                    <span class="tradition-label">Norse World Tree</span>
-                </a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Sacred Places Interlink Panel -->
-<section class="interlink-panel" style="margin-top: var(--spacing-xl);">
-    <h3 class="interlink-header">
-        <span class="interlink-icon">🏛️</span>
-        Sacred Buddhist Sites
-    </h3>
-
-    <div class="interlink-grid">
-        <div class="interlink-section">
-            <div class="interlink-section-title">Buddhist Pilgrimage Sites</div>
-            <a href="../../spiritual-places/temples/mahabodhi.html" class="place-link-card">
-                <div class="place-visual">
-                    <span class="place-icon">🌳</span>
-                    <span class="place-type">Temple Complex</span>
-                </div>
-                <div class="place-info">
-                    <h4>Mahabodhi Temple</h4>
-                    <p>Site of Buddha's enlightenment at Bodh Gaya</p>
-                    <div class="place-tags">
-                        <span class="tag">India</span>
-                        <span class="tag">UNESCO</span>
-                    </div>
-                </div>
-            </a>
-            <a href="../../spiritual-places/temples/borobudur.html" class="place-link-card" style="margin-top: var(--spacing-md);">
-                <div class="place-visual">
-                    <span class="place-icon">🏛️</span>
-                    <span class="place-type">Monument</span>
-                </div>
-                <div class="place-info">
-                    <h4>Borobudur</h4>
-                    <p>World's largest Buddhist temple in Java</p>
-                    <div class="place-tags">
-                        <span class="tag">Indonesia</span>
-                        <span class="tag">Mahayana</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="interlink-section">
-            <div class="interlink-section-title">Related Sacred Sites</div>
-            <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
-                Compare with sacred mountains and temples across traditions.
-            </p>
-            <div class="parallel-grid">
-                <a href="../../spiritual-places/mountains/mount-kailash.html" class="parallel-card">
-                    <span class="tradition-flag">🏔️</span>
-                    <span class="parallel-name">Mount Kailash</span>
-                    <span class="tradition-label">Buddhist/Hindu</span>
-                </a>
-                <a href="../../spiritual-places/temples/angkor-wat.html" class="parallel-card">
-                    <span class="tradition-flag">🏛️</span>
-                    <span class="parallel-name">Angkor Wat</span>
-                    <span class="tradition-label">Hindu-Buddhist</span>
-                </a>
-                <a href="../../spiritual-places/mountains/mount-fuji.html" class="parallel-card">
-                    <span class="tradition-flag">🗻</span>
-                    <span class="parallel-name">Mount Fuji</span>
-                    <span class="tradition-label">Shinto-Buddhist</span>
-                </a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Related Traditions Section -->
-<section class="glass-card" style="margin-top: var(--spacing-xl);">
-<h2 style="color: var(--color-primary);">🔗 Related Traditions</h2>
-<p style="line-height: 1.7; margin-bottom: var(--spacing-lg);">
-                Buddhist mythology shares themes and has influenced many Asian traditions. Explore connections
-                with other world mythologies.
-            </p>
-<div class="deity-grid">
-<div class="deity-card" onclick="window.location.href='../hindu/index.html'">
-<h3>Hindu Mythology</h3>
-<p>Buddha as avatar of Vishnu, shared cosmology, rebirth cycles, moksha/nirvana parallels</p>
-<a href="../hindu/index.html">Explore Hindu →</a>
-</div>
-<div class="deity-card" onclick="window.location.href='../../archetypes/celestial/index.html'">
-<h3>Taoist Mythology</h3>
-<p>Chan/Zen Buddhism synthesis, shared meditation practices, complementary philosophies</p>
-<a href="../../archetypes/celestial/index.html">Explore Taoist →</a>
-</div>
-<div class="deity-card" onclick="window.location.href='../greek/index.html'">
-<h3>Greek Mythology</h3>
-<p>Compare afterlife journeys, cyclical time concepts, philosophical traditions</p>
-<a href="../greek/index.html">Explore Greek →</a>
-</div>
-<div class="deity-card" onclick="window.location.href='../egyptian/index.html'">
-<h3>Egyptian Mythology</h3>
-<p>Similar judgment after death, book of the dead traditions, elaborate afterlife cosmology</p>
-<a href="../egyptian/index.html">Explore Egyptian →</a>
-</div>
-</div>
-</section>
-</main>
-<footer>
-<p>
-<strong>World Mythos Explorer</strong> - Buddhist Mythology<br/>
-            Based on Pali Canon, Mahayana Sutras, Tibetan Book of the Dead, and traditional Buddhist sources<br/>
-<a href="https://www.accesstoinsight.org/" target="_blank">Read Pali Canon at Access to Insight</a>
-</p>
-</footer>
-
-<!-- Auto-inject submission button -->
-<script>
-    if (window.SubmissionLink) {
-        window.SubmissionLink.autoInject();
-    }
-</script>
-
-<!-- Firebase SDK (CDN) -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="../../firebase-config.js"></script>
-
-<!-- Initialize Auth UI -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Initialize Google Sign-In button in header
-        if (window.GoogleSignInButton) {
-            const authNav = document.getElementById('user-auth-nav');
-            if (authNav) {
-                window.GoogleSignInButton.injectIntoElement(authNav, {
-                    showUserInfo: true,
-                    showAvatar: true,
-                    compact: true
-                });
-            }
+    <!-- Auto-inject submission button -->
+    <script>
+        if (window.SubmissionLink) {
+            window.SubmissionLink.autoInject();
         }
-    });
-</script>
+    </script>
+
+    <!-- Firebase SDK (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script src="../../firebase-config.js"></script>
+
+    <!-- Firebase Content Loader (Module) -->
+    <script type="module">
+        import { FirebaseContentLoader } from '../../FIREBASE/js/firebase-content-loader.js';
+
+        // Wait for Firebase to initialize
+        window.addEventListener('load', async () => {
+            try {
+                // Check if Firebase is initialized
+                if (!window.firebaseApp || !window.firebaseDb) {
+                    console.error('[Index] Firebase not initialized');
+                    showGlobalError('Firebase is not configured. Please check firebase-config.js');
+                    return;
+                }
+
+                console.log('[Index] Initializing Firebase Content Loader for buddhist');
+
+                // Create content loader instance
+                const loader = new FirebaseContentLoader(window.firebaseApp);
+                const mythology = 'buddhist'; // e.g., 'greek', 'norse', 'egyptian'
+
+                // Content types to load
+                const contentTypes = [
+                    { type: 'deities', container: 'deities-container', loading: 'deities-loading' },
+                    { type: 'heroes', container: 'heroes-container', loading: 'heroes-loading' },
+                    { type: 'creatures', container: 'creatures-container', loading: 'creatures-loading' },
+                    { type: 'cosmology', container: 'cosmology-container', loading: 'cosmology-loading' },
+                    { type: 'texts', container: 'texts-container', loading: 'texts-loading' },
+                    { type: 'herbs', container: 'herbs-container', loading: 'herbs-loading' },
+                    { type: 'rituals', container: 'rituals-container', loading: 'rituals-loading' },
+                    { type: 'symbols', container: 'symbols-container', loading: 'symbols-loading' },
+                    { type: 'concepts', container: 'concepts-container', loading: 'concepts-loading' },
+                    { type: 'myths', container: 'myths-container', loading: 'myths-loading' }
+                ];
+
+                // Load each content type
+                for (const { type, container, loading } of contentTypes) {
+                    try {
+                        console.log(`[Index] Loading ${type} for ${mythology}...`);
+
+                        // Load content filtered by mythology
+                        await loader.loadContent(type, { mythology: mythology });
+
+                        // Hide loading, show container
+                        const loadingEl = document.getElementById(loading);
+                        const containerEl = document.getElementById(container);
+
+                        if (loadingEl) loadingEl.style.display = 'none';
+                        if (containerEl) containerEl.style.display = 'grid';
+
+                        // Render content
+                        loader.renderContent(container, type);
+
+                        console.log(`[Index] ✓ ${type} loaded successfully`);
+
+                    } catch (error) {
+                        console.error(`[Index] Error loading ${type}:`, error);
+
+                        // Hide loading, show error
+                        const loadingEl = document.getElementById(loading);
+                        const containerEl = document.getElementById(container);
+
+                        if (loadingEl) {
+                            loadingEl.innerHTML = `
+                                <div class="error-container">
+                                    <div class="error-title">Failed to load ${type}</div>
+                                    <div class="error-message">${error.message}</div>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+
+                console.log('[Index] All content loaded successfully');
+
+            } catch (error) {
+                console.error('[Index] Fatal error:', error);
+                showGlobalError('Failed to load content: ' + error.message);
+            }
+        });
+
+        function showGlobalError(message) {
+            document.querySelectorAll('.loading-container').forEach(el => {
+                el.innerHTML = `
+                    <div class="error-container">
+                        <div class="error-title">Error</div>
+                        <div class="error-message">${message}</div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>

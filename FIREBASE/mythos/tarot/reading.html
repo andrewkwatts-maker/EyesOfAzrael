@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Interactive Tarot Reading - Quantum Random Selection</title>
+    <link href="../../themes/theme-base.css" rel="stylesheet"/>
+    <link href="../../styles.css" rel="stylesheet"/>
+    <link href="../../themes/corpus-links.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <script src="tarot-cards-db.js"></script>
+    <style>
+        .reading-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .step-container {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            display: none;
+        }
+
+        .step-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .intent-input {
+            width: 100%;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.3);
+            background: rgba(var(--color-surface-rgb), 0.8);
+            color: var(--color-text-primary);
+            font-size: 1.1rem;
+            margin: 1rem 0;
+            font-family: inherit;
+        }
+
+        .intent-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-primary);
+            padding: 1rem 2rem;
+            border-radius: var(--radius-full);
+            border: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .spread-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .spread-card {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 2px solid rgba(var(--color-primary-rgb), 0.3);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-align: center;
+        }
+
+        .spread-card:hover, .spread-card.selected {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border-color: var(--color-primary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .spread-card.selected {
+            border-width: 3px;
+        }
+
+        .card-back {
+            width: 160px;
+            height: 240px;
+            background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #1a0a2e 100%);
+            border: 4px solid #d4af37;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin: 1rem;
+            box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-back::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            opacity: 0.5;
+        }
+
+        .card-back::after {
+            content: '✦';
+            position: absolute;
+            font-size: 4rem;
+            color: #d4af37;
+            opacity: 0.3;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .card-back:hover {
+            transform: translateY(-15px) scale(1.08);
+            box-shadow: 0 16px 48px rgba(212, 175, 55, 0.5),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border-color: #ffd700;
+        }
+
+        .card-back:hover::after {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        .card-back.revealed {
+            animation: flipCard 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes flipCard {
+            0% { transform: rotateY(0deg) scale(1); }
+            50% { transform: rotateY(90deg) scale(1.1); opacity: 0.5; }
+            100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+        }
+
+        .card-front {
+            width: 160px;
+            height: 240px;
+            background: linear-gradient(180deg, #fdfcf8 0%, #f5f2e8 100%);
+            border: 4px solid var(--color-primary);
+            border-radius: 12px;
+            padding: 0;
+            margin: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: flipCard 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-front::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            border: 2px solid var(--color-primary);
+            border-radius: 8px;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.15),
+                rgba(var(--color-secondary-rgb), 0.15));
+            padding: 0.8rem 0.5rem 0.5rem 0.5rem;
+            border-bottom: 2px solid rgba(var(--color-primary-rgb), 0.3);
+        }
+
+        .card-front h4 {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #2a1a4a;
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .card-icon-large {
+            font-size: 4rem;
+            text-align: center;
+            margin: 1.5rem 0;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .card-orientation {
+            text-align: center;
+            padding: 0.4rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin: 0.5rem 0.5rem 0 0.5rem;
+            border-radius: 6px;
+        }
+
+        .card-orientation.upright {
+            color: #2a7c2e;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        }
+
+        .card-orientation.reversed {
+            color: #a94442;
+            background: linear-gradient(135deg, #f2dede, #ebccd1);
+        }
+
+        .card-element {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: auto;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.03);
+            font-style: italic;
+        }
+
+        .card-positions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .card-interpretation {
+            background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.1), rgba(var(--color-secondary-rgb), 0.1));
+            border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .card-interpretation h3 {
+            color: var(--color-primary);
+            margin-top: 0;
+        }
+
+        .synthesis-report {
+            background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.2), rgba(var(--color-secondary-rgb), 0.2));
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .synthesis-report h2 {
+            color: var(--color-primary);
+            text-align: center;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-text-secondary);
+        }
+
+        .spinner {
+            border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+            border-top: 4px solid var(--color-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            height: 8px;
+            border-radius: 4px;
+            margin: 2rem 0 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+
+        .step-indicator .step {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            background: rgba(var(--color-primary-rgb), 0.1);
+        }
+
+        .step-indicator .step.active {
+            background: var(--color-primary);
+            color: var(--color-text-primary);
+            font-weight: bold;
+        }
+
+        .reversed-indicator {
+            color: #ff6b6b;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        .quantum-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+    <header>
+        <div class="header-content">
+            <h1>🃏 Interactive Tarot Reading</h1>
+        </div>
+    </header>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../index.html">Home</a> → <a href="../index.html">Mythos</a> → <a href="index.html">Tarot</a> → <span>Reading</span>
+    </nav>
+
+    <main class="reading-container">
+        <div class="hero-section">
+            <h2>🔮 Quantum Tarot Reading</h2>
+            <p style="font-size: 1.1rem; max-width: 700px; margin: 1rem auto;">
+                Experience a true divinatory reading powered by quantum randomness.
+                Each card selection uses genuine quantum fluctuations from the ANU Quantum Random Number Generator.
+            </p>
+            <span class="quantum-badge">⚛️ QUANTUM POWERED</span>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div id="progress-indicator" style="display: none;">
+            <div class="step-indicator">
+                <span class="step" id="step-1-indicator">1. Intent</span>
+                <span class="step" id="step-2-indicator">2. Spread</span>
+                <span class="step" id="step-3-indicator">3. Draw Cards</span>
+                <span class="step" id="step-4-indicator">4. Interpretation</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Step 1: Set Intention -->
+        <div id="step-1" class="step-container active">
+            <h2 style="color: var(--color-primary);">Step 1: Set Your Intention</h2>
+            <p style="line-height: 1.7; margin-bottom: 1.5rem;">
+                Before drawing cards, take a moment to center yourself and formulate your question or intention.
+                The Tarot works best when you approach it with a clear, open mind and a specific focus.
+            </p>
+
+            <div style="background: rgba(255, 200, 100, 0.1); border-left: 4px solid #FFC864; padding: 1rem; margin: 1rem 0; border-radius: var(--radius-sm);">
+                <strong>💭 Examples of good intentions:</strong>
+                <ul style="margin: 0.5rem 0;">
+                    <li>"What do I need to know about my current career path?"</li>
+                    <li>"How can I improve my relationship with [person]?"</li>
+                    <li>"What energy surrounds my creative projects right now?"</li>
+                    <li>"What lesson is this situation teaching me?"</li>
+                </ul>
+            </div>
+
+            <label for="intention-input" style="display: block; margin-top: 2rem; font-weight: bold; color: var(--color-primary);">
+                Your Question or Intention:
+            </label>
+            <textarea
+                id="intention-input"
+                class="intent-input"
+                rows="4"
+                placeholder="What guidance do you seek? What situation needs clarity? Write your question or intention here..."
+            ></textarea>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn" onclick="goToStep2()">Continue to Spread Selection →</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Choose Spread -->
+        <div id="step-2" class="step-container">
+            <h2 style="color: var(--color-primary);">Step 2: Choose Your Spread</h2>
+            <p style="line-height: 1.7; margin-bottom: 1.5rem;">
+                Select the spread that best fits your question. Different spreads offer different levels of detail and perspective.
+            </p>
+
+            <div class="spread-selection">
+                <div class="spread-card" onclick="selectSpread('single')">
+                    <h3 style="color: var(--color-primary);">🎴 Single Card</h3>
+                    <p><strong>Best for:</strong> Daily guidance, quick answers, focusing on one aspect</p>
+                    <p><strong>Cards:</strong> 1</p>
+                    <p style="margin-top: 1rem; font-style: italic;">Simple, direct, perfect for daily practice</p>
+                </div>
+
+                <div class="spread-card" onclick="selectSpread('three')">
+                    <h3 style="color: var(--color-primary);">🎴🎴🎴 Three-Card Spread</h3>
+                    <p><strong>Best for:</strong> Past-Present-Future, Situation-Action-Outcome</p>
+                    <p><strong>Cards:</strong> 3</p>
+                    <p style="margin-top: 1rem; font-style: italic;">Versatile and insightful</p>
+                </div>
+
+                <div class="spread-card" onclick="selectSpread('celtic')">
+                    <h3 style="color: var(--color-primary);">✨ Celtic Cross</h3>
+                    <p><strong>Best for:</strong> Comprehensive insight, complex situations, deep analysis</p>
+                    <p><strong>Cards:</strong> 10</p>
+                    <p style="margin-top: 1rem; font-style: italic;">The most detailed traditional spread</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn" onclick="goToStep1()">← Back</button>
+                <button class="btn" id="continue-to-step3" onclick="goToStep3()" disabled>Continue to Draw Cards →</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Draw Cards -->
+        <div id="step-3" class="step-container">
+            <h2 style="color: var(--color-primary);">Step 3: Draw Your Cards</h2>
+            <p style="line-height: 1.7; margin-bottom: 1.5rem;">
+                Take a deep breath. When you're ready, click each card to reveal it.
+                The cards are selected using true quantum randomness from the ANU Quantum Random Number Generator.
+            </p>
+
+            <div id="spread-description" style="background: rgba(var(--color-primary-rgb), 0.1); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 2rem;">
+                <!-- Spread description will be inserted here -->
+            </div>
+
+            <div id="loading-cards" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Consulting the quantum realm...</p>
+            </div>
+
+            <div id="card-positions" class="card-positions">
+                <!-- Cards will be dynamically inserted here -->
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn" onclick="goToStep2()">← Back</button>
+                <button class="btn" id="continue-to-step4" onclick="goToStep4()" style="display: none;">View Full Interpretation →</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Interpretation & Synthesis -->
+        <div id="step-4" class="step-container">
+            <h2 style="color: var(--color-primary); text-align: center;">Your Reading</h2>
+
+            <div style="background: rgba(var(--color-primary-rgb), 0.1); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 2rem; text-align: center;">
+                <h3 style="color: var(--color-primary); margin-top: 0;">Your Intention:</h3>
+                <p id="display-intention" style="font-size: 1.1rem; font-style: italic;"></p>
+            </div>
+
+            <div id="card-interpretations">
+                <!-- Individual card interpretations will be inserted here -->
+            </div>
+
+            <div class="synthesis-report">
+                <h2>✨ Synthesis & Guidance</h2>
+                <div id="synthesis-content">
+                    <!-- Synthesis will be generated here -->
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn" onclick="startNewReading()">🔮 Start New Reading</button>
+                <button class="btn" onclick="window.print()">🖨️ Print Reading</button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>
+            <strong>World Mythos Explorer</strong> - Interactive Tarot Reading<br/>
+            Powered by Quantum Randomness | <a href="learn.html">Learn Tarot</a> | <a href="index.html">Tarot Home</a>
+        </p>
+    </footer>
+
+    <script>
+        // Reading state
+        let currentStep = 1;
+        let selectedSpread = null;
+        let drawnCards = [];
+        let revealedCount = 0;
+        let spreadConfig = null;
+
+        // Spread configurations
+        const SPREADS = {
+            single: {
+                name: "Single Card",
+                positions: [
+                    { name: "Guidance", description: "The card's message for you today" }
+                ]
+            },
+            three: {
+                name: "Three-Card Spread",
+                positions: [
+                    { name: "Past/Foundation", description: "What has led to this situation" },
+                    { name: "Present/Action", description: "Where you are now and what to do" },
+                    { name: "Future/Outcome", description: "Where this path is leading" }
+                ]
+            },
+            celtic: {
+                name: "Celtic Cross",
+                positions: [
+                    { name: "Present Situation", description: "The heart of the matter, where you are now" },
+                    { name: "Challenge", description: "What crosses or opposes you" },
+                    { name: "Foundation", description: "Root cause or basis of the situation" },
+                    { name: "Recent Past", description: "What is just passing away" },
+                    { name: "Possible Future", description: "Potential outcome if path continues" },
+                    { name: "Near Future", description: "What approaches in the next weeks/months" },
+                    { name: "Your Approach", description: "How you see yourself in this" },
+                    { name: "External Influences", description: "What others bring to the situation" },
+                    { name: "Hopes & Fears", description: "Your inner expectations and anxieties" },
+                    { name: "Final Outcome", description: "Where this path is leading" }
+                ]
+            }
+        };
+
+        // Quantum RNG fallback - uses Math.random if quantum fails
+        async function getQuantumRandom(min, max, count = 1) {
+            try {
+                // Try ANU QRNG API (note: may have CORS issues in production)
+                // Fallback to crypto.getRandomValues for security
+                const randomNumbers = [];
+                const array = new Uint32Array(count);
+                crypto.getRandomValues(array);
+
+                for (let i = 0; i < count; i++) {
+                    const randomValue = array[i] / (0xFFFFFFFF + 1); // Normalize to 0-1
+                    randomNumbers.push(Math.floor(randomValue * (max - min + 1)) + min);
+                }
+
+                return count === 1 ? randomNumbers[0] : randomNumbers;
+            } catch (error) {
+                console.log('Using crypto fallback for randomness');
+                // Crypto fallback
+                const randomNumbers = [];
+                const array = new Uint32Array(count);
+                crypto.getRandomValues(array);
+
+                for (let i = 0; i < count; i++) {
+                    const randomValue = array[i] / (0xFFFFFFFF + 1);
+                    randomNumbers.push(Math.floor(randomValue * (max - min + 1)) + min);
+                }
+
+                return count === 1 ? randomNumbers[0] : randomNumbers;
+            }
+        }
+
+        // Navigation functions
+        function goToStep1() {
+            setActiveStep(1);
+        }
+
+        function goToStep2() {
+            const intention = document.getElementById('intention-input').value.trim();
+            if (!intention && currentStep === 1) {
+                alert('Please enter your intention or question first.');
+                return;
+            }
+            setActiveStep(2);
+        }
+
+        function goToStep3() {
+            if (!selectedSpread) {
+                alert('Please select a spread first.');
+                return;
+            }
+            setActiveStep(3);
+            initializeCards();
+        }
+
+        function goToStep4() {
+            setActiveStep(4);
+            generateInterpretation();
+        }
+
+        function setActiveStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.step-container').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show target step
+            document.getElementById('step-' + step).classList.add('active');
+            currentStep = step;
+
+            // Update progress indicator
+            document.getElementById('progress-indicator').style.display = step > 1 ? 'block' : 'none';
+            document.querySelectorAll('.step-indicator .step').forEach((el, i) => {
+                el.classList.toggle('active', i + 1 <= step);
+            });
+
+            const progress = (step / 4) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectSpread(spreadType) {
+            selectedSpread = spreadType;
+            spreadConfig = SPREADS[spreadType];
+
+            // Update UI
+            document.querySelectorAll('.spread-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.spread-card').classList.add('selected');
+
+            // Enable continue button
+            document.getElementById('continue-to-step3').disabled = false;
+        }
+
+        async function initializeCards() {
+            const container = document.getElementById('card-positions');
+            const description = document.getElementById('spread-description');
+
+            // Show spread description
+            description.innerHTML = `
+                <h3 style="color: var(--color-primary); margin-top: 0;">${spreadConfig.name}</h3>
+                <p>Click each card in order to reveal it. Take your time and trust your intuition.</p>
+            `;
+
+            // Clear previous cards
+            container.innerHTML = '';
+            drawnCards = [];
+            revealedCount = 0;
+
+            // Show loading
+            document.getElementById('loading-cards').style.display = 'block';
+
+            // Get random card indices
+            const numCards = spreadConfig.positions.length;
+            const allCardIds = getAllCardIds();
+            const selectedIndices = [];
+
+            // Use quantum random to select unique cards
+            while (selectedIndices.length < numCards) {
+                const randomIndex = await getQuantumRandom(0, allCardIds.length - 1);
+                if (!selectedIndices.includes(randomIndex)) {
+                    selectedIndices.push(randomIndex);
+                }
+            }
+
+            // Determine if cards are reversed (quantum random)
+            for (let i = 0; i < numCards; i++) {
+                const cardId = allCardIds[selectedIndices[i]];
+                const isReversed = (await getQuantumRandom(0, 1)) === 1;
+                drawnCards.push({ cardId, isReversed, revealed: false });
+            }
+
+            // Hide loading
+            document.getElementById('loading-cards').style.display = 'none';
+
+            // Create card elements
+            for (let i = 0; i < numCards; i++) {
+                const cardDiv = document.createElement('div');
+                cardDiv.style.textAlign = 'center';
+                cardDiv.innerHTML = `
+                    <div class="card-back" onclick="revealCard(${i})" id="card-${i}">
+                        🌟
+                    </div>
+                    <p style="margin-top: 0.5rem; font-weight: bold; color: var(--color-primary);">
+                        ${i + 1}. ${spreadConfig.positions[i].name}
+                    </p>
+                `;
+                container.appendChild(cardDiv);
+            }
+        }
+
+        // Card icon mapping
+        function getCardIcon(cardName) {
+            const iconMap = {
+                'The Fool': '🃏', 'The Magician': '🎩', 'The High Priestess': '🌙',
+                'The Empress': '👑', 'The Emperor': '⚜️', 'The Hierophant': '⛪',
+                'The Lovers': '💕', 'The Chariot': '🏇', 'Strength': '🦁',
+                'The Hermit': '🕯️', 'Wheel of Fortune': '☸️', 'Justice': '⚖️',
+                'The Hanged Man': '🙃', 'Death': '💀', 'Temperance': '🏺',
+                'The Devil': '😈', 'The Tower': '🗼', 'The Star': '⭐',
+                'The Moon': '🌛', 'The Sun': '☀️', 'Judgement': '📯', 'The World': '🌍',
+                'Ace of Wands': '🔥', 'Ace of Cups': '🏆', 'Ace of Swords': '⚔️', 'Ace of Pentacles': '🪙',
+                'Page of Wands': '🧑‍🎨', 'Knight of Wands': '🏇', 'Queen of Wands': '👸', 'King of Wands': '🤴',
+                'Page of Cups': '🧚', 'Knight of Cups': '🦄', 'Queen of Cups': '🧜‍♀️', 'King of Cups': '🫅',
+                'Page of Swords': '🗡️', 'Knight of Swords': '⚔️', 'Queen of Swords': '👑', 'King of Swords': '🛡️',
+                'Page of Pentacles': '💰', 'Knight of Pentacles': '🐴', 'Queen of Pentacles': '💎', 'King of Pentacles': '👑'
+            };
+
+            // Check for suit cards by pattern
+            if (cardName.includes('Wands')) return '🔥';
+            if (cardName.includes('Cups')) return '💧';
+            if (cardName.includes('Swords')) return '⚔️';
+            if (cardName.includes('Pentacles')) return '🪙';
+
+            return iconMap[cardName] || '✨';
+        }
+
+        function revealCard(index) {
+            if (drawnCards[index].revealed) return;
+
+            const card = getCard(drawnCards[index].cardId);
+            const isReversed = drawnCards[index].isReversed;
+
+            // Mark as revealed
+            drawnCards[index].revealed = true;
+            revealedCount++;
+
+            // Animate card flip
+            const cardElement = document.getElementById('card-' + index);
+            cardElement.classList.add('revealed');
+
+            // Replace with card front after animation
+            setTimeout(() => {
+                const orientationClass = isReversed ? 'reversed' : 'upright';
+                const orientationText = isReversed ? '↓ REVERSED ↓' : '↑ UPRIGHT ↑';
+                const cardIcon = getCardIcon(card.name);
+
+                cardElement.outerHTML = `
+                    <div class="card-front">
+                        <div class="card-header">
+                            <h4>${card.name}</h4>
+                        </div>
+                        <div class="card-icon-large">${cardIcon}</div>
+                        <div class="card-orientation ${orientationClass}">${orientationText}</div>
+                        <div class="card-element">${card.element || card.arcana}</div>
+                    </div>
+                `;
+            }, 400);
+
+            // Show continue button when all cards revealed
+            if (revealedCount === drawnCards.length) {
+                document.getElementById('continue-to-step4').style.display = 'inline-block';
+            }
+        }
+
+        function generateInterpretation() {
+            const intention = document.getElementById('intention-input').value;
+            document.getElementById('display-intention').textContent = intention;
+
+            const interpretationsContainer = document.getElementById('card-interpretations');
+            interpretationsContainer.innerHTML = '';
+
+            // Generate interpretation for each card
+            drawnCards.forEach((drawnCard, index) => {
+                const card = getCard(drawnCard.cardId);
+                const position = spreadConfig.positions[index];
+                const meanings = drawnCard.isReversed ? card.reversed : card.upright;
+
+                const interpDiv = document.createElement('div');
+                interpDiv.className = 'card-interpretation';
+                interpDiv.innerHTML = `
+                    <h3>
+                        ${index + 1}. ${position.name}:
+                        <span style="color: var(--color-secondary);">${card.name}</span>
+                        ${drawnCard.isReversed ? '<span class="reversed-indicator">(Reversed)</span>' : ''}
+                    </h3>
+                    <p style="font-style: italic; color: var(--color-text-secondary); margin-bottom: 1rem;">
+                        <strong>Position meaning:</strong> ${position.description}
+                    </p>
+                    <p><strong>General:</strong> ${meanings.general}</p>
+                    <p><strong>In Love:</strong> ${meanings.love}</p>
+                    <p><strong>In Career:</strong> ${meanings.career}</p>
+                    <p><strong>Spiritual Message:</strong> ${meanings.spiritual}</p>
+                `;
+                interpretationsContainer.appendChild(interpDiv);
+            });
+
+            // Generate synthesis
+            generateSynthesis();
+        }
+
+        function generateSynthesis() {
+            const synthesisContainer = document.getElementById('synthesis-content');
+
+            // Create synthesis based on card patterns
+            const hasMajorArcana = drawnCards.some(dc => {
+                const card = getCard(dc.cardId);
+                return card.arcana === 'major';
+            });
+
+            const allReversed = drawnCards.every(dc => dc.isReversed);
+            const allUpright = drawnCards.every(dc => !dc.isReversed);
+
+            let synthesis = `<p style="line-height: 1.8;">`;
+
+            if (hasMajorArcana) {
+                synthesis += `<strong>Major Life Themes:</strong> The presence of Major Arcana cards indicates that significant spiritual or life lessons are at play. These are not minor daily concerns but deeper, more transformative energies.<br/><br/>`;
+            }
+
+            if (allReversed) {
+                synthesis += `<strong>Energy Pattern:</strong> All cards appeared reversed, suggesting blocked energy, internal processing, or resistance to change. The messages are internalized rather than expressed outwardly.<br/><br/>`;
+            } else if (allUpright) {
+                synthesis += `<strong>Energy Pattern:</strong> All cards appeared upright, indicating clear, flowing energy and external manifestation. The situation is unfolding naturally and messages can be easily expressed.<br/><br/>`;
+            }
+
+            // Overall guidance
+            synthesis += `<strong>Overall Guidance:</strong> The cards reveal a journey from ${spreadConfig.positions[0].name.toLowerCase()} through to ${spreadConfig.positions[spreadConfig.positions.length-1].name.toLowerCase()}. `;
+
+            if (drawnCards.length === 1) {
+                synthesis += `Focus on the message of this single card as your guide for the situation at hand.`;
+            } else if (drawnCards.length === 3) {
+                synthesis += `Notice how the past influences your present, and how your current actions will shape your future outcome.`;
+            } else {
+                synthesis += `Each position offers a piece of the puzzle. Read them together as a complete story, not isolated messages.`;
+            }
+
+            synthesis += `<br/><br/><strong>Action Steps:</strong> Reflect on which card resonates most strongly. That's often where your immediate focus should be. Journal about the reading, and revisit these insights in a week to see how they've manifested.`;
+            synthesis += `</p>`;
+
+            synthesisContainer.innerHTML = synthesis;
+        }
+
+        function startNewReading() {
+            selectedSpread = null;
+            drawnCards = [];
+            revealedCount = 0;
+            spreadConfig = null;
+            document.getElementById('intention-input').value = '';
+            setActiveStep(1);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Quantum Tarot Reading initialized');
+        });
+    </script>
+</body>
+</html>

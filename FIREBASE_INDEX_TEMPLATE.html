@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Greek Mythology - World Mythos Explorer</title>
+
+    <!-- Base Theme Styles -->
+    <link href="../../themes/theme-base.css" rel="stylesheet"/>
+    <link href="../../styles.css" rel="stylesheet"/>
+    <link href="../../themes/corpus-links.css" rel="stylesheet"/>
+    <script defer src="../../themes/theme-picker.js"></script>
+    <script defer src="../../themes/theme-animations.js"></script>
+    <link rel="stylesheet" href="../../themes/smart-links.css">
+    <script defer src="../../themes/smart-links.js"></script>
+
+    <!-- Submission Link System -->
+    <script src="../../js/submission-context.js"></script>
+    <script src="../../js/components/submission-link.js"></script>
+    <link rel="stylesheet" href="../../css/submission-link.css">
+
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../css/user-auth.css">
+    <script src="../../js/firebase-auth.js"></script>
+    <script src="../../js/auth-guard.js"></script>
+    <script src="../../js/components/google-signin-button.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="/firebase-config.js"></script>
+
+    <!-- Theme System -->
+    <link rel="stylesheet" href="/FIREBASE/css/firebase-themes.css">
+    <script src="/FIREBASE/js/theme-manager.js"></script>
+
+    <style>
+        /* ============================================
+           MODERN GLASS UI TEMPLATE - Greek Mythos
+           Firebase-Integrated Version
+           ============================================ */
+
+        /* Hero Section - Modern Glass Styling */
+        .hero-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.8),
+                rgba(var(--color-secondary-rgb), 0.8));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            color: var(--color-text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-icon-display {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 1rem auto;
+            line-height: 1.7;
+        }
+
+        /* Section Headers */
+        .section-header {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-lg);
+            margin-top: var(--spacing-xl, 3rem);
+        }
+
+        /* Glass Grid Container - For Firebase Content */
+        .glass-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        /* Loading State */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            color: var(--color-primary);
+            font-size: 1.1rem;
+        }
+
+        /* Error State */
+        .error-container {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(220, 38, 38, 0.1);
+            border: 2px solid rgba(220, 38, 38, 0.3);
+            border-radius: var(--radius-lg);
+        }
+
+        .error-title {
+            color: #dc2626;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            color: var(--color-text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state-title {
+            font-size: 1.5rem;
+            color: var(--color-text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state-message {
+            color: var(--color-text-secondary);
+        }
+
+        /* Content Card (from firebase-content-loader.js) */
+        .content-card {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-base, 0.3s ease);
+            cursor: pointer;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .content-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+            border-color: rgba(var(--color-primary-rgb), 0.4);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .card-title {
+            color: var(--color-primary);
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .card-badge {
+            background: var(--color-primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.85rem;
+            text-transform: capitalize;
+        }
+
+        .card-body {
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        .card-footer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: var(--spacing-md);
+        }
+
+        .card-tag {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            color: var(--color-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+        }
+
+        main {
+            max-width: var(--container-xl);
+            margin: 0 auto;
+            padding: var(--spacing-lg);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .glass-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .hero-icon-display {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="greek" data-mythology="greek">
+
+<!-- Theme Picker Container -->
+<div id="theme-picker"></div>
+<div id="theme-picker-container"></div>
+
+<header>
+    <div class="header-content">
+        <h1>⚡ Greek Mythology</h1>
+        <div id="user-auth-nav"></div>
+    </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="../../mythos/index.html">Home</a> →
+    <span aria-current="page">Greek Mythology</span>
+</nav>
+
+<main>
+    <!-- Hero Section (Static) -->
+    <div class="hero-section">
+        <div class="hero-icon-display">⚡</div>
+        <h2>Greek Mythology & the Olympian Pantheon</h2>
+        <p class="hero-description">
+            Explore the rich tapestry of Greek mythology, from the heights of Mount Olympus to the depths of Tartarus.
+            Discover the twelve Olympians, legendary heroes, fearsome creatures, and the mysteries that shaped
+            Western civilization for over a millennium.
+        </p>
+    </div>
+
+    <!-- Deities Section (Dynamic from Firebase) -->
+    <section>
+        <h2 class="section-header">⚡ The Olympian Pantheon</h2>
+        <p style="margin-bottom: var(--spacing-lg); line-height: 1.7;">
+            The twelve great gods who dwelt upon Mount Olympus, ruling over the cosmos and interfering in the affairs
+            of mortals. Each Olympian commanded unique domains and wielded divine powers that shaped the Greek world.
+        </p>
+        <div id="deities-container" class="glass-grid" data-content-container>
+            <!-- Content loaded by FirebaseContentLoader -->
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading deities...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cosmology Section (Dynamic from Firebase) -->
+    <section>
+        <h2 class="section-header">🌌 Cosmology & the Structure of Reality</h2>
+        <p style="margin-bottom: var(--spacing-lg); line-height: 1.7;">
+            The three-tiered structure of the Greek universe: Olympus (realm of gods), Earth (realm of mortals),
+            and the Underworld (realm of the dead).
+        </p>
+        <div id="cosmology-container" class="glass-grid" data-content-container>
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading cosmology...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Heroes Section (Dynamic from Firebase) -->
+    <section>
+        <h2 class="section-header">🦸 Heroes & Legendary Mortals</h2>
+        <p style="margin-bottom: var(--spacing-lg); line-height: 1.7;">
+            Legendary mortals who performed impossible deeds, often with divine parentage or aid. Their stories
+            of courage, cunning, and tragic flaws have inspired millennia of literature and art.
+        </p>
+        <div id="heroes-container" class="glass-grid" data-content-container>
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading heroes...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Creatures Section (Dynamic from Firebase) -->
+    <section>
+        <h2 class="section-header">🐉 Creatures & Monsters</h2>
+        <p style="margin-bottom: var(--spacing-lg); line-height: 1.7;">
+            The fearsome monsters and magical creatures that populate Greek myth - from the Gorgons to the Chimera,
+            from Pegasus to the Hydra. Challenges for heroes and warnings to mortals.
+        </p>
+        <div id="creatures-container" class="glass-grid" data-content-container>
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading creatures...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Herbs Section (Dynamic from Firebase) -->
+    <section>
+        <h2 class="section-header">🌿 Sacred Plants & Herbalism</h2>
+        <p style="margin-bottom: var(--spacing-lg); line-height: 1.7;">
+            The plants sacred to the gods and used in ritual, healing, and magic. Each deity has their favored
+            herbs, and many myths tell of botanical transformations and divine gardens.
+        </p>
+        <div id="herbs-container" class="glass-grid" data-content-container>
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading herbs...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rituals Section (Dynamic from Firebase) -->
+    <section>
+        <h2 class="section-header">🔮 Mysteries, Rituals & Magic</h2>
+        <p style="margin-bottom: var(--spacing-lg); line-height: 1.7;">
+            The ceremonies, festivals, and sacred rites that connected mortals with the divine. From the
+            Olympic Games to the Eleusinian Mysteries, ritual was the heart of Greek religion.
+        </p>
+        <div id="rituals-container" class="glass-grid" data-content-container>
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading rituals...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Texts Section (Dynamic from Firebase) -->
+    <section>
+        <h2 class="section-header">📚 Sacred Texts</h2>
+        <p style="margin-bottom: var(--spacing-lg); line-height: 1.7;">
+            Homer's Iliad & Odyssey, Hesiod's Theogony, Homeric Hymns, Orphic Hymns, and the works of the great tragedians.
+        </p>
+        <div id="texts-container" class="glass-grid" data-content-container>
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading texts...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Symbols Section (Dynamic from Firebase) -->
+    <section>
+        <h2 class="section-header">🔱 Sacred Symbols</h2>
+        <p style="margin-bottom: var(--spacing-lg); line-height: 1.7;">
+            Zeus's thunderbolt, Poseidon's trident, Athena's owl, Apollo's lyre, and other divine emblems.
+        </p>
+        <div id="symbols-container" class="glass-grid" data-content-container>
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading symbols...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Concepts Section (Dynamic from Firebase) -->
+    <section>
+        <h2 class="section-header">💭 Mystical Concepts</h2>
+        <p style="margin-bottom: var(--spacing-lg); line-height: 1.7;">
+            Philosophical and mystical ideas that shaped Greek thought and spirituality.
+        </p>
+        <div id="concepts-container" class="glass-grid" data-content-container>
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading concepts...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Myths Section (Dynamic from Firebase) -->
+    <section>
+        <h2 class="section-header">📖 Myths & Legends</h2>
+        <p style="margin-bottom: var(--spacing-lg); line-height: 1.7;">
+            The great stories and epic tales that form the foundation of Greek mythology.
+        </p>
+        <div id="myths-container" class="glass-grid" data-content-container>
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading myths...</div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>
+        <strong>Greek Mythology</strong> - World Mythos Explorer<br/>
+        <a href="../../mythos/index.html">Back to World Mythos Home</a> |
+        <a href="../../index.html">Main Site</a> |
+        <a href="http://www.perseus.tufts.edu/hopper/" rel="noopener noreferrer" target="_blank">Perseus Digital Library</a>
+    </p>
+</footer>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
+<!-- Initialize Auth UI -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize Google Sign-In button in header
+        if (window.GoogleSignInButton) {
+            const authNav = document.getElementById('user-auth-nav');
+            if (authNav) {
+                window.GoogleSignInButton.injectIntoElement(authNav, {
+                    showUserInfo: true,
+                    showAvatar: true,
+                    compact: true
+                });
+            }
+        }
+    });
+</script>
+
+<!-- Firebase Content Loader -->
+<script type="module">
+  import { FirebaseContentLoader } from '/FIREBASE/js/firebase-content-loader.js';
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      // Initialize content loader
+      const loader = new FirebaseContentLoader(firebaseApp);
+      loader.initFirestore(firebaseApp);
+
+      const mythology = 'greek';
+
+      console.log('[greek] Loading content from Firebase...');
+
+      // Load all content types for this mythology
+      await Promise.all([
+        loader.loadContent('deities', { mythology }),
+        loader.loadContent('heroes', { mythology }),
+        loader.loadContent('creatures', { mythology }),
+        loader.loadContent('cosmology', { mythology }),
+        loader.loadContent('texts', { mythology }),
+        loader.loadContent('herbs', { mythology }),
+        loader.loadContent('rituals', { mythology }),
+        loader.loadContent('symbols', { mythology }),
+        loader.loadContent('concepts', { mythology }),
+        loader.loadContent('myths', { mythology })
+      ]);
+
+      console.log('[greek] Content loaded successfully');
+
+      // Render each content type to its container
+      loader.renderContent('deities-container', 'deities');
+      loader.renderContent('heroes-container', 'heroes');
+      loader.renderContent('creatures-container', 'creatures');
+      loader.renderContent('cosmology-container', 'cosmology');
+      loader.renderContent('texts-container', 'texts');
+      loader.renderContent('herbs-container', 'herbs');
+      loader.renderContent('rituals-container', 'rituals');
+      loader.renderContent('symbols-container', 'symbols');
+      loader.renderContent('concepts-container', 'concepts');
+      loader.renderContent('myths-container', 'myths');
+
+      console.log('[greek] All content rendered');
+
+    } catch (error) {
+      console.error('[greek] Error loading content:', error);
+
+      // Show user-friendly error message
+      const containers = document.querySelectorAll('[data-content-container]');
+      containers.forEach(container => {
+        container.innerHTML = `
+          <div style="padding: 2rem; text-align: center; color: var(--color-error);">
+            <h3>Unable to load content</h3>
+            <p>Please check your connection and try again.</p>
+            <button onclick="location.reload()" class="glass-btn glass-btn-primary">
+              Retry
+            </button>
+          </div>
+        `;
+      });
+    }
+  });
+</script>
+
+</body>
+</html>
