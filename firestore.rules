@@ -349,9 +349,8 @@ service cloud.firestore {
     // Full deity information with domains, symbols, relationships
 
     match /deities/{deityId} {
-      // Anyone can read deities (with query limits)
-      allow get: if true;
-      allow list: if request.query.limit <= 100;
+      // Anyone can read deities
+      allow read: if true;
 
       // Only author can create/update/delete official content
       allow create, update, delete: if isAuthenticated()
@@ -362,8 +361,7 @@ service cloud.firestore {
     // Path: /heroes/{heroId}
 
     match /heroes/{heroId} {
-      allow get: if true;
-      allow list: if request.query.limit <= 100;
+      allow read: if true;
       allow create, update, delete: if isAuthenticated()
         && request.auth.token.email == 'andrewkwatts@gmail.com';
     }
@@ -372,8 +370,7 @@ service cloud.firestore {
     // Path: /creatures/{creatureId}
 
     match /creatures/{creatureId} {
-      allow get: if true;
-      allow list: if request.query.limit <= 100;
+      allow read: if true;
       allow create, update, delete: if isAuthenticated()
         && request.auth.token.email == 'andrewkwatts@gmail.com';
     }
@@ -423,6 +420,51 @@ service cloud.firestore {
       allow read: if true;
 
       // Only author can create/update/delete
+      allow create, update, delete: if isAuthenticated()
+        && request.auth.token.email == 'andrewkwatts@gmail.com';
+    }
+
+    // ===== MYTHS COLLECTION =====
+    // Path: /myths/{mythId}
+
+    match /myths/{mythId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated()
+        && request.auth.token.email == 'andrewkwatts@gmail.com';
+    }
+
+    // ===== EVENTS COLLECTION =====
+    // Path: /events/{eventId}
+
+    match /events/{eventId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated()
+        && request.auth.token.email == 'andrewkwatts@gmail.com';
+    }
+
+    // ===== CONCEPTS COLLECTION =====
+    // Path: /concepts/{conceptId}
+
+    match /concepts/{conceptId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated()
+        && request.auth.token.email == 'andrewkwatts@gmail.com';
+    }
+
+    // ===== SYMBOLS COLLECTION =====
+    // Path: /symbols/{symbolId}
+
+    match /symbols/{symbolId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated()
+        && request.auth.token.email == 'andrewkwatts@gmail.com';
+    }
+
+    // ===== PLACES COLLECTION =====
+    // Path: /places/{placeId}
+
+    match /places/{placeId} {
+      allow read: if true;
       allow create, update, delete: if isAuthenticated()
         && request.auth.token.email == 'andrewkwatts@gmail.com';
     }
@@ -588,9 +630,13 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // ===== DENY ALL OTHER PATHS =====
-    match /{document=**} {
-      allow read, write: if false;
+    // ===== DEFAULT FALLBACK FOR UNDEFINED COLLECTIONS =====
+    // Allow read access to any collection not explicitly defined above
+    // This is useful for new collections during development
+    match /{collection}/{document=**} {
+      allow read: if true;
+      allow write: if isAuthenticated()
+        && request.auth.token.email == 'andrewkwatts@gmail.com';
     }
   }
 }
