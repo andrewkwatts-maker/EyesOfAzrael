@@ -1,6 +1,6 @@
 # Local vs Firestore Content Comparison
 
-**Generated:** 2025-12-13T04:55:33.597Z
+**Generated:** 2025-12-13T09:49:38.529Z
 
 ---
 
@@ -10,9 +10,9 @@
 |--------|-------|
 | **Total Local Files** | 376 |
 | **Total Firestore Docs** | 439 |
-| **In Both** | 376 |
-| **Only in Local** | 0 |
-| **Only in Firestore** | 63 |
+| **In Both** | 364 |
+| **Only in Local** | 12 |
+| **Only in Firestore** | 75 |
 
 
 ⚠️ **VALIDATION WARNING** - Discrepancies found!
@@ -21,10 +21,10 @@
 
 | Content Type | Local | Firestore | Only Local | Only Firestore | In Both |
 |--------------|-------|-----------|------------|----------------|----------|
-| deities | 190 | 190 | 0 | 0 | 190 |
+| deities | 190 | 190 | 10 | 10 | 180 |
 | heroes | 32 | 50 | 0 | 18 | 32 |
 | creatures | 29 | 30 | 0 | 1 | 29 |
-| cosmology | 65 | 65 | 0 | 0 | 65 |
+| cosmology | 65 | 65 | 2 | 2 | 63 |
 | texts | 1 | 35 | 0 | 34 | 1 |
 | herbs | 22 | 22 | 0 | 0 | 22 |
 | rituals | 20 | 20 | 0 | 0 | 20 |
@@ -33,23 +33,56 @@
 | myths | 9 | 9 | 0 | 0 | 9 |
 | events | 1 | 1 | 0 | 0 | 1 |
 
-## ℹ️ Content in Firestore but NOT in Local (63)
+## ⚠️ Content in Local but NOT in Firestore (12)
+
+### deitie (10)
+
+- **celtic_aengus** - Celtic - Aengus Óg (celtic)
+  - File: `H:\Github\EyesOfAzrael\mythos\celtic\deities\aengus.html`
+- **celtic_brigid** - Celtic - Brigid (celtic)
+  - File: `H:\Github\EyesOfAzrael\mythos\celtic\deities\brigid.html`
+- **celtic_cernunnos** - Celtic - Cernunnos (celtic)
+  - File: `H:\Github\EyesOfAzrael\mythos\celtic\deities\cernunnos.html`
+- **celtic_dagda** - The (celtic)
+  - File: `H:\Github\EyesOfAzrael\mythos\celtic\deities\dagda.html`
+- **celtic_danu** - Celtic - Danu (celtic)
+  - File: `H:\Github\EyesOfAzrael\mythos\celtic\deities\danu.html`
+- **celtic_lugh** - Celtic - Lugh (celtic)
+  - File: `H:\Github\EyesOfAzrael\mythos\celtic\deities\lugh.html`
+- **celtic_manannan** - Celtic - Manannan mac Lir (celtic)
+  - File: `H:\Github\EyesOfAzrael\mythos\celtic\deities\manannan.html`
+- **celtic_morrigan** - The (celtic)
+  - File: `H:\Github\EyesOfAzrael\mythos\celtic\deities\morrigan.html`
+- **celtic_nuada** - Celtic - Nuada Airgetlám (celtic)
+  - File: `H:\Github\EyesOfAzrael\mythos\celtic\deities\nuada.html`
+- **celtic_ogma** - Celtic - Ogma (celtic)
+  - File: `H:\Github\EyesOfAzrael\mythos\celtic\deities\ogma.html`
+
+### cosmolog (2)
+
+- **celtic_afterlife** - Celtic Afterlife - (celtic)
+  - File: `H:\Github\EyesOfAzrael\mythos\celtic\cosmology\afterlife.html`
+- **celtic_creation** - Celtic Creation - The Coming of the Gods (celtic)
+  - File: `H:\Github\EyesOfAzrael\mythos\celtic\cosmology\creation.html`
+
+
+## ℹ️ Content in Firestore but NOT in Local (75)
 
 These may be from previous uploads or Phase 2 content.
 
-### undefined (29)
+### undefined (41)
 
-- **christian_andrew** - The First Called (christian)
-- **christian_james-son-of-zebedee** - Son of Thunder (christian)
-- **jewish_1-enoch-heavenly-journeys** - Eyes of Azrael (jewish)
-- **jewish_assumption-tradition** - Eyes of Azrael (jewish)
-- **jewish_circumcision-parallels** - Circumcision Parallels: Egyptian Ritual Purity and Israelite Covenant | Eyes of Azrael (jewish)
-- **jewish_egyptian-monotheism** - Akhenaten and Yahwism: Egyptian Monotheism and Moses | Eyes of Azrael (jewish)
-- **jewish_enoch-calendar** - Day Solar Calendar vs 354 (jewish)
-- **jewish_enoch-hermes-thoth** - Hermes (jewish)
-- **jewish_enoch-islam** - Eyes of Azrael (jewish)
-- **jewish_enoch-pseudepigrapha** - Eyes of Azrael (jewish)
-- ... and 19 more
+- **aengus** - Aengus (celtic)
+- **brigid** - Brigid (celtic)
+- **cernunnos** - Cernunnos (celtic)
+- **dagda** - The Dagda (celtic)
+- **danu** - Danu (celtic)
+- **lugh** - Lugh (celtic)
+- **manannan** - Manannán mac Lir (celtic)
+- **morrigan** - The Morrígan (celtic)
+- **nuada** - Nuada (celtic)
+- **ogma** - Ogma (celtic)
+- ... and 31 more
 
 ### texts (34)
 
@@ -99,12 +132,13 @@ These may be from previous uploads or Phase 2 content.
 
 ## Recommendations
 
-✅ **Safe to Proceed:**
-- All local content is in Firestore
-- Safe to delete local HTML files after final verification
+⚠️ **Action Required:**
+- 12 local files are NOT in Firestore
+- Upload these files before deleting local content
+- Use migration scripts to upload missing content
 
 ℹ️ **Additional Content in Firestore:**
-- 63 documents in Firestore have no local source
+- 75 documents in Firestore have no local source
 - These may be from Phase 2 migrations (heroes, texts, etc.)
 - Verify these are intentional before proceeding
 
