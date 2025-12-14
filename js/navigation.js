@@ -4,6 +4,8 @@
  * Includes breadcrumb generation, mythology menu, and recently viewed tracking
  */
 
+import { ENTITY_ICONS, getEntityIcon } from './constants/entity-types.js';
+
 class NavigationSystem {
     constructor() {
         this.mythologies = [];
@@ -327,23 +329,7 @@ class NavigationSystem {
      * Get entity icon
      */
     getEntityIcon(entity) {
-        if (entity.visual?.icon || entity.icon) {
-            return entity.visual?.icon || entity.icon;
-        }
-
-        const iconMap = {
-            deity: '⚡',
-            hero: '🗡️',
-            creature: '🐉',
-            item: '⚔️',
-            place: '🏛️',
-            concept: '💭',
-            magic: '🔮',
-            theory: '🔬',
-            mythology: '📜'
-        };
-
-        return iconMap[entity.type] || '✨';
+        return getEntityIcon(entity);
     }
 
     /**
@@ -446,6 +432,58 @@ class NavigationSystem {
             this.renderRecentlyViewed('recently-viewed', {
                 excludeCurrentId: context.entityId
             });
+        }
+
+        // Initialize header filters integration
+        this.setupHeaderFiltersIntegration();
+    }
+
+    /**
+     * Set up integration with header filters
+     */
+    setupHeaderFiltersIntegration() {
+        // Wait for header filters to be initialized
+        const checkHeaderFilters = setInterval(() => {
+            if (window.headerFilters && window.headerFilters.initialized) {
+                clearInterval(checkHeaderFilters);
+
+                // Register listener for filter changes
+                window.headerFilters.onFilterChange((filters) => {
+                    console.log('[Navigation] Header filters changed:', filters);
+                    this.handleFilterChange(filters);
+                });
+
+                console.log('[Navigation] Header filters integration ready');
+            }
+        }, 100);
+
+        // Stop checking after 10 seconds
+        setTimeout(() => clearInterval(checkHeaderFilters), 10000);
+    }
+
+    /**
+     * Handle filter changes from header filters
+     * @param {Object} filters - Current filter state
+     */
+    handleFilterChange(filters) {
+        // Update mythology menu to reflect active filters
+        const mythMenuEl = document.getElementById('mythology-menu');
+        if (mythMenuEl && filters.mythologies.length > 0) {
+            // Highlight active mythologies in menu
+            mythMenuEl.querySelectorAll('[data-mythology]').forEach(item => {
+                const mythology = item.dataset.mythology;
+                if (filters.mythologies.includes(mythology)) {
+                    item.classList.add('filtered-active');
+                } else {
+                    item.classList.remove('filtered-active');
+                }
+            });
+        }
+
+        // Trigger reload of entity grids if EntityLoader is available
+        if (window.EntityLoader) {
+            // EntityLoader will handle the reload through its own listener
+            console.log('[Navigation] Entity grids will reload automatically');
         }
     }
 

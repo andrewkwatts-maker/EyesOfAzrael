@@ -599,6 +599,29 @@ service cloud.firestore {
       allow delete: if isAdminEmail();
     }
 
+    // ===== USER PREFERENCES COLLECTION =====
+    // Path: /user_preferences/{userId}
+    // User-specific preferences for filtering, display, notifications, etc.
+
+    match /user_preferences/{userId} {
+      // Users can only read their own preferences
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+
+      // Users can create their own preferences
+      allow create: if isAuthenticated()
+                    && request.auth.uid == userId
+                    && request.resource.data.userId == userId;
+
+      // Users can update their own preferences
+      allow update: if isAuthenticated()
+                    && request.auth.uid == userId
+                    && resource.data.userId == userId
+                    && request.resource.data.userId == userId;
+
+      // Users can delete their own preferences
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+
     // ===== SYSTEM COLLECTION =====
     // Path: /system/{document}
     // Rate limiting, blocked IPs, security logs
