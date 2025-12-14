@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Review Queue - Eyes of Azrael</title>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../css/submission-workflow.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config and Auth -->
+    <script src="../firebase-config.js"></script>
+    <script src="../js/firebase-init.js"></script>
+    <script src="../js/auth-guard.js"></script>
+    <script src="../js/submission-workflow.js"></script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .admin-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.3), rgba(239, 68, 68, 0.2));
+            border: 2px solid #dc2626;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .admin-header h1 {
+            font-size: 2.5rem;
+            margin: 0 0 0.5rem 0;
+            background: linear-gradient(135deg, #fca5a5, #f87171);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #9370DB, #DAA520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #c0c0c0;
+            margin-top: 0.5rem;
+        }
+
+        .filters-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 0.875rem;
+            color: #c0c0c0;
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 1rem;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #9370DB;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .submissions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .submission-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .submission-card:hover {
+            border-color: rgba(147, 112, 219, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .submission-card.selected {
+            border-color: #9370DB;
+            background: rgba(147, 112, 219, 0.1);
+        }
+
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .submission-title {
+            font-size: 1.5rem;
+            color: #9370DB;
+            margin: 0;
+        }
+
+        .submission-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: #c0c0c0;
+            margin-bottom: 1rem;
+        }
+
+        .meta-badge {
+            background: rgba(147, 112, 219, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid rgba(147, 112, 219, 0.4);
+        }
+
+        .submission-content {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        .submission-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+        }
+
+        .btn-approve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+        }
+
+        .btn-reject {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-view {
+            background: rgba(147, 112, 219, 0.2);
+            border: 2px solid rgba(147, 112, 219, 0.4);
+            color: #9370DB;
+        }
+
+        .btn-view:hover {
+            background: rgba(147, 112, 219, 0.3);
+        }
+
+        .bulk-actions {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #9370DB;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .bulk-actions.show {
+            display: block;
+        }
+
+        .bulk-actions-header {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .bulk-actions-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .loading-spinner {
+            font-size: 3rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border: 2px solid #9370DB;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #9370DB;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            color: #c0c0c0;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group textarea,
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .form-group textarea:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #9370DB;
+        }
+
+        .duplicate-warning {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .duplicate-list {
+            margin-top: 0.5rem;
+            padding-left: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <div class="admin-header">
+            <h1>🔐 Admin Review Queue</h1>
+            <p>Review and manage user-submitted content</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="admin-stats" id="admin-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-pending">--</div>
+                <div class="stat-label">Pending Review</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-today">--</div>
+                <div class="stat-label">Submitted Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-approved">--</div>
+                <div class="stat-label">Approved (All Time)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-rejected">--</div>
+                <div class="stat-label">Rejected (All Time)</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-panel">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select id="filter-status">
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="">All</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Entity Type</label>
+                    <select id="filter-type">
+                        <option value="">All Types</option>
+                        <option value="deity">Deity</option>
+                        <option value="hero">Hero</option>
+                        <option value="creature">Creature</option>
+                        <option value="place">Place</option>
+                        <option value="item">Item</option>
+                        <option value="text">Text</option>
+                        <option value="concept">Concept</option>
+                        <option value="event">Event</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Mythology</label>
+                    <select id="filter-mythology">
+                        <option value="">All Mythologies</option>
+                        <option value="greek">Greek</option>
+                        <option value="norse">Norse</option>
+                        <option value="egyptian">Egyptian</option>
+                        <option value="hindu">Hindu</option>
+                        <option value="christian">Christian</option>
+                        <option value="jewish">Jewish</option>
+                        <option value="buddhist">Buddhist</option>
+                        <option value="chinese">Chinese</option>
+                        <option value="japanese">Japanese</option>
+                        <option value="celtic">Celtic</option>
+                        <option value="aztec">Aztec</option>
+                        <option value="mayan">Mayan</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Sort By</label>
+                    <select id="filter-sort">
+                        <option value="desc">Newest First</option>
+                        <option value="asc">Oldest First</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <button class="btn btn-view" onclick="loadSubmissions()">🔄 Refresh</button>
+                <button class="btn btn-view" onclick="toggleBulkMode()">☑️ Bulk Mode</button>
+            </div>
+        </div>
+
+        <!-- Submissions List -->
+        <div id="submissions-container">
+            <div class="loading">
+                <div class="loading-spinner">⏳</div>
+                <p>Loading submissions...</p>
+            </div>
+        </div>
+
+        <!-- Bulk Actions Panel -->
+        <div class="bulk-actions" id="bulk-actions">
+            <div class="bulk-actions-header">
+                <span id="bulk-count">0</span> selected
+            </div>
+            <div class="bulk-actions-buttons">
+                <button class="btn btn-approve" onclick="bulkApprove()">✅ Approve All</button>
+                <button class="btn btn-reject" onclick="bulkReject()">❌ Reject All</button>
+                <button class="btn btn-view" onclick="clearSelection()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rejection Modal -->
+    <div class="modal" id="reject-modal">
+        <div class="modal-content">
+            <div class="modal-header">Reject Submission</div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Rejection Reason (will be sent to user)</label>
+                    <textarea id="rejection-reason" rows="4" placeholder="Please explain why this submission is being rejected and what can be improved..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-view" onclick="closeRejectModal()">Cancel</button>
+                <button class="btn btn-reject" onclick="confirmReject()">Reject</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">Edit & Approve</div>
+            <div class="modal-body" id="edit-modal-body">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-view" onclick="closeEditModal()">Cancel</button>
+                <button class="btn btn-approve" onclick="confirmEditAndApprove()">Approve with Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedSubmissions = new Set();
+        let currentSubmissionId = null;
+        let bulkMode = false;
+
+        // Check admin access on load
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Wait for Firebase auth
+                await new Promise(resolve => {
+                    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+                        unsubscribe();
+                        resolve(user);
+                    });
+                });
+
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    window.location.href = '../index.html';
+                    return;
+                }
+
+                // Check if user is admin
+                const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+                if (!userDoc.exists || userDoc.data().role !== 'admin') {
+                    alert('Admin access required');
+                    window.location.href = '../index.html';
+                    return;
+                }
+
+                // Load submissions
+                await loadSubmissions();
+                await loadStats();
+
+                // Set up filter listeners
+                document.getElementById('filter-status').addEventListener('change', loadSubmissions);
+                document.getElementById('filter-type').addEventListener('change', loadSubmissions);
+                document.getElementById('filter-mythology').addEventListener('change', loadSubmissions);
+                document.getElementById('filter-sort').addEventListener('change', loadSubmissions);
+
+            } catch (error) {
+                console.error('Error initializing admin panel:', error);
+                alert('Failed to initialize admin panel');
+            }
+        });
+
+        async function loadStats() {
+            try {
+                const [pending, approved, rejected] = await Promise.all([
+                    firebase.firestore().collection('submissions').where('status', '==', 'pending').get(),
+                    firebase.firestore().collection('submissions').where('status', '==', 'approved').get(),
+                    firebase.firestore().collection('submissions').where('status', '==', 'rejected').get()
+                ]);
+
+                // Count today's submissions
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const todayTimestamp = firebase.firestore.Timestamp.fromDate(today);
+
+                const todaySnapshot = await firebase.firestore().collection('submissions')
+                    .where('submittedAt', '>=', todayTimestamp)
+                    .get();
+
+                document.getElementById('stat-pending').textContent = pending.size;
+                document.getElementById('stat-approved').textContent = approved.size;
+                document.getElementById('stat-rejected').textContent = rejected.size;
+                document.getElementById('stat-today').textContent = todaySnapshot.size;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadSubmissions() {
+            const container = document.getElementById('submissions-container');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner">⏳</div><p>Loading submissions...</p></div>';
+
+            try {
+                const status = document.getElementById('filter-status').value;
+                const type = document.getElementById('filter-type').value;
+                const mythology = document.getElementById('filter-mythology').value;
+                const sortOrder = document.getElementById('filter-sort').value;
+
+                const result = await window.submissionWorkflow.getPendingSubmissions({
+                    status: status || undefined,
+                    type: type || undefined,
+                    mythology: mythology || undefined,
+                    sortOrder: sortOrder,
+                    limit: 50
+                });
+
+                if (result.submissions.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <p>No submissions found matching your filters</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const html = result.submissions.map(sub => renderSubmissionCard(sub)).join('');
+                container.innerHTML = `<div class="submissions-list">${html}</div>`;
+
+            } catch (error) {
+                console.error('Error loading submissions:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <p>Error loading submissions: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderSubmissionCard(submission) {
+            const submittedDate = submission.submittedAt?.toDate?.() || new Date();
+            const dateStr = submittedDate.toLocaleDateString();
+
+            let statusBadge = '';
+            if (submission.status === 'pending') {
+                statusBadge = '<span class="meta-badge" style="background: rgba(251, 191, 36, 0.2); border-color: #fbbf24;">⏳ Pending</span>';
+            } else if (submission.status === 'approved') {
+                statusBadge = '<span class="meta-badge" style="background: rgba(34, 197, 94, 0.2); border-color: #22c55e;">✅ Approved</span>';
+            } else if (submission.status === 'rejected') {
+                statusBadge = '<span class="meta-badge" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444;">❌ Rejected</span>';
+            }
+
+            return `
+                <div class="submission-card ${selectedSubmissions.has(submission.id) ? 'selected' : ''}"
+                     data-submission-id="${submission.id}"
+                     onclick="${bulkMode ? `toggleSelection('${submission.id}')` : ''}">
+                    ${bulkMode ? `<input type="checkbox" ${selectedSubmissions.has(submission.id) ? 'checked' : ''} onclick="toggleSelection('${submission.id}')">` : ''}
+
+                    <div class="submission-header">
+                        <h3 class="submission-title">${escapeHtml(submission.entityName)}</h3>
+                        <div>
+                            ${statusBadge}
+                        </div>
+                    </div>
+
+                    <div class="submission-meta">
+                        <span class="meta-badge">📂 ${submission.type}</span>
+                        <span class="meta-badge">🌍 ${submission.mythology || 'None'}</span>
+                        <span class="meta-badge">👤 ${submission.submittedByName}</span>
+                        <span class="meta-badge">📅 ${dateStr}</span>
+                    </div>
+
+                    <div class="submission-content">
+                        <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">${JSON.stringify(submission.data, null, 2).substring(0, 500)}...</pre>
+                    </div>
+
+                    ${submission.status === 'pending' ? `
+                        <div class="submission-actions">
+                            <button class="btn btn-approve" onclick="approveSubmission(event, '${submission.id}')">✅ Approve</button>
+                            <button class="btn btn-edit" onclick="editAndApprove(event, '${submission.id}')">✏️ Edit & Approve</button>
+                            <button class="btn btn-reject" onclick="showRejectModal(event, '${submission.id}')">❌ Reject</button>
+                            <button class="btn btn-view" onclick="viewSubmission(event, '${submission.id}')">👁️ View Full</button>
+                        </div>
+                    ` : submission.status === 'rejected' ? `
+                        <div style="background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            <strong>Rejection Reason:</strong><br>
+                            ${escapeHtml(submission.rejectionReason || 'No reason provided')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        async function approveSubmission(event, submissionId) {
+            if (event) event.stopPropagation();
+
+            if (!confirm('Approve this submission and publish it to the main collection?')) {
+                return;
+            }
+
+            try {
+                const result = await window.submissionWorkflow.approveSubmission(submissionId);
+                alert(`Submission approved! Published to ${result.entityCollection}`);
+                await loadSubmissions();
+                await loadStats();
+            } catch (error) {
+                console.error('Error approving submission:', error);
+                alert('Failed to approve submission: ' + error.message);
+            }
+        }
+
+        function showRejectModal(event, submissionId) {
+            if (event) event.stopPropagation();
+            currentSubmissionId = submissionId;
+            document.getElementById('reject-modal').classList.add('show');
+        }
+
+        function closeRejectModal() {
+            document.getElementById('reject-modal').classList.remove('show');
+            document.getElementById('rejection-reason').value = '';
+            currentSubmissionId = null;
+        }
+
+        async function confirmReject() {
+            const reason = document.getElementById('rejection-reason').value.trim();
+
+            if (!reason) {
+                alert('Please provide a rejection reason');
+                return;
+            }
+
+            try {
+                await window.submissionWorkflow.rejectSubmission(currentSubmissionId, reason);
+                alert('Submission rejected and user notified');
+                closeRejectModal();
+                await loadSubmissions();
+                await loadStats();
+            } catch (error) {
+                console.error('Error rejecting submission:', error);
+                alert('Failed to reject submission: ' + error.message);
+            }
+        }
+
+        function editAndApprove(event, submissionId) {
+            if (event) event.stopPropagation();
+            alert('Edit interface coming soon! For now, please use the Approve button or provide modification instructions in the rejection.');
+        }
+
+        function viewSubmission(event, submissionId) {
+            if (event) event.stopPropagation();
+            // Open detailed view in new tab
+            alert('Detailed view coming soon!');
+        }
+
+        function toggleBulkMode() {
+            bulkMode = !bulkMode;
+            if (!bulkMode) {
+                clearSelection();
+            }
+            loadSubmissions();
+        }
+
+        function toggleSelection(submissionId) {
+            if (selectedSubmissions.has(submissionId)) {
+                selectedSubmissions.delete(submissionId);
+            } else {
+                selectedSubmissions.add(submissionId);
+            }
+
+            updateBulkPanel();
+            loadSubmissions();
+        }
+
+        function clearSelection() {
+            selectedSubmissions.clear();
+            updateBulkPanel();
+            loadSubmissions();
+        }
+
+        function updateBulkPanel() {
+            const panel = document.getElementById('bulk-actions');
+            const count = document.getElementById('bulk-count');
+
+            count.textContent = selectedSubmissions.size;
+
+            if (selectedSubmissions.size > 0) {
+                panel.classList.add('show');
+            } else {
+                panel.classList.remove('show');
+            }
+        }
+
+        async function bulkApprove() {
+            if (!confirm(`Approve ${selectedSubmissions.size} submissions?`)) {
+                return;
+            }
+
+            try {
+                const results = await window.submissionWorkflow.bulkApprove(Array.from(selectedSubmissions));
+                alert(`Approved: ${results.success.length}\nFailed: ${results.failed.length}`);
+                clearSelection();
+                await loadSubmissions();
+                await loadStats();
+            } catch (error) {
+                console.error('Error bulk approving:', error);
+                alert('Failed to bulk approve: ' + error.message);
+            }
+        }
+
+        async function bulkReject() {
+            const reason = prompt('Enter rejection reason for all selected submissions:');
+            if (!reason) return;
+
+            try {
+                const results = await window.submissionWorkflow.bulkReject(Array.from(selectedSubmissions), reason);
+                alert(`Rejected: ${results.success.length}\nFailed: ${results.failed.length}`);
+                clearSelection();
+                await loadSubmissions();
+                await loadStats();
+            } catch (error) {
+                console.error('Error bulk rejecting:', error);
+                alert('Failed to bulk reject: ' + error.message);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

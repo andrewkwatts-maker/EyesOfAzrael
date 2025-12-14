@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - Eyes of Azrael</title>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="css/submission-workflow.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config and Auth -->
+    <script src="firebase-config.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script src="js/submission-workflow.js"></script>
+    <script src="js/user-theories.js"></script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, rgba(147, 112, 219, 0.3), rgba(218, 165, 32, 0.2));
+            border: 2px solid #9370DB;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: 3px solid #9370DB;
+        }
+
+        .user-details h1 {
+            margin: 0;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #c0b5f0, #daa520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-email {
+            color: #c0c0c0;
+            font-size: 0.875rem;
+        }
+
+        .dashboard-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(147, 112, 219, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #9370DB, #DAA520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #c0c0c0;
+            margin-top: 0.5rem;
+        }
+
+        .section {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #9370DB;
+            margin: 0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(147, 112, 219, 0.3);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: #c0c0c0;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab.active {
+            background: rgba(147, 112, 219, 0.2);
+            color: #9370DB;
+            border-bottom: 2px solid #9370DB;
+        }
+
+        .tab:hover:not(.active) {
+            background: rgba(147, 112, 219, 0.1);
+        }
+
+        .submission-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .submission-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(147, 112, 219, 0.3);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .submission-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(147, 112, 219, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .submission-item.highlighted {
+            animation: highlight-pulse 2s ease-in-out;
+        }
+
+        .submission-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+
+        .submission-item-title {
+            font-size: 1.125rem;
+            color: #e0e0e0;
+            margin: 0;
+        }
+
+        .submission-item-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: #c0c0c0;
+        }
+
+        .meta-badge {
+            background: rgba(147, 112, 219, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid rgba(147, 112, 219, 0.4);
+        }
+
+        .status-pending {
+            background: rgba(251, 191, 36, 0.2);
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+
+        .status-approved {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .submission-item-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #9370DB, #8B7FDB);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(147, 112, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(147, 112, 219, 0.2);
+            border: 2px solid rgba(147, 112, 219, 0.4);
+            color: #9370DB;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(147, 112, 219, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .rejection-reason {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 0.75rem;
+        }
+
+        .rejection-reason-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #ef4444;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            color: #c0c0c0;
+            font-size: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .loading-spinner {
+            font-size: 2.5rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes highlight-pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(147, 112, 219, 0);
+                border-color: rgba(147, 112, 219, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px 10px rgba(147, 112, 219, 0.6);
+                border-color: rgba(147, 112, 219, 1);
+            }
+        }
+
+        .notification-item {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .notification-item:hover {
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .notification-item.unread {
+            border-width: 2px;
+            border-color: #3b82f6;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: #c0c0c0;
+        }
+
+        .notification-message {
+            color: #c0c0c0;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="user-info">
+                <img id="user-avatar" class="user-avatar" src="" alt="User Avatar">
+                <div class="user-details">
+                    <h1 id="user-name">My Dashboard</h1>
+                    <div class="user-email" id="user-email"></div>
+                </div>
+            </div>
+            <div class="dashboard-actions">
+                <a href="theories/user-submissions/submit.html" class="btn btn-primary">
+                    ✨ New Submission
+                </a>
+                <a href="theories/user-submissions/browse.html" class="btn btn-secondary">
+                    📚 Browse All
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total">--</div>
+                <div class="stat-label">Total Contributions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-pending">--</div>
+                <div class="stat-label">Pending Review</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-approved">--</div>
+                <div class="stat-label">Approved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-approval-rate">--%</div>
+                <div class="stat-label">Approval Rate</div>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">🔔 Notifications</h2>
+                <button class="btn btn-secondary" onclick="markAllAsRead()">Mark All Read</button>
+            </div>
+            <div id="notifications-container">
+                <div class="loading">
+                    <div class="loading-spinner">⏳</div>
+                    <p>Loading notifications...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submissions -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">📝 My Submissions</h2>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" data-status="all" onclick="switchTab('all')">All</button>
+                <button class="tab" data-status="pending" onclick="switchTab('pending')">
+                    Pending <span id="tab-pending-count"></span>
+                </button>
+                <button class="tab" data-status="approved" onclick="switchTab('approved')">
+                    Approved <span id="tab-approved-count"></span>
+                </button>
+                <button class="tab" data-status="rejected" onclick="switchTab('rejected')">
+                    Needs Revision <span id="tab-rejected-count"></span>
+                </button>
+            </div>
+
+            <div id="submissions-container">
+                <div class="loading">
+                    <div class="loading-spinner">⏳</div>
+                    <p>Loading submissions...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'all';
+
+        // Initialize dashboard on load
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Wait for Firebase auth
+                await new Promise(resolve => {
+                    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+                        unsubscribe();
+                        resolve(user);
+                    });
+                });
+
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                // Update user info
+                document.getElementById('user-name').textContent = user.displayName || 'User';
+                document.getElementById('user-email').textContent = user.email;
+                document.getElementById('user-avatar').src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=9370DB&color=fff`;
+
+                // Load data
+                await Promise.all([
+                    loadStats(),
+                    loadNotifications(),
+                    loadSubmissions()
+                ]);
+
+                // Check for highlight parameter
+                checkHighlight();
+
+            } catch (error) {
+                console.error('Error initializing dashboard:', error);
+                alert('Failed to load dashboard');
+            }
+        });
+
+        async function loadStats() {
+            try {
+                const stats = await window.submissionWorkflow.getUserStats();
+
+                document.getElementById('stat-total').textContent = stats.total;
+                document.getElementById('stat-pending').textContent = stats.pending;
+                document.getElementById('stat-approved').textContent = stats.approved;
+                document.getElementById('stat-approval-rate').textContent = stats.approvalRate + '%';
+
+                // Update tab counts
+                document.getElementById('tab-pending-count').textContent = stats.pending > 0 ? `(${stats.pending})` : '';
+                document.getElementById('tab-approved-count').textContent = stats.approved > 0 ? `(${stats.approved})` : '';
+                document.getElementById('tab-rejected-count').textContent = stats.rejected > 0 ? `(${stats.rejected})` : '';
+
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadNotifications() {
+            const container = document.getElementById('notifications-container');
+
+            try {
+                const notifications = await window.submissionWorkflow.getUserNotifications({ limit: 10 });
+
+                if (notifications.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔕</div>
+                            <p class="empty-state-text">No notifications yet</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const html = notifications.map(notif => {
+                    const createdAt = notif.createdAt?.toDate?.() || new Date();
+                    const timeStr = formatTimeAgo(createdAt);
+
+                    return `
+                        <div class="notification-item ${!notif.read ? 'unread' : ''}"
+                             onclick="handleNotificationClick('${notif.id}', '${notif.link || ''}')">
+                            <div class="notification-header">
+                                <div class="notification-title">${escapeHtml(notif.title)}</div>
+                                <div class="notification-time">${timeStr}</div>
+                            </div>
+                            <div class="notification-message">${escapeHtml(notif.message)}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <p class="empty-state-text">Error loading notifications</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadSubmissions() {
+            const container = document.getElementById('submissions-container');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner">⏳</div><p>Loading submissions...</p></div>';
+
+            try {
+                const options = currentTab !== 'all' ? { status: currentTab } : {};
+                const submissions = await window.submissionWorkflow.getUserSubmissions(options);
+
+                if (submissions.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <p class="empty-state-text">No ${currentTab !== 'all' ? currentTab : ''} submissions yet</p>
+                            <a href="theories/user-submissions/submit.html" class="btn btn-primary" style="margin-top: 1rem;">
+                                Make Your First Submission
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const html = submissions.map(sub => renderSubmissionItem(sub)).join('');
+                container.innerHTML = `<div class="submission-list">${html}</div>`;
+
+            } catch (error) {
+                console.error('Error loading submissions:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <p class="empty-state-text">Error loading submissions</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderSubmissionItem(submission) {
+            const submittedDate = submission.submittedAt?.toDate?.() || new Date();
+            const dateStr = submittedDate.toLocaleDateString();
+
+            let statusBadge = '';
+            let statusClass = '';
+
+            if (submission.status === 'pending') {
+                statusBadge = '⏳ Pending Review';
+                statusClass = 'status-pending';
+            } else if (submission.status === 'approved') {
+                statusBadge = '✅ Approved';
+                statusClass = 'status-approved';
+            } else if (submission.status === 'rejected') {
+                statusBadge = '🔄 Needs Revision';
+                statusClass = 'status-rejected';
+            }
+
+            const rejectionSection = submission.status === 'rejected' ? `
+                <div class="rejection-reason">
+                    <div class="rejection-reason-label">Feedback:</div>
+                    <div>${escapeHtml(submission.rejectionReason || 'No specific feedback provided')}</div>
+                </div>
+            ` : '';
+
+            const actions = submission.status === 'pending' ? `
+                <div class="submission-item-actions">
+                    <button class="btn btn-secondary" onclick="viewSubmission('${submission.id}')">View</button>
+                    <button class="btn btn-danger" onclick="deleteSubmission('${submission.id}')">Delete</button>
+                </div>
+            ` : submission.status === 'rejected' ? `
+                <div class="submission-item-actions">
+                    <button class="btn btn-primary" onclick="editSubmission('${submission.id}')">Edit & Resubmit</button>
+                    <button class="btn btn-danger" onclick="deleteSubmission('${submission.id}')">Delete</button>
+                </div>
+            ` : submission.status === 'approved' ? `
+                <div class="submission-item-actions">
+                    <button class="btn btn-primary" onclick="viewPublished('${submission.approvedEntityId}', '${submission.approvedEntityCollection}')">View Published</button>
+                </div>
+            ` : '';
+
+            return `
+                <div class="submission-item" data-submission-id="${submission.id}">
+                    <div class="submission-item-header">
+                        <h3 class="submission-item-title">${escapeHtml(submission.entityName)}</h3>
+                        <span class="meta-badge ${statusClass}">${statusBadge}</span>
+                    </div>
+                    <div class="submission-item-meta">
+                        <span class="meta-badge">📂 ${submission.type}</span>
+                        <span class="meta-badge">🌍 ${submission.mythology || 'General'}</span>
+                        <span class="meta-badge">📅 ${dateStr}</span>
+                    </div>
+                    ${rejectionSection}
+                    ${actions}
+                </div>
+            `;
+        }
+
+        function switchTab(status) {
+            currentTab = status;
+
+            // Update tab styling
+            document.querySelectorAll('.tab').forEach(tab => {
+                if (tab.dataset.status === status) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            loadSubmissions();
+        }
+
+        async function deleteSubmission(submissionId) {
+            if (!confirm('Are you sure you want to delete this submission? This cannot be undone.')) {
+                return;
+            }
+
+            try {
+                await window.submissionWorkflow.deleteSubmission(submissionId);
+                await loadStats();
+                await loadSubmissions();
+            } catch (error) {
+                console.error('Error deleting submission:', error);
+                alert('Failed to delete submission: ' + error.message);
+            }
+        }
+
+        function editSubmission(submissionId) {
+            window.location.href = `theories/user-submissions/edit.html?id=${submissionId}`;
+        }
+
+        function viewSubmission(submissionId) {
+            alert('Detailed view coming soon!');
+        }
+
+        function viewPublished(entityId, collection) {
+            window.location.href = `/${collection}/${entityId}.html`;
+        }
+
+        async function handleNotificationClick(notificationId, link) {
+            try {
+                await window.submissionWorkflow.markNotificationAsRead(notificationId);
+                if (link) {
+                    window.location.href = link;
+                }
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+            }
+        }
+
+        async function markAllAsRead() {
+            try {
+                await window.submissionWorkflow.markAllNotificationsAsRead();
+                await loadNotifications();
+            } catch (error) {
+                console.error('Error marking all as read:', error);
+                alert('Failed to mark notifications as read');
+            }
+        }
+
+        function checkHighlight() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const highlightId = urlParams.get('highlight');
+
+            if (highlightId) {
+                setTimeout(() => {
+                    const submissionCard = document.querySelector(`[data-submission-id="${highlightId}"]`);
+                    if (submissionCard) {
+                        submissionCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        submissionCard.classList.add('highlighted');
+                    }
+                }, 1000);
+            }
+        }
+
+        function formatTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                week: 604800,
+                day: 86400,
+                hour: 3600,
+                minute: 60
+            };
+
+            for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / secondsInUnit);
+                if (interval >= 1) {
+                    return `${interval} ${unit}${interval !== 1 ? 's' : ''} ago`;
+                }
+            }
+
+            return 'Just now';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

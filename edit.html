@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entity Editor - Eyes of Azrael</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="css/entity-editor.css">
+    <link rel="stylesheet" href="css/entity-display.css">
+    <link rel="stylesheet" href="css/loading-states.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Config and Initialization -->
+    <script src="firebase-config.js"></script>
+    <script src="js/firebase-init.js"></script>
+
+    <style>
+        :root {
+            --color-primary: #64ffda;
+            --color-secondary: #667eea;
+            --color-accent: #764ba2;
+            --color-success: #4ade80;
+            --color-error: #ff6b6b;
+            --color-warning: #ffc107;
+            --color-border: rgba(100, 255, 218, 0.2);
+        }
+
+        body {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Site Header */
+        .site-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(100, 255, 218, 0.2);
+        }
+
+        .site-logo {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-decoration: none;
+            text-shadow: 0 0 20px rgba(100, 255, 218, 0.3);
+        }
+
+        .site-logo:hover {
+            color: #00d4ff;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--color-primary);
+            background: rgba(100, 255, 218, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: rgba(100, 255, 218, 0.05);
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            border-radius: 20px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+        }
+
+        .user-name {
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        .sign-in-btn {
+            background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+            color: white;
+            padding: 10px 24px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .sign-in-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Loading State */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            gap: 20px;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(100, 255, 218, 0.1);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Error State */
+        .error-container {
+            background: rgba(255, 107, 107, 0.1);
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            max-width: 600px;
+            margin: 40px auto;
+        }
+
+        .error-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .error-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+            color: white;
+            padding: 12px 30px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Page Title */
+        .page-title-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            color: var(--color-primary);
+            margin: 0 0 15px 0;
+            text-shadow: 0 0 30px rgba(100, 255, 218, 0.3);
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Footer */
+        .site-footer {
+            margin-top: 60px;
+            padding: 30px 0;
+            border-top: 2px solid rgba(100, 255, 218, 0.2);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .footer-link {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Site Header -->
+    <header class="site-header page-container">
+        <a href="/index.html" class="site-logo">Eyes of Azrael</a>
+
+        <nav class="header-nav">
+            <a href="/index.html" class="nav-link">Home</a>
+            <a href="/mythos/index.html" class="nav-link">Mythologies</a>
+            <a href="/theories/index.html" class="nav-link">Theories</a>
+
+            <div id="user-section">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="page-container">
+        <!-- Page Title (only shown in create mode) -->
+        <div class="page-title-section" id="page-title-section" style="display: none;">
+            <h1 class="page-title">Create New Entity</h1>
+            <p class="page-subtitle">
+                Contribute to the collective knowledge of world mythology by creating a new entity.
+                Your contribution will be reviewed before publication.
+            </p>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-container" id="loading-state">
+            <div class="spinner"></div>
+            <div class="loading-text">Initializing entity editor...</div>
+        </div>
+
+        <!-- Error State -->
+        <div class="error-container" id="error-state" style="display: none;">
+            <div class="error-icon">⚠️</div>
+            <h2 class="error-title">Unable to Load Editor</h2>
+            <p class="error-message" id="error-message">An error occurred while loading the entity editor.</p>
+            <a href="/index.html" class="btn-back">Return to Home</a>
+        </div>
+
+        <!-- Entity Editor Container -->
+        <div id="entity-editor-container"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-links">
+            <a href="/about.html" class="footer-link">About</a>
+            <a href="/ENTITY_EDITOR_GUIDE.md" class="footer-link">Editor Guide</a>
+            <a href="/contact.html" class="footer-link">Contact</a>
+        </div>
+        <p>&copy; 2025 Eyes of Azrael. All rights reserved.</p>
+    </footer>
+
+    <!-- Load Dependencies -->
+    <script src="js/entity-display.js"></script>
+    <script src="js/entity-loader.js"></script>
+    <script src="js/entity-editor.js"></script>
+
+    <!-- Page Script -->
+    <script>
+        (async function() {
+            'use strict';
+
+            try {
+                // Wait for Firebase to initialize
+                await waitForFirebase();
+
+                // Parse URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const entityType = urlParams.get('type');
+                const entityId = urlParams.get('id');
+
+                // Determine mode
+                const mode = entityId ? 'edit' : 'create';
+
+                // Show/hide page title based on mode
+                const pageTitleSection = document.getElementById('page-title-section');
+                if (mode === 'create') {
+                    pageTitleSection.style.display = 'block';
+                }
+
+                // Update page title
+                if (mode === 'edit') {
+                    document.title = `Edit ${entityType ? entityType.charAt(0).toUpperCase() + entityType.slice(1) : 'Entity'} - Eyes of Azrael`;
+                }
+
+                // Initialize user section
+                initializeUserSection();
+
+                // Hide loading state
+                document.getElementById('loading-state').style.display = 'none';
+
+                // Initialize Entity Editor
+                const editor = new EntityEditor('entity-editor-container', {
+                    mode: mode,
+                    entityType: entityType,
+                    entityId: entityId,
+                    autoSave: true,
+                    autoSaveInterval: 30000, // 30 seconds
+                    onSave: (entity) => {
+                        console.log('Entity saved:', entity);
+                    },
+                    onError: (error) => {
+                        console.error('Editor error:', error);
+                        showError('An error occurred: ' + error.message);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error initializing editor:', error);
+                showError('Failed to initialize entity editor: ' + error.message);
+            }
+
+            /**
+             * Initialize user section in header
+             */
+            function initializeUserSection() {
+                const userSection = document.getElementById('user-section');
+
+                // Listen for auth state changes
+                window.addEventListener('firebaseAuthStateChanged', (event) => {
+                    const { user, userProfile } = event.detail;
+
+                    if (user) {
+                        // User is signed in
+                        userSection.innerHTML = `
+                            <div class="user-info">
+                                <div class="user-avatar" style="background-image: url('${user.photoURL || ''}')"></div>
+                                <span class="user-name">${userProfile?.username || user.displayName || 'User'}</span>
+                            </div>
+                        `;
+                    } else {
+                        // User is signed out
+                        userSection.innerHTML = `
+                            <button class="sign-in-btn" onclick="signIn()">
+                                Sign In
+                            </button>
+                        `;
+                    }
+                });
+
+                // Check current auth state
+                const currentUser = FirebaseService.getCurrentUser();
+                if (currentUser) {
+                    userSection.innerHTML = `
+                        <div class="user-info">
+                            <div class="user-avatar" style="background-image: url('${currentUser.photoURL || ''}')"></div>
+                            <span class="user-name">${currentUser.displayName || 'User'}</span>
+                        </div>
+                    `;
+                } else {
+                    userSection.innerHTML = `
+                        <button class="sign-in-btn" onclick="signIn()">
+                            Sign In
+                        </button>
+                    `;
+                }
+            }
+
+            /**
+             * Show error state
+             */
+            function showError(message) {
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('entity-editor-container').style.display = 'none';
+
+                const errorState = document.getElementById('error-state');
+                const errorMessage = document.getElementById('error-message');
+
+                errorMessage.textContent = message;
+                errorState.style.display = 'block';
+            }
+
+            /**
+             * Sign in with Google
+             */
+            window.signIn = async function() {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    const result = await firebase.auth().signInWithPopup(provider);
+
+                    // Create user profile if doesn't exist
+                    if (result.user) {
+                        await FirebaseService.createUserProfile(result.user);
+                    }
+                } catch (error) {
+                    console.error('Sign in error:', error);
+                    alert('Failed to sign in: ' + error.message);
+                }
+            };
+
+            /**
+             * Sign out
+             */
+            window.signOut = async function() {
+                try {
+                    await firebase.auth().signOut();
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                    alert('Failed to sign out: ' + error.message);
+                }
+            };
+
+        })();
+    </script>
+</body>
+</html>
