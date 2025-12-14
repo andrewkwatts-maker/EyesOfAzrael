@@ -8,6 +8,8 @@
  *   EntityLoader.loadAndRenderDetail('zeus', 'deity', '#detail-container');
  */
 
+import { ENTITY_COLLECTIONS, getCollectionName } from './constants/entity-types.js';
+
 class EntityLoader {
     /**
      * Load and render grid of entities
@@ -27,11 +29,14 @@ class EntityLoader {
         container.innerHTML = this.renderLoadingGrid();
 
         try {
+            // Merge with header filters if available
+            const mergedFilters = this.mergeWithHeaderFilters(filters);
+
             // Build Firestore query
             let query = firebase.firestore().collection(collection);
 
             // Apply filters
-            Object.entries(filters).forEach(([field, value]) => {
+            Object.entries(mergedFilters).forEach(([field, value]) => {
                 if (Array.isArray(value)) {
                     query = query.where(field, 'in', value);
                 } else if (field.includes('.')) {
@@ -65,7 +70,11 @@ class EntityLoader {
             // Execute query
             const snapshot = await query.get();
 
-            if (snapshot.empty) {
+            // Apply client-side filters (for filters that can't be done in Firestore)
+            let entities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            entities = this.applyClientSideFilters(entities);
+
+            if (entities.length === 0) {
                 container.innerHTML = this.renderEmptyState(collection);
                 return;
             }
@@ -74,19 +83,103 @@ class EntityLoader {
             container.innerHTML = '';
             container.className = 'entities-grid';
 
-            snapshot.forEach(doc => {
-                const entity = { id: doc.id, ...doc.data() };
+            entities.forEach(entity => {
                 const card = EntityDisplay.renderCard(entity);
                 container.appendChild(card);
             });
 
-            // Add stats
-            this.addGridStats(container, snapshot.size, collection);
+            // Add stats with filter info
+            this.addGridStatsWithFilters(container, entities.length, snapshot.size, collection);
 
         } catch (error) {
             console.error('Error loading entities:', error);
             container.innerHTML = this.renderErrorState(error.message);
         }
+    }
+
+    /**
+     * Merge filters with header filters
+     * @param {Object} filters - Original filters
+     * @returns {Object} Merged filters
+     */
+    static mergeWithHeaderFilters(filters) {
+        if (!window.headerFilters) {
+            return filters;
+        }
+
+        const headerFilters = window.headerFilters.getActiveFilters();
+        const merged = { ...filters };
+
+        // Apply mythology filters
+        if (headerFilters.mythologies.length > 0 && !filters.mythology) {
+            // For single mythology filter, use direct match
+            if (headerFilters.mythologies.length === 1) {
+                merged.mythology = headerFilters.mythologies[0];
+            } else {
+                // For multiple mythologies, use 'in' query
+                merged.mythology = headerFilters.mythologies;
+            }
+        }
+
+        // Entity type filters are applied client-side (see applyClientSideFilters)
+        // Content source filters are applied client-side (see applyClientSideFilters)
+        // Topic filters are applied client-side (see applyClientSideFilters)
+
+        return merged;
+    }
+
+    /**
+     * Apply client-side filters (for complex filtering that can't be done in Firestore)
+     * @param {Array} entities - Array of entities
+     * @returns {Array} Filtered entities
+     */
+    static applyClientSideFilters(entities) {
+        let filtered = [...entities];
+
+        // Apply header filters if available
+        if (window.headerFilters) {
+            const filters = window.headerFilters.getActiveFilters();
+
+            // Apply content source filter
+            if (filters.contentSource !== 'both') {
+                filtered = filtered.filter(entity => {
+                    const isOfficial = entity.source === 'official' || !entity.source;
+                    const isCommunity = entity.source === 'community' || entity.userSubmitted;
+
+                    if (filters.contentSource === 'official') {
+                        return isOfficial;
+                    } else if (filters.contentSource === 'community') {
+                        return isCommunity;
+                    }
+
+                    return true;
+                });
+            }
+
+            // Apply entity type filter
+            if (filters.entityTypes.length > 0) {
+                filtered = filtered.filter(entity =>
+                    filters.entityTypes.includes(entity.type)
+                );
+            }
+
+            // Apply topic/tag filter
+            if (filters.topics.length > 0) {
+                filtered = filtered.filter(entity => {
+                    const entityTags = entity.tags || entity.topics || [];
+                    return filters.topics.some(topic =>
+                        entityTags.includes(topic)
+                    );
+                });
+            }
+        }
+
+        // Apply user preferences filters if available
+        if (window.userPreferences && window.userPreferences.userId) {
+            filtered = window.userPreferences.applyFilters(filtered);
+        }
+
+        return filtered;
     }
 
     /**
@@ -246,19 +339,7 @@ class EntityLoader {
      * Get collection name from entity type
      */
     static getCollectionName(type) {
-        const collectionMap = {
-            'deity': 'deities',
-            'hero': 'heroes',
-            'creature': 'creatures',
-            'item': 'items',
-            'place': 'places',
-            'concept': 'concepts',
-            'magic': 'magic',
-            'theory': 'user_theories',
-            'mythology': 'mythologies'
-        };
-
-        return collectionMap[type] || type + 's';
+        return getCollectionName(type);
     }
 
     /**
@@ -344,6 +425,28 @@ class EntityLoader {
     }
 
     /**
+     * Add grid statistics with filter information
+     */
+    static addGridStatsWithFilters(container, filteredCount, totalCount, collection) {
+        const stats = document.createElement('div');
+        stats.className = 'grid-stats filter-results-count';
+
+        const hasActiveFilters = window.headerFilters && window.headerFilters.getActiveFilterCount() > 0;
+
+        if (hasActiveFilters && filteredCount !== totalCount) {
+            stats.innerHTML = `
+                <span>Showing <strong>${filteredCount}</strong> of <span class="results-total">${totalCount}</span> ${collection}</span>
+            `;
+        } else {
+            stats.innerHTML = `
+                <span>Showing <strong>${filteredCount}</strong> ${collection}</span>
+            `;
+        }
+
+        container.parentElement.insertBefore(stats, container);
+    }
+
+    /**
      * Track entity view (for analytics)
      */
     static trackView(id, type) {
@@ -359,13 +462,52 @@ class EntityLoader {
     /**
      * Initialize auto-loading based on page context
      */
-    static init() {
+    static async init() {
+        // Load user preferences if user is logged in
+        const user = firebase.auth().currentUser;
+        if (user && window.userPreferences && !window.userPreferences.userId) {
+            try {
+                await window.userPreferences.loadPreferences(user.uid);
+                console.log('[EntityLoader] User preferences loaded');
+            } catch (error) {
+                console.error('[EntityLoader] Error loading user preferences:', error);
+            }
+        }
+
         // Check if this is a detail page
         if (document.getElementById('entity-container')) {
             this.loadFromURL();
         }
 
         // Check if this is a grid page
+        const gridContainer = document.querySelector('[data-entity-grid]');
+        if (gridContainer) {
+            const collection = gridContainer.dataset.entityGrid;
+            const mythology = gridContainer.dataset.mythology;
+            const filters = mythology ? { mythology } : {};
+
+            this.loadAndRenderGrid(collection, `[data-entity-grid="${collection}"]`, filters);
+
+            // Register for filter change events
+            if (window.headerFilters) {
+                window.headerFilters.onFilterChange(() => {
+                    console.log('[EntityLoader] Reloading due to filter change');
+                    this.loadAndRenderGrid(collection, `[data-entity-grid="${collection}"]`, filters);
+                });
+            }
+
+            // Register for preference change events
+            window.addEventListener('preferencesApplied', () => {
+                console.log('[EntityLoader] Reloading due to preference change');
+                this.loadAndRenderGrid(collection, `[data-entity-grid="${collection}"]`, filters);
+            });
+        }
+    }
+
+    /**
+     * Reload current grid with updated filters
+     */
+    static reloadCurrentGrid() {
         const gridContainer = document.querySelector('[data-entity-grid]');
         if (gridContainer) {
             const collection = gridContainer.dataset.entityGrid;

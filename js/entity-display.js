@@ -8,6 +8,8 @@
  *   const detail = EntityDisplay.renderDetail(entity);
  */
 
+import { ENTITY_ICONS, ENTITY_LABELS, getEntityIcon, getEntityLabel } from './constants/entity-types.js';
+
 class EntityDisplay {
     /**
      * Render entity as a card (grid view)
@@ -21,7 +23,11 @@ class EntityDisplay {
         card.dataset.entityType = entity.type;
 
         // Click handler to navigate to detail page
-        card.addEventListener('click', () => {
+        card.addEventListener('click', (e) => {
+            // Don't navigate if clicking on filter dropdown
+            if (e.target.closest('.content-filter-dropdown')) {
+                return;
+            }
             window.location.href = `/${entity.mythology}/${entity.type}s/${entity.id}.html`;
         });
 
@@ -36,6 +42,13 @@ class EntityDisplay {
             <div class="entity-type-badge">${this.getTypeLabel(entity.type)}</div>
         `;
 
+        // Add filter dropdown for user-generated content
+        if (window.contentFilterDropdown) {
+            setTimeout(() => {
+                window.contentFilterDropdown.addDropdown(card, entity);
+            }, 0);
+        }
+
         return card;
     }
 
@@ -46,6 +59,8 @@ class EntityDisplay {
      */
     static renderDetail(entity, container) {
         container.className = 'entity-detail-page';
+        container.dataset.entityId = entity.id;
+        container.dataset.entityType = entity.type;
 
         const sections = [];
 
@@ -85,6 +100,16 @@ class EntityDisplay {
         sections.push(this.renderEditButton(entity));
 
         container.innerHTML = sections.filter(s => s).join('');
+
+        // Add filter dropdown for user-generated content
+        if (window.contentFilterDropdown) {
+            setTimeout(() => {
+                const header = container.querySelector('.entity-header');
+                if (header) {
+                    window.contentFilterDropdown.addDropdown(header, entity);
+                }
+            }, 0);
+        }
     }
 
     /**
@@ -845,23 +870,7 @@ class EntityDisplay {
      * Helper: Get entity icon
      */
     static getEntityIcon(entity) {
-        if (entity.visual?.icon || entity.icon) {
-            return entity.visual?.icon || entity.icon;
-        }
-
-        const iconMap = {
-            deity: '⚡',
-            hero: '🗡️',
-            creature: '🐉',
-            item: '⚔️',
-            place: '🏛️',
-            concept: '💭',
-            magic: '🔮',
-            theory: '🔬',
-            mythology: '📜'
-        };
-
-        return iconMap[entity.type] || '✨';
+        return getEntityIcon(entity);
     }
 
     /**
@@ -882,18 +891,7 @@ class EntityDisplay {
      * Helper: Get type label
      */
     static getTypeLabel(type) {
-        const labels = {
-            deity: 'Deity',
-            hero: 'Hero',
-            creature: 'Creature',
-            item: 'Artifact',
-            place: 'Place',
-            concept: 'Concept',
-            magic: 'Magic System',
-            theory: 'Theory',
-            mythology: 'Mythology'
-        };
-        return labels[type] || this.capitalize(type);
+        return getEntityLabel(type);
     }
 
     /**
@@ -939,6 +937,66 @@ class EntityDisplay {
      */
     static editEntity(id, type) {
         window.location.href = `/edit.html?type=${type}&id=${id}`;
+    }
+
+    /**
+     * Check if entity should be displayed based on content filters
+     * @param {Object} entity - Entity data
+     * @returns {boolean} - True if should be displayed
+     */
+    static shouldDisplayEntity(entity) {
+        if (!entity) return false;
+
+        // Check if content filter is active
+        if (window.contentFilter && !window.contentFilter.shouldShow(entity)) {
+            return false;
+        }
+
+        // Check if entity is individually hidden
+        if (window.contentFilterDropdown) {
+            const hiddenSubmissions = window.contentFilterDropdown.getHiddenSubmissions();
+            if (hiddenSubmissions.includes(entity.id)) {
+                return false;
+            }
+
+            // Check if category is blocked
+            const blockedCategories = window.contentFilterDropdown.getBlockedCategories();
+            if (entity.userId && blockedCategories.includes(entity.type)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Filter an array of entities based on content filters
+     * @param {Array} entities - Array of entity objects
+     * @returns {Array} - Filtered array
+     */
+    static filterEntities(entities) {
+        if (!entities || !Array.isArray(entities)) return [];
+        return entities.filter(entity => this.shouldDisplayEntity(entity));
+    }
+
+    /**
+     * Get entity metadata for display
+     * @param {Object} entity - Entity data
+     * @returns {Object} - Metadata object
+     */
+    static getEntityMetadata(entity) {
+        const isOfficial = !entity.userId || entity.official === true;
+        const currentUserId = window.userAuth?.getCurrentUser()?.uid;
+        const isOwn = entity.userId && entity.userId === currentUserId;
+
+        return {
+            isOfficial,
+            isOwn,
+            isUserGenerated: !isOfficial,
+            author: entity.userName || entity.userDisplayName || 'Unknown',
+            submittedDate: entity.createdAt,
+            approvalStatus: entity.approvalStatus || 'pending'
+        };
     }
 }
 

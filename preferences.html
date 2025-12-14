@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Preferences - Eyes of Azrael</title>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="css/preferences.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config and Auth -->
+    <script src="firebase-config.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/auth-guard.js"></script>
+
+    <!-- Preferences System -->
+    <script src="js/user-preferences.js"></script>
+    <script src="js/content-filter.js"></script>
+    <script src="js/preferences-ui.js"></script>
+</head>
+<body>
+    <div class="preferences-container">
+        <!-- Header -->
+        <div class="preferences-header">
+            <div class="header-content">
+                <button class="btn-back" onclick="window.history.back()">
+                    <span class="icon">←</span>
+                    Back
+                </button>
+                <h1 class="page-title">User Preferences</h1>
+                <div class="header-actions">
+                    <button class="btn-secondary" id="btn-export">
+                        <span class="icon">↓</span>
+                        Export
+                    </button>
+                    <button class="btn-secondary" id="btn-import">
+                        <span class="icon">↑</span>
+                        Import
+                    </button>
+                    <button class="btn-danger" id="btn-reset">
+                        <span class="icon">↺</span>
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Auto-save indicator -->
+            <div class="save-indicator" id="save-indicator">
+                <span class="save-icon">✓</span>
+                <span class="save-text">All changes saved</span>
+                <span class="save-timestamp" id="save-timestamp"></span>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <nav class="preferences-tabs">
+            <button class="pref-tab active" data-tab="content-filters">
+                <span class="tab-icon">🎛️</span>
+                <span class="tab-label">Content Filters</span>
+            </button>
+            <button class="pref-tab" data-tab="blocked-content">
+                <span class="tab-icon">🚫</span>
+                <span class="tab-label">Blocked Content</span>
+                <span class="tab-badge" id="blocked-count-badge">0</span>
+            </button>
+            <button class="pref-tab" data-tab="display-settings">
+                <span class="tab-icon">🎨</span>
+                <span class="tab-label">Display Settings</span>
+            </button>
+            <button class="pref-tab" data-tab="notifications">
+                <span class="tab-icon">🔔</span>
+                <span class="tab-label">Notifications</span>
+            </button>
+            <button class="pref-tab" data-tab="privacy">
+                <span class="tab-icon">🔒</span>
+                <span class="tab-label">Privacy</span>
+            </button>
+        </nav>
+
+        <!-- Tab Content -->
+        <div class="preferences-content">
+            <!-- Content Filters Tab -->
+            <div class="tab-panel active" id="tab-content-filters">
+                <h2 class="section-title">Content Filters</h2>
+                <p class="section-description">
+                    Control what type of content you see across the site. These settings help you customize your browsing experience.
+                </p>
+
+                <!-- User Content Visibility -->
+                <div class="pref-section">
+                    <div class="pref-section-header">
+                        <h3 class="pref-section-title">User-Generated Content</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="show-user-content" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p class="pref-section-description">
+                        Show or hide all user-submitted content. When disabled, only official content will be visible.
+                    </p>
+                </div>
+
+                <!-- Content Source -->
+                <div class="pref-section">
+                    <h3 class="pref-section-title">Default Content Source</h3>
+                    <p class="pref-section-description">
+                        Choose which content sources to display by default.
+                    </p>
+                    <div class="radio-group">
+                        <label class="radio-card">
+                            <input type="radio" name="content-source" value="official" id="source-official">
+                            <div class="radio-card-content">
+                                <div class="radio-icon">🏛️</div>
+                                <div class="radio-label">Official Only</div>
+                                <div class="radio-description">Show only verified official content</div>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="content-source" value="official-self" id="source-official-self" checked>
+                            <div class="radio-card-content">
+                                <div class="radio-icon">🏛️ + 👤</div>
+                                <div class="radio-label">Official + My Content</div>
+                                <div class="radio-description">Official content plus your own submissions</div>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="content-source" value="everyone" id="source-everyone">
+                            <div class="radio-card-content">
+                                <div class="radio-icon">🌍</div>
+                                <div class="radio-label">Everyone</div>
+                                <div class="radio-description">Show all community content (full wiki experience)</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Mythology Filters -->
+                <div class="pref-section">
+                    <h3 class="pref-section-title">Mythology Filters</h3>
+                    <p class="pref-section-description">
+                        Select which mythologies you want to see content from.
+                    </p>
+                    <div class="checkbox-grid" id="mythology-filters">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Entity Type Filters -->
+                <div class="pref-section">
+                    <h3 class="pref-section-title">Entity Type Filters</h3>
+                    <p class="pref-section-description">
+                        Choose which types of entities to display.
+                    </p>
+                    <div class="checkbox-grid" id="entity-type-filters">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Topic/Tag Filters -->
+                <div class="pref-section">
+                    <h3 class="pref-section-title">Topic & Tag Filters</h3>
+                    <p class="pref-section-description">
+                        Filter content by specific topics and tags.
+                    </p>
+                    <div class="tag-filter-container">
+                        <input type="text" id="tag-filter-input" class="tag-input" placeholder="Add topic or tag to filter...">
+                        <button class="btn-add-tag" id="btn-add-tag">Add</button>
+                    </div>
+                    <div class="tag-chips" id="filtered-tags">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blocked Content Tab -->
+            <div class="tab-panel" id="tab-blocked-content">
+                <h2 class="section-title">Blocked Content</h2>
+                <p class="section-description">
+                    Manage users, topics, and individual submissions you've chosen to hide.
+                </p>
+
+                <!-- Blocked Users -->
+                <div class="pref-section">
+                    <div class="pref-section-header">
+                        <h3 class="pref-section-title">Blocked Users</h3>
+                        <button class="btn-text-small" id="btn-clear-blocked-users">Clear All</button>
+                    </div>
+                    <div class="blocked-list" id="blocked-users-list">
+                        <div class="empty-state">
+                            <div class="empty-icon">👥</div>
+                            <p>No blocked users</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blocked Topics -->
+                <div class="pref-section">
+                    <div class="pref-section-header">
+                        <h3 class="pref-section-title">Blocked Topics</h3>
+                        <button class="btn-text-small" id="btn-clear-blocked-topics">Clear All</button>
+                    </div>
+                    <div class="tag-filter-container">
+                        <input type="text" id="block-topic-input" class="tag-input" placeholder="Add topic to block...">
+                        <button class="btn-add-tag" id="btn-block-topic">Block</button>
+                    </div>
+                    <div class="tag-chips" id="blocked-topics">
+                        <div class="empty-state-inline">No blocked topics</div>
+                    </div>
+                </div>
+
+                <!-- Hidden Submissions -->
+                <div class="pref-section">
+                    <div class="pref-section-header">
+                        <h3 class="pref-section-title">Hidden Submissions</h3>
+                        <button class="btn-text-small" id="btn-clear-hidden-submissions">Clear All</button>
+                    </div>
+                    <div class="hidden-submissions-list" id="hidden-submissions-list">
+                        <div class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <p>No hidden submissions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Display Settings Tab -->
+            <div class="tab-panel" id="tab-display-settings">
+                <h2 class="section-title">Display Settings</h2>
+                <p class="section-description">
+                    Customize how content is displayed on your screen.
+                </p>
+
+                <!-- Theme Selector -->
+                <div class="pref-section">
+                    <h3 class="pref-section-title">Theme</h3>
+                    <div class="radio-group">
+                        <label class="radio-card">
+                            <input type="radio" name="theme" value="dark" id="theme-dark" checked>
+                            <div class="radio-card-content">
+                                <div class="radio-icon">🌙</div>
+                                <div class="radio-label">Dark</div>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="theme" value="light" id="theme-light">
+                            <div class="radio-card-content">
+                                <div class="radio-icon">☀️</div>
+                                <div class="radio-label">Light</div>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="theme" value="auto" id="theme-auto">
+                            <div class="radio-card-content">
+                                <div class="radio-icon">🔄</div>
+                                <div class="radio-label">Auto</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Layout Options -->
+                <div class="pref-section">
+                    <h3 class="pref-section-title">Layout</h3>
+                    <div class="radio-group">
+                        <label class="radio-card">
+                            <input type="radio" name="layout" value="grid" id="layout-grid" checked>
+                            <div class="radio-card-content">
+                                <div class="radio-icon">⊞</div>
+                                <div class="radio-label">Grid</div>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="layout" value="list" id="layout-list">
+                            <div class="radio-card-content">
+                                <div class="radio-icon">☰</div>
+                                <div class="radio-label">List</div>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="layout" value="compact" id="layout-compact">
+                            <div class="radio-card-content">
+                                <div class="radio-icon">▤</div>
+                                <div class="radio-label">Compact</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Grid Columns -->
+                <div class="pref-section">
+                    <h3 class="pref-section-title">Grid Columns</h3>
+                    <div class="slider-container">
+                        <input type="range" id="grid-columns" min="2" max="6" value="3" step="1" class="slider">
+                        <div class="slider-value" id="grid-columns-value">3 columns</div>
+                    </div>
+                </div>
+
+                <!-- Card Size -->
+                <div class="pref-section">
+                    <h3 class="pref-section-title">Card Size</h3>
+                    <div class="radio-group">
+                        <label class="radio-card">
+                            <input type="radio" name="card-size" value="small" id="card-small">
+                            <div class="radio-card-content">
+                                <div class="radio-label">Small</div>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="card-size" value="medium" id="card-medium" checked>
+                            <div class="radio-card-content">
+                                <div class="radio-label">Medium</div>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="card-size" value="large" id="card-large">
+                            <div class="radio-card-content">
+                                <div class="radio-label">Large</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Font Size -->
+                <div class="pref-section">
+                    <h3 class="pref-section-title">Font Size</h3>
+                    <div class="radio-group">
+                        <label class="radio-card">
+                            <input type="radio" name="font-size" value="small" id="font-small">
+                            <div class="radio-card-content">
+                                <div class="radio-label">Small</div>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="font-size" value="medium" id="font-medium" checked>
+                            <div class="radio-card-content">
+                                <div class="radio-label">Medium</div>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="font-size" value="large" id="font-large">
+                            <div class="radio-card-content">
+                                <div class="radio-label">Large</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Animation Preferences -->
+                <div class="pref-section">
+                    <h3 class="pref-section-title">Animations</h3>
+                    <div class="radio-group">
+                        <label class="radio-card">
+                            <input type="radio" name="animations" value="full" id="animations-full" checked>
+                            <div class="radio-card-content">
+                                <div class="radio-label">Full</div>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="animations" value="reduced" id="animations-reduced">
+                            <div class="radio-card-content">
+                                <div class="radio-label">Reduced</div>
+                            </div>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="animations" value="none" id="animations-none">
+                            <div class="radio-card-content">
+                                <div class="radio-label">None</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Tab -->
+            <div class="tab-panel" id="tab-notifications">
+                <h2 class="section-title">Notification Preferences</h2>
+                <p class="section-description">
+                    Control what notifications you receive and how you receive them.
+                </p>
+
+                <!-- Email Notifications -->
+                <div class="pref-section">
+                    <div class="pref-section-header">
+                        <h3 class="pref-section-title">Email Notifications</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="email-notifications" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p class="pref-section-description">
+                        Receive email updates about your submissions and activity.
+                    </p>
+                </div>
+
+                <!-- Submission Status Updates -->
+                <div class="pref-section">
+                    <div class="pref-section-header">
+                        <h3 class="pref-section-title">Submission Status Updates</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="notify-submission-status" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p class="pref-section-description">
+                        Get notified when your submissions are reviewed, approved, or need revision.
+                    </p>
+                </div>
+
+                <!-- Community Activity -->
+                <div class="pref-section">
+                    <div class="pref-section-header">
+                        <h3 class="pref-section-title">Community Activity</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="notify-community">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p class="pref-section-description">
+                        Receive notifications about comments, likes, and interactions on your content.
+                    </p>
+                </div>
+
+                <!-- Site Updates -->
+                <div class="pref-section">
+                    <div class="pref-section-header">
+                        <h3 class="pref-section-title">Site Updates</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="notify-site-updates" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p class="pref-section-description">
+                        Get notified about new features, important announcements, and system updates.
+                    </p>
+                </div>
+
+                <!-- Weekly Digest -->
+                <div class="pref-section">
+                    <div class="pref-section-header">
+                        <h3 class="pref-section-title">Weekly Digest</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="weekly-digest">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p class="pref-section-description">
+                        Receive a weekly summary of popular content and community highlights.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Privacy Tab -->
+            <div class="tab-panel" id="tab-privacy">
+                <h2 class="section-title">Privacy & Data</h2>
+                <p class="section-description">
+                    Manage your privacy settings and data preferences.
+                </p>
+
+                <!-- Profile Visibility -->
+                <div class="pref-section">
+                    <div class="pref-section-header">
+                        <h3 class="pref-section-title">Public Profile</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="public-profile" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p class="pref-section-description">
+                        Allow other users to view your profile and contribution history.
+                    </p>
+                </div>
+
+                <!-- Show Email -->
+                <div class="pref-section">
+                    <div class="pref-section-header">
+                        <h3 class="pref-section-title">Show Email on Profile</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="show-email">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p class="pref-section-description">
+                        Display your email address on your public profile.
+                    </p>
+                </div>
+
+                <!-- Activity Tracking -->
+                <div class="pref-section">
+                    <div class="pref-section-header">
+                        <h3 class="pref-section-title">Activity Tracking</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="activity-tracking" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p class="pref-section-description">
+                        Allow the site to track your viewing and interaction history to provide personalized recommendations.
+                    </p>
+                </div>
+
+                <!-- Statistics Dashboard -->
+                <div class="pref-section">
+                    <h3 class="pref-section-title">Your Data Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">👤</div>
+                            <div class="stat-value" id="stat-blocked-users">0</div>
+                            <div class="stat-label">Blocked Users</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🏷️</div>
+                            <div class="stat-value" id="stat-blocked-topics">0</div>
+                            <div class="stat-label">Blocked Topics</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📋</div>
+                            <div class="stat-value" id="stat-hidden-content">0</div>
+                            <div class="stat-label">Hidden Items</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💾</div>
+                            <div class="stat-value" id="stat-storage-used">0 KB</div>
+                            <div class="stat-label">Storage Used</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Management -->
+                <div class="pref-section">
+                    <h3 class="pref-section-title">Data Management</h3>
+                    <div class="action-buttons">
+                        <button class="btn-secondary" id="btn-download-data">
+                            <span class="icon">📥</span>
+                            Download My Data
+                        </button>
+                        <button class="btn-danger" id="btn-clear-history">
+                            <span class="icon">🗑️</span>
+                            Clear Browsing History
+                        </button>
+                        <button class="btn-danger" id="btn-delete-account">
+                            <span class="icon">⚠️</span>
+                            Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Button (Manual Save) -->
+        <div class="preferences-footer">
+            <button class="btn-primary btn-save" id="btn-manual-save">
+                <span class="icon">💾</span>
+                Save All Changes
+            </button>
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="import-file-input" accept=".json" style="display: none;">
+
+    <!-- Initialize Preferences UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for auth to be ready
+            firebase.auth().onAuthStateChanged((user) => {
+                if (!user) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                // Initialize preferences UI
+                if (window.preferencesUI) {
+                    window.preferencesUI.init();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

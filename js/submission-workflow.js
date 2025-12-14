@@ -3,6 +3,8 @@
  * Handles user submissions, admin approval queue, and notifications
  */
 
+import { ENTITY_COLLECTIONS } from './constants/entity-types.js';
+
 class SubmissionWorkflow {
     constructor() {
         this.db = null;
@@ -395,18 +397,7 @@ class SubmissionWorkflow {
             const data = submission.data();
 
             // Determine target collection based on type
-            const collectionMap = {
-                'deity': 'deities',
-                'hero': 'heroes',
-                'creature': 'creatures',
-                'place': 'places',
-                'item': 'spiritual-items',
-                'text': 'texts',
-                'concept': 'concepts',
-                'event': 'events'
-            };
-
-            const targetCollection = collectionMap[data.type];
+            const targetCollection = ENTITY_COLLECTIONS[data.type];
             if (!targetCollection) {
                 throw new Error('Invalid submission type: ' + data.type);
             }
@@ -711,18 +702,7 @@ class SubmissionWorkflow {
 
         try {
             // Check in main collections
-            const collectionMap = {
-                'deity': 'deities',
-                'hero': 'heroes',
-                'creature': 'creatures',
-                'place': 'places',
-                'item': 'spiritual-items',
-                'text': 'texts',
-                'concept': 'concepts',
-                'event': 'events'
-            };
-
-            const targetCollection = collectionMap[type];
+            const targetCollection = ENTITY_COLLECTIONS[type];
             if (!targetCollection) {
                 return [];
             }

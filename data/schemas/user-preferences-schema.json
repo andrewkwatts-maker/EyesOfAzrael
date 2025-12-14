@@ -1,0 +1,400 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Eyes of Azrael User Preferences Schema",
+  "description": "Schema for user preferences stored in Firestore",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["userId", "updatedAt"],
+  "properties": {
+    "userId": {
+      "type": "string",
+      "description": "Firebase Auth UID of the user"
+    },
+    "blockedUsers": {
+      "type": "array",
+      "description": "Array of user IDs whose content should be hidden",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "blockedTopics": {
+      "type": "array",
+      "description": "Array of topic/tag strings to filter out",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "blockedCategories": {
+      "type": "array",
+      "description": "Array of entity type categories to hide",
+      "items": {
+        "type": "string",
+        "enum": [
+          "deity",
+          "hero",
+          "creature",
+          "place",
+          "item",
+          "concept",
+          "magic",
+          "archetype",
+          "user_theory",
+          "submission"
+        ]
+      },
+      "default": []
+    },
+    "blockedMythologies": {
+      "type": "array",
+      "description": "Array of mythology IDs to hide",
+      "items": {
+        "type": "string",
+        "enum": [
+          "greek",
+          "norse",
+          "egyptian",
+          "jewish",
+          "hindu",
+          "chinese",
+          "celtic",
+          "japanese",
+          "roman",
+          "mesopotamian",
+          "aztec",
+          "mayan",
+          "buddhist",
+          "christian",
+          "universal"
+        ]
+      },
+      "default": []
+    },
+    "hiddenSubmissions": {
+      "type": "array",
+      "description": "Array of submission IDs that user wants to hide",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "hiddenTheories": {
+      "type": "array",
+      "description": "Array of theory IDs that user wants to hide",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "displayPreferences": {
+      "type": "object",
+      "description": "UI/UX display settings",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "enum": ["auto", "light", "dark"],
+          "default": "auto",
+          "description": "Color theme preference"
+        },
+        "layout": {
+          "type": "string",
+          "enum": ["grid", "list", "compact"],
+          "default": "grid",
+          "description": "Entity list layout style"
+        },
+        "gridSize": {
+          "type": "string",
+          "enum": ["small", "medium", "large"],
+          "default": "medium",
+          "description": "Size of grid cards"
+        },
+        "itemsPerPage": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 100,
+          "default": 24,
+          "description": "Number of items to show per page"
+        },
+        "showImages": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to display entity images"
+        },
+        "showIcons": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to display entity icons/emoji"
+        },
+        "compactMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable compact display mode"
+        },
+        "animationsEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable UI animations"
+        }
+      },
+      "default": {}
+    },
+    "contentFilters": {
+      "type": "object",
+      "description": "Content filtering preferences",
+      "properties": {
+        "showUserContent": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show user-submitted entities and theories"
+        },
+        "showTheories": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show theory pages and analyses"
+        },
+        "showSubmissions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show pending submissions"
+        },
+        "showApprovedOnly": {
+          "type": "boolean",
+          "default": false,
+          "description": "Only show approved/official content"
+        },
+        "hideControversial": {
+          "type": "boolean",
+          "default": false,
+          "description": "Hide content flagged as controversial"
+        },
+        "minVoteScore": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100,
+          "default": -10,
+          "description": "Minimum vote score to display content"
+        }
+      },
+      "default": {}
+    },
+    "notificationPreferences": {
+      "type": "object",
+      "description": "Notification and alert settings",
+      "properties": {
+        "emailNotifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Send email notifications"
+        },
+        "notifyOnTheoryComment": {
+          "type": "boolean",
+          "default": true,
+          "description": "Notify when someone comments on your theory"
+        },
+        "notifyOnSubmissionUpdate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Notify when submission status changes"
+        },
+        "notifyOnVote": {
+          "type": "boolean",
+          "default": false,
+          "description": "Notify when someone votes on your content"
+        },
+        "notifyOnMention": {
+          "type": "boolean",
+          "default": true,
+          "description": "Notify when you're mentioned in comments"
+        },
+        "notifyOnReply": {
+          "type": "boolean",
+          "default": true,
+          "description": "Notify when someone replies to your comment"
+        },
+        "digestFrequency": {
+          "type": "string",
+          "enum": ["never", "daily", "weekly"],
+          "default": "weekly",
+          "description": "Email digest frequency"
+        }
+      },
+      "default": {}
+    },
+    "privacySettings": {
+      "type": "object",
+      "description": "Privacy and data preferences",
+      "properties": {
+        "profileVisibility": {
+          "type": "string",
+          "enum": ["public", "registered", "private"],
+          "default": "public",
+          "description": "Who can view your profile"
+        },
+        "showEmail": {
+          "type": "boolean",
+          "default": false,
+          "description": "Display email on profile"
+        },
+        "showTheories": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show your theories on profile"
+        },
+        "showVotes": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show your voting activity"
+        },
+        "allowMessages": {
+          "type": "boolean",
+          "default": true,
+          "description": "Allow other users to message you"
+        },
+        "analyticsOptOut": {
+          "type": "boolean",
+          "default": false,
+          "description": "Opt out of analytics tracking"
+        }
+      },
+      "default": {}
+    },
+    "searchPreferences": {
+      "type": "object",
+      "description": "Search and discovery settings",
+      "properties": {
+        "defaultSearchScope": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["deities", "heroes", "creatures", "places", "items", "concepts", "magic", "theories"]
+          },
+          "default": ["deities", "heroes", "creatures", "places", "items", "concepts", "magic", "theories"],
+          "description": "Default collections to search"
+        },
+        "searchHistory": {
+          "type": "boolean",
+          "default": true,
+          "description": "Save search history"
+        },
+        "autoComplete": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable search autocomplete"
+        }
+      },
+      "default": {}
+    },
+    "bookmarks": {
+      "type": "array",
+      "description": "Bookmarked entities (for quick reference)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "type": {"type": "string"},
+          "addedAt": {"type": "string", "format": "date-time"}
+        }
+      },
+      "default": []
+    },
+    "recentlyViewed": {
+      "type": "array",
+      "description": "Recently viewed entities (max 50)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "type": {"type": "string"},
+          "viewedAt": {"type": "string", "format": "date-time"}
+        }
+      },
+      "maxItems": 50,
+      "default": []
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when preferences were created"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of last update"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "description": "Schema version for migration purposes"
+    }
+  },
+  "examples": [
+    {
+      "userId": "abc123xyz",
+      "blockedUsers": ["spamUser123"],
+      "blockedTopics": ["ancient-aliens", "flat-earth"],
+      "blockedCategories": [],
+      "blockedMythologies": [],
+      "hiddenSubmissions": ["submission-456"],
+      "hiddenTheories": [],
+      "displayPreferences": {
+        "theme": "dark",
+        "layout": "grid",
+        "gridSize": "medium",
+        "itemsPerPage": 24,
+        "showImages": true,
+        "showIcons": true,
+        "compactMode": false,
+        "animationsEnabled": true
+      },
+      "contentFilters": {
+        "showUserContent": true,
+        "showTheories": true,
+        "showSubmissions": true,
+        "showApprovedOnly": false,
+        "hideControversial": false,
+        "minVoteScore": -10
+      },
+      "notificationPreferences": {
+        "emailNotifications": true,
+        "notifyOnTheoryComment": true,
+        "notifyOnSubmissionUpdate": true,
+        "notifyOnVote": false,
+        "notifyOnMention": true,
+        "notifyOnReply": true,
+        "digestFrequency": "weekly"
+      },
+      "privacySettings": {
+        "profileVisibility": "public",
+        "showEmail": false,
+        "showTheories": true,
+        "showVotes": false,
+        "allowMessages": true,
+        "analyticsOptOut": false
+      },
+      "searchPreferences": {
+        "defaultSearchScope": ["deities", "heroes", "creatures"],
+        "searchHistory": true,
+        "autoComplete": true
+      },
+      "bookmarks": [
+        {
+          "id": "zeus",
+          "type": "deity",
+          "addedAt": "2025-12-14T10:00:00Z"
+        }
+      ],
+      "recentlyViewed": [
+        {
+          "id": "zeus",
+          "type": "deity",
+          "viewedAt": "2025-12-14T11:00:00Z"
+        }
+      ],
+      "createdAt": "2025-12-01T10:00:00Z",
+      "updatedAt": "2025-12-14T10:00:00Z",
+      "version": 1
+    }
+  ]
+}

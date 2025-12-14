@@ -24,6 +24,9 @@
     <script src="firebase-config.js"></script>
     <script src="js/firebase-init.js"></script>
 
+    <!-- Submission Workflow -->
+    <script src="js/submission-workflow.js"></script>
+
     <style>
         :root {
             --color-primary: #64ffda;
@@ -725,21 +728,18 @@
                     // Prepare entity data
                     const entityData = {
                         ...wizardData,
-                        status: 'pending_review',
-                        authorId: FirebaseService.getUserId(),
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        id: generateId(wizardData.name),
+                        authorId: FirebaseService.getUserId()
                     };
 
-                    // Generate ID
-                    entityData.id = generateId(entityData.name);
-
-                    // Save to Firestore
-                    const collection = EntityLoader.getCollectionName(wizardData.type);
-                    await db.collection(collection).doc(entityData.id).set(entityData);
-
-                    alert('Entity submitted successfully!');
-                    window.location.href = `/view.html?type=${wizardData.type}&id=${entityData.id}`;
+                    // Use submission workflow for proper approval process
+                    if (window.submissionWorkflow) {
+                        const submissionId = await window.submissionWorkflow.createSubmission(entityData, wizardData.type);
+                        alert('Entity submitted for review! You can track its status in your dashboard.');
+                        window.location.href = `/dashboard.html`;
+                    } else {
+                        throw new Error('Submission workflow not available');
+                    }
 
                 } catch (error) {
                     console.error('Error submitting entity:', error);
