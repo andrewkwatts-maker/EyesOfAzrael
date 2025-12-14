@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Filtering Dropdown Test - Eyes of Azrael</title>
+
+    <!-- Base Styles -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e5e7eb;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            color: #64ffda;
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(100, 255, 218, 0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .test-info {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(100, 255, 218, 0.3);
+            border-radius: 15px;
+            padding: 24px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .test-info h2 {
+            color: #64ffda;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+        }
+
+        .test-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .test-info li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .test-info li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #64ffda;
+        }
+
+        .entity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(139, 127, 255, 0.3);
+            border-radius: 15px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .controls h3 {
+            color: #8b7fff;
+            margin-bottom: 16px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(100, 255, 218, 0.2);
+            border: 2px solid rgba(100, 255, 218, 0.4);
+            color: #64ffda;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(100, 255, 218, 0.3);
+        }
+    </style>
+
+    <!-- Entity Display Styles -->
+    <link rel="stylesheet" href="css/entity-display.css">
+
+    <!-- Filter Settings Styles -->
+    <link rel="stylesheet" href="css/filter-settings.css">
+
+    <!-- Content Filter Dropdown Styles -->
+    <link rel="stylesheet" href="css/content-filter-dropdown.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Content Filtering Dropdown Test</h1>
+        <p class="subtitle">Testing inline content filtering with dropdown menus</p>
+
+        <div class="test-info">
+            <h2>Test Instructions</h2>
+            <ul>
+                <li>Hover over user-generated content cards to see the three-dot menu (⋮)</li>
+                <li>Click the menu to see filtering options</li>
+                <li>Try blocking a user, topic, or category</li>
+                <li>Try hiding a single submission</li>
+                <li>Try reporting content (requires sign-in)</li>
+                <li>Notice how official content and your own content don't show the menu</li>
+                <li>Check the content badges showing content type</li>
+            </ul>
+        </div>
+
+        <div class="controls">
+            <h3>Test Controls</h3>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="loadTestEntities()">Load Test Entities</button>
+                <button class="btn btn-secondary" onclick="clearFilters()">Clear All Filters</button>
+                <button class="btn btn-secondary" onclick="showFilteredCount()">Show Filtered Count</button>
+            </div>
+        </div>
+
+        <div id="entity-grid" class="entity-grid">
+            <!-- Entities will be rendered here -->
+        </div>
+    </div>
+
+    <!-- Mock Firebase (for testing without Firebase) -->
+    <script>
+        // Mock Firebase for testing
+        window.firebase = {
+            firestore: () => ({
+                collection: () => ({
+                    add: async (data) => {
+                        console.log('Mock Firestore: Report added', data);
+                        return { id: 'mock-report-' + Date.now() };
+                    }
+                })
+            }),
+            auth: () => ({
+                currentUser: null,
+                onAuthStateChanged: (callback) => callback(null)
+            })
+        };
+    </script>
+
+    <!-- Content Filter System -->
+    <script src="js/content-filter.js"></script>
+
+    <!-- Content Filter Dropdown -->
+    <script src="js/content-filter-dropdown.js"></script>
+
+    <!-- Entity Display -->
+    <script src="js/entity-display.js"></script>
+
+    <!-- Test Script -->
+    <script>
+        // Test entities with different authors, topics, and types
+        const testEntities = [
+            {
+                id: 'deity-zeus-official',
+                type: 'deity',
+                name: 'Zeus',
+                subtitle: 'King of the Gods',
+                mythology: 'greek',
+                official: true,
+                icon: '⚡'
+            },
+            {
+                id: 'deity-hera-community-1',
+                type: 'deity',
+                name: 'Hera (Community)',
+                subtitle: 'Queen of the Gods',
+                mythology: 'greek',
+                userId: 'user123',
+                userName: 'MythologyFan42',
+                userDisplayName: 'MythologyFan42',
+                userTopic: 'olympians',
+                createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+                approvalStatus: 'approved',
+                icon: '👑'
+            },
+            {
+                id: 'hero-hercules-community-1',
+                type: 'hero',
+                name: 'Hercules (Community)',
+                subtitle: 'Hero of Twelve Labors',
+                mythology: 'greek',
+                userId: 'user123',
+                userName: 'MythologyFan42',
+                userDisplayName: 'MythologyFan42',
+                userTopic: 'heroes',
+                createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+                approvalStatus: 'pending',
+                icon: '🗡️'
+            },
+            {
+                id: 'creature-medusa-community-2',
+                type: 'creature',
+                name: 'Medusa (Community)',
+                subtitle: 'Gorgon with Snake Hair',
+                mythology: 'greek',
+                userId: 'user456',
+                userName: 'GreekMyths101',
+                userDisplayName: 'GreekMyths101',
+                userTopic: 'monsters',
+                createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+                approvalStatus: 'approved',
+                icon: '🐍'
+            },
+            {
+                id: 'item-mjolnir-community-3',
+                type: 'item',
+                name: 'Mjolnir (Community)',
+                subtitle: 'Thor\'s Hammer',
+                mythology: 'norse',
+                userId: 'user789',
+                userName: 'NorseLegends',
+                userDisplayName: 'NorseLegends',
+                userTopic: 'weapons',
+                createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                approvalStatus: 'flagged',
+                icon: '🔨'
+            },
+            {
+                id: 'deity-odin-official',
+                type: 'deity',
+                name: 'Odin',
+                subtitle: 'All-Father',
+                mythology: 'norse',
+                official: true,
+                icon: '👁️'
+            },
+            {
+                id: 'theory-atlantis-community-1',
+                type: 'theory',
+                name: 'Atlantis Theory (Community)',
+                subtitle: 'Advanced Ancient Civilization',
+                mythology: 'greek',
+                userId: 'user123',
+                userName: 'MythologyFan42',
+                userDisplayName: 'MythologyFan42',
+                userTopic: 'lost-civilizations',
+                createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+                approvalStatus: 'rejected',
+                icon: '🔬'
+            },
+            {
+                id: 'place-asgard-community-4',
+                type: 'place',
+                name: 'Asgard (Community)',
+                subtitle: 'Realm of the Aesir',
+                mythology: 'norse',
+                userId: 'user999',
+                userName: 'VikingSaga',
+                userDisplayName: 'VikingSaga',
+                userTopic: 'realms',
+                createdAt: new Date(),
+                approvalStatus: 'pending',
+                icon: '🏰'
+            }
+        ];
+
+        // Load test entities
+        function loadTestEntities() {
+            const grid = document.getElementById('entity-grid');
+            grid.innerHTML = '';
+
+            testEntities.forEach(entity => {
+                const card = EntityDisplay.renderCard(entity);
+                grid.appendChild(card);
+            });
+
+            console.log('Loaded', testEntities.length, 'test entities');
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            if (window.contentFilter) {
+                window.contentFilter.clearAllHidden();
+            }
+
+            localStorage.removeItem('hiddenSubmissions');
+            localStorage.removeItem('blockedCategories');
+
+            // Reload entities
+            loadTestEntities();
+
+            alert('All filters cleared! Entities reloaded.');
+        }
+
+        // Show filtered count
+        function showFilteredCount() {
+            const stats = window.contentFilter ? window.contentFilter.getStats() : null;
+
+            if (stats) {
+                const message = `
+Filter Statistics:
+- Mode: ${stats.mode}
+- Hidden Users: ${stats.hiddenUsersCount}
+- Hidden Topics: ${stats.hiddenTopicsCount}
+- Hidden Subtopics: ${stats.hiddenSubtopicsCount}
+                `;
+                alert(message);
+            } else {
+                alert('Content filter not initialized');
+            }
+        }
+
+        // Auto-load entities on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, loading test entities...');
+            setTimeout(loadTestEntities, 500);
+        });
+
+        // Listen for filter changes
+        window.addEventListener('contentFilterChanged', (e) => {
+            console.log('Filter changed:', e.detail);
+        });
+    </script>
+</body>
+</html>
