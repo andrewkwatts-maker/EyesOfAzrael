@@ -546,28 +546,25 @@ service cloud.firestore {
 
     // ===== SUBMISSIONS COLLECTION =====
     // Path: /submissions/{submissionId}
-    // User submissions/appendments to existing content
+    // User submissions for new entities (deities, heroes, creatures, etc.)
 
     match /submissions/{submissionId} {
       function isValidSubmission() {
-        return request.resource.data.keys().hasAll(['title', 'content', 'parentCollection', 'parentDocumentId', 'contentType', 'submittedBy', 'status'])
-               && request.resource.data.title is string
-               && request.resource.data.title.size() >= 3
-               && request.resource.data.title.size() <= 200
-               && request.resource.data.content is string
-               && request.resource.data.content.size() >= 10
-               && request.resource.data.content.size() <= 5000
-               && request.resource.data.parentCollection is string
-               && request.resource.data.parentDocumentId is string
-               && request.resource.data.contentType is string
+        return request.resource.data.keys().hasAll(['id', 'type', 'status', 'data', 'submittedBy', 'entityName'])
+               && request.resource.data.id is string
+               && request.resource.data.type in ['deity', 'hero', 'creature', 'place', 'item', 'text', 'concept', 'event']
+               && request.resource.data.status in ['pending', 'approved', 'rejected']
+               && request.resource.data.data is map
                && request.resource.data.submittedBy == request.auth.uid
-               && request.resource.data.status in ['pending', 'approved', 'rejected'];
+               && request.resource.data.entityName is string
+               && request.resource.data.entityName.size() >= 1
+               && request.resource.data.entityName.size() <= 200;
       }
 
       // Anyone can read approved submissions
       allow get: if resource.data.status == 'approved';
       allow list: if resource.data.status == 'approved'
-                  && request.query.limit <= 50;
+                  && request.query.limit <= 100;
 
       // Users can read their own submissions regardless of status
       allow read: if isAuthenticated()
@@ -579,24 +576,24 @@ service cloud.firestore {
       // Authenticated users can create submissions
       allow create: if isAuthenticated()
                     && isValidSubmission()
-                    && request.resource.data.status == 'pending';
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.submittedBy == request.auth.uid;
 
-      // Users can update their own pending submissions
+      // Users can update their own pending or rejected submissions
       allow update: if isAuthenticated()
                     && resource.data.submittedBy == request.auth.uid
-                    && resource.data.status == 'pending'
+                    && resource.data.status in ['pending', 'rejected']
                     && request.resource.data.submittedBy == request.auth.uid
-                    && request.resource.data.status == 'pending'
                     && isValidSubmission();
 
-      // Admin can approve/reject submissions
+      // Admin can approve/reject any submission
       allow update: if isAdminEmail()
                     && request.resource.data.submittedBy == resource.data.submittedBy;
 
-      // Users can delete their own pending submissions
+      // Users can delete their own pending or rejected submissions
       allow delete: if isAuthenticated()
                     && resource.data.submittedBy == request.auth.uid
-                    && resource.data.status == 'pending';
+                    && resource.data.status in ['pending', 'rejected'];
 
       // Admin can delete any submission
       allow delete: if isAdminEmail();
