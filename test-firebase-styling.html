@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Styling Test - Eyes of Azrael</title>
+
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Mythology-Specific Colors -->
+    <link rel="stylesheet" href="themes/mythology-colors.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    <script src="js/firebase-init.js"></script>
+
+    <!-- Entity Renderer -->
+    <script src="js/entity-renderer-firebase.js"></script>
+
+    <style>
+        .test-controls {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .test-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .test-btn {
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mythology-switcher {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .mythology-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--color-border);
+            background: var(--color-surface);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mythology-btn:hover {
+            border-color: var(--color-primary);
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .mythology-btn.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .loading-indicator {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.5rem;
+        }
+
+        .loading-indicator::after {
+            content: '...';
+            animation: ellipsis 1.5s infinite;
+        }
+
+        @keyframes ellipsis {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <header>
+        <div class="header-content">
+            <h1>🔬 Firebase Styling Test</h1>
+            <p style="font-size: 0.9rem; opacity: 0.8;">Testing mythology-specific styling with Firebase dynamic loading</p>
+        </div>
+    </header>
+
+    <nav class="breadcrumb">
+        <a href="index.html">Home</a> →
+        <span>Firebase Styling Test</span>
+    </nav>
+
+    <main>
+        <!-- Test Controls -->
+        <section class="test-controls">
+            <h2>🎨 Mythology Color Test</h2>
+            <p>Click a mythology to see how the color scheme changes dynamically:</p>
+
+            <div class="mythology-switcher" id="mythology-switcher">
+                <button class="mythology-btn" data-mythology="greek">Greek</button>
+                <button class="mythology-btn" data-mythology="norse">Norse</button>
+                <button class="mythology-btn" data-mythology="egyptian">Egyptian</button>
+                <button class="mythology-btn" data-mythology="hindu">Hindu</button>
+                <button class="mythology-btn" data-mythology="buddhist">Buddhist</button>
+                <button class="mythology-btn" data-mythology="chinese">Chinese</button>
+                <button class="mythology-btn" data-mythology="japanese">Japanese</button>
+                <button class="mythology-btn" data-mythology="celtic">Celtic</button>
+                <button class="mythology-btn" data-mythology="roman">Roman</button>
+                <button class="mythology-btn" data-mythology="aztec">Aztec</button>
+                <button class="mythology-btn" data-mythology="sumerian">Sumerian</button>
+                <button class="mythology-btn" data-mythology="african">African</button>
+            </div>
+
+            <h3 style="margin-top: 2rem;">🔥 Load Entities from Firebase</h3>
+            <p>Test loading real entities from Firestore with mythology-specific styling:</p>
+
+            <div class="test-buttons">
+                <button class="test-btn" onclick="loadEntity('deity', 'zeus', 'greek')">
+                    ⚡ Zeus (Greek)
+                </button>
+                <button class="test-btn" onclick="loadEntity('deity', 'odin', 'norse')">
+                    🧙 Odin (Norse)
+                </button>
+                <button class="test-btn" onclick="loadEntity('deity', 'ra', 'egyptian')">
+                    ☀️ Ra (Egyptian)
+                </button>
+                <button class="test-btn" onclick="loadEntity('deity', 'shiva', 'hindu')">
+                    🕉️ Shiva (Hindu)
+                </button>
+                <button class="test-btn" onclick="loadEntity('deity', 'amaterasu', 'japanese')">
+                    ☀️ Amaterasu (Japanese)
+                </button>
+                <button class="test-btn" onclick="loadEntity('hero', 'hercules', 'greek')">
+                    🗡️ Hercules (Hero)
+                </button>
+            </div>
+        </section>
+
+        <!-- Sample Content with Mythology Styling -->
+        <section id="sample-content" data-mythology="greek">
+            <div class="deity-header">
+                <div class="deity-icon">⚡</div>
+                <h2>Sample Entity</h2>
+                <p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">
+                    This is a sample entity showing mythology-specific styling
+                </p>
+                <p style="font-size: 1.1rem; margin-top: 1rem;">
+                    The colors, gradients, and styling automatically adapt based on the mythology.
+                    Try switching mythologies above to see the visual transformation.
+                </p>
+            </div>
+
+            <div>
+                <h2 style="color: var(--mythos-primary);">Attributes & Domains</h2>
+                <div class="attribute-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+                    <div class="attribute-card">
+                        <div class="attribute-label">Primary Color</div>
+                        <div class="attribute-value">
+                            <div style="width: 100%; height: 40px; background: var(--mythos-primary); border-radius: 8px; margin-top: 0.5rem;"></div>
+                        </div>
+                    </div>
+                    <div class="attribute-card">
+                        <div class="attribute-label">Secondary Color</div>
+                        <div class="attribute-value">
+                            <div style="width: 100%; height: 40px; background: var(--mythos-secondary); border-radius: 8px; margin-top: 0.5rem;"></div>
+                        </div>
+                    </div>
+                    <div class="attribute-card">
+                        <div class="attribute-label">Accent Color</div>
+                        <div class="attribute-value">
+                            <div style="width: 100%; height: 40px; background: var(--mythos-accent); border-radius: 8px; margin-top: 0.5rem;"></div>
+                        </div>
+                    </div>
+                    <div class="attribute-card">
+                        <div class="attribute-label">Gradient</div>
+                        <div class="attribute-value">
+                            <div style="width: 100%; height: 40px; background: linear-gradient(135deg, var(--mythos-gradient-start), var(--mythos-gradient-end)); border-radius: 8px; margin-top: 0.5rem;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <h3 style="color: var(--mythos-secondary);">Glass Card Example</h3>
+                <p>This is a glass card that adapts to the mythology's color scheme. The border and background use the mythology-specific colors.</p>
+
+                <div style="margin-top: 1rem;">
+                    <div class="subsection-card accent-border-left" style="margin-bottom: 1rem;">
+                        <h4 style="color: var(--mythos-secondary);">Subsection Card</h4>
+                        <p>Subsection cards have a left accent border in the mythology's primary color.</p>
+                    </div>
+
+                    <div class="interactive-element" style="padding: 1rem; border-radius: 8px;">
+                        <p><strong>Interactive Element:</strong> Hover over this to see the glow effect in the mythology's color.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <h3 style="color: var(--mythos-secondary);">Badge Example</h3>
+                <p>
+                    <span class="mythology-badge">Primary Badge</span>
+                    <span style="display: inline-block; margin-left: 0.5rem; background: var(--mythos-secondary); color: white; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: bold;">Secondary Badge</span>
+                </p>
+            </div>
+        </section>
+
+        <!-- Firebase-Loaded Content Container -->
+        <section id="firebase-content" style="min-height: 400px;">
+            <!-- Content will be dynamically loaded here -->
+        </section>
+    </main>
+
+    <script>
+        // Mythology switcher functionality
+        const sampleContent = document.getElementById('sample-content');
+        const mythologySwitcher = document.getElementById('mythology-switcher');
+
+        mythologySwitcher.addEventListener('click', (e) => {
+            if (e.target.classList.contains('mythology-btn')) {
+                const mythology = e.target.dataset.mythology;
+
+                // Update active button
+                document.querySelectorAll('.mythology-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                e.target.classList.add('active');
+
+                // Apply mythology to sample content
+                sampleContent.setAttribute('data-mythology', mythology);
+
+                // Update URL parameter (optional)
+                const url = new URL(window.location);
+                url.searchParams.set('mythology', mythology);
+                window.history.pushState({}, '', url);
+            }
+        });
+
+        // Entity loading functionality
+        async function loadEntity(type, id, mythology) {
+            const container = document.getElementById('firebase-content');
+
+            // Show loading indicator
+            container.innerHTML = '<div class="loading-indicator">Loading entity from Firebase</div>';
+
+            try {
+                // Create renderer instance
+                const renderer = new FirebaseEntityRenderer();
+
+                // Load and render entity
+                await renderer.loadAndRender(type, id, mythology, container);
+
+                // Scroll to content
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            } catch (error) {
+                console.error('Error loading entity:', error);
+                container.innerHTML = `
+                    <div class="glass-card" style="border-color: #DC143C; background: rgba(220, 20, 60, 0.1);">
+                        <h2 style="color: #DC143C;">Error Loading Entity</h2>
+                        <p>${error.message}</p>
+                        <p><strong>Details:</strong></p>
+                        <ul>
+                            <li>Type: ${type}</li>
+                            <li>ID: ${id}</li>
+                            <li>Mythology: ${mythology}</li>
+                        </ul>
+                        <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                            Make sure the entity exists in Firestore and Firebase is properly initialized.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize with URL parameters if present
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const mythology = params.get('mythology');
+
+            if (mythology) {
+                sampleContent.setAttribute('data-mythology', mythology);
+                const btn = document.querySelector(`[data-mythology="${mythology}"]`);
+                if (btn) btn.classList.add('active');
+            } else {
+                // Default to greek
+                document.querySelector('[data-mythology="greek"]').classList.add('active');
+            }
+        });
+
+        // Theme picker integration
+        if (window.ThemePicker) {
+            new ThemePicker();
+        }
+    </script>
+
+    <script defer src="themes/theme-picker.js"></script>
+</body>
+</html>
