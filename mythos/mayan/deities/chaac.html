@@ -4,126 +4,40 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Maya - Chaac</title>
+
+<!-- Entity Metadata for Dynamic Loading -->
+<meta name="mythology" content="mayan">
+<meta name="entity-type" content="deity">
+<meta name="entity-id" content="chaac">
+
     <link href="../../../themes/theme-base.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../../themes/mythology-colors.css">
     <link href="../../../styles.css" rel="stylesheet"/>
     <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../themes/smart-links.css">
+
+<!-- Firebase Auth System -->
+<link rel="stylesheet" href="../../../css/user-auth.css">
+<script src="../../../js/firebase-auth.js"></script>
+<script src="../../../js/auth-guard.js"></script>
+<script src="../../../js/components/google-signin-button.js"></script>
+
 <script defer src="../../../themes/smart-links.js"></script>
     <script defer src="../../../themes/theme-animations.js"></script>
     <script defer src="../../../themes/theme-picker.js"></script>
-    <style>
-        :root {
-            --mythos-primary: #1E90FF;
-            --mythos-secondary: #00CED1;
-            --mythos-primary-rgb: 30, 144, 255;
-            --mythos-accent: #228B22;
-            --mythos-jade: #00A86B;
-        }
+    
 
-        .deity-header {
-            background: linear-gradient(135deg, #1a365d, var(--mythos-primary));
-            color: white;
-            padding: 3rem 2rem;
-            border-radius: var(--radius-lg, 15px);
-            margin-bottom: 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .deity-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 L35 20 L30 15 L25 20 Z' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E") repeat;
-            opacity: 0.4;
-        }
-
-        .deity-header > * {
-            position: relative;
-            z-index: 1;
-        }
-
-        .deity-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        .attribute-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-
-        .attribute-card {
-            background: rgba(30, 144, 255, 0.1);
-            border: 1px solid rgba(30, 144, 255, 0.3);
-            padding: 1rem;
-            border-radius: 10px;
-        }
-
-        .attribute-label {
-            color: var(--mythos-primary);
-            font-weight: bold;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
-        }
-
-        .attribute-value {
-            font-size: 1.1rem;
-        }
-
-        .mayan-term {
-            font-style: italic;
-            color: var(--mythos-primary);
-        }
-
-        .myth-section {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: rgba(30, 144, 255, 0.05);
-            border-radius: var(--radius-lg, 15px);
-            border-left: 4px solid var(--mythos-primary);
-        }
-
-        .citation {
-            font-size: 0.9rem;
-            color: var(--color-text-secondary);
-            background: rgba(30, 144, 255, 0.05);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-        }
-
-        h2 {
-            color: var(--mythos-primary);
-        }
-
-        h3 {
-            color: var(--mythos-secondary);
-        }
-
-        /* Heading visibility improvements */
-        h2, h3 {
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        .interlink-header {
-            color: var(--color-text-primary);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+<!-- Dynamic Redirect System (PHASE 4) -->
+<script src="../../../js/dynamic-redirect.js"></script>
 </head>
 <body>
     <div id="theme-picker-container"></div>
     <header>
         <div class="header-content">
             <h1>&#127783; Chaac</h1>
-        </div>
+        
+        <div id="user-auth-nav"></div>
+    </div>
     </header>
     <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="../../../mythos/index.html">Home</a> >
@@ -131,9 +45,9 @@
         <a href="index.html">Deities</a> >
         <span>Chaac</span>
     </nav>
-    <main>
-        <section class="deity-header">
-            <div class="deity-icon">&#127783;</div>
+    <main data-mythology="mayan">
+        <section class="hero-section">
+            <div class="hero-icon-display">&#127783;</div>
             <h2 style="color: white;">Chaac</h2>
             <p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0; color: #98FB98;">
                 <span class="mayan-term">Chaahk</span> - "Thunder" / "Lightning Strike"
@@ -150,27 +64,27 @@
         <section>
             <h2>Names and Meanings</h2>
             <div class="attribute-grid">
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Primary Name</div>
                     <div class="attribute-value"><span class="mayan-term">Chaahk</span> / Chaac / Chac</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Etymology</div>
                     <div class="attribute-value">From Proto-Mayan *<span class="mayan-term">kaq</span> meaning "thunder" or "lightning bolt"</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Scholarly Designation</div>
                     <div class="attribute-value">God B in the Schellhas classification system</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Aztec Equivalent</div>
                     <div class="attribute-value">Tlaloc (both rain gods with goggle eyes)</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Epithets</div>
                     <div class="attribute-value">"Lord of the Waters," "He Who Splits the Sky"</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Principal Cult Centers</div>
                     <div class="attribute-value">Uxmal, Kabah, Sayil (Puuc region)</div>
                 </div>
@@ -180,27 +94,27 @@
         <section>
             <h2>Attributes and Domains</h2>
             <div class="attribute-grid">
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Domains</div>
                     <div class="attribute-value">Rain, thunder, lightning, fertility, agriculture, water, cenotes, caves</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Symbols</div>
                     <div class="attribute-value">Lightning axe, jade, water lily, shell, serpent, frog, T-shaped element (wind/breath)</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Sacred Animals</div>
                     <div class="attribute-value">Frog (rain herald), serpent, fish, turtle, water birds</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Colors</div>
                     <div class="attribute-value">Blue (water/sky), green (jade/fertility), white (clouds)</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Associated Places</div>
                     <div class="attribute-value">Cenotes (sacred wells), caves, mountains where clouds form</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Cardinal Manifestations</div>
                     <div class="attribute-value">Four Chaacs at the four directions, each with distinct color</div>
                 </div>
@@ -315,19 +229,19 @@
         <section style="margin-top: 2rem;">
             <h2>Iconography and Symbols</h2>
             <div class="attribute-grid">
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Long Nose</div>
                     <div class="attribute-value">Chaac's most distinctive feature - a curved, elongated nose possibly representing a lightning bolt or serpent</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Goggle Eyes</div>
                     <div class="attribute-value">Large, circular eyes similar to Tlaloc, possibly representing clouds, rain, or serpent coils</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Lightning Axe</div>
                     <div class="attribute-value">His primary weapon, often serpent-shaped, used to split clouds and create thunder</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Jade Ornaments</div>
                     <div class="attribute-value">Associated with water and preciousness, often shown with jade ear spools and pectorals</div>
                 </div>

@@ -4,122 +4,40 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Aztec - Quetzalcoatl</title>
+
+<!-- Entity Metadata for Dynamic Loading -->
+<meta name="mythology" content="aztec">
+<meta name="entity-type" content="deity">
+<meta name="entity-id" content="quetzalcoatl">
+
     <link href="../../../themes/theme-base.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../../themes/mythology-colors.css">
     <link href="../../../styles.css" rel="stylesheet"/>
     <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../themes/smart-links.css">
+
+<!-- Firebase Auth System -->
+<link rel="stylesheet" href="../../../css/user-auth.css">
+<script src="../../../js/firebase-auth.js"></script>
+<script src="../../../js/auth-guard.js"></script>
+<script src="../../../js/components/google-signin-button.js"></script>
+
 <script defer src="../../../themes/smart-links.js"></script>
     <script defer src="../../../themes/theme-animations.js"></script>
     <script defer src="../../../themes/theme-picker.js"></script>
-    <style>
-        :root {
-            --mythos-primary: #009B77;
-            --mythos-secondary: #C9A227;
-            --mythos-primary-rgb: 0, 155, 119;
-            --mythos-accent: #8B0000;
-        }
+    
 
-        .deity-header {
-            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
-            color: white;
-            padding: 3rem 2rem;
-            border-radius: var(--radius-lg, 15px);
-            margin-bottom: 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .deity-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30z' fill='rgba(255,255,255,0.05)'/%3E%3C/svg%3E") repeat;
-            opacity: 0.3;
-        }
-
-        .deity-header > * {
-            position: relative;
-            z-index: 1;
-        }
-
-        .deity-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        .attribute-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-
-        .attribute-card {
-            background: rgba(0, 155, 119, 0.1);
-            border: 1px solid rgba(0, 155, 119, 0.3);
-            padding: 1rem;
-            border-radius: 10px;
-        }
-
-        .attribute-label {
-            color: var(--mythos-primary);
-            font-weight: bold;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
-        }
-
-        .attribute-value {
-            font-size: 1.1rem;
-        }
-
-        .nahuatl-term {
-            font-style: italic;
-            color: var(--mythos-secondary);
-        }
-
-        .myth-section {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: rgba(0, 155, 119, 0.05);
-            border-radius: var(--radius-lg, 15px);
-            border-left: 4px solid var(--mythos-primary);
-        }
-
-        .citation {
-            font-size: 0.9rem;
-            color: var(--color-text-secondary);
-            background: rgba(0, 155, 119, 0.05);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-        }
-
-        /* Heading visibility improvements */
-        h2, h3 {
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        .interlink-header {
-            color: var(--color-text-primary);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        section h2 {
-            color: var(--mythos-primary);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+<!-- Dynamic Redirect System (PHASE 4) -->
+<script src="../../../js/dynamic-redirect.js"></script>
 </head>
 <body>
     <div id="theme-picker-container"></div>
     <header>
         <div class="header-content">
             <h1>&#128013; Quetzalcoatl</h1>
-        </div>
+        
+        <div id="user-auth-nav"></div>
+    </div>
     </header>
     <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="../../../mythos/index.html">Home</a> >
@@ -127,9 +45,9 @@
         <a href="index.html">Deities</a> >
         <span>Quetzalcoatl</span>
     </nav>
-    <main>
-        <section class="deity-header">
-            <div class="deity-icon">&#128013;</div>
+    <main data-mythology="aztec">
+        <section class="hero-section">
+            <div class="hero-icon-display">&#128013;</div>
             <h2>Quetzalcoatl</h2>
             <p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;"><span class="nahuatl-term">Quetzalcoatl</span> - "Feathered Serpent" / "Precious Twin"</p>
             <p style="font-size: 1.1rem; margin-top: 1rem;">
@@ -140,21 +58,21 @@
         </section>
 
         <section>
-            <h2 style="color: var(--mythos-primary);">Names and Meanings</h2>
+            <h2 style="color: var(--color-primary);">Names and Meanings</h2>
             <div class="attribute-grid">
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Nahuatl Name</div>
                     <div class="attribute-value"><span class="nahuatl-term">Quetzalcoatl</span></div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Etymology</div>
                     <div class="attribute-value"><span class="nahuatl-term">Quetzalli</span> (precious feather) + <span class="nahuatl-term">Coatl</span> (serpent)</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Alternative Names</div>
                     <div class="attribute-value">Ehecatl (Wind aspect), Ce Acatl Topiltzin (historical priest-king)</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Maya Equivalent</div>
                     <div class="attribute-value">Kukulkan / K'uk'ulkan</div>
                 </div>
@@ -162,29 +80,29 @@
         </section>
 
         <section>
-            <h2 style="color: var(--mythos-primary);">Attributes and Domains</h2>
+            <h2 style="color: var(--color-primary);">Attributes and Domains</h2>
             <div class="attribute-grid">
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Domains</div>
                     <div class="attribute-value">Wind, air, learning, knowledge, arts, dawn, the morning star (Venus), priesthood, merchants</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Symbols</div>
                     <div class="attribute-value">Feathered serpent, wind jewel (<span class="nahuatl-term">ehecailacocozcatl</span>), conch shell, Venus, quetzal feathers</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Sacred Animals</div>
                     <div class="attribute-value">Quetzal bird, rattlesnake, spider monkey, dog (Xolotl)</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Colors</div>
                     <div class="attribute-value">Green (quetzal feathers), white (as White Tezcatlipoca), gold</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Cardinal Direction</div>
                     <div class="attribute-value">West (as one of the four Tezcatlipocas)</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Calendar Day</div>
                     <div class="attribute-value">9 Wind (<span class="nahuatl-term">9 Ehecatl</span>)</div>
                 </div>
@@ -192,10 +110,10 @@
         </section>
 
         <section style="margin-top: 2rem;">
-            <h2 style="color: var(--mythos-primary);">Creation Mythology</h2>
+            <h2 style="color: var(--color-primary);">Creation Mythology</h2>
 
             <div class="myth-section">
-                <h3 style="color: var(--mythos-secondary);">Creation of Humanity</h3>
+                <h3 style="color: var(--color-secondary);">Creation of Humanity</h3>
                 <p>
                     After the destruction of the Fourth Sun, Quetzalcoatl journeyed to <span class="nahuatl-term">Mictlan</span>,
                     the underworld, to retrieve the bones of previous humans. He succeeded in stealing them from the death god
@@ -207,7 +125,7 @@
             </div>
 
             <div class="myth-section">
-                <h3 style="color: var(--mythos-secondary);">The Gift of Maize</h3>
+                <h3 style="color: var(--color-secondary);">The Gift of Maize</h3>
                 <p>
                     Quetzalcoatl discovered that ants were carrying corn kernels from inside a mountain. Transforming himself
                     into a black ant, he followed them into <span class="nahuatl-term">Tonacatepetl</span> (Mountain of Sustenance)
@@ -218,7 +136,7 @@
             </div>
 
             <div class="myth-section">
-                <h3 style="color: var(--mythos-secondary);">The Creation of the Fifth Sun</h3>
+                <h3 style="color: var(--color-secondary);">The Creation of the Fifth Sun</h3>
                 <p>
                     In the darkness after the Fourth Sun's destruction, the gods gathered at Teotihuacan to create a new sun.
                     Two gods volunteered to become the new sun by throwing themselves into a divine fire. After the sacrifice,
@@ -230,7 +148,7 @@
         </section>
 
         <section style="margin-top: 2rem;">
-            <h2 style="color: var(--mythos-primary);">The Fall of Quetzalcoatl</h2>
+            <h2 style="color: var(--color-primary);">The Fall of Quetzalcoatl</h2>
             <p>
                 The most dramatic myth involves the priest-king Ce Acatl Topiltzin Quetzalcoatl of Tollan (Tula). His rival
                 Tezcatlipoca, jealous of his virtue and opposed to human sacrifice, tricked him into drinking pulque (alcohol)
@@ -250,14 +168,14 @@
         </section>
 
         <section style="margin-top: 2rem;">
-            <h2 style="color: var(--mythos-primary);">Sacrifice and Rituals</h2>
+            <h2 style="color: var(--color-primary);">Sacrifice and Rituals</h2>
             <p>
                 Unlike most Aztec deities, Quetzalcoatl was traditionally associated with <em>opposition</em> to human sacrifice.
                 As the culture hero who refused blood offerings and promoted self-sacrifice through bloodletting, he represents
                 an alternative spiritual path. However, his temples still received offerings, and as Ehecatl (Wind), round temples
                 were built to him so wind could flow freely.
             </p>
-            <h3 style="color: var(--mythos-secondary);">Forms of Worship</h3>
+            <h3 style="color: var(--color-secondary);">Forms of Worship</h3>
             <ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
                 <li><strong>Auto-sacrifice:</strong> Priests drew blood from their own bodies using maguey thorns</li>
                 <li><strong>Offerings:</strong> Quetzal feathers, jade, butterflies, flowers, and incense</li>
@@ -267,21 +185,21 @@
         </section>
 
         <section style="margin-top: 2rem;">
-            <h2 style="color: var(--mythos-primary);">Iconography and Symbols</h2>
+            <h2 style="color: var(--color-primary);">Iconography and Symbols</h2>
             <div class="attribute-grid">
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Physical Form</div>
                     <div class="attribute-value">Depicted as a serpent covered in quetzal feathers, or as a man with a beard wearing a conical hat and wind jewel</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Wind Jewel</div>
                     <div class="attribute-value">The <span class="nahuatl-term">ehecailacocozcatl</span> - a cross-section of a conch shell worn as a breastplate</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Venus Symbol</div>
                     <div class="attribute-value">As the morning star, he was associated with death and resurrection, disappearing and reappearing</div>
                 </div>
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Twin - Xolotl</div>
                     <div class="attribute-value">His twin and shadow, represented as a dog-headed god of lightning and death, the evening star</div>
                 </div>
@@ -289,7 +207,7 @@
         </section>
 
         <section style="margin-top: 2rem;">
-            <h2 style="color: var(--mythos-primary);">Modern Significance</h2>
+            <h2 style="color: var(--color-primary);">Modern Significance</h2>
             <p>
                 Quetzalcoatl remains one of the most recognized deities of pre-Columbian America. His image as the feathered
                 serpent is found throughout Mesoamerican art from Teotihuacan to the Maya regions. The myth of his return

@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Dynamic Title & Meta Tags (populated by JavaScript) -->
+    <title>Loading... - Eyes of Azrael</title>
+    <meta name="description" content="Explore mythology entity details dynamically loaded from Firebase">
+    <meta property="og:title" content="Entity - Eyes of Azrael">
+    <meta property="og:description" content="Explore world mythology">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- JSON-LD Structured Data (populated by JavaScript) -->
+    <script type="application/ld+json" id="entity-schema">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Loading...",
+        "description": "Loading entity details..."
+    }
+    </script>
+
+    <!-- Base Theme System -->
+    <link rel="stylesheet" href="/themes/theme-base.css">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/themes/corpus-links.css">
+    <link rel="stylesheet" href="/themes/smart-links.css">
+    <link rel="stylesheet" href="/css/firebase-themes.css">
+
+    <!-- Entity Display Styles -->
+    <link rel="stylesheet" href="/css/entity-detail.css">
+
+    <!-- Theme Scripts -->
+    <script defer src="/themes/theme-picker.js"></script>
+    <script defer src="/themes/theme-animations.js"></script>
+    <script defer src="/themes/smart-links.js"></script>
+
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="/css/user-auth.css">
+    <script src="/js/firebase-auth.js"></script>
+    <script src="/js/auth-guard.js"></script>
+    <script src="/js/components/google-signin-button.js"></script>
+
+    <style>
+        /* Loading State */
+        .entity-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            gap: 1rem;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Breadcrumb Navigation */
+        .breadcrumb {
+            position: sticky;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(var(--color-surface-rgb), 0.9);
+            backdrop-filter: blur(12px);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.15);
+        }
+
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--color-secondary);
+            text-decoration: underline;
+        }
+
+        /* Entity Container */
+        #entity-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
+        /* Error State */
+        .entity-error {
+            max-width: 600px;
+            margin: 4rem auto;
+            padding: var(--spacing-xl);
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid #ef4444;
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+
+        .entity-error h2 {
+            color: #ef4444;
+            margin-top: 0;
+        }
+
+        /* Fallback Notice */
+        .fallback-notice {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+        }
+
+        .fallback-notice-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        /* Static Version Button */
+        .static-version-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: rgba(var(--color-primary-rgb), 0.9);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-fast);
+            z-index: 1000;
+        }
+
+        .static-version-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+            background: rgba(var(--color-primary-rgb), 1);
+        }
+
+        /* Deity Header (for visual fidelity with static pages) */
+        .deity-header {
+            background: linear-gradient(135deg, var(--mythos-primary, var(--color-primary)), var(--mythos-secondary, var(--color-secondary)));
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .deity-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .attribute-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .attribute-card {
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+            padding: 1rem;
+            border-radius: 10px;
+        }
+
+        .attribute-label {
+            color: var(--color-primary);
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .attribute-value {
+            font-size: 1.1rem;
+        }
+
+        /* Related Entities Sidebar */
+        .related-sidebar {
+            position: fixed;
+            right: 0;
+            top: 120px;
+            width: 300px;
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+            padding: var(--spacing-lg);
+            background: rgba(var(--color-surface-rgb), 0.8);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(var(--color-primary-rgb), 0.2);
+        }
+
+        @media (max-width: 1400px) {
+            .related-sidebar {
+                display: none;
+            }
+        }
+
+        /* Recently Viewed Component */
+        .recently-viewed {
+            margin-top: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: rgba(var(--color-surface-rgb), 0.6);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+        }
+
+        .recently-viewed h3 {
+            color: var(--color-primary);
+            margin-top: 0;
+        }
+
+        .recently-viewed-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .recently-viewed-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background: rgba(var(--color-surface-rgb), 0.4);
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .recently-viewed-item:hover {
+            background: rgba(var(--color-primary-rgb), 0.2);
+            transform: translateX(4px);
+        }
+
+        .recently-viewed-icon {
+            font-size: 1.5rem;
+        }
+
+        .recently-viewed-info {
+            flex: 1;
+        }
+
+        .recently-viewed-name {
+            font-weight: 600;
+            display: block;
+        }
+
+        .recently-viewed-type {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Picker Container -->
+    <div id="theme-picker-container"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1 id="page-title">Eyes of Azrael</h1>
+            <div id="user-auth-nav"></div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb Navigation (dynamically populated) -->
+    <nav class="breadcrumb" id="breadcrumb-nav" aria-label="Breadcrumb">
+        <a href="/index.html">Home</a>
+    </nav>
+
+    <main>
+        <!-- Entity Container (dynamically populated) -->
+        <div id="entity-container" class="entity-loading">
+            <div class="loading-spinner"></div>
+            <p>Loading entity from Firebase...</p>
+        </div>
+
+        <!-- Related Entities Sidebar -->
+        <aside class="related-sidebar" id="related-sidebar" style="display: none;">
+            <h3>Related Entities</h3>
+            <div id="related-entities-list"></div>
+        </aside>
+
+        <!-- Recently Viewed Component -->
+        <section class="recently-viewed" id="recently-viewed" style="display: none;">
+            <h3>Recently Viewed</h3>
+            <div class="recently-viewed-list" id="recently-viewed-list"></div>
+        </section>
+    </main>
+
+    <!-- Static Version Button -->
+    <a href="#" id="static-version-btn" class="static-version-btn" style="display: none;">
+        View Static Version
+    </a>
+
+    <!-- Footer -->
+    <footer>
+        <p>
+            <strong>Eyes of Azrael</strong> - Exploring World Mythology<br>
+            <a href="/mythos/index.html">Browse Mythologies</a> |
+            <a href="/index.html">Main Site</a>
+        </p>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script src="/firebase-config.js"></script>
+
+    <!-- Entity Display & Loader -->
+    <script src="/js/entity-display.js"></script>
+    <script src="/js/entity-loader.js"></script>
+
+    <!-- Navigation System -->
+    <script src="/js/navigation.js"></script>
+
+    <!-- Initialize Dynamic Entity Page -->
+    <script>
+        // Configuration
+        const ENABLE_FALLBACK_TO_STATIC = true;
+        const FALLBACK_TIMEOUT = 5000; // 5 seconds
+
+        // Wait for Firebase and DOM to be ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize auth UI
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+
+            // Wait for Firebase to initialize
+            await new Promise(resolve => {
+                if (window.firebaseApp && window.firebaseDb) {
+                    resolve();
+                } else {
+                    setTimeout(resolve, 1000);
+                }
+            });
+
+            // Load entity from URL
+            await loadEntityFromURL();
+        });
+
+        /**
+         * Load and display entity based on URL parameters
+         * Supports: ?type=deity&id=zeus&mythology=greek
+         * Also supports: ?slug=zeus&mythology=greek (auto-detect type)
+         */
+        async function loadEntityFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let type = urlParams.get('type');
+            const id = urlParams.get('id');
+            const mythology = urlParams.get('mythology');
+            const slug = urlParams.get('slug');
+
+            // Fallback timeout
+            const fallbackTimer = ENABLE_FALLBACK_TO_STATIC ? setTimeout(() => {
+                showFallbackOption();
+            }, FALLBACK_TIMEOUT) : null;
+
+            try {
+                // Validate parameters
+                if (!id && !slug) {
+                    throw new Error('Missing entity identifier (id or slug)');
+                }
+
+                if (!type && !slug) {
+                    throw new Error('Missing entity type');
+                }
+
+                // If slug provided without type, try to find entity
+                if (slug && !type) {
+                    const entityData = await findEntityBySlug(slug, mythology);
+                    if (entityData) {
+                        type = entityData.type;
+                        renderEntityFromData(entityData);
+                        clearTimeout(fallbackTimer);
+                        return;
+                    } else {
+                        throw new Error(`Entity with slug "${slug}" not found`);
+                    }
+                }
+
+                // Load by type and id
+                const collection = EntityLoader.getCollectionName(type);
+                const doc = await firebase.firestore()
+                    .collection(collection)
+                    .doc(id || slug)
+                    .get();
+
+                if (!doc.exists) {
+                    throw new Error(`The ${type} "${id || slug}" could not be found in the database.`);
+                }
+
+                const entity = { id: doc.id, ...doc.data() };
+                renderEntityFromData(entity);
+                clearTimeout(fallbackTimer);
+
+            } catch (error) {
+                console.error('Error loading entity:', error);
+                clearTimeout(fallbackTimer);
+
+                // Show error with fallback option
+                if (ENABLE_FALLBACK_TO_STATIC) {
+                    showErrorWithFallback(error.message);
+                } else {
+                    showError('Error Loading Entity', error.message);
+                }
+            }
+        }
+
+        /**
+         * Find entity by slug across all collections
+         */
+        async function findEntityBySlug(slug, mythology) {
+            const collections = ['deities', 'heroes', 'creatures', 'items', 'places', 'concepts', 'magic'];
+
+            for (const collection of collections) {
+                try {
+                    let query = firebase.firestore().collection(collection);
+
+                    // Add mythology filter if provided
+                    if (mythology) {
+                        query = query.where('mythology', '==', mythology);
+                    }
+
+                    // Try to find by slug field
+                    query = query.where('slug', '==', slug).limit(1);
+                    const snapshot = await query.get();
+
+                    if (!snapshot.empty) {
+                        const doc = snapshot.docs[0];
+                        return {
+                            id: doc.id,
+                            type: collection.slice(0, -1), // Remove plural 's'
+                            ...doc.data()
+                        };
+                    }
+
+                    // Try to find by id matching slug
+                    const docById = await firebase.firestore().collection(collection).doc(slug).get();
+                    if (docById.exists) {
+                        return {
+                            id: docById.id,
+                            type: collection.slice(0, -1),
+                            ...docById.data()
+                        };
+                    }
+                } catch (err) {
+                    console.warn(`Error searching ${collection}:`, err);
+                }
+            }
+
+            return null;
+        }
+
+        /**
+         * Render entity from loaded data
+         */
+        function renderEntityFromData(entity) {
+            // Apply mythology-specific styling
+            if (entity.mythology) {
+                applyMythologyTheming(entity.mythology);
+            }
+
+            // Update page metadata
+            updatePageMetadata(entity);
+
+            // Update breadcrumb
+            updateBreadcrumb(entity);
+
+            // Render entity
+            const container = document.getElementById('entity-container');
+            container.className = 'entity-detail-page';
+            EntityDisplay.renderDetail(entity, container);
+
+            // Load related entities
+            loadRelatedEntities(entity);
+
+            // Track view in recently viewed
+            addToRecentlyViewed(entity);
+
+            // Show recently viewed
+            displayRecentlyViewed();
+
+            // Setup static version button
+            setupStaticVersionButton(entity);
+
+            // Track analytics
+            if (window.gtag) {
+                gtag('event', 'view_entity_dynamic', {
+                    entity_type: entity.type,
+                    entity_id: entity.id,
+                    mythology: entity.mythology
+                });
+            }
+        }
+
+        /**
+         * Apply mythology-specific color theming
+         */
+        function applyMythologyTheming(mythology) {
+            // This would integrate with your existing theme system
+            if (window.themeManager) {
+                themeManager.setTheme(mythology);
+            }
+
+            // Apply CSS variables for mythology colors
+            const mythologyColors = {
+                greek: { primary: '#DAA520', secondary: '#FFD700', rgb: '218, 165, 32' },
+                norse: { primary: '#4A90E2', secondary: '#7CB9E8', rgb: '74, 144, 226' },
+                egyptian: { primary: '#D4AF37', secondary: '#FFD700', rgb: '212, 175, 55' },
+                hindu: { primary: '#FF6B35', secondary: '#FFA500', rgb: '255, 107, 53' },
+                buddhist: { primary: '#FF9933', secondary: '#FFCC00', rgb: '255, 153, 51' },
+                chinese: { primary: '#DC143C', secondary: '#FFD700', rgb: '220, 20, 60' },
+                japanese: { primary: '#E60012', secondary: '#FFD700', rgb: '230, 0, 18' },
+                celtic: { primary: '#228B22', secondary: '#90EE90', rgb: '34, 139, 34' },
+                roman: { primary: '#8B0000', secondary: '#DC143C', rgb: '139, 0, 0' },
+                aztec: { primary: '#CD853F', secondary: '#DAA520', rgb: '205, 133, 63' },
+                mayan: { primary: '#8B4513', secondary: '#D2691E', rgb: '139, 69, 19' }
+            };
+
+            const colors = mythologyColors[mythology] || mythologyColors.greek;
+            document.documentElement.style.setProperty('--mythos-primary', colors.primary);
+            document.documentElement.style.setProperty('--mythos-secondary', colors.secondary);
+            document.documentElement.style.setProperty('--mythos-primary-rgb', colors.rgb);
+        }
+
+        /**
+         * Update page title, meta tags, and structured data
+         */
+        function updatePageMetadata(entity) {
+            const name = entity.name || entity.title;
+            const description = entity.description || entity.shortDescription || '';
+            const type = entity.type || 'entity';
+            const mythology = entity.mythology || '';
+
+            // Update title
+            document.title = `${name} - ${mythology} ${type} - Eyes of Azrael`;
+            document.getElementById('page-title').textContent = name;
+
+            // Update meta tags
+            const metaTags = {
+                'description': description.substring(0, 160),
+                'og:title': `${name} - ${mythology} Mythology`,
+                'og:description': description.substring(0, 200),
+                'twitter:title': `${name} - ${mythology} Mythology`
+            };
+
+            Object.entries(metaTags).forEach(([name, content]) => {
+                let meta = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
+                if (!meta) {
+                    meta = document.createElement('meta');
+                    if (name.startsWith('og:') || name.startsWith('twitter:')) {
+                        meta.setAttribute('property', name);
+                    } else {
+                        meta.setAttribute('name', name);
+                    }
+                    document.head.appendChild(meta);
+                }
+                meta.setAttribute('content', content);
+            });
+
+            // Update JSON-LD structured data
+            const schema = {
+                "@context": "https://schema.org",
+                "@type": "Article",
+                "headline": name,
+                "description": description,
+                "author": {
+                    "@type": "Organization",
+                    "name": "Eyes of Azrael"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "Eyes of Azrael"
+                },
+                "mainEntityOfPage": {
+                    "@type": "WebPage",
+                    "@id": window.location.href
+                }
+            };
+
+            if (entity.visual?.icon) {
+                schema.image = entity.visual.icon;
+            }
+
+            document.getElementById('entity-schema').textContent = JSON.stringify(schema, null, 2);
+        }
+
+        /**
+         * Update breadcrumb navigation
+         */
+        function updateBreadcrumb(entity) {
+            const breadcrumb = document.getElementById('breadcrumb-nav');
+            const mythology = entity.mythology || '';
+            const type = entity.type || 'entity';
+            const name = entity.name || entity.title;
+
+            breadcrumb.innerHTML = `
+                <a href="/index.html">Home</a> →
+                <a href="/mythos/index.html">Mythologies</a> →
+                <a href="/templates/mythology-hub.html?mythology=${mythology}">${capitalize(mythology)}</a> →
+                <a href="/templates/entity-grid.html?type=${type}&mythology=${mythology}">${capitalize(type)}s</a> →
+                <span aria-current="page">${name}</span>
+            `;
+        }
+
+        /**
+         * Load and display related entities
+         */
+        async function loadRelatedEntities(entity) {
+            if (!entity.relatedEntities && !entity.crossReferences) {
+                return;
+            }
+
+            const sidebar = document.getElementById('related-sidebar');
+            const list = document.getElementById('related-entities-list');
+
+            try {
+                const crossRefs = await EntityLoader.loadCrossReferences(entity);
+
+                if (Object.keys(crossRefs).length === 0) {
+                    return;
+                }
+
+                let html = '';
+                Object.entries(crossRefs).forEach(([type, entities]) => {
+                    if (entities && entities.length > 0) {
+                        html += `<h4>${capitalize(type)}</h4>`;
+                        entities.forEach(relatedEntity => {
+                            const card = EntityDisplay.renderCard(relatedEntity);
+                            html += card.outerHTML;
+                        });
+                    }
+                });
+
+                list.innerHTML = html;
+                sidebar.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading related entities:', error);
+            }
+        }
+
+        /**
+         * Add entity to recently viewed (localStorage)
+         */
+        function addToRecentlyViewed(entity) {
+            const recent = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+
+            // Remove if already exists
+            const filtered = recent.filter(item => item.id !== entity.id);
+
+            // Add to beginning
+            filtered.unshift({
+                id: entity.id,
+                type: entity.type,
+                name: entity.name || entity.title,
+                mythology: entity.mythology,
+                icon: EntityDisplay.getEntityIcon(entity),
+                timestamp: Date.now()
+            });
+
+            // Keep only last 10
+            const limited = filtered.slice(0, 10);
+
+            localStorage.setItem('recentlyViewed', JSON.stringify(limited));
+        }
+
+        /**
+         * Display recently viewed entities
+         */
+        function displayRecentlyViewed() {
+            const recent = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+
+            if (recent.length <= 1) {
+                return; // Don't show if only current entity
+            }
+
+            const section = document.getElementById('recently-viewed');
+            const list = document.getElementById('recently-viewed-list');
+
+            const html = recent.slice(1, 6).map(item => `
+                <a href="/entity-dynamic.html?type=${item.type}&id=${item.id}&mythology=${item.mythology}" class="recently-viewed-item">
+                    <span class="recently-viewed-icon">${item.icon}</span>
+                    <div class="recently-viewed-info">
+                        <span class="recently-viewed-name">${item.name}</span>
+                        <span class="recently-viewed-type">${capitalize(item.mythology)} ${capitalize(item.type)}</span>
+                    </div>
+                </a>
+            `).join('');
+
+            list.innerHTML = html;
+            section.style.display = 'block';
+        }
+
+        /**
+         * Setup static version button
+         */
+        function setupStaticVersionButton(entity) {
+            const btn = document.getElementById('static-version-btn');
+            const mythology = entity.mythology || '';
+            const type = entity.type || 'entity';
+            const id = entity.id || entity.slug || '';
+
+            // Construct static URL path
+            const staticUrl = `/mythos/${mythology}/${type}s/${id}.html`;
+
+            btn.href = staticUrl;
+            btn.style.display = 'block';
+            btn.title = 'View the original static HTML version of this page';
+        }
+
+        /**
+         * Show fallback option
+         */
+        function showFallbackOption() {
+            const container = document.getElementById('entity-container');
+            if (container.classList.contains('entity-loading')) {
+                const notice = document.createElement('div');
+                notice.className = 'fallback-notice';
+                notice.innerHTML = `
+                    <div class="fallback-notice-icon">⏱️</div>
+                    <p><strong>Taking longer than expected...</strong></p>
+                    <p>Firebase loading is slow. Would you like to view the static version instead?</p>
+                    <a href="#" onclick="redirectToStatic(); return false;" class="btn btn-primary">View Static Version</a>
+                `;
+                container.appendChild(notice);
+            }
+        }
+
+        /**
+         * Show error with fallback option
+         */
+        function showErrorWithFallback(message) {
+            const container = document.getElementById('entity-container');
+            container.className = 'entity-error';
+            container.innerHTML = `
+                <h2>Error Loading from Firebase</h2>
+                <p>${escapeHtml(message)}</p>
+                <p>Would you like to try the static version instead?</p>
+                <button onclick="redirectToStatic()" class="btn btn-primary">View Static Version</button>
+                <a href="/mythos/index.html" class="btn btn-secondary" style="margin-left: 1rem;">Browse Mythologies</a>
+            `;
+        }
+
+        /**
+         * Redirect to static version
+         */
+        window.redirectToStatic = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const type = urlParams.get('type') || 'deity';
+            const id = urlParams.get('id') || urlParams.get('slug') || '';
+            const mythology = urlParams.get('mythology') || 'greek';
+
+            const staticUrl = `/mythos/${mythology}/${type}s/${id}.html`;
+            window.location.href = staticUrl;
+        };
+
+        /**
+         * Show error state
+         */
+        function showError(title, message) {
+            const container = document.getElementById('entity-container');
+            container.className = 'entity-error';
+            container.innerHTML = `
+                <h2>${title}</h2>
+                <p>${escapeHtml(message)}</p>
+                <a href="/mythos/index.html" class="btn btn-primary">Browse Mythologies</a>
+            `;
+        }
+
+        /**
+         * Capitalize string
+         */
+        function capitalize(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        /**
+         * Escape HTML to prevent XSS
+         */
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

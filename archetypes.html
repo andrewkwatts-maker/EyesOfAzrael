@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Archetypes Browser - Eyes of Azrael</title>
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    <script src="js/firebase-init.js"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #9370DB, #DAA520, #4ade80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #c0c0c0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .nav-tab {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .nav-tab:hover {
+            border-color: #9370DB;
+            background: rgba(147, 112, 219, 0.2);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #9370DB, #DAA520);
+            border-color: #9370DB;
+            color: white;
+        }
+
+        /* View Container */
+        .view-container {
+            display: none;
+        }
+
+        .view-container.active {
+            display: block;
+        }
+
+        /* Archetype Grid */
+        .archetype-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .archetype-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .archetype-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #9370DB, #DAA520);
+        }
+
+        .archetype-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(147, 112, 219, 0.5);
+            border-color: #9370DB;
+        }
+
+        .archetype-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .archetype-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #9370DB;
+            margin-bottom: 0.5rem;
+        }
+
+        .archetype-description {
+            color: #c0c0c0;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .archetype-meta {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .meta-badge {
+            background: rgba(147, 112, 219, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            border: 1px solid rgba(147, 112, 219, 0.3);
+        }
+
+        .archetype-keywords {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .keyword-tag {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+
+        /* Detail Panel */
+        .detail-panel {
+            position: fixed;
+            top: 0;
+            right: -600px;
+            width: 600px;
+            height: 100vh;
+            background: rgba(10, 10, 26, 0.98);
+            backdrop-filter: blur(20px);
+            border-left: 2px solid #9370DB;
+            padding: 2rem;
+            overflow-y: auto;
+            transition: right 0.3s ease;
+            z-index: 1000;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .detail-panel.active {
+            right: 0;
+        }
+
+        .detail-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(147, 112, 219, 0.2);
+            border: 2px solid #9370DB;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .detail-close:hover {
+            background: #9370DB;
+            transform: scale(1.1);
+        }
+
+        .detail-header {
+            margin-bottom: 2rem;
+        }
+
+        .detail-title {
+            font-size: 2rem;
+            color: #9370DB;
+            margin-bottom: 1rem;
+        }
+
+        .detail-description {
+            font-size: 1.1rem;
+            color: #c0c0c0;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .detail-section {
+            margin-bottom: 2rem;
+        }
+
+        .detail-section h3 {
+            color: #DAA520;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .entity-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .entity-item {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .entity-item:hover {
+            border-color: #9370DB;
+            background: rgba(147, 112, 219, 0.1);
+        }
+
+        .entity-name {
+            font-weight: 600;
+            color: #9370DB;
+            font-size: 1.1rem;
+        }
+
+        .entity-mythology {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .entity-score {
+            float: right;
+            background: linear-gradient(135deg, #9370DB, #DAA520);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+        }
+
+        /* Mythology Filter */
+        .filter-section {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-section h3 {
+            color: #9370DB;
+            margin-bottom: 1rem;
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 999px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .filter-chip:hover {
+            border-color: #9370DB;
+            background: rgba(147, 112, 219, 0.2);
+        }
+
+        .filter-chip.active {
+            background: linear-gradient(135deg, #9370DB, #DAA520);
+            border-color: #9370DB;
+            color: white;
+        }
+
+        /* Network Visualization */
+        .network-container {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .network-info {
+            color: #c0c0c0;
+            margin-bottom: 1rem;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(147, 112, 219, 0.2);
+            border-top-color: #9370DB;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            border-bottom: 1px solid rgba(147, 112, 219, 0.2);
+        }
+
+        .comparison-row:last-child {
+            border-bottom: none;
+        }
+
+        .comparison-label {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.4);
+            font-weight: 600;
+            color: #9370DB;
+        }
+
+        .comparison-value {
+            padding: 1rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #9370DB;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .back-link:hover {
+            color: #DAA520;
+            transform: translateX(-5px);
+        }
+
+        /* Statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #9370DB, #DAA520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: #c0c0c0;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Home</a>
+
+        <div class="header">
+            <h1>Universal Archetypes</h1>
+            <p>Explore common patterns and archetypes that appear across world mythologies</p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-number" id="statArchetypes">--</div>
+                <div class="stat-label">Total Archetypes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statMythologies">--</div>
+                <div class="stat-label">Mythologies Covered</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statUniversal">--</div>
+                <div class="stat-label">Universal Patterns</div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-view="all">All Archetypes</div>
+            <div class="nav-tab" data-view="universal">Universal Patterns</div>
+            <div class="nav-tab" data-view="mythology">By Mythology</div>
+            <div class="nav-tab" data-view="network">Archetype Network</div>
+        </div>
+
+        <!-- All Archetypes View -->
+        <div class="view-container active" id="view-all">
+            <div class="filter-section">
+                <h3>Filter by Category</h3>
+                <div class="filter-chips" id="categoryFilters"></div>
+            </div>
+            <div class="archetype-grid" id="allArchetypesGrid">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading archetypes...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Universal Patterns View -->
+        <div class="view-container" id="view-universal">
+            <div class="archetype-grid" id="universalArchetypesGrid">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Analyzing universal patterns...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- By Mythology View -->
+        <div class="view-container" id="view-mythology">
+            <div class="filter-section">
+                <h3>Select Mythology</h3>
+                <div class="filter-chips" id="mythologyFilters"></div>
+            </div>
+            <div class="archetype-grid" id="mythologyArchetypesGrid">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Select a mythology to begin...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Network View -->
+        <div class="view-container" id="view-network">
+            <div class="network-container">
+                <h3>Archetype Relationship Network</h3>
+                <div class="network-info">
+                    This network shows relationships between archetypes based on shared characteristics and keywords.
+                </div>
+                <div id="networkVisualization">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Building network map...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="detail-panel" id="detailPanel">
+        <div class="detail-close" id="detailClose">✕</div>
+        <div id="detailContent"></div>
+    </div>
+
+    <script src="js/mythology-comparisons.js"></script>
+    <script src="js/archetype-finder.js"></script>
+    <script>
+        // Archetype Browser UI
+        class ArchetypeBrowserUI {
+            constructor() {
+                this.finder = new ArchetypeFinder();
+                this.currentView = 'all';
+                this.selectedMythology = null;
+                this.init();
+            }
+
+            async init() {
+                // Wait for Firebase
+                await this.waitForFirebase();
+
+                // Set up navigation
+                this.setupNavigation();
+
+                // Set up detail panel
+                this.setupDetailPanel();
+
+                // Load initial view
+                await this.loadAllArchetypes();
+
+                // Load statistics
+                await this.loadStatistics();
+            }
+
+            async waitForFirebase() {
+                return new Promise(resolve => {
+                    if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                        resolve();
+                    } else {
+                        setTimeout(() => this.waitForFirebase().then(resolve), 500);
+                    }
+                });
+            }
+
+            setupNavigation() {
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const view = tab.dataset.view;
+                        this.switchView(view);
+                    });
+                });
+            }
+
+            setupDetailPanel() {
+                document.getElementById('detailClose').addEventListener('click', () => {
+                    this.closeDetailPanel();
+                });
+            }
+
+            async switchView(view) {
+                this.currentView = view;
+
+                // Update tabs
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.view === view);
+                });
+
+                // Update views
+                document.querySelectorAll('.view-container').forEach(container => {
+                    container.classList.toggle('active', container.id === `view-${view}`);
+                });
+
+                // Load view data
+                switch (view) {
+                    case 'all':
+                        if (!document.querySelector('#allArchetypesGrid .archetype-card')) {
+                            await this.loadAllArchetypes();
+                        }
+                        break;
+                    case 'universal':
+                        await this.loadUniversalArchetypes();
+                        break;
+                    case 'mythology':
+                        await this.loadMythologyView();
+                        break;
+                    case 'network':
+                        await this.loadNetworkView();
+                        break;
+                }
+            }
+
+            async loadAllArchetypes() {
+                const grid = document.getElementById('allArchetypesGrid');
+                const archetypes = this.finder.getAllArchetypes();
+
+                grid.innerHTML = '';
+
+                for (const [id, archetype] of Object.entries(archetypes)) {
+                    const card = this.createArchetypeCard(id, archetype);
+                    grid.appendChild(card);
+                }
+            }
+
+            createArchetypeCard(id, archetype) {
+                const card = document.createElement('div');
+                card.className = 'archetype-card';
+
+                const keywords = archetype.keywords || archetype.attributes || [];
+                const examples = archetype.examples || {};
+                const mythologyCount = Object.keys(examples).length;
+
+                card.innerHTML = `
+                    <div class="archetype-icon">${this.getArchetypeIcon(id)}</div>
+                    <div class="archetype-name">${archetype.name}</div>
+                    <div class="archetype-description">${archetype.description}</div>
+                    <div class="archetype-meta">
+                        <span class="meta-badge">${mythologyCount} mythologies</span>
+                        <span class="meta-badge">${keywords.length} keywords</span>
+                    </div>
+                    <div class="archetype-keywords">
+                        ${keywords.slice(0, 5).map(k => `<span class="keyword-tag">${k}</span>`).join('')}
+                    </div>
+                `;
+
+                card.addEventListener('click', () => {
+                    this.showArchetypeDetail(id, archetype);
+                });
+
+                return card;
+            }
+
+            getArchetypeIcon(id) {
+                const icons = {
+                    'sky-father': '⚡',
+                    'earth-mother': '🌍',
+                    'trickster': '🎭',
+                    'war-god': '⚔️',
+                    'underworld-ruler': '💀',
+                    'love-goddess': '❤️',
+                    'sun-deity': '☀️',
+                    'wisdom-deity': '🦉',
+                    'hero-journey': '🗡️',
+                    'divine-messenger': '🕊️',
+                    'craftsman-god': '🔨',
+                    'harvest-deity': '🌾',
+                    'storm-god': '⛈️',
+                    'sea-deity': '🌊',
+                    'lunar-deity': '🌙',
+                    'dawn-deity': '🌅',
+                    'hunting-deity': '🏹',
+                    'justice-deity': '⚖️',
+                    'wine-deity': '🍷',
+                    'healer-deity': '⚕️',
+                    'fire-deity': '🔥'
+                };
+                return icons[id] || '✨';
+            }
+
+            async showArchetypeDetail(id, archetype) {
+                const panel = document.getElementById('detailPanel');
+                const content = document.getElementById('detailContent');
+
+                content.innerHTML = `
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading entities...</p>
+                    </div>
+                `;
+
+                panel.classList.add('active');
+
+                // Fetch entities matching this archetype
+                const entities = await this.finder.findByArchetype(id, { limit: 20 });
+
+                content.innerHTML = `
+                    <div class="detail-header">
+                        <div class="detail-title">${this.getArchetypeIcon(id)} ${archetype.name}</div>
+                        <div class="detail-description">${archetype.description}</div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Characteristics</h3>
+                        <div class="archetype-keywords">
+                            ${(archetype.keywords || archetype.attributes || []).map(k =>
+                                `<span class="keyword-tag">${k}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Examples (${entities.length} found)</h3>
+                        <div class="entity-list">
+                            ${entities.map(entity => `
+                                <div class="entity-item">
+                                    <span class="entity-score">Match: ${entity.archetypeScore}</span>
+                                    <div class="entity-name">${entity.name}</div>
+                                    <div class="entity-mythology">${entity.mythology || 'Unknown'} • ${entity.collection}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            closeDetailPanel() {
+                document.getElementById('detailPanel').classList.remove('active');
+            }
+
+            async loadUniversalArchetypes() {
+                const grid = document.getElementById('universalArchetypesGrid');
+                grid.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Finding universal patterns...</p></div>';
+
+                const universalArchetypes = await this.finder.findUniversalArchetypes(3);
+
+                grid.innerHTML = '';
+
+                universalArchetypes.forEach(arch => {
+                    const card = this.createUniversalArchetypeCard(arch);
+                    grid.appendChild(card);
+                });
+            }
+
+            createUniversalArchetypeCard(arch) {
+                const card = document.createElement('div');
+                card.className = 'archetype-card';
+
+                card.innerHTML = `
+                    <div class="archetype-icon">${this.getArchetypeIcon(arch.id)}</div>
+                    <div class="archetype-name">${arch.name}</div>
+                    <div class="archetype-description">${arch.description}</div>
+                    <div class="archetype-meta">
+                        <span class="meta-badge">${arch.mythologyCount} mythologies</span>
+                        <span class="meta-badge">${arch.entityCount} entities</span>
+                    </div>
+                    <div class="archetype-keywords">
+                        ${arch.mythologies.slice(0, 5).map(m =>
+                            `<span class="keyword-tag">${m}</span>`
+                        ).join('')}
+                    </div>
+                `;
+
+                card.addEventListener('click', () => {
+                    this.showArchetypeDetail(arch.id, arch);
+                });
+
+                return card;
+            }
+
+            async loadMythologyView() {
+                const filterContainer = document.getElementById('mythologyFilters');
+
+                // Get available mythologies
+                const mythologies = ['greek', 'norse', 'egyptian', 'hindu', 'roman', 'celtic', 'aztec', 'mayan', 'japanese', 'chinese'];
+
+                filterContainer.innerHTML = mythologies.map(myth => `
+                    <div class="filter-chip" data-mythology="${myth}">
+                        ${myth.charAt(0).toUpperCase() + myth.slice(1)}
+                    </div>
+                `).join('');
+
+                // Add click handlers
+                filterContainer.querySelectorAll('.filter-chip').forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        this.filterByMythology(chip.dataset.mythology);
+                    });
+                });
+            }
+
+            async filterByMythology(mythology) {
+                // Update active chip
+                document.querySelectorAll('#mythologyFilters .filter-chip').forEach(chip => {
+                    chip.classList.toggle('active', chip.dataset.mythology === mythology);
+                });
+
+                const grid = document.getElementById('mythologyArchetypesGrid');
+                grid.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading archetypes...</p></div>';
+
+                const archetypes = await this.finder.findArchetypesByMythology(mythology);
+
+                grid.innerHTML = '';
+
+                archetypes.forEach(arch => {
+                    const card = this.createArchetypeCard(arch.id, arch);
+                    grid.appendChild(card);
+                });
+            }
+
+            async loadNetworkView() {
+                const container = document.getElementById('networkVisualization');
+                container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Mapping relationships...</p></div>';
+
+                const network = await this.finder.mapArchetypeNetwork();
+
+                // Simple text-based network display
+                container.innerHTML = `
+                    <div class="comparison-table">
+                        ${network.nodes.map(node => `
+                            <div class="comparison-row">
+                                <div class="comparison-label">
+                                    ${this.getArchetypeIcon(node.id)} ${node.name}
+                                </div>
+                                <div class="comparison-value">
+                                    ${node.entityCount} entities |
+                                    Connected to: ${network.edges.filter(e =>
+                                        e.source === node.id || e.target === node.id
+                                    ).length} archetypes
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            async loadStatistics() {
+                const archetypes = this.finder.getAllArchetypes();
+                const archetypeCount = Object.keys(archetypes).length;
+
+                // Get unique mythologies from examples
+                const mythologies = new Set();
+                Object.values(archetypes).forEach(arch => {
+                    if (arch.examples) {
+                        Object.keys(arch.examples).forEach(myth => mythologies.add(myth));
+                    }
+                });
+
+                const universalArchetypes = await this.finder.findUniversalArchetypes(3);
+
+                document.getElementById('statArchetypes').textContent = archetypeCount;
+                document.getElementById('statMythologies').textContent = mythologies.size;
+                document.getElementById('statUniversal').textContent = universalArchetypes.length;
+            }
+        }
+
+        // Initialize when ready
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                new ArchetypeBrowserUI();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

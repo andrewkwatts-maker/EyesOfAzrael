@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found - Eyes of Azrael</title>
+    <meta name="description" content="The page you're looking for couldn't be found. Explore our mythology collection instead.">
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(147, 112, 219, 0.6);
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+            box-shadow: 0 0 10px rgba(147, 112, 219, 0.8);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .error-content {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-icon {
+            font-size: 8rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite ease-in-out;
+            filter: drop-shadow(0 0 20px rgba(147, 112, 219, 0.6));
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+        }
+
+        .error-code {
+            font-size: 6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #9370DB, #DAA520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #c0c0c0;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-box {
+            margin: 2rem 0;
+            display: flex;
+            gap: 0.5rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 12px;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #9370DB;
+            box-shadow: 0 0 20px rgba(147, 112, 219, 0.4);
+        }
+
+        .search-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #9370DB, #DAA520);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(147, 112, 219, 0.5);
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .quick-link {
+            background: rgba(147, 112, 219, 0.1);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem 1rem;
+            text-decoration: none;
+            color: #ffffff;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-link:hover {
+            background: rgba(147, 112, 219, 0.2);
+            border-color: #9370DB;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(147, 112, 219, 0.3);
+        }
+
+        .quick-link-icon {
+            font-size: 2.5rem;
+        }
+
+        .quick-link-text {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .home-btn {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, #9370DB, #DAA520);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(147, 112, 219, 0.3);
+        }
+
+        .home-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(147, 112, 219, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 4rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .quick-links {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <div class="error-content">
+            <div class="error-icon">👁️</div>
+            <div class="error-code">404</div>
+            <h1>Page Not Found</h1>
+            <p>
+                The path you seek does not exist in our realm. Perhaps it was lost to time,
+                or never written in the first place. Let us guide you back to familiar territory.
+            </p>
+
+            <div class="search-box">
+                <input
+                    type="text"
+                    class="search-input"
+                    placeholder="Search mythologies, deities, or topics..."
+                    id="searchInput"
+                    aria-label="Search"
+                >
+                <button class="search-btn" onclick="performSearch()" aria-label="Search">
+                    🔍 Search
+                </button>
+            </div>
+
+            <div class="quick-links">
+                <a href="/" class="quick-link">
+                    <div class="quick-link-icon">🏠</div>
+                    <div class="quick-link-text">Home</div>
+                </a>
+                <a href="/mythos/index.html" class="quick-link">
+                    <div class="quick-link-icon">📚</div>
+                    <div class="quick-link-text">Mythologies</div>
+                </a>
+                <a href="/magic/index.html" class="quick-link">
+                    <div class="quick-link-icon">✨</div>
+                    <div class="quick-link-text">Magic Systems</div>
+                </a>
+                <a href="/herbalism/index.html" class="quick-link">
+                    <div class="quick-link-icon">🌿</div>
+                    <div class="quick-link-text">Herbalism</div>
+                </a>
+            </div>
+
+            <a href="/" class="home-btn">Return to Home</a>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            const particleCount = 30;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particles.appendChild(particle);
+            }
+        }
+
+        // Search functionality
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                window.location.href = `/search.html?q=${encodeURIComponent(query)}`;
+            }
+        }
+
+        // Allow Enter key to search
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // Initialize
+        createParticles();
+
+        // Track 404 errors (if analytics is set up)
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'exception', {
+                'description': '404_error',
+                'fatal': false
+            });
+        }
+    </script>
+</body>
+</html>

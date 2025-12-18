@@ -1,0 +1,451 @@
+/**
+ * Accessibility Enhancements
+ * WCAG 2.1 AA Compliant Styles
+ */
+
+/* Skip to main content link */
+.skip-to-main {
+    position: absolute;
+    top: -100px;
+    left: 0;
+    background: var(--color-primary, #9370DB);
+    color: white;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    font-weight: 600;
+    z-index: 10000;
+    border-radius: 0 0 8px 0;
+    transition: top 0.3s ease;
+}
+
+.skip-to-main:focus {
+    top: 0;
+    outline: 3px solid #DAA520;
+    outline-offset: 2px;
+}
+
+/* Focus indicators - highly visible */
+*:focus {
+    outline: 3px solid #9370DB;
+    outline-offset: 2px;
+}
+
+button:focus,
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 3px solid #9370DB;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(147, 112, 219, 0.2);
+}
+
+/* Focus visible (only keyboard, not mouse) */
+*:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+}
+
+*:focus-visible {
+    outline: 3px solid #9370DB;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(147, 112, 219, 0.2);
+}
+
+/* High contrast focus for buttons */
+button:focus-visible,
+.btn:focus-visible,
+[role="button"]:focus-visible {
+    outline: 3px solid #DAA520;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px rgba(218, 165, 32, 0.3);
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.sr-only-focusable:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+}
+
+/* Ensure sufficient color contrast */
+:root {
+    --text-high-contrast: #ffffff;
+    --text-medium-contrast: #e0e0e0;
+    --text-low-contrast: #b0b0b0;
+    --bg-high-contrast: #000000;
+    --bg-medium-contrast: #1a1a2e;
+    --link-color: #88aaff;
+    --link-visited: #bb88ff;
+    --link-hover: #aaccff;
+}
+
+/* Ensure links have good contrast and are distinguishable */
+a {
+    color: var(--link-color);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+a:visited {
+    color: var(--link-visited);
+}
+
+a:hover,
+a:focus {
+    color: var(--link-hover);
+    text-decoration-thickness: 2px;
+}
+
+/* Button contrast */
+button,
+.btn {
+    min-height: 44px;
+    min-width: 44px;
+    cursor: pointer;
+}
+
+/* Disabled state with sufficient contrast */
+button:disabled,
+.btn:disabled,
+[aria-disabled="true"] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #555;
+    color: #999;
+}
+
+/* Keyboard navigation indicators */
+[tabindex="-1"]:focus {
+    outline: none;
+}
+
+/* Make sure interactive elements are keyboard accessible */
+[role="button"]:not([tabindex]),
+[role="link"]:not([tabindex]),
+[onclick]:not([tabindex]):not(button):not(a) {
+    cursor: pointer;
+}
+
+[role="button"]:not([tabindex]):not(button):not(a),
+[role="link"]:not([tabindex]):not(a),
+[onclick]:not([tabindex]):not(button):not(a) {
+    -webkit-tap-highlight-color: rgba(147, 112, 219, 0.3);
+}
+
+/* Live region announcements */
+[aria-live="polite"],
+[aria-live="assertive"] {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* Visible live regions */
+.live-region-visible {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    padding: 1rem;
+    background: rgba(147, 112, 219, 0.2);
+    border: 2px solid #9370DB;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+/* ARIA expanded/collapsed indicators */
+[aria-expanded="false"] .collapse-icon::before {
+    content: "▶";
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+[aria-expanded="true"] .collapse-icon::before {
+    content: "▼";
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+/* Form labels and inputs */
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-high-contrast);
+}
+
+input:required + label::after,
+label[for]:has(+ input:required)::after {
+    content: " *";
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+    border-color: #ff6b6b;
+    border-width: 2px;
+}
+
+.error-message {
+    color: #ff6b6b;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.error-message::before {
+    content: "⚠";
+}
+
+/* Modal accessibility */
+.modal[aria-hidden="true"] {
+    display: none;
+}
+
+.modal[aria-modal="true"] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9998;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    * {
+        border-width: 2px;
+    }
+
+    button,
+    .btn,
+    a {
+        outline-width: 3px;
+    }
+}
+
+/* Dark mode preference */
+@media (prefers-color-scheme: light) {
+    :root {
+        --text-high-contrast: #000000;
+        --text-medium-contrast: #333333;
+        --text-low-contrast: #666666;
+        --bg-high-contrast: #ffffff;
+        --bg-medium-contrast: #f5f5f5;
+        --link-color: #0066cc;
+        --link-visited: #6600cc;
+        --link-hover: #0088ff;
+    }
+}
+
+/* Tooltip accessibility */
+[aria-describedby][role="tooltip"] {
+    position: relative;
+}
+
+.tooltip {
+    position: absolute;
+    background: #1a1a2e;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border: 1px solid #9370DB;
+}
+
+.tooltip[aria-hidden="true"] {
+    display: none;
+}
+
+/* Custom checkbox and radio with accessibility */
+.custom-checkbox,
+.custom-radio {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    min-height: 44px;
+}
+
+.custom-checkbox input[type="checkbox"],
+.custom-radio input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.custom-checkbox .checkmark,
+.custom-radio .checkmark {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #9370DB;
+    border-radius: 4px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.custom-radio .checkmark {
+    border-radius: 50%;
+}
+
+.custom-checkbox input:checked + .checkmark,
+.custom-radio input:checked + .checkmark {
+    background: #9370DB;
+    border-color: #9370DB;
+}
+
+.custom-checkbox input:checked + .checkmark::after {
+    content: "✓";
+    color: white;
+    font-weight: bold;
+}
+
+.custom-radio input:checked + .checkmark::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+}
+
+.custom-checkbox input:focus + .checkmark,
+.custom-radio input:focus + .checkmark {
+    outline: 3px solid #9370DB;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(147, 112, 219, 0.2);
+}
+
+/* Landmarks for screen readers */
+main {
+    display: block;
+}
+
+[role="navigation"],
+[role="main"],
+[role="complementary"],
+[role="contentinfo"] {
+    display: block;
+}
+
+/* Breadcrumb navigation */
+nav[aria-label="Breadcrumb"] ol {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+nav[aria-label="Breadcrumb"] li:not(:last-child)::after {
+    content: "›";
+    margin-left: 0.5rem;
+    color: #888;
+}
+
+/* Table accessibility */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th {
+    text-align: left;
+    font-weight: 600;
+    background: rgba(147, 112, 219, 0.2);
+    padding: 1rem;
+}
+
+td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(147, 112, 219, 0.2);
+}
+
+caption {
+    padding: 1rem;
+    font-weight: 600;
+    font-size: 1.2rem;
+    text-align: left;
+}
+
+/* Responsive text sizing */
+@media (max-width: 768px) {
+    body {
+        font-size: 16px;
+    }
+
+    button,
+    .btn,
+    input,
+    select {
+        min-height: 48px;
+        font-size: 16px;
+    }
+}
+
+/* Touch target sizing */
+@media (pointer: coarse) {
+    button,
+    .btn,
+    a,
+    input[type="checkbox"],
+    input[type="radio"],
+    select {
+        min-height: 48px;
+        min-width: 48px;
+    }
+}

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mythology Visualizations - Eyes of Azrael</title>
+
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Leaflet for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Three.js for 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- Visualization scripts -->
+    <script src="visualization-utils.js"></script>
+    <script src="family-tree.js"></script>
+    <script src="relationship-graph.js"></script>
+    <script src="mythology-map.js"></script>
+    <script src="timeline.js"></script>
+    <script src="constellation-view.js"></script>
+    <script src="pantheon-hierarchy.js"></script>
+
+    <link rel="stylesheet" href="visualizations.css">
+</head>
+<body>
+    <header>
+        <h1>🌌 Mythology Visualizations</h1>
+        <p>Explore mythology through interactive visual tools</p>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/mythos/">Browse Mythologies</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Navigation Tabs -->
+        <div class="viz-tabs">
+            <button class="tab-btn active" data-viz="family-tree">Family Tree</button>
+            <button class="tab-btn" data-viz="relationship-graph">Relationship Graph</button>
+            <button class="tab-btn" data-viz="mythology-map">Geographic Map</button>
+            <button class="tab-btn" data-viz="timeline">Historical Timeline</button>
+            <button class="tab-btn" data-viz="constellation">Constellations</button>
+            <button class="tab-btn" data-viz="pantheon">Pantheon Hierarchy</button>
+        </div>
+
+        <!-- Visualization Containers -->
+        <div class="viz-container active" id="family-tree-container">
+            <div class="viz-header">
+                <h2>Family Tree Generator</h2>
+                <p>Interactive family trees showing divine lineages across mythologies</p>
+            </div>
+            <div class="viz-content" id="family-tree"></div>
+            <div class="viz-description">
+                <h3>Features:</h3>
+                <ul>
+                    <li>Expand/collapse branches to explore different generations</li>
+                    <li>Click nodes to see detailed information</li>
+                    <li>View Greek Titans → Olympians, Norse Ymir → Aesir/Vanir, and more</li>
+                    <li>Export as image for reference</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="viz-container" id="relationship-graph-container">
+            <div class="viz-header">
+                <h2>Relationship Graph</h2>
+                <p>Force-directed graph showing connections between mythological entities</p>
+            </div>
+            <div class="viz-content" id="relationship-graph"></div>
+            <div class="viz-description">
+                <h3>Features:</h3>
+                <ul>
+                    <li>Nodes sized by importance and connections</li>
+                    <li>Color-coded by entity type (deity, hero, creature, etc.)</li>
+                    <li>Filter by mythology and relationship type</li>
+                    <li>Drag nodes to explore connections</li>
+                    <li>Click to highlight related entities</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="viz-container" id="mythology-map-container">
+            <div class="viz-header">
+                <h2>Geographic Mythology Map</h2>
+                <p>World map showing the origins and spread of mythologies through time</p>
+            </div>
+            <div class="viz-content" id="mythology-map"></div>
+            <div class="viz-description">
+                <h3>Features:</h3>
+                <ul>
+                    <li>Timeline slider to see mythologies across different periods</li>
+                    <li>Click markers to explore specific locations</li>
+                    <li>View migration patterns and cultural exchanges</li>
+                    <li>Filter by mythology to focus on specific traditions</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="viz-container" id="timeline-container">
+            <div class="viz-header">
+                <h2>Historical Timeline</h2>
+                <p>Interactive timeline of mythology periods, events, and cultural influences</p>
+            </div>
+            <div class="viz-content" id="timeline"></div>
+            <div class="viz-description">
+                <h3>Features:</h3>
+                <ul>
+                    <li>View major periods from Sumerian to Viking Age</li>
+                    <li>See important events: Trojan War, First Olympics, composition of epics</li>
+                    <li>Track cultural influences between mythologies</li>
+                    <li>Filter by mythology or time period</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="viz-container" id="constellation-container">
+            <div class="viz-header">
+                <h2>3D Constellation View</h2>
+                <p>Interactive 3D star map showing mythological constellations</p>
+            </div>
+            <div class="viz-content" id="constellation"></div>
+            <div class="viz-description">
+                <h3>Features:</h3>
+                <ul>
+                    <li>3D rotating view of the night sky</li>
+                    <li>Click constellations to learn their mythological stories</li>
+                    <li>Compare Greek traditions with other cultures</li>
+                    <li>Auto-rotate or manual navigation</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="viz-container" id="pantheon-container">
+            <div class="viz-header">
+                <h2>Pantheon Hierarchy</h2>
+                <p>Tree diagrams showing divine hierarchies across different mythologies</p>
+            </div>
+            <div class="viz-content" id="pantheon"></div>
+            <div class="viz-description">
+                <h3>Features:</h3>
+                <ul>
+                    <li>Greek: Chaos → Titans → Olympians</li>
+                    <li>Norse: Ymir → Aesir/Vanir</li>
+                    <li>Egyptian: Ennead structure</li>
+                    <li>Hindu: Trimurti and avatars</li>
+                    <li>Switch between tree, radial, and sunburst layouts</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Eyes of Azrael - Mythology Visualizations</p>
+        <p>Built with D3.js, Three.js, and Leaflet</p>
+    </footer>
+
+    <script>
+        // Tab switching
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const vizContainers = document.querySelectorAll('.viz-container');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const vizId = btn.dataset.viz;
+
+                // Update active states
+                tabBtns.forEach(b => b.classList.remove('active'));
+                vizContainers.forEach(c => c.classList.remove('active'));
+
+                btn.classList.add('active');
+                document.getElementById(`${vizId}-container`).classList.add('active');
+
+                // Initialize visualization if not already done
+                initializeVisualization(vizId);
+            });
+        });
+
+        // Track initialized visualizations
+        const initializedViz = new Set();
+
+        function initializeVisualization(vizId) {
+            if (initializedViz.has(vizId)) return;
+
+            try {
+                switch(vizId) {
+                    case 'family-tree':
+                        const familyTree = new FamilyTreeGenerator('#family-tree', {
+                            mythology: 'greek'
+                        });
+                        familyTree.init();
+                        break;
+
+                    case 'relationship-graph':
+                        const relationshipGraph = new RelationshipGraph('#relationship-graph', {
+                            mythology: 'all'
+                        });
+                        relationshipGraph.init();
+                        break;
+
+                    case 'mythology-map':
+                        const mythologyMap = new MythologyMap(
+                            document.getElementById('mythology-map'),
+                            {
+                                showTimeline: true,
+                                showMigrations: true
+                            }
+                        );
+                        mythologyMap.init();
+                        // Make globally accessible for callbacks
+                        window.mythologyMap = mythologyMap;
+                        break;
+
+                    case 'timeline':
+                        const timeline = new HistoricalTimeline('#timeline', {
+                            mythology: 'all'
+                        });
+                        timeline.init();
+                        break;
+
+                    case 'constellation':
+                        const constellationView = new ConstellationView(
+                            document.getElementById('constellation'),
+                            {
+                                autoRotate: true,
+                                mythology: 'greek'
+                            }
+                        );
+                        constellationView.init();
+                        break;
+
+                    case 'pantheon':
+                        const pantheonHierarchy = new PantheonHierarchy('#pantheon', {
+                            mythology: 'greek',
+                            layout: 'tree'
+                        });
+                        pantheonHierarchy.init();
+                        break;
+                }
+
+                initializedViz.add(vizId);
+            } catch (error) {
+                console.error(`Error initializing ${vizId}:`, error);
+                document.getElementById(vizId).innerHTML = `
+                    <div class="error-message">
+                        <h3>Error Loading Visualization</h3>
+                        <p>${error.message}</p>
+                        <p>Please check that all required libraries are loaded.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize first visualization
+        initializeVisualization('family-tree');
+    </script>
+</body>
+</html>
