@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You're Offline - Eyes of Azrael</title>
+    <meta name="description" content="You're currently offline. Some content may be available from cache.">
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0a1a2e 0%, #1a2a3e 50%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .offline-content {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(100, 149, 237, 0.3);
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .offline-icon {
+            font-size: 8rem;
+            margin-bottom: 1rem;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(100, 149, 237, 0.6));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #c0c0c0;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: rgba(255, 69, 0, 0.2);
+            border: 2px solid rgba(255, 69, 0, 0.4);
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .connection-status.online {
+            background: rgba(74, 222, 128, 0.2);
+            border-color: rgba(74, 222, 128, 0.4);
+        }
+
+        .status-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ff4500;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.online {
+            background: #4ade80;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+        }
+
+        .cached-content {
+            background: rgba(100, 149, 237, 0.1);
+            border: 2px solid rgba(100, 149, 237, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .cached-content h3 {
+            color: #6495ED;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .cached-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .cached-item {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(100, 149, 237, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            text-decoration: none;
+            color: #ffffff;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .cached-item:hover {
+            background: rgba(100, 149, 237, 0.2);
+            border-color: #6495ED;
+            transform: translateY(-2px);
+        }
+
+        .cached-icon {
+            font-size: 1.5rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6495ED, #4169E1);
+            color: white;
+            box-shadow: 0 5px 20px rgba(100, 149, 237, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(100, 149, 237, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .tips {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tips h3 {
+            color: #9370DB;
+            margin-bottom: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .tips ul {
+            text-align: left;
+            list-style: none;
+            padding: 0;
+        }
+
+        .tips li {
+            padding: 0.5rem 0;
+            color: #c0c0c0;
+        }
+
+        .tips li:before {
+            content: "💡 ";
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .cached-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="offline-content">
+            <div class="offline-icon">📡</div>
+            <h1>You're Offline</h1>
+            <p>
+                It seems you've lost your connection to the digital realm. Don't worry—some
+                content may still be available from your device's cache. Check your internet
+                connection and try again.
+            </p>
+
+            <div class="connection-status" id="connectionStatus">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Disconnected</span>
+            </div>
+
+            <div class="cached-content">
+                <h3>📦 Available Offline Content</h3>
+                <p style="font-size: 0.95rem; color: #b0b0b0;">
+                    These pages have been cached and may be accessible offline:
+                </p>
+                <div class="cached-list" id="cachedList">
+                    <a href="/" class="cached-item">
+                        <span class="cached-icon">🏠</span>
+                        <span>Home Page</span>
+                    </a>
+                    <a href="/mythos/index.html" class="cached-item">
+                        <span class="cached-icon">📚</span>
+                        <span>Mythologies</span>
+                    </a>
+                    <a href="/about.html" class="cached-item">
+                        <span class="cached-icon">ℹ️</span>
+                        <span>About</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" onclick="location.reload()">
+                    🔄 Try Reconnecting
+                </button>
+                <a href="/" class="btn btn-secondary">
+                    🏠 Go to Home
+                </a>
+            </div>
+
+            <div class="tips">
+                <h3>Connection Tips</h3>
+                <ul>
+                    <li>Check your WiFi or mobile data connection</li>
+                    <li>Try turning airplane mode off and on</li>
+                    <li>Move to an area with better signal</li>
+                    <li>Restart your router or modem</li>
+                    <li>Browse cached content while waiting to reconnect</li>
+                </ul>
+            </div>
+
+            <p style="margin-top: 2rem; font-size: 0.9rem; color: #888;">
+                The page will automatically refresh when your connection is restored.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Check connection status
+        function updateConnectionStatus() {
+            const isOnline = navigator.onLine;
+            const statusElement = document.getElementById('connectionStatus');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+
+            if (isOnline) {
+                statusElement.classList.add('online');
+                statusDot.classList.add('online');
+                statusText.textContent = 'Connection Restored!';
+
+                // Auto-reload after 2 seconds
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                statusElement.classList.remove('online');
+                statusDot.classList.remove('online');
+                statusText.textContent = 'Disconnected';
+            }
+        }
+
+        // Listen for online/offline events
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+
+        // Check on load
+        updateConnectionStatus();
+
+        // Try to load cached pages list from service worker
+        if ('caches' in window) {
+            caches.keys().then(cacheNames => {
+                if (cacheNames.length > 0) {
+                    caches.open(cacheNames[0]).then(cache => {
+                        cache.keys().then(requests => {
+                            const cachedList = document.getElementById('cachedList');
+                            const htmlPages = requests
+                                .filter(req => req.url.endsWith('.html') || req.url.endsWith('/'))
+                                .slice(0, 10); // Limit to 10 pages
+
+                            if (htmlPages.length > 3) {
+                                // Clear default items
+                                cachedList.innerHTML = '';
+
+                                htmlPages.forEach(req => {
+                                    const url = new URL(req.url);
+                                    const path = url.pathname;
+                                    const name = path === '/' ? 'Home' : path.split('/').pop().replace('.html', '');
+
+                                    const item = document.createElement('a');
+                                    item.href = path;
+                                    item.className = 'cached-item';
+                                    item.innerHTML = `
+                                        <span class="cached-icon">📄</span>
+                                        <span>${name}</span>
+                                    `;
+                                    cachedList.appendChild(item);
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+        }
+
+        // Periodic connection check
+        setInterval(() => {
+            if (navigator.onLine) {
+                // Try to fetch a small resource to verify real connectivity
+                fetch('/manifest.json', { method: 'HEAD', cache: 'no-cache' })
+                    .then(() => {
+                        updateConnectionStatus();
+                    })
+                    .catch(() => {
+                        // Still offline despite navigator.onLine
+                    });
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

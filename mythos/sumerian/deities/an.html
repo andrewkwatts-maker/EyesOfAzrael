@@ -4,166 +4,39 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Sumerian - An</title>
+
+<!-- Entity Metadata for Dynamic Loading -->
+<meta name="mythology" content="sumerian">
+<meta name="entity-type" content="deity">
+<meta name="entity-id" content="an">
+
 <link href="../../../styles.css" rel="stylesheet"/>
 <link href="../../../themes/theme-base.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../../themes/mythology-colors.css">
 <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
     <link rel="stylesheet" href="../../../themes/smart-links.css">
+
+<!-- Firebase Auth System -->
+<link rel="stylesheet" href="../../../css/user-auth.css">
+<script src="../../../js/firebase-auth.js"></script>
+<script src="../../../js/auth-guard.js"></script>
+<script src="../../../js/components/google-signin-button.js"></script>
+
     <script defer src="../../../themes/smart-links.js"></script>
     <script defer src="../../../themes/theme-animations.js"></script>
 <script defer src="../../../themes/theme-picker.js"></script>
-<style>
-        :root {
-            --mythos-primary: #8B4513;
-            --mythos-secondary: #D2691E;
-        }
 
-        .deity-header {
-            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
-            color: white;
-            padding: 3rem 2rem;
-            border-radius: var(--radius-lg, 15px);
-            margin-bottom: 2rem;
-            position: relative;
-        }
 
-        .deity-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        .attribute-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-
-        .attribute-card {
-            background: rgba(139, 69, 19, 0.1);
-            border: 1px solid rgba(139, 69, 19, 0.3);
-            padding: 1rem;
-            border-radius: 10px;
-        }
-
-        .attribute-label {
-            color: var(--mythos-primary);
-            font-weight: bold;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
-        }
-
-        .attribute-value {
-            font-size: 1.1rem;
-        }
-
-        .codex-search-section {
-            margin: 20px 0;
-            border: 1px solid #ddd;
-            border-radius: var(--radius-sm, 8px);
-            background: #f9f9f9;
-        }
-
-        .codex-search-header {
-            padding: 12px 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            cursor: pointer;
-            border-radius: var(--radius-sm, 8px) 8px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.3s ease;
-        }
-
-        .codex-search-header:hover {
-            background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
-        }
-
-        .codex-search-header h3 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .expand-icon {
-            font-size: 20px;
-            transition: transform 0.3s ease;
-        }
-
-        .expanded .expand-icon {
-            transform: rotate(180deg);
-        }
-
-        .codex-search-content {
-            display: none;
-            padding: 15px;
-            background: white;
-            border-radius: 0 0 8px 8px;
-        }
-
-        .codex-search-content.show {
-            display: block;
-        }
-
-        .search-result-item {
-            margin: 10px 0;
-            padding: 10px;
-            border-left: 3px solid #667eea;
-            background: #f5f7ff;
-        }
-
-        .citation {
-            font-weight: 600;
-            color: #667eea;
-            cursor: pointer;
-            margin-bottom: 8px;
-        }
-
-        .citation:hover {
-            color: #764ba2;
-            text-decoration: underline;
-        }
-
-        .verse-text {
-            display: none;
-            margin-top: 8px;
-            padding: 10px;
-            background: white;
-            border-left: 2px solid #764ba2;
-            font-style: italic;
-            color: #333;
-        }
-
-        .verse-text.show {
-            display: block;
-        }
-
-        .book-reference {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .inline-search-link {
-            color: #667eea;
-            text-decoration: none;
-            border-bottom: 1px dashed #667eea;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .inline-search-link:hover {
-            color: #764ba2;
-            border-bottom-color: #764ba2;
-        }
-    </style>
+<!-- Dynamic Redirect System (PHASE 4) -->
+<script src="../../../js/dynamic-redirect.js"></script>
 </head>
 <body>
 <div id="theme-picker-container"></div>
 <header>
     <div class="header-content">
         <h1>☁️ <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> (<a class="corpus-link" data-term="Anu" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'Anu'">Anu</a>)</h1>
+    
+        <div id="user-auth-nav"></div>
     </div>
 </header>
 <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -172,44 +45,44 @@
                 <a href="../deities/index.html">Deities</a> →
                 <span><a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a></span>
 </nav>
-<main>
-<section class="deity-header">
-<div class="deity-icon">☁️</div>
+<main data-mythology="sumerian">
+<section class="hero-section">
+<div class="hero-icon-display">☁️</div>
 <h2><a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> (<a class="corpus-link" data-term="Anu" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'Anu'">Anu</a>)</h2>
 <p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">The Sky God, King of Gods</p>
 <p style="font-size: 1.1rem; margin-top: 1rem;"><a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> is the supreme deity of the <a data-term="Sumerian" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=sumerian" title="View sumerian in ancient texts">Sumerian</a> pantheon, personification of the sky itself, and <a class="corpus-link" data-term="Father of the Gods" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'Father of the Gods'">father of the gods</a>. His name literally means "sky" or "heaven." Though the most authoritative god, <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> is often distant, delegating active rulership to <a class="corpus-link" data-term="Enlil" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=enlil" title="Search corpus for 'Enlil'">Enlil</a> while maintaining ultimate sovereignty over the cosmos.</p>
 </section>
 <section>
-<h2 style="color: var(--mythos-primary);"><a data-term="Attributes" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=attributes" title="View attributes in ancient texts">Attributes</a> &amp; Domains</h2>
+<h2 style="color: var(--color-primary);"><a data-term="Attributes" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=attributes" title="View attributes in ancient texts">Attributes</a> &amp; Domains</h2>
 <div class="attribute-grid">
-<div class="attribute-card">
+<div class="subsection-card">
 <div class="attribute-label">Titles</div>
 <div class="attribute-value"><a class="corpus-link" data-term="Father of the Gods" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'Father of the Gods'">Father of the Gods</a>, King of <a data-term="Heaven" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=heaven" title="View heaven in ancient texts">Heaven</a>, Lord of Constellations</div>
 </div>
-<div class="attribute-card">
+<div class="subsection-card">
 <div class="attribute-label">Domains</div>
 <div class="attribute-value">Sky, <a data-term="Heaven" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=heaven" title="View heaven in ancient texts">Heaven</a>, Authority, Kingship, Fate, Constellations</div>
 </div>
-<div class="attribute-card">
+<div class="subsection-card">
 <div class="attribute-label">Symbols</div>
 <div class="attribute-value">Horned crown, bull, star (<a class="corpus-link" data-term="𒀭" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=an" title="Search corpus for '𒀭'">𒀭</a>), scepter</div>
 </div>
-<div class="attribute-card">
+<div class="subsection-card">
 <div class="attribute-label"><a data-term="Sacred" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=sacred" title="View sacred in ancient texts">Sacred</a> Animals</div>
 <div class="attribute-value">Bull (strength and fertility)</div>
 </div>
-<div class="attribute-card">
+<div class="subsection-card">
 <div class="attribute-label"><a data-term="Sacred" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=sacred" title="View sacred in ancient texts">Sacred</a> Plants</div>
 <div class="attribute-value">Cedar (royal tree)</div>
 </div>
-<div class="attribute-card">
+<div class="subsection-card">
 <div class="attribute-label">Colors</div>
 <div class="attribute-value"><a class="corpus-link" data-term="Deep" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=abzu" title="Search corpus for 'Deep'">Deep</a> blue (sky), white, silver</div>
 </div></div></section>
 <section style="margin-top: 2rem;">
-<h2 style="color: var(--mythos-primary);"><a data-term="Mythology" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=mythology" title="View mythology in ancient texts">Mythology</a> &amp; Stories</h2>
+<h2 style="color: var(--color-primary);"><a data-term="Mythology" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=mythology" title="View mythology in ancient texts">Mythology</a> &amp; Stories</h2>
 <p><a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a>'s <a data-term="Mythology" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=mythology" title="View mythology in ancient texts">mythology</a> emphasizes his role as cosmic authority figure rather than active participant. He represents the unchanging, eternal power of heaven itself—stable, distant, but ultimately sovereign over all.</p>
-<h3 style="color: var(--mythos-secondary); margin-top: 1.5rem;"><a data-term="Key Myths" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=key%20myths" title="View key myths in ancient texts">Key Myths</a>:</h3>
+<h3 style="color: var(--color-secondary); margin-top: 1.5rem;"><a data-term="Key Myths" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=key%20myths" title="View key myths in ancient texts">Key Myths</a>:</h3>
 <ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
 <li><strong>Separation of <a data-term="Heaven" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=heaven" title="View heaven in ancient texts">Heaven</a> and Earth:</strong> In the beginning, <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> (<a data-term="Heaven" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=heaven" title="View heaven in ancient texts">heaven</a>) and <a class="corpus-link" data-term="Ki" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=ninhursag" title="Search corpus for 'Ki'">Ki</a> (earth) were united as one cosmic <a class="corpus-link" data-term="Mountain" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=kur" title="Search corpus for 'Mountain'">mountain</a>. Their son <a class="corpus-link" data-term="Enlil" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=enlil" title="Search corpus for 'Enlil'">Enlil</a> separated them, creating the space between where life could exist. <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> withdrew to the highest heaven, while <a class="corpus-link" data-term="Ki" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=ninhursag" title="Search corpus for 'Ki'">Ki</a> remained below. This act established the <a class="corpus-link" data-term="Cosmic Order" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=me" title="Search corpus for 'Cosmic Order'">cosmic order</a>.</li>
 <li><strong>The <a class="corpus-link" data-term="Me" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=me" title="Search corpus for 'Me'">Me</a> and Divine Authority:</strong> <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> possesses the ultimate authority over the <a class="corpus-link" data-term="Me" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=me" title="Search corpus for 'Me'">Me</a>—the <a class="corpus-link" data-term="Divine Decrees" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=tablet_of_destinies" title="Search corpus for 'Divine Decrees'">divine decrees</a> that govern all aspects of existence. When <a data-term="Inanna" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=inanna" title="View inanna in ancient texts">Inanna</a> tricked <a class="corpus-link" data-term="Enki" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=ea" title="Search corpus for 'Enki'">Enki</a> into giving her the <a class="corpus-link" data-term="Me" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=me" title="Search corpus for 'Me'">Me</a>, <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> acknowledged her right to keep them, demonstrating his role as final arbiter of divine power.</li>
@@ -290,13 +163,13 @@
 </div>
 </div>
 <section style="margin-top: 2rem;">
-<h2 style="color: var(--mythos-primary);">📜 <a data-term="Primary Sources   Cuneiform Texts" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=primary%20sources%20%20%20cuneiform%20texts" title="View primary sources - cuneiform texts in ancient texts">Primary Sources - Cuneiform Texts</a></h2>
+<h2 style="color: var(--color-primary);">📜 <a data-term="Primary Sources   Cuneiform Texts" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=primary%20sources%20%20%20cuneiform%20texts" title="View primary sources - cuneiform texts in ancient texts">Primary Sources - Cuneiform Texts</a></h2>
 <p>
 <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> appears in ancient Sumerian <a data-term="Cuneiform" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=cuneiform" title="View cuneiform in ancient texts">cuneiform</a> texts.
                 Search the ORACC corpus to explore original texts in transliteration and translation.
             </p>
 <div style="margin: 1.5rem 0;">
-<a href="../corpus-search.html?term=an&amp;language=sumerian" style="display: inline-block; padding: 0.75rem 1.5rem; background: var(--mythos-primary); color: white; text-decoration: none; border-radius: var(--radius-sm, 8px); font-weight: bold; transition: all 0.3s;">
+<a href="../corpus-search.html?term=an&amp;language=sumerian" style="display: inline-block; padding: 0.75rem 1.5rem; background: var(--color-primary); color: white; text-decoration: none; border-radius: var(--radius-sm, 8px); font-weight: bold; transition: all 0.3s;">
                     🔍 Search "An" in Cuneiform Corpus →
                 </a>
 </div>
@@ -305,34 +178,34 @@
             </p>
 </section>
 <section style="margin-top: 2rem;">
-<h2 style="color: var(--mythos-primary);"><a data-term="Relationships" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=relationships" title="View relationships in ancient texts">Relationships</a></h2>
-<h3 style="color: var(--mythos-secondary);">Family</h3>
+<h2 style="color: var(--color-primary);"><a data-term="Relationships" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=relationships" title="View relationships in ancient texts">Relationships</a></h2>
+<h3 style="color: var(--color-secondary);">Family</h3>
 <ul style="margin: 0.5rem 0 0 2rem;">
 <li><strong>Parents:</strong> Nammu (primordial mother) or self-created from cosmic waters</li>
 <li><strong>Consort(s):</strong> <a class="corpus-link" data-term="Ki" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=ninhursag" title="Search corpus for 'Ki'">Ki</a> (Earth), Antu/Antum (<a data-term="Heaven" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=heaven" title="View heaven in ancient texts">heaven</a> queen), Uras (earth goddess)</li>
 <li><strong>Children:</strong> <a class="corpus-link" data-term="Enlil" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=enlil" title="Search corpus for 'Enlil'">Enlil</a> (<a class="corpus-link" data-term="Lord Wind" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=enlil" title="Search corpus for 'Lord Wind'">lord wind</a>), <a class="corpus-link" data-term="Enki" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=ea" title="Search corpus for 'Enki'">Enki</a> (lord wisdom), <a class="corpus-link" data-term="Nanna" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=sin" title="Search corpus for 'Nanna'">Nanna</a> (moon), <a class="corpus-link" data-term="Inanna" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=ishtar" title="Search corpus for 'Inanna'">Inanna</a> (some <a data-term="Traditions" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=traditions" title="View traditions in ancient texts">traditions</a>), the <a class="corpus-link" data-term="Anunnaki" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anunnaki" title="Search corpus for 'Anunnaki'">Anunnaki</a></li>
 <li><strong>Siblings:</strong> <a class="corpus-link" data-term="Ki" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=ninhursag" title="Search corpus for 'Ki'">Ki</a> (earth) - in some <a data-term="Traditions" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=traditions" title="View traditions in ancient texts">traditions</a> also his sister/wife</li>
 </ul>
-<h3 style="color: var(--mythos-secondary); margin-top: 1rem;"><a data-term="Allies" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=allies" title="View allies in ancient texts">Allies</a> &amp; Enemies</h3>
+<h3 style="color: var(--color-secondary); margin-top: 1rem;"><a data-term="Allies" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=allies" title="View allies in ancient texts">Allies</a> &amp; Enemies</h3>
 <ul style="margin: 0.5rem 0 0 2rem;">
 <li><strong>Allies:</strong> All the <a data-term="Anunnaki" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=anunnaki" title="View anunnaki in ancient texts">Anunnaki</a> serve under his authority; <a class="corpus-link" data-term="Enlil" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=enlil" title="Search corpus for 'Enlil'">Enlil</a> (his executive); Seven gods who determine fate</li>
 <li><strong>Enemies:</strong> Demons of chaos and disorder (though he rarely confronts them directly)</li>
 </ul></section>
 <section style="margin-top: 2rem;">
-<h2 style="color: var(--mythos-primary);"><a data-term="Worship" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=worship" title="View worship in ancient texts">Worship</a> &amp; Rituals</h2>
-<h3 style="color: var(--mythos-secondary);"><a data-term="Sacred Sites" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=sacred%20sites" title="View sacred sites in ancient texts">Sacred Sites</a></h3>
+<h2 style="color: var(--color-primary);"><a data-term="Worship" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=worship" title="View worship in ancient texts">Worship</a> &amp; Rituals</h2>
+<h3 style="color: var(--color-secondary);"><a data-term="Sacred Sites" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=sacred%20sites" title="View sacred sites in ancient texts">Sacred Sites</a></h3>
 <p><a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a>'s <a data-term="Primary" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=primary" title="View primary in ancient texts">primary</a> cult center was <strong>Uruk</strong>, one of the world's first cities. The great temple complex <strong>E-anna</strong> ("House of <a data-term="Heaven" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=heaven" title="View heaven in ancient texts">Heaven</a>") was dedicated to <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> and <a class="corpus-link" data-term="Inanna" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=ishtar" title="Search corpus for 'Inanna'">Inanna</a>. The White Temple atop the ziggurat was <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a>'s earthly residence. Uruk was considered the "beloved city of <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a>."</p>
-<h3 style="color: var(--mythos-secondary); margin-top: 1rem;">Festivals</h3>
+<h3 style="color: var(--color-secondary); margin-top: 1rem;">Festivals</h3>
 <ul style="margin: 0.5rem 0 0 2rem;">
 <li><strong><a class="corpus-link" data-term="Akitu" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=akitu" title="Search corpus for 'Akitu'">Akitu</a> (<a class="corpus-link" data-term="New Year Festival" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=akitu" title="Search corpus for 'New Year Festival'">New Year Festival</a>):</strong> <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a>'s authority was invoked at the beginning of the year to renew <a class="corpus-link" data-term="Cosmic Order" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=me" title="Search corpus for 'Cosmic Order'">cosmic order</a>. The king received his mandate from <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> during this festival. Lasted 12 days with processions, sacrifices, and ritual dramas.</li>
 <li><strong>Enthronement <a data-term="Rituals" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=rituals" title="View rituals in ancient texts">Rituals</a>:</strong> New kings were crowned in <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a>'s name, receiving divine authority to rule. The horned crown, symbol of divinity, represented <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a>'s delegated power to the mortal king.</li>
 </ul>
-<h3 style="color: var(--mythos-secondary); margin-top: 1rem;">Offerings</h3>
+<h3 style="color: var(--color-secondary); margin-top: 1rem;">Offerings</h3>
 <p>Offerings to <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> included white bulls (his sacred animal), silver vessels, incense (cedar and myrrh), finest grains and breads, date wine, and precious metals. As the highest god, he received the first portion of all temple offerings before they were distributed to other <a data-term="Deities" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=deities" title="View deities in ancient texts">deities</a>.</p>
-<h3 style="color: var(--mythos-secondary); margin-top: 1rem;">Prayers &amp; <a data-term="Invocations" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=invocations" title="View invocations in ancient texts">Invocations</a></h3>
+<h3 style="color: var(--color-secondary); margin-top: 1rem;">Prayers &amp; <a data-term="Invocations" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=invocations" title="View invocations in ancient texts">Invocations</a></h3>
 <p><a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> was invoked as ultimate authority in legal oaths and treaties. Kings swore by <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> to legitimize their rule. <a data-term="Prayers" data-tradition="sumerian" class="corpus-link" href="../../../mythos/sumerian/corpus-search.html?term=prayers" title="View prayers in ancient texts">Prayers</a> emphasized his supreme power: "<a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a>, whose word cannot be changed, whose command is unalterable, who holds the bond of heaven and earth." Priests called on <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a> to ratify decisions made by lower gods.</p>
 </section>
-<h2 style="color: var(--mythos-primary);">🎭 Archetypal Patterns</h2>
+<h2 style="color: var(--color-primary);">🎭 Archetypal Patterns</h2>
 <span style="font-size: 1.5rem; font-weight: bold;">95%</span>
 <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.9;">Primal creator god, father of all gods</p>
 <a href="../../../archetypes/cross-reference-matrix.html" >
