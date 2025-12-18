@@ -4,8 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eyes of Azrael - World Mythos Explorer</title>
+    <meta name="description" content="A comprehensive encyclopedia of world mythologies, magical systems, sacred herbalism, and spiritual traditions spanning 6000+ years of human history">
+    <meta name="keywords" content="mythology, world religions, deities, gods, goddesses, magic systems, herbalism, spiritual traditions, ancient wisdom">
+    <meta name="author" content="Eyes of Azrael">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#9370DB">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Eyes of Azrael">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png">
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="css/accessibility.css">
+    <link rel="stylesheet" href="css/ui-components.css">
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -423,7 +442,10 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Skip to main content (Accessibility) -->
+    <a href="#main-content" class="skip-to-main">Skip to main content</a>
+
+    <div class="container" id="main-content" role="main">
         <!-- Header -->
         <header class="site-header">
             <a href="/" class="site-logo">👁️ Eyes of Azrael</a>
@@ -788,6 +810,52 @@
                 }
             });
         }
+
+        // Initialize SEO Manager
+        const seoManager = new SEOManager();
+        seoManager.init('home', {
+            title: 'Eyes of Azrael - World Mythos Explorer',
+            description: 'A comprehensive encyclopedia of world mythologies, magical systems, sacred herbalism, and spiritual traditions spanning 6000+ years of human history',
+            keywords: ['mythology', 'world religions', 'deities', 'gods', 'goddesses', 'magic systems', 'herbalism'],
+            type: 'website',
+            image: 'https://eyesofazrael.com/icons/icon-512x512.png'
+        });
     </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered:', registration);
+
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New service worker available
+                                    if (window.toast) {
+                                        window.toast.info('New version available! Refresh to update.', {
+                                            duration: 0,
+                                            dismissible: true
+                                        });
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed:', err);
+                    });
+            });
+        }
+    </script>
+
+    <!-- Scripts -->
+    <script src="js/seo-manager.js"></script>
+    <script src="js/toast-notifications.js"></script>
+    <script src="js/image-optimizer.js"></script>
 </body>
 </html>

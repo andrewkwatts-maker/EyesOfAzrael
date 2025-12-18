@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Mythology Comparison - Eyes of Azrael</title>
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    <script src="js/firebase-init.js"></script>
+
+    <style>
+        :root {
+            --compare-col-1: #9370DB;
+            --compare-col-2: #DAA520;
+            --compare-col-3: #4ade80;
+            --compare-col-4: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #9370DB, #DAA520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #c0c0c0;
+        }
+
+        /* Entity Selector */
+        .entity-selector {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .entity-selector h2 {
+            color: var(--compare-col-1);
+            margin-bottom: 1.5rem;
+        }
+
+        .entity-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .entity-input-group {
+            position: relative;
+        }
+
+        .entity-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .entity-input:focus {
+            outline: none;
+            border-color: var(--compare-col-1);
+            box-shadow: 0 0 20px rgba(147, 112, 219, 0.3);
+        }
+
+        .entity-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--compare-col-1);
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .entity-suggestions.active {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(147, 112, 219, 0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(147, 112, 219, 0.2);
+        }
+
+        .suggestion-name {
+            font-weight: 600;
+            color: var(--compare-col-1);
+        }
+
+        .suggestion-meta {
+            font-size: 0.875rem;
+            color: #999;
+            margin-top: 0.25rem;
+        }
+
+        .compare-btn {
+            background: linear-gradient(135deg, var(--compare-col-1), var(--compare-col-2));
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .compare-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(147, 112, 219, 0.5);
+        }
+
+        .compare-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Comparison Grid */
+        .comparison-container {
+            display: none;
+        }
+
+        .comparison-container.active {
+            display: block;
+        }
+
+        .comparison-header {
+            display: grid;
+            grid-template-columns: 200px repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .comparison-header-label {
+            background: transparent;
+        }
+
+        .entity-header {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .entity-header[data-col="0"] { border-color: var(--compare-col-1); }
+        .entity-header[data-col="1"] { border-color: var(--compare-col-2); }
+        .entity-header[data-col="2"] { border-color: var(--compare-col-3); }
+        .entity-header[data-col="3"] { border-color: var(--compare-col-4); }
+
+        .entity-header-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .entity-header-mythology {
+            font-size: 0.9rem;
+            color: #c0c0c0;
+        }
+
+        /* Comparison Rows */
+        .comparison-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--compare-col-1);
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(147, 112, 219, 0.1);
+            border-left: 4px solid var(--compare-col-1);
+            border-radius: 8px;
+        }
+
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 200px repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: start;
+        }
+
+        .field-label {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--compare-col-1);
+            align-self: stretch;
+            display: flex;
+            align-items: center;
+        }
+
+        .field-value {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid;
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 60px;
+        }
+
+        .field-value[data-col="0"] { border-color: rgba(147, 112, 219, 0.3); }
+        .field-value[data-col="1"] { border-color: rgba(218, 165, 32, 0.3); }
+        .field-value[data-col="2"] { border-color: rgba(74, 222, 128, 0.3); }
+        .field-value[data-col="3"] { border-color: rgba(245, 158, 11, 0.3); }
+
+        .field-value.highlight {
+            border-color: var(--compare-col-1);
+            background: rgba(147, 112, 219, 0.1);
+        }
+
+        .field-value ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .field-value li {
+            padding: 0.25rem 0;
+        }
+
+        .field-value li:before {
+            content: "• ";
+            color: var(--compare-col-1);
+        }
+
+        /* Insights Panel */
+        .insights-panel {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--compare-col-1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .insights-panel h3 {
+            color: var(--compare-col-1);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .insight-group {
+            margin-bottom: 2rem;
+        }
+
+        .insight-group h4 {
+            color: var(--compare-col-2);
+            margin-bottom: 1rem;
+        }
+
+        .insight-item {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--compare-col-1);
+        }
+
+        .insight-label {
+            font-weight: 600;
+            color: var(--compare-col-1);
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-description {
+            color: #c0c0c0;
+        }
+
+        .insight-values {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(147, 112, 219, 0.1);
+            border-radius: 4px;
+            font-style: italic;
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 100px;
+            height: 100px;
+            border: 4px solid rgba(147, 112, 219, 0.2);
+            border-top-color: var(--compare-col-1);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Archetype Badge */
+        .archetype-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--compare-col-1), var(--compare-col-2));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            margin: 0.25rem;
+        }
+
+        /* Cultural Context */
+        .cultural-context {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .context-card {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 2px solid;
+        }
+
+        .context-card[data-col="0"] { border-color: var(--compare-col-1); }
+        .context-card[data-col="1"] { border-color: var(--compare-col-2); }
+        .context-card[data-col="2"] { border-color: var(--compare-col-3); }
+        .context-card[data-col="3"] { border-color: var(--compare-col-4); }
+
+        .context-card h5 {
+            margin-bottom: 1rem;
+            color: var(--compare-col-1);
+        }
+
+        .context-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .context-label {
+            font-weight: 600;
+            color: #999;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--compare-col-1);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--compare-col-2);
+            transform: translateX(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Home</a>
+
+        <div class="header">
+            <h1>Cross-Mythology Comparison</h1>
+            <p>Compare deities, heroes, and entities across different mythological traditions</p>
+        </div>
+
+        <!-- Entity Selector -->
+        <div class="entity-selector">
+            <h2>Select Entities to Compare (2-4)</h2>
+            <div class="entity-inputs">
+                <div class="entity-input-group">
+                    <input type="text"
+                           class="entity-input"
+                           id="entity1"
+                           placeholder="Enter deity/hero name (e.g., Zeus)"
+                           data-index="0">
+                    <div class="entity-suggestions" id="suggestions1"></div>
+                </div>
+                <div class="entity-input-group">
+                    <input type="text"
+                           class="entity-input"
+                           id="entity2"
+                           placeholder="Enter deity/hero name (e.g., Odin)"
+                           data-index="1">
+                    <div class="entity-suggestions" id="suggestions2"></div>
+                </div>
+                <div class="entity-input-group">
+                    <input type="text"
+                           class="entity-input"
+                           id="entity3"
+                           placeholder="Optional third entity (e.g., Ra)"
+                           data-index="2">
+                    <div class="entity-suggestions" id="suggestions3"></div>
+                </div>
+                <div class="entity-input-group">
+                    <input type="text"
+                           class="entity-input"
+                           id="entity4"
+                           placeholder="Optional fourth entity (e.g., Indra)"
+                           data-index="3">
+                    <div class="entity-suggestions" id="suggestions4"></div>
+                </div>
+            </div>
+            <button class="compare-btn" id="compareBtn" disabled>Compare Entities</button>
+        </div>
+
+        <!-- Comparison Results -->
+        <div class="comparison-container" id="comparisonContainer">
+            <div id="comparisonContent"></div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="js/mythology-comparisons.js"></script>
+    <script>
+        // Comparison UI Controller
+        class ComparisonUI {
+            constructor() {
+                this.comparisonEngine = new MythologyComparisons();
+                this.selectedEntities = [null, null, null, null];
+                this.init();
+            }
+
+            init() {
+                // Set up entity input handlers
+                for (let i = 1; i <= 4; i++) {
+                    const input = document.getElementById(`entity${i}`);
+                    input.addEventListener('input', (e) => this.handleInput(e, i - 1));
+                    input.addEventListener('focus', (e) => this.handleFocus(e, i - 1));
+                }
+
+                // Close suggestions on click outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('entity-input')) {
+                        this.closeAllSuggestions();
+                    }
+                });
+
+                // Compare button
+                document.getElementById('compareBtn').addEventListener('click', () => {
+                    this.performComparison();
+                });
+
+                // Enable compare button when at least 2 entities selected
+                setInterval(() => this.updateCompareButton(), 500);
+            }
+
+            async handleInput(event, index) {
+                const query = event.target.value.trim();
+                if (query.length < 2) {
+                    this.closeSuggestions(index);
+                    return;
+                }
+
+                const suggestions = await this.searchEntities(query);
+                this.showSuggestions(suggestions, index);
+            }
+
+            handleFocus(event, index) {
+                const query = event.target.value.trim();
+                if (query.length >= 2) {
+                    this.handleInput(event, index);
+                }
+            }
+
+            async searchEntities(query) {
+                try {
+                    const db = firebase.firestore();
+                    const collections = ['deities', 'heroes', 'creatures'];
+                    const results = [];
+
+                    for (const collection of collections) {
+                        const snapshot = await db.collection(collection)
+                            .where('name', '>=', query)
+                            .where('name', '<=', query + '\uf8ff')
+                            .limit(5)
+                            .get();
+
+                        snapshot.forEach(doc => {
+                            results.push({
+                                id: doc.id,
+                                collection,
+                                ...doc.data()
+                            });
+                        });
+                    }
+
+                    return results.slice(0, 10);
+                } catch (error) {
+                    console.error('Search error:', error);
+                    return [];
+                }
+            }
+
+            showSuggestions(suggestions, index) {
+                const suggestionsDiv = document.getElementById(`suggestions${index + 1}`);
+
+                if (suggestions.length === 0) {
+                    suggestionsDiv.classList.remove('active');
+                    return;
+                }
+
+                suggestionsDiv.innerHTML = suggestions.map(entity => `
+                    <div class="suggestion-item" data-id="${entity.id}" data-index="${index}">
+                        <div class="suggestion-name">${entity.name}</div>
+                        <div class="suggestion-meta">${entity.mythology || 'Unknown'} • ${entity.collection}</div>
+                    </div>
+                `).join('');
+
+                // Add click handlers
+                suggestionsDiv.querySelectorAll('.suggestion-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const entityId = item.dataset.id;
+                        const idx = parseInt(item.dataset.index);
+                        this.selectEntity(entityId, idx);
+                    });
+                });
+
+                suggestionsDiv.classList.add('active');
+            }
+
+            closeSuggestions(index) {
+                document.getElementById(`suggestions${index + 1}`).classList.remove('active');
+            }
+
+            closeAllSuggestions() {
+                for (let i = 0; i < 4; i++) {
+                    this.closeSuggestions(i);
+                }
+            }
+
+            async selectEntity(entityId, index) {
+                const entity = await this.comparisonEngine.fetchEntity(entityId);
+                this.selectedEntities[index] = entity;
+
+                // Update input
+                const input = document.getElementById(`entity${index + 1}`);
+                input.value = entity.name;
+
+                // Close suggestions
+                this.closeSuggestions(index);
+
+                this.updateCompareButton();
+            }
+
+            updateCompareButton() {
+                const validCount = this.selectedEntities.filter(e => e !== null).length;
+                const btn = document.getElementById('compareBtn');
+                btn.disabled = validCount < 2;
+                btn.textContent = validCount >= 2
+                    ? `Compare ${validCount} Entities`
+                    : 'Select at least 2 entities';
+            }
+
+            async performComparison() {
+                const validEntities = this.selectedEntities.filter(e => e !== null);
+                if (validEntities.length < 2) return;
+
+                // Show loading
+                document.getElementById('loadingOverlay').classList.add('active');
+
+                try {
+                    const entityIds = validEntities.map(e => e.id);
+                    const comparison = await this.comparisonEngine.compareEntities(entityIds);
+
+                    this.renderComparison(comparison);
+
+                    // Scroll to results
+                    document.getElementById('comparisonContainer').scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                } catch (error) {
+                    console.error('Comparison error:', error);
+                    alert('Error performing comparison: ' + error.message);
+                } finally {
+                    document.getElementById('loadingOverlay').classList.remove('active');
+                }
+            }
+
+            renderComparison(comparison) {
+                const container = document.getElementById('comparisonContent');
+                const entities = comparison.entities;
+
+                let html = `
+                    <!-- Entity Headers -->
+                    <div class="comparison-header">
+                        <div class="comparison-header-label"></div>
+                        ${entities.map((entity, idx) => `
+                            <div class="entity-header" data-col="${idx}">
+                                <div class="entity-header-name">${entity.name}</div>
+                                <div class="entity-header-mythology">${entity.mythology || 'Unknown'}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Basic Information -->
+                    <div class="comparison-section">
+                        <h3 class="section-title">Basic Information</h3>
+                        ${this.renderFieldRow('Name', entities.map(e => e.name))}
+                        ${this.renderFieldRow('Mythology', entities.map(e => e.mythology || 'Unknown'))}
+                        ${this.renderFieldRow('Role', entities.map(e => e.role || 'N/A'))}
+                        ${this.renderFieldRow('Title', entities.map(e => e.title || 'N/A'))}
+                    </div>
+
+                    <!-- Attributes -->
+                    <div class="comparison-section">
+                        <h3 class="section-title">Attributes & Domains</h3>
+                        ${this.renderArrayFieldRow('Domains', entities.map(e => e.domains || []))}
+                        ${this.renderArrayFieldRow('Attributes', entities.map(e => e.attributes || []))}
+                        ${this.renderArrayFieldRow('Symbols', entities.map(e => e.symbols || []))}
+                    </div>
+
+                    <!-- Description -->
+                    <div class="comparison-section">
+                        <h3 class="section-title">Descriptions</h3>
+                        ${this.renderFieldRow('Description', entities.map(e => e.description || 'No description available'))}
+                    </div>
+
+                    <!-- Insights Panel -->
+                    ${this.renderInsights(comparison)}
+
+                    <!-- Cultural Context -->
+                    ${this.renderCulturalContext(comparison)}
+                `;
+
+                container.innerHTML = html;
+                document.getElementById('comparisonContainer').classList.add('active');
+            }
+
+            renderFieldRow(label, values) {
+                return `
+                    <div class="comparison-row">
+                        <div class="field-label">${label}</div>
+                        ${values.map((value, idx) => `
+                            <div class="field-value" data-col="${idx}">
+                                ${value}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            renderArrayFieldRow(label, valueArrays) {
+                return `
+                    <div class="comparison-row">
+                        <div class="field-label">${label}</div>
+                        ${valueArrays.map((values, idx) => `
+                            <div class="field-value" data-col="${idx}">
+                                ${values.length > 0
+                                    ? `<ul>${values.map(v => `<li>${v}</li>`).join('')}</ul>`
+                                    : 'None'}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            renderInsights(comparison) {
+                return `
+                    <div class="insights-panel">
+                        <h3>Comparative Insights</h3>
+
+                        <!-- Similarities -->
+                        ${comparison.similarities.length > 0 ? `
+                            <div class="insight-group">
+                                <h4>Similarities</h4>
+                                ${comparison.similarities.map(sim => `
+                                    <div class="insight-item">
+                                        <div class="insight-label">${sim.description}</div>
+                                        <div class="insight-values">
+                                            ${Array.isArray(sim.values) ? sim.values.join(', ') : sim.values}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        <!-- Archetypes -->
+                        ${comparison.archetypes.length > 0 ? `
+                            <div class="insight-group">
+                                <h4>Shared Archetypes</h4>
+                                ${comparison.archetypes.map(arch => `
+                                    <div class="insight-item">
+                                        <div class="insight-label">${arch.archetype}</div>
+                                        <div class="insight-description">${arch.description}</div>
+                                        <div class="insight-values">
+                                            Matching: ${arch.matchingEntities.join(', ')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        <!-- Cultural Connections -->
+                        ${comparison.culturalContext.culturalConnections.length > 0 ? `
+                            <div class="insight-group">
+                                <h4>Cultural Connections</h4>
+                                ${comparison.culturalContext.culturalConnections.map(conn => `
+                                    <div class="insight-item">
+                                        <div class="insight-label">${conn.type} Connection</div>
+                                        <div class="insight-description">${conn.description}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            renderCulturalContext(comparison) {
+                const contexts = comparison.culturalContext.contexts;
+
+                return `
+                    <div class="comparison-section">
+                        <h3 class="section-title">Cultural Context</h3>
+                        <div class="cultural-context">
+                            ${contexts.map((ctx, idx) => `
+                                <div class="context-card" data-col="${idx}">
+                                    <h5>${ctx.entity}</h5>
+                                    <div class="context-item">
+                                        <span class="context-label">Culture:</span>
+                                        ${ctx.culture}
+                                    </div>
+                                    ${ctx.period ? `
+                                        <div class="context-item">
+                                            <span class="context-label">Period:</span>
+                                            ${ctx.period}
+                                        </div>
+                                    ` : ''}
+                                    ${ctx.geography ? `
+                                        <div class="context-item">
+                                            <span class="context-label">Region:</span>
+                                            ${ctx.geography}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize when ready
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                new ComparisonUI();
+            }, 1000); // Wait for Firebase
+        });
+    </script>
+</body>
+</html>

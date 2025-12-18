@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Error - Eyes of Azrael</title>
+    <meta name="description" content="A server error occurred. We're working to fix it.">
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a0a0a 0%, #2e1a1a 50%, #3e1621 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 69, 0, 0.1) 0%, transparent 50%);
+            animation: pulse 4s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .error-content {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 69, 0, 0.3);
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            box-shadow: 0 20px 60px rgba(255, 69, 0, 0.3);
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-icon {
+            font-size: 8rem;
+            margin-bottom: 1rem;
+            animation: shake 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(255, 69, 0, 0.8));
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        .error-code {
+            font-size: 6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6347, #ff4500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #c0c0c0;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .status-box {
+            background: rgba(255, 69, 0, 0.1);
+            border: 2px solid rgba(255, 69, 0, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem auto;
+            max-width: 500px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 69, 0, 0.2);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        .status-checking { background: #ffa500; }
+        .status-error { background: #ff4500; }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #9370DB, #DAA520);
+            color: white;
+            box-shadow: 0 5px 20px rgba(147, 112, 219, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(147, 112, 219, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .help-text {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .help-text h3 {
+            color: #9370DB;
+            margin-bottom: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .help-text ul {
+            text-align: left;
+            list-style: none;
+            padding: 0;
+        }
+
+        .help-text li {
+            padding: 0.5rem 0;
+            color: #c0c0c0;
+        }
+
+        .help-text li:before {
+            content: "→ ";
+            color: #9370DB;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 4rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-overlay"></div>
+
+    <div class="container">
+        <div class="error-content">
+            <div class="error-icon">⚠️</div>
+            <div class="error-code">500</div>
+            <h1>Server Error</h1>
+            <p>
+                The cosmic forces are temporarily misaligned. Our servers encountered an unexpected
+                error while processing your request. Don't worry—our team has been notified and is
+                working to restore balance.
+            </p>
+
+            <div class="status-box">
+                <div class="status-item">
+                    <span class="status-label">Server Status</span>
+                    <span class="status-indicator">
+                        <span class="status-dot status-error"></span>
+                        <span>Error Detected</span>
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Recovery Process</span>
+                    <span class="status-indicator">
+                        <span class="status-dot status-checking"></span>
+                        <span>Auto-Healing</span>
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Error ID</span>
+                    <span class="status-indicator" id="errorId">
+                        <span>ERR-<span id="errorCode"></span></span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" onclick="location.reload()">
+                    🔄 Try Again
+                </button>
+                <a href="/" class="btn btn-secondary">
+                    🏠 Return Home
+                </a>
+                <a href="/mythos/index.html" class="btn btn-secondary">
+                    📚 Browse Mythologies
+                </a>
+            </div>
+
+            <div class="help-text">
+                <h3>What can you do?</h3>
+                <ul>
+                    <li>Wait a few moments and try refreshing the page</li>
+                    <li>Check your internet connection</li>
+                    <li>Clear your browser cache and cookies</li>
+                    <li>Try accessing a different page</li>
+                    <li>If the problem persists, please report it to our team</li>
+                </ul>
+            </div>
+
+            <p style="margin-top: 2rem; font-size: 0.9rem; color: #888;">
+                If this error continues, please contact support with the error ID above.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Generate unique error ID
+        function generateErrorId() {
+            const timestamp = Date.now().toString(36).toUpperCase();
+            const random = Math.random().toString(36).substring(2, 7).toUpperCase();
+            return `${timestamp}-${random}`;
+        }
+
+        document.getElementById('errorCode').textContent = generateErrorId();
+
+        // Auto-retry after 30 seconds
+        let retryCountdown = 30;
+        const retryTimer = setInterval(() => {
+            retryCountdown--;
+            if (retryCountdown <= 0) {
+                clearInterval(retryTimer);
+                location.reload();
+            }
+        }, 1000);
+
+        // Track errors (if analytics is set up)
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'exception', {
+                'description': '500_server_error',
+                'fatal': true
+            });
+        }
+
+        // Log error details for debugging
+        console.error('500 Server Error occurred', {
+            url: window.location.href,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent
+        });
+    </script>
+</body>
+</html>

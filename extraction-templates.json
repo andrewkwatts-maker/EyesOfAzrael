@@ -1,0 +1,575 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-12-15",
+    "description": "HTML extraction templates for Eyes of Azrael mythology entity pages",
+    "based_on_analysis": "STRUCTURE_PATTERNS.md",
+    "sample_size": 10
+  },
+
+  "common_patterns": {
+    "breadcrumb": {
+      "selector": "nav.breadcrumb",
+      "structure": "Home → [Mythology] → [Entity Type] → [Entity Name]",
+      "extract": {
+        "mythology": "a[href*='mythos']:nth-of-type(2)",
+        "entity_type": "a:nth-of-type(3)",
+        "entity_name": "span"
+      }
+    },
+
+    "header": {
+      "selector_variants": [
+        "section.deity-header",
+        "section.hero-header",
+        "section.hero-section"
+      ],
+      "extract": {
+        "icon": {
+          "selector": "div[class*='icon']",
+          "method": "text",
+          "special_handling": {
+            "hieroglyphs": "span[style*='Segoe UI Historic']"
+          }
+        },
+        "name": {
+          "selector": "h2",
+          "method": "text_content",
+          "cleanup": "strip_links"
+        },
+        "subtitle": {
+          "selector": "p.subtitle",
+          "fallback": "p[style*='font-size: 1.5rem']"
+        },
+        "description": {
+          "selector": "p[style*='font-size: 1.1rem'], p[style*='margin-top: 1rem']",
+          "method": "first_match"
+        }
+      }
+    },
+
+    "css_variables": {
+      "location": "head > style",
+      "extract": {
+        "mythos_primary": "(:root.*--mythos-primary:\\s*([^;]+))",
+        "mythos_secondary": "(:root.*--mythos-secondary:\\s*([^;]+))",
+        "mythos_primary_rgb": "(:root.*--mythos-primary-rgb:\\s*([^;]+))"
+      }
+    },
+
+    "attributes_section": {
+      "selector": "section[id='attributes'], section:has(h2:contains('Attributes'))",
+      "container": ".attribute-grid",
+      "card_selector": ".attribute-card",
+      "extract": {
+        "label": ".attribute-label",
+        "value": ".attribute-value"
+      },
+      "expected_labels": [
+        "Titles",
+        "Domains",
+        "Symbols",
+        "Sacred Animals",
+        "Sacred Plants",
+        "Colors",
+        "Planet",
+        "Number",
+        "Weapons"
+      ]
+    },
+
+    "mythology_section": {
+      "selector": "section[id='mythology'], section:has(h2:contains('Mythology'))",
+      "extract": {
+        "intro_paragraph": "p:first-of-type",
+        "key_myths": {
+          "selector": "ul li",
+          "pattern": "<strong>([^:]+):</strong>\\s*(.+)",
+          "groups": ["myth_name", "myth_description"]
+        },
+        "citation": {
+          "selector": ".citation, div[class='citation']",
+          "extract": "strong:contains('Sources:') + text"
+        }
+      }
+    },
+
+    "relationships_section": {
+      "selector": "section[id='relationships'], section:has(h2:contains('Relationships'))",
+      "subsections": {
+        "family": {
+          "selector": "div:has(h3:contains('Family')), h3:contains('Family') + ul",
+          "extract": {
+            "parents": "li:has(strong:contains('Parents'))",
+            "consorts": "li:has(strong:contains('Consort'))",
+            "children": "li:has(strong:contains('Children'))",
+            "siblings": "li:has(strong:contains('Siblings'))"
+          },
+          "pattern": "<strong>([^:]+):</strong>\\s*(.+)"
+        },
+        "allies_enemies": {
+          "selector": "div:has(h3:contains('Allies')), h3:contains('Allies') + ul",
+          "extract": {
+            "allies": "li:has(strong:contains('Allies'))",
+            "enemies": "li:has(strong:contains('Enemies'))",
+            "rivals": "li:has(strong:contains('Rivals'))"
+          },
+          "pattern": "<strong>([^:]+):</strong>\\s*(.+)"
+        }
+      }
+    },
+
+    "interlink_panel": {
+      "selector": "section.interlink-panel",
+      "extract": {
+        "archetype": {
+          "selector": ".archetype-link-card",
+          "fields": {
+            "name": ".archetype-badge",
+            "description": ".archetype-context",
+            "parallels": ".see-parallels",
+            "url": "@href"
+          }
+        },
+        "sacred_items": {
+          "selector": ".interlink-section:has(.interlink-section-title:contains('Sacred Items')) .item-link-card",
+          "fields": {
+            "name": "h4",
+            "type": ".item-type",
+            "context": ".item-context",
+            "url": "@href"
+          }
+        },
+        "sacred_places": {
+          "selector": ".interlink-section:has(.interlink-section-title:contains('Sacred Places')) .place-link-card",
+          "fields": {
+            "name": "h4",
+            "type": ".place-type",
+            "description": "p",
+            "url": "@href"
+          }
+        },
+        "cross_cultural_parallels": {
+          "selector": ".parallel-traditions .parallel-card",
+          "fields": {
+            "name": ".parallel-name",
+            "mythology": ".tradition-label",
+            "flag": ".tradition-flag",
+            "url": "@href"
+          }
+        }
+      }
+    },
+
+    "see_also": {
+      "selector": ".see-also-section .see-also-links a",
+      "extract": {
+        "icon": "span",
+        "name": "text (after span)",
+        "url": "@href"
+      }
+    },
+
+    "corpus_links": {
+      "selector": "a.corpus-link",
+      "extract": {
+        "term": "@data-term",
+        "tradition": "@data-tradition",
+        "corpus": "@data-corpus",
+        "url": "@href",
+        "display_text": "text"
+      }
+    }
+  },
+
+  "entity_type_templates": {
+    "deity": {
+      "inherits": "common_patterns",
+      "header_class": "deity-header",
+      "additional_sections": {
+        "worship": {
+          "selector": "section[id='worship'], section:has(h2:contains('Worship'))",
+          "subsections": {
+            "sacred_sites": {
+              "selector": "div:has(h3:contains('Sacred Sites')), h3:contains('Sacred Sites') + p",
+              "method": "text"
+            },
+            "festivals": {
+              "selector": "div:has(h3:contains('Festivals')), h3:contains('Festivals') + ul",
+              "extract": "li"
+            },
+            "offerings": {
+              "selector": "div:has(h3:contains('Offerings')), h3:contains('Offerings') + p",
+              "method": "text"
+            },
+            "prayers": {
+              "selector": "div:has(h3:contains('Prayers')), h3:contains('Prayers') + p",
+              "method": "text"
+            }
+          }
+        },
+        "forms": {
+          "selector": "section[id='forms'], section:has(h2:contains('Forms'))",
+          "note": "Egyptian deities primarily",
+          "extract": {
+            "form_cards": {
+              "selector": "div[style*='border-left: 4px']",
+              "fields": {
+                "name": "strong",
+                "description": "p"
+              }
+            }
+          }
+        }
+      },
+      "special_attributes": [
+        "Sacred Animals",
+        "Sacred Plants",
+        "Planet",
+        "Number"
+      ]
+    },
+
+    "hero": {
+      "inherits": "common_patterns",
+      "header_class": "hero-header",
+      "additional_sections": {
+        "adventures": {
+          "selector": "section:has(h2:contains('Adventures')), section:has(h3:contains('Adventures'))",
+          "extract": "narrative_structure"
+        },
+        "labors": {
+          "selector": ".labors-grid",
+          "note": "Greek heroes like Heracles",
+          "card_selector": ".labor-card",
+          "extract": {
+            "number": ".labor-number",
+            "title": ".labor-title",
+            "description": ".labor-desc"
+          }
+        },
+        "death_apotheosis": {
+          "selector": "h3:contains('Death'), h3:contains('Apotheosis')",
+          "extract": "following_paragraphs"
+        },
+        "primary_sources": {
+          "selector": "section:has(h2:contains('Primary Sources'))",
+          "extract": "ul li"
+        }
+      },
+      "special_attributes": [
+        "Weapons",
+        "Birth Name",
+        "Titles"
+      ]
+    },
+
+    "creature": {
+      "inherits": "common_patterns",
+      "header_class": "hero-section",
+      "additional_sections": {
+        "physical_description": {
+          "selector": "section:has(h2:contains('Physical Description')), div.deity-grid",
+          "extract": "card_structure"
+        },
+        "origin": {
+          "selector": "section:has(h2:contains('Origin')), div.glass-card:has(h3:contains('Origin'))",
+          "extract": "paragraphs"
+        },
+        "symbolism": {
+          "selector": "section:has(h2:contains('Symbolism')), section:has(h2:contains('Modern Interpretations'))",
+          "extract": "narrative_structure"
+        },
+        "types": {
+          "selector": "section:has(h2:contains('Types'))",
+          "extract": "ul li"
+        },
+        "cultural_legacy": {
+          "selector": "section:has(h2:contains('Cultural Legacy')), section:has(h2:contains('Legacy'))",
+          "extract": "narrative_structure"
+        }
+      },
+      "special_attributes": [
+        "Physical Features",
+        "Types"
+      ]
+    }
+  },
+
+  "mythology_specific_variations": {
+    "egyptian": {
+      "special_character_handling": {
+        "hieroglyphs": {
+          "font_pattern": "font-family:.*Segoe UI Historic|Noto Sans Egyptian Hieroglyphs",
+          "encoding": "unicode",
+          "preservation": "required"
+        },
+        "transliteration": {
+          "pattern": "font-style: italic",
+          "examples": ["rꜥ", "mꜣꜥt"]
+        }
+      },
+      "unique_sections": [
+        "Forms and Manifestations",
+        "Author's Theories"
+      ]
+    },
+
+    "greek": {
+      "hero_labors": {
+        "structure": "labors-grid",
+        "numbered": true,
+        "card_class": "labor-card"
+      },
+      "extensive_sources": true
+    },
+
+    "norse": {
+      "compact_structure": true,
+      "ragnarok_references": "common",
+      "rune_handling": {
+        "note": "Potential future requirement",
+        "font_pattern": "runic fonts"
+      }
+    },
+
+    "babylonian": {
+      "cuneiform_references": {
+        "corpus": "ORACC",
+        "search_pattern": "corpus-search.html?term=[term]&language=akkadian"
+      },
+      "extra_theories": {
+        "selector": "section.extra-theories",
+        "note": "Speculative content marked clearly"
+      },
+      "special_attributes": [
+        "Planet",
+        "Number",
+        "Cuneiform Name"
+      ]
+    },
+
+    "hindu": {
+      "sanskrit_terminology": true,
+      "avatar_sections": {
+        "note": "For Vishnu, Krishna, etc.",
+        "selector": "section:has(h2:contains('Avatars'))"
+      },
+      "karma_reincarnation_context": "common"
+    }
+  },
+
+  "extraction_methods": {
+    "text_content": {
+      "description": "Extract plain text, strip HTML",
+      "preserve_links": false
+    },
+
+    "html_content": {
+      "description": "Preserve HTML structure including links",
+      "preserve_links": true,
+      "allowed_tags": ["a", "strong", "em", "span"]
+    },
+
+    "strip_links": {
+      "description": "Remove <a> tags but keep text content",
+      "method": "text_only"
+    },
+
+    "narrative_structure": {
+      "description": "Extract h3 headings and following paragraphs as structured narrative",
+      "structure": {
+        "section_heading": "h3",
+        "content": "following_siblings until next h3"
+      }
+    },
+
+    "card_structure": {
+      "description": "Extract card-based layouts (glass-card, deity-grid, etc.)",
+      "selectors": [
+        ".glass-card",
+        ".deity-grid > div",
+        ".related-card"
+      ]
+    },
+
+    "following_paragraphs": {
+      "description": "Extract all <p> tags following a heading until next section",
+      "method": "next_siblings(p) until h2|h3|section"
+    }
+  },
+
+  "fallback_strategies": {
+    "missing_id": {
+      "description": "If section ID not found, search by heading text",
+      "pattern": "section:has(h2:contains('[section_name]'))"
+    },
+
+    "missing_class": {
+      "description": "If specific class not found, use structural position",
+      "pattern": "main > section:nth-of-type(n)"
+    },
+
+    "inline_styles": {
+      "description": "Parse inline styles when classes absent",
+      "method": "regex_parse_style_attribute"
+    },
+
+    "nested_links": {
+      "description": "Handle nested <a> tags in corpus links",
+      "method": "extract_outermost_link_data"
+    }
+  },
+
+  "quality_checks": {
+    "required_fields": [
+      "entity_name",
+      "mythology",
+      "entity_type",
+      "description"
+    ],
+
+    "validation_rules": {
+      "entity_name": {
+        "not_empty": true,
+        "max_length": 200,
+        "pattern": "^[A-Za-z\\s\\-'()]+$|^[\\u0080-\\uFFFF]+$"
+      },
+
+      "mythology": {
+        "enum": [
+          "egyptian",
+          "greek",
+          "roman",
+          "norse",
+          "celtic",
+          "hindu",
+          "buddhist",
+          "babylonian",
+          "sumerian",
+          "persian",
+          "aztec",
+          "mayan",
+          "chinese",
+          "japanese",
+          "christian",
+          "jewish",
+          "islamic",
+          "apocryphal"
+        ]
+      },
+
+      "entity_type": {
+        "enum": [
+          "deity",
+          "hero",
+          "creature",
+          "being",
+          "concept",
+          "location",
+          "ritual",
+          "text",
+          "symbol"
+        ]
+      }
+    },
+
+    "data_completeness_scoring": {
+      "full_page": {
+        "header": 10,
+        "attributes": 20,
+        "mythology": 25,
+        "relationships": 20,
+        "type_specific_section": 15,
+        "interlinks": 10
+      },
+
+      "thresholds": {
+        "complete": 90,
+        "partial": 50,
+        "stub": 25
+      }
+    }
+  },
+
+  "output_format": {
+    "json_structure": {
+      "metadata": {
+        "source_file": "string",
+        "source_url": "string",
+        "extraction_date": "ISO 8601",
+        "extraction_version": "string",
+        "completeness_score": "integer (0-100)"
+      },
+
+      "entity": {
+        "name": "string",
+        "mythology": "string",
+        "type": "string",
+        "icon": "string (emoji/unicode)",
+        "subtitle": "string",
+        "description": "string (HTML or text)",
+        "css_colors": {
+          "primary": "string (hex)",
+          "secondary": "string (hex)"
+        }
+      },
+
+      "attributes": {
+        "[label]": "string"
+      },
+
+      "mythology_stories": {
+        "intro": "string",
+        "key_myths": [
+          {
+            "name": "string",
+            "description": "string (HTML)"
+          }
+        ],
+        "sources": "string"
+      },
+
+      "relationships": {
+        "family": {
+          "parents": "string",
+          "consorts": "string",
+          "children": "string",
+          "siblings": "string"
+        },
+        "allies_enemies": {
+          "allies": "string",
+          "enemies": "string"
+        }
+      },
+
+      "type_specific": "object (varies by entity type)",
+
+      "interlinks": {
+        "archetype": "object",
+        "sacred_items": "array",
+        "sacred_places": "array",
+        "cross_cultural_parallels": "array"
+      },
+
+      "see_also": "array",
+
+      "corpus_links": "array",
+
+      "all_links": {
+        "internal": "array",
+        "external": "array",
+        "corpus": "array"
+      }
+    }
+  },
+
+  "usage_notes": {
+    "parsing_library": "beautifulsoup4 recommended",
+    "encoding": "UTF-8 required for special characters",
+    "error_handling": "Log warnings for missing sections, continue extraction",
+    "link_resolution": "Convert relative paths to absolute for Firebase",
+    "html_sanitization": "Preserve semantic HTML, strip scripts/styles",
+    "batch_processing": "Process by mythology folder for consistency"
+  }
+}

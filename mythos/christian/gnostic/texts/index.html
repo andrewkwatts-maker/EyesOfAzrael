@@ -5,242 +5,14 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Gnostic Sacred Texts - World Mythos Explorer</title>
 <link href="../../../../themes/theme-base.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../../../themes/mythology-colors.css">
 <link href="../../../../styles.css" rel="stylesheet"/>
 <link href="../../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../../themes/smart-links.css">
 <script defer src="../../../../themes/smart-links.js"></script>
     <script defer src="../../../../themes/theme-animations.js"></script>
 <script defer src="../../../../themes/theme-picker.js"></script>
-<style>
-        :root {
-            --mythos-primary: #8B008B;
-            --mythos-secondary: #FFD700;
-            --mythos-accent: #9370DB;
-        }
 
-        .hero-section {
-            background: linear-gradient(135deg, #2C003E 0%, #8B008B 50%, #4B0082 100%);
-            color: white;
-            padding: 4rem 2rem;
-            border-radius: var(--radius-2xl);
-            margin-bottom: 3rem;
-            text-align: center;
-            box-shadow: var(--shadow-xl);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 30% 50%, rgba(255, 215, 0, 0.1), transparent 50%),
-                        radial-gradient(circle at 70% 50%, rgba(147, 112, 219, 0.1), transparent 50%);
-            pointer-events: none;
-        }
-
-        .hero-section h2 {
-            font-size: var(--text-5xl);
-            margin-bottom: var(--space-6);
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-section p {
-            font-size: var(--text-xl);
-            max-width: 900px;
-            margin: var(--space-4) auto 0;
-            line-height: var(--leading-relaxed);
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
-        }
-
-        .text-category {
-            background: var(--color-card-bg);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--mythos-primary);
-            border-radius: var(--radius-xl);
-            padding: var(--space-8);
-            margin-bottom: var(--space-8);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .text-category h2 {
-            color: var(--mythos-primary);
-            font-size: var(--text-3xl);
-            margin-bottom: var(--space-6);
-            padding-bottom: var(--space-4);
-            border-bottom: 3px solid var(--mythos-primary);
-        }
-
-        .text-card {
-            background: var(--color-card-bg);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--color-border);
-            border-radius: var(--radius-xl);
-            padding: var(--space-6);
-            margin-bottom: var(--space-6);
-            transition: all var(--transition-base);
-        }
-
-        .text-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--mythos-accent);
-        }
-
-        .text-card h3 {
-            color: var(--mythos-accent);
-            font-size: var(--text-2xl);
-            margin-bottom: var(--space-4);
-        }
-
-        .text-card h4 {
-            color: var(--mythos-primary);
-            font-size: var(--text-lg);
-            margin-top: var(--space-4);
-            margin-bottom: var(--space-3);
-        }
-
-        .quote-box {
-            background: linear-gradient(135deg, rgba(139, 0, 139, 0.05), rgba(147, 112, 219, 0.05));
-            border-left: 4px solid var(--mythos-primary);
-            padding: var(--space-5);
-            margin: var(--space-4) 0;
-            border-radius: var(--radius-lg);
-            font-style: italic;
-            line-height: var(--leading-relaxed);
-        }
-
-        .quote-box cite {
-            display: block;
-            margin-top: var(--space-3);
-            font-style: normal;
-            font-size: var(--text-sm);
-            color: var(--mythos-accent);
-            font-weight: 600;
-        }
-
-        .key-themes {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--space-4);
-            margin: var(--space-6) 0;
-        }
-
-        .theme-tag {
-            background: linear-gradient(135deg, rgba(139, 0, 139, 0.1), rgba(147, 112, 219, 0.1));
-            border: 1px solid var(--mythos-accent);
-            padding: var(--space-3) var(--space-4);
-            border-radius: var(--radius-lg);
-            text-align: center;
-            font-weight: 600;
-            color: var(--mythos-accent);
-            transition: all var(--transition-fast);
-        }
-
-        .theme-tag:hover {
-            background: linear-gradient(135deg, rgba(139, 0, 139, 0.2), rgba(147, 112, 219, 0.2));
-            transform: scale(1.05);
-        }
-
-        .deity-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: var(--space-6);
-            margin-top: var(--space-8);
-        }
-
-        .deity-card {
-            background: var(--color-card-bg);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--color-border);
-            border-radius: var(--radius-xl);
-            padding: var(--space-6);
-            text-decoration: none;
-            cursor: pointer;
-            transition: all var(--transition-base);
-            display: flex;
-            flex-direction: column;
-            box-shadow: var(--shadow-md);
-        }
-
-        .deity-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--mythos-primary);
-        }
-
-        .deity-icon {
-            font-size: var(--text-5xl);
-            margin-bottom: var(--space-4);
-            text-align: center;
-        }
-
-        .deity-card h3 {
-            color: var(--mythos-accent);
-            margin-bottom: var(--space-3);
-            font-size: var(--text-xl);
-            text-align: center;
-        }
-
-        .deity-card p {
-            color: var(--color-text);
-            font-size: var(--text-sm);
-            line-height: var(--leading-relaxed);
-            text-align: center;
-            margin-bottom: 0;
-        }
-
-        .discovery-info {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(139, 0, 139, 0.1));
-            padding: var(--space-5);
-            border-radius: var(--radius-lg);
-            margin: var(--space-4) 0;
-            border: 1px solid var(--mythos-secondary);
-        }
-
-        .related-card {
-            background: var(--color-card-bg);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--color-border);
-            border-radius: var(--radius-xl);
-            padding: var(--space-6);
-        }
-
-        .related-card h3 {
-            color: var(--mythos-primary);
-            margin-bottom: var(--space-4);
-        }
-
-        .related-card ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .related-card li {
-            padding: var(--space-3) 0;
-            border-bottom: 1px solid var(--color-border);
-        }
-
-        .related-card li:last-child {
-            border-bottom: none;
-        }
-
-        .related-card a {
-            color: var(--color-link);
-            transition: color var(--transition-fast);
-        }
-
-        .related-card a:hover {
-            color: var(--mythos-accent);
-        }
-    </style>
 </head>
 <body>
 <div id="theme-picker-container"></div>
@@ -255,7 +27,7 @@
                 <a href="../../index.html">Gnostic</a> →
                 <span>Texts</span>
 </nav>
-<main>
+<main data-mythology="christian">
 <section class="hero-section">
 <h2>The Lost Gospels of Divine Knowledge</h2>
 <p>
@@ -1050,79 +822,79 @@
 <h2>Explore Individual Texts</h2>
 <div class="deity-grid">
 <a href="../../../../index.html" class="deity-card">
-<div class="deity-icon">📖</div>
+<div class="hero-icon-display">📖</div>
 <h3>Gospel of Thomas</h3>
 <p>114 sayings of Jesus on the kingdom within and divine knowledge</p>
 </a>
 
 <a href="../../../../index.html" class="deity-card">
-<div class="deity-icon">💒</div>
+<div class="hero-icon-display">💒</div>
 <h3>Gospel of Philip</h3>
 <p>Sacramental theology and the mystery of the bridal chamber</p>
 </a>
 
 <a href="../../../../index.html" class="deity-card">
-<div class="deity-icon">✨</div>
+<div class="hero-icon-display">✨</div>
 <h3>Gospel of Truth</h3>
 <p>Valentinian meditation on Christ's redemptive revelation</p>
 </a>
 
 <a href="../../../../index.html" class="deity-card">
-<div class="deity-icon">🌌</div>
+<div class="hero-icon-display">🌌</div>
 <h3>Apocryphon of John</h3>
 <p>Sethian cosmogony and the divine plan for all souls</p>
 </a>
 
 <a href="../../../../index.html" class="deity-card">
-<div class="deity-icon">⚡</div>
+<div class="hero-icon-display">⚡</div>
 <h3>Thunder, Perfect Mind</h3>
 <p>The divine feminine speaking in paradoxes and unity</p>
 </a>
 
 <a href="../../../../index.html" class="deity-card">
-<div class="deity-icon">🔱</div>
+<div class="hero-icon-display">🔱</div>
 <h3>Trimorphic Protennoia</h3>
 <p>Three descents of the divine logos for universal liberation</p>
 </a>
 
 <a href="../../../../index.html" class="deity-card">
-<div class="deity-icon">🌹</div>
+<div class="hero-icon-display">🌹</div>
 <h3>Gospel of Mary</h3>
 <p>Mary Magdalene's teachings and the soul's ascent</p>
 </a>
 
 <a href="../../../../index.html" class="deity-card">
-<div class="deity-icon">💬</div>
+<div class="hero-icon-display">💬</div>
 <h3>Dialogue of the Savior</h3>
 <p>Post-resurrection teachings on seeking and return</p>
 </a>
 
 <a href="../../../../index.html" class="deity-card">
-<div class="deity-icon">💎</div>
+<div class="hero-icon-display">💎</div>
 <h3>Pistis Sophia</h3>
 <p>Sophia's fall and redemption as cosmic template</p>
 </a>
 
 <a href="../../../../index.html" class="deity-card">
-<div class="deity-icon">🔐</div>
+<div class="hero-icon-display">🔐</div>
 <h3>Books of Jeu</h3>
 <p>Divine names and mysteries of the Treasury of Light</p>
 </a>
 
 <a href="../../../../index.html" class="deity-card">
-<div class="deity-icon">🗝️</div>
+<div class="hero-icon-display">🗝️</div>
 <h3>Gospel of Judas</h3>
 <p>Judas as hero helping Jesus escape material prison</p>
 </a>
 
 <a href="../../../../index.html" class="deity-card">
-<div class="deity-icon">💃</div>
+<div class="hero-icon-display">💃</div>
 <h3>Acts of John</h3>
 <p>Docetic Christ and the cosmic dance of liberation</p>
 </a>
 
 <a href="../../../../index.html" class="deity-card">
-<div class="deity-icon">🎵</div>
+<div class="hero-icon-display">🎵</div>
 <h3>Odes of Solomon</h3>
 <p>Mystical hymns of union and harrowing of Hades</p>
 </a>

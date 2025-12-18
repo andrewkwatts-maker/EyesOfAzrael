@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Search - Eyes of Azrael</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/advanced-search.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Config and Initialization -->
+    <script src="firebase-config.js"></script>
+    <script src="js/firebase-init.js"></script>
+
+    <!-- Advanced Search System -->
+    <script src="js/advanced-search.js"></script>
+</head>
+<body>
+    <div class="search-container">
+        <!-- Header -->
+        <header class="search-header">
+            <a href="/" class="logo">Eyes of Azrael</a>
+            <nav class="header-nav">
+                <a href="mythos/index.html">Mythologies</a>
+                <a href="theories/user-submissions/browse.html">Theories</a>
+                <a href="about.html">About</a>
+            </nav>
+        </header>
+
+        <!-- Search Hero -->
+        <div class="search-hero">
+            <h1>Advanced Search</h1>
+            <p>Search across all mythologies, deities, heroes, creatures, and sacred knowledge</p>
+        </div>
+
+        <!-- Main Search Interface -->
+        <div class="search-main">
+            <!-- Search Bar -->
+            <div class="search-bar-container">
+                <div class="search-input-wrapper">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        class="search-input"
+                        placeholder='Try "Zeus", "creation myth", mythology:greek, or "golden fleece"'
+                        autocomplete="off"
+                    >
+                    <button id="searchBtn" class="search-btn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM18 18l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Search
+                    </button>
+                </div>
+
+                <!-- Autocomplete Dropdown -->
+                <div id="autocompleteDropdown" class="autocomplete-dropdown" style="display: none;">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- Search Tips -->
+                <div class="search-tips">
+                    <span class="tip">Use quotes for exact phrases: "hero's journey"</span>
+                    <span class="tip">Filter by field: mythology:greek</span>
+                    <span class="tip">Wildcards: zeu* matches Zeus</span>
+                    <span class="tip">Boolean: thunder AND zeus</span>
+                </div>
+            </div>
+
+            <div class="search-content">
+                <!-- Sidebar Filters -->
+                <aside class="search-sidebar">
+                    <div class="sidebar-section">
+                        <h3>Filters</h3>
+                        <button id="clearFiltersBtn" class="clear-filters-btn">Clear All</button>
+                    </div>
+
+                    <!-- Mythology Filter -->
+                    <div class="filter-group">
+                        <h4 class="filter-title">Mythology</h4>
+                        <div id="mythologyFilters" class="filter-options">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Content Type Filter -->
+                    <div class="filter-group">
+                        <h4 class="filter-title">Content Type</h4>
+                        <div id="contentTypeFilters" class="filter-options">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Domain Filter (for deities) -->
+                    <div class="filter-group">
+                        <h4 class="filter-title">Domains</h4>
+                        <div id="domainFilters" class="filter-options">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Tags Filter -->
+                    <div class="filter-group">
+                        <h4 class="filter-title">Tags</h4>
+                        <div id="tagFilters" class="filter-options">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Search Analytics -->
+                    <div class="sidebar-section">
+                        <h3>Popular Searches</h3>
+                        <div id="popularSearches" class="popular-searches">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3>Trending</h3>
+                        <div id="trendingSearches" class="trending-searches">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Results Area -->
+                <main class="search-results-area">
+                    <!-- Search Stats -->
+                    <div id="searchStats" class="search-stats" style="display: none;">
+                        <span id="resultsCount">0 results</span>
+                        <span id="searchTime">0ms</span>
+                    </div>
+
+                    <!-- Spell Suggestions -->
+                    <div id="spellingSuggestions" class="spelling-suggestions" style="display: none;">
+                        Did you mean: <span id="suggestedQuery"></span>?
+                    </div>
+
+                    <!-- Related Searches -->
+                    <div id="relatedSearches" class="related-searches" style="display: none;">
+                        <strong>Related:</strong>
+                        <div id="relatedSearchesList"></div>
+                    </div>
+
+                    <!-- Sort Options -->
+                    <div id="sortOptions" class="sort-options" style="display: none;">
+                        <label>Sort by:</label>
+                        <select id="sortSelect">
+                            <option value="relevance">Relevance</option>
+                            <option value="name">Name (A-Z)</option>
+                            <option value="newest">Newest</option>
+                            <option value="popular">Most Popular</option>
+                            <option value="views">Most Viewed</option>
+                        </select>
+
+                        <div class="view-toggle">
+                            <button id="gridViewBtn" class="view-btn active" title="Grid View">
+                                <svg width="20" height="20" viewBox="0 0 20 20">
+                                    <rect x="2" y="2" width="7" height="7" fill="currentColor"/>
+                                    <rect x="11" y="2" width="7" height="7" fill="currentColor"/>
+                                    <rect x="2" y="11" width="7" height="7" fill="currentColor"/>
+                                    <rect x="11" y="11" width="7" height="7" fill="currentColor"/>
+                                </svg>
+                            </button>
+                            <button id="listViewBtn" class="view-btn" title="List View">
+                                <svg width="20" height="20" viewBox="0 0 20 20">
+                                    <rect x="2" y="3" width="16" height="2" fill="currentColor"/>
+                                    <rect x="2" y="9" width="16" height="2" fill="currentColor"/>
+                                    <rect x="2" y="15" width="16" height="2" fill="currentColor"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Results Grid/List -->
+                    <div id="searchResults" class="search-results grid-view">
+                        <!-- Initial State -->
+                        <div class="search-empty-state">
+                            <svg class="empty-icon" width="120" height="120" viewBox="0 0 120 120">
+                                <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="4" fill="none"/>
+                                <path d="M80 80 L110 110" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                            </svg>
+                            <h2>Start Your Search</h2>
+                            <p>Enter a query above to search across all mythological content</p>
+
+                            <div class="quick-searches">
+                                <h3>Quick Searches:</h3>
+                                <button class="quick-search-btn" data-query="creation myth">Creation Myths</button>
+                                <button class="quick-search-btn" data-query="underworld">Underworld</button>
+                                <button class="quick-search-btn" data-query="sky god">Sky Gods</button>
+                                <button class="quick-search-btn" data-query="hero">Heroes</button>
+                                <button class="quick-search-btn" data-query="trickster">Tricksters</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No Results State -->
+                    <div id="noResults" class="no-results" style="display: none;">
+                        <h2>No Results Found</h2>
+                        <p>Try different keywords or clear some filters</p>
+                        <button id="clearAllBtn" class="clear-all-btn">Clear All Filters</button>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="loadingState" class="loading-state" style="display: none;">
+                        <div class="spinner-container">
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                        </div>
+                        <p>Searching...</p>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div id="pagination" class="pagination" style="display: none;">
+                        <button id="prevPageBtn" class="page-btn">Previous</button>
+                        <span id="pageInfo">Page 1</span>
+                        <button id="nextPageBtn" class="page-btn">Next</button>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search UI Controller -->
+    <script>
+        class SearchUIController {
+            constructor() {
+                this.searchSystem = window.advancedSearchSystem;
+                this.currentResults = [];
+                this.currentFilters = {
+                    mythologies: [],
+                    contentTypes: [],
+                    domains: [],
+                    tags: []
+                };
+                this.currentSort = 'relevance';
+                this.currentView = 'grid';
+                this.currentPage = 1;
+                this.resultsPerPage = 20;
+                this.debounceTimer = null;
+
+                this.initializeUI();
+            }
+
+            async initializeUI() {
+                // Initialize search system
+                await this.searchSystem.init();
+
+                // Set up event listeners
+                this.setupEventListeners();
+
+                // Load facets
+                await this.loadFacets();
+
+                // Load analytics
+                this.loadAnalytics();
+            }
+
+            setupEventListeners() {
+                // Search input
+                const searchInput = document.getElementById('searchInput');
+                searchInput.addEventListener('input', (e) => {
+                    this.handleSearchInput(e.target.value);
+                });
+
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.performSearch();
+                    }
+                });
+
+                // Search button
+                document.getElementById('searchBtn').addEventListener('click', () => {
+                    this.performSearch();
+                });
+
+                // Sort select
+                document.getElementById('sortSelect').addEventListener('change', (e) => {
+                    this.currentSort = e.target.value;
+                    this.renderResults();
+                });
+
+                // View toggle
+                document.getElementById('gridViewBtn').addEventListener('click', () => {
+                    this.setView('grid');
+                });
+
+                document.getElementById('listViewBtn').addEventListener('click', () => {
+                    this.setView('list');
+                });
+
+                // Clear filters
+                document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+                    this.clearFilters();
+                });
+
+                // Quick searches
+                document.querySelectorAll('.quick-search-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const query = e.target.dataset.query;
+                        document.getElementById('searchInput').value = query;
+                        this.performSearch();
+                    });
+                });
+            }
+
+            handleSearchInput(value) {
+                // Debounce autocomplete
+                clearTimeout(this.debounceTimer);
+                this.debounceTimer = setTimeout(async () => {
+                    await this.showAutocomplete(value);
+                }, 300);
+            }
+
+            async showAutocomplete(query) {
+                const dropdown = document.getElementById('autocompleteDropdown');
+
+                if (query.length < 2) {
+                    dropdown.style.display = 'none';
+                    return;
+                }
+
+                const suggestions = await this.searchSystem.getAutocompleteSuggestions(query);
+
+                if (suggestions.length === 0) {
+                    dropdown.style.display = 'none';
+                    return;
+                }
+
+                dropdown.innerHTML = suggestions.map(s =>
+                    `<div class="autocomplete-item" data-value="${s}">${this.highlightMatch(s, query)}</div>`
+                ).join('');
+
+                dropdown.style.display = 'block';
+
+                // Add click handlers
+                dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        document.getElementById('searchInput').value = e.target.dataset.value;
+                        dropdown.style.display = 'none';
+                        this.performSearch();
+                    });
+                });
+            }
+
+            highlightMatch(text, query) {
+                const regex = new RegExp(`(${query})`, 'gi');
+                return text.replace(regex, '<strong>$1</strong>');
+            }
+
+            async performSearch() {
+                const query = document.getElementById('searchInput').value.trim();
+
+                if (!query) {
+                    return;
+                }
+
+                // Hide autocomplete
+                document.getElementById('autocompleteDropdown').style.display = 'none';
+
+                // Show loading state
+                this.showLoading();
+
+                try {
+                    const results = await this.searchSystem.search(query, {
+                        filters: this.currentFilters,
+                        sortBy: this.currentSort
+                    });
+
+                    this.currentResults = results;
+                    this.currentPage = 1;
+
+                    // Show stats
+                    this.showSearchStats(results);
+
+                    // Show spelling suggestions
+                    this.showSpellingSuggestions(query);
+
+                    // Show related searches
+                    this.showRelatedSearches(query);
+
+                    // Render results
+                    this.renderResults();
+
+                    // Hide empty state
+                    document.querySelector('.search-empty-state').style.display = 'none';
+
+                } catch (error) {
+                    console.error('Search error:', error);
+                    this.showError('Search failed. Please try again.');
+                } finally {
+                    this.hideLoading();
+                }
+            }
+
+            showSearchStats(results) {
+                const statsEl = document.getElementById('searchStats');
+                const countEl = document.getElementById('resultsCount');
+                const timeEl = document.getElementById('searchTime');
+
+                countEl.textContent = `${results.totalResults} result${results.totalResults !== 1 ? 's' : ''}`;
+                timeEl.textContent = `${results.searchTime}ms`;
+
+                statsEl.style.display = 'flex';
+                document.getElementById('sortOptions').style.display = 'flex';
+            }
+
+            showSpellingSuggestions(query) {
+                const suggestions = this.searchSystem.getSpellingSuggestions(query);
+                const container = document.getElementById('spellingSuggestions');
+                const suggestedEl = document.getElementById('suggestedQuery');
+
+                if (suggestions.length > 0) {
+                    const correctedQuery = query.split(' ').map(word => {
+                        const suggestion = suggestions.find(s => s.original === word);
+                        return suggestion ? suggestion.suggestion : word;
+                    }).join(' ');
+
+                    suggestedEl.innerHTML = `<a href="#" class="suggestion-link">${correctedQuery}</a>`;
+                    container.style.display = 'block';
+
+                    suggestedEl.querySelector('a').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        document.getElementById('searchInput').value = correctedQuery;
+                        this.performSearch();
+                    });
+                } else {
+                    container.style.display = 'none';
+                }
+            }
+
+            showRelatedSearches(query) {
+                const related = this.searchSystem.getRelatedSearches(query);
+                const container = document.getElementById('relatedSearches');
+                const listEl = document.getElementById('relatedSearchesList');
+
+                if (related.length > 0) {
+                    listEl.innerHTML = related.map(r =>
+                        `<button class="related-search-btn" data-query="${r}">${r}</button>`
+                    ).join('');
+
+                    container.style.display = 'block';
+
+                    listEl.querySelectorAll('.related-search-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            document.getElementById('searchInput').value = e.target.dataset.query;
+                            this.performSearch();
+                        });
+                    });
+                } else {
+                    container.style.display = 'none';
+                }
+            }
+
+            renderResults() {
+                const container = document.getElementById('searchResults');
+                const results = this.currentResults.results || [];
+
+                if (results.length === 0) {
+                    document.getElementById('noResults').style.display = 'block';
+                    container.innerHTML = '';
+                    return;
+                }
+
+                document.getElementById('noResults').style.display = 'none';
+
+                // Pagination
+                const start = (this.currentPage - 1) * this.resultsPerPage;
+                const end = start + this.resultsPerPage;
+                const pageResults = results.slice(start, end);
+
+                container.innerHTML = pageResults.map(result => this.renderResultCard(result)).join('');
+
+                // Set up card click handlers
+                container.querySelectorAll('.result-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const id = card.dataset.id;
+                        const result = results.find(r => r.id === id);
+                        this.openResult(result);
+                    });
+                });
+
+                // Update pagination
+                this.updatePagination();
+            }
+
+            renderResultCard(result) {
+                const iconDisplay = result.icon || '📖';
+                const imageDisplay = result.imageUrl ?
+                    `<img src="${result.imageUrl}" alt="${result.title}" class="result-image">` :
+                    `<div class="result-icon">${iconDisplay}</div>`;
+
+                return `
+                    <div class="result-card" data-id="${result.id}">
+                        ${imageDisplay}
+                        <div class="result-content">
+                            <h3 class="result-title">${result.highlightedTitle || result.title}</h3>
+                            ${result.subtitle ? `<p class="result-subtitle">${result.highlightedSubtitle || result.subtitle}</p>` : ''}
+                            <p class="result-summary">${result.highlightedSummary || result.summary}</p>
+                            <div class="result-meta">
+                                <span class="meta-badge">${result.mythologyName}</span>
+                                <span class="meta-badge">${result.contentType}</span>
+                                ${result.votes > 0 ? `<span class="meta-badge">👍 ${result.votes}</span>` : ''}
+                                ${result.views > 0 ? `<span class="meta-badge">👁️ ${result.views}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            openResult(result) {
+                // Track entity view
+                this.searchSystem.trackEntityView(result.id, result.title);
+
+                // Navigate to entity page (implement based on your routing)
+                // For now, just log
+                console.log('Opening result:', result);
+                alert(`Opening: ${result.title}\n\nThis would navigate to the entity detail page.`);
+            }
+
+            updatePagination() {
+                const totalPages = Math.ceil(this.currentResults.totalResults / this.resultsPerPage);
+
+                if (totalPages <= 1) {
+                    document.getElementById('pagination').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('pagination').style.display = 'flex';
+                document.getElementById('pageInfo').textContent = `Page ${this.currentPage} of ${totalPages}`;
+
+                const prevBtn = document.getElementById('prevPageBtn');
+                const nextBtn = document.getElementById('nextPageBtn');
+
+                prevBtn.disabled = this.currentPage === 1;
+                nextBtn.disabled = this.currentPage === totalPages;
+
+                prevBtn.onclick = () => {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                        this.renderResults();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                };
+
+                nextBtn.onclick = () => {
+                    if (this.currentPage < totalPages) {
+                        this.currentPage++;
+                        this.renderResults();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                };
+            }
+
+            setView(view) {
+                this.currentView = view;
+                const resultsEl = document.getElementById('searchResults');
+
+                if (view === 'grid') {
+                    resultsEl.className = 'search-results grid-view';
+                    document.getElementById('gridViewBtn').classList.add('active');
+                    document.getElementById('listViewBtn').classList.remove('active');
+                } else {
+                    resultsEl.className = 'search-results list-view';
+                    document.getElementById('listViewBtn').classList.add('active');
+                    document.getElementById('gridViewBtn').classList.remove('active');
+                }
+            }
+
+            async loadFacets() {
+                const facets = await this.searchSystem.getAvailableFacets();
+
+                // Render mythology filters
+                this.renderFilters('mythologyFilters', facets.mythologies, 'mythologies');
+
+                // Render content type filters
+                this.renderFilters('contentTypeFilters', facets.contentTypes, 'contentTypes');
+
+                // Render domain filters
+                this.renderFilters('domainFilters', facets.domains.slice(0, 20), 'domains');
+
+                // Render tag filters
+                this.renderFilters('tagFilters', facets.tags.slice(0, 20), 'tags');
+            }
+
+            renderFilters(containerId, options, filterType) {
+                const container = document.getElementById(containerId);
+
+                container.innerHTML = options.map(option => `
+                    <label class="filter-option">
+                        <input type="checkbox" value="${option}" data-filter-type="${filterType}">
+                        <span>${option}</span>
+                    </label>
+                `).join('');
+
+                // Add change listeners
+                container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        this.handleFilterChange(e.target.dataset.filterType, e.target.value, e.target.checked);
+                    });
+                });
+            }
+
+            handleFilterChange(filterType, value, checked) {
+                if (checked) {
+                    if (!this.currentFilters[filterType].includes(value)) {
+                        this.currentFilters[filterType].push(value);
+                    }
+                } else {
+                    this.currentFilters[filterType] = this.currentFilters[filterType].filter(v => v !== value);
+                }
+
+                // Re-perform search if we have a query
+                const query = document.getElementById('searchInput').value;
+                if (query) {
+                    this.performSearch();
+                }
+            }
+
+            clearFilters() {
+                this.currentFilters = {
+                    mythologies: [],
+                    contentTypes: [],
+                    domains: [],
+                    tags: []
+                };
+
+                // Uncheck all checkboxes
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                });
+
+                // Re-perform search
+                const query = document.getElementById('searchInput').value;
+                if (query) {
+                    this.performSearch();
+                }
+            }
+
+            loadAnalytics() {
+                // Popular searches
+                const popular = this.searchSystem.getPopularSearches(5);
+                const popularContainer = document.getElementById('popularSearches');
+
+                if (popular.length > 0) {
+                    popularContainer.innerHTML = popular.map(p =>
+                        `<button class="popular-search-btn" data-query="${p.query}">${p.query} (${p.count})</button>`
+                    ).join('');
+
+                    popularContainer.querySelectorAll('.popular-search-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            document.getElementById('searchInput').value = e.target.dataset.query;
+                            this.performSearch();
+                        });
+                    });
+                } else {
+                    popularContainer.innerHTML = '<p class="no-data">No searches yet</p>';
+                }
+
+                // Trending searches
+                const trending = this.searchSystem.getSearchTrends(7);
+                const trendingContainer = document.getElementById('trendingSearches');
+
+                if (trending.length > 0) {
+                    trendingContainer.innerHTML = trending.slice(0, 5).map(t =>
+                        `<button class="trending-search-btn" data-query="${t.query}">${t.query} (${t.count})</button>`
+                    ).join('');
+
+                    trendingContainer.querySelectorAll('.trending-search-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            document.getElementById('searchInput').value = e.target.dataset.query;
+                            this.performSearch();
+                        });
+                    });
+                } else {
+                    trendingContainer.innerHTML = '<p class="no-data">No trends yet</p>';
+                }
+            }
+
+            showLoading() {
+                document.getElementById('loadingState').style.display = 'flex';
+            }
+
+            hideLoading() {
+                document.getElementById('loadingState').style.display = 'none';
+            }
+
+            showError(message) {
+                alert(message); // Replace with better error UI
+            }
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Wait for Firebase
+                await new Promise(resolve => {
+                    if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                        resolve();
+                    } else {
+                        setTimeout(resolve, 1000);
+                    }
+                });
+
+                const searchUI = new SearchUIController();
+                window.searchUI = searchUI; // For debugging
+            } catch (error) {
+                console.error('Failed to initialize search UI:', error);
+            }
+        });
+    </script>
+</body>
+</html>
