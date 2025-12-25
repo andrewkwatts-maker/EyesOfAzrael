@@ -1,0 +1,109 @@
+/**
+ * Header Position Fix
+ * Ensures header is at the top of the page with proper alignment
+ */
+
+/* Reset html and body to ensure no gaps */
+html {
+    margin: 0 !important;
+    padding: 0 !important;
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Override any generic header styles - use fixed positioning */
+header.site-header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    z-index: 9999 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Add padding to body to account for fixed header */
+body {
+    padding-top: 70px; /* Height of fixed header */
+}
+
+/* Ensure header container has proper flexbox layout */
+.site-header .header-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 2rem !important;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.75rem 2rem;
+}
+
+/* Logo stays on left */
+.site-header .site-logo {
+    flex-shrink: 0;
+    order: 1;
+}
+
+/* Navigation in center */
+.site-header .main-nav {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    order: 2;
+}
+
+/* Actions (theme toggle, user info) on right */
+.site-header .header-actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    order: 3;
+}
+
+/* Ensure main content doesn't overlap with fixed header */
+main#main-content {
+    margin-top: 0; /* padding-top on body handles this */
+}
+
+/* Breadcrumb navigation positioning */
+#breadcrumb-nav {
+    position: relative;
+    top: 0;
+    margin-top: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    body {
+        padding-top: 120px; /* More space for wrapped header on mobile */
+    }
+
+    .site-header .header-container {
+        flex-wrap: wrap;
+        padding: 0.75rem 1rem;
+    }
+
+    .site-header .main-nav {
+        order: 3;
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .site-header .header-actions {
+        order: 2;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding-top: 140px;
+    }
+}
