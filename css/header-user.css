@@ -1,0 +1,267 @@
+/**
+ * Header User Info Styles
+ * Display user information in header after login
+ */
+
+/* ============================================
+   USER INFO CONTAINER
+   ============================================ */
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.6);
+    border-radius: 50px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.user-info:hover {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.9);
+    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+}
+
+/* ============================================
+   USER AVATAR
+   ============================================ */
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--color-primary, #8b7fff);
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.user-info:hover .user-avatar {
+    border-color: var(--color-secondary, #ff7eb6);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+}
+
+/* ============================================
+   USER NAME
+   ============================================ */
+
+.user-info #userName {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #f8f9fa);
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ============================================
+   SIGN OUT BUTTON
+   ============================================ */
+
+.user-info #signOutBtn {
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+    color: var(--color-primary, #8b7fff);
+    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.user-info #signOutBtn:hover {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.25);
+    border-color: var(--color-primary, #8b7fff);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+}
+
+.user-info #signOutBtn:active {
+    transform: translateY(0);
+}
+
+/* ============================================
+   HEADER ACTIONS
+   ============================================ */
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+/* Tablet */
+@media (max-width: 768px) {
+    .user-info {
+        gap: 0.5rem;
+        padding: 0.4rem 0.75rem;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+
+    .user-info #userName {
+        max-width: 100px;
+        font-size: 0.85rem;
+    }
+
+    .user-info #signOutBtn {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Mobile - hide email on small screens */
+@media (max-width: 640px) {
+    .user-info #userName {
+        display: none;
+    }
+
+    .user-info {
+        gap: 0.5rem;
+        padding: 0.4rem 0.5rem;
+    }
+
+    .user-info #signOutBtn {
+        padding: 0.4rem 0.75rem;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+    .header-actions {
+        gap: 0.5rem;
+    }
+
+    .user-info #signOutBtn {
+        font-size: 0;
+        padding: 0.4rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        position: relative;
+    }
+
+    .user-info #signOutBtn::after {
+        content: '⏻';
+        font-size: 1.2rem;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* ============================================
+   DROPDOWN MENU (Enhanced User Menu)
+   ============================================ */
+
+.user-menu-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.8);
+    border-radius: 16px;
+    padding: 0.75rem 0;
+    min-width: 220px;
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+}
+
+.user-menu-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    color: var(--color-text-primary, #f8f9fa);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.user-menu-item:hover {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+    color: var(--color-primary, #8b7fff);
+}
+
+.user-menu-divider {
+    height: 1px;
+    background: rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.6);
+    margin: 0.5rem 0;
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Focus visible for keyboard navigation */
+.user-info:focus-within {
+    outline: 2px solid var(--color-primary, #8b7fff);
+    outline-offset: 2px;
+}
+
+.user-info #signOutBtn:focus-visible {
+    outline: 2px solid var(--color-primary, #8b7fff);
+    outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .user-info {
+        border-width: 2px;
+    }
+
+    .user-avatar {
+        border-width: 3px;
+    }
+
+    .user-info #signOutBtn {
+        border-width: 2px;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .user-info,
+    .user-avatar,
+    .user-info #signOutBtn,
+    .user-menu-dropdown {
+        transition: none;
+    }
+
+    .user-info:hover .user-avatar {
+        transform: none;
+    }
+}
