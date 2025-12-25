@@ -42,32 +42,6 @@
 
     <!-- Firebase Config -->
     <script src="firebase-config.js"></script>
-
-    <!-- Auth Guard - Redirect to login if not authenticated -->
-    <script>
-        (function() {
-            // Check auth state before page loads
-            if (typeof firebase !== 'undefined' && firebase.apps.length === 0 && typeof firebaseConfig !== 'undefined') {
-                firebase.initializeApp(firebaseConfig);
-            }
-
-            if (typeof firebase !== 'undefined') {
-                const auth = firebase.auth();
-
-                // Show loading while checking auth
-                document.addEventListener('DOMContentLoaded', () => {
-                    auth.onAuthStateChanged((user) => {
-                        if (!user) {
-                            console.log('[Auth Guard] No user - redirecting to login');
-                            window.location.href = '/login.html';
-                        } else {
-                            console.log('[Auth Guard] User authenticated:', user.email);
-                        }
-                    });
-                });
-            }
-        })();
-    </script>
 </head>
 <body>
     <!-- Shader Background Canvas -->
