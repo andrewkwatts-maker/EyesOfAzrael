@@ -1,0 +1,205 @@
+/**
+ * Header Theme Picker Styles
+ * Dropdown theme selector styling
+ */
+
+.theme-picker-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.theme-picker-btn {
+    /* Inherits from .icon-btn in site-header.css */
+    cursor: pointer;
+    user-select: none;
+}
+
+.theme-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 240px;
+    max-height: 500px;
+    overflow-y: auto;
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.98);
+    backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.8);
+    border-radius: 16px;
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+    z-index: 10000;
+    padding: 0.5rem 0;
+    animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.theme-category {
+    padding: 0.5rem 0;
+}
+
+.theme-category + .theme-category {
+    border-top: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.6);
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+}
+
+.theme-category-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted, #6c757d);
+    padding: 0.25rem 1rem 0.5rem;
+}
+
+.theme-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    color: var(--color-text-primary, #f8f9fa);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.theme-option:hover {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+    color: var(--color-primary, #8b7fff);
+}
+
+.theme-option.active {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+    color: var(--color-primary, #8b7fff);
+}
+
+.theme-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    width: 1.5rem;
+    text-align: center;
+}
+
+.theme-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.theme-check {
+    color: var(--color-primary, #8b7fff);
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* Scrollbar styling for dropdown */
+.theme-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+.theme-dropdown::-webkit-scrollbar-track {
+    background: rgba(var(--color-bg-secondary-rgb, 21, 26, 53), 0.5);
+    border-radius: 8px;
+}
+
+.theme-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.5);
+    border-radius: 8px;
+}
+
+.theme-dropdown::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.7);
+}
+
+/* Theme transition animation */
+body.theme-transitioning,
+body.theme-transitioning * {
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease,
+        border-color 0.3s ease !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .theme-dropdown {
+        min-width: 200px;
+        right: -10px;
+    }
+
+    .theme-option {
+        padding: 0.65rem 0.875rem;
+        font-size: 0.9rem;
+    }
+
+    .theme-category-label {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .theme-dropdown {
+        min-width: 180px;
+        max-height: 400px;
+    }
+
+    .theme-option {
+        padding: 0.6rem 0.75rem;
+        gap: 0.5rem;
+    }
+
+    .theme-icon {
+        font-size: 1.1rem;
+        width: 1.25rem;
+    }
+}
+
+/* Accessibility */
+.theme-option:focus-visible {
+    outline: 2px solid var(--color-primary, #8b7fff);
+    outline-offset: -2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .theme-dropdown {
+        border-width: 2px;
+    }
+
+    .theme-category {
+        border-top-width: 2px;
+    }
+
+    .theme-option.active {
+        font-weight: 700;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .theme-dropdown {
+        animation: none;
+    }
+
+    .theme-option,
+    body.theme-transitioning,
+    body.theme-transitioning * {
+        transition: none !important;
+    }
+}
