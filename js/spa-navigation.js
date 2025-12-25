@@ -114,10 +114,16 @@ class SPANavigation {
 
         console.log('[SPA] Handling route:', path);
 
-        // Double-check authentication
-        if (!this.authReady || !this.auth || !this.auth.isAuthenticated()) {
-            console.log('[SPA] Not authenticated - redirecting to login');
-            window.location.href = '/login.html';
+        // Double-check authentication (auth guard already handles this)
+        if (!this.authReady) {
+            console.log('[SPA] Auth not ready yet, waiting...');
+            return;
+        }
+
+        // Verify user is authenticated via Firebase
+        const currentUser = firebase.auth().currentUser;
+        if (!currentUser) {
+            console.log('[SPA] No current user - auth guard will show login overlay');
             return;
         }
 
