@@ -1,0 +1,388 @@
+/**
+ * Panel-Specific Shader Integration
+ * Applies shader themes to entity panels, content areas, and interactive elements
+ */
+
+/* Entity panels with shader-aware styling */
+.entity-panel,
+.detail-panel,
+.mythology-card,
+.search-result-item {
+    position: relative;
+    background: rgba(26, 31, 58, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(139, 127, 255, 0.3);
+    border-radius: var(--radius-xl, 1rem);
+    padding: var(--spacing-lg, 1.5rem);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+/* Subtle shader-aware gradient overlay */
+.entity-panel::before,
+.detail-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.05) 0%,
+        rgba(118, 75, 162, 0.05) 100%
+    );
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.entity-panel:hover::before,
+.detail-panel:hover::before {
+    opacity: 1;
+}
+
+/* Panel content should be above overlay */
+.entity-panel > *,
+.detail-panel > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Hover effects that complement shaders */
+.entity-panel:hover,
+.mythology-card:hover {
+    background: rgba(26, 31, 58, 0.92);
+    border-color: rgba(139, 127, 255, 0.6);
+    box-shadow:
+        0 12px 48px rgba(102, 126, 234, 0.3),
+        0 0 0 1px rgba(139, 127, 255, 0.2);
+    transform: translateY(-4px);
+}
+
+/* Active/Selected state */
+.entity-panel.active,
+.mythology-card.active {
+    background: rgba(26, 31, 58, 0.95);
+    border-color: var(--color-primary, #667eea);
+    box-shadow:
+        0 0 0 2px var(--color-primary, #667eea),
+        0 16px 64px rgba(102, 126, 234, 0.5);
+}
+
+/* Theme-specific mythology cards */
+.mythology-card[data-mythology="greek"] {
+    border-left: 4px solid rgba(255, 215, 0, 0.7);
+}
+
+.mythology-card[data-mythology="norse"] {
+    border-left: 4px solid rgba(100, 149, 237, 0.7);
+}
+
+.mythology-card[data-mythology="egyptian"] {
+    border-left: 4px solid rgba(218, 165, 32, 0.7);
+}
+
+.mythology-card[data-mythology="hindu"] {
+    border-left: 4px solid rgba(255, 99, 71, 0.7);
+}
+
+.mythology-card[data-mythology="buddhist"] {
+    border-left: 4px solid rgba(255, 255, 255, 0.7);
+}
+
+.mythology-card[data-mythology="christian"] {
+    border-left: 4px solid rgba(255, 255, 224, 0.7);
+}
+
+.mythology-card[data-mythology="celtic"] {
+    border-left: 4px solid rgba(34, 139, 34, 0.7);
+}
+
+.mythology-card[data-mythology="roman"] {
+    border-left: 4px solid rgba(220, 20, 60, 0.7);
+}
+
+.mythology-card[data-mythology="aztec"] {
+    border-left: 4px solid rgba(255, 140, 0, 0.7);
+}
+
+.mythology-card[data-mythology="chinese"] {
+    border-left: 4px solid rgba(255, 0, 0, 0.7);
+}
+
+.mythology-card[data-mythology="persian"] {
+    border-left: 4px solid rgba(128, 0, 128, 0.7);
+}
+
+/* Panel headers with shader complementary styling */
+.entity-panel-header,
+.panel-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md, 1rem);
+    padding-bottom: var(--spacing-md, 1rem);
+    border-bottom: 1px solid rgba(139, 127, 255, 0.2);
+    margin-bottom: var(--spacing-lg, 1.5rem);
+}
+
+.panel-title h2,
+.panel-title h3 {
+    margin: 0;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+}
+
+/* Entity detail panels */
+.detail-panel {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.detail-panel .entity-icon {
+    font-size: 4rem;
+    line-height: 1;
+    text-align: center;
+    margin-bottom: var(--spacing-lg, 1.5rem);
+    filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.5));
+}
+
+.detail-panel .entity-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: var(--spacing-sm, 0.5rem);
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.detail-panel .entity-subtitle {
+    text-align: center;
+    color: var(--color-text-secondary, #9ca3af);
+    font-size: 1.125rem;
+    margin-bottom: var(--spacing-xl, 2rem);
+}
+
+/* Section dividers with shader theme */
+.panel-section {
+    margin: var(--spacing-xl, 2rem) 0;
+    padding: var(--spacing-lg, 1.5rem);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-lg, 0.75rem);
+    border: 1px solid rgba(139, 127, 255, 0.1);
+}
+
+.panel-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-md, 1rem);
+    color: var(--color-primary, #667eea);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm, 0.5rem);
+}
+
+.panel-section-title::before {
+    content: '';
+    width: 4px;
+    height: 1.5rem;
+    background: linear-gradient(180deg, var(--color-primary, #667eea), var(--color-secondary, #764ba2));
+    border-radius: 2px;
+}
+
+/* Tags and badges in panels */
+.entity-tag,
+.panel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(102, 126, 234, 0.2);
+    border: 1px solid rgba(102, 126, 234, 0.4);
+    border-radius: var(--radius-full, 9999px);
+    font-size: 0.875rem;
+    color: var(--color-text-primary, #e5e7eb);
+    transition: all 0.2s ease;
+}
+
+.entity-tag:hover,
+.panel-badge:hover {
+    background: rgba(102, 126, 234, 0.3);
+    border-color: var(--color-primary, #667eea);
+    transform: translateY(-1px);
+}
+
+/* Lists in panels */
+.panel-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.panel-list-item {
+    padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+    margin-bottom: var(--spacing-sm, 0.5rem);
+    background: rgba(0, 0, 0, 0.2);
+    border-left: 3px solid transparent;
+    border-radius: var(--radius-md, 0.5rem);
+    transition: all 0.2s ease;
+}
+
+.panel-list-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-left-color: var(--color-primary, #667eea);
+    transform: translateX(4px);
+}
+
+/* Grid layouts for entity collections */
+.entity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg, 1.5rem);
+    margin: var(--spacing-xl, 2rem) 0;
+}
+
+@media (max-width: 768px) {
+    .entity-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Loading states for panels */
+.entity-panel.loading,
+.detail-panel.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.entity-panel.loading::after,
+.detail-panel.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(26, 31, 58, 0.8);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+/* Error states */
+.entity-panel.error {
+    border-color: rgba(239, 68, 68, 0.6);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+/* Success states (for saved/created entities) */
+.entity-panel.success {
+    border-color: rgba(34, 197, 94, 0.6);
+    animation: successPulse 0.6s ease;
+}
+
+@keyframes successPulse {
+    0%, 100% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); }
+    50% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.3), 0 8px 32px rgba(34, 197, 94, 0.4); }
+}
+
+/* Panel actions (edit, delete buttons) */
+.panel-actions {
+    display: flex;
+    gap: var(--spacing-sm, 0.5rem);
+    margin-top: var(--spacing-lg, 1.5rem);
+    padding-top: var(--spacing-lg, 1.5rem);
+    border-top: 1px solid rgba(139, 127, 255, 0.2);
+}
+
+.panel-action-btn {
+    flex: 1;
+    padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: var(--radius-md, 0.5rem);
+    color: var(--color-text-primary, #e5e7eb);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.panel-action-btn:hover {
+    background: var(--color-primary, #667eea);
+    border-color: var(--color-primary, #667eea);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.panel-action-btn.danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.panel-action-btn.danger:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+}
+
+/* Ownership indicator */
+.panel-owner-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: var(--radius-full, 9999px);
+    font-size: 0.875rem;
+    color: #22c55e;
+    margin-bottom: var(--spacing-md, 1rem);
+}
+
+.panel-owner-badge::before {
+    content: '👤';
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .entity-panel,
+    .detail-panel {
+        padding: var(--spacing-md, 1rem);
+    }
+
+    .detail-panel .entity-icon {
+        font-size: 3rem;
+    }
+
+    .detail-panel .entity-name {
+        font-size: 2rem;
+    }
+
+    .panel-actions {
+        flex-direction: column;
+    }
+}
+
+/* Print styles */
+@media print {
+    .entity-panel,
+    .detail-panel {
+        background: white !important;
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+    }
+
+    .panel-actions {
+        display: none !important;
+    }
+}
