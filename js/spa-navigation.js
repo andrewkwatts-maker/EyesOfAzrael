@@ -176,6 +176,18 @@ class SPANavigation {
             return;
         }
 
+        // Use HomeView class if available
+        if (typeof HomeView !== 'undefined') {
+            console.log('[SPA] Using HomeView class');
+            const homeView = new HomeView(this.db);
+            await homeView.render(mainContent);
+            console.log('[SPA] Home page rendered via HomeView');
+            return;
+        }
+
+        // Fallback to inline rendering if HomeView not available
+        console.warn('[SPA] HomeView not found, using fallback rendering');
+
         // Get all mythologies
         const mythologies = [
             { id: 'greek', name: 'Greek', icon: '🏛️', color: '#4A90E2' },
