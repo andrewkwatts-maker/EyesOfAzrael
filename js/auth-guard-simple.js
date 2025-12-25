@@ -112,10 +112,12 @@ function handleAuthenticated(user) {
     // Update user info display in header
     updateUserDisplay(user);
 
-    // Initialize SPA navigation if it exists
-    if (window.EyesOfAzrael && window.EyesOfAzrael.navigation) {
-        console.log('[EOA Auth Guard] Navigation already initialized');
-    }
+    // Trigger navigation after a short delay to ensure all scripts loaded
+    setTimeout(() => {
+        console.log('[EOA Auth Guard] Triggering initial navigation...');
+        // Trigger hashchange event to load content
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+    }, 1000);
 }
 
 /**
