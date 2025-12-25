@@ -80,53 +80,92 @@
 
     <!-- Initialize -->
     <script>
-        // Initialize Firebase and Auth
-        const app = firebase.initializeApp(firebaseConfig);
-        const authManager = new AuthManager(app);
+        console.log('[Login] Page loaded');
 
-        // Check if already signed in
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                console.log('User already signed in, redirecting...');
-                window.location.href = '/index.html';
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[Login] DOM ready, initializing Firebase...');
+
+            // Initialize Firebase
+            if (typeof firebase === 'undefined') {
+                console.error('[Login] Firebase not loaded!');
+                return;
             }
-        });
 
-        // Sign in button
-        const signInBtn = document.getElementById('sign-in-btn');
-        const loading = document.getElementById('loading');
-        const errorDiv = document.getElementById('auth-error');
+            if (typeof firebaseConfig === 'undefined') {
+                console.error('[Login] Firebase config not found!');
+                return;
+            }
 
-        signInBtn.addEventListener('click', async () => {
-            signInBtn.style.display = 'none';
-            loading.style.display = 'block';
-            errorDiv.style.display = 'none';
+            let app;
+            if (firebase.apps.length === 0) {
+                app = firebase.initializeApp(firebaseConfig);
+                console.log('[Login] Firebase initialized');
+            } else {
+                app = firebase.app();
+                console.log('[Login] Using existing Firebase app');
+            }
 
-            try {
-                // Use redirect on mobile, popup on desktop
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                if (isMobile) {
-                    await authManager.signInWithGoogleRedirect();
-                } else {
-                    await authManager.signInWithGoogle();
-                    // Will redirect via onAuthStateChanged
+            const authManager = new AuthManager(app);
+            console.log('[Login] AuthManager created');
+
+            // Check if already signed in
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    console.log('[Login] User already signed in, redirecting...');
+                    window.location.href = '/index.html';
                 }
-            } catch (error) {
-                console.error('Sign-in error:', error);
+            });
+
+            // Sign in button
+            const signInBtn = document.getElementById('sign-in-btn');
+            const loading = document.getElementById('loading');
+            const errorDiv = document.getElementById('auth-error');
+
+            if (!signInBtn) {
+                console.error('[Login] Sign-in button not found!');
+                return;
+            }
+
+            console.log('[Login] Setting up click handler...');
+
+            signInBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                console.log('[Login] Sign-in button clicked');
+
+                signInBtn.style.display = 'none';
+                loading.style.display = 'block';
+                errorDiv.style.display = 'none';
+
+                try {
+                    console.log('[Login] Starting sign-in...');
+                    // Always use popup for better UX
+                    const result = await authManager.signInWithGoogle();
+                    console.log('[Login] Sign-in successful:', result.email);
+                    // Redirect will happen via onAuthStateChanged
+                } catch (error) {
+                    console.error('[Login] Sign-in error:', error);
+                    signInBtn.style.display = 'flex';
+                    loading.style.display = 'none';
+                    errorDiv.style.display = 'block';
+                    errorDiv.textContent = error.message || 'Failed to sign in. Please try again.';
+                }
+            });
+
+            console.log('[Login] Click handler attached');
+
+            // Handle redirect result (if coming back from redirect)
+            authManager.getRedirectResult().then(result => {
+                if (result) {
+                    console.log('[Login] Redirect result:', result.email);
+                }
+            }).catch(error => {
+                console.error('[Login] Redirect error:', error);
                 signInBtn.style.display = 'flex';
                 loading.style.display = 'none';
                 errorDiv.style.display = 'block';
-                errorDiv.textContent = error.message || 'Failed to sign in. Please try again.';
-            }
-        });
-
-        // Handle redirect result
-        authManager.getRedirectResult().catch(error => {
-            console.error('Redirect error:', error);
-            signInBtn.style.display = 'flex';
-            loading.style.display = 'none';
-            errorDiv.style.display = 'block';
-            errorDiv.textContent = error.message || 'Failed to complete sign in. Please try again.';
+                errorDiv.textContent = error.message || 'Failed to complete sign in. Please try again.';
+            });
         });
     </script>
 </body>
