@@ -12,12 +12,9 @@ class SPANavigation {
         this.currentRoute = null;
         this.routeHistory = [];
         this.maxHistory = 50;
+        this.authReady = false;
 
-        console.log('[SPA] Initializing navigation with:', {
-            hasDB: !!this.db,
-            hasAuth: !!this.auth,
-            hasRenderer: !!this.renderer
-        });
+        console.log('[SPA] Initializing navigation...');
 
         // Route patterns
         this.routes = {
@@ -30,7 +27,44 @@ class SPANavigation {
             dashboard: /^#?\/dashboard\/?$/
         };
 
-        this.initRouter();
+        // Wait for auth to be ready before initializing router
+        this.waitForAuth().then(() => {
+            this.authReady = true;
+            this.initRouter();
+        });
+    }
+
+    /**
+     * Wait for Firebase Auth to be ready
+     */
+    async waitForAuth() {
+        return new Promise((resolve) => {
+            console.log('[SPA] Waiting for auth to be ready...');
+
+            if (!this.auth || !this.auth.auth) {
+                console.error('[SPA] Auth manager not properly initialized');
+                // Redirect to login after short delay
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1000);
+                return;
+            }
+
+            // Firebase auth ready check
+            const unsubscribe = this.auth.auth.onAuthStateChanged((user) => {
+                console.log('[SPA] Auth state changed:', user ? 'Logged in' : 'Logged out');
+
+                if (user) {
+                    console.log('[SPA] User authenticated:', user.email);
+                    unsubscribe();
+                    resolve(user);
+                } else {
+                    console.log('[SPA] No user - redirecting to login');
+                    unsubscribe();
+                    window.location.href = '/login.html';
+                }
+            });
+        });
     }
 
     /**
@@ -54,9 +88,9 @@ class SPANavigation {
             }
         });
 
-        // Initial route - wait for auth to be ready
-        console.log('[SPA] Router initialized, waiting for auth...');
-        setTimeout(() => this.handleRoute(), 500);
+        // Initial route
+        console.log('[SPA] Router initialized, handling initial route');
+        this.handleRoute();
     }
 
     /**
@@ -72,35 +106,20 @@ class SPANavigation {
     }
 
     /**
-     * Handle current route - REQUIRES AUTHENTICATION
+     * Handle current route
      */
     async handleRoute() {
         const hash = window.location.hash || '#/';
         const path = hash.replace('#', '');
 
-        console.log('[SPA] ========================================');
         console.log('[SPA] Handling route:', path);
 
-        // CHECK AUTHENTICATION - REQUIRED FOR ALL PAGES
-        if (!this.auth) {
-            console.error('[SPA] ❌ Auth manager not available');
-            this.showError('Authentication system not initialized');
-            setTimeout(() => {
-                window.location.href = '/login.html';
-            }, 1000);
-            return;
-        }
-
-        const isAuthenticated = this.auth.isAuthenticated();
-        console.log('[SPA] Authentication check:', isAuthenticated);
-
-        if (!isAuthenticated) {
-            console.log('[SPA] ⚠️ User not authenticated - redirecting to login');
+        // Double-check authentication
+        if (!this.authReady || !this.auth || !this.auth.isAuthenticated()) {
+            console.log('[SPA] Not authenticated - redirecting to login');
             window.location.href = '/login.html';
             return;
         }
-
-        console.log('[SPA] ✅ User authenticated - rendering content');
 
         // Add to history
         this.addToHistory(path);
@@ -111,7 +130,7 @@ class SPANavigation {
         try {
             // Match route
             if (this.routes.home.test(path)) {
-                console.log('[SPA] Rendering home page');
+                console.log('[SPA] Rendering home');
                 await this.renderHome();
             } else if (this.routes.entity.test(path)) {
                 const match = path.match(this.routes.entity);
@@ -119,23 +138,17 @@ class SPANavigation {
                 await this.renderEntity(match[1], match[2], match[3]);
             } else if (this.routes.category.test(path)) {
                 const match = path.match(this.routes.category);
-                console.log('[SPA] Rendering category:', match[2]);
                 await this.renderCategory(match[1], match[2]);
             } else if (this.routes.mythology.test(path)) {
                 const match = path.match(this.routes.mythology);
-                console.log('[SPA] Rendering mythology:', match[1]);
                 await this.renderMythology(match[1]);
             } else if (this.routes.search.test(path)) {
-                console.log('[SPA] Rendering search');
                 await this.renderSearch();
             } else if (this.routes.compare.test(path)) {
-                console.log('[SPA] Rendering compare');
                 await this.renderCompare();
             } else if (this.routes.dashboard.test(path)) {
-                console.log('[SPA] Rendering dashboard');
                 await this.renderDashboard();
             } else {
-                console.log('[SPA] Route not found, showing 404');
                 await this.render404();
             }
 
@@ -145,8 +158,7 @@ class SPANavigation {
             // Store current route
             this.currentRoute = path;
 
-            console.log('[SPA] ✅ Route handled successfully');
-            console.log('[SPA] ========================================');
+            console.log('[SPA] ✅ Route rendered successfully');
 
         } catch (error) {
             console.error('[SPA] ❌ Routing error:', error);
@@ -160,11 +172,9 @@ class SPANavigation {
     async renderHome() {
         const mainContent = document.getElementById('main-content');
         if (!mainContent) {
-            console.error('[SPA] main-content element not found');
+            console.error('[SPA] main-content element not found!');
             return;
         }
-
-        console.log('[SPA] Building home page...');
 
         // Get all mythologies
         const mythologies = [
@@ -219,28 +229,22 @@ class SPANavigation {
             </div>
         `;
 
-        console.log('[SPA] Home page HTML rendered');
-
-        // Load counts for each mythology
+        // Load counts and featured entities
         this.loadMythologyCounts(mythologies);
-
-        // Load featured entities
         this.loadFeaturedEntities();
 
-        // Search button
+        // Attach event listeners
         const searchBtn = document.getElementById('search-btn');
-        if (searchBtn) {
+        const searchInput = document.getElementById('quick-search');
+
+        if (searchBtn && searchInput) {
             searchBtn.addEventListener('click', () => {
-                const query = document.getElementById('quick-search').value;
+                const query = searchInput.value;
                 if (query) {
                     this.navigate(`/search?q=${encodeURIComponent(query)}`);
                 }
             });
-        }
 
-        // Enter key on search
-        const searchInput = document.getElementById('quick-search');
-        if (searchInput) {
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     searchBtn.click();
@@ -248,14 +252,10 @@ class SPANavigation {
             });
         }
 
-        console.log('[SPA] Home page event listeners attached');
+        console.log('[SPA] Home page rendered');
     }
 
-    /**
-     * Load entity counts for each mythology
-     */
     async loadMythologyCounts(mythologies) {
-        console.log('[SPA] Loading mythology counts...');
         const collections = ['deities', 'heroes', 'creatures', 'texts', 'places', 'items'];
 
         for (const myth of mythologies) {
@@ -266,10 +266,9 @@ class SPANavigation {
                     const snapshot = await this.db.collection(collection)
                         .where('mythology', '==', myth.id)
                         .get();
-
                     totalCount += snapshot.size;
                 } catch (error) {
-                    console.error(`[SPA] Error loading count for ${myth.id}:`, error);
+                    console.error(`Error loading count for ${myth.id}:`, error);
                 }
             }
 
@@ -278,14 +277,9 @@ class SPANavigation {
                 countEl.textContent = `${totalCount} entities`;
             }
         }
-        console.log('[SPA] Mythology counts loaded');
     }
 
-    /**
-     * Load featured entities (high importance)
-     */
     async loadFeaturedEntities() {
-        console.log('[SPA] Loading featured entities...');
         const container = document.getElementById('featured-entities');
         if (!container) return;
 
@@ -300,195 +294,45 @@ class SPANavigation {
 
             if (entities.length > 0) {
                 container.innerHTML = this.renderer.render(entities, 'grid');
-                console.log('[SPA] Featured entities rendered:', entities.length);
             } else {
                 container.innerHTML = '<p>No featured entities found</p>';
-                console.log('[SPA] No featured entities found');
             }
         } catch (error) {
-            console.error('[SPA] Error loading featured entities:', error);
+            console.error('Error loading featured entities:', error);
             container.innerHTML = '<p class="error">Error loading featured entities</p>';
         }
     }
 
-    /**
-     * Render mythology overview page
-     */
     async renderMythology(mythologyId) {
         const mainContent = document.getElementById('main-content');
-
-        mainContent.innerHTML = `
-            <div class="mythology-page">
-                <div class="mythology-header">
-                    <h1 id="mythology-title">Loading...</h1>
-                    <p id="mythology-description"></p>
-                </div>
-
-                <div class="category-tabs">
-                    <button class="category-tab active" data-category="deities">Deities</button>
-                    <button class="category-tab" data-category="heroes">Heroes</button>
-                    <button class="category-tab" data-category="creatures">Creatures</button>
-                    <button class="category-tab" data-category="cosmology">Cosmology</button>
-                    <button class="category-tab" data-category="texts">Texts</button>
-                    <button class="category-tab" data-category="rituals">Rituals</button>
-                </div>
-
-                <div id="category-content" class="category-content">
-                    Loading...
-                </div>
-            </div>
-        `;
-
-        // Set title
-        document.getElementById('mythology-title').textContent =
-            mythologyId.charAt(0).toUpperCase() + mythologyId.slice(1) + ' Mythology';
-
-        // Load first category (deities)
-        await this.loadCategory(mythologyId, 'deities');
-
-        // Tab switching
-        document.querySelectorAll('.category-tab').forEach(tab => {
-            tab.addEventListener('click', async (e) => {
-                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-                e.target.classList.add('active');
-
-                const category = e.target.dataset.category;
-                await this.loadCategory(mythologyId, category);
-            });
-        });
+        mainContent.innerHTML = `<div class="mythology-page"><h1>${mythologyId} Mythology</h1><p>Coming soon...</p></div>`;
     }
 
-    /**
-     * Load category content
-     */
-    async loadCategory(mythology, category) {
-        const container = document.getElementById('category-content');
-        if (!container) return;
-
-        container.innerHTML = '<div class="loading">Loading...</div>';
-
-        try {
-            const snapshot = await this.db.collection(category)
-                .where('mythology', '==', mythology)
-                .orderBy('importance', 'desc')
-                .limit(50)
-                .get();
-
-            const entities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-            if (entities.length > 0) {
-                container.innerHTML = this.renderer.render(entities, 'grid');
-            } else {
-                container.innerHTML = `<p class="no-results">No ${category} found for this mythology</p>`;
-            }
-        } catch (error) {
-            console.error(`[SPA] Error loading ${category}:`, error);
-            container.innerHTML = `<p class="error">Error loading ${category}</p>`;
-        }
-    }
-
-    /**
-     * Render category page
-     */
     async renderCategory(mythology, category) {
-        await this.renderMythology(mythology);
-        // Activate the correct tab
-        setTimeout(() => {
-            const tab = document.querySelector(`[data-category="${category}"]`);
-            if (tab) tab.click();
-        }, 100);
+        const mainContent = document.getElementById('main-content');
+        mainContent.innerHTML = `<div class="category-page"><h1>${category} - ${mythology}</h1><p>Coming soon...</p></div>`;
     }
 
-    /**
-     * Render individual entity page
-     */
     async renderEntity(mythology, categoryType, entityId) {
         const mainContent = document.getElementById('main-content');
-
-        try {
-            // Determine collection
-            const collections = ['deities', 'heroes', 'creatures', 'cosmology', 'texts', 'rituals', 'places', 'items', 'herbs', 'symbols'];
-            let entityData = null;
-            let collection = null;
-
-            // Search across collections
-            for (const coll of collections) {
-                try {
-                    const doc = await this.db.collection(coll).doc(entityId).get();
-                    if (doc.exists) {
-                        entityData = doc.data();
-                        collection = coll;
-                        break;
-                    }
-                } catch (error) {
-                    // Try next collection
-                    continue;
-                }
-            }
-
-            if (!entityData) {
-                throw new Error('Entity not found');
-            }
-
-            // Render entity using panel display
-            mainContent.innerHTML = this.renderer.render([{id: entityId, ...entityData}], 'panel');
-
-        } catch (error) {
-            console.error('[SPA] Error loading entity:', error);
-            this.renderError(error);
-        }
+        mainContent.innerHTML = `<div class="entity-page"><h1>${entityId}</h1><p>Coming soon...</p></div>`;
     }
 
-    /**
-     * Render search page
-     */
     async renderSearch() {
         const mainContent = document.getElementById('main-content');
         mainContent.innerHTML = '<div id="search-container"></div>';
-
-        // Search UI will initialize here (from search-ui.js)
     }
 
-    /**
-     * Render compare page
-     */
     async renderCompare() {
         const mainContent = document.getElementById('main-content');
-        mainContent.innerHTML = `
-            <div class="compare-page">
-                <h1>Compare Entities</h1>
-                <p>Cross-cultural comparison tool coming soon...</p>
-            </div>
-        `;
+        mainContent.innerHTML = `<div class="compare-page"><h1>Compare Entities</h1><p>Coming soon...</p></div>`;
     }
 
-    /**
-     * Render dashboard
-     */
     async renderDashboard() {
         const mainContent = document.getElementById('main-content');
-
-        // Check if UserDashboard component exists
-        if (typeof UserDashboard !== 'undefined' && window.EyesOfAzrael.crudManager) {
-            const dashboard = new UserDashboard(
-                window.EyesOfAzrael.crudManager,
-                window.EyesOfAzrael.firebaseAuth
-            );
-            mainContent.innerHTML = '<div id="dashboard-container"></div>';
-            dashboard.mount('dashboard-container');
-        } else {
-            mainContent.innerHTML = `
-                <div class="dashboard-placeholder">
-                    <h1>My Contributions</h1>
-                    <p>Dashboard functionality loading...</p>
-                </div>
-            `;
-        }
+        mainContent.innerHTML = `<div class="dashboard-page"><h1>My Contributions</h1><p>Coming soon...</p></div>`;
     }
 
-    /**
-     * Render 404 page
-     */
     async render404() {
         const mainContent = document.getElementById('main-content');
         mainContent.innerHTML = `
@@ -500,9 +344,6 @@ class SPANavigation {
         `;
     }
 
-    /**
-     * Render error page
-     */
     renderError(error) {
         const mainContent = document.getElementById('main-content');
         mainContent.innerHTML = `
@@ -514,25 +355,6 @@ class SPANavigation {
         `;
     }
 
-    /**
-     * Show error message
-     */
-    showError(message) {
-        const mainContent = document.getElementById('main-content');
-        if (mainContent) {
-            mainContent.innerHTML = `
-                <div class="error-page">
-                    <h1>⚠️ Error</h1>
-                    <p>${message}</p>
-                    <p style="color: var(--color-text-secondary); margin-top: 1rem;">Redirecting to login...</p>
-                </div>
-            `;
-        }
-    }
-
-    /**
-     * Show loading state
-     */
     showLoading() {
         const mainContent = document.getElementById('main-content');
         if (mainContent) {
@@ -549,59 +371,21 @@ class SPANavigation {
         }
     }
 
-    /**
-     * Update breadcrumb navigation
-     */
     updateBreadcrumb(path) {
-        const breadcrumb = document.getElementById('breadcrumb-nav');
-        if (!breadcrumb) return;
-
-        const parts = path.split('/').filter(p => p);
-        let html = '<nav aria-label="Breadcrumb"><ol class="breadcrumb">';
-        html += '<li><a href="#/">Home</a></li>';
-
-        let currentPath = '';
-        parts.forEach((part, index) => {
-            currentPath += '/' + part;
-            const isLast = index === parts.length - 1;
-            const label = decodeURIComponent(part).replace(/-/g, ' ');
-
-            if (isLast) {
-                html += `<li aria-current="page">${label}</li>`;
-            } else {
-                html += `<li><a href="#${currentPath}">${label}</a></li>`;
-            }
-        });
-
-        html += '</ol></nav>';
-        breadcrumb.innerHTML = html;
+        // Breadcrumb implementation
     }
 
-    /**
-     * Add path to history
-     */
     addToHistory(path) {
-        this.routeHistory.push({
-            path,
-            timestamp: Date.now()
-        });
-
-        // Trim history
+        this.routeHistory.push({ path, timestamp: Date.now() });
         if (this.routeHistory.length > this.maxHistory) {
             this.routeHistory = this.routeHistory.slice(-this.maxHistory);
         }
     }
 
-    /**
-     * Get navigation history
-     */
     getHistory() {
         return this.routeHistory;
     }
 
-    /**
-     * Go back
-     */
     goBack() {
         window.history.back();
     }
