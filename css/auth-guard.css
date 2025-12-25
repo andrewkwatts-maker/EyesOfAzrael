@@ -1,0 +1,298 @@
+/**
+ * Authentication Guard Styles for Eyes of Azrael
+ * Overlay-based authentication system
+ */
+
+/* ==========================================
+   LOADING SCREEN
+   ========================================== */
+
+.auth-loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--color-bg-primary, #0a0e27);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+}
+
+.auth-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+    border-top-color: var(--color-primary, #8b7fff);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    margin-top: 2rem;
+    color: var(--color-text-secondary, #adb5bd);
+    font-size: 1.1rem;
+}
+
+/* ==========================================
+   AUTH OVERLAY
+   ========================================== */
+
+.auth-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--color-bg-primary, #0a0e27);
+    background-image:
+        radial-gradient(at 40% 20%, rgba(var(--color-primary-rgb, 139, 127, 255), 0.1) 0px, transparent 50%),
+        radial-gradient(at 80% 80%, rgba(var(--color-secondary-rgb, 255, 126, 182), 0.08) 0px, transparent 50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99998;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.auth-card {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.95);
+    backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.8);
+    border-radius: 32px;
+    padding: 4rem 3rem;
+    max-width: 520px;
+    width: 100%;
+    text-align: center;
+    box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(var(--color-primary-rgb, 139, 127, 255), 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    animation: cardFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-logo {
+    font-size: 5rem;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 4px 20px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4));
+    animation: logoFloat 3s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.auth-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(
+        135deg,
+        var(--color-primary, #8b7fff) 0%,
+        var(--color-secondary, #ff7eb6) 50%,
+        var(--color-accent, #ffd93d) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+}
+
+.auth-subtitle {
+    font-size: 1.1rem;
+    color: var(--color-text-secondary, #adb5bd);
+    margin-bottom: 1rem;
+    font-style: italic;
+    font-family: 'Crimson Text', Georgia, serif;
+    letter-spacing: 0.02em;
+}
+
+.auth-description {
+    font-size: 0.95rem;
+    color: var(--color-text-muted, #6c757d);
+    margin-bottom: 3rem;
+    line-height: 1.6;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ==========================================
+   GOOGLE LOGIN BUTTON
+   ========================================== */
+
+.google-login-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border: 1px solid #747775;
+    border-radius: 20px;
+    padding: 0 24px;
+    height: 56px;
+    color: #1f1f1f;
+    font-family: 'Roboto', arial, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.218s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin: 2rem 0;
+    max-width: 400px;
+    width: 100%;
+}
+
+.google-login-btn:hover {
+    border-color: #4285f4;
+    box-shadow: 0 6px 20px rgba(66, 133, 244, 0.3);
+    background-color: #f8f9fa;
+}
+
+.google-login-btn:active {
+    background-color: #e8eaed;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.google-login-btn:disabled {
+    cursor: default;
+    background-color: #ffffff61;
+    border-color: #1f1f1f1f;
+    opacity: 0.6;
+}
+
+/* ==========================================
+   TERMS OF SERVICE
+   ========================================== */
+
+.auth-tos {
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.5);
+    font-size: 0.85rem;
+    color: var(--color-text-muted, #6c757d);
+    line-height: 1.6;
+}
+
+.tos-notice {
+    margin-bottom: 0.5rem;
+}
+
+.tos-notice a {
+    color: var(--color-primary, #8b7fff);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    font-weight: 500;
+}
+
+.tos-notice a:hover {
+    color: var(--color-secondary, #ff7eb6);
+    text-decoration: underline;
+}
+
+.tos-summary {
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+.auth-footer {
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+    color: var(--color-text-muted, #6c757d);
+    opacity: 0.7;
+}
+
+/* ==========================================
+   BODY STATES
+   ========================================== */
+
+/* Loading state - show loading screen, hide everything else */
+body.auth-loading #auth-loading-screen {
+    display: flex;
+}
+
+body.auth-loading #auth-overlay {
+    display: none;
+}
+
+body.auth-loading #main-content {
+    display: none;
+}
+
+/* Not authenticated - show overlay, hide main content */
+body.not-authenticated #auth-loading-screen {
+    display: none;
+}
+
+body.not-authenticated #auth-overlay {
+    display: flex;
+}
+
+body.not-authenticated #main-content {
+    display: none;
+}
+
+/* Authenticated - hide overlay and loading, show main content */
+body.authenticated #auth-loading-screen {
+    display: none;
+}
+
+body.authenticated #auth-overlay {
+    display: none;
+}
+
+body.authenticated #main-content {
+    display: block;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 768px) {
+    .auth-card {
+        padding: 3rem 2rem;
+        border-radius: 24px;
+    }
+
+    .auth-logo {
+        font-size: 4rem;
+    }
+
+    .auth-title {
+        font-size: 2rem;
+    }
+
+    .auth-subtitle {
+        font-size: 1rem;
+    }
+
+    .google-login-btn {
+        height: 48px;
+        font-size: 14px;
+        padding: 0 16px;
+    }
+}
