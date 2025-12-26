@@ -1,0 +1,375 @@
+/**
+ * Debug Borders CSS
+ * Adds visible colored borders to diagnose layout issues
+ *
+ * Usage: Add this stylesheet to index.html temporarily:
+ * <link rel="stylesheet" href="css/debug-borders.css">
+ *
+ * Remove when debugging is complete.
+ */
+
+/* ============================================
+   AUTHENTICATION ELEMENTS
+   ============================================ */
+
+#auth-loading-screen {
+    outline: 5px solid magenta !important;
+    outline-offset: -5px;
+}
+
+#auth-loading-screen::before {
+    content: "AUTH LOADING SCREEN";
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: magenta;
+    color: white;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 100000;
+    pointer-events: none;
+}
+
+#auth-overlay {
+    outline: 5px solid orange !important;
+    outline-offset: -5px;
+}
+
+#auth-overlay::before {
+    content: "AUTH OVERLAY";
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: orange;
+    color: white;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 100000;
+    pointer-events: none;
+}
+
+/* ============================================
+   MAIN CONTENT ELEMENTS
+   ============================================ */
+
+#main-content {
+    outline: 5px solid lime !important;
+    outline-offset: -5px;
+    min-height: 200px; /* Ensure it's visible even when empty */
+}
+
+#main-content::before {
+    content: "MAIN CONTENT (display: " attr(style) ")";
+    position: sticky;
+    top: 80px;
+    left: 10px;
+    background: lime;
+    color: black;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 100000;
+    display: block;
+    width: fit-content;
+}
+
+.view-container {
+    outline: 3px dashed cyan !important;
+    outline-offset: -3px;
+}
+
+.loading-container {
+    outline: 5px solid red !important;
+    outline-offset: -5px;
+    min-height: 100px;
+}
+
+.loading-container::before {
+    content: "LOADING CONTAINER (should be hidden after auth)";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: red;
+    color: white;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 100000;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* ============================================
+   LAYOUT ELEMENTS
+   ============================================ */
+
+.site-header {
+    outline: 3px solid blue !important;
+    outline-offset: -3px;
+}
+
+.site-header::after {
+    content: "HEADER (fixed top)";
+    position: absolute;
+    top: 5px;
+    right: 200px;
+    background: blue;
+    color: white;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 100000;
+    pointer-events: none;
+}
+
+#breadcrumb-nav {
+    outline: 3px solid yellow !important;
+    outline-offset: -3px;
+}
+
+.site-footer {
+    outline: 3px solid purple !important;
+    outline-offset: -3px;
+}
+
+/* ============================================
+   BODY STATE INDICATORS
+   ============================================ */
+
+body::before {
+    content: "BODY STATE: " attr(class);
+    position: fixed;
+    top: 80px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 100001;
+    border: 3px solid white;
+    border-radius: 8px;
+    font-family: monospace;
+}
+
+/* State-specific indicators */
+body.auth-loading::before {
+    content: "🔄 BODY STATE: auth-loading";
+    background: rgba(255, 0, 255, 0.9);
+    border-color: magenta;
+}
+
+body.not-authenticated::before {
+    content: "🔒 BODY STATE: not-authenticated";
+    background: rgba(255, 165, 0, 0.9);
+    border-color: orange;
+}
+
+body.authenticated::before {
+    content: "✅ BODY STATE: authenticated";
+    background: rgba(0, 255, 0, 0.9);
+    border-color: lime;
+    color: black;
+}
+
+/* ============================================
+   VISIBILITY INDICATORS
+   ============================================ */
+
+/* Hidden elements get a special marker */
+[style*="display: none"]::after,
+[style*="display:none"]::after {
+    content: "❌ HIDDEN" !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    background: rgba(255, 0, 0, 0.8) !important;
+    color: white !important;
+    padding: 20px !important;
+    font-size: 20px !important;
+    font-weight: bold !important;
+    z-index: 99999 !important;
+    border: 5px solid red !important;
+    border-radius: 10px !important;
+    pointer-events: none !important;
+}
+
+/* Visible elements that should have content */
+#main-content:not([style*="display: none"]):not([style*="display:none"]) {
+    background: rgba(0, 255, 0, 0.05) !important; /* Subtle green tint */
+}
+
+/* ============================================
+   CONTENT DETECTION
+   ============================================ */
+
+/* Main content with no children (empty) */
+#main-content:empty::after {
+    content: "⚠️ MAIN CONTENT IS EMPTY";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 165, 0, 0.9);
+    color: white;
+    padding: 30px;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 100000;
+    border: 5px solid orange;
+    border-radius: 10px;
+}
+
+/* Main content with only loading container */
+#main-content:not(:empty) {
+    position: relative;
+}
+
+/* ============================================
+   Z-INDEX VISUALIZATION
+   ============================================ */
+
+/* Show z-index layers */
+#auth-loading-screen,
+#auth-overlay,
+#main-content,
+.site-header {
+    position: relative;
+}
+
+#auth-loading-screen::after {
+    content: "z-index: 99999";
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-family: monospace;
+    border-radius: 5px;
+    pointer-events: none;
+}
+
+#auth-overlay::after {
+    content: "z-index: 99998";
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-family: monospace;
+    border-radius: 5px;
+    pointer-events: none;
+}
+
+.site-header::after {
+    content: "z-index: 9999";
+    position: absolute;
+    bottom: 5px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-family: monospace;
+    border-radius: 5px;
+    pointer-events: none;
+}
+
+/* ============================================
+   DIMENSION INDICATORS
+   ============================================ */
+
+#main-content::after {
+    content: "Width: " attr(data-width) " | Height: " attr(data-height);
+    position: sticky;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0, 255, 0, 0.8);
+    color: black;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-family: monospace;
+    border-radius: 5px;
+    display: block;
+    width: fit-content;
+    z-index: 100000;
+}
+
+/* ============================================
+   CONSOLE LOG TRIGGERS
+   ============================================ */
+
+/* This doesn't work in CSS, but serves as documentation
+   for what to check in the browser console */
+
+/*
+CONSOLE CHECKS:
+
+// Check main content visibility
+const mainContent = document.getElementById('main-content');
+console.log('Main Content Display:', mainContent.style.display);
+console.log('Main Content Computed Display:', getComputedStyle(mainContent).display);
+console.log('Main Content Dimensions:', mainContent.getBoundingClientRect());
+
+// Check body classes
+console.log('Body Classes:', document.body.className);
+
+// Check all elements with display:none
+document.querySelectorAll('[style*="display: none"], [style*="display:none"]').forEach(el => {
+    console.log('Hidden element:', el.id || el.className, el);
+});
+
+// Check loading containers
+document.querySelectorAll('.loading-container').forEach((el, i) => {
+    console.log(`Loading Container ${i}:`, {
+        display: el.style.display,
+        computed: getComputedStyle(el).display,
+        visible: getComputedStyle(el).display !== 'none'
+    });
+});
+*/
+
+/* ============================================
+   PRINT HELPER
+   ============================================ */
+
+@media print {
+    /* Hide all debug borders and labels when printing */
+    #auth-loading-screen::before,
+    #auth-loading-screen::after,
+    #auth-overlay::before,
+    #auth-overlay::after,
+    #main-content::before,
+    #main-content::after,
+    .loading-container::before,
+    .site-header::after,
+    body::before {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   MOBILE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+    body::before {
+        top: 130px; /* Account for wrapped header */
+        font-size: 10px;
+        padding: 5px 8px;
+    }
+
+    #main-content::before {
+        top: 130px;
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+}
