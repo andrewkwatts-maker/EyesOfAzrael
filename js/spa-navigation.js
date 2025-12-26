@@ -41,28 +41,19 @@ class SPANavigation {
         return new Promise((resolve) => {
             console.log('[SPA] Waiting for auth to be ready...');
 
-            if (!this.auth || !this.auth.auth) {
-                console.error('[SPA] Auth manager not properly initialized');
-                // Redirect to login after short delay
-                setTimeout(() => {
-                    window.location.href = '/login.html';
-                }, 1000);
+            // Use Firebase auth directly (compatible with auth guard)
+            const auth = firebase.auth();
+            if (!auth) {
+                console.error('[SPA] Firebase auth not available!');
+                resolve(null);
                 return;
             }
 
-            // Firebase auth ready check
-            const unsubscribe = this.auth.auth.onAuthStateChanged((user) => {
-                console.log('[SPA] Auth state changed:', user ? 'Logged in' : 'Logged out');
-
-                if (user) {
-                    console.log('[SPA] User authenticated:', user.email);
-                    unsubscribe();
-                    resolve(user);
-                } else {
-                    console.log('[SPA] No user - redirecting to login');
-                    unsubscribe();
-                    window.location.href = '/login.html';
-                }
+            // Firebase auth ready check - just resolve, auth guard handles UI
+            const unsubscribe = auth.onAuthStateChanged((user) => {
+                console.log('[SPA] Auth state ready:', user ? 'Logged in' : 'Logged out');
+                unsubscribe();
+                resolve(user);
             });
         });
     }
