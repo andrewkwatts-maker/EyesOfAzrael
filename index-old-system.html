@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eyes of Azrael - World Mythos Explorer</title>
+    <meta name="description" content="A comprehensive encyclopedia of world mythologies, magical systems, sacred herbalism, and spiritual traditions spanning 6000+ years of human history">
+    <meta name="keywords" content="mythology, world religions, deities, gods, goddesses, magic systems, herbalism, spiritual traditions, ancient wisdom">
+    <meta name="author" content="Eyes of Azrael">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#9370DB">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Eyes of Azrael">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="css/accessibility.css">
+    <link rel="stylesheet" href="css/ui-components.css">
+    <link rel="stylesheet" href="css/spinner.css">
+    <link rel="stylesheet" href="css/universal-grid.css">
+    <link rel="stylesheet" href="css/dynamic-views.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Config and Initialization -->
+    <script src="firebase-config.js"></script>
+    <script src="js/firebase-init.js"></script>
+</head>
+<body>
+    <!-- Skip to main content (Accessibility) -->
+    <a href="#main-content" class="skip-to-main">Skip to main content</a>
+
+    <!-- Site Header -->
+    <header class="site-header">
+        <div class="header-container">
+            <a href="#/" class="site-logo">👁️ Eyes of Azrael</a>
+
+            <nav class="main-nav">
+                <a href="#/" class="nav-link">Home</a>
+                <a href="#/search" class="nav-link">Search</a>
+                <a href="#/compare" class="nav-link">Compare</a>
+            </nav>
+
+            <div class="header-actions">
+                <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
+                    🌙
+                </button>
+                <button id="signInBtn" class="sign-in-btn" style="display: none;">
+                    Sign in with Google
+                </button>
+                <div id="userInfo" class="user-info" style="display: none;">
+                    <img id="userAvatar" class="user-avatar" src="" alt="User">
+                    <span id="userName"></span>
+                    <button id="signOutBtn" class="btn-secondary btn-sm">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb Navigation -->
+    <div id="breadcrumb-nav" aria-label="Breadcrumb"></div>
+
+    <!-- Main Content Container -->
+    <main id="main-content" class="view-container" role="main">
+        <!-- Content will be dynamically loaded here -->
+        <div class="loading-container">
+            <div class="spinner-container">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+            </div>
+            <p class="loading-message">Initializing...</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <p>&copy; 2024 Eyes of Azrael. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#/about">About</a>
+                <a href="#/privacy">Privacy</a>
+                <a href="#/terms">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Core Scripts -->
+    <script src="js/seo-manager.js"></script>
+    <script src="js/toast-notifications.js"></script>
+    <script src="js/image-optimizer.js"></script>
+
+    <!-- Dynamic Router System -->
+    <script src="js/dynamic-router.js"></script>
+    <script src="js/universal-entity-renderer.js"></script>
+
+    <!-- View Components -->
+    <script src="js/components/view-container.js"></script>
+    <script src="js/components/breadcrumb-nav.js"></script>
+    <script src="js/components/mythology-browser.js"></script>
+    <script src="js/components/mythology-overview.js"></script>
+    <script src="js/components/entity-type-browser.js"></script>
+    <script src="js/components/entity-detail-viewer.js"></script>
+
+    <!-- Application Initialization -->
+    <script>
+        (async function initApp() {
+            'use strict';
+
+            console.log('[App] Initializing Eyes of Azrael Dynamic SPA...');
+
+            // Wait for Firebase to initialize
+            await new Promise(resolve => {
+                if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                    resolve();
+                } else {
+                    const checkFirebase = setInterval(() => {
+                        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                            clearInterval(checkFirebase);
+                            resolve();
+                        }
+                    }, 100);
+
+                    // Timeout after 5 seconds
+                    setTimeout(() => {
+                        clearInterval(checkFirebase);
+                        console.warn('[App] Firebase initialization timeout');
+                        resolve();
+                    }, 5000);
+                }
+            });
+
+            console.log('[App] Firebase initialized');
+
+            // Get Firestore instance
+            const db = firebase.firestore();
+
+            // Initialize router
+            const router = new DynamicRouter({
+                viewContainer: document.getElementById('main-content'),
+                breadcrumbContainer: document.getElementById('breadcrumb-nav')
+            });
+
+            // Initialize breadcrumb navigation
+            const breadcrumbNav = new BreadcrumbNav(document.getElementById('breadcrumb-nav'));
+
+            // Override router's breadcrumb update to use BreadcrumbNav component
+            const originalUpdateBreadcrumbs = router.updateBreadcrumbs.bind(router);
+            router.updateBreadcrumbs = function(route) {
+                breadcrumbNav.update(route);
+            };
+
+            // Register view components
+            const mythologyBrowser = new MythologyBrowser({ db, router });
+            const mythologyOverview = new MythologyOverview({ db, router });
+            const entityTypeBrowser = new EntityTypeBrowser({ db, router });
+            const entityDetailViewer = new EntityDetailViewer({ db, router });
+
+            router.registerComponent('home', mythologyBrowser);
+            router.registerComponent('mythology-overview', mythologyOverview);
+            router.registerComponent('entity-type-browser', entityTypeBrowser);
+            router.registerComponent('entity-detail-viewer', entityDetailViewer);
+
+            // Register placeholder components for search and compare
+            router.registerComponent('search', {
+                render: async () => {
+                    return `
+                        <div class="empty-container">
+                            <div class="empty-icon">🔍</div>
+                            <h2>Search</h2>
+                            <p class="empty-message">Search functionality coming soon!</p>
+                            <a href="#/" class="btn-primary">Back to Home</a>
+                        </div>
+                    `;
+                }
+            });
+
+            router.registerComponent('compare', {
+                render: async () => {
+                    return `
+                        <div class="empty-container">
+                            <div class="empty-icon">⚖️</div>
+                            <h2>Compare</h2>
+                            <p class="empty-message">Comparison tools coming soon!</p>
+                            <a href="#/" class="btn-primary">Back to Home</a>
+                        </div>
+                    `;
+                }
+            });
+
+            console.log('[App] View components registered');
+
+            // Setup authentication UI
+            setupAuthUI();
+
+            // Setup theme toggle
+            setupThemeToggle();
+
+            console.log('[App] Initialization complete');
+
+        })();
+
+        /**
+         * Setup authentication UI
+         */
+        function setupAuthUI() {
+            const signInBtn = document.getElementById('signInBtn');
+            const signOutBtn = document.getElementById('signOutBtn');
+            const userInfo = document.getElementById('userInfo');
+            const userName = document.getElementById('userName');
+            const userAvatar = document.getElementById('userAvatar');
+
+            if (!firebase.auth) {
+                console.warn('[Auth] Firebase Auth not available');
+                return;
+            }
+
+            // Listen for auth state changes
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    // User is signed in
+                    signInBtn.style.display = 'none';
+                    userInfo.style.display = 'flex';
+                    userName.textContent = user.displayName || user.email;
+                    userAvatar.src = user.photoURL || 'https://via.placeholder.com/32';
+                } else {
+                    // User is signed out
+                    signInBtn.style.display = 'flex';
+                    userInfo.style.display = 'none';
+                }
+            });
+
+            // Sign in button click handler
+            if (signInBtn) {
+                signInBtn.addEventListener('click', async () => {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    try {
+                        await firebase.auth().signInWithPopup(provider);
+                    } catch (error) {
+                        console.error('[Auth] Sign in error:', error);
+                        alert('Failed to sign in: ' + error.message);
+                    }
+                });
+            }
+
+            // Sign out button click handler
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', async () => {
+                    try {
+                        await firebase.auth().signOut();
+                    } catch (error) {
+                        console.error('[Auth] Sign out error:', error);
+                    }
+                });
+            }
+        }
+
+        /**
+         * Setup theme toggle
+         */
+        function setupThemeToggle() {
+            const themeToggle = document.getElementById('themeToggle');
+            if (!themeToggle) return;
+
+            // Get saved theme or default to dark
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+
+            function updateThemeIcon(theme) {
+                themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
+        }
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('[SW] ServiceWorker registered:', registration);
+
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New service worker available
+                                    if (window.toast) {
+                                        window.toast.info('New version available! Refresh to update.', {
+                                            duration: 0,
+                                            dismissible: true
+                                        });
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => {
+                        console.log('[SW] ServiceWorker registration failed:', err);
+                    });
+            });
+        }
+    </script>
+
+    <style>
+        /* Inline critical styles for SPA */
+        :root {
+            --color-primary: #667eea;
+            --color-secondary: #764ba2;
+            --color-text-primary: #e5e7eb;
+            --color-text-secondary: #9ca3af;
+            --color-border: rgba(139, 127, 255, 0.3);
+            --color-surface: rgba(26, 31, 58, 0.8);
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --spacing-4xl: 4rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            --radius-full: 9999px;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 2rem;
+            --font-size-4xl: 2.5rem;
+            --font-medium: 500;
+            --font-semibold: 600;
+            --font-bold: 700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .skip-to-main {
+            position: absolute;
+            left: -9999px;
+            z-index: 999;
+            padding: 1em;
+            background-color: var(--color-primary);
+            color: white;
+            text-decoration: none;
+        }
+
+        .skip-to-main:focus {
+            left: 50%;
+            transform: translateX(-50%);
+            top: 1em;
+        }
+
+        /* Header */
+        .site-header {
+            background: rgba(26, 31, 58, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--color-border);
+            padding: var(--spacing-md) 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--spacing-lg);
+        }
+
+        .site-logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .main-nav {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .nav-link {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            transition: all 150ms ease;
+        }
+
+        .nav-link:hover {
+            color: var(--color-primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: center;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: 2px solid var(--color-border);
+            color: var(--color-text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 150ms ease;
+        }
+
+        .icon-btn:hover {
+            border-color: var(--color-primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .sign-in-btn {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 150ms ease;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .sign-in-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--color-primary);
+        }
+
+        .btn-secondary {
+            background: rgba(102, 126, 234, 0.2);
+            color: var(--color-primary);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 150ms ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            font-size: var(--font-size-sm);
+        }
+
+        /* Footer */
+        .site-footer {
+            background: rgba(26, 31, 58, 0.95);
+            border-top: 2px solid var(--color-border);
+            padding: var(--spacing-xl) 0;
+            margin-top: var(--spacing-4xl);
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: var(--spacing-lg);
+        }
+
+        .footer-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: color 150ms ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--color-primary);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: var(--spacing-md) var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-wrap: wrap;
+            }
+
+            .main-nav {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .footer-container {
+                flex-direction: column;
+                gap: var(--spacing-md);
+                text-align: center;
+            }
+        }
+    </style>
+</body>
+</html>

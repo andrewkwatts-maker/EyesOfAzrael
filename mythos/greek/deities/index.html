@@ -7,6 +7,7 @@
 <link href="../../../themes/theme-base.css" rel="stylesheet"/>
     <link rel="stylesheet" href="../../../themes/mythology-colors.css">
 <link href="../../../styles.css" rel="stylesheet"/>
+<link href="../../../css/spinner.css" rel="stylesheet"/>
 <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../themes/smart-links.css">
 <script defer src="../../../themes/smart-links.js"></script>
@@ -23,6 +24,14 @@
 <script src="../../../js/components/submission-link.js"></script>
 <link rel="stylesheet" href="../../../css/submission-link.css">
 
+<!-- Add Entity Card System -->
+<link rel="stylesheet" href="../../../css/add-entity-card.css">
+<script defer src="../../../js/components/add-entity-card.js"></script>
+
+
+<!-- Universal Entity Renderer -->
+<script defer src="../../../js/universal-entity-renderer.js"></script>
+<link rel="stylesheet" href="../../../css/entity-renderer.css">
 </head>
 <body>
 <div id="theme-picker-container"></div>
@@ -54,91 +63,78 @@
                 twelve (Hestia and <a class="corpus-link" data-term="Dionysus" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=dionysus" title="Search corpus for 'Dionysus'">Dionysus</a> sometimes switch places), these are the most widely recognized major deities
                 of the Greek pantheon.
             </p>
-<div class="pantheon-grid">
+
+<!-- Dynamic Entity Grid (Firebase-Powered) -->
+<div id="entity-grid" class="pantheon-grid" data-mythology="greek" data-entity-type="deity">
+    <!-- Entities will be loaded dynamically from Firebase -->
+    <div class="loading-placeholder">
+        <div class="spinner"></div>
+        <p>Loading deities...</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Firebase and renderer are available
+    if (typeof firebase === 'undefined' || !firebase.firestore) {
+        console.error('Firebase not initialized');
+        return;
+    }
+
+    if (typeof UniversalEntityRenderer === 'undefined') {
+        console.error('UniversalEntityRenderer not loaded');
+        return;
+    }
+
+    const renderer = new UniversalEntityRenderer();
+    const db = firebase.firestore();
+    const gridElement = document.getElementById('entity-grid');
+
+    // Query Firebase for greek deities
+    db.collection('deities')
+        .where('mythology', '==', 'greek')
+        .orderBy('name')
+        .get()
+        .then(snapshot => {
+            if (snapshot.empty) {
+                gridElement.innerHTML = '<p class="no-results">No deities found in database. Check back soon!</p>';
+                return;
+            }
+
+            const entities = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // Render the entities using the universal renderer
+            gridElement.innerHTML = renderer.renderGrid(entities, {
+                entityType: 'deity',
+                mythology: 'greek',
+                showIcons: true,
+                enableClick: true
+            });
+
+            console.log(`Loaded ${entities.length} greek deities from Firebase`);
+        })
+        .catch(error => {
+            console.error('Error loading deities:', error);
+            gridElement.innerHTML = '<p class="error-message">Error loading deities. Please try again later.</p>';
+        });
+});
+</script>
+
+<!-- Fallback: Static deity cards (shown if JavaScript disabled or Firebase unavailable) -->
+<noscript>
+<div class="pantheon-grid" id="olympian-deities-grid">
 <div class="deity-card" onclick="window.location.href='zeus.html'">
 <div class="hero-icon-display">⚡</div>
-<h3><a class="corpus-link" data-term="Zeus" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=zeus" title="Search corpus for 'Zeus'">Zeus</a></h3>
-<p><strong>King of the Gods</strong></p>
-<p>God of sky, thunder, lightning, law, order, and justice. <a class="corpus-link" data-term="Father of Gods and Men" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=zeus" title="Search corpus for 'Father of Gods and Men'">Father of gods and men</a>, wielder of the thunderbolt.</p>
-<p style="font-size: 0.9rem; color: var(--color-primary);"><em>Domains:</em> Sky, Thunder, Justice, Kingship</p>
+</noscript>
+<div class="static-fallback" style="display: none;">
+<div class="pantheon-grid" id="olympian-deities-grid">
+<div class="deity-card" onclick="window.location.href='zeus.html'">
+<div class="hero-icon-display">⚡</div>
 </div>
-<div class="deity-card" onclick="window.location.href='hera.html'">
-<div class="hero-icon-display">👑</div>
-<h3><a class="corpus-link" data-term="Hera" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=hera" title="Search corpus for 'Hera'">Hera</a></h3>
-<p><strong>Queen of the Gods</strong></p>
-<p>Goddess of marriage, women, childbirth, and <a class="corpus-link" href="../corpus-search.html?term=family" title="View family in ancient texts">family</a>. Wife of <a class="corpus-link" data-term="Zeus" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=zeus" title="Search corpus for 'Zeus'">Zeus</a> and protector of married women.</p>
-<p style="font-size: 0.9rem; color: var(--color-primary);"><em>Domains:</em> Marriage, <a class="corpus-link" href="../corpus-search.html?term=family" title="View family in ancient texts">Family</a>, Childbirth</p>
-</div>
-<div class="deity-card" onclick="window.location.href='poseidon.html'">
-<div class="hero-icon-display">🌊</div>
-<h3><a class="corpus-link" data-term="Poseidon" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=poseidon" title="Search corpus for 'Poseidon'">Poseidon</a></h3>
-<p><strong>God of the Sea</strong></p>
-<p>God of the <a class="corpus-link" data-term="Ocean" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=oceanus" title="Search corpus for 'Ocean'">ocean</a>, earthquakes, storms, and horses. Brother of <a class="corpus-link" href="../corpus-search.html?term=zeus" title="View zeus in ancient texts">Zeus</a>, wielder of the trident.</p>
-<p style="font-size: 0.9rem; color: var(--color-primary);"><em>Domains:</em> Seas, Earthquakes, Horses</p>
-</div>
-<div class="deity-card" onclick="window.location.href='athena.html'">
-<div class="hero-icon-display">🦉</div>
-<h3><a class="corpus-link" data-term="Athena" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=athena" title="Search corpus for 'Athena'">Athena</a></h3>
-<p><strong><a class="corpus-link" data-term="Goddess of Wisdom" data-tradition="roman" href="../../../mythos/roman/corpus-search.html?term=minerva" title="Search corpus for 'Goddess of Wisdom'">Goddess of Wisdom</a></strong></p>
-<p><a class="corpus-link" data-term="Goddess of Wisdom" data-tradition="roman" href="../../../mythos/roman/corpus-search.html?term=minerva" title="Search corpus for 'Goddess of Wisdom'">Goddess of wisdom</a>, strategic warfare, handicrafts, and reason. Born from <a class="corpus-link" href="../corpus-search.html?term=zeus" title="View zeus in ancient texts">Zeus</a>'s head fully armed.</p>
-<p style="font-size: 0.9rem; color: var(--color-primary);"><em>Domains:</em> Wisdom, Strategy, Crafts</p>
-</div>
-<div class="deity-card" onclick="window.location.href='apollo.html'">
-<div class="hero-icon-display">☀️</div>
-<h3><a class="corpus-link" data-term="Apollo" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=apollo" title="Search corpus for 'Apollo'">Apollo</a></h3>
-<p><strong><a class="corpus-link" data-term="God of Light" data-tradition="roman" href="../../../mythos/roman/corpus-search.html?term=apollo" title="Search corpus for 'God of Light'">God of Light</a> &amp; Prophecy</strong></p>
-<p>God of sun, music, poetry, prophecy, healing, and archery. Patron of the <a class="corpus-link" data-term="Muses" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=muses" title="Search corpus for 'Muses'">Muses</a> and leader of the choir.</p>
-<p style="font-size: 0.9rem; color: var(--color-primary);"><em>Domains:</em> Sun, Music, Prophecy, Healing</p>
-</div>
-<div class="deity-card" onclick="window.location.href='artemis.html'">
-<div class="hero-icon-display">🏹</div>
-<h3><a class="corpus-link" data-term="Artemis" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=artemis" title="Search corpus for 'Artemis'">Artemis</a></h3>
-<p><strong>Goddess of the Hunt</strong></p>
-<p>Goddess of the hunt, wilderness, wild animals, the moon, and chastity. Twin sister of <a class="corpus-link" data-term="Apollo" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=apollo" title="Search corpus for 'Apollo'">Apollo</a>.</p>
-<p style="font-size: 0.9rem; color: var(--color-primary);"><em>Domains:</em> Hunt, Moon, Wilderness, Virginity</p>
-</div>
-<div class="deity-card" onclick="window.location.href='ares.html'">
-<div class="hero-icon-display">⚔️</div>
-<h3><a class="corpus-link" data-term="Ares" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=ares" title="Search corpus for 'Ares'">Ares</a></h3>
-<p><strong><a class="corpus-link" data-term="God of War" data-tradition="roman" href="../../../mythos/roman/corpus-search.html?term=mars" title="Search corpus for 'God of War'">God of War</a></strong></p>
-<p><a class="corpus-link" data-term="God of War" data-tradition="roman" href="../../../mythos/roman/corpus-search.html?term=mars" title="Search corpus for 'God of War'">God of war</a>, <a class="corpus-link" data-term="Courage" data-tradition="roman" href="../../../mythos/roman/corpus-search.html?term=virtus" title="Search corpus for 'Courage'">courage</a>, bloodshed, and violence. Represents the brutal, chaotic aspects of warfare.</p>
-<p style="font-size: 0.9rem; color: var(--color-primary);"><em>Domains:</em> War, <a class="corpus-link" data-term="Courage" data-tradition="roman" href="../../../mythos/roman/corpus-search.html?term=virtus" title="Search corpus for 'Courage'">Courage</a>, Bloodlust</p>
-</div>
-<div class="deity-card" onclick="window.location.href='aphrodite.html'">
-<div class="hero-icon-display">💘</div>
-<h3><a class="corpus-link" data-term="Aphrodite" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=aphrodite" title="Search corpus for 'Aphrodite'">Aphrodite</a></h3>
-<p><strong>Goddess of Love</strong></p>
-<p>Goddess of love, beauty, pleasure, passion, and procreation. Born from sea foam near Cyprus.</p>
-<p style="font-size: 0.9rem; color: var(--color-primary);"><em>Domains:</em> Love, Beauty, Desire</p>
-</div>
-<div class="deity-card" onclick="window.location.href='hephaestus.html'">
-<div class="hero-icon-display">🔨</div>
-<h3><a class="corpus-link" data-term="Hephaestus" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=hephaestus" title="Search corpus for 'Hephaestus'">Hephaestus</a></h3>
-<p><strong><a class="corpus-link" data-term="God of the Forge" data-tradition="roman" href="../../../mythos/roman/corpus-search.html?term=vulcan" title="Search corpus for 'God of the Forge'">God of the Forge</a></strong></p>
-<p>God of fire, metalworking, craftsmanship, sculpture, and volcanoes. Divine smith and <a class="corpus-link" data-term="Craftsman" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=hephaestus" title="Search corpus for 'Craftsman'">craftsman</a>.</p>
-<p style="font-size: 0.9rem; color: var(--color-primary);"><em>Domains:</em> Fire, Smithing, Crafts</p>
-</div>
-<div class="deity-card" onclick="window.location.href='hermes.html'">
-<div class="hero-icon-display">📨</div>
-<h3><a class="corpus-link" data-term="Hermes" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=hermes" title="Search corpus for 'Hermes'">Hermes</a></h3>
-<p><strong>Messenger of the Gods</strong></p>
-<p>God of travel, commerce, communication, borders, cunning, thieves, and messenger of the gods.</p>
-<p style="font-size: 0.9rem; color: var(--color-primary);"><em>Domains:</em> Travel, Trade, Trickery, Messages</p>
-</div>
-<div class="deity-card" onclick="window.location.href='demeter.html'">
-<div class="hero-icon-display">🌾</div>
-<h3><a class="corpus-link" data-term="Demeter" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=demeter" title="Search corpus for 'Demeter'">Demeter</a></h3>
-<p><strong>Goddess of the Harvest</strong></p>
-<p>Goddess of agriculture, grain, harvest, growth, and nourishment. Mother of <a class="corpus-link" href="../corpus-search.html?term=persephone" title="View persephone in ancient texts">Persephone</a>.</p>
-<p style="font-size: 0.9rem; color: var(--color-primary);"><em>Domains:</em> Agriculture, Harvest, Fertility</p>
-</div>
-<div class="deity-card" onclick="window.location.href='dionysus.html'">
-<div class="hero-icon-display">🍇</div>
-<h3><a class="corpus-link" data-term="Dionysus" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=dionysus" title="Search corpus for 'Dionysus'">Dionysus</a></h3>
-<p><strong>God of Wine &amp; Ecstasy</strong></p>
-<p>God of wine, pleasure, festivity, madness, ecstasy, theater, and religious ecstasy.</p>
-<p style="font-size: 0.9rem; color: var(--color-primary);"><em>Domains:</em> Wine, Ecstasy, Theater, Liberation</p>
-</div></div></section>
+</section>
 <div class="section-divider"></div>
 <section>
 <h2 style="color: var(--color-primary);"><a class="corpus-link" href="../corpus-search.html?term=other" title="View other in ancient texts">Other</a> Major Olympians</h2>
@@ -330,6 +326,18 @@
                         compact: true
                     });
                 }
+            }
+
+            // Initialize Add Entity Card
+            if (window.renderAddEntityCard) {
+                window.renderAddEntityCard({
+                    containerId: 'olympian-deities-grid',
+                    entityType: 'deity',
+                    mythology: 'greek',
+                    position: 'end',
+                    showForGuests: true,
+                    redirectUrl: '/theories/user-submissions/edit.html'
+                });
             }
         });
     </script>

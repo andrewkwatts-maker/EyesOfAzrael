@@ -5,6 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Norse Deities - Pantheon Overview</title>
 <link href="../../../themes/theme-base.css" rel="stylesheet"/>
+<link rel="stylesheet" href="../../../css/spinner.css">
 <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../themes/smart-links.css">
 <script defer src="../../../themes/smart-links.js"></script>
@@ -95,6 +96,13 @@
             box-shadow: var(--shadow-glow);
         }
     </style>
+
+    <!-- Universal Grid System -->
+    <link rel="stylesheet" href="../../../css/universal-grid.css">
+
+<!-- Universal Entity Renderer -->
+<script defer src="../../../js/universal-entity-renderer.js"></script>
+<link rel="stylesheet" href="../../../css/entity-renderer.css">
 </head>
 <body>
 <div id="theme-picker-container"></div>
@@ -140,206 +148,78 @@
                 law, wisdom, and the structured aspects of existence. Most of the major gods worshipped across
                 Scandinavia belong to the Aesir tribe.
             </p>
+
+<!-- Dynamic Entity Grid (Firebase-Powered) -->
+<div id="entity-grid" class="pantheon-grid" data-mythology="norse" data-entity-type="deity">
+    <!-- Entities will be loaded dynamically from Firebase -->
+    <div class="loading-placeholder">
+        <div class="spinner"></div>
+        <p>Loading deities...</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Firebase and renderer are available
+    if (typeof firebase === 'undefined' || !firebase.firestore) {
+        console.error('Firebase not initialized');
+        return;
+    }
+
+    if (typeof UniversalEntityRenderer === 'undefined') {
+        console.error('UniversalEntityRenderer not loaded');
+        return;
+    }
+
+    const renderer = new UniversalEntityRenderer();
+    const db = firebase.firestore();
+    const gridElement = document.getElementById('entity-grid');
+
+    // Query Firebase for norse deities
+    db.collection('deities')
+        .where('mythology', '==', 'norse')
+        .orderBy('name')
+        .get()
+        .then(snapshot => {
+            if (snapshot.empty) {
+                gridElement.innerHTML = '<p class="no-results">No deities found in database. Check back soon!</p>';
+                return;
+            }
+
+            const entities = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // Render the entities using the universal renderer
+            gridElement.innerHTML = renderer.renderGrid(entities, {
+                entityType: 'deity',
+                mythology: 'norse',
+                showIcons: true,
+                enableClick: true
+            });
+
+            console.log(`Loaded ${entities.length} norse deities from Firebase`);
+        })
+        .catch(error => {
+            console.error('Error loading deities:', error);
+            gridElement.innerHTML = '<p class="error-message">Error loading deities. Please try again later.</p>';
+        });
+});
+</script>
+
+<!-- Fallback: Static deity cards (shown if JavaScript disabled or Firebase unavailable) -->
+<noscript>
 <div class="deity-grid">
 <div class="deity-card">
 <div class="deity-icon">🧙</div>
-<h3><a class="corpus-link" href="../corpus-search.html?tradition=norse&term=odin" title="View odin in ancient texts">Odin</a> (<a class="corpus-link" data-term="Óðinn" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=odin" title="Search corpus for 'Óðinn'">Óðinn</a>)</h3>
-<p class="deity-title">The <a class="corpus-link" data-term="Allfather" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=odin" title="Search corpus for 'Allfather'">Allfather</a>, God of Wisdom, War, and Death</p>
-<p>
-                        Chief of the Aesir and king of <a class="corpus-link" data-term="Asgard" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=asgard" title="Search corpus for 'Asgard'">Asgard</a>. Sacrificed his eye for wisdom at Mimir's well and
-                        hung on <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=yggdrasil" title="View yggdrasil in ancient texts">Yggdrasil</a> for nine nights to gain knowledge of the runes. God of poetry, magic,
-                        battle strategy, and the honored dead who feast in <a class="corpus-link" data-term="Valhalla" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=valhalla" title="Search corpus for 'Valhalla'">Valhalla</a>.
-                    </p>
-<p><strong>Symbols:</strong> Spear <a class="corpus-link" data-term="Gungnir" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=gungnir" title="Search corpus for 'Gungnir'">Gungnir</a>, ravens Huginn and Muninn, wolves Geri and Freki,
-                       eight-legged horse Sleipnir, Valknut</p>
-<p><strong>Day:</strong> Wednesday (<a class="corpus-link" href="../corpus-search.html?tradition=norse&term=odin" title="View odin in ancient texts">Odin</a>'s Day/Wodin's Day)</p>
-<a class="deity-link" href="odin.html">Learn More →</a>
-</div>
-<div class="deity-card">
-<div class="deity-icon">⚡</div>
-<h3><a class="corpus-link" href="../corpus-search.html?tradition=norse&term=thor" title="View thor in ancient texts">Thor</a> (<a class="corpus-link" data-term="Þórr" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=thor" title="Search corpus for 'Þórr'">Þórr</a>)</h3>
-<p class="deity-title">God of Thunder, Protector of <a class="corpus-link" data-term="Midgard" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=midgard" title="Search corpus for 'Midgard'">Midgard</a></p>
-<p>
-<a class="corpus-link" data-term="Son of Odin" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=baldur" title="Search corpus for 'Son of Odin'">Son of Odin</a> and Jord (Earth). Mightiest warrior of the Aesir and defender of gods and
-                        humans against giants. Most widely worshipped of <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=norse" title="View norse in ancient texts">Norse</a> gods, especially among common folk.
-                        Wields the hammer <a class="corpus-link" data-term="Mjolnir" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=mjolnir" title="Search corpus for 'Mjolnir'">Mjolnir</a> which always returns to his hand.
-                    </p>
-<p><strong>Symbols:</strong> Hammer <a class="corpus-link" data-term="Mjolnir" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=mjolnir" title="Search corpus for 'Mjolnir'">Mjolnir</a>, thunder, lightning, oak tree, goats</p>
-<p><strong>Day:</strong> Thursday (<a class="corpus-link" href="../corpus-search.html?tradition=norse&term=thor" title="View thor in ancient texts">Thor</a>'s Day)</p>
-<a class="deity-link" href="thor.html">Learn More →</a>
-</div>
-<div class="deity-card">
-<div class="deity-icon">⚖️</div>
-<h3><a class="corpus-link" data-term="Týr" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=tyr" title="Search corpus for 'Týr'">Týr</a></h3>
-<p class="deity-title">God of War, Justice, and Oaths</p>
-<p>
-                        Ancient war god who sacrificed his right hand to bind <a class="corpus-link" data-term="Fenrir" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=fenrir" title="Search corpus for 'Fenrir'">Fenrir</a> wolf. God of law, justice,
-                        honorable combat, and oath-keeping. Once possibly chief of the gods before <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=odin" title="View odin in ancient texts">Odin</a>'s rise.
-                        Represents courage and righteous sacrifice.
-                    </p>
-<p><strong>Symbols:</strong> Sword, spear, scales of justice, single hand</p>
-<p><strong>Day:</strong> Tuesday (<a class="corpus-link" data-term="Tyr" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=tyr" title="Search corpus for 'Tyr'">Tyr</a>'s Day)</p>
-<a class="deity-link" href="tyr.html">Learn More →</a>
-</div>
-<div class="deity-card">
-<div class="deity-icon">👸</div>
-<h3><a class="corpus-link" data-term="Frigg" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=frigg" title="Search corpus for 'Frigg'">Frigg</a></h3>
-<p class="deity-title">Queen of <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=asgard" title="View asgard in ancient texts">Asgard</a>, Goddess of Marriage and Motherhood</p>
-<p>
-                        Wife of <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=odin" title="View odin in ancient texts">Odin</a> and mother of <a class="corpus-link" data-term="Baldr" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=baldur" title="Search corpus for 'Baldr'">Baldr</a>. Goddess of domestic life, marriage, childbirth, and
-                        foresight. Knows all fates but speaks none. Rules from her hall Fensalir. Only goddess
-                        permitted to sit on <a class="corpus-link" data-term="Odin" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=odin" title="Search corpus for 'Odin'">Odin</a>'s throne Hlidskjalf.
-                    </p>
-<p><strong>Symbols:</strong> Spindle, keys, falcon cloak, mists</p>
-<p><strong>Day:</strong> Friday (<a class="corpus-link" data-term="Frigg" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=frigg" title="Search corpus for 'Frigg'">Frigg</a>'s Day, often conflated with <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=freyja" title="View freyja in ancient texts">Freyja</a>)</p>
-<a class="deity-link" href="frigg.html">Learn More →</a>
-</div>
-<div class="deity-card">
-<div class="deity-icon">🌟</div>
-<h3><a class="corpus-link" data-term="Baldr" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=baldur" title="Search corpus for 'Baldr'">Baldr</a></h3>
-<p class="deity-title">God of Light, Beauty, and Purity</p>
-<p>
-<a class="corpus-link" data-term="Son of Odin" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=baldur" title="Search corpus for 'Son of Odin'">Son of Odin</a> and <a class="corpus-link" data-term="Frigg" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=frigg" title="Search corpus for 'Frigg'">Frigg</a>. Most beautiful and beloved of all gods. Killed by <a class="corpus-link" data-term="Loki" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=loki" title="Search corpus for 'Loki'">Loki</a>'s trickery
-                        using mistletoe, the only thing that could harm him. His death triggers the path to
-                        <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=ragnarok" title="View ragnarok in ancient texts">Ragnarok</a>. Will return from <a class="corpus-link" data-term="Hel" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=hel" title="Search corpus for 'Hel'">Hel</a> after the world's renewal.
-                    </p>
-<p><strong>Symbols:</strong> Light, mistletoe, ships (ship burial)</p>
-<a class="deity-link" href="baldr.html">Learn More →</a>
-</div>
-<div class="deity-card">
-<div class="deity-icon">🎭</div>
-<h3><a class="corpus-link" data-term="Loki" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=loki" title="Search corpus for 'Loki'">Loki</a></h3>
-<p class="deity-title">Trickster God, Agent of Chaos</p>
-<p>
-<a class="corpus-link" data-term="Blood-Brother of Odin" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=loki" title="Search corpus for 'Blood-Brother of Odin'">Blood-brother of Odin</a> but neither Aesir nor Vanir - a giant's son dwelling among gods.
-                        Shape-shifter and clever trickster who helps and harms the gods. Father of <a class="corpus-link" data-term="Hel" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=hel" title="Search corpus for 'Hel'">Hel</a>, <a class="corpus-link" data-term="Fenrir" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=fenrir" title="Search corpus for 'Fenrir'">Fenrir</a>,
-                        and <a class="corpus-link" data-term="Jormungandr" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=jormungandr" title="Search corpus for 'Jormungandr'">Jormungandr</a>. His betrayal (killing <a class="corpus-link" data-term="Baldr" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=baldur" title="Search corpus for 'Baldr'">Baldr</a>) leads to his binding and eventual freedom
-                        at <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=ragnarok" title="View ragnarok in ancient texts">Ragnarok</a>.
-                    </p>
-<p><strong>Symbols:</strong> Fire, snakes, chaos, fishing net</p>
-<a class="deity-link" href="loki.html">Learn More →</a>
-</div>
-<div class="deity-card">
-<div class="deity-icon">🛡️</div>
-<h3><a class="corpus-link" data-term="Heimdall" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=heimdall" title="Search corpus for 'Heimdall'">Heimdall</a></h3>
-<p class="deity-title">Guardian of <a class="corpus-link" data-term="Bifrost" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=bifrost" title="Search corpus for 'Bifrost'">Bifrost</a>, Watchman of the Gods</p>
-<p>
-                        Guardian who stands watch at <a class="corpus-link" data-term="Bifrost" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=bifrost" title="Search corpus for 'Bifrost'">Bifrost</a> bridge connecting <a class="corpus-link" data-term="Asgard" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=asgard" title="Search corpus for 'Asgard'">Asgard</a> to <a class="corpus-link" data-term="Midgard" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=midgard" title="Search corpus for 'Midgard'">Midgard</a>. Has hearing so
-                        keen he can hear grass growing and sight so sharp he can see a hundred leagues. Will blow
-                        the Gjallarhorn to signal <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=ragnarok" title="View ragnarok in ancient texts">Ragnarok</a>'s beginning.
-                    </p>
-<p><strong>Symbols:</strong> Gjallarhorn, <a class="corpus-link" data-term="Bifrost" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=bifrost" title="Search corpus for 'Bifrost'">Bifrost</a>, golden teeth, white</p>
-<a class="deity-link" href="heimdall.html">Learn More →</a>
-</div>
-<div class="deity-card">
-<div class="deity-icon">⚰️</div>
-<h3><a class="corpus-link" data-term="Hel" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=hel" title="Search corpus for 'Hel'">Hel</a></h3>
-<p class="deity-title">Goddess of the Underworld</p>
-<p>
-                        Daughter of <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=loki" title="View loki in ancient texts">Loki</a> and giantess Angrboda. Rules Helheim, realm of those who die of sickness,
-                        old age, or dishonor (not in battle). Half her body beautiful, half corpse-like. Controls
-                        the fate of most dead - only warriors go to <a class="corpus-link" data-term="Valhalla" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=valhalla" title="Search corpus for 'Valhalla'">Valhalla</a> or Folkvangr.
-                    </p>
-<p><strong>Symbols:</strong> Half-corpse appearance, Helheim, the dead</p>
-<a class="deity-link" href="hel.html">Learn More →</a>
-</div>
-</div>
-</div>
-<div class="tribe-section" style="border-left-color: var(--mythos-secondary);">
-<h2 style="color: var(--mythos-secondary);">🌾 The Vanir - Gods of Fertility and Magic</h2>
-<p>
-                The Vanir dwell in Vanaheim and are gods of fertility, prosperity, magic, and the natural world.
-                After the war, three Vanir came to live among the Aesir as honored members of the pantheon, bringing
-                their powerful magic (especially seidr) to <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=asgard" title="View asgard in ancient texts">Asgard</a>.
-            </p>
-<div class="deity-grid">
-<div class="deity-card" style="border-color: var(--mythos-secondary);">
-<div class="deity-icon">💎</div>
-<h3><a class="corpus-link" data-term="Freyja" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=freyja" title="Search corpus for 'Freyja'">Freyja</a></h3>
-<p class="deity-title">Goddess of Love, Beauty, Fertility, and Magic</p>
-<p>
-                        Most renowned of the Vanir. Goddess of love, beauty, fertility, gold, death, and <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=seidr" title="View seidr in ancient texts">seidr</a>
-                        magic. Receives half the warriors slain in battle (the other half go to <a class="corpus-link" data-term="Odin" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=odin" title="Search corpus for 'Odin'">Odin</a>'s <a class="corpus-link" data-term="Valhalla" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=valhalla" title="Search corpus for 'Valhalla'">Valhalla</a>).
-                        Rides a chariot pulled by cats and wears the necklace Brisingamen. Taught seidr magic to
-                        the Aesir.
-                    </p>
-<p><strong>Symbols:</strong> Cats, falcon cloak, Brisingamen necklace, boar Hildisvini</p>
-<p><strong>Day:</strong> Friday (often merged with <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=frigg" title="View frigg in ancient texts">Frigg</a>)</p>
-<a class="deity-link" href="freya.html">Learn More →</a>
-</div>
-<div class="deity-card" style="border-color: var(--mythos-secondary);">
-<div class="deity-icon">🌾</div>
-<h3><a class="corpus-link" data-term="Freyr" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=freyr" title="Search corpus for 'Freyr'">Freyr</a></h3>
-<p class="deity-title">God of Fertility, Prosperity, and Peace</p>
-<p>
-                        Twin brother of <a class="corpus-link" data-term="Freyja" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=freyja" title="Search corpus for 'Freyja'">Freyja</a> and son of <a class="corpus-link" data-term="Njord" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=njord" title="Search corpus for 'Njord'">Njord</a>. God of sunshine, rain, harvest, and peace.
-                        Controls fertility of the earth and brings prosperity. Owns the ship Skidbladnir and
-                        golden boar Gullinbursti. Will fight at <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=ragnarok" title="View ragnarok in ancient texts">Ragnarok</a> without his sword (which he gave away
-                        for love).
-                    </p>
-<p><strong>Symbols:</strong> Boar Gullinbursti, ship, sun, rain, harvest</p>
-<a class="deity-link" href="../../../index.html">Learn More →</a>
-</div>
-<div class="deity-card" style="border-color: var(--mythos-secondary);">
-<div class="deity-icon">🌊</div>
-<h3><a class="corpus-link" data-term="Njord" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=njord" title="Search corpus for 'Njord'">Njord</a> (<a class="corpus-link" data-term="Njörðr" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=njord" title="Search corpus for 'Njörðr'">Njörðr</a>)</h3>
-<p class="deity-title">God of Sea, Wind, and Wealth</p>
-<p>
-                        Father of <a class="corpus-link" data-term="Freyr" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=freyr" title="Search corpus for 'Freyr'">Freyr</a> and <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=freyja" title="View freyja in ancient texts">Freyja</a>. God of the sea, sailing, fishing, wind, and coastal wealth.
-                        Patron of sailors and fishermen. Lives in Noatun ("ship-enclosure"). Married to giantess
-                        Skadi in unsuccessful union of mountain and sea.
-                    </p>
-<p><strong>Symbols:</strong> Ships, seabirds, harbors, wind, fishing</p>
-<a class="deity-link" href="../../../index.html">Learn More →</a>
-</div>
-</div>
-</div>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--mythos-primary);"><a class="corpus-link" href="../corpus-search.html?tradition=norse&term=other" title="View other in ancient texts">Other</a> Divine &amp; Semi-Divine Beings</h2>
+</noscript>
+<div class="static-fallback" style="display: none;">
 <div class="deity-grid">
 <div class="deity-card">
-<div class="deity-icon">❄️</div>
-<h3>Skadi</h3>
-<p class="deity-title">Goddess of Winter, Hunting, and Mountains</p>
-<p>
-                        Giantess who became goddess. Daughter of giant Thiazi. Came to <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=asgard" title="View asgard in ancient texts">Asgard</a> seeking revenge for
-                        her father's death but married <a class="corpus-link" data-term="Njord" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=njord" title="Search corpus for 'Njord'">Njord</a> as compensation. Goddess of skiing, hunting, winter,
-                        and mountains.
-                    </p>
-<a class="deity-link" href="skadi.html">Learn More →</a>
+<div class="deity-icon">🧙</div>
 </div>
-<div class="deity-card">
-<div class="deity-icon">💉</div>
-<h3>Eir</h3>
-<p class="deity-title">Goddess of Healing</p>
-<p>
-                        Goddess or valkyrie associated with healing and medicine. Possesses extraordinary medical
-                        skill. Invoked for healing wounds and illnesses. Associated with medicinal herbs and the
-                        healing arts.
-                    </p>
-<a class="deity-link" href="eir.html">Learn More →</a>
-</div>
-<div class="deity-card">
-<div class="deity-icon">🎵</div>
-<h3><a class="corpus-link" data-term="Bragi" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=bragi" title="Search corpus for 'Bragi'">Bragi</a></h3>
-<p class="deity-title">God of Poetry and Eloquence</p>
-<p>
-                        God of poetry, music, and eloquence. Husband of Idun. Welcomes fallen heroes to <a class="corpus-link" data-term="Valhalla" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=valhalla" title="Search corpus for 'Valhalla'">Valhalla</a>
-                        with songs. Patron of skalds (poets). Represents the power of words and artistic expression.
-                    </p>
-<a class="deity-link" href="../../../index.html">Learn More →</a>
-</div>
-<div class="deity-card">
-<div class="deity-icon">🍎</div>
-<h3>Idun</h3>
-<p class="deity-title">Goddess of Youth and Keeper of Immortality</p>
-<p>
-                        Goddess who guards the golden apples that keep the gods young. Wife of <a class="corpus-link" data-term="Bragi" data-tradition="norse" href="../corpus-search.html?tradition=norse&term=bragi" title="Search corpus for 'Bragi'">Bragi</a>. Her apples
-                        grant immortality to the Aesir. When <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=loki" title="View loki in ancient texts">Loki</a> allowed her kidnapping by giant Thiazi, the gods
-                        began to age rapidly until her rescue.
-                    </p>
-<a class="deity-link" href="../../../index.html">Learn More →</a>
-</div></div></section>
+</section>
 <section class="related-concepts" style="margin-top: 3rem;">
 <h2>🔗 <a class="corpus-link" href="../corpus-search.html?tradition=norse&term=related-concepts" title="View related concepts in ancient texts">Related Concepts</a></h2>
 <div class="grid">

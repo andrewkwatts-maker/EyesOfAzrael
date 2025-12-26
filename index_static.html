@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eyes of Azrael - World Mythos Explorer</title>
+    <meta name="description" content="A comprehensive encyclopedia of world mythologies, magical systems, sacred herbalism, and spiritual traditions spanning 6000+ years of human history">
+    <meta name="keywords" content="mythology, world religions, deities, gods, goddesses, magic systems, herbalism, spiritual traditions, ancient wisdom">
+    <meta name="author" content="Eyes of Azrael">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#9370DB">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Eyes of Azrael">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="css/accessibility.css">
+    <link rel="stylesheet" href="css/ui-components.css">
+    <link rel="stylesheet" href="css/spinner.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Config and Initialization -->
+    <script src="firebase-config.js"></script>
+    <script src="js/firebase-init.js"></script>
+
+    <style>
+        :root {
+            --color-primary: #9370DB;
+            --color-secondary: #DAA520;
+            --color-success: #4ade80;
+            --color-border: rgba(147, 112, 219, 0.3);
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-2xl: 24px;
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
+        /* Header Navigation */
+        .site-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md) 0;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .site-logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: center;
+        }
+
+        .sign-in-btn {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .sign-in-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(147, 112, 219, 0.4);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            color: var(--color-primary);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--color-primary);
+        }
+
+        .hero-section {
+            background: rgba(147, 51, 234, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-xl) var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+            text-align: center;
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #fff, rgba(255,255,255,0.9));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-xl) 0;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            border: 2px solid var(--color-border);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #c0c0c0;
+            margin-top: var(--spacing-sm);
+        }
+
+        /* Widget System */
+        .widget {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+        }
+
+        .widget-header {
+            font-size: 1.8rem;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        /* Mythology Grid Widget */
+        .mythology-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .mythos-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mythos-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: currentColor;
+        }
+
+        .mythos-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(147, 112, 219, 0.4);
+            border-color: var(--color-primary);
+        }
+
+        .mythos-card.completed::after {
+            content: 'Complete';
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            background: var(--color-success);
+            color: #000;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .mythos-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .mythos-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            color: var(--color-primary);
+        }
+
+        .mythos-description {
+            font-size: 0.9rem;
+            color: #c0c0c0;
+            line-height: 1.6;
+            margin: var(--spacing-sm) 0;
+        }
+
+        .meta-badges {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+            margin-top: var(--spacing-md);
+        }
+
+        .meta-badge {
+            background: rgba(147, 112, 219, 0.2);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 999px;
+            font-size: 0.75rem;
+            border: 1px solid var(--color-border);
+        }
+
+        /* Loading spinner styles now in css/spinner.css */
+
+        /* Search Widget */
+        .search-widget {
+            margin: var(--spacing-xl) 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: var(--spacing-md);
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            color: #fff;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 20px rgba(147, 112, 219, 0.3);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+            margin-top: var(--spacing-md);
+        }
+
+        .filter-button {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(147, 112, 219, 0.2);
+            border: 2px solid var(--color-border);
+            border-radius: 999px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-button:hover {
+            background: rgba(147, 112, 219, 0.4);
+            transform: scale(1.05);
+        }
+
+        .filter-button.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        /* Error State */
+        .error {
+            background: rgba(255, 69, 0, 0.2);
+            border: 2px solid #ff6347;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            color: #ff6347;
+        }
+
+        /* Navigation Links */
+        .nav-links {
+            display: flex;
+            gap: var(--spacing-lg);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-lg);
+        }
+
+        .nav-link {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(147, 112, 219, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip to main content (Accessibility) -->
+    <a href="#main-content" class="skip-to-main">Skip to main content</a>
+
+    <div class="container" id="main-content" role="main">
+        <!-- Header -->
+        <header class="site-header">
+            <a href="/" class="site-logo">👁️ Eyes of Azrael</a>
+            <div class="header-actions">
+                <a href="theories/user-submissions/browse.html" class="nav-link" style="padding: 0.5rem 1rem; margin: 0;">Browse Submissions</a>
+                <button id="signInBtn" class="sign-in-btn" style="display: none;">
+                    Sign in with Google
+                </button>
+                <div id="userInfo" class="user-info" style="display: none;">
+                    <img id="userAvatar" class="user-avatar" src="" alt="User">
+                    <span id="userName"></span>
+                    <button id="signOutBtn" class="sign-in-btn" style="padding: 0.5rem 1rem;">Sign Out</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1>👁️ Eyes of Azrael</h1>
+            <p style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.95);">
+                A comprehensive encyclopedia of world mythologies, magical systems, sacred herbalism, and spiritual traditions
+            </p>
+        </div>
+
+        <!-- Stats Widget -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-mythologies">--</div>
+                <div class="stat-label">Mythological Traditions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-deities">--</div>
+                <div class="stat-label">Deities & Entities</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-archetypes">--</div>
+                <div class="stat-label">Universal Archetypes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">6000+</div>
+                <div class="stat-label">Years of History</div>
+            </div>
+        </div>
+
+
+        <!-- Main Content Type Panels -->
+        <div class="widget">
+            <h2 class="widget-header">Explore Content</h2>
+            <div id="contentGridContainer">
+                <div class="loading">
+                    <div class="spinner-container">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Data Layer -->
+    <script>
+        // Firebase Database Interface
+        class ContentDatabase {
+            constructor() {
+                this.db = firebase.firestore();
+                this.cache = new Map();
+            }
+
+            // Get content type counts
+            async getContentCounts() {
+                if (this.cache.has('contentCounts')) {
+                    return this.cache.get('contentCounts');
+                }
+
+                try {
+                    const [
+                        mythologiesSnapshot,
+                        magicSnapshot,
+                        herbalismSnapshot,
+                        itemsSnapshot,
+                        placesSnapshot,
+                        theoriesSnapshot
+                    ] = await Promise.all([
+                        this.db.collection('mythologies').get(),
+                        this.db.collection('magic-systems').get(),
+                        this.db.collection('herbs').get(),
+                        this.db.collection('spiritual-items').get(),
+                        this.db.collection('spiritual-places').get(),
+                        this.db.collection('user-theories').get()
+                    ]);
+
+                    // Exclude special categories from mythology count
+                    const excludedCategories = ['comparative', 'herbalism', 'themes', 'freemasons', 'tarot'];
+                    const actualMythCount = mythologiesSnapshot.docs.filter(
+                        doc => !excludedCategories.includes(doc.id)
+                    ).length;
+
+                    const counts = {
+                        mythologies: actualMythCount,
+                        magic: magicSnapshot.size,
+                        herbalism: herbalismSnapshot.size,
+                        items: itemsSnapshot.size,
+                        places: placesSnapshot.size,
+                        theories: theoriesSnapshot.size
+                    };
+
+                    this.cache.set('contentCounts', counts);
+                    return counts;
+                } catch (error) {
+                    console.error('Error fetching content counts:', error);
+                    return {
+                        mythologies: 0,
+                        magic: 0,
+                        herbalism: 0,
+                        items: 0,
+                        places: 0,
+                        theories: 0
+                    };
+                }
+            }
+
+            // Get statistics for header
+            async getStats() {
+                try {
+                    const [mythCount, deityCount, archetypeCount] = await Promise.all([
+                        this.db.collection('mythologies').get(),
+                        this.db.collection('deities').get(),
+                        this.db.collection('archetypes').get()
+                    ]);
+
+                    // Exclude special categories
+                    const excludedCategories = ['comparative', 'herbalism', 'themes', 'freemasons', 'tarot'];
+                    const actualMythCount = mythCount.docs.filter(
+                        doc => !excludedCategories.includes(doc.id)
+                    ).length;
+
+                    return {
+                        mythologies: actualMythCount,
+                        deities: deityCount.size,
+                        archetypes: archetypeCount.size
+                    };
+                } catch (error) {
+                    console.error('Error fetching stats:', error);
+                    return { mythologies: 0, deities: 0, archetypes: 0 };
+                }
+            }
+        }
+
+        // UI Controller
+        class UIController {
+            constructor(db) {
+                this.db = db;
+            }
+
+            async init() {
+                await this.loadStats();
+                await this.loadContentPanels();
+            }
+
+            async loadStats() {
+                const stats = await this.db.getStats();
+                document.getElementById('stat-mythologies').textContent = stats.mythologies;
+                document.getElementById('stat-deities').textContent = stats.deities;
+                document.getElementById('stat-archetypes').textContent = stats.archetypes;
+            }
+
+            async loadContentPanels() {
+                const container = document.getElementById('contentGridContainer');
+
+                try {
+                    const counts = await this.db.getContentCounts();
+                    this.renderContentPanels(counts);
+                } catch (error) {
+                    container.innerHTML = `
+                        <div class="error">
+                            <strong>Error loading content:</strong> ${error.message}
+                            <br><br>
+                            <em>Note: Firebase configuration required. See FIREBASE_MIGRATION_SCHEMA.md for setup instructions.</em>
+                        </div>
+                    `;
+                }
+            }
+
+            renderContentPanels(counts) {
+                const container = document.getElementById('contentGridContainer');
+
+                const contentTypes = [
+                    {
+                        id: 'mythologies',
+                        icon: '📚',
+                        title: 'Mythologies',
+                        description: 'Explore world mythological traditions, deities, and cosmologies',
+                        count: counts.mythologies,
+                        countLabel: 'mythologies',
+                        link: 'mythos/index.html',
+                        color: '#9370DB'
+                    },
+                    {
+                        id: 'magic',
+                        icon: '✨',
+                        title: 'Magic Systems',
+                        description: 'Esoteric practices, ritual magic, and mystical traditions',
+                        count: counts.magic,
+                        countLabel: 'systems',
+                        link: 'magic/index.html',
+                        color: '#c084fc'
+                    },
+                    {
+                        id: 'herbalism',
+                        icon: '🌿',
+                        title: 'Herbalism',
+                        description: 'Sacred plants, traditional medicine, and botanical wisdom',
+                        count: counts.herbalism,
+                        countLabel: 'herbs',
+                        link: 'herbalism/index.html',
+                        color: '#4ade80'
+                    },
+                    {
+                        id: 'items',
+                        icon: '⚔️',
+                        title: 'Sacred Items',
+                        description: 'Mythical weapons, artifacts, and objects of power',
+                        count: counts.items,
+                        countLabel: 'items',
+                        link: 'spiritual-items/index.html',
+                        color: '#f59e0b'
+                    },
+                    {
+                        id: 'theories',
+                        icon: '📝',
+                        title: 'User Theories',
+                        description: 'Community-contributed research and scholarly insights',
+                        count: counts.theories,
+                        countLabel: 'submissions',
+                        link: 'theories/user-submissions/browse.html',
+                        color: '#60a5fa'
+                    },
+                    {
+                        id: 'places',
+                        icon: '🏛️',
+                        title: 'Sacred Places',
+                        description: 'Temples, mountains, and pilgrimage destinations',
+                        count: counts.places,
+                        countLabel: 'places',
+                        link: 'spiritual-places/index.html',
+                        color: '#ec4899'
+                    }
+                ];
+
+                const grid = document.createElement('div');
+                grid.className = 'mythology-grid';
+
+                contentTypes.forEach(content => {
+                    const card = this.createContentCard(content);
+                    grid.appendChild(card);
+                });
+
+                container.innerHTML = '';
+                container.appendChild(grid);
+            }
+
+            createContentCard(content) {
+                const card = document.createElement('div');
+                card.className = 'mythos-card';
+                card.style.borderColor = content.color;
+                card.style.color = content.color;
+
+                const displayCount = content.count > 0 ? `${content.count}+` : 'Coming Soon';
+
+                card.innerHTML = `
+                    <div class="mythos-icon">${content.icon}</div>
+                    <div class="mythos-name">${content.title}</div>
+                    <div class="mythos-description">${content.description}</div>
+                    <div class="meta-badges">
+                        <span class="meta-badge" style="background: ${content.color}22; border-color: ${content.color};">
+                            ${displayCount} ${content.countLabel}
+                        </span>
+                    </div>
+                `;
+
+                card.onclick = () => {
+                    window.location.href = content.link;
+                };
+
+                return card;
+            }
+        }
+
+        // Initialize when DOM and Firebase are ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Wait for Firebase to initialize
+                await new Promise(resolve => {
+                    if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                        resolve();
+                    } else {
+                        setTimeout(resolve, 1000);
+                    }
+                });
+
+                const db = new ContentDatabase();
+                const ui = new UIController(db);
+                await ui.init();
+
+                // Set up authentication UI
+                setupAuthUI();
+
+                console.log('✅ Firebase integration initialized successfully');
+            } catch (error) {
+                console.error('❌ Failed to initialize:', error);
+                document.getElementById('contentGridContainer').innerHTML = `
+                    <div class="error">
+                        <strong>Firebase not configured</strong>
+                        <p>This page requires Firebase configuration. Please see the migration documentation.</p>
+                    </div>
+                `;
+            }
+        });
+
+        // Authentication UI Setup
+        function setupAuthUI() {
+            const signInBtn = document.getElementById('signInBtn');
+            const signOutBtn = document.getElementById('signOutBtn');
+            const userInfo = document.getElementById('userInfo');
+            const userName = document.getElementById('userName');
+            const userAvatar = document.getElementById('userAvatar');
+
+            // Listen for auth state changes
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    // User is signed in
+                    signInBtn.style.display = 'none';
+                    userInfo.style.display = 'flex';
+                    userName.textContent = user.displayName || user.email;
+                    userAvatar.src = user.photoURL || 'https://via.placeholder.com/32';
+                } else {
+                    // User is signed out
+                    signInBtn.style.display = 'flex';
+                    userInfo.style.display = 'none';
+                }
+            });
+
+            // Sign in button click handler
+            signInBtn.addEventListener('click', async () => {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                try {
+                    await firebase.auth().signInWithPopup(provider);
+                } catch (error) {
+                    console.error('Sign in error:', error);
+                    alert('Failed to sign in: ' + error.message);
+                }
+            });
+
+            // Sign out button click handler
+            signOutBtn.addEventListener('click', async () => {
+                try {
+                    await firebase.auth().signOut();
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                }
+            });
+        }
+
+        // Initialize SEO Manager
+        const seoManager = new SEOManager();
+        seoManager.init('home', {
+            title: 'Eyes of Azrael - World Mythos Explorer',
+            description: 'A comprehensive encyclopedia of world mythologies, magical systems, sacred herbalism, and spiritual traditions spanning 6000+ years of human history',
+            keywords: ['mythology', 'world religions', 'deities', 'gods', 'goddesses', 'magic systems', 'herbalism'],
+            type: 'website',
+            image: 'https://eyesofazrael.com/icons/icon-512x512.png'
+        });
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered:', registration);
+
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New service worker available
+                                    if (window.toast) {
+                                        window.toast.info('New version available! Refresh to update.', {
+                                            duration: 0,
+                                            dismissible: true
+                                        });
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed:', err);
+                    });
+            });
+        }
+    </script>
+
+    <!-- Scripts -->
+    <script src="js/seo-manager.js"></script>
+    <script src="js/toast-notifications.js"></script>
+    <script src="js/image-optimizer.js"></script>
+</body>
+</html>

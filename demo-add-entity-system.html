@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Entity Card System - Demo</title>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/entity-display.css">
+
+    <!-- Component Styles -->
+    <link rel="stylesheet" href="css/add-entity-card.css">
+    <link rel="stylesheet" href="css/edit-icon.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d1b4e 100%);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .demo-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .demo-header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            background: linear-gradient(135deg, #64ffda, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .demo-section {
+            margin-bottom: 4rem;
+        }
+
+        .demo-section h2 {
+            font-family: 'Cinzel', serif;
+            color: #64ffda;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        .demo-section h3 {
+            color: #00d4ff;
+            margin: 2rem 0 1rem 0;
+            font-size: 1.3rem;
+        }
+
+        .demo-description {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #64ffda;
+            margin-bottom: 2rem;
+        }
+
+        .pantheon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .deity-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            position: relative;
+        }
+
+        .deity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(100, 255, 218, 0.3);
+            border-color: rgba(100, 255, 218, 0.3);
+        }
+
+        .hero-icon-display {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 10px rgba(100, 255, 218, 0.3));
+        }
+
+        .deity-card h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
+            color: #64ffda;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .deity-card p {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .code-example {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-example pre {
+            margin: 0;
+            color: #64ffda;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .auth-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            border: 2px solid rgba(100, 255, 218, 0.3);
+            z-index: 1000;
+        }
+
+        .auth-status-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-status-user {
+            font-weight: 600;
+            color: #64ffda;
+        }
+
+        .mock-login-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .mock-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .variant-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-badge {
+            display: inline-block;
+            background: rgba(100, 255, 218, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin: 0.25rem;
+            color: #64ffda;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>Add Entity Card System</h1>
+            <p style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.7);">
+                Universal component for community contributions across Eyes of Azrael
+            </p>
+            <div style="margin-top: 1rem;">
+                <span class="feature-badge">Auth-Aware</span>
+                <span class="feature-badge">Context Detection</span>
+                <span class="feature-badge">Glassmorphism</span>
+                <span class="feature-badge">Responsive</span>
+                <span class="feature-badge">Accessible</span>
+            </div>
+        </div>
+
+        <!-- Auth Status Mock -->
+        <div class="auth-status">
+            <div class="auth-status-label">DEMO MODE</div>
+            <div class="auth-status-user" id="auth-user-display">Not Logged In</div>
+            <button class="mock-login-btn" id="mock-login-btn" onclick="toggleMockAuth()">
+                Mock Login
+            </button>
+        </div>
+
+        <!-- Demo Section 1: Basic Add Entity Card -->
+        <div class="demo-section">
+            <h2>1. Basic Add Entity Card</h2>
+
+            <div class="demo-description">
+                <strong>Features:</strong> Dashed border to differentiate from regular cards, icon rotation on hover,
+                glassmorphism background, auth-aware visibility.
+            </div>
+
+            <h3>Greek Deities Collection</h3>
+            <div class="pantheon-grid">
+                <!-- Regular deity cards -->
+                <div class="deity-card" onclick="alert('Navigate to Zeus detail page')">
+                    <div class="hero-icon-display">⚡</div>
+                    <h3>Zeus</h3>
+                    <p>King of the Gods</p>
+                </div>
+
+                <div class="deity-card" onclick="alert('Navigate to Hera detail page')">
+                    <div class="hero-icon-display">👑</div>
+                    <h3>Hera</h3>
+                    <p>Queen of the Gods</p>
+                </div>
+
+                <div class="deity-card" onclick="alert('Navigate to Poseidon detail page')">
+                    <div class="hero-icon-display">🌊</div>
+                    <h3>Poseidon</h3>
+                    <p>God of the Sea</p>
+                </div>
+
+                <!-- Add Entity Card -->
+                <div id="add-deity-basic"></div>
+            </div>
+
+            <div class="code-example">
+                <pre>&lt;div id="add-deity-basic">&lt;/div>
+
+&lt;script>
+    renderAddEntityCard({
+        containerId: 'add-deity-basic',
+        entityType: 'deity',
+        mythology: 'greek',
+        label: 'Add New Deity'
+    });
+&lt;/script></pre>
+            </div>
+        </div>
+
+        <!-- Demo Section 2: Edit Icons -->
+        <div class="demo-section">
+            <h2>2. Edit Icons on User Content</h2>
+
+            <div class="demo-description">
+                <strong>Ownership-based visibility:</strong> Edit icons only appear on entities created by the current user.
+                Clicking the icon opens the edit form without navigating to the detail page.
+            </div>
+
+            <h3>Your Submitted Deities</h3>
+            <div class="pantheon-grid">
+                <!-- User-created deity (will have edit icon) -->
+                <div
+                    class="deity-card"
+                    id="card-user-deity"
+                    data-edit-icon
+                    data-entity-id="custom-deity-1"
+                    data-entity-type="deity"
+                    data-created-by="demo-user-123"
+                    data-mythology="greek"
+                    onclick="alert('Navigate to detail page')">
+
+                    <div class="hero-icon-display">🌟</div>
+                    <h3>Your Custom Deity</h3>
+                    <p>Created by you</p>
+                </div>
+
+                <!-- Another user's deity (no edit icon) -->
+                <div
+                    class="deity-card"
+                    data-edit-icon
+                    data-entity-id="other-deity-1"
+                    data-entity-type="deity"
+                    data-created-by="other-user-456"
+                    data-mythology="greek"
+                    onclick="alert('Navigate to detail page')">
+
+                    <div class="hero-icon-display">✨</div>
+                    <h3>Someone Else's Deity</h3>
+                    <p>Created by another user</p>
+                </div>
+
+                <!-- Add more -->
+                <div id="add-deity-edit"></div>
+            </div>
+
+            <div class="code-example">
+                <pre>&lt;div
+    class="deity-card"
+    data-edit-icon
+    data-entity-id="custom-deity-1"
+    data-entity-type="deity"
+    data-created-by="user-uid-123"
+    data-mythology="greek">
+
+    &lt;h3>Your Deity&lt;/h3>
+&lt;/div>
+
+&lt;!-- Auto-injects edit icon on page load -->
+&lt;script src="/js/components/edit-icon.js">&lt;/script></pre>
+            </div>
+        </div>
+
+        <!-- Demo Section 3: Styling Variants -->
+        <div class="demo-section">
+            <h2>3. Styling Variants</h2>
+
+            <div class="demo-description">
+                <strong>Theme variants:</strong> Default (cyan), Purple (theories), Gold (special), different sizes.
+            </div>
+
+            <h3>Default (Cyan)</h3>
+            <div class="variant-showcase">
+                <div id="add-variant-cyan"></div>
+            </div>
+
+            <h3>Purple (Theories)</h3>
+            <div class="variant-showcase">
+                <div id="add-variant-purple"></div>
+            </div>
+
+            <h3>Gold (Special)</h3>
+            <div class="variant-showcase">
+                <div id="add-variant-gold"></div>
+            </div>
+
+            <h3>Compact Size</h3>
+            <div class="variant-showcase">
+                <div id="add-variant-compact"></div>
+            </div>
+
+            <div class="code-example">
+                <pre>// Purple variant for theories
+const card = renderAddEntityCard({ ... });
+card.cardElement.classList.add('add-entity-card--purple');
+
+// Gold variant for special entities
+card.cardElement.classList.add('add-entity-card--gold');
+
+// Compact size
+card.cardElement.classList.add('add-entity-card--compact');</pre>
+            </div>
+        </div>
+
+        <!-- Demo Section 4: Different Entity Types -->
+        <div class="demo-section">
+            <h2>4. Different Entity Types</h2>
+
+            <div class="demo-description">
+                <strong>Versatile usage:</strong> Works for deities, heroes, creatures, items, places, herbs, rituals, and more.
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
+                <div>
+                    <h3>Sacred Herbs</h3>
+                    <div id="add-herb" style="margin-top: 1rem;"></div>
+                </div>
+
+                <div>
+                    <h3>Heroes</h3>
+                    <div id="add-hero" style="margin-top: 1rem;"></div>
+                </div>
+
+                <div>
+                    <h3>Creatures</h3>
+                    <div id="add-creature" style="margin-top: 1rem;"></div>
+                </div>
+
+                <div>
+                    <h3>Sacred Places</h3>
+                    <div id="add-place" style="margin-top: 1rem;"></div>
+                </div>
+            </div>
+
+            <div class="code-example" style="margin-top: 2rem;">
+                <pre>// Herbs
+renderAddEntityCard({
+    containerId: 'add-herb',
+    entityType: 'herb',
+    icon: '🌿',
+    label: 'Add Sacred Herb'
+});
+
+// Heroes
+renderAddEntityCard({
+    containerId: 'add-hero',
+    entityType: 'hero',
+    icon: '🦸',
+    label: 'Add Hero'
+});
+
+// And so on...</pre>
+            </div>
+        </div>
+
+        <!-- Demo Section 5: Auto-Inject -->
+        <div class="demo-section">
+            <h2>5. Auto-Inject with Data Attributes</h2>
+
+            <div class="demo-description">
+                <strong>Zero JavaScript:</strong> Components auto-initialize from HTML data attributes.
+            </div>
+
+            <div class="pantheon-grid">
+                <div
+                    id="add-auto-inject"
+                    data-add-entity-auto
+                    data-entity-type="deity"
+                    data-mythology="norse"
+                    data-label="Auto-Injected Card">
+                </div>
+            </div>
+
+            <div class="code-example">
+                <pre>&lt;div
+    id="add-deity"
+    data-add-entity-auto
+    data-entity-type="deity"
+    data-mythology="norse"
+    data-label="Add New Deity">
+&lt;/div>
+
+&lt;!-- No JavaScript needed! --></pre>
+            </div>
+        </div>
+
+        <!-- Features Summary -->
+        <div class="demo-section">
+            <h2>Features Summary</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <div style="background: rgba(100, 255, 218, 0.05); padding: 1.5rem; border-radius: 10px; border-left: 4px solid #64ffda;">
+                    <h3 style="margin-top: 0;">Add Entity Card</h3>
+                    <ul style="line-height: 1.8;">
+                        <li>Auth-aware visibility</li>
+                        <li>Context auto-detection</li>
+                        <li>Glassmorphism aesthetic</li>
+                        <li>Dashed border (differentiates from regular cards)</li>
+                        <li>Icon rotation on hover</li>
+                        <li>Accessible (keyboard + screen reader)</li>
+                        <li>Responsive design</li>
+                        <li>Theme variants</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(147, 51, 234, 0.05); padding: 1.5rem; border-radius: 10px; border-left: 4px solid #9333ea;">
+                    <h3 style="margin-top: 0;">Edit Icon</h3>
+                    <ul style="line-height: 1.8;">
+                        <li>Ownership-based visibility</li>
+                        <li>Event propagation stopped</li>
+                        <li>Multiple position options</li>
+                        <li>Size variants (small, medium, large)</li>
+                        <li>Built-in tooltips</li>
+                        <li>Batch rendering support</li>
+                        <li>Theme variants</li>
+                        <li>Mobile optimized</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Integration Guide -->
+        <div class="demo-section">
+            <h2>Quick Integration</h2>
+
+            <div class="code-example">
+                <pre>&lt;!-- 1. Include CSS -->
+&lt;link rel="stylesheet" href="/css/add-entity-card.css">
+&lt;link rel="stylesheet" href="/css/edit-icon.css">
+
+&lt;!-- 2. Include JavaScript -->
+&lt;script src="/js/components/add-entity-card.js">&lt;/script>
+&lt;script src="/js/components/edit-icon.js">&lt;/script>
+
+&lt;!-- 3. Add container to your grid -->
+&lt;div class="pantheon-grid">
+    &lt;!-- Your entity cards here -->
+    &lt;div id="add-entity-container">&lt;/div>
+&lt;/div>
+
+&lt;!-- 4. Initialize -->
+&lt;script>
+    renderAddEntityCard({
+        containerId: 'add-entity-container',
+        entityType: 'deity',
+        mythology: 'greek',
+        label: 'Add New Deity'
+    });
+&lt;/script></pre>
+            </div>
+
+            <p style="text-align: center; margin-top: 2rem; font-size: 1.2rem; color: rgba(255, 255, 255, 0.7);">
+                📖 Full documentation: <strong style="color: #64ffda;">ADD_ENTITY_CARD_GUIDE.md</strong>
+            </p>
+        </div>
+    </div>
+
+    <!-- Mock Firebase Auth for Demo -->
+    <script>
+        // Mock Firebase Auth for demo purposes
+        window.firebaseAuth = {
+            currentUser: null,
+            auth: {},
+            onAuthStateChanged: function(callback) {
+                this.authCallbacks = this.authCallbacks || [];
+                this.authCallbacks.push(callback);
+                callback(this.currentUser);
+                return () => {};
+            },
+            getCurrentUser: function() {
+                return this.currentUser;
+            },
+            notifyAuthStateChange: function(user) {
+                this.currentUser = user;
+                if (this.authCallbacks) {
+                    this.authCallbacks.forEach(cb => cb(user));
+                }
+            }
+        };
+
+        // Mock auth toggle
+        function toggleMockAuth() {
+            const btn = document.getElementById('mock-login-btn');
+            const display = document.getElementById('auth-user-display');
+
+            if (window.firebaseAuth.currentUser) {
+                // Log out
+                window.firebaseAuth.notifyAuthStateChange(null);
+                btn.textContent = 'Mock Login';
+                display.textContent = 'Not Logged In';
+            } else {
+                // Log in
+                window.firebaseAuth.notifyAuthStateChange({
+                    uid: 'demo-user-123',
+                    email: 'demo@example.com',
+                    displayName: 'Demo User'
+                });
+                btn.textContent = 'Mock Logout';
+                display.textContent = 'Demo User (logged in)';
+            }
+        }
+    </script>
+
+    <!-- Component Scripts -->
+    <script src="js/components/add-entity-card.js"></script>
+    <script src="js/components/edit-icon.js"></script>
+
+    <!-- Initialize Demo Components -->
+    <script>
+        // Basic deity card
+        renderAddEntityCard({
+            containerId: 'add-deity-basic',
+            entityType: 'deity',
+            mythology: 'greek',
+            label: 'Add New Deity'
+        });
+
+        // Deity with edit functionality
+        renderAddEntityCard({
+            containerId: 'add-deity-edit',
+            entityType: 'deity',
+            mythology: 'greek',
+            label: 'Add New Deity'
+        });
+
+        // Variants - Cyan
+        renderAddEntityCard({
+            containerId: 'add-variant-cyan',
+            entityType: 'deity',
+            label: 'Default (Cyan)'
+        });
+
+        // Variants - Purple
+        const purpleCard = renderAddEntityCard({
+            containerId: 'add-variant-purple',
+            entityType: 'theory',
+            label: 'Purple (Theories)',
+            icon: '💡'
+        });
+        purpleCard.cardElement.classList.add('add-entity-card--purple');
+
+        // Variants - Gold
+        const goldCard = renderAddEntityCard({
+            containerId: 'add-variant-gold',
+            entityType: 'deity',
+            label: 'Gold (Special)',
+            icon: '⭐'
+        });
+        goldCard.cardElement.classList.add('add-entity-card--gold');
+
+        // Variants - Compact
+        const compactCard = renderAddEntityCard({
+            containerId: 'add-variant-compact',
+            entityType: 'deity',
+            label: 'Compact Size'
+        });
+        compactCard.cardElement.classList.add('add-entity-card--compact');
+
+        // Different entity types
+        renderAddEntityCard({
+            containerId: 'add-herb',
+            entityType: 'herb',
+            mythology: 'greek',
+            label: 'Add Sacred Herb',
+            icon: '🌿'
+        });
+
+        renderAddEntityCard({
+            containerId: 'add-hero',
+            entityType: 'hero',
+            mythology: 'greek',
+            label: 'Add Hero',
+            icon: '🦸'
+        });
+
+        renderAddEntityCard({
+            containerId: 'add-creature',
+            entityType: 'creature',
+            mythology: 'greek',
+            label: 'Add Creature',
+            icon: '🐉'
+        });
+
+        renderAddEntityCard({
+            containerId: 'add-place',
+            entityType: 'place',
+            mythology: 'greek',
+            label: 'Add Sacred Place',
+            icon: '🏛️'
+        });
+
+        // Auto-inject example (already handled by auto-inject mechanism)
+    </script>
+</body>
+</html>

@@ -1,195 +1,284 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Heroes &amp; Legendary Figures - Egyptian Mythology</title>
-<link href="../../../themes/theme-base.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="../../../themes/mythology-colors.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heroes - Egyptian Mythology</title>
 
-<link href="../../../themes/corpus-links.css" rel="stylesheet"/>
-<link rel="stylesheet" href="../../../themes/smart-links.css">
-<script defer src="../../../themes/smart-links.js"></script>
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="../../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../../css/spinner.css">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="../../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../../themes/smart-links.css">
+
+    <!-- Entity System -->
+    <link rel="stylesheet" href="../../../components/panels/panels.css">
+    <link rel="stylesheet" href="../../../components/panels/entity-panel-enhanced.css">
+    <link rel="stylesheet" href="../../../components/auto-populate.css">
+
+    <!-- Theme System -->
+    <script defer src="../../../themes/theme-picker.js"></script>
     <script defer src="../../../themes/theme-animations.js"></script>
-<script defer src="../../../themes/theme-picker.js"></script>
+    <script defer src="../../../themes/smart-links.js"></script>
+
+    <!-- Entity Panel Components -->
+    <script src="../../../components/panels/entity-panel-enhanced.js"></script>
+    <script src="../../../components/auto-populate.js"></script>
+
+    <style>
+        :root {
+            --mythos-primary: #DAA520;
+            --mythos-secondary: #4169E1;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: var(--radius-2xl);
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero-section h2 {
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .section-divider {
+            margin: 4rem 0 2rem;
+            text-align: center;
+        }
+
+        .section-title {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.1),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border-radius: var(--radius-xl);
+            border: 2px solid rgba(var(--color-border-rgb), 0.3);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .entity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text-secondary);
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../../css/user-auth.css">
+    <script src="../../../js/firebase-auth.js"></script>
+    <script src="../../../js/auth-guard.js"></script>
+    <script src="../../../js/components/google-signin-button.js"></script>
 <!-- Submission Link System -->
 <script src="../../../js/submission-context.js"></script>
 <script src="../../../js/components/submission-link.js"></script>
 <link rel="stylesheet" href="../../../css/submission-link.css">
-<link href="../../../styles.css" rel="stylesheet"/>
 
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="../../../js/firebase-init.js"></script>
+
+    <!-- Universal Grid System -->
+    <link rel="stylesheet" href="../../../css/universal-grid.css">
 </head>
 <body>
     <div id="theme-picker-container"></div>
-<header>
-    <div class="header-content">
-        <h1>👑 Heroes &amp; Legendary Figures</h1>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../../mythos/index.html">Home</a> →
-                <a href="../index.html">Egyptian</a> →
-                <a href="../index.html">Heroes</a> →
-                <span>Heroes &amp; Legendary Figures</span>
-</nav>
-<main data-mythology="egyptian">
-<section>
-<h2 style="color: var(--color-primary);">Egyptian Heroes and Mortals</h2>
-<p>While Egyptian mythology focused primarily on gods and cosmic forces, certain mortals achieved legendary or semi-divine status through their deeds, wisdom, or service to the gods.</p>
-</section>
-<section style="margin-top: 2rem;">
-<h2 style="color: var(--color-primary);">Legendary Pharaohs</h2>
-<ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
-<li><strong>Djoser (c. 2670 BCE):</strong> Third Dynasty pharaoh who commissioned the first pyramid (Step Pyramid) through his vizier <a href="../deities/imhotep.html">Imhotep</a></li>
-<li><strong>Khufu (Cheops, c. 2580 BCE):</strong> Fourth Dynasty pharaoh who built the Great Pyramid of Giza, largest of the ancient pyramids</li>
-<li><strong>Hatshepsut (c. 1479-1458 BCE):</strong> Female pharaoh who ruled as king, built magnificent mortuary temple at Deir el-Bahari</li>
-<li><strong>Akhenaten (c. 1353-1336 BCE):</strong> Revolutionary pharaoh who attempted to establish monotheistic worship of Aten (sun disk)</li>
-<li><strong>Ramesses II (c. 1279-1213 BCE):</strong> "Ramesses the Great" - mighty warrior-pharaoh, prolific builder, lived over 90 years</li>
-</ul>
-</section>
-<section style="margin-top: 2rem;">
-<h2 style="color: var(--color-primary);">Deified Mortals</h2>
-<ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
-<li><strong><a href="../deities/imhotep.html">Imhotep</a>:</strong> Architect, physician, and sage who designed the Step Pyramid; later deified as god of medicine and wisdom</li>
-<li><strong>Amenhotep son of Hapu:</strong> Architect and scribe under Amenhotep III; deified for his wisdom and healing powers</li>
-</ul>
-</section>
-<section style="margin-top: 2rem;">
-<h2 style="color: var(--color-primary);">Legendary Priests and Magicians</h2>
-<ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
-<li><strong>Djedi:</strong> Magician from tales of Khufu, said to perform miracles including reattaching severed heads</li>
-<li><strong>Setne Khamwas:</strong> Legendary magician and son of Ramesses II, protagonist of magical adventure tales</li>
-<li><strong>High Priests of <a class="corpus-link" data-term="Amun" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=amun" title="Search corpus for 'Amun'">Amun</a>:</strong> Wielded immense <a class="corpus-link" data-term="Power" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=sekhem" title="Search corpus for 'Power'">power</a>, especially during New Kingdom when they rivaled pharaohs</li>
-</ul>
-</section>
-<section style="margin-top: 2rem;">
-<h2 style="color: var(--color-primary);">The Pharaoh as Living God</h2>
-<p>Every pharaoh <a class="corpus-link" data-term="Was" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=was" title="Search corpus for 'Was'">was</a> considered the living embodiment of <a href="../deities/horus.html">Horus</a> and son of <a href="../deities/ra.html">Ra</a>. Upon death, the pharaoh became <a href="../deities/osiris.html">Osiris</a>, while the new pharaoh became <a class="corpus-link" data-term="Horus" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=horus" title="Search corpus for 'Horus'">Horus</a>. This divine kingship united heaven and earth, maintaining <a href="../deities/maat.html">ma'at</a> (cosmic <a class="corpus-link" data-term="Order" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=maat" title="Search corpus for 'Order'">order</a>) through royal authority.</p>
-</section>
 
-<!-- Interlink Panel Section -->
-<section class="interlink-panel" style="margin-top: 3rem;">
-    <h3 class="interlink-header">
-        <span class="interlink-icon">🔗</span>
-        Related Across the Mythos
-    </h3>
+    <header>
+        <div class="header-content">
+            <h1>🦸 Heroes</h1>
+        <div id="user-auth-nav"></div>
+        </div>
+    </header>
 
-    <div class="interlink-grid">
-        <!-- Archetype Section -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Archetype</div>
-            <a href="../../../archetypes/celestial/index.html" class="archetype-link-card">
-                <div class="archetype-badge">👑 DIVINE KING</div>
-                <p class="archetype-context">Egyptian pharaohs embody the Divine King archetype - mortals who channel divine authority.</p>
-                <span class="see-parallels">See parallels: Gilgamesh, Arthur, David →</span>
-            </a>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../../mythos/index.html">Home</a> →
+        <a href="../index.html">Egyptian</a> →
+        <span>Heroes</span>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h2>Heroes & Legendary Figures</h2>
+            <p>Discover the legendary heroes, warriors, and mortal champions.</p>
+        </section>
+
+        <!-- Main Entity Grid (Auto-Populated) -->
+        <div
+            data-auto-populate
+            data-mythology="egyptian"
+            data-category="hero"
+            data-display-mode="compact"
+            data-show-corpus="true">
+            <!-- Loading state -->
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading Heroes...</p>
+            </div>
         </div>
 
-        <!-- Key Figure -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Deified Mortal</div>
-            <a href="../deities/imhotep.html" class="item-link-card">
-                <div class="item-icon">🏛️</div>
-                <div class="item-info">
-                    <h4>Imhotep</h4>
-                    <p class="item-type">Deified Sage</p>
-                    <p class="item-context">Architect who became a god</p>
+        <!-- Optional: Filtered Sections -->
+        <!-- Uncomment and customize as needed -->
+        <!--
+        <div class="section-divider">
+            <div class="section-title">Sacred Heroes</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="egyptian"
+            data-category="hero"
+            data-subcategory="sacred"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+
+        <div class="section-divider">
+            <div class="section-title">Ritual Heroes</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="egyptian"
+            data-category="hero"
+            data-subcategory="ritual"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+        -->
+
+        <!-- Cross-Cultural Parallels -->
+        <section class="interlink-panel" style="margin-top: 4rem;">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Heroes Across Mythologies
+            </h3>
+
+            <div class="parallel-traditions glass-card">
+                <h4>🌍 Explore Other Traditions</h4>
+                <div class="parallel-grid">
+                    <!-- Add links to similar categories in other mythologies -->
+
+                    <a href="../../greek/heroes/index.html" class="parallel-card">
+                        <span class="tradition-flag">🏛️</span>
+                        <span class="parallel-name">Greek Heroes</span>
+                        <span class="tradition-label">Greek</span>
+                    </a>
+                    <a href="../../norse/heroes/index.html" class="parallel-card">
+                        <span class="tradition-flag">⚔️</span>
+                        <span class="parallel-name">Norse Heroes</span>
+                        <span class="tradition-label">Norse</span>
+                    </a>
+                    <a href="../../egyptian/heroes/index.html" class="parallel-card">
+                        <span class="tradition-flag">𓂀</span>
+                        <span class="parallel-name">Egyptian Heroes</span>
+                        <span class="tradition-label">Egyptian</span>
+                    </a>
+                    <a href="../../hindu/heroes/index.html" class="parallel-card">
+                        <span class="tradition-flag">🕉️</span>
+                        <span class="parallel-name">Hindu Heroes</span>
+                        <span class="tradition-label">Hindu</span>
+                    </a>
                 </div>
-            </a>
-        </div>
+            </div>
+        </section>
 
-        <!-- Related Deity -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Divine Connection</div>
-            <a href="../deities/horus.html" class="place-link-card">
-                <div class="place-visual">
-                    <span class="place-icon">🦅</span>
-                    <span class="place-type">Deity</span>
-                </div>
-                <div class="place-info">
-                    <h4>Horus</h4>
-                    <p>Living pharaoh as Horus incarnate</p>
-                </div>
-            </a>
+        <!-- See Also Section -->
+        <div class="see-also-section" style="margin-top: 3rem;">
+            <h4>📚 See Also</h4>
+            <div class="see-also-links">
+                <a href="../deities/index.html" class="see-also-link">
+                    <span>⚡</span> Deities
+                </a>
+                <a href="../heroes/index.html" class="see-also-link">
+                    <span>🦸</span> Heroes
+                </a>
+                <a href="../places/index.html" class="see-also-link">
+                    <span>📍</span> Places
+                </a>
+                <a href="../index.html" class="see-also-link">
+                    <span>🏛️</span> Egyptian Home
+                </a>
+            </div>
         </div>
+    </main>
 
-        <!-- Related Cosmology -->
-        <div class="interlink-section">
-            <div class="interlink-section-title">Cosmic Order</div>
-            <a href="../deities/maat.html" class="magic-link-card">
-                <div class="magic-icon">⚖️</div>
-                <div class="magic-info">
-                    <h4>Ma'at</h4>
-                    <p class="magic-type">Divine Order</p>
-                </div>
-                <span class="tradition-badge egyptian">Egyptian</span>
-            </a>
-        </div>
-    </div>
+    <footer>
+        <p>
+            <strong>Heroes</strong> - Egyptian Mythology<br>
+            <a href="../../../mythos/index.html">World Mythos Home</a> |
+            <a href="../index.html">Egyptian Tradition</a>
+        </p>
+    </footer>
 
-    <!-- Cross-Cultural Parallels -->
-    <div class="parallel-traditions glass-card" style="margin-top: var(--spacing-lg);">
-        <h4>🌍 Cross-Cultural Parallels</h4>
-        <div class="parallel-grid">
-            <a href="../../greek/heroes/index.html" class="parallel-card">
-                <span class="tradition-flag">🏛️</span>
-                <span class="parallel-name">Greek Heroes</span>
-                <span class="tradition-label">Greek</span>
-            </a>
-            <a href="../../norse/heroes/index.html" class="parallel-card">
-                <span class="tradition-flag">⚔️</span>
-                <span class="parallel-name">Norse Heroes</span>
-                <span class="tradition-label">Norse</span>
-            </a>
-            <a href="../../sumerian/heroes/gilgamesh.html" class="parallel-card">
-                <span class="tradition-flag">🌙</span>
-                <span class="parallel-name">Gilgamesh</span>
-                <span class="tradition-label">Sumerian</span>
-            </a>
-            <a href="../../hindu/heroes/index.html" class="parallel-card">
-                <span class="tradition-flag">🕉️</span>
-                <span class="parallel-name">Hindu Heroes</span>
-                <span class="tradition-label">Hindu</span>
-            </a>
-        </div>
-    </div>
-</section>
+    <!-- Initialize Auto-Populate -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const populator = new EntityAutoPopulator();
+            populator.populatePage();
+        });
+    </script>
 
-<!-- See Also Section -->
-<div class="see-also-section">
-    <h4>📚 See Also</h4>
-    <div class="see-also-links">
-        <a href="../deities/horus.html" class="see-also-link">
-            <span>🦅</span> Horus
-        </a>
-        <a href="../deities/ra.html" class="see-also-link">
-            <span>☀️</span> Ra
-        </a>
-        <a href="../deities/osiris.html" class="see-also-link">
-            <span>👑</span> Osiris
-        </a>
-        <a href="../cosmology/index.html" class="see-also-link">
-            <span>🌌</span> Cosmology
-        </a>
-        <a href="../../../archetypes/celestial/index.html" class="see-also-link">
-            <span>👑</span> Divine King Archetype
-        </a>
-    </div>
-</div>
-</main>
-<footer>
-<p>
-<strong>Heroes &amp; Legendary Figures</strong> - Egyptian Mythology<br/>
-<a href="../../../mythos/index.html">World Mythos Home</a> |
-            <a href="../index.html">Egyptian Tradition</a> |
-            <a href="../corpus-search.html">Search Egyptian Corpus</a>
-</p>
-</footer>
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
+
 <!-- Auto-inject submission button -->
 <script>
     if (window.SubmissionLink) {
         window.SubmissionLink.autoInject();
     }
 </script>
+
 </body>
 </html>

@@ -173,7 +173,16 @@ class SPANavigation {
             return;
         }
 
-        // Use HomeView class if available
+        // Try PageAssetRenderer first (dynamic Firebase page loading)
+        if (typeof PageAssetRenderer !== 'undefined') {
+            console.log('[SPA] Using PageAssetRenderer for home page');
+            const renderer = new PageAssetRenderer(this.db);
+            await renderer.renderPage('home', mainContent);
+            console.log('[SPA] Home page rendered via PageAssetRenderer');
+            return;
+        }
+
+        // Fallback to HomeView class if PageAssetRenderer not available
         if (typeof HomeView !== 'undefined') {
             console.log('[SPA] Using HomeView class');
             const homeView = new HomeView(this.db);

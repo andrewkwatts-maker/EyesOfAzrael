@@ -6,6 +6,7 @@
 <title>Roman Deities - Roman Mythology</title>
 <link href="../../../themes/theme-base.css" rel="stylesheet"/>
     <link rel="stylesheet" href="../../../themes/mythology-colors.css">
+    <link rel="stylesheet" href="../../../css/spinner.css">
 <link href="../../../styles.css" rel="stylesheet"/>
 <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../themes/smart-links.css">
@@ -18,6 +19,48 @@
     <script src="../../../js/auth-guard.js"></script>
     <script src="../../../js/components/google-signin-button.js"></script>
 
+<!-- Submission Link System -->
+<script src="../../../js/submission-context.js"></script>
+<script src="../../../js/components/submission-link.js"></script>
+<link rel="stylesheet" href="../../../css/submission-link.css">
+
+
+    <!-- Universal Grid System -->
+    <link rel="stylesheet" href="../../../css/universal-grid.css">
+
+<!-- Universal Entity Renderer -->
+<script defer src="../../../js/universal-entity-renderer.js"></script>
+<link rel="stylesheet" href="../../../css/entity-renderer.css">
+
+    <style>
+        /* Responsive table styling */
+        @media (max-width: 768px) {
+            table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .comparison-table, .contrast-table {
+                font-size: 0.85rem;
+            }
+
+            .comparison-table th,
+            .comparison-table td,
+            .contrast-table th,
+            .contrast-table td {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Info notice responsive */
+        @media (max-width: 640px) {
+            .info-notice {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
 </head>
 <body>
 <div id="theme-picker-container"></div>
@@ -33,6 +76,16 @@
                 <span>Deities</span>
 </nav>
 <main data-mythology="roman">
+    <!-- Static Content Notice -->
+    <div class="info-notice" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+         border: 2px solid var(--color-primary, #667eea); border-radius: 12px; padding: 1rem 1.5rem;
+         margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem;">
+        <span style="font-size: 1.5rem;">&#128214;</span>
+        <p style="margin: 0; line-height: 1.6;">
+            <strong>Research Content:</strong> This page contains static comparative and theological research.
+            The content may be migrated to the Firebase database in a future update for enhanced features.
+        </p>
+    </div>
 <section class="pantheon-header">
 <h2>The <a class="corpus-link" href="../corpus-search.html?term=roman" title="View roman in ancient texts">Roman</a> Pantheon</h2>
 <p style="font-size: 1.1rem; margin-top: 1rem;">
@@ -66,26 +119,78 @@
 </div>
 <section>
 <h3 style="color: var(--color-secondary);">The <a class="corpus-link" data-term="Capitoline Triad" data-tradition="roman" href="../../../mythos/roman/corpus-search.html?term=minerva" title="Search corpus for 'Capitoline Triad'">Capitoline Triad</a></h3>
+
+<!-- Dynamic Entity Grid (Firebase-Powered) -->
+<div id="entity-grid" class="pantheon-grid" data-mythology="roman" data-entity-type="deity">
+    <!-- Entities will be loaded dynamically from Firebase -->
+    <div class="loading-placeholder">
+        <div class="spinner"></div>
+        <p>Loading deities...</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Firebase and renderer are available
+    if (typeof firebase === 'undefined' || !firebase.firestore) {
+        console.error('Firebase not initialized');
+        return;
+    }
+
+    if (typeof UniversalEntityRenderer === 'undefined') {
+        console.error('UniversalEntityRenderer not loaded');
+        return;
+    }
+
+    const renderer = new UniversalEntityRenderer();
+    const db = firebase.firestore();
+    const gridElement = document.getElementById('entity-grid');
+
+    // Query Firebase for roman deities
+    db.collection('deities')
+        .where('mythology', '==', 'roman')
+        .orderBy('name')
+        .get()
+        .then(snapshot => {
+            if (snapshot.empty) {
+                gridElement.innerHTML = '<p class="no-results">No deities found in database. Check back soon!</p>';
+                return;
+            }
+
+            const entities = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // Render the entities using the universal renderer
+            gridElement.innerHTML = renderer.renderGrid(entities, {
+                entityType: 'deity',
+                mythology: 'roman',
+                showIcons: true,
+                enableClick: true
+            });
+
+            console.log(`Loaded ${entities.length} roman deities from Firebase`);
+        })
+        .catch(error => {
+            console.error('Error loading deities:', error);
+            gridElement.innerHTML = '<p class="error-message">Error loading deities. Please try again later.</p>';
+        });
+});
+</script>
+
+<!-- Fallback: Static deity cards (shown if JavaScript disabled or Firebase unavailable) -->
+<noscript>
 <div class="deity-grid">
 <a class="deity-card" href="jupiter.html" style="text-decoration: none; color: inherit;">
 <div class="hero-icon-display">⚡</div>
-<h3><a class="corpus-link" data-term="Jupiter" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=zeus" title="Search corpus for 'Jupiter'">Jupiter</a></h3>
-<div class="deity-title">King of Gods, Sky &amp; Thunder</div>
-<p>Supreme deity of Rome, god of sky, thunder, and justice. Protector of the Roman state and guarantor of oaths.</p>
-</a>
-<a class="deity-card" href="juno.html" style="text-decoration: none; color: inherit;">
-<div class="hero-icon-display">👑</div>
-<h3><a class="corpus-link" data-term="Juno" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=hera" title="Search corpus for 'Juno'">Juno</a></h3>
-<div class="deity-title">Queen of Gods, Marriage &amp; Childbirth</div>
-<p>Divine consort of <a class="corpus-link" data-term="Jupiter" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=zeus" title="Search corpus for 'Jupiter'">Jupiter</a>, protector of women, marriage, and the Roman state as <a class="corpus-link" data-term="Juno" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=hera" title="Search corpus for 'Juno'">Juno</a> Regina.</p>
-</a>
-<a class="deity-card" href="minerva.html" style="text-decoration: none; color: inherit;">
-<div class="hero-icon-display">🦉</div>
-<h3><a class="corpus-link" data-term="Minerva" data-tradition="greek" href="../../../mythos/greek/corpus-search.html?term=athena" title="Search corpus for 'Minerva'">Minerva</a></h3>
-<div class="deity-title">Wisdom, War Strategy &amp; Crafts</div>
-<p><a class="corpus-link" data-term="Goddess of Wisdom" data-tradition="roman" href="../../../mythos/roman/corpus-search.html?term=minerva" title="Search corpus for 'Goddess of Wisdom'">Goddess of wisdom</a>, strategic warfare, and practical crafts. Patron of artisans and <a class="corpus-link" data-term="Guardian of Rome" data-tradition="roman" href="../../../mythos/roman/corpus-search.html?term=vesta" title="Search corpus for 'Guardian of Rome'">guardian of Rome</a>.</p>
-</a>
-</div></section>
+</noscript>
+<div class="static-fallback" style="display: none;">
+<div class="deity-grid">
+<a class="deity-card" href="jupiter.html" style="text-decoration: none; color: inherit;">
+<div class="hero-icon-display">⚡</div>
+</div>
+</section>
 <section style="margin-top: 3rem;">
 <h3 style="color: var(--color-secondary);">Major Di Consentes</h3>
 <div class="deity-grid">
@@ -380,5 +485,13 @@
             }
         });
     </script>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
 </body>
 </html>

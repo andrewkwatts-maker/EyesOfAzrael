@@ -65,11 +65,16 @@ class SVGEditorModal {
         } else {
             console.warn('GeminiSVGGenerator not loaded. AI generation will be disabled.');
         }
+
+        // Also initialize AI Icon Generator for entity-based generation
+        if (window.AIIconGenerator) {
+            this.iconGenerator = new window.AIIconGenerator();
+        }
     }
 
     /**
      * Open the SVG editor modal
-     * @param {Object} options - {initialSvg, initialPrompt, onSave}
+     * @param {Object} options - {initialSvg, initialPrompt, onSave, entityData}
      */
     open(options = {}) {
         if (this.isOpen) {
@@ -80,6 +85,7 @@ class SVGEditorModal {
         this.currentSvg = options.initialSvg || '';
         this.currentPrompt = options.initialPrompt || '';
         this.onSaveCallback = options.onSave || null;
+        this.entityData = options.entityData || null; // Store entity data for AI generation
 
         this.render();
         this.attachEventListeners();
@@ -243,6 +249,9 @@ class SVGEditorModal {
                         placeholder="Example: Zeus hurling a lightning bolt with dramatic clouds and golden accents"
                     >${this.escapeHtml(this.currentPrompt)}</textarea>
                     <p class="svg-form-hint">Describe the mythological scene, symbol, or concept you want to visualize</p>
+                    ${this.entityData ? `<button type="button" class="svg-generate-from-entity-btn" id="svg-generate-from-entity-btn" style="margin-top: 0.5rem;">
+                        🤖 Generate Icon from Entity Data
+                    </button>` : ''}
                 </div>
 
                 <div class="svg-form-group">
@@ -422,6 +431,13 @@ class SVGEditorModal {
                 this.useExample(prompt, style, color);
             });
         });
+
+        // Generate from entity data button
+        const generateFromEntityBtn = this.overlay.querySelector('#svg-generate-from-entity-btn');
+        if (generateFromEntityBtn && !generateFromEntityBtn.dataset.handlerAttached) {
+            generateFromEntityBtn.dataset.handlerAttached = 'true';
+            generateFromEntityBtn.addEventListener('click', () => this.generateFromEntity());
+        }
     }
 
     /**
@@ -638,6 +654,52 @@ class SVGEditorModal {
                 `;
             }
         });
+    }
+
+    /**
+     * Generate SVG from entity data using AI Icon Generator
+     */
+    async generateFromEntity() {
+        if (!this.iconGenerator) {
+            this.showMessage('error', 'AI Icon Generator not available. Please ensure ai-icon-generator.js is loaded.');
+            return;
+        }
+
+        if (!this.entityData) {
+            this.showMessage('error', 'No entity data provided for icon generation.');
+            return;
+        }
+
+        // Show loading state
+        this.setGenerating(true);
+        this.showMessage('info', 'Generating icon from entity data...');
+
+        try {
+            const result = this.iconGenerator.generateWithOptions(this.entityData, {
+                style: 'symbolic',
+                size: 64,
+                colorScheme: 'auto'
+            });
+
+            if (result.success) {
+                this.currentSvg = result.svgCode;
+
+                // Update code editor
+                const codeInput = this.overlay.querySelector('#svg-code-input');
+                if (codeInput) {
+                    codeInput.value = this.currentSvg;
+                }
+
+                this.updatePreview();
+                this.showMessage('success', `Icon generated for ${this.entityData.name}! You can edit the code in the Code Editor tab if needed.`);
+            } else {
+                this.showMessage('error', `Generation failed: ${result.error}`);
+            }
+        } catch (error) {
+            this.showMessage('error', `Unexpected error: ${error.message}`);
+        } finally {
+            this.setGenerating(false);
+        }
     }
 
     /**

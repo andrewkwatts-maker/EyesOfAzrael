@@ -6,6 +6,7 @@
 <title>Islamic Path - World Mythos Explorer</title>
 <link href="../../../themes/theme-base.css" rel="stylesheet"/>
 <link href="../../../styles.css" rel="stylesheet"/>
+<link rel="stylesheet" href="../../../css/spinner.css">
 <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../themes/smart-links.css">
 <script defer src="../../../themes/smart-links.js"></script>
@@ -26,12 +27,24 @@
             text-align: center;
         }
     </style>
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../../css/user-auth.css">
+    <script src="../../../js/firebase-auth.js"></script>
+    <script src="../../../js/auth-guard.js"></script>
+    <script src="../../../js/components/google-signin-button.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="../../../js/firebase-init.js"></script>
 </head>
 <body>
 <div id="theme-picker-container"></div>
 <header>
     <div class="header-content">
         <h1>🛤️ Islamic Path</h1>
+        <div id="user-auth-nav"></div>
     </div>
 </header>
 <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -158,5 +171,22 @@
             <a href="../index.html">Islamic Tradition</a>
 </p>
 </footer>
+
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>

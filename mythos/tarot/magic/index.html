@@ -1,150 +1,248 @@
-﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Tarot Magic and Meditation - Tarot Mythology</title>
-<link href="../../../styles.css" rel="stylesheet"/>
-<link href="../../../themes/theme-base.css" rel="stylesheet"/>
-<link href="../../../themes/corpus-links.css" rel="stylesheet"/>
-<link rel="stylesheet" href="../../../themes/smart-links.css">
-<script defer src="../../../themes/smart-links.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic - Tarot Mythology</title>
+
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="../../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="../../../css/spinner.css">
+    <link rel="stylesheet" href="../../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../../themes/smart-links.css">
+
+    <!-- Entity System -->
+    <link rel="stylesheet" href="../../../components/panels/panels.css">
+    <link rel="stylesheet" href="../../../components/panels/entity-panel-enhanced.css">
+    <link rel="stylesheet" href="../../../components/auto-populate.css">
+
+    <!-- Theme System -->
+    <script defer src="../../../themes/theme-picker.js"></script>
     <script defer src="../../../themes/theme-animations.js"></script>
-<script defer="None" src="../../../themes/theme-picker.js"></script>
-<style>
+    <script defer src="../../../themes/smart-links.js"></script>
+
+    <!-- Entity Panel Components -->
+    <script src="../../../components/panels/entity-panel-enhanced.js"></script>
+    <script src="../../../components/auto-populate.js"></script>
+
+    <style>
         :root {
-            --mythos-primary: #9370DB;
-            --mythos-secondary: #8A2BE2;
+            --mythos-primary: #4B0082;
+            --mythos-secondary: #9370DB;
         }
 
-        .concept-header {
+        .hero-section {
             background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
             color: white;
             padding: 3rem 2rem;
-            border-radius: var(--radius-lg, 15px);
+            border-radius: var(--radius-2xl);
             margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         }
 
-        .inline-search-link {
-            color: #667eea;
-            text-decoration: none;
-            border-bottom: 1px dashed #667eea;
-            cursor: pointer;
+        .hero-section h2 {
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
         }
 
-        .inline-search-link:hover {
-            color: #764ba2;
-            border-bottom-color: #764ba2;
+        .hero-section p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .section-divider {
+            margin: 4rem 0 2rem;
+            text-align: center;
+        }
+
+        .section-title {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.1),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border-radius: var(--radius-xl);
+            border: 2px solid rgba(var(--color-border-rgb), 0.3);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .entity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text-secondary);
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="../../../js/firebase-init.js"></script>
+
+    <!-- Universal Grid System -->
+    <link rel="stylesheet" href="../../../css/universal-grid.css">
 </head>
 <body>
-<div id="theme-picker-container"></div>
-<header>
-    <div class="header-content">
-        <h1>Tarot Magic and <a data-term="Meditation" data-tradition="tarot" class="corpus-link" href="../../../mythos/tarot/index.html" title="View meditation in ancient texts">Meditation</a></h1>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../../mythos/index.html">Home</a> →
-                <a href="../../index.html">Tarot</a> →
-                <span>Tarot Magic and <a data-term="Meditation" data-tradition="tarot" class="corpus-link" href="../../../mythos/tarot/index.html" title="View meditation in ancient texts">Meditation</a></span>
-</nav>
-<main>
-<section class="concept-header">
-<h2>Tarot Magic and <a data-term="Meditation" data-tradition="tarot" class="corpus-link" href="../../../mythos/tarot/index.html" title="View meditation in ancient texts">Meditation</a></h2>
-<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">Using the Tarot for <a data-term="Spiritual" data-tradition="tarot" class="corpus-link" href="../../../mythos/tarot/index.html" title="View spiritual in ancient texts">Spiritual</a> Work</p>
-<p style="font-size: 1.1rem; margin-top: 1rem;">Practices for using the Tarot in <a data-term="Meditation" data-tradition="tarot" class="corpus-link" href="../../../mythos/tarot/index.html" title="View meditation in ancient texts">meditation</a>, pathworking, and ceremonial magic.</p>
-</section>
-<section>
-<h2 style="color: var(--mythos-primary);">Overview</h2>
-<p>This page provides information about tarot magic and meditation within the Tarot <a data-term="Mythological" data-tradition="tarot" class="corpus-link" href="../../../mythos/tarot/index.html" title="View mythological in ancient texts">mythological</a> tradition.</p>
-<p>For <a data-term="Related" data-tradition="tarot" class="corpus-link" href="../../../mythos/tarot/index.html" title="View related in ancient texts">related</a> information, please explore:</p>
-<ul style="margin: 0.5rem 0 0 2rem; line-height: 1.8;">
-<li><a class="inline-search-link" href="../../index.html">Tarot Tradition Home</a></li>
-<li><a class="inline-search-link" href="../../../mythos/index.html">World Mythos Index</a></li>
-</ul></section>
-<section class="related-concepts" style="margin-top: 3rem; background: rgba(148, 0, 211, 0.05); padding: 2rem; border-radius: 10px;">
-<h2 style="color: var(--mythos-primary);"><a data-term="Related Concepts" data-tradition="tarot" class="corpus-link" href="../../../mythos/tarot/index.html" title="View related concepts in ancient texts">Related Concepts</a></h2>
-<p>Explore other aspects of Tarot <a data-term="Mythology" data-tradition="tarot" class="corpus-link" href="../../../mythos/tarot/index.html" title="View mythology in ancient texts">mythology</a> on the <a class="inline-search-link" href="../../index.html">main index page</a>.</p>
-<!-- Interlink Panel Section -->
-<section class="interlink-panel" style="margin-top: 3rem;">
-    <h3 class="interlink-header">
-        <span class="interlink-icon">🔗</span>
-        Related Across the Mythos
-    </h3>
+    <div id="theme-picker-container"></div>
 
-    <div class="interlink-grid">
-        <div class="interlink-section">
-            <div class="interlink-section-title">Core Archetype</div>
-            <a href="../../../archetypes/celestial/index.html" class="archetype-link-card">
-                <div class="archetype-badge">✨ CEREMONIAL MAGIC</div>
-                <p class="archetype-context">Hermetic magic uses correspondences, ritual, and meditation to align human will with cosmic forces for transformation.</p>
-                <span class="see-parallels">See parallels: Theurgy, High Magic →</span>
-            </a>
+    <header>
+        <div class="header-content">
+            <h1>✨ Magic</h1>
+        </div>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../../mythos/index.html">Home</a> →
+        <a href="../index.html">Tarot</a> →
+        <span>Magic</span>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h2>Magical Practices & Systems</h2>
+            <p>Explore the magical traditions, spells, and mystical practices.</p>
+        </section>
+
+        <!-- Main Entity Grid (Auto-Populated) -->
+        <div
+            data-auto-populate
+            data-mythology="tarot"
+            data-category="magic"
+            data-display-mode="compact"
+            data-show-corpus="true">
+            <!-- Loading state -->
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading Magic...</p>
+            </div>
         </div>
 
-        <div class="interlink-section">
-            <div class="interlink-section-title">Key Figure</div>
-            <a href="../deities/magician.html" class="item-link-card">
-                <div class="item-icon">🎩</div>
-                <div class="item-info">
-                    <h4>The Magician</h4>
-                    <p class="item-type">Card I</p>
-                    <p class="item-context">"As above, so below"</p>
+        <!-- Optional: Filtered Sections -->
+        <!-- Uncomment and customize as needed -->
+        <!--
+        <div class="section-divider">
+            <div class="section-title">Sacred Magic</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="tarot"
+            data-category="magic"
+            data-subcategory="sacred"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+
+        <div class="section-divider">
+            <div class="section-title">Ritual Magic</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="tarot"
+            data-category="magic"
+            data-subcategory="ritual"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+        -->
+
+        <!-- Cross-Cultural Parallels -->
+        <section class="interlink-panel" style="margin-top: 4rem;">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Magic Across Mythologies
+            </h3>
+
+            <div class="parallel-traditions glass-card">
+                <h4>🌍 Explore Other Traditions</h4>
+                <div class="parallel-grid">
+                    <!-- Add links to similar categories in other mythologies -->
+
+                    <a href="../../greek/magic/index.html" class="parallel-card">
+                        <span class="tradition-flag">🏛️</span>
+                        <span class="parallel-name">Greek Magic</span>
+                        <span class="tradition-label">Greek</span>
+                    </a>
+                    <a href="../../norse/magic/index.html" class="parallel-card">
+                        <span class="tradition-flag">⚔️</span>
+                        <span class="parallel-name">Norse Magic</span>
+                        <span class="tradition-label">Norse</span>
+                    </a>
+                    <a href="../../egyptian/magic/index.html" class="parallel-card">
+                        <span class="tradition-flag">𓂀</span>
+                        <span class="parallel-name">Egyptian Magic</span>
+                        <span class="tradition-label">Egyptian</span>
+                    </a>
+                    <a href="../../hindu/magic/index.html" class="parallel-card">
+                        <span class="tradition-flag">🕉️</span>
+                        <span class="parallel-name">Hindu Magic</span>
+                        <span class="tradition-label">Hindu</span>
+                    </a>
                 </div>
-            </a>
-        </div>
+            </div>
+        </section>
 
-        <div class="interlink-section">
-            <div class="interlink-section-title">Correspondences</div>
-            <a href="../cosmology/tree-of-life.html" class="place-link-card">
-                <div class="place-visual">
-                    <span class="place-icon">🌳</span>
-                    <span class="place-type">System</span>
-                </div>
-                <div class="place-info">
-                    <h4>Tree of Life</h4>
-                    <p>Magical correspondences</p>
-                </div>
-            </a>
+        <!-- See Also Section -->
+        <div class="see-also-section" style="margin-top: 3rem;">
+            <h4>📚 See Also</h4>
+            <div class="see-also-links">
+                <a href="../deities/index.html" class="see-also-link">
+                    <span>⚡</span> Deities
+                </a>
+                <a href="../heroes/index.html" class="see-also-link">
+                    <span>🦸</span> Heroes
+                </a>
+                <a href="../places/index.html" class="see-also-link">
+                    <span>📍</span> Places
+                </a>
+                <a href="../index.html" class="see-also-link">
+                    <span>🏛️</span> Tarot Home
+                </a>
+            </div>
         </div>
-    </div>
+    </main>
 
-    <div class="parallel-traditions glass-card" style="margin-top: var(--spacing-lg);">
-        <h4>🌍 Cross-Cultural Parallels</h4>
-        <div class="parallel-grid">
-            <a href="../../../magic/divination/index.html" class="parallel-card">
-                <span class="tradition-flag">🔮</span>
-                <span class="parallel-name">Magic Systems</span>
-                <span class="tradition-label">Comparative Magic</span>
-            </a>
-            <a href="../../egyptian/magic/index.html" class="parallel-card">
-                <span class="tradition-flag">𓂀</span>
-                <span class="parallel-name">Egyptian Magic</span>
-                <span class="tradition-label">Heka Tradition</span>
-            </a>
-            <a href="../../babylonian/rituals/index.html" class="parallel-card">
-                <span class="tradition-flag">📐</span>
-                <span class="parallel-name">Masonic Ritual</span>
-                <span class="tradition-label">Ceremonial Work</span>
-            </a>
-            <a href="../../jewish/kabbalah/index.html" class="parallel-card">
-                <span class="tradition-flag">✡️</span>
-                <span class="parallel-name">Practical Kabbalah</span>
-                <span class="tradition-label">Jewish Magic</span>
-            </a>
-        </div>
-    </div>
-</section>
-</section>
-</main>
-<footer style="margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary)); color: white; border-radius: 10px;">
-<p style="text-align: center; margin: 0;">
-<strong>Tarot Magic and <a data-term="Meditation" data-tradition="tarot" class="corpus-link" href="../../../mythos/tarot/index.html" title="View meditation in ancient texts">Meditation</a></strong> - Tarot <a data-term="Tradition" data-tradition="tarot" class="corpus-link" href="../../../mythos/tarot/index.html" title="View tradition in ancient texts">Tradition</a><br/>
-<a href="../../../mythos/index.html" style="color: white;">World Mythos Home</a> |
-            <a href="../../index.html" style="color: white;">Tarot Tradition</a>
-</p>
-</footer>
+    <footer>
+        <p>
+            <strong>Magic</strong> - Tarot Mythology<br>
+            <a href="../../../mythos/index.html">World Mythos Home</a> |
+            <a href="../index.html">Tarot Tradition</a>
+        </p>
+    </footer>
+
+    <!-- Initialize Auto-Populate -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const populator = new EntityAutoPopulator();
+            populator.populatePage();
+        });
+    </script>
 </body>
 </html>

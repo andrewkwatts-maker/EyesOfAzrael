@@ -1,357 +1,284 @@
-﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Buddhist Mythical Beings - Creatures & Spirits - Buddhist Mythology</title>
-<link href="../../../themes/theme-base.css" rel="stylesheet"/>
-<link href="../../../styles.css" rel="stylesheet"/>
-<link href="../../../themes/corpus-links.css" rel="stylesheet"/>
-<link rel="stylesheet" href="../../../themes/smart-links.css">
-<script defer src="../../../themes/smart-links.js"></script>
-    <script defer src="../../../themes/theme-animations.js"></script>
-<script defer="" src="../../../themes/theme-picker.js"></script>
-<style>
-        
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creatures - Buddhist Mythology</title>
 
-        .hero-section {
-            background: linear-gradient(135deg,
-                rgba(var(--color-primary-rgb), 0.8),
-                rgba(var(--color-secondary-rgb), 0.8));
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--color-primary);
-            color: var(--color-text-primary);
-            padding: 3rem 2rem;
-            text-align: center;
-            border-radius: var(--radius-xl);
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-xl);
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="../../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../../css/spinner.css">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="../../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../../themes/smart-links.css">
+
+    <!-- Entity System -->
+    <link rel="stylesheet" href="../../../components/panels/panels.css">
+    <link rel="stylesheet" href="../../../components/panels/entity-panel-enhanced.css">
+    <link rel="stylesheet" href="../../../components/auto-populate.css">
+
+    <!-- Theme System -->
+    <script defer src="../../../themes/theme-picker.js"></script>
+    <script defer src="../../../themes/theme-animations.js"></script>
+    <script defer src="../../../themes/smart-links.js"></script>
+
+    <!-- Entity Panel Components -->
+    <script src="../../../components/panels/entity-panel-enhanced.js"></script>
+    <script src="../../../components/auto-populate.js"></script>
+
+    <style>
+        :root {
+            --mythos-primary: #FF8C00;
+            --mythos-secondary: #FFD700;
         }
 
-        .creature-grid {
+        .hero-section {
+            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: var(--radius-2xl);
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero-section h2 {
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .section-divider {
+            margin: 4rem 0 2rem;
+            text-align: center;
+        }
+
+        .section-title {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.1),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border-radius: var(--radius-xl);
+            border: 2px solid rgba(var(--color-border-rgb), 0.3);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .entity-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--spacing-lg);
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
             margin: 2rem 0;
         }
 
-        .creature-card {
-            background: rgba(var(--color-primary-rgb), 0.05);
-            border: 2px solid var(--color-primary);
-            border-radius: var(--radius-xl);
-            padding: var(--spacing-lg);
-            transition: all var(--transition-base);
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text-secondary);
         }
 
-        .creature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(var(--color-primary-rgb), 0.4);
-            background: rgba(var(--color-primary-rgb), 0.1);
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .creature-card h3 {
-            color: var(--color-primary);
-            margin-top: 0;
-        }
-
-        .creature-icon {
-            font-size: 2.5rem;
-            margin-bottom: var(--spacing-sm);
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../../css/user-auth.css">
+    <script src="../../../js/firebase-auth.js"></script>
+    <script src="../../../js/auth-guard.js"></script>
+    <script src="../../../js/components/google-signin-button.js"></script>
+<!-- Submission Link System -->
+<script src="../../../js/submission-context.js"></script>
+<script src="../../../js/components/submission-link.js"></script>
+<link rel="stylesheet" href="../../../css/submission-link.css">
+
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="../../../js/firebase-init.js"></script>
+
+    <!-- Universal Grid System -->
+    <link rel="stylesheet" href="../../../css/universal-grid.css">
 </head>
 <body>
-<!-- Theme Picker Container -->
-<div id="theme-picker"></div>
+    <div id="theme-picker-container"></div>
 
-<div id="theme-picker-container"></div>
-<header>
-    <div class="header-content">
-        <h1>👹 Buddhist Mythical Beings</h1>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../../mythos/index.html">Home</a> →
-                <a href="../../index.html">Buddhist</a> →
-                <span>Creatures</span>
-</nav>
-<main>
-<div class="hero-section">
-<h2>Creatures &amp; Spirits of Buddhist Cosmology</h2>
-<p style="font-size: 1.2rem; max-width: 800px; margin: 1rem auto;">
-                Buddhist cosmology teems with diverse beings inhabiting the 31 realms of existence—from serpentine <a class="inline-search-link" href="../creatures/nagas.html">nagas</a>
-                guarding treasures beneath the earth to celestial devas dwelling in heavenly palaces, from fearsome
-                protector demons to subtle spirits of mountains and forests. All are subject to karma and rebirth,
-                trapped in <a class="inline-search-link" href="../cosmology/samsara.html">samsara</a> until they achieve enlightenment.
-            </p>
-</div>
-<section>
-<h2 style="color: var(--color-primary);">Celestial Beings</h2>
-<p>Divine inhabitants of the heavenly realms who live for eons in bliss but remain subject to death and rebirth.</p>
-<div class="creature-grid">
-<div class="creature-card">
-<div class="creature-icon">👼</div>
-<h3>Devas (Gods)</h3>
-<p><strong>Celestial Beings of the Six God Realms</strong></p>
-<p>Beings reborn in the six deva realms due to virtuous karma. They possess subtle bodies of light,
-                       experience immense pleasure, live for millions of years, and have limited supernatural powers. However,
-                       they are not creators or eternal—when their merit exhausts, they die and are reborn elsewhere. The
-                       Buddha and arhats are spiritually superior to devas because they have escaped rebirth entirely.</p>
-<p style="margin-top: 0.5rem;"><strong>Notable Devas:</strong> Indra/Sakra (king of Tavatimsa heaven),
-                       the Four Great Kings (guardians of directions), Brahma (high god of form realms)</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Realm:</em> Six Deva Realms, Form Realms</p>
-</div>
-<div class="creature-card">
-<div class="creature-icon">🧚</div>
-<h3>Dakinis</h3>
-<p><strong>Sky-Dancing Wisdom Beings</strong></p>
-<p>Feminine beings in Vajrayana Buddhism who embody enlightened energy and wisdom. They appear as
-                       beautiful or wrathful figures who test practitioners, grant teachings in visions, and guide tantric
-                       initiates. Dakinis dance in charnel grounds, revealing the emptiness of phenomena and the vitality
-                       of awakened energy. They represent the active, manifesting aspect of enlightened mind.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Role:</em> Teachers, Initiators, Wisdom revealers</p>
-</div>
-<div class="creature-card">
-<div class="creature-icon">🌟</div>
-<h3>Apsaras (Celestial Dancers)</h3>
-<p><strong>Heavenly Musicians &amp; Entertainers</strong></p>
-<p>Beautiful celestial beings who dance and perform music in the god realms. When virtuous beings are
-                       reborn in heaven, apsaras welcome them with divine performances. They represent the aesthetic bliss
-                       of heaven but also the danger of sensual attachment—gods enchanted by apsaras forget to practice
-dharma and eventually fall from heaven when their merit expires.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Realm:</em> Deva Realms</p>
-</div></div></section>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--color-primary);">Titans &amp; Demigods</h2>
-<div class="creature-grid">
-<div class="creature-card">
-<div class="creature-icon">⚔️</div>
-<h3>Asuras (Jealous Gods / Titans)</h3>
-<p><strong>Warriors Consumed by Envy</strong></p>
-<p>Powerful beings reborn due to mixed karma—they performed virtuous deeds but were motivated by pride,
-                       jealousy, and competitiveness. Asuras dwell in their own realm adjacent to the lowest heaven and
-                       constantly wage war against the devas, whom they envy. Despite their strength and magical weapons,
-                       they always lose battles. Their suffering comes from never being satisfied, always comparing themselves
-                       to others, and perpetual conflict.</p>
-<p style="margin-top: 0.5rem;"><strong>Teaching:</strong> The asura realm illustrates how
-                       competitiveness and jealousy prevent peace even when one possesses great power and pleasure.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Realm:</em> Asura Realm (between human and deva)</p>
-</div></div></section>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--color-primary);">Serpent Beings &amp; Water Spirits</h2>
-<div class="creature-grid">
-<div class="creature-card">
-<div class="creature-icon">🐉</div>
-<h3><a class="inline-search-link" href="../creatures/nagas.html">Nagas</a></h3>
-<p><strong>Serpent Spirits of Waters &amp; Treasures</strong></p>
-<p>Semi-divine beings appearing as humans with serpent tails or as multi-headed cobras. <a class="inline-search-link" href="../creatures/nagas.html">Nagas</a> inhabit
-                       oceans, rivers, lakes, and underground realms where they guard treasures and secret teachings. They
-                       can be benevolent protectors of Buddhism (Mucalinda the naga king sheltered <a class="inline-search-link" href="../deities/gautama_buddha.html">the Buddha</a> during a storm)
-                       or dangerous when angered (causing floods, droughts, and diseases). Some <a class="inline-search-link" href="../creatures/nagas.html">nagas</a> are highly evolved
-                       beings who practice dharma and protect sacred sites.</p>
-<p style="margin-top: 0.5rem;"><strong>Mythology:</strong> <a class="inline-search-link" href="../heroes/nagarjuna.html">Nagarjuna</a> retrieved the Prajnaparamita
-                       Sutras from the naga realm. The naga Mucalinda coiled around the meditating Buddha to shelter him
-                       from rain. Naga kings maintain palaces beneath the sea filled with Buddhist texts and treasures.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Realm:</em> Animal Realm / Special Naga Realm</p>
-</div>
-<div class="creature-card">
-<div class="creature-icon">🌊</div>
-<h3>Water Spirits (Nagins, Lake Guardians)</h3>
-<p><strong>Protectors of Sacred Waters</strong></p>
-<p>Lesser water beings including nagins (female <a class="inline-search-link" href="../creatures/nagas.html">nagas</a>), lake spirits, and river guardians. In Tibetan
-                       Buddhism, lu (<a class="inline-search-link" href="../creatures/nagas.html">nagas</a>) protect springs and lakes—disturbing their waters without offerings can cause
-                       illness. These spirits are propitiated with rituals and offerings to ensure good health, rain for
-                       crops, and protection from water disasters.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Role:</em> Environmental protection, Disease causation/cure</p>
-</div></div></section>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--color-primary);">Protector Spirits &amp; Dharmapalas</h2>
-<div class="creature-grid">
-<div class="creature-card">
-<div class="creature-icon">😈</div>
-<h3>Dharmapalas (Dharma Protectors)</h3>
-<p><strong>Wrathful Guardians of Buddhism</strong></p>
-<p>Fierce beings who vowed to protect Buddhist teachings and practitioners. Some are enlightened
-                       manifestations (like Mahakala and Palden Lhamo), while others are worldly spirits subdued by great
-                       masters and bound by oath. They appear in terrifying forms—with skulls, weapons, flames, and wrathful
-                       expressions—not from evil nature but from fierce compassion that destroys obstacles to enlightenment.
-                       Monasteriesperform rituals to invoke their protection.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Examples:</em> Mahakala, Palden Lhamo, Six-Armed Guardian</p>
-</div>
-<div class="creature-card">
-<div class="creature-icon">👹</div>
-<h3>Yakshas</h3>
-<p><strong>Nature Spirits &amp; Tree Guardians</strong></p>
-<p>Powerful nature spirits associated with trees, forests, and wild places. Yakshas can be benevolent
-                       protectors or dangerous when their territory is violated. In Buddhist art, yakshas often guard temple
-                       entrances as fierce doorkeepers. Some were converted by <a class="inline-search-link" href="../deities/gautama_buddha.html">the Buddha</a> and became dharma protectors; others
-                       remain worldly but generally friendly to Buddhism.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Role:</em> Nature guardians, Temple protectors</p>
-</div>
-<div class="creature-card">
-<div class="creature-icon">🗿</div>
-<h3>The Four Great Kings (Lokapalas)</h3>
-<p><strong>Guardian Kings of the Four Directions</strong></p>
-<p>Four massive warrior devas who protect Buddhism and guard the four cardinal directions. They dwell
-                       on the slopes of Mount Meru and command armies of spirits. Virudhaka (South) - blue, holding sword;
-                       Dhritarashtra (East) - white, playing lute; Virupaksha (West) - red, holding jewel and snake;
-                       Vaishravana (North) - yellow, holding umbrella and mongoose vomiting jewels (also called Kubera,
-                       god of wealth).</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Realm:</em> Catumaharajika Heaven</p>
-</div></div></section>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--color-primary);">Suffering Beings of Lower Realms</h2>
-<div class="creature-grid">
-<div class="creature-card">
-<div class="creature-icon">👻</div>
-<h3>Pretas (Hungry Ghosts)</h3>
-<p><strong>Beings of Insatiable Craving</strong></p>
-<p>Pitiful beings with enormous bellies, tiny throats, and mouths no bigger than a needle's eye. They
-                       wander desperately seeking food and drink but cannot swallow; when they try, substances turn to fire
-                       or excrement. Pretas are reborn due to greed, miserliness, addiction, and jealousy. They haunt places
-                       where they were attached in life. Some pretas have specific afflictions—those who see only pus and
-                       blood, those who cannot find any food for centuries, those whose very bodies burn them.</p>
-<p style="margin-top: 0.5rem;"><strong>Festival:</strong> During Hungry Ghost Month (7th lunar month),
-                       Buddhists make offerings to feed wandering pretas, accumulating merit and showing compassion.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Realm:</em> Preta Realm (Hungry Ghost Realm)</p>
-</div>
-<div class="creature-card">
-<div class="creature-icon">🐄</div>
-<h3>Animals</h3>
-<p><strong>Beings of Ignorance &amp; Instinct</strong></p>
-<p>Sentient beings reborn as animals due to ignorance, stupidity, and lack of moral awareness in past
-                       lives. The animal realm includes creatures on earth, in oceans, and in the air. While they can
-                       experience pleasure and pain, animals lack the intelligence to understand dharma or ethical principles.
-                       They live by instinct, often exploited by others as food, labor, or sport. <a class="inline-search-link" href="../deities/gautama_buddha.html">The Buddha</a> taught that all
-                       animals have been our mothers in past lives, deserving compassion.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Realm:</em> Animal Realm (Tiracchana-yoni)</p>
-</div>
-<div class="creature-card">
-<div class="creature-icon">🔥</div>
-<h3>Hell Guardians &amp; Torturers</h3>
-<p><strong>Manifest Karma-Demons</strong></p>
-<p>Fearsome beings that torture hell realm inhabitants—demons with iron claws, dogs with flaming teeth,
-                       birds that peck out eyes. Crucially, these are not separate evil beings but manifestations of the
-                       hell-dwellers' own negative karma. They appear as external torturers but are actually projections of
-                       guilt, hatred, and violence coming home to roost. This distinguishes Buddhist hells from eternal
-                       punishment by an external judge.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Realm:</em> Hell Realms (Naraka)</p>
-</div></div></section>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--color-primary);">Demons &amp; Obstacles</h2>
-<div class="creature-grid">
-<div class="creature-card">
-<div class="creature-icon">😈</div>
-<h3>Mara</h3>
-<p><strong>The Demon of Delusion</strong></p>
-<p>Not truly an independent demon but the personification of the forces that keep beings trapped in
-                       <a class="inline-search-link" href="../cosmology/samsara.html">samsara</a>—desire, fear, doubt, and ignorance. Mara attempted to prevent <a class="inline-search-link" href="../deities/gautama_buddha.html">the Buddha</a>'s enlightenment by
-                       sending armies of demons, seductive daughters, and terrifying visions, but <a class="inline-search-link" href="../deities/gautama_buddha.html">the Buddha</a> remained unmoved.
-                       Mara rules the highest heaven (Paranimmita-vasavatti), representing how even divine pleasure becomes
-                       an obstacle to liberation. He constantly tries to disrupt dharma practice, but recognizing his
-                       temptations dissolves his power.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Meaning:</em> Internal obstacles, not external evil</p>
-</div>
-<div class="creature-card">
-<div class="creature-icon">💀</div>
-<h3>Yama (Lord of Death)</h3>
-<p><strong>The Dharma King Who Judges Karma</strong></p>
-<p>The fearsome lord of death who appears to beings in the bardo (intermediate state) with a bull's
-                       head or wrathful face. He holds a mirror showing all actions and counts white and black stones
-                       representing good and evil deeds. But Yama doesn't arbitrarily judge—he merely reveals what karma
-                       has already determined. He is himself subject to rebirth, not an eternal deity. Yamantaka (slayer of
-                       Yama) is the wrathful form of <a class="inline-search-link" href="../deities/manjushri.html">Manjushri</a> who conquered death itself, showing wisdom defeats even death.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Role:</em> Death judge, Karma revealer</p>
-</div>
-<div class="creature-card">
-<div class="creature-icon">👺</div>
-<h3>Rakshasas</h3>
-<p><strong>Flesh-Eating Demons</strong></p>
-<p>Powerful, shapeshifting demons who devour humans and disrupt spiritual practice. In Buddhist
-                       mythology, many rakshasas were subdued by great masters (especially Padmasambhava in Tibet) and
-                       converted to become dharma protectors. Others remain as obstacles, representing the violent and
-                       predatory aspects of ignorance. They inhabit wild places, graveyards, and the periphery of
-                       civilization.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Status:</em> Some converted, some remain obstacles</p>
-</div></div></section>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--color-primary);">The Nature of Buddhist Beings</h2>
-<div class="card">
-<h3>All Beings Subject to Karma</h3>
-<p>Unlike creator gods in other traditions, Buddhist beings (except enlightened ones) are all trapped in
-                   <a class="inline-search-link" href="../cosmology/samsara.html">samsara</a>, subject to death and rebirth. Even the highest gods will eventually die. This levels the cosmic
-                   playing field—humans can achieve what gods cannot (enlightenment), and gods can fall to become animals or
-                   hell beings.</p>
-</div>
-<div class="card">
-<h3>Beings as Teachers</h3>
-<p>Every being has been one's mother in past lives, according to Buddhist teaching. This generates compassion
-                   and breaks down the barrier between self and other, human and non-human. Animals, hungry ghosts, and even
-                   demons deserve compassion as fellow sufferers in <a class="inline-search-link" href="../cosmology/samsara.html">samsara</a>.</p>
-</div>
-<div class="card">
-<h3>Symbolic &amp; Actual</h3>
-<p>Buddhist creatures function on multiple levels—they are actual beings in the six realms AND psychological
-                   states one can experience. Meeting Mara represents facing one's own desire and doubt. Becoming a hungry
-                   ghost means experiencing the mentality of insatiable craving. This dual understanding makes Buddhist
-                   mythology both cosmology and psychology.</p>
-</div></section>
-<section class="related-concepts" style="margin-top: 3rem;">
-<h2>🔗 Related Concepts</h2>
-<div class="grid">
-<div class="related-card">
-<h3>Within Buddhist Tradition</h3>
-<ul>
-<li>The 31 Realms - Where these beings dwell</li>
-<li><a href="../cosmology/afterlife.html">Rebirth</a> - How beings move between forms</li>
-<li>Enlightened Beings - Those who escaped the cycle</li>
-<li>Working with Spirits - Ritual relationships</li>
-</ul>
-</div>
-<div class="related-card">
-<h3>Similar Creatures in Other Traditions</h3>
-<ul>
-<li><a href="../../hindu/creatures/index.html">Hindu Beings</a> - Shared <a class="inline-search-link" href="../creatures/nagas.html">nagas</a>, yakshas, asuras</li>
-<li><a href="../../greek/creatures/index.html">Greek Monsters</a> - Different cosmology, similar diversity</li>
-<li><a href="../../norse/creatures/index.html">Norse Beings</a> - Multiple realms, diverse creatures</li>
-<li><a href="../../christian/creatures/index.html">Angels &amp; Demons</a> - Eternal rather than transient</li>
-</ul></div></div></section>
-<section class="interlink-panel">
-    <h3 class="interlink-title">Related Content</h3>
-    <div class="interlink-grid">
-        <div class="archetype-link-card">
-            <h4>Cross-Cultural Parallels</h4>
-            <ul>
-                <li><a href="../../hindu/creatures/index.html">Hindu Beings</a> - Shared nagas, yakshas, and asuras</li>
-                <li><a href="../../apocryphal/creatures/index.html">Jain Cosmological Beings</a> - Similar realm inhabitants</li>
-                <li><a href="../../chinese/creatures/index.html">Chinese Spirits</a> - Dragons and celestial beings</li>
-            </ul>
+    <header>
+        <div class="header-content">
+            <h1>🐉 Creatures</h1>
+        <div id="user-auth-nav"></div>
         </div>
-        <div class="archetype-link-card">
-            <h4>Related Archetypes</h4>
-            <ul>
-                <li><a href="../../../archetypes/index.html">The Guardian</a> - Protector spirits archetype</li>
-                <li><a href="../../../archetypes/index.html">The Trickster</a> - Shapeshifting beings archetype</li>
-                <li><a href="../../../archetypes/index.html">The Demon</a> - Obstacle beings archetype</li>
-            </ul>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../../mythos/index.html">Home</a> →
+        <a href="../index.html">Buddhist</a> →
+        <span>Creatures</span>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h2>Mythical Creatures & Beings</h2>
+            <p>Encounter the legendary creatures, monsters, and divine beasts.</p>
+        </section>
+
+        <!-- Main Entity Grid (Auto-Populated) -->
+        <div
+            data-auto-populate
+            data-mythology="buddhist"
+            data-category="creature"
+            data-display-mode="compact"
+            data-show-corpus="true">
+            <!-- Loading state -->
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading Creatures...</p>
+            </div>
         </div>
-    </div>
-    <div class="see-also-section">
-        <h4>See Also</h4>
-        <ul>
-            <li><a href="nagas.html">Nagas</a> - Serpent spirits of the waters</li>
-            <li><a href="../cosmology/realms.html">Six Realms</a> - Where these beings dwell</li>
-            <li><a href="../cosmology/samsara.html">Samsara</a> - The cycle binding all beings</li>
-        </ul>
-    </div>
-</section>
-</main>
-<footer>
-<p>
-<strong>Buddhist Mythical Beings</strong> - World Mythos Explorer<br/>
-<a href="../../../mythos/index.html">World Mythos Home</a> |
-            <a href="../../index.html">Buddhist Tradition</a>
-</p>
-</footer>
+
+        <!-- Optional: Filtered Sections -->
+        <!-- Uncomment and customize as needed -->
+        <!--
+        <div class="section-divider">
+            <div class="section-title">Sacred Creatures</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="buddhist"
+            data-category="creature"
+            data-subcategory="sacred"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+
+        <div class="section-divider">
+            <div class="section-title">Ritual Creatures</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="buddhist"
+            data-category="creature"
+            data-subcategory="ritual"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+        -->
+
+        <!-- Cross-Cultural Parallels -->
+        <section class="interlink-panel" style="margin-top: 4rem;">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Creatures Across Mythologies
+            </h3>
+
+            <div class="parallel-traditions glass-card">
+                <h4>🌍 Explore Other Traditions</h4>
+                <div class="parallel-grid">
+                    <!-- Add links to similar categories in other mythologies -->
+
+                    <a href="../../greek/creatures/index.html" class="parallel-card">
+                        <span class="tradition-flag">🏛️</span>
+                        <span class="parallel-name">Greek Creatures</span>
+                        <span class="tradition-label">Greek</span>
+                    </a>
+                    <a href="../../norse/creatures/index.html" class="parallel-card">
+                        <span class="tradition-flag">⚔️</span>
+                        <span class="parallel-name">Norse Creatures</span>
+                        <span class="tradition-label">Norse</span>
+                    </a>
+                    <a href="../../egyptian/creatures/index.html" class="parallel-card">
+                        <span class="tradition-flag">𓂀</span>
+                        <span class="parallel-name">Egyptian Creatures</span>
+                        <span class="tradition-label">Egyptian</span>
+                    </a>
+                    <a href="../../hindu/creatures/index.html" class="parallel-card">
+                        <span class="tradition-flag">🕉️</span>
+                        <span class="parallel-name">Hindu Creatures</span>
+                        <span class="tradition-label">Hindu</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- See Also Section -->
+        <div class="see-also-section" style="margin-top: 3rem;">
+            <h4>📚 See Also</h4>
+            <div class="see-also-links">
+                <a href="../deities/index.html" class="see-also-link">
+                    <span>⚡</span> Deities
+                </a>
+                <a href="../heroes/index.html" class="see-also-link">
+                    <span>🦸</span> Heroes
+                </a>
+                <a href="../places/index.html" class="see-also-link">
+                    <span>📍</span> Places
+                </a>
+                <a href="../index.html" class="see-also-link">
+                    <span>🏛️</span> Buddhist Home
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <strong>Creatures</strong> - Buddhist Mythology<br>
+            <a href="../../../mythos/index.html">World Mythos Home</a> |
+            <a href="../index.html">Buddhist Tradition</a>
+        </p>
+    </footer>
+
+    <!-- Initialize Auto-Populate -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const populator = new EntityAutoPopulator();
+            populator.populatePage();
+        });
+    </script>
+
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
 </body>
 </html>

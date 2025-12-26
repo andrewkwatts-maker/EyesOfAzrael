@@ -6,11 +6,18 @@
 <title>Kabbalah - Jewish Mysticism</title>
 <link href="../../../themes/theme-base.css" rel="stylesheet"/>
 <link href="../../../styles.css" rel="stylesheet"/>
+<link href="../../../css/spinner.css" rel="stylesheet"/>
 <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../themes/smart-links.css">
+<link rel="stylesheet" href="../../../css/user-auth.css">
+<link rel="stylesheet" href="../../../css/mythology-nav.css">
 <script defer src="../../../themes/smart-links.js"></script>
 <script defer src="../../../themes/theme-animations.js"></script>
 <script defer src="../../../themes/theme-picker.js"></script>
+<script defer src="../../../js/components/mythology-nav.js"></script>
+<script defer src="../../../js/user-auth.js"></script>
+<script defer src="../../../js/user-theories.js"></script>
+<script defer src="../../../js/components/theory-widget.js"></script>
 <style>
     :root {
         --kabbalah-gold: #FFD700;
@@ -595,6 +602,12 @@
         }
     }
 </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="../../../js/firebase-init.js"></script>
 </head>
 <body>
 <div id="theme-picker-container"></div>
@@ -606,6 +619,16 @@
 <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="../../../index.html">Home</a> &rarr; <a href="../../index.html">Mythos</a> &rarr; <a href="../index.html">Jewish</a> &rarr; <span>Kabbalah</span>
 </nav>
+
+<!-- Back to Base Mythology Link -->
+<div
+    data-mythology-nav="back"
+    data-base-url="../index.html"
+    data-base-name="Jewish Tradition"
+    data-base-icon="✡️"
+    data-advanced-name="Kabbalah - Mystical Esoteric Teachings">
+</div>
+
 <main>
 <!-- Hero Section -->
 <section class="hero-section">
@@ -873,5 +896,17 @@
     <a href="https://www.sefaria.org/texts/Kabbalah" target="_blank">Study Kabbalah at Sefaria.org</a>
 </p>
 </footer>
+
+<!-- Auth Modal Container -->
+<div id="auth-modal-container"></div>
+<script>
+    fetch('../../../auth-modal-firebase.html')
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('auth-modal-container').innerHTML = html;
+        })
+        .catch(error => console.error('Error loading auth modal:', error));
+</script>
+
 </body>
 </html>

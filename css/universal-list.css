@@ -1,0 +1,465 @@
+/**
+ * Universal List CSS
+ * Vertical list layouts for entity rendering
+ *
+ * Features:
+ * - Vertical list with icons
+ * - Categorized/grouped lists
+ * - Collapsible sections
+ * - Compact and detailed views
+ * - Theme integration
+ */
+
+/* ============================================
+   LIST CONTAINER
+   ============================================ */
+
+.universal-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md, 1rem);
+    width: 100%;
+    padding: var(--spacing-md, 1rem);
+}
+
+/* ============================================
+   LIST ITEM
+   ============================================ */
+
+.universal-list-item {
+    display: flex;
+    gap: var(--spacing-md, 1rem);
+    align-items: flex-start;
+    padding: var(--spacing-lg, 1.5rem);
+    background: var(--color-surface, rgba(26, 31, 58, 0.8));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid var(--color-border, rgba(139, 127, 255, 0.3));
+    border-radius: var(--radius-lg, 0.75rem);
+    transition: all var(--transition-base, 0.3s ease);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.universal-list-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--color-primary, #667eea);
+    opacity: 0;
+    transition: opacity var(--transition-fast, 0.15s ease);
+}
+
+.universal-list-item:hover {
+    border-color: var(--color-primary, #667eea);
+    box-shadow: 0 4px 16px rgba(var(--color-primary-rgb, 102, 126, 234), 0.3);
+    transform: translateX(4px);
+}
+
+.universal-list-item:hover::before {
+    opacity: 1;
+}
+
+/* ============================================
+   LIST ITEM COMPONENTS
+   ============================================ */
+
+/* Icon */
+.list-item-icon {
+    font-size: var(--font-size-4xl, 2.25rem);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--color-primary-rgb, 102, 126, 234), 0.1);
+    border-radius: var(--radius-lg, 0.75rem);
+    border: 2px solid rgba(var(--color-primary-rgb, 102, 126, 234), 0.3);
+}
+
+/* Content */
+.list-item-content {
+    flex: 1;
+    min-width: 0; /* Allow text truncation */
+}
+
+.list-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-md, 1rem);
+    margin-bottom: var(--spacing-sm, 0.5rem);
+    flex-wrap: wrap;
+}
+
+.list-item-title {
+    font-size: var(--font-size-lg, 1.125rem);
+    font-weight: var(--font-semibold, 600);
+    color: var(--color-text-primary, #e5e7eb);
+    margin: 0;
+}
+
+.list-item-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--transition-fast, 0.15s ease);
+}
+
+.list-item-title a:hover {
+    color: var(--color-primary, #667eea);
+}
+
+/* Badges */
+.list-item-badges {
+    display: flex;
+    gap: var(--spacing-xs, 0.25rem);
+    flex-wrap: wrap;
+}
+
+/* Description */
+.list-item-description {
+    color: var(--color-text-secondary, #9ca3af);
+    font-size: var(--font-size-sm, 0.875rem);
+    line-height: var(--leading-normal, 1.5);
+    margin: var(--spacing-sm, 0.5rem) 0;
+}
+
+/* Fields */
+.list-item-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm, 0.5rem);
+    margin-top: var(--spacing-md, 1rem);
+}
+
+.field-tag {
+    display: inline-block;
+    padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+    background: rgba(var(--color-primary-rgb, 102, 126, 234), 0.15);
+    border: 1px solid rgba(var(--color-primary-rgb, 102, 126, 234), 0.3);
+    border-radius: var(--radius-md, 0.5rem);
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-text-secondary, #9ca3af);
+}
+
+.field-tag strong {
+    color: var(--color-text-primary, #e5e7eb);
+}
+
+/* Actions */
+.list-item-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm, 0.5rem);
+}
+
+.list-item-actions .btn-view-details {
+    padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+    background: rgba(var(--color-primary-rgb, 102, 126, 234), 0.2);
+    color: var(--color-primary, #667eea);
+    border: 1px solid var(--color-primary, #667eea);
+    text-decoration: none;
+    border-radius: var(--radius-md, 0.5rem);
+    font-size: var(--font-size-sm, 0.875rem);
+    font-weight: var(--font-medium, 500);
+    transition: all var(--transition-fast, 0.15s ease);
+    white-space: nowrap;
+}
+
+.list-item-actions .btn-view-details:hover {
+    background: var(--color-primary, #667eea);
+    color: white;
+}
+
+/* ============================================
+   COMPACT LIST VARIANT
+   ============================================ */
+
+.universal-list.compact .universal-list-item {
+    padding: var(--spacing-md, 1rem);
+    gap: var(--spacing-sm, 0.5rem);
+}
+
+.universal-list.compact .list-item-icon {
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-2xl, 1.5rem);
+}
+
+.universal-list.compact .list-item-title {
+    font-size: var(--font-size-base, 1rem);
+}
+
+.universal-list.compact .list-item-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ============================================
+   CATEGORIZED/GROUPED LISTS
+   ============================================ */
+
+.universal-list-category {
+    margin-bottom: var(--spacing-2xl, 2.5rem);
+}
+
+.list-category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md, 1rem) 0;
+    margin-bottom: var(--spacing-md, 1rem);
+    border-bottom: 2px solid var(--color-primary, #667eea);
+}
+
+.list-category-title {
+    font-size: var(--font-size-xl, 1.25rem);
+    font-weight: var(--font-semibold, 600);
+    color: var(--color-primary, #667eea);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm, 0.5rem);
+}
+
+.list-category-count {
+    background: rgba(var(--color-primary-rgb, 102, 126, 234), 0.2);
+    color: var(--color-primary, #667eea);
+    padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+    border-radius: var(--radius-full, 9999px);
+    font-size: var(--font-size-sm, 0.875rem);
+    font-weight: var(--font-medium, 500);
+}
+
+/* ============================================
+   COLLAPSIBLE SECTIONS
+   ============================================ */
+
+.universal-list-section {
+    margin-bottom: var(--spacing-lg, 1.5rem);
+}
+
+.list-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md, 1rem);
+    background: rgba(var(--color-primary-rgb, 102, 126, 234), 0.1);
+    border: 2px solid rgba(var(--color-primary-rgb, 102, 126, 234), 0.3);
+    border-radius: var(--radius-lg, 0.75rem);
+    cursor: pointer;
+    transition: all var(--transition-fast, 0.15s ease);
+    user-select: none;
+}
+
+.list-section-header:hover {
+    background: rgba(var(--color-primary-rgb, 102, 126, 234), 0.2);
+}
+
+.list-section-title {
+    font-size: var(--font-size-lg, 1.125rem);
+    font-weight: var(--font-semibold, 600);
+    color: var(--color-text-primary, #e5e7eb);
+    margin: 0;
+}
+
+.list-section-toggle {
+    font-size: var(--font-size-xl, 1.25rem);
+    color: var(--color-primary, #667eea);
+    transition: transform var(--transition-base, 0.3s ease);
+}
+
+.list-section.collapsed .list-section-toggle {
+    transform: rotate(-90deg);
+}
+
+.list-section-content {
+    margin-top: var(--spacing-md, 1rem);
+    overflow: hidden;
+    transition: max-height var(--transition-base, 0.3s ease),
+                opacity var(--transition-base, 0.3s ease);
+}
+
+.list-section.collapsed .list-section-content {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+}
+
+.list-section:not(.collapsed) .list-section-content {
+    max-height: 10000px;
+    opacity: 1;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+    .universal-list {
+        padding: var(--spacing-sm, 0.5rem);
+        gap: var(--spacing-sm, 0.5rem);
+    }
+
+    .universal-list-item {
+        flex-direction: column;
+        padding: var(--spacing-md, 1rem);
+    }
+
+    .list-item-icon {
+        width: 50px;
+        height: 50px;
+        font-size: var(--font-size-3xl, 1.875rem);
+    }
+
+    .list-item-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .list-item-actions {
+        width: 100%;
+        margin-top: var(--spacing-sm, 0.5rem);
+    }
+
+    .list-item-actions .btn-view-details {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .list-item-title {
+        font-size: var(--font-size-base, 1rem);
+    }
+
+    .list-category-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs, 0.25rem);
+    }
+}
+
+/* ============================================
+   DIVIDERS
+   ============================================ */
+
+.list-divider {
+    height: 1px;
+    background: var(--color-border, rgba(139, 127, 255, 0.3));
+    margin: var(--spacing-lg, 1.5rem) 0;
+}
+
+.list-divider.strong {
+    height: 2px;
+    background: var(--color-primary, #667eea);
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.universal-list-empty {
+    text-align: center;
+    padding: var(--spacing-4xl, 4rem) var(--spacing-xl, 2rem);
+    color: var(--color-text-secondary, #9ca3af);
+}
+
+.universal-list-empty .empty-icon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-lg, 1.5rem);
+}
+
+/* ============================================
+   LOADING STATE
+   ============================================ */
+
+.universal-list.loading .universal-list-item {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ============================================
+   SELECTION STATE
+   ============================================ */
+
+.universal-list-item.selected {
+    border-color: var(--color-primary, #667eea);
+    background: rgba(var(--color-primary-rgb, 102, 126, 234), 0.1);
+}
+
+.universal-list-item.selected::before {
+    opacity: 1;
+}
+
+/* ============================================
+   ALTERNATING ROWS
+   ============================================ */
+
+.universal-list.striped .universal-list-item:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+.universal-list-item:focus-within {
+    outline: 2px solid var(--color-primary, #667eea);
+    outline-offset: 2px;
+}
+
+.list-section-header:focus {
+    outline: 2px solid var(--color-primary, #667eea);
+    outline-offset: 2px;
+}
+
+/* Screen reader only text */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .universal-list-item {
+        border-width: 3px;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .universal-list-item,
+    .list-section-toggle,
+    .list-section-content,
+    .btn-view-details {
+        transition: none;
+    }
+
+    .universal-list-item:hover {
+        transform: none;
+    }
+}

@@ -6,6 +6,7 @@
     <title>Sacred Places - World Mythos Explorer</title>
     <link rel="stylesheet" href="../themes/theme-base.css">
     <link rel="stylesheet" href="../themes/corpus-links.css">
+    <link rel="stylesheet" href="../css/spinner.css">
     <link rel="stylesheet" href="../styles.css">
     <script defer src="../themes/theme-picker.js"></script>
     <script defer src="../themes/theme-animations.js"></script>
@@ -13,6 +14,18 @@
     <script defer src="../themes/smart-links.js"></script>
 
     <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
         .hero-section {
             background: linear-gradient(135deg,
                 rgba(var(--color-primary-rgb), 0.8),
@@ -160,6 +173,76 @@
             font-size: var(--text-sm);
             color: var(--color-text-secondary);
         }
+
+        /* Add New Card Styling */
+        .add-place-card {
+            border: 2px dashed var(--color-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            background: rgba(var(--color-surface-rgb), 0.3);
+        }
+
+        .add-place-card:hover {
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.05);
+        }
+
+        .add-place-card .add-icon {
+            font-size: 3rem;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .add-place-card .add-text {
+            color: var(--color-text-primary);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-semibold);
+        }
+
+        /* Edit Icon for User-Owned Content */
+        .edit-icon {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            width: 24px;
+            height: 24px;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .edit-icon:hover {
+            background: var(--color-primary);
+            transform: scale(1.1);
+        }
+
+        .edit-icon svg {
+            width: 14px;
+            height: 14px;
+            fill: var(--color-text-primary);
+        }
+
+        /* Firebase Loading Container */
+        #firebase-places-container {
+            min-height: 200px;
+        }
+
+        .tradition-section {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-left: 4px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-lg) 0;
+        }
     </style>
 </head>
 <body>
@@ -183,6 +266,23 @@
                 across cultures and millennia. From ancient stone circles to living pilgrimage destinations, discover the places
                 where heaven touches earth.
             </p>
+        </div>
+
+        <!-- FIREBASE-LOADED PLACES -->
+        <div class="tradition-section" id="firebase-section">
+            <h2>🏛️ Sacred Places Collection</h2>
+            <p>Explore our growing collection of sacred sites and spiritual locations from traditions around the world.</p>
+            <div class="places-grid" id="firebase-places-container">
+                <!-- Loaded from Firebase -->
+                <div class="loading">
+                    <div class="spinner-container">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <div class="loading-text">Loading places from database...</div>
+                </div>
+            </div>
         </div>
 
         <!-- TEMPLES & SACRED STRUCTURES -->
@@ -328,19 +428,6 @@
                         <span class="tradition-tag">Buddhist</span>
                     </div>
                 </div>
-
-                <!-- BROKEN LINK: mountains/uluru.html does not exist -->
-                <!-- <div class="place-card" onclick="location.href='mountains/uluru.html'">
-                    <div class="place-icon">🪨</div>
-                    <h3 class="place-title">Uluru (Ayers Rock)</h3>
-                    <p class="place-location">Australia</p>
-                    <p class="place-description">
-                        Sacred to the Anangu people, Dreamtime creation site, living cultural landscape
-                    </p>
-                    <div class="tradition-tags">
-                        <span class="tradition-tag">Aboriginal</span>
-                    </div>
-                </div> -->
             </div>
         </div>
 
@@ -388,32 +475,6 @@
                         <span class="tradition-tag">Islamic</span>
                     </div>
                 </div>
-
-                <!-- BROKEN LINK: pilgrimage/santiago.html does not exist -->
-                <!-- <div class="place-card" onclick="location.href='../index.html'">
-                    <div class="place-icon">✝️</div>
-                    <h3 class="place-title">Santiago de Compostela</h3>
-                    <p class="place-location">Spain</p>
-                    <p class="place-description">
-                        End of the Camino de Santiago pilgrimage, burial site of Saint James the Apostle
-                    </p>
-                    <div class="tradition-tags">
-                        <span class="tradition-tag">Christian</span>
-                    </div>
-                </div> -->
-
-                <!-- BROKEN LINK: pilgrimage/ganges.html does not exist -->
-                <!-- <div class="place-card" onclick="location.href='../index.html'">
-                    <div class="place-icon">🌊</div>
-                    <h3 class="place-title">River Ganges</h3>
-                    <p class="place-location">India</p>
-                    <p class="place-description">
-                        Sacred river goddess, purification, liberation, spiritual cleansing
-                    </p>
-                    <div class="tradition-tags">
-                        <span class="tradition-tag">Hindu</span>
-                    </div>
-                </div> -->
             </div>
         </div>
 
@@ -460,83 +521,6 @@
                         <span class="tradition-tag">Christian</span>
                     </div>
                 </div>
-
-                <!-- BROKEN LINK: groves/ise-shrine.html does not exist -->
-                <!-- <div class="place-card" onclick="location.href='../index.html'">
-                    <div class="place-icon">⛩️</div>
-                    <h3 class="place-title">Ise Grand Shrine</h3>
-                    <p class="place-location">Japan</p>
-                    <p class="place-description">
-                        Most sacred Shinto shrine, dedicated to Amaterasu, rebuilt every 20 years
-                    </p>
-                    <div class="tradition-tags">
-                        <span class="tradition-tag">Shinto</span>
-                    </div>
-                </div> -->
-            </div>
-        </div>
-
-        <!-- STONE CIRCLES & MEGALITHS -->
-        <div class="category-section">
-            <div class="category-header">
-                <span class="category-icon">🗿</span>
-                <h2 class="category-title">Stone Circles & Megalithic Sites</h2>
-            </div>
-            <div class="places-grid">
-                <!-- BROKEN LINK: megaliths/stonehenge.html does not exist (megaliths directory doesn't exist) -->
-                <!-- <div class="place-card" onclick="location.href='../index.html'">
-                    <div class="place-icon">🗿</div>
-                    <h3 class="place-title">Stonehenge</h3>
-                    <p class="place-location">England</p>
-                    <p class="place-description">
-                        Neolithic stone circle aligned with solstices, ancient ceremonial and astronomical site
-                    </p>
-                    <div class="tradition-tags">
-                        <span class="tradition-tag">Celtic</span>
-                        <span class="tradition-tag">Prehistoric</span>
-                    </div>
-                </div> -->
-
-                <!-- BROKEN LINK: megaliths/newgrange.html does not exist (megaliths directory doesn't exist) -->
-                <!-- <div class="place-card" onclick="location.href='../index.html'">
-                    <div class="place-icon">☀️</div>
-                    <h3 class="place-title">Newgrange</h3>
-                    <p class="place-location">Ireland</p>
-                    <p class="place-description">
-                        Neolithic passage tomb aligned with winter solstice sunrise, older than pyramids
-                    </p>
-                    <div class="tradition-tags">
-                        <span class="tradition-tag">Celtic</span>
-                        <span class="tradition-tag">Prehistoric</span>
-                    </div>
-                </div> -->
-
-                <!-- BROKEN LINK: megaliths/carnac.html does not exist (megaliths directory doesn't exist) -->
-                <!-- <div class="place-card" onclick="location.href='../index.html'">
-                    <div class="place-icon">🪨</div>
-                    <h3 class="place-title">Carnac Stones</h3>
-                    <p class="place-location">France</p>
-                    <p class="place-description">
-                        Thousands of megalithic standing stones arranged in mysterious alignments
-                    </p>
-                    <div class="tradition-tags">
-                        <span class="tradition-tag">Celtic</span>
-                        <span class="tradition-tag">Prehistoric</span>
-                    </div>
-                </div> -->
-
-                <!-- BROKEN LINK: megaliths/easter-island.html does not exist (megaliths directory doesn't exist) -->
-                <!-- <div class="place-card" onclick="location.href='../index.html'">
-                    <div class="place-icon">🗿</div>
-                    <h3 class="place-title">Easter Island (Rapa Nui)</h3>
-                    <p class="place-location">Chile</p>
-                    <p class="place-description">
-                        Moai statues representing ancestors, sacred ceremonial sites
-                    </p>
-                    <div class="tradition-tags">
-                        <span class="tradition-tag">Polynesian</span>
-                    </div>
-                </div> -->
             </div>
         </div>
 
@@ -630,41 +614,6 @@
                     <p class="archetype-context">Mountains as axis mundi connecting heaven and earth, dwelling places of gods and sites of divine revelation.</p>
                     <span class="see-parallels">Olympus, Kailash, Sinai, Fuji →</span>
                 </a>
-
-                <!-- BROKEN LINK: ../archetypes/temple-complex/ does not exist -->
-                <!-- <a href="../archetypes/index.html" class="archetype-link-card">
-                    <div class="archetype-badge">🏛️ TEMPLE COMPLEX</div>
-                    <p class="archetype-context">Sacred architecture as microcosm of the universe, houses of gods, and centers of religious power.</p>
-                    <span class="see-parallels">Karnak, Angkor Wat, Parthenon →</span>
-                </a> -->
-
-                <!-- BROKEN LINK: ../archetypes/oracle-site/ does not exist -->
-                <!-- <a href="../archetypes/index.html" class="archetype-link-card">
-                    <div class="archetype-badge">🔮 ORACLE SITE</div>
-                    <p class="archetype-context">Places where the veil between worlds is thin, enabling divine communication and prophecy.</p>
-                    <span class="see-parallels">Delphi, Dodona, Siwa →</span>
-                </a> -->
-
-                <!-- BROKEN LINK: ../archetypes/pilgrimage-center/ does not exist -->
-                <!-- <a href="../archetypes/index.html" class="archetype-link-card">
-                    <div class="archetype-badge">🚶 PILGRIMAGE CENTER</div>
-                    <p class="archetype-context">Destinations of sacred journeys where transformation and spiritual merit are attained.</p>
-                    <span class="see-parallels">Jerusalem, Mecca, Varanasi →</span>
-                </a> -->
-
-                <!-- BROKEN LINK: ../archetypes/sacred-grove/ does not exist -->
-                <!-- <a href="../archetypes/index.html" class="archetype-link-card">
-                    <div class="archetype-badge">🌳 SACRED GROVE</div>
-                    <p class="archetype-context">Natural sanctuaries where nature worship and divine presence intersect in untouched wilderness.</p>
-                    <span class="see-parallels">Dodona, Glastonbury, Ise →</span>
-                </a> -->
-
-                <!-- BROKEN LINK: ../archetypes/world-center/ does not exist -->
-                <!-- <a href="../archetypes/index.html" class="archetype-link-card">
-                    <div class="archetype-badge">🌍 WORLD CENTER</div>
-                    <p class="archetype-context">The omphalos or navel of the world, cosmic axis points believed to be the center of creation.</p>
-                    <span class="see-parallels">Delphi, Jerusalem, Kailash →</span>
-                </a> -->
             </div>
         </section>
 
@@ -692,5 +641,170 @@
             <a href="../spiritual-items/index.html" style="color: var(--color-primary); text-decoration: none;">Items</a>
         </p>
     </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../firebase-config.js"></script>
+    <script src="../js/firebase-init.js"></script>
+    <script src="../js/firebase-content-loader.js"></script>
+
+    <script>
+        // Initialize Firebase Content Loader for Places
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Wait for Firebase to initialize
+                await waitForFirebase();
+
+                // Create content loader instance
+                const placeLoader = new FirebaseContentLoader(window.firebaseApp, {
+                    enableCache: true,
+                    enableLogging: true
+                });
+
+                // Initialize Firestore
+                placeLoader.initFirestore(window.firebaseApp);
+
+                // Load places from Firebase
+                await placeLoader.loadContent('places', {
+                    limit: 50 // Load up to 50 places
+                });
+
+                // Render places with custom rendering
+                renderPlaceCards(placeLoader.getData());
+
+            } catch (error) {
+                console.error('Error loading places:', error);
+                document.getElementById('firebase-places-container').innerHTML = `
+                    <div class="error-container" style="text-align: center; padding: 2rem;">
+                        <p style="color: var(--color-error);">Error loading places from database.</p>
+                        <p style="color: var(--color-text-secondary); font-size: 0.9rem;">${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+
+        /**
+         * Render place cards with edit icons and add card
+         */
+        function renderPlaceCards(places) {
+            const container = document.getElementById('firebase-places-container');
+            container.innerHTML = '';
+
+            // Check if user is authenticated
+            const currentUser = firebase.auth().currentUser;
+
+            // Render place cards
+            places.forEach(place => {
+                const card = createPlaceCard(place, currentUser);
+                container.appendChild(card);
+            });
+
+            // Add "+" card at the end if user is logged in
+            if (currentUser) {
+                const addCard = createAddPlaceCard();
+                container.appendChild(addCard);
+            }
+        }
+
+        /**
+         * Create a place card element
+         */
+        function createPlaceCard(place, currentUser) {
+            const card = document.createElement('div');
+            card.className = 'place-card';
+            card.setAttribute('data-id', place.id);
+
+            // Add edit icon if user owns this place
+            if (currentUser && place.createdBy === currentUser.uid) {
+                const editIcon = document.createElement('div');
+                editIcon.className = 'edit-icon';
+                editIcon.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                `;
+                editIcon.onclick = (e) => {
+                    e.stopPropagation();
+                    editPlace(place.id);
+                };
+                card.appendChild(editIcon);
+            }
+
+            // Card content
+            const icon = document.createElement('div');
+            icon.className = 'place-icon';
+            icon.textContent = place.icon || '🏛️';
+
+            const title = document.createElement('h3');
+            title.className = 'place-title';
+            title.textContent = place.name || 'Unnamed Place';
+
+            const location = document.createElement('p');
+            location.className = 'place-location';
+            location.textContent = place.location || 'Unknown Location';
+
+            const description = document.createElement('p');
+            description.className = 'place-description';
+            description.textContent = place.description || 'No description available.';
+
+            if (place.traditions && place.traditions.length > 0) {
+                const tags = document.createElement('div');
+                tags.className = 'tradition-tags';
+                place.traditions.forEach(tradition => {
+                    const tag = document.createElement('span');
+                    tag.className = 'tradition-tag';
+                    tag.textContent = tradition;
+                    tags.appendChild(tag);
+                });
+                card.appendChild(tags);
+            }
+
+            card.appendChild(icon);
+            card.appendChild(title);
+            card.appendChild(location);
+            card.appendChild(description);
+
+            // Add click handler to navigate to detail page
+            card.onclick = () => {
+                if (place.slug) {
+                    window.location.href = `places/${place.slug}.html`;
+                }
+            };
+
+            return card;
+        }
+
+        /**
+         * Create an "Add New Place" card
+         */
+        function createAddPlaceCard() {
+            const card = document.createElement('div');
+            card.className = 'place-card add-place-card';
+
+            card.innerHTML = `
+                <div class="add-icon">+</div>
+                <div class="add-text">Add New Place</div>
+                <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-top: 0.5rem;">
+                    Submit your own sacred place to the collection
+                </p>
+            `;
+
+            card.onclick = () => {
+                // Navigate to submission page with context
+                window.location.href = '../theories/user-submissions/edit.html?type=place';
+            };
+
+            return card;
+        }
+
+        /**
+         * Edit an existing place
+         */
+        function editPlace(placeId) {
+            window.location.href = `../theories/user-submissions/edit.html?type=place&id=${placeId}`;
+        }
+    </script>
 </body>
 </html>

@@ -6,6 +6,7 @@
     <title>Aztec Deities - The Mexica Pantheon</title>
     <link href="../../../themes/theme-base.css" rel="stylesheet"/>
     <link rel="stylesheet" href="../../../themes/mythology-colors.css">
+    <link rel="stylesheet" href="../../../css/spinner.css">
     <link href="../../../styles.css" rel="stylesheet"/>
     <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../themes/smart-links.css">
@@ -18,6 +19,15 @@
     <script src="../../../js/auth-guard.js"></script>
     <script src="../../../js/components/google-signin-button.js"></script>
     
+<!-- Submission Link System -->
+<script src="../../../js/submission-context.js"></script>
+<script src="../../../js/components/submission-link.js"></script>
+<link rel="stylesheet" href="../../../css/submission-link.css">
+
+
+<!-- Universal Entity Renderer -->
+<script defer src="../../../js/universal-entity-renderer.js"></script>
+<link rel="stylesheet" href="../../../css/entity-renderer.css">
 </head>
 <body>
     <div id="theme-picker-container"></div>
@@ -48,53 +58,140 @@
                 The most powerful and widely worshipped gods of the Aztec world, each presiding over essential aspects
                 of existence - from the sun's daily journey to the life-giving rains, from creation to destruction.
             </p>
-            <div class="pantheon-grid">
+            
+<!-- Dynamic Entity Grid (Firebase-Powered) -->
+<div id="entity-grid" class="pantheon-grid" data-mythology="aztec" data-entity-type="deity">
+    <!-- Entities will be loaded dynamically from Firebase -->
+    <div class="loading-placeholder">
+        <div class="spinner"></div>
+        <p>Loading deities...</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Firebase and renderer are available
+    if (typeof firebase === 'undefined' || !firebase.firestore) {
+        console.error('Firebase not initialized');
+        return;
+    }
+
+    if (typeof UniversalEntityRenderer === 'undefined') {
+        console.error('UniversalEntityRenderer not loaded');
+        return;
+    }
+
+    const renderer = new UniversalEntityRenderer();
+    const db = firebase.firestore();
+    const gridElement = document.getElementById('entity-grid');
+
+    // Query Firebase for aztec deities
+    db.collection('deities')
+        .where('mythology', '==', 'aztec')
+        .orderBy('name')
+        .get()
+        .then(snapshot => {
+            if (snapshot.empty) {
+                gridElement.innerHTML = '<p class="no-results">No deities found in database. Check back soon!</p>';
+                return;
+            }
+
+            const entities = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // Render the entities using the universal renderer
+            gridElement.innerHTML = renderer.renderGrid(entities, {
+                entityType: 'deity',
+                mythology: 'aztec',
+                showIcons: true,
+                enableClick: true
+            });
+
+            console.log(`Loaded ${entities.length} aztec deities from Firebase`);
+        })
+        .catch(error => {
+            console.error('Error loading deities:', error);
+            gridElement.innerHTML = '<p class="error-message">Error loading deities. Please try again later.</p>';
+        });
+});
+</script>
+
+<!-- Fallback: Static deity cards (shown if JavaScript disabled or Firebase unavailable) -->
+<noscript>
+
+<!-- Dynamic Entity Grid (Firebase-Powered) -->
+<div id="entity-grid" class="pantheon-grid" data-mythology="aztec" data-entity-type="deity">
+    <!-- Entities will be loaded dynamically from Firebase -->
+    <div class="loading-placeholder">
+        <div class="spinner"></div>
+        <p>Loading deities...</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Firebase and renderer are available
+    if (typeof firebase === 'undefined' || !firebase.firestore) {
+        console.error('Firebase not initialized');
+        return;
+    }
+
+    if (typeof UniversalEntityRenderer === 'undefined') {
+        console.error('UniversalEntityRenderer not loaded');
+        return;
+    }
+
+    const renderer = new UniversalEntityRenderer();
+    const db = firebase.firestore();
+    const gridElement = document.getElementById('entity-grid');
+
+    // Query Firebase for aztec deities
+    db.collection('deities')
+        .where('mythology', '==', 'aztec')
+        .orderBy('name')
+        .get()
+        .then(snapshot => {
+            if (snapshot.empty) {
+                gridElement.innerHTML = '<p class="no-results">No deities found in database. Check back soon!</p>';
+                return;
+            }
+
+            const entities = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // Render the entities using the universal renderer
+            gridElement.innerHTML = renderer.renderGrid(entities, {
+                entityType: 'deity',
+                mythology: 'aztec',
+                showIcons: true,
+                enableClick: true
+            });
+
+            console.log(`Loaded ${entities.length} aztec deities from Firebase`);
+        })
+        .catch(error => {
+            console.error('Error loading deities:', error);
+            gridElement.innerHTML = '<p class="error-message">Error loading deities. Please try again later.</p>';
+        });
+});
+</script>
+
+<!-- Fallback: Static deity cards (shown if JavaScript disabled or Firebase unavailable) -->
+<noscript>
+<div class="pantheon-grid">
                 <div class="deity-card" onclick="window.location.href='quetzalcoatl.html'">
                     <div class="hero-icon-display">&#128013;</div>
-                    <h3>Quetzalcoatl</h3>
-                    <p class="nahuatl-name">"Feathered Serpent"</p>
-                    <p><strong>God of Wind, Learning, and Creation</strong></p>
-                    <p>The plumed serpent who brought knowledge, the calendar, and maize to humanity. One of the four Tezcatlipocas, associated with Venus as the morning star.</p>
-                    <p class="deity-domains"><em>Domains:</em> Wind, Wisdom, Creation, Arts, Priesthood</p>
-                </div>
-
-                <div class="deity-card" onclick="window.location.href='tezcatlipoca.html'">
-                    <div class="hero-icon-display">&#129689;</div>
-                    <h3>Tezcatlipoca</h3>
-                    <p class="nahuatl-name">"Smoking Mirror"</p>
-                    <p><strong>God of Night, Sorcery, and Fate</strong></p>
-                    <p>The supreme god of Aztec religion, lord of the night sky, jaguar, and obsidian. Patron of warriors, sorcerers, and rulers. Eternal rival of Quetzalcoatl.</p>
-                    <p class="deity-domains"><em>Domains:</em> Night, Destiny, Sorcery, Jaguars, War</p>
-                </div>
-
-                <div class="deity-card" onclick="window.location.href='huitzilopochtli.html'">
-                    <div class="hero-icon-display">&#9728;</div>
-                    <h3>Huitzilopochtli</h3>
-                    <p class="nahuatl-name">"Hummingbird of the South"</p>
-                    <p><strong>God of War and the Sun</strong></p>
-                    <p>Patron deity of the Mexica people and god of war and sun. Born fully armed to defend his mother Coatlicue, he guided the Aztecs to found Tenochtitlan.</p>
-                    <p class="deity-domains"><em>Domains:</em> War, Sun, Sacrifice, Tribal Patron</p>
-                </div>
-
-                <div class="deity-card" onclick="window.location.href='tlaloc.html'">
-                    <div class="hero-icon-display">&#127783;</div>
-                    <h3>Tlaloc</h3>
-                    <p class="nahuatl-name">"He Who Makes Things Sprout"</p>
-                    <p><strong>God of Rain and Fertility</strong></p>
-                    <p>Ancient rain deity predating the Aztecs, dwelling atop mountains where clouds gather. Bringer of life-giving rain and devastating floods, ruler of Tlalocan paradise.</p>
-                    <p class="deity-domains"><em>Domains:</em> Rain, Fertility, Agriculture, Lightning</p>
-                </div>
-
-                <div class="deity-card" onclick="window.location.href='coatlicue.html'">
-                    <div class="hero-icon-display">&#128126;</div>
-                    <h3>Coatlicue</h3>
-                    <p class="nahuatl-name">"Serpent Skirt"</p>
-                    <p><strong>Earth Mother Goddess</strong></p>
-                    <p>Primordial earth mother who gave birth to the moon, stars, and Huitzilopochtli. Her terrifying visage represents both life-giving fertility and devouring death.</p>
-                    <p class="deity-domains"><em>Domains:</em> Earth, Fertility, Death, Creation</p>
-                </div>
-            </div>
-        </section>
+</noscript>
+<div class="static-fallback" style="display: none;">
+<div class="pantheon-grid">
+                <div class="deity-card" onclick="window.location.href='quetzalcoatl.html'">
+                    <div class="hero-icon-display">&#128013;</div>
+</div>
+</section>
 
         <div class="section-divider"></div>
 
@@ -204,5 +301,13 @@
             }
         });
     </script>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
 </body>
 </html>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../themes/theme-base.css">
     <link rel="stylesheet" href="../themes/corpus-links.css">
+    <link rel="stylesheet" href="../css/spinner.css">
     <script defer src="../themes/theme-picker.js"></script>
     <script defer src="../themes/theme-animations.js"></script>
     <link rel="stylesheet" href="../themes/smart-links.css">
@@ -12,6 +13,18 @@
     <title>Universal Herbalism - Mythos Explorer</title>
     <link rel="stylesheet" href="../styles.css">
     <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
         :root {
             --herb-primary: var(--color-primary);
             --herb-secondary: var(--color-secondary);
@@ -59,6 +72,8 @@
             border-radius: var(--radius-lg);
             padding: var(--spacing-lg);
             transition: all var(--transition-base);
+            position: relative;
+            cursor: pointer;
         }
 
         .herb-card:hover {
@@ -66,6 +81,61 @@
             box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.4);
             border-color: var(--color-primary);
             background: rgba(var(--color-primary-rgb), 0.1);
+        }
+
+        /* Add New Card Styling */
+        .add-herb-card {
+            border: 2px dashed var(--color-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            background: rgba(var(--color-surface-rgb), 0.3);
+        }
+
+        .add-herb-card:hover {
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.05);
+        }
+
+        .add-herb-card .add-icon {
+            font-size: 3rem;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .add-herb-card .add-text {
+            color: var(--color-text-primary);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-semibold);
+        }
+
+        /* Edit Icon for User-Owned Content */
+        .edit-icon {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            width: 24px;
+            height: 24px;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .edit-icon:hover {
+            background: var(--color-primary);
+            transform: scale(1.1);
+        }
+
+        .edit-icon svg {
+            width: 14px;
+            height: 14px;
+            fill: var(--color-text-primary);
         }
 
         .universal-herb {
@@ -108,6 +178,11 @@
             padding: var(--spacing-xl);
             margin: var(--spacing-xl) 0;
             box-shadow: var(--shadow-lg);
+        }
+
+        /* Firebase Loading Container */
+        #firebase-herbs-container {
+            min-height: 200px;
         }
     </style>
 </head>
@@ -156,6 +231,24 @@
             </p>
         </div>
 
+        <!-- FIREBASE-LOADED HERBS -->
+        <div class="tradition-section" id="firebase-section">
+            <h2>🌟 Sacred Herbs Collection</h2>
+            <p>Explore our growing collection of sacred and medicinal herbs from traditions around the world.</p>
+            <div class="herb-grid" id="firebase-herbs-container">
+                <!-- Loaded from Firebase -->
+                <div class="loading">
+                    <div class="spinner-container">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <div class="loading-text">Loading herbs from database...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATIC UNIVERSAL HERBS (Kept as-is for now) -->
         <div class="tradition-section" id="universal">
             <h2>🌟 Universal Sacred Plants</h2>
             <p>These plants appear across multiple traditions with similar spiritual and medicinal applications.</p>
@@ -516,9 +609,7 @@
         </div>
 
 
-        <!-- ============================================
-             INTERLINK PANELS - Quick Navigation by Tradition
-             ============================================ -->
+        <!-- INTERLINK PANELS - Quick Navigation by Tradition -->
         <section class="interlink-panel">
             <h3 class="interlink-header">
                 <span class="interlink-icon">🔗</span>
@@ -855,6 +946,157 @@
             <a href="../spiritual-places/index.html" style="color: var(--color-primary); text-decoration: none;">Places</a>
         </p>
     </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../firebase-config.js"></script>
+    <script src="../js/firebase-init.js"></script>
+    <script src="../js/firebase-content-loader.js"></script>
+
+    <script>
+        // Initialize Firebase Content Loader for Herbs
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Wait for Firebase to initialize
+                await waitForFirebase();
+
+                // Create content loader instance
+                const herbLoader = new FirebaseContentLoader(window.firebaseApp, {
+                    enableCache: true,
+                    enableLogging: true
+                });
+
+                // Initialize Firestore
+                herbLoader.initFirestore(window.firebaseApp);
+
+                // Load herbs from Firebase
+                await herbLoader.loadContent('herbs', {
+                    limit: 50 // Load up to 50 herbs
+                });
+
+                // Render herbs with custom rendering
+                renderHerbCards(herbLoader.getData());
+
+            } catch (error) {
+                console.error('Error loading herbs:', error);
+                document.getElementById('firebase-herbs-container').innerHTML = `
+                    <div class="error-container" style="text-align: center; padding: 2rem;">
+                        <p style="color: var(--color-error);">Error loading herbs from database.</p>
+                        <p style="color: var(--color-text-secondary); font-size: 0.9rem;">${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+
+        /**
+         * Render herb cards with edit icons and add card
+         */
+        function renderHerbCards(herbs) {
+            const container = document.getElementById('firebase-herbs-container');
+            container.innerHTML = '';
+
+            // Check if user is authenticated
+            const currentUser = firebase.auth().currentUser;
+
+            // Render herb cards
+            herbs.forEach(herb => {
+                const card = createHerbCard(herb, currentUser);
+                container.appendChild(card);
+            });
+
+            // Add "+" card at the end if user is logged in
+            if (currentUser) {
+                const addCard = createAddHerbCard();
+                container.appendChild(addCard);
+            }
+        }
+
+        /**
+         * Create a herb card element
+         */
+        function createHerbCard(herb, currentUser) {
+            const card = document.createElement('div');
+            card.className = 'herb-card';
+            card.setAttribute('data-id', herb.id);
+
+            // Add edit icon if user owns this herb
+            if (currentUser && herb.createdBy === currentUser.uid) {
+                const editIcon = document.createElement('div');
+                editIcon.className = 'edit-icon';
+                editIcon.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                `;
+                editIcon.onclick = (e) => {
+                    e.stopPropagation();
+                    editHerb(herb.id);
+                };
+                card.appendChild(editIcon);
+            }
+
+            // Card content
+            const title = document.createElement('h3');
+            title.textContent = herb.name || 'Unnamed Herb';
+
+            const mythology = document.createElement('p');
+            mythology.innerHTML = `<strong>Tradition:</strong> ${herb.mythology || 'Unknown'}`;
+
+            const description = document.createElement('p');
+            description.textContent = herb.description || 'No description available.';
+
+            if (herb.uses) {
+                const uses = document.createElement('p');
+                uses.innerHTML = `<strong>Uses:</strong> ${Array.isArray(herb.uses) ? herb.uses.join(', ') : herb.uses}`;
+                card.appendChild(uses);
+            }
+
+            card.appendChild(title);
+            card.appendChild(mythology);
+            card.appendChild(description);
+
+            // Add click handler to navigate to detail page
+            card.onclick = () => {
+                if (herb.slug) {
+                    window.location.href = `herbs/${herb.slug}.html`;
+                }
+            };
+
+            return card;
+        }
+
+        /**
+         * Create an "Add New Herb" card
+         */
+        function createAddHerbCard() {
+            const card = document.createElement('div');
+            card.className = 'herb-card add-herb-card';
+
+            card.innerHTML = `
+                <div class="add-icon">+</div>
+                <div class="add-text">Add New Herb</div>
+                <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-top: 0.5rem;">
+                    Submit your own herb to the collection
+                </p>
+            `;
+
+            card.onclick = () => {
+                // Navigate to submission page with context
+                window.location.href = '../theories/user-submissions/edit.html?type=herb';
+            };
+
+            return card;
+        }
+
+        /**
+         * Edit an existing herb
+         */
+        function editHerb(herbId) {
+            window.location.href = `../theories/user-submissions/edit.html?type=herb&id=${herbId}`;
+        }
+    </script>
 
     <script src="../mythos_data.js"></script>
 </body>

@@ -6,6 +6,7 @@
 <title>Celtic - Index</title>
 <link href="../../../themes/theme-base.css" rel="stylesheet"/>
     <link rel="stylesheet" href="../../../themes/mythology-colors.css">
+    <link rel="stylesheet" href="../../../css/spinner.css">
 <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../themes/smart-links.css">
 <script defer src="../../../themes/smart-links.js"></script>
@@ -18,6 +19,18 @@
     <script src="../../../js/auth-guard.js"></script>
     <script src="../../../js/components/google-signin-button.js"></script>
 
+<!-- Submission Link System -->
+<script src="../../../js/submission-context.js"></script>
+<script src="../../../js/components/submission-link.js"></script>
+<link rel="stylesheet" href="../../../css/submission-link.css">
+
+
+    <!-- Universal Grid System -->
+    <link rel="stylesheet" href="../../../css/universal-grid.css">
+
+<!-- Universal Entity Renderer -->
+<script defer src="../../../js/universal-entity-renderer.js"></script>
+<link rel="stylesheet" href="../../../css/entity-renderer.css">
 </head>
 <body>
 <div id="theme-picker-container"></div>
@@ -43,6 +56,68 @@
         </p></section>
 <section>
 <h2 style="color: var(--color-primary);">Major <a data-term="Deities" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View deities in ancient texts">Deities</a></h2>
+
+<!-- Dynamic Entity Grid (Firebase-Powered) -->
+<div id="entity-grid" class="pantheon-grid" data-mythology="celtic" data-entity-type="deity">
+    <!-- Entities will be loaded dynamically from Firebase -->
+    <div class="loading-placeholder">
+        <div class="spinner"></div>
+        <p>Loading deities...</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Firebase and renderer are available
+    if (typeof firebase === 'undefined' || !firebase.firestore) {
+        console.error('Firebase not initialized');
+        return;
+    }
+
+    if (typeof UniversalEntityRenderer === 'undefined') {
+        console.error('UniversalEntityRenderer not loaded');
+        return;
+    }
+
+    const renderer = new UniversalEntityRenderer();
+    const db = firebase.firestore();
+    const gridElement = document.getElementById('entity-grid');
+
+    // Query Firebase for celtic deities
+    db.collection('deities')
+        .where('mythology', '==', 'celtic')
+        .orderBy('name')
+        .get()
+        .then(snapshot => {
+            if (snapshot.empty) {
+                gridElement.innerHTML = '<p class="no-results">No deities found in database. Check back soon!</p>';
+                return;
+            }
+
+            const entities = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // Render the entities using the universal renderer
+            gridElement.innerHTML = renderer.renderGrid(entities, {
+                entityType: 'deity',
+                mythology: 'celtic',
+                showIcons: true,
+                enableClick: true
+            });
+
+            console.log(`Loaded ${entities.length} celtic deities from Firebase`);
+        })
+        .catch(error => {
+            console.error('Error loading deities:', error);
+            gridElement.innerHTML = '<p class="error-message">Error loading deities. Please try again later.</p>';
+        });
+});
+</script>
+
+<!-- Fallback: Static deity cards (shown if JavaScript disabled or Firebase unavailable) -->
+<noscript>
 <div class="deity-grid">
 <div class="deity-card">
 <h3 class="deity-name">⚡ <a data-term="The Dagda" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View the dagda in ancient texts">The Dagda</a></h3>
@@ -51,76 +126,18 @@
 <p><strong>Domains:</strong> Abundance, protection, magic, time, life and death</p>
 <p><a href="dagda.html" data-smart="celtic" style="color: var(--color-secondary);">Learn more →</a></p>
 </div>
+</noscript>
+<div class="static-fallback" style="display: none;">
+<div class="deity-grid">
 <div class="deity-card">
-<h3 class="deity-name">🔥 <a class="corpus-link" data-term="Brigid" data-tradition="celtic" href="../../../mythos/celtic/index.html" title="Search corpus for 'Brigid'">Brigid</a></h3>
-<p class="deity-title">Goddess of Fire, Poetry, and Healing</p>
-<p>Triple goddess embodying the <a data-term="Three" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View three in ancient texts">three</a> fires: hearth, forge, and inspiration. Patroness of poets, smiths, and healers. Her festival <a class="corpus-link" data-term="Imbolc" data-tradition="celtic" href="../../../mythos/celtic/index.html" title="Search corpus for 'Imbolc'">Imbolc</a> marks the first stirrings of spring.</p>
-<p><strong>Domains:</strong> Poetry, healing, smithcraft, <a data-term="Sacred" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View sacred in ancient texts">sacred</a> fire, wells</p>
-<p><a href="brigid.html" data-smart="celtic" style="color: var(--color-secondary);">Learn more →</a></p>
+<h3 class="deity-name">⚡ <a data-term="The Dagda" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View the dagda in ancient texts">The Dagda</a></h3>
+<p class="deity-title"><a class="corpus-link" data-term="The Good God" data-tradition="celtic" href="../../../mythos/celtic/index.html" title="Search corpus for 'The Good God'">The Good God</a>, <a class="corpus-link" data-term="Father of All" data-tradition="celtic" href="../../../mythos/celtic/index.html" title="Search corpus for 'Father of All'">Father of All</a></p>
+<p>Chief of the <a data-term="Tuatha Dé Danann" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View tuatha dé danann in ancient texts">Tuatha Dé Danann</a> and father figure to the divine race. Possesses three magical treasures: an inexhaustible cauldron, a club that kills with one end and revives with the other, and a harp that controls the seasons.</p>
+<p><strong>Domains:</strong> Abundance, protection, magic, time, life and death</p>
+<p><a href="dagda.html" data-smart="celtic" style="color: var(--color-secondary);">Learn more →</a></p>
 </div>
-<div class="deity-card">
-<h3 class="deity-name">☀️ <a class="corpus-link" data-term="Lugh" data-tradition="celtic" href="../../../mythos/celtic/index.html" title="Search corpus for 'Lugh'">Lugh</a></h3>
-<p class="deity-title">The Many-Skilled, Shining One</p>
-<p>Master of all arts and skills, warrior and craftsman, sun god and leader. Killed his grandfather Balor with a sling stone, saving the <a data-term="Tuatha Dé Danann" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View tuatha dé danann in ancient texts">Tuatha Dé Danann</a> from the Fomorians.</p>
-<p><strong>Domains:</strong> Light, skill, warfare, oaths, truth</p>
-<p><a href="lugh.html" data-smart="celtic" style="color: var(--color-secondary);">Learn more →</a></p>
 </div>
-<div class="deity-card">
-<h3 class="deity-name">🌿 <a class="corpus-link" data-term="Danu" data-tradition="celtic" href="../../../mythos/celtic/index.html" title="Search corpus for 'Danu'">Danu</a></h3>
-<p class="deity-title">Mother Goddess</p>
-<p>Primordial mother of the <a data-term="Tuatha Dé Danann" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View tuatha dé danann in ancient texts">Tuatha Dé Danann</a>, whose name they bear. Ancient earth and river goddess, embodiment of sovereignty and fertility. The Danube River is said to be named after her.</p>
-<p><strong>Domains:</strong> Motherhood, rivers, earth, fertility, sovereignty</p>
-<p><a href="danu.html" data-smart="celtic" style="color: var(--color-secondary);">Learn more →</a></p>
-</div>
-<div class="deity-card">
-<h3 class="deity-name">⚔️ <a data-term="The Morrigan" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View the morrigan in ancient texts">The Morrigan</a></h3>
-<p class="deity-title">Phantom Queen, Goddess of War</p>
-<p>Triple goddess (<a class="corpus-link" data-term="Badb" data-tradition="celtic" href="../../../mythos/celtic/index.html" title="Search corpus for 'Badb'">Badb</a>, <a class="corpus-link" data-term="Macha" data-tradition="celtic" href="../../../mythos/celtic/index.html" title="Search corpus for 'Macha'">Macha</a>, <a class="corpus-link" data-term="Nemain" data-tradition="celtic" href="../../../mythos/celtic/index.html" title="Search corpus for 'Nemain'">Nemain</a>) of battle, fate, and prophecy. Shape-shifter who appears as a crow or raven. Both terrifying and protective, she determines the outcome of battles.</p>
-<p><strong>Domains:</strong> War, fate, death, sovereignty, prophecy</p>
-<p><a href="morrigan.html" data-smart="celtic" style="color: var(--color-secondary);">Learn more →</a></p>
-</div>
-<div class="deity-card">
-<h3 class="deity-name">🌊 <a href="manannan.html" data-smart="celtic" style="color: var(--color-primary); text-decoration: none;">Manannan mac Lir</a></h3>
-<p class="deity-title">God of the Sea</p>
-<p>Guardian of <a data-term="The Otherworld" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View the otherworld in ancient texts">the Otherworld</a> and master of the seas. Possesses magical treasures including a self-navigating boat, a horse that rides over water, and a sword that never misses. Creates mists and illusions.</p>
-<p><strong>Domains:</strong> Sea, <a data-term="Otherworld" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View otherworld in ancient texts">Otherworld</a>, magic, navigation, mist</p>
-</div>
-<div class="deity-card">
-<h3 class="deity-name">🎵 Aengus Óg</h3>
-<p class="deity-title">God of Youth and Love</p>
-<p>Son of <a data-term="The Dagda" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View the dagda in ancient texts">the Dagda</a> and Boann, eternally young and beautiful. God of poetry, love, and dreams. Birds circle his head representing kisses. His palace is Brú na Bóinne (Newgrange).</p>
-<p><strong>Domains:</strong> Love, youth, poetry, beauty, dreams</p>
-</div>
-<div class="deity-card">
-<h3 class="deity-name">⚒️ Goibniu</h3>
-<p class="deity-title">Divine Smith</p>
-<p>Master smith of the <a data-term="Tuatha Dé Danann" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View tuatha dé danann in ancient texts">Tuatha Dé Danann</a> who forges magical weapons. His spears never miss, his swords never fail. Brews the ale of immortality at his feasts.</p>
-<p><strong>Domains:</strong> Smithcraft, craftsmanship, hospitality, immortality</p>
-</div>
-<div class="deity-card">
-<h3 class="deity-name">🌾 <a class="corpus-link" data-term="Nuada" data-tradition="celtic" href="../../../mythos/celtic/index.html" title="Search corpus for 'Nuada'">Nuada</a></h3>
-<p class="deity-title">The Silver-Armed King</p>
-<p>First king of the <a data-term="Tuatha Dé Danann" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View tuatha dé danann in ancient texts">Tuatha Dé Danann</a> in Ireland. Lost his arm in battle, was given a silver prosthetic by Dian Cécht. Wields a sword from which none can escape once it is drawn.</p>
-<p><strong>Domains:</strong> Kingship, justice, sovereignty, warfare</p>
-</div>
-<div class="deity-card">
-<h3 class="deity-name">🌊 Boann</h3>
-<p class="deity-title">Goddess of the River Boyne</p>
-<p>River goddess and mother of Aengus. Defied the <a data-term="Sacred" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View sacred in ancient texts">sacred</a> well Segais, which rose up and became the River Boyne. Represents the power and danger of water.</p>
-<p><strong>Domains:</strong> Rivers, water, fertility, transformation</p>
-</div>
-<div class="deity-card">
-<h3 class="deity-name">🎨 Ogma</h3>
-<p class="deity-title">God of Eloquence and Learning</p>
-<p>Divine warrior and poet, inventor of the Ogham alphabet. God of eloquence, poetry, and learning. Depicted as elderly and swarthy, but immensely strong.</p>
-<p><strong>Domains:</strong> Writing, eloquence, learning, strength, binding</p>
-</div>
-<div class="deity-card">
-<h3 class="deity-name">⚕️ Dian Cécht</h3>
-<p class="deity-title">God of Healing</p>
-<p>Divine physician who can heal any wound. Created <a class="corpus-link" data-term="Nuada" data-tradition="celtic" href="../../../mythos/celtic/index.html" title="Search corpus for 'Nuada'">Nuada</a>'s silver arm and the Well of Slaine that resurrects the dead. Father of medical knowledge.</p>
-<p><strong>Domains:</strong> Healing, medicine, herbalism, life, rejuvenation</p>
-</div></div></section>
+</section>
 <section style="margin-top: 3rem;">
 <h2 style="color: var(--color-primary);">The Four Treasures of the <a data-term="Tuatha Dé Danann" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View tuatha dé danann in ancient texts">Tuatha Dé Danann</a></h2>
 <p>When the <a data-term="Tuatha Dé Danann" data-tradition="celtic" class="corpus-link" href="../../../mythos/celtic/index.html" title="View tuatha dé danann in ancient texts">Tuatha Dé Danann</a> arrived in Ireland, they brought four magical treasures from their four cities:</p>
@@ -280,5 +297,13 @@
             }
         });
     </script>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
 </body>
 </html>

@@ -1,389 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Christian Sacred Herbs & Plants - World Mythos Explorer</title>
-<link rel="stylesheet" href="../../../themes/theme-base.css">
-<link rel="stylesheet" href="../../../themes/corpus-links.css">
-<link rel="stylesheet" href="../../../themes/smart-links.css">
-<script defer src="../../../themes/smart-links.js"></script>
-<script defer src="../../../themes/theme-picker.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herbs - Christian Mythology</title>
+
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="../../../themes/theme-base.css">
+<link rel="stylesheet" href="../../../css/spinner.css">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="../../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../../themes/smart-links.css">
+
+    <!-- Entity System -->
+    <link rel="stylesheet" href="../../../components/panels/panels.css">
+    <link rel="stylesheet" href="../../../components/panels/entity-panel-enhanced.css">
+    <link rel="stylesheet" href="../../../components/auto-populate.css">
+
+    <!-- Theme System -->
+    <script defer src="../../../themes/theme-picker.js"></script>
     <script defer src="../../../themes/theme-animations.js"></script>
+    <script defer src="../../../themes/smart-links.js"></script>
+
+    <!-- Entity Panel Components -->
+    <script src="../../../components/panels/entity-panel-enhanced.js"></script>
+    <script src="../../../components/auto-populate.js"></script>
+
+    <style>
+        :root {
+            --mythos-primary: #8B0000;
+            --mythos-secondary: #FFD700;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: var(--radius-2xl);
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero-section h2 {
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .section-divider {
+            margin: 4rem 0 2rem;
+            text-align: center;
+        }
+
+        .section-title {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.1),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border-radius: var(--radius-xl);
+            border: 2px solid rgba(var(--color-border-rgb), 0.3);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .entity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text-secondary);
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../../css/user-auth.css">
+    <script src="../../../js/firebase-auth.js"></script>
+    <script src="../../../js/auth-guard.js"></script>
+    <script src="../../../js/components/google-signin-button.js"></script>
+<!-- Submission Link System -->
+<script src="../../../js/submission-context.js"></script>
+<script src="../../../js/components/submission-link.js"></script>
+<link rel="stylesheet" href="../../../css/submission-link.css">
+
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="../../../js/firebase-init.js"></script>
+
+    <!-- Universal Grid System -->
+    <link rel="stylesheet" href="../../../css/universal-grid.css">
 </head>
 <body>
-<div id="theme-picker-container"></div>
-<header>
-    <div class="header-content">
-        <h1>🌿 Christian Sacred Herbs & Plants</h1>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../../mythos/index.html">Home</a> →
-<a href="../index.html">Christian</a> →
-<span>Herbs</span>
-</nav>
+    <div id="theme-picker-container"></div>
 
-<main>
-<section class="hero-section">
-<h2>Botanical Symbols of Faith</h2>
-<p>
-From the <a class="corpus-link" data-term="Garden of Eden" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=garden%20of%20eden" title="View garden of eden">Garden of Eden</a>
-to the gifts of the <a class="corpus-link" data-term="Magi" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=magi" title="View magi">Magi</a>,
-plants have carried profound spiritual significance in Christian tradition. Sacred herbs, resins, and botanicals appear throughout
-<a class="corpus-link" data-term="Scripture" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=scripture" title="View scripture">Scripture</a>,
-liturgy, and devotional practice, connecting the faithful to creation's sanctity and pointing toward divine mysteries.
-</p>
-</section>
+    <header>
+        <div class="header-content">
+            <h1>🌿 Herbs</h1>
+        <div id="user-auth-nav"></div>
+        </div>
+    </header>
 
-<section>
-<h2 class="section-header">🎁 The Gifts of the Magi - Sacred Resins</h2>
-<p>The wise men brought three gifts to the infant <a href="../deities/jesus-christ.html">Christ</a>, each laden with theological symbolism.</p>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../../mythos/index.html">Home</a> →
+        <a href="../index.html">Christian</a> →
+        <span>Herbs</span>
+    </nav>
 
-<div class="deity-grid">
-<div class="glass-card">
-<div class="deity-icon">💛</div>
-<h3>Frankincense</h3>
-<p>Aromatic resin from <em>Boswellia</em> trees, burned as incense in worship. Represents Christ's divinity and priestly office. "Let my prayer rise before you like incense" (Psalm 141:2).</p>
-<p><strong>Symbolism:</strong> Divinity, prayer, worship</p>
-<p><strong>Uses:</strong> Liturgical incense, consecration, meditation</p>
-</div>
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h2>Sacred Plants & Herbs</h2>
+            <p>Discover the sacred plants, herbs, and botanical wonders used in ancient practices.</p>
+        </section>
 
-<div class="glass-card">
-<div class="deity-icon">🟤</div>
-<h3>Myrrh</h3>
-<p>Bitter resin from <em>Commiphora</em> trees, used for anointing and embalming. Represents Christ's suffering and death. Mixed with wine, it was offered to Christ on the cross.</p>
-<p><strong>Symbolism:</strong> Mortality, sacrifice, burial</p>
-<p><strong>Uses:</strong> Anointing oil, funeral rites, medicinal balm</p>
-</div>
+        <!-- Main Entity Grid (Auto-Populated) -->
+        <div
+            data-auto-populate
+            data-mythology="christian"
+            data-category="herb"
+            data-display-mode="compact"
+            data-show-corpus="true">
+            <!-- Loading state -->
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading Herbs...</p>
+            </div>
+        </div>
 
-<div class="glass-card">
-<div class="deity-icon">👑</div>
-<h3>Gold (with Saffron)</h3>
-<p>While gold itself is a metal, the golden color is associated with saffron (from <em>Crocus sativus</em>), the world's most precious spice. Represents Christ's kingship and royalty.</p>
-<p><strong>Symbolism:</strong> Kingship, divine glory, preciousness</p>
-<p><strong>Uses:</strong> Liturgical vestments, sacred art, offerings</p>
-</div>
-</div>
-</section>
+        <!-- Optional: Filtered Sections -->
+        <!-- Uncomment and customize as needed -->
+        <!--
+        <div class="section-divider">
+            <div class="section-title">Sacred Herbs</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="christian"
+            data-category="herb"
+            data-subcategory="sacred"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
 
-<section style="margin-top: var(--spacing-4xl);">
-<h2 class="section-header">🌾 Biblical Plants of Spiritual Significance</h2>
+        <div class="section-divider">
+            <div class="section-title">Ritual Herbs</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="christian"
+            data-category="herb"
+            data-subcategory="ritual"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+        -->
 
-<div class="deity-grid">
-<div class="glass-card">
-<div class="deity-icon">🍇</div>
-<h3>Grape Vine</h3>
-<p>"I am the vine; you are the branches" (John 15:5). The vine represents <a href="../deities/jesus-christ.html">Christ</a> as source of spiritual life. Wine becomes his blood in the <a href="../rituals/index.html">Eucharist</a>.</p>
-<p><strong>Symbolism:</strong> Christ, communion, spiritual fruit</p>
-<p><strong>Biblical Context:</strong> John 15:1-8, Last Supper</p>
-</div>
+        <!-- Cross-Cultural Parallels -->
+        <section class="interlink-panel" style="margin-top: 4rem;">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Herbs Across Mythologies
+            </h3>
 
-<div class="glass-card">
-<div class="deity-icon">🌾</div>
-<h3>Wheat</h3>
-<p>"I am the bread of life" (John 6:35). Wheat becomes the bread of the Eucharist, Christ's body. Represents spiritual nourishment and the harvest of <a class="corpus-link" data-term="Souls" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=souls" title="View souls">souls</a>.</p>
-<p><strong>Symbolism:</strong> Eucharist, body of Christ, harvest</p>
-<p><strong>Biblical Context:</strong> John 6:35-58, parable of the sower</p>
-</div>
+            <div class="parallel-traditions glass-card">
+                <h4>🌍 Explore Other Traditions</h4>
+                <div class="parallel-grid">
+                    <!-- Add links to similar categories in other mythologies -->
 
-<div class="glass-card">
-<div class="deity-icon">🕊️</div>
-<h3>Olive</h3>
-<p>The olive tree and its oil symbolize peace, anointing, and the <a href="../deities/holy-spirit.html">Holy Spirit</a>. Noah's dove brought an olive branch. Christ prayed in the Garden of Gethsemane (olive press).</p>
-<p><strong>Symbolism:</strong> Peace, anointing, Holy Spirit</p>
-<p><strong>Biblical Context:</strong> Genesis 8:11, Garden of Gethsemane</p>
-</div>
+                    <a href="../../greek/herbs/index.html" class="parallel-card">
+                        <span class="tradition-flag">🏛️</span>
+                        <span class="parallel-name">Greek Herbs</span>
+                        <span class="tradition-label">Greek</span>
+                    </a>
+                    <a href="../../norse/herbs/index.html" class="parallel-card">
+                        <span class="tradition-flag">⚔️</span>
+                        <span class="parallel-name">Norse Herbs</span>
+                        <span class="tradition-label">Norse</span>
+                    </a>
+                    <a href="../../egyptian/herbs/index.html" class="parallel-card">
+                        <span class="tradition-flag">𓂀</span>
+                        <span class="parallel-name">Egyptian Herbs</span>
+                        <span class="tradition-label">Egyptian</span>
+                    </a>
+                    <a href="../../hindu/herbs/index.html" class="parallel-card">
+                        <span class="tradition-flag">🕉️</span>
+                        <span class="parallel-name">Hindu Herbs</span>
+                        <span class="tradition-label">Hindu</span>
+                    </a>
+                </div>
+            </div>
+        </section>
 
-<div class="glass-card">
-<div class="deity-icon">🌴</div>
-<h3>Palm</h3>
-<p>Symbol of victory and <a class="corpus-link" data-term="Martyrdom" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=martyrdom" title="View martyrdom">martyrdom</a>. People waved palm branches to welcome <a href="../deities/jesus-christ.html">Jesus</a> into Jerusalem on Palm Sunday. Martyrs hold palms in heavenly glory.</p>
-<p><strong>Symbolism:</strong> Victory, triumph, martyrdom</p>
-<p><strong>Biblical Context:</strong> John 12:13, Revelation 7:9</p>
-</div>
+        <!-- See Also Section -->
+        <div class="see-also-section" style="margin-top: 3rem;">
+            <h4>📚 See Also</h4>
+            <div class="see-also-links">
+                <a href="../deities/index.html" class="see-also-link">
+                    <span>⚡</span> Deities
+                </a>
+                <a href="../heroes/index.html" class="see-also-link">
+                    <span>🦸</span> Heroes
+                </a>
+                <a href="../places/index.html" class="see-also-link">
+                    <span>📍</span> Places
+                </a>
+                <a href="../index.html" class="see-also-link">
+                    <span>🏛️</span> Christian Home
+                </a>
+            </div>
+        </div>
+    </main>
 
-<div class="glass-card">
-<div class="deity-icon">🌹</div>
-<h3>Rose</h3>
-<p>The "rose without thorns" symbolizes <a class="corpus-link" data-term="Mary" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=mary" title="View mary">Mary's</a> purity and sinlessness. The <a href="../rituals/index.html">Rosary</a> takes its name from rose gardens of prayer.</p>
-<p><strong>Symbolism:</strong> Mary, purity, divine love</p>
-<p><strong>Associations:</strong> Immaculate Conception, Rosary devotion</p>
-</div>
+    <footer>
+        <p>
+            <strong>Herbs</strong> - Christian Mythology<br>
+            <a href="../../../mythos/index.html">World Mythos Home</a> |
+            <a href="../index.html">Christian Tradition</a>
+        </p>
+    </footer>
 
-<div class="glass-card">
-<div class="deity-icon">🌺</div>
-<h3>Lily</h3>
-<p>"Consider the lilies" (Matthew 6:28). The white lily symbolizes purity, chastity, and the Virgin Mary. The <em>Madonna Lily</em> often appears in Annunciation art.</p>
-<p><strong>Symbolism:</strong> Purity, virginity, resurrection</p>
-<p><strong>Biblical Context:</strong> Matthew 6:28-30, Song of Songs 2:1</p>
-</div>
+    <!-- Initialize Auto-Populate -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const populator = new EntityAutoPopulator();
+            populator.populatePage();
+        });
+    </script>
 
-<div class="glass-card">
-<div class="deity-icon">🌿</div>
-<h3>Cedar of Lebanon</h3>
-<p>Majestic tree used to build Solomon's Temple. Represents strength, incorruptibility, and the faithful. "The righteous flourish like a cedar in Lebanon" (Psalm 92:12).</p>
-<p><strong>Symbolism:</strong> Strength, righteousness, temple</p>
-<p><strong>Biblical Context:</strong> 1 Kings 5-6, Psalm 92:12</p>
-</div>
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
 
-<div class="glass-card">
-<div class="deity-icon">🍃</div>
-<h3>Hyssop</h3>
-<p>Purifying herb used in Temple rituals and the Passover. "Cleanse me with hyssop, and I will be clean" (Psalm 51:7). Vinegar was offered to Christ on a hyssop branch.</p>
-<p><strong>Symbolism:</strong> Purification, cleansing, sacrifice</p>
-<p><strong>Biblical Context:</strong> Exodus 12:22, Psalm 51:7, John 19:29</p>
-</div>
-</div>
-</section>
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
 
-<section style="margin-top: var(--spacing-4xl);">
-<h2 class="section-header">🌸 Marian Flowers</h2>
-<p>Plants especially associated with the Blessed Virgin <a class="corpus-link" data-term="Mary" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=mary" title="View mary">Mary</a>.</p>
-
-<div class="deity-grid">
-<div class="glass-card">
-<div class="deity-icon">💙</div>
-<h3>Mary's Blue Mantle Flower</h3>
-<p><em>Veronica</em> flowers, said to bear the image of Mary's face or veil. Blue flowers represent her heavenly nature and the traditional color of her mantle.</p>
-<p><strong>Symbolism:</strong> Mary's protection, heavenly realm</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">⭐</div>
-<h3>Lady's Mantle</h3>
-<p><em>Alchemilla vulgaris</em>, with leaves that gather dew like jewels, symbolizing Mary's tears and her intercessory prayer gathering like morning dew.</p>
-<p><strong>Symbolism:</strong> Mary's tears, intercession, protection</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🌼</div>
-<h3>Marigold (Mary's Gold)</h3>
-<p>Golden flowers that open at sunrise, symbolizing Mary's radiance and her role as the dawn of <a class="corpus-link" data-term="Salvation" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=salvation" title="View salvation">salvation</a>.</p>
-<p><strong>Symbolism:</strong> Mary's glory, dawn, resurrection</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🌷</div>
-<h3>Our Lady's Bedstraw</h3>
-<p><em>Galium verum</em>, legend says this fragrant herb lined the manger where <a href="../deities/jesus-christ.html">Jesus</a> was born, turning golden in honor of the Christ child.</p>
-<p><strong>Symbolism:</strong> Nativity, humility, service</p>
-</div>
-</div>
-</section>
-
-<section style="margin-top: var(--spacing-4xl);">
-<h2 class="section-header">🌿 Herbs of Protection & Blessing</h2>
-
-<div class="deity-grid">
-<div class="glass-card">
-<div class="deity-icon">🌿</div>
-<h3>Rosemary</h3>
-<p>"Rosemary for remembrance." Associated with memory, fidelity, and <a class="corpus-link" data-term="Virgin Mary" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=virgin%20mary" title="View virgin mary">Mary</a>. Legend says Mary spread her blue cloak on rosemary, turning its white flowers blue.</p>
-<p><strong>Symbolism:</strong> Remembrance, fidelity, protection</p>
-<p><strong>Uses:</strong> Funerals, weddings, blessings</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🌾</div>
-<h3>Sage</h3>
-<p><em>Salvia</em> means "to save." Associated with wisdom, health, and longevity. Used in cleansing rituals and protection blessings.</p>
-<p><strong>Symbolism:</strong> Wisdom, salvation, immortality</p>
-<p><strong>Uses:</strong> Purification, healing, protection</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">✝️</div>
-<h3>St. John's Wort</h3>
-<p><em>Hypericum perforatum</em>, blooms around St. John's feast day (June 24). Used to ward off evil and heal wounds, physical and spiritual.</p>
-<p><strong>Symbolism:</strong> Protection, healing, light</p>
-<p><strong>Feast Day:</strong> June 24 (Nativity of St. John the Baptist)</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🍀</div>
-<h3>Shamrock</h3>
-<p>Three-leafed clover used by St. <a href="../heroes/index.html">Patrick</a> to explain the <a class="corpus-link" data-term="Trinity" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=trinity" title="View trinity">Trinity</a>. Ireland's national symbol of faith and good fortune.</p>
-<p><strong>Symbolism:</strong> Trinity, Irish Christianity, faith</p>
-<p><strong>Feast Day:</strong> March 17 (St. Patrick's Day)</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🌱</div>
-<h3>Basil</h3>
-<p>"Royal herb" (<em>basileus</em> = king). Associated with royalty and the finding of the True Cross by St. Helena. In Orthodox tradition, used to bless holy water.</p>
-<p><strong>Symbolism:</strong> Royalty, True Cross, blessing</p>
-<p><strong>Uses:</strong> Water blessing, protection, consecration</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🌿</div>
-<h3>Rue</h3>
-<p>"Herb of grace." Associated with repentance, mercy, and protection against evil. Sprinkled during exorcism and blessing rites in some traditions.</p>
-<p><strong>Symbolism:</strong> Repentance, grace, protection</p>
-<p><strong>Uses:</strong> Exorcism, blessing water, spiritual cleansing</p>
-</div>
-</div>
-</section>
-
-<section style="margin-top: var(--spacing-4xl);">
-<h2 class="section-header">🌳 Trees of Theological Significance</h2>
-
-<div class="deity-grid">
-<div class="glass-card">
-<div class="deity-icon">🍎</div>
-<h3>Apple (Tree of Knowledge)</h3>
-<p>Though not explicitly named in Genesis, tradition identifies the forbidden fruit as an apple. Represents the <a class="corpus-link" data-term="Fall" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=fall" title="View fall">Fall</a>, temptation, and redemption through <a href="../deities/jesus-christ.html">Christ</a> (the New Adam).</p>
-<p><strong>Symbolism:</strong> Fall, temptation, redemption</p>
-<p><strong>Biblical Context:</strong> Genesis 3, typology of Adam/Christ</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🌲</div>
-<h3>Evergreen (Fir, Pine)</h3>
-<p>Evergreens symbolize eternal life and Christ's victory over death. Christmas trees represent the Tree of Life in paradise regained.</p>
-<p><strong>Symbolism:</strong> Eternal life, immortality, paradise</p>
-<p><strong>Uses:</strong> Christmas traditions, Advent wreaths</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🌳</div>
-<h3>Fig Tree</h3>
-<p><a href="../deities/jesus-christ.html">Jesus</a> cursed the barren fig tree as a sign of judgment. Also represents Israel and the call to bear spiritual fruit. Nathanael sat under a fig tree when called by Christ.</p>
-<p><strong>Symbolism:</strong> Fruitfulness, judgment, calling</p>
-<p><strong>Biblical Context:</strong> Mark 11:12-14, John 1:48</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🌿</div>
-<h3>Mustard</h3>
-<p>Though a small seed, it grows into a great tree. "The kingdom of <a href="../cosmology/heaven.html">heaven</a> is like a mustard seed" (Matthew 13:31). Represents faith's growth.</p>
-<p><strong>Symbolism:</strong> Faith, Kingdom growth, transformation</p>
-<p><strong>Biblical Context:</strong> Matthew 13:31-32, Luke 17:6</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🌳</div>
-<h3>Sycamore</h3>
-<p>Zacchaeus climbed a sycamore to see <a href="../deities/jesus-christ.html">Jesus</a> (Luke 19:4). Represents seeking Christ despite obstacles and the grace of conversion.</p>
-<p><strong>Symbolism:</strong> Seeking, conversion, divine encounter</p>
-<p><strong>Biblical Context:</strong> Luke 19:1-10</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">☘️</div>
-<h3>Ivy</h3>
-<p>Evergreen vine clinging to walls and trees, represents eternal life, faithfulness, and the soul's dependence on Christ. In medieval art, often paired with holly.</p>
-<p><strong>Symbolism:</strong> Eternal life, fidelity, dependence on God</p>
-<p><strong>Uses:</strong> Christmas decorations, church ornamentation</p>
-</div>
-</div>
-</section>
-
-<section style="margin-top: var(--spacing-4xl);">
-<h2 class="section-header">🌿 Liturgical Herbs & Ritual Plants</h2>
-
-<div class="deity-grid">
-<div class="glass-card">
-<div class="deity-icon">🌿</div>
-<h3>Boxwood</h3>
-<p>In regions without palms, boxwood branches are blessed on Palm Sunday. Represents endurance, steadfastness, and eternal life (evergreen).</p>
-<p><strong>Symbolism:</strong> Endurance, immortality, blessing</p>
-<p><strong>Liturgical Use:</strong> Palm Sunday substitute</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🌾</div>
-<h3>Strewing Herbs</h3>
-<p>Sweet-smelling herbs (lavender, mint, chamomile) scattered on church floors for feast days. Fragrance rising represents prayers ascending to <a href="../deities/god-father.html">God</a>.</p>
-<p><strong>Symbolism:</strong> Prayer, purification, celebration</p>
-<p><strong>Liturgical Use:</strong> Major feasts, processions</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">💐</div>
-<h3>Easter Flowers</h3>
-<p>Easter lilies, daffodils, and tulips symbolize <a class="corpus-link" data-term="Resurrection" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=resurrection" title="View resurrection">resurrection</a> and new life emerging from death (bulbs from the earth).</p>
-<p><strong>Symbolism:</strong> Resurrection, new life, hope</p>
-<p><strong>Liturgical Season:</strong> Easter</p>
-</div>
-
-<div class="glass-card">
-<div class="deity-icon">🌲</div>
-<h3>Advent Wreath Greens</h3>
-<p>Evergreen branches (pine, fir, holly, ivy) formed into a circle represent eternal life and God's endless love. The circle has no beginning or end.</p>
-<p><strong>Symbolism:</strong> Eternity, hope, anticipation</p>
-<p><strong>Liturgical Season:</strong> Advent</p>
-</div>
-</div>
-</section>
-
-<section class="related-concepts" style="margin-top: var(--spacing-4xl);">
-<h2 class="section-header">🔗 Related Concepts</h2>
-<div class="deity-grid">
-<div class="glass-card">
-<h3>Within Christian Tradition</h3>
-<ul>
-<li><a href="../symbols/index.html">Sacred Symbols</a> - Cross, fish, and visual signs</li>
-<li><a href="../rituals/index.html">Rituals & Sacraments</a> - Seven sacraments and liturgy</li>
-<li><a href="../cosmology/index.html">Cosmology & Creation</a> - Garden of Eden and creation</li>
-<li><a href="../deities/index.html">Divine Figures</a> - Trinity, angels, and saints</li>
-<li><a href="../heroes/index.html">Heroes & Saints</a> - Exemplars of faith</li>
-</ul>
-</div>
-
-<div class="glass-card">
-<h3>Sacred Plants in Other Traditions</h3>
-<ul>
-<li><a href="../../../herbalism/traditions/jewish/index.html">Jewish Herbs</a> - Passover herbs, Temple incense</li>
-<li><a href="../../greek/herbs/index.html">Greek Herbs</a> - Laurel, myrtle, sacred plants</li>
-<li><a href="../../egyptian/herbs/index.html">Egyptian Herbs</a> - Lotus, papyrus, sacred botanicals</li>
-<li><a href="../../hindu/herbs/index.html">Hindu Herbs</a> - Tulsi, lotus, sacred flora</li>
-</ul>
-</div>
-</div>
-</section>
-
-<!-- Interlink Panel -->
-<section class="interlink-panel">
-<h2>Sacred Connections</h2>
-<div class="interlink-grid">
-<div class="archetype-link-card">
-<h3>Jewish Roots & Parallels</h3>
-<ul>
-<li><a href="../../../herbalism/traditions/jewish/hyssop.html">Hyssop</a> - Purification herb in Torah rituals</li>
-<li><a href="../../../index.html">Bitter Herbs</a> - Maror of the Passover seder</li>
-<li><a href="../../jewish/rituals/index.html">Temple Incense</a> - The sacred ketoret blend</li>
-<li><a href="../../../index.html">Shabbat</a> - Holy herbs and spices in ritual</li>
-</ul>
-</div>
-<div class="archetype-link-card">
-<h3>Gnostic Connections</h3>
-<ul>
-<li><a href="../../../index.html">Sophia</a> - Wisdom and herbal knowledge</li>
-<li><a href="../../../index.html">Gnostic Anointing</a> - Sacred oils in initiation</li>
-<li><a href="../gnostic/texts/index.html">Gospel of Philip</a> - Chrism and sacred substances</li>
-</ul>
-</div>
-<div class="parallel-card">
-<h3>Cross-Cultural Parallels</h3>
-<ul>
-<li><a href="../../egyptian/herbs/lotus.html">Egyptian Lotus</a> - Sacred flower of rebirth</li>
-<li><a href="../../../herbalism/traditions/hindu/tulsi.html">Hindu Tulsi</a> - Holy basil, divine plant</li>
-<li><a href="../../greek/herbs/laurel.html">Greek Laurel</a> - Apollo's sacred plant</li>
-<li><a href="../../../herbalism/universal/mistletoe.html">Celtic Mistletoe</a> - Druidic sacred herb</li>
-</ul>
-</div>
-</div>
-</section>
-</main>
-
-<footer>
-<p>
-<strong>Christian Sacred Herbs & Plants</strong> - World Mythos Explorer<br/>
-<a href="../../../mythos/index.html">World Mythos Home</a> |
-<a href="../index.html">Christian Tradition</a>
-</p>
-</footer>
 </body>
 </html>

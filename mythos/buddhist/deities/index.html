@@ -5,6 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Buddhist Enlightened Beings - Buddha" - Buddhist Mythology</title>
 <link href="../../../themes/theme-base.css" rel="stylesheet"/>
+<link rel="stylesheet" href="../../../css/spinner.css">
 <link href="../../../styles.css" rel="stylesheet"/>
 <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../themes/smart-links.css">
@@ -85,6 +86,15 @@
             padding-top: 2rem;
         }
     </style>
+<!-- Submission Link System -->
+<script src="../../../js/submission-context.js"></script>
+<script src="../../../js/components/submission-link.js"></script>
+<link rel="stylesheet" href="../../../css/submission-link.css">
+
+
+<!-- Universal Entity Renderer -->
+<script defer src="../../../js/universal-entity-renderer.js"></script>
+<link rel="stylesheet" href="../../../css/entity-renderer.css">
 </head>
 <body>
 <!-- Theme Picker Container -->
@@ -119,15 +129,78 @@ Siddhartha Gautama, the historical Buddha, achieved perfect enlightenment under 
                 and taught the path to liberation for 45 years. In Mahayana Buddhism, countless Buddhas exist
                 throughout time and space, each manifesting the same eternal truth (Dharma) in different worlds.
             </p>
+
+<!-- Dynamic Entity Grid (Firebase-Powered) -->
+<div id="entity-grid" class="pantheon-grid" data-mythology="buddhist" data-entity-type="deity">
+    <!-- Entities will be loaded dynamically from Firebase -->
+    <div class="loading-placeholder">
+        <div class="spinner"></div>
+        <p>Loading deities...</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Firebase and renderer are available
+    if (typeof firebase === 'undefined' || !firebase.firestore) {
+        console.error('Firebase not initialized');
+        return;
+    }
+
+    if (typeof UniversalEntityRenderer === 'undefined') {
+        console.error('UniversalEntityRenderer not loaded');
+        return;
+    }
+
+    const renderer = new UniversalEntityRenderer();
+    const db = firebase.firestore();
+    const gridElement = document.getElementById('entity-grid');
+
+    // Query Firebase for buddhist deities
+    db.collection('deities')
+        .where('mythology', '==', 'buddhist')
+        .orderBy('name')
+        .get()
+        .then(snapshot => {
+            if (snapshot.empty) {
+                gridElement.innerHTML = '<p class="no-results">No deities found in database. Check back soon!</p>';
+                return;
+            }
+
+            const entities = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // Render the entities using the universal renderer
+            gridElement.innerHTML = renderer.renderGrid(entities, {
+                entityType: 'deity',
+                mythology: 'buddhist',
+                showIcons: true,
+                enableClick: true
+            });
+
+            console.log(`Loaded ${entities.length} buddhist deities from Firebase`);
+        })
+        .catch(error => {
+            console.error('Error loading deities:', error);
+            gridElement.innerHTML = '<p class="error-message">Error loading deities. Please try again later.</p>';
+        });
+});
+</script>
+
+<!-- Fallback: Static deity cards (shown if JavaScript disabled or Firebase unavailable) -->
+<noscript>
 <div class="pantheon-grid">
 <div class="deity-card" onclick="window.location.href='buddha.html'">
 <div class="deity-icon">🧘</div>
-<h3>Buddha Shakyamuni</h3>
-<p><strong>The Enlightened One</strong></p>
-<p>Siddhartha Gautama, the historical Buddha who achieved enlightenment and founded Buddhism.
-                       Teacher of the Four Noble Truths and the Eightfold Path to liberation from suffering.</p>
-<p style="font-size: var(--font-size-sm); color: var(--color-primary);"><em>Domains:</em> Enlightenment, Wisdom, Compassion, Liberation</p>
-</div></div></section>
+</noscript>
+<div class="static-fallback" style="display: none;">
+<div class="pantheon-grid">
+<div class="deity-card" onclick="window.location.href='buddha.html'">
+<div class="deity-icon">🧘</div>
+</div>
+</section>
 <div class="section-divider"></div>
 <section>
 <h2 style="color: var(--color-primary);">The Great Bodhisattvas</h2>
@@ -301,5 +374,13 @@ Siddhartha Gautama, the historical Buddha, achieved perfect enlightenment under 
             }
         });
     </script>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
 </body>
 </html>

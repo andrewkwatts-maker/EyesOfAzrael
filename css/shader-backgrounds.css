@@ -1,0 +1,325 @@
+/**
+ * Shader Background Integration Styles
+ * Ensures shader canvas works properly with existing layout
+ */
+
+/* Shader canvas base styling */
+#shader-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+/* When shaders are disabled, fade out */
+#shader-background.disabled {
+    opacity: 0;
+}
+
+/* Ensure body allows shader background to show through */
+body {
+    position: relative;
+    background: transparent;
+}
+
+/* Make sure main content areas have proper backdrop for readability */
+.view-container,
+.site-header,
+.site-footer {
+    position: relative;
+    background: transparent;
+}
+
+/* Ensure glass-morphism panels work well with shaders */
+.glass-card,
+.deity-card,
+.card {
+    background: rgba(26, 31, 58, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Hero sections need stronger background for readability */
+.hero-section {
+    background: rgba(26, 31, 58, 0.75);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+/* Improve text readability over shaders */
+.glass-card h1,
+.glass-card h2,
+.glass-card h3,
+.hero-section h1,
+.hero-section h2,
+.hero-section h3 {
+    text-shadow:
+        0 0 20px rgba(0, 0, 0, 0.8),
+        0 2px 4px rgba(0, 0, 0, 0.9),
+        0 0 10px rgba(var(--color-primary-rgb), 0.5);
+}
+
+/* Shader controls panel */
+.shader-controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(26, 31, 58, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-md);
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.shader-controls:hover {
+    opacity: 1;
+}
+
+.shader-controls button {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
+}
+
+.shader-controls button:hover {
+    background: var(--color-primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.shader-controls button.active {
+    background: var(--color-primary);
+    color: white;
+}
+
+.shader-intensity-slider {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.shader-intensity-slider label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.shader-intensity-slider input[type="range"] {
+    width: 150px;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--color-border);
+    outline: none;
+}
+
+.shader-intensity-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shader-intensity-slider input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 10px var(--color-primary);
+}
+
+.shader-intensity-slider input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.shader-intensity-slider input[type="range"]::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 10px var(--color-primary);
+}
+
+.shader-info {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    padding: var(--spacing-xs);
+    border-top: 1px solid var(--color-border);
+}
+
+.shader-info .fps {
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
+.shader-info .fps.low {
+    color: #ef4444;
+}
+
+.shader-info .fps.good {
+    color: #22c55e;
+}
+
+/* Performance warning */
+.shader-performance-warning {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1001;
+    background: rgba(239, 68, 68, 0.95);
+    color: white;
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 300px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.shader-performance-warning button {
+    background: white;
+    color: #ef4444;
+    border: none;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: var(--spacing-sm);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    /* Hide shader controls on mobile by default */
+    .shader-controls {
+        bottom: 10px;
+        right: 10px;
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-xs);
+    }
+
+    .shader-intensity-slider input[type="range"] {
+        width: 100px;
+    }
+
+    /* Reduce shader quality on mobile automatically */
+    #shader-background {
+        opacity: 0.8;
+    }
+
+    /* Stronger backgrounds on mobile for readability */
+    .glass-card,
+    .deity-card,
+    .card {
+        background: rgba(26, 31, 58, 0.92);
+    }
+
+    .hero-section {
+        background: rgba(26, 31, 58, 0.88);
+    }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    #shader-background {
+        display: none;
+    }
+
+    .shader-controls {
+        display: none;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .glass-card,
+    .deity-card,
+    .card,
+    .hero-section {
+        background: rgba(26, 31, 58, 0.98);
+    }
+}
+
+/* Print styles */
+@media print {
+    #shader-background,
+    .shader-controls {
+        display: none !important;
+    }
+}
+
+/* Loading state for shader */
+#shader-background.loading {
+    opacity: 0;
+}
+
+#shader-background.loaded {
+    opacity: 1;
+    transition: opacity 0.8s ease;
+}
+
+/* Fallback gradient when WebGL not supported */
+body.no-webgl {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+}
+
+body.no-webgl #shader-background {
+    display: none;
+}
+
+/* Theme-specific fallbacks */
+body.no-webgl[data-shader-theme="water"] {
+    background: linear-gradient(135deg, #0a1628 0%, #0d3d56 50%, #1a5f7a 100%);
+}
+
+body.no-webgl[data-shader-theme="fire"] {
+    background: linear-gradient(135deg, #1a0a05 0%, #3d1f0d 50%, #5a2f1a 100%);
+}
+
+body.no-webgl[data-shader-theme="night"] {
+    background: linear-gradient(135deg, #05050a 0%, #0a0a1e 50%, #0f0f2e 100%);
+}
+
+body.no-webgl[data-shader-theme="earth"] {
+    background: linear-gradient(135deg, #0a0805 0%, #1a150d 50%, #2a251a 100%);
+}
+
+body.no-webgl[data-shader-theme="light"] {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #3a3a3a 100%);
+}
+
+body.no-webgl[data-shader-theme="dark"] {
+    background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #141414 100%);
+}

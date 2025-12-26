@@ -1,866 +1,725 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Allah - Islamic Theology</title>
-
-<!-- Entity Metadata for Dynamic Loading -->
-<meta name="mythology" content="islamic">
-<meta name="entity-type" content="deity">
-<meta name="entity-id" content="allah">
-
-<link href="../../../styles.css" rel="stylesheet"/>
-<link href="../../../themes/theme-base.css" rel="stylesheet"/>
-
-<link href="../../../themes/corpus-links.css" rel="stylesheet"/>
-<link rel="stylesheet" href="../../../themes/smart-links.css">
-
-<!-- Firebase Auth System -->
-<link rel="stylesheet" href="../../../css/user-auth.css">
-<script src="../../../js/firebase-auth.js"></script>
-<script src="../../../js/auth-guard.js"></script>
-<script src="../../../js/components/google-signin-button.js"></script>
-
-<script defer src="../../../themes/smart-links.js"></script>
-    <script defer src="../../../themes/theme-animations.js"></script>
-<script defer="None" src="../../../themes/theme-picker.js"></script>
-<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allah - Islamic Theology</title>
+    <link rel="stylesheet" href="../../../styles.css">
+    <style>
         :root {
             --mythos-primary: #008000;
             --mythos-secondary: #00CED1;
         }
 
         .deity-header {
-            background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.2), rgba(var(--color-secondary-rgb), 0.2));
-            border: 2px solid var(--color-primary);
-            border-radius: var(--radius-2xl);
-            padding: var(--space-12) var(--space-8);
-            margin-bottom: var(--space-8);
+            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
             text-align: center;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
         }
 
         .deity-icon {
-            font-size: var(--text-5xl);
-            margin-bottom: var(--space-4);
-        }
-
-        .deity-header h2 {
-            font-size: var(--text-4xl);
-            font-weight: var(--font-bold);
-            color: var(--color-primary);
-            margin: var(--space-2) 0;
-        }
-
-        .deity-header .subtitle {
-            font-size: var(--text-2xl);
-            color: var(--color-text-primary);
-            margin: var(--space-2) 0;
+            font-size: 4rem;
+            margin-bottom: 1rem;
         }
 
         .attribute-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--space-4);
-            margin: var(--space-6) 0;
+            gap: 1rem;
+            margin: 1.5rem 0;
         }
 
         .attribute-card {
-            background: var(--color-surface);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--color-border);
-            padding: var(--space-4);
-            border-radius: var(--radius-lg);
-            transition: all var(--transition-base, 0.3s ease);
-        }
-
-        .attribute-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--color-primary);
+            background: rgba(0, 128, 0, 0.05);
+            border: 1px solid rgba(0, 128, 0, 0.3);
+            padding: 1rem;
+            border-radius: 10px;
         }
 
         .attribute-label {
-            color: var(--color-primary);
-            font-weight: var(--font-bold);
-            font-size: var(--text-xs);
+            color: var(--mythos-primary);
+            font-weight: bold;
+            font-size: 0.85rem;
             text-transform: uppercase;
-            margin-bottom: var(--space-2);
-            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
         }
 
         .attribute-value {
-            font-size: var(--text-base);
-            color: var(--color-text-primary);
-            line-height: var(--leading-relaxed);
+            font-size: 1.1rem;
         }
 
         .names-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: var(--space-3);
-            margin: var(--space-6) 0;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
         }
 
         .name-card {
-            background: var(--color-surface);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--color-border);
-            border-left: 4px solid var(--color-secondary);
-            padding: var(--space-3);
-            border-radius: var(--radius-md);
+            background: rgba(0, 128, 0, 0.03);
+            border-left: 3px solid var(--mythos-secondary);
+            padding: 0.75rem;
+            border-radius: 6px;
             transition: all 0.2s ease;
         }
 
         .name-card:hover {
-            background: var(--color-surface-hover);
-            transform: translateX(4px);
-            box-shadow: var(--shadow-md);
+            background: rgba(0, 128, 0, 0.08);
+            transform: translateX(3px);
         }
 
         .name-arabic {
-            font-size: var(--text-xl);
-            font-weight: var(--font-bold);
-            color: var(--color-primary);
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--mythos-primary);
         }
 
         .name-transliteration {
-            font-size: var(--text-base);
-            color: var(--color-secondary);
-            margin: var(--space-1) 0;
-            font-weight: var(--font-medium);
+            font-size: 0.95rem;
+            color: var(--mythos-secondary);
+            margin: 0.25rem 0;
         }
 
         .name-meaning {
-            font-size: var(--text-sm);
-            color: var(--color-text-secondary);
+            font-size: 0.85rem;
+            color: #666;
         }
 
-        .citation {
-            background: var(--color-surface);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--color-border);
-            border-left: 4px solid var(--color-accent);
-            padding: var(--space-4);
-            border-radius: var(--radius-lg);
-            margin: var(--space-4) 0;
-        }
-
-        .sources-section {
-            background: var(--color-surface);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--color-border);
-            padding: var(--space-6);
-            border-radius: var(--radius-xl);
-            margin-top: var(--space-8);
-        }
-
-        .sources-section h3 {
-            color: var(--color-primary);
-            font-size: var(--text-xl);
-            margin-top: 0;
-        }
-
-        .sources-section ul {
-            line-height: var(--leading-relaxed);
-            color: var(--color-text-primary);
+        .related-card {
+            background: rgba(0, 128, 0, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
         }
     </style>
-
-<!-- Dynamic Redirect System (PHASE 4) -->
-<script src="../../../js/dynamic-redirect.js"></script>
 </head>
 <body>
-<div id="theme-picker-container"></div>
-<header>
-    <div class="header-content">
-        <h1>☪️ Allah</h1>
-    
-        <div id="user-auth-nav"></div>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../../mythos/index.html">Home</a> →
+    <header>
+        <div class="header-content">
+            <h1>☪️ Allah</h1>
+            <nav class="breadcrumb">
+                <a href="../../../mythos-index.html">Home</a> →
                 <a href="../index.html">Islamic</a> →
                 <a href="index.html">Divine Beings</a> →
                 <span>Allah</span>
-</nav>
-<main>
-<section class="deity-header">
-<div class="deity-icon">☪️</div>
-<h2>Allah</h2>
-<p class="subtitle" style="font-size: var(--text-2xl); margin: 0.5rem 0;">الله - The One, The Eternal, The Absolute</p>
-<p style="font-size: var(--text-lg); margin-top: var(--space-4);">
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="deity-header">
+            <div class="deity-icon">☪️</div>
+            <h2>Allah</h2>
+            <p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">الله - The One, The Eternal, The Absolute</p>
+            <p style="font-size: 1.1rem; margin-top: 1rem;">
                 The sole deity in Islam, utterly transcendent yet intimately near. Creator and Sustainer of all existence,
-                beyond all comparison, possessing absolute perfection in all <a data-term="Attributes" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View attributes in ancient texts">attributes</a>.
-        </p></section>
-<section>
-<h2 style="color: var(--color-primary); font-size: var(--text-3xl); margin-bottom: var(--space-6);"><a data-term="Core Attributes" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View core attributes in ancient texts">Core Attributes</a> - <a href="../cosmology/tawhid.html" style="color: var(--color-accent); text-decoration: none;">Tawhid</a></h2>
-<div class="attribute-grid">
-<div class="attribute-card">
-<div class="attribute-label">Essence</div>
-<div class="attribute-value">Absolute Unity (<a data-term="Tawhid" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View tawhid in ancient texts">Tawhid</a>)</div>
-</div>
-<div class="attribute-card">
-<div class="attribute-label">Domains</div>
-<div class="attribute-value">All <a data-term="Creation" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View creation in ancient texts">Creation</a>, All Knowledge, All Power</div>
-</div>
-<div class="attribute-card">
-<div class="attribute-label">Symbols</div>
-<div class="attribute-value">Crescent Moon, Star, Calligraphy</div>
-</div>
-<div class="attribute-card">
-<div class="attribute-label">Sacred Text</div>
-<div class="attribute-value"><a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> (revealed word)</div>
-</div>
-<div class="attribute-card">
-<div class="attribute-label"><a data-term="Primary" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View primary in ancient texts">Primary</a> Names</div>
-<div class="attribute-value">Ar-Rahman (The Compassionate), Ar-Rahim (The Merciful)</div>
-</div>
-<div class="attribute-card">
-<div class="attribute-label">Relationship</div>
-<div class="attribute-value">Creator-<a data-term="Creation" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View creation in ancient texts">Creation</a>, Master-Servant, Closer than jugular vein</div>
-</div></div></section>
-<section style="margin-top: var(--space-8);">
-<h2 style="color: var(--color-primary); font-size: var(--text-3xl); margin-bottom: var(--space-6);">The <a data-term="Nature" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View nature in ancient texts">Nature</a> of Allah</h2>
-<p style="font-size: var(--text-lg); line-height: var(--leading-relaxed); color: var(--color-text-primary);">
-<strong><a href="../cosmology/tawhid.html" style="color: var(--color-accent); text-decoration: none;">Tawhid</a></strong> (absolute <a class="corpus-link" data-term="Monotheism" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Monotheism'">monotheism</a>) is the cornerstone of Islamic theology. Allah is One in essence,
-                <a data-term="Attributes" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View attributes in ancient texts">attributes</a>, and worship. He has no partners, equals, parents, or offspring. He is eternal (no beginning),
-                everlasting (no end), self-sufficient (needs nothing), and unlike anything in <a href="../cosmology/creation.html" style="color: var(--color-accent); text-decoration: none;">creation</a>.
-            </p>
-<h3 style="color: var(--color-secondary); font-size: var(--text-2xl); margin-top: var(--space-6); margin-bottom: var(--space-4);">Key <a data-term="Theological" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View theological in ancient texts">Theological</a> Principles:</h3>
-<ul style="margin: var(--space-4) 0 0 var(--space-8); line-height: var(--leading-loose); color: var(--color-text-primary); font-size: var(--text-base);">
-<li><strong>Transcendence (Tanzih):</strong> Allah is utterly beyond <a data-term="Creation" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View creation in ancient texts">creation</a>, incomparable to anything that exists</li>
-<li><strong>Immanence:</strong> Despite transcendence, <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a> is nearer to each person than their jugular vein (<a href="../texts/index.html" style="color: var(--color-accent); text-decoration: none;">Quran</a> 50:16)</li>
-<li><strong>No Anthropomorphism:</strong> <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a> is not bound by physical form, location, or time</li>
-<li><strong>Perfect <a data-term="Attributes" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View attributes in ancient texts">Attributes</a>:</strong> All of Allah's <a data-term="Attributes" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View attributes in ancient texts">attributes</a> are perfect and without deficiency</li>
-<li><strong><a data-term="Divine" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View divine in ancient texts">Divine</a> Will:</strong> Everything that occurs is by <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a>'s permission and decree (Qadr)</li>
-<li><strong>Mercy Above All:</strong> "My mercy encompasses all things" (<a data-term="Quran" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View quran in ancient texts">Quran</a> 7:156)</li>
-</ul>
-<div class="citation">
-<strong>Verse of Pure <a class="corpus-link" data-term="Monotheism" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Monotheism'">Monotheism</a> (Ayat al-<a data-term="Tawhid" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View tawhid in ancient texts">Tawhid</a>):</strong><br/>
-                "Say: He is <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a>, the One. Allah, the Eternal Refuge. He neither begets nor is born,
-                nor is there to Him any equivalent." - <em><a href="../texts/index.html" style="color: var(--color-accent); text-decoration: none;">Quran</a> 112:1-4 (Surah Al-Ikhlas)</em>
-</div>
-</section>
-<section style="margin-top: var(--space-8);">
-<h2 style="color: var(--color-primary); font-size: var(--text-3xl); margin-bottom: var(--space-6);">The 99 Beautiful Names (Asma al-Husna)</h2>
-<p style="font-size: var(--text-lg); line-height: var(--leading-relaxed); color: var(--color-text-primary); margin-bottom: var(--space-4);">
-                Allah has 99 names mentioned in <a data-term="Islamic Tradition" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View islamic tradition in ancient texts">Islamic tradition</a>, each revealing a different aspect of His perfect nature.
-                The Prophet <a href="muhammad.html" style="color: var(--color-accent); text-decoration: none;">Muhammad</a> said: "<a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a> has ninety-nine names, one hundred minus one. Whoever knows them
-                will enter <a class="corpus-link" data-term="Paradise" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Paradise'">Paradise</a>." (Sahih Bukhari)
-            </p>
-<div class="names-grid">
-<div class="name-card">
-<div class="name-arabic">الرَّحْمَنُ</div>
-<div class="name-transliteration">Ar-Rahman</div>
-<div class="name-meaning">The Most Compassionate</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الرَّحِيمُ</div>
-<div class="name-transliteration">Ar-Rahim</div>
-<div class="name-meaning">The Most Merciful</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمَلِكُ</div>
-<div class="name-transliteration">Al-Malik</div>
-<div class="name-meaning">The <a class="corpus-link" data-term="King" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=king_of_kings" title="Search corpus for 'King'">King</a>, The <a class="corpus-link" data-term="Sovereign" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=king_of_kings" title="Search corpus for 'Sovereign'">Sovereign</a></div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْقُدُّوسُ</div>
-<div class="name-transliteration">Al-Quddus</div>
-<div class="name-meaning">The Most Holy</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">السَّلاَمُ</div>
-<div class="name-transliteration">As-Salam</div>
-<div class="name-meaning">The Source of Peace</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُؤْمِنُ</div>
-<div class="name-transliteration">Al-Mu'min</div>
-<div class="name-meaning">The Granter of Security</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُهَيْمِنُ</div>
-<div class="name-transliteration">Al-Muhaymin</div>
-<div class="name-meaning">The Guardian, The Protector</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْعَزِيزُ</div>
-<div class="name-transliteration">Al-Aziz</div>
-<div class="name-meaning">The <a class="corpus-link" data-term="Almighty" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=god_father" title="Search corpus for 'Almighty'">Almighty</a>, The Invincible</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْجَبَّارُ</div>
-<div class="name-transliteration">Al-Jabbar</div>
-<div class="name-meaning">The Compeller, The Restorer</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُتَكَبِّرُ</div>
-<div class="name-transliteration">Al-Mutakabbir</div>
-<div class="name-meaning">The Supreme, The Majestic</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْخَالِقُ</div>
-<div class="name-transliteration">Al-Khaliq</div>
-<div class="name-meaning">The Creator</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْبَارِئُ</div>
-<div class="name-transliteration">Al-Bari</div>
-<div class="name-meaning">The Originator</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُصَوِّرُ</div>
-<div class="name-transliteration">Al-Musawwir</div>
-<div class="name-meaning">The Fashioner, The Shaper</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْغَفَّارُ</div>
-<div class="name-transliteration">Al-Ghaffar</div>
-<div class="name-meaning">The Repeatedly Forgiving</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْقَهَّارُ</div>
-<div class="name-transliteration">Al-Qahhar</div>
-<div class="name-meaning">The Subduer, The Ever-Dominating</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْوَهَّابُ</div>
-<div class="name-transliteration">Al-Wahhab</div>
-<div class="name-meaning">The Giver of Gifts</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الرَّزَّاقُ</div>
-<div class="name-transliteration">Ar-Razzaq</div>
-<div class="name-meaning">The Provider</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْفَتَّاحُ</div>
-<div class="name-transliteration">Al-Fattah</div>
-<div class="name-meaning">The Opener, The Judge</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْعَلِيمُ</div>
-<div class="name-transliteration">Al-Alim</div>
-<div class="name-meaning">The All-Knowing</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْقَابِضُ</div>
-<div class="name-transliteration">Al-Qabid</div>
-<div class="name-meaning">The Withholder</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْبَاسِطُ</div>
-<div class="name-transliteration">Al-Basit</div>
-<div class="name-meaning">The Extender</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْخَافِضُ</div>
-<div class="name-transliteration">Al-Khafid</div>
-<div class="name-meaning">The Reducer, The Abaser</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الرَّافِعُ</div>
-<div class="name-transliteration">Ar-Rafi</div>
-<div class="name-meaning">The Exalter, The Elevator</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُعِزُّ</div>
-<div class="name-transliteration">Al-Mu'izz</div>
-<div class="name-meaning">The Giver of Honor</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُذِلُّ</div>
-<div class="name-transliteration">Al-Mudhill</div>
-<div class="name-meaning">The Giver of Dishonor</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">السَّمِيعُ</div>
-<div class="name-transliteration">As-Sami</div>
-<div class="name-meaning">The All-Hearing</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْبَصِيرُ</div>
-<div class="name-transliteration">Al-Basir</div>
-<div class="name-meaning">The All-Seeing</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْحَكَمُ</div>
-<div class="name-transliteration">Al-Hakam</div>
-<div class="name-meaning">The Judge, The Arbitrator</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْعَدْلُ</div>
-<div class="name-transliteration">Al-Adl</div>
-<div class="name-meaning">The Utterly Just</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">اللَّطِيفُ</div>
-<div class="name-transliteration">Al-Latif</div>
-<div class="name-meaning">The Subtle, The Gentle</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْخَبِيرُ</div>
-<div class="name-transliteration">Al-Khabir</div>
-<div class="name-meaning">The All-Aware</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْحَلِيمُ</div>
-<div class="name-transliteration">Al-Halim</div>
-<div class="name-meaning">The Forbearing, The Clement</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْعَظِيمُ</div>
-<div class="name-transliteration">Al-Azim</div>
-<div class="name-meaning">The Magnificent, The Great</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْغَفُورُ</div>
-<div class="name-transliteration">Al-Ghafur</div>
-<div class="name-meaning">The Forgiving</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الشَّكُورُ</div>
-<div class="name-transliteration">Ash-Shakur</div>
-<div class="name-meaning">The Appreciative, The Grateful</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْعَلِيُّ</div>
-<div class="name-transliteration">Al-Ali</div>
-<div class="name-meaning">The Most High, The Exalted</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْكَبِيرُ</div>
-<div class="name-transliteration">Al-Kabir</div>
-<div class="name-meaning">The Greatest, The Most Grand</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْحَفِيظُ</div>
-<div class="name-transliteration">Al-Hafiz</div>
-<div class="name-meaning">The Preserver, The Guardian</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُقِيتُ</div>
-<div class="name-transliteration">Al-Muqit</div>
-<div class="name-meaning">The Sustainer, The Nourisher</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْحَسِيبُ</div>
-<div class="name-transliteration">Al-Hasib</div>
-<div class="name-meaning">The Reckoner, The Sufficient</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْجَلِيلُ</div>
-<div class="name-transliteration">Al-Jalil</div>
-<div class="name-meaning">The Majestic, The Revered</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْكَرِيمُ</div>
-<div class="name-transliteration">Al-Karim</div>
-<div class="name-meaning">The Generous, The Noble</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الرَّقِيبُ</div>
-<div class="name-transliteration">Ar-Raqib</div>
-<div class="name-meaning">The Watchful, The Overseer</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُجِيبُ</div>
-<div class="name-transliteration">Al-Mujib</div>
-<div class="name-meaning">The Responsive, The Answerer</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْوَاسِعُ</div>
-<div class="name-transliteration">Al-Wasi</div>
-<div class="name-meaning">The All-Encompassing</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْحَكِيمُ</div>
-<div class="name-transliteration">Al-Hakim</div>
-<div class="name-meaning">The Wise</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْوَدُودُ</div>
-<div class="name-transliteration">Al-Wadud</div>
-<div class="name-meaning">The Loving, The Affectionate</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمَجِيدُ</div>
-<div class="name-transliteration">Al-Majid</div>
-<div class="name-meaning">The Glorious, The Most Honorable</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْبَاعِثُ</div>
-<div class="name-transliteration">Al-Ba'ith</div>
-<div class="name-meaning">The Resurrector</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الشَّهِيدُ</div>
-<div class="name-transliteration">Ash-Shahid</div>
-<div class="name-meaning">The Witness</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْحَقُّ</div>
-<div class="name-transliteration">Al-Haqq</div>
-<div class="name-meaning">The Truth, The Reality</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْوَكِيلُ</div>
-<div class="name-transliteration">Al-Wakil</div>
-<div class="name-meaning">The Trustee, The Disposer of Affairs</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْقَوِيُّ</div>
-<div class="name-transliteration">Al-Qawi</div>
-<div class="name-meaning">The Strong, The Powerful</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمَتِينُ</div>
-<div class="name-transliteration">Al-Matin</div>
-<div class="name-meaning">The Firm, The Steadfast</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْوَلِيُّ</div>
-<div class="name-transliteration">Al-Wali</div>
-<div class="name-meaning">The Protecting Friend</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْحَمِيدُ</div>
-<div class="name-transliteration">Al-Hamid</div>
-<div class="name-meaning">The Praiseworthy</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُحْصِي</div>
-<div class="name-transliteration">Al-Muhsi</div>
-<div class="name-meaning">The Accounter, The Numberer</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُبْدِئُ</div>
-<div class="name-transliteration">Al-Mubdi</div>
-<div class="name-meaning">The Originator, The Initiator</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُعِيدُ</div>
-<div class="name-transliteration">Al-Mu'id</div>
-<div class="name-meaning">The Restorer, The Reinstater</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُحْيِي</div>
-<div class="name-transliteration">Al-Muhyi</div>
-<div class="name-meaning">The Giver of Life</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُمِيتُ</div>
-<div class="name-transliteration">Al-Mumit</div>
-<div class="name-meaning">The Bringer of Death</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْحَيُّ</div>
-<div class="name-transliteration">Al-Hayy</div>
-<div class="name-meaning">The Ever-Living</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْقَيُّومُ</div>
-<div class="name-transliteration">Al-Qayyum</div>
-<div class="name-meaning">The Self-Subsisting, The Sustainer</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْوَاجِدُ</div>
-<div class="name-transliteration">Al-Wajid</div>
-<div class="name-meaning">The Finder, The Perceiver</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمَاجِدُ</div>
-<div class="name-transliteration">Al-Majid</div>
-<div class="name-meaning">The Noble, The Illustrious</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْوَاحِدُ</div>
-<div class="name-transliteration">Al-Wahid</div>
-<div class="name-meaning">The One, The Unique</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الصَّمَدُ</div>
-<div class="name-transliteration">As-Samad</div>
-<div class="name-meaning">The Eternal Refuge</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْقَادِرُ</div>
-<div class="name-transliteration">Al-Qadir</div>
-<div class="name-meaning">The Capable, The Powerful</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُقْتَدِرُ</div>
-<div class="name-transliteration">Al-Muqtadir</div>
-<div class="name-meaning">The Omnipotent</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُقَدِّمُ</div>
-<div class="name-transliteration">Al-Muqaddim</div>
-<div class="name-meaning">The Expediter, The Promoter</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُؤَخِّرُ</div>
-<div class="name-transliteration">Al-Mu'akhkhir</div>
-<div class="name-meaning">The Delayer, The Retarder</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الأَوَّلُ</div>
-<div class="name-transliteration">Al-Awwal</div>
-<div class="name-meaning">The First, The Beginning</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الآخِرُ</div>
-<div class="name-transliteration">Al-Akhir</div>
-<div class="name-meaning">The Last, The End</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الظَّاهِرُ</div>
-<div class="name-transliteration">Az-Zahir</div>
-<div class="name-meaning">The Manifest, The Evident</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْبَاطِنُ</div>
-<div class="name-transliteration">Al-Batin</div>
-<div class="name-meaning">The Hidden, The Innermost</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْوَالِي</div>
-<div class="name-transliteration">Al-Wali</div>
-<div class="name-meaning">The Governor, The Protector</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُتَعَالِي</div>
-<div class="name-transliteration">Al-Muta'ali</div>
-<div class="name-meaning">The Supremely Exalted</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْبَرُّ</div>
-<div class="name-transliteration">Al-Barr</div>
-<div class="name-meaning">The Source of Goodness</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">التَّوَّابُ</div>
-<div class="name-transliteration">At-Tawwab</div>
-<div class="name-meaning">The Ever-Accepting of Repentance</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُنْتَقِمُ</div>
-<div class="name-transliteration">Al-Muntaqim</div>
-<div class="name-meaning">The Avenger</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">العَفُوُّ</div>
-<div class="name-transliteration">Al-Afuww</div>
-<div class="name-meaning">The Pardoner, The Effacer</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الرَّؤُوفُ</div>
-<div class="name-transliteration">Ar-Ra'uf</div>
-<div class="name-meaning">The Most Kind</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">مَالِكُ الْمُلْكِ</div>
-<div class="name-transliteration">Malik-ul-Mulk</div>
-<div class="name-meaning">Master of the Kingdom</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">ذُو الْجَلاَلِ وَالإِكْرَامِ</div>
-<div class="name-transliteration">Dhul-Jalali wal-Ikram</div>
-<div class="name-meaning">Possessor of Glory and Honor</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُقْسِطُ</div>
-<div class="name-transliteration">Al-Muqsit</div>
-<div class="name-meaning">The Equitable, The Requiter</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْجَامِعُ</div>
-<div class="name-transliteration">Al-Jami</div>
-<div class="name-meaning">The Gatherer, The Uniter</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْغَنِيُّ</div>
-<div class="name-transliteration">Al-Ghani</div>
-<div class="name-meaning">The Self-Sufficient</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْمُغْنِي</div>
-<div class="name-transliteration">Al-Mughni</div>
-<div class="name-meaning">The Enricher</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">المَانِعُ</div>
-<div class="name-transliteration">Al-Mani</div>
-<div class="name-meaning">The Preventer, The Withholder</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الضَّارُ</div>
-<div class="name-transliteration">Ad-Darr</div>
-<div class="name-meaning">The Distresser</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">النَّافِعُ</div>
-<div class="name-transliteration">An-Nafi</div>
-<div class="name-meaning">The Benefactor, The Propitious</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">النُّورُ</div>
-<div class="name-transliteration">An-Nur</div>
-<div class="name-meaning">The <a class="corpus-link" data-term="Light" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=light_of_the_world" title="Search corpus for 'Light'">Light</a></div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْهَادِي</div>
-<div class="name-transliteration">Al-Hadi</div>
-<div class="name-meaning">The Guide</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْبَدِيعُ</div>
-<div class="name-transliteration">Al-Badi</div>
-<div class="name-meaning">The Incomparable Originator</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْبَاقِي</div>
-<div class="name-transliteration">Al-Baqi</div>
-<div class="name-meaning">The Everlasting, The Eternal</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الْوَارِثُ</div>
-<div class="name-transliteration">Al-Warith</div>
-<div class="name-meaning">The Inheritor, The Heir</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الرَّشِيدُ</div>
-<div class="name-transliteration">Ar-Rashid</div>
-<div class="name-meaning">The Righteous Teacher</div>
-</div>
-<div class="name-card">
-<div class="name-arabic">الصَّبُورُ</div>
-<div class="name-transliteration">As-Sabur</div>
-<div class="name-meaning">The Patient, The Timeless</div>
-</div>
-</div>
-<p style="margin-top: var(--space-6); font-size: var(--text-base); color: var(--color-text-secondary); font-style: italic;">
-                Note: There exists a 100th name known only to <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a> Himself, or to those to whom He reveals it through spiritual unveiling (kashf).
-            </p>
-</section>
-<section style="margin-top: var(--space-8);">
-<h2 style="color: var(--color-primary); font-size: var(--text-3xl); margin-bottom: var(--space-6);">Worship &amp; Relationship with <a data-term="Creation" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View creation in ancient texts">Creation</a></h2>
-<h3 style="color: var(--color-secondary); font-size: var(--text-2xl); margin-bottom: var(--space-4);">How to Approach <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a></h3>
-<ul style="margin: var(--space-4) 0 0 var(--space-8); line-height: var(--leading-loose); color: var(--color-text-primary); font-size: var(--text-base);">
-<li><strong><a href="../rituals/salat.html" style="color: var(--color-accent); text-decoration: none;">Salah (Prayer)</a>:</strong> <a class="corpus-link" data-term="Five Daily Prayers" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Five Daily Prayers'">Five daily prayers</a> are the pillar of worship</li>
-<li><strong>Dhikr (Remembrance):</strong> Constant remembrance of <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a> through His names and phrases</li>
-<li><strong>Du'a (Supplication):</strong> Personal <a class="corpus-link" data-term="Prayer" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Prayer'">prayer</a> and requests made directly to <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a></li>
-<li><strong>Tawbah (Repentance):</strong> Sincere turning away from sin and returning to <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a></li>
-<li><strong>Tawakkul (<a class="corpus-link" data-term="Trust" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=faith" title="Search corpus for 'Trust'">Trust</a>):</strong> Complete reliance on <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a> while taking appropriate action</li>
-<li><strong>Ihsan (Excellence):</strong> Worshipping <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a> as if you see Him; knowing He sees you</li>
-</ul>
-<h3 style="color: var(--color-secondary); font-size: var(--text-2xl); margin-top: var(--space-6); margin-bottom: var(--space-4);">The Opening (Al-Fatiha) - Most Recited <a class="corpus-link" data-term="Prayer" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Prayer'">Prayer</a></h3>
-<div class="citation">
-<p style="margin: var(--space-2) 0;"><em>In the name of <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a>, the Most Compassionate, the Most Merciful.</em></p>
-<p style="margin: var(--space-2) 0;"><em>All praise is for <a data-term="Allah" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View allah in ancient texts">Allah</a>—Lord of all worlds,</em></p>
-<p style="margin: var(--space-2) 0;"><em>the Most Compassionate, the Most Merciful,</em></p>
-<p style="margin: var(--space-2) 0;"><em>Master of the <a href="../cosmology/afterlife.html" style="color: var(--color-accent); text-decoration: none;">Day of Judgment</a>.</em></p>
-<p style="margin: var(--space-2) 0;"><em>You alone we worship. You alone we ask for help.</em></p>
-<p style="margin: var(--space-2) 0;"><em>Guide us along the Straight Path—</em></p>
-<p style="margin: var(--space-2) 0;"><em>the path of those You have blessed, not those You are displeased with, or those who are astray.</em></p>
-<p style="margin-top: var(--space-2); font-weight: var(--font-semibold);">- <a href="../texts/index.html" style="color: var(--color-accent); text-decoration: none;">Quran</a> 1:1-7</p>
-</div>
-</section>
-<section class="sources-section">
-<h3>Sources</h3>
-<ul>
-<li><a href="../texts/index.html" style="color: var(--color-accent); text-decoration: none;">Quran</a> - Complete text, especially Surah Al-Ikhlas (112), Ayat al-Kursi (2:255)</li>
-<li>Sahih Bukhari &amp; Sahih Muslim - <a class="corpus-link" data-term="Hadith" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Hadith'">Hadith</a> on the 99 Names</li>
-<li>Al-Ghazali - "The Ninety-Nine Beautiful Names of God" (Al-Maqsad al-Asna)</li>
-<li>Ibn Arabi - "The Bezels of Wisdom" on divine <a data-term="Attributes" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View attributes in ancient texts">attributes</a></li>
-<li>Tafsir Ibn Kathir - Classical Quranic commentary</li>
-</ul>
-</section>
+                beyond all comparison, possessing absolute perfection in all attributes.
+        </section>
 
-<!-- Interlink Panel Section -->
-<section class="interlink-panel" style="margin-top: 3rem;">
-    <h3 class="interlink-header">
-        <span class="interlink-icon">🔗</span>
-        Related Across the Mythos
-    </h3>
-
-    <div class="interlink-grid">
-        <div class="interlink-section">
-            <div class="interlink-section-title">Core Archetype</div>
-            <a href="../../../archetypes/celestial/index.html" class="archetype-link-card">
-                <div class="archetype-badge">☪️ THE ONE, THE ABSOLUTE</div>
-                <p class="archetype-context">Allah is the sole deity in Islam - utterly transcendent yet intimately near. The 99 Beautiful Names reveal His perfect attributes: Ar-Rahman (Most Compassionate), Ar-Rahim (Most Merciful).</p>
-                <span class="see-parallels">See parallels: Divine Unity, Supreme Creator →</span>
-            </a>
-        </div>
-
-        <div class="interlink-section">
-            <div class="interlink-section-title">Core Doctrine</div>
-            <a href="../cosmology/tawhid.html" class="item-link-card">
-                <div class="item-icon">☪️</div>
-                <div class="item-info">
-                    <h4>Tawhid</h4>
-                    <p class="item-type">Absolute Monotheism</p>
-                    <p class="item-context">Oneness of Allah</p>
+        <section>
+            <h2 style="color: var(--mythos-primary);">Core Attributes - Tawhid</h2>
+            <div class="attribute-grid">
+                <div class="attribute-card">
+                    <div class="attribute-label">Essence</div>
+                    <div class="attribute-value">Absolute Unity (Tawhid)</div>
                 </div>
-            </a>
-        </div>
-
-        <div class="interlink-section">
-            <div class="interlink-section-title">Connection to Allah</div>
-            <a href="../rituals/salat.html" class="place-link-card">
-                <div class="place-visual">
-                    <span class="place-icon">🕌</span>
-                    <span class="place-type">Worship</span>
+                <div class="attribute-card">
+                    <div class="attribute-label">Domains</div>
+                    <div class="attribute-value">All Creation, All Knowledge, All Power</div>
                 </div>
-                <div class="place-info">
-                    <h4>Salat</h4>
-                    <p>Five daily prayers</p>
+                <div class="attribute-card">
+                    <div class="attribute-label">Symbols</div>
+                    <div class="attribute-value">Crescent Moon, Star, Calligraphy</div>
                 </div>
-            </a>
-        </div>
-    </div>
+                <div class="attribute-card">
+                    <div class="attribute-label">Sacred Text</div>
+                    <div class="attribute-value">Quran (revealed word)</div>
+                </div>
+                <div class="attribute-card">
+                    <div class="attribute-label">Primary Names</div>
+                    <div class="attribute-value">Ar-Rahman (The Compassionate), Ar-Rahim (The Merciful)</div>
+                </div>
+                <div class="attribute-card">
+                    <div class="attribute-label">Relationship</div>
+                    <div class="attribute-value">Creator-Creation, Master-Servant, Closer than jugular vein</div>
+        </section>
 
-    <div class="parallel-traditions glass-card" style="margin-top: var(--spacing-lg);">
-        <h4>🌍 Abrahamic Monotheism</h4>
-        <div class="parallel-grid">
-            <a href="../../jewish/deities/index.html" class="parallel-card">
-                <span class="tradition-flag">✡️</span>
-                <span class="parallel-name">YHWH</span>
-                <span class="tradition-label">Jewish Concept</span>
-            </a>
-            <a href="../../christian/deities/god-father.html" class="parallel-card">
-                <span class="tradition-flag">✝️</span>
-                <span class="parallel-name">God the Father</span>
-                <span class="tradition-label">Christian Concept</span>
-            </a>
-            <a href="muhammad.html" class="parallel-card">
-                <span class="tradition-flag">☪️</span>
-                <span class="parallel-name">Muhammad (SAW)</span>
-                <span class="tradition-label">Final Messenger</span>
-            </a>
-            <a href="../heroes/ibrahim.html" class="parallel-card">
-                <span class="tradition-flag">☪️</span>
-                <span class="parallel-name">Ibrahim (AS)</span>
-                <span class="tradition-label">Friend of Allah</span>
-            </a>
-        </div>
-    </div>
-</section>
-</main>
-<footer>
-<p>
-<strong>Allah</strong> - Islamic <a data-term="Theology" data-tradition="islamic" class="corpus-link" href="../../../mythos/islamic/index.html" title="View theology in ancient texts">Theology</a><br/>
-<a href="../../../mythos/index.html">World Mythos Home</a> |
+        <section style="margin-top: 2rem;">
+            <h2 style="color: var(--mythos-primary);">The Nature of Allah</h2>
+            <p>
+                <strong>Tawhid</strong> (absolute monotheism) is the cornerstone of Islamic theology. Allah is One in essence,
+                attributes, and worship. He has no partners, equals, parents, or offspring. He is eternal (no beginning),
+                everlasting (no end), self-sufficient (needs nothing), and unlike anything in creation.
+            </p>
+
+            <h3 style="color: var(--mythos-secondary); margin-top: 1.5rem;">Key Theological Principles:</h3>
+            <ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
+                <li><strong>Transcendence (Tanzih):</strong> Allah is utterly beyond creation, incomparable to anything that exists</li>
+                <li><strong>Immanence:</strong> Despite transcendence, Allah is nearer to each person than their jugular vein (Quran 50:16)</li>
+                <li><strong>No Anthropomorphism:</strong> Allah is not bound by physical form, location, or time</li>
+                <li><strong>Perfect Attributes:</strong> All of Allah's attributes are perfect and without deficiency</li>
+                <li><strong>Divine Will:</strong> Everything that occurs is by Allah's permission and decree (Qadr)</li>
+                <li><strong>Mercy Above All:</strong> "My mercy encompasses all things" (Quran 7:156)</li>
+            </ul>
+
+            <div class="citation" style="margin-top: 1rem; background: rgba(0, 128, 0, 0.05); padding: 1rem; border-radius: 8px;">
+                <strong>Verse of Pure Monotheism (Ayat al-Tawhid):</strong><br>
+                "Say: He is Allah, the One. Allah, the Eternal Refuge. He neither begets nor is born,
+                nor is there to Him any equivalent." - <em>Quran 112:1-4 (Surah Al-Ikhlas)</em>
+        </section>
+
+        <section style="margin-top: 2rem;">
+            <h2 style="color: var(--mythos-primary);">The 99 Beautiful Names (Asma al-Husna)</h2>
+            <p>
+                Allah has 99 names mentioned in Islamic tradition, each revealing a different aspect of His perfect nature.
+                The Prophet Muhammad said: "Allah has ninety-nine names, one hundred minus one. Whoever knows them
+                will enter Paradise." (Sahih Bukhari)
+            </p>
+
+            <div class="names-grid">
+                <div class="name-card">
+                    <div class="name-arabic">الرَّحْمَنُ</div>
+                    <div class="name-transliteration">Ar-Rahman</div>
+                    <div class="name-meaning">The Most Compassionate</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الرَّحِيمُ</div>
+                    <div class="name-transliteration">Ar-Rahim</div>
+                    <div class="name-meaning">The Most Merciful</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمَلِكُ</div>
+                    <div class="name-transliteration">Al-Malik</div>
+                    <div class="name-meaning">The King, The Sovereign</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْقُدُّوسُ</div>
+                    <div class="name-transliteration">Al-Quddus</div>
+                    <div class="name-meaning">The Most Holy</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">السَّلاَمُ</div>
+                    <div class="name-transliteration">As-Salam</div>
+                    <div class="name-meaning">The Source of Peace</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُؤْمِنُ</div>
+                    <div class="name-transliteration">Al-Mu'min</div>
+                    <div class="name-meaning">The Granter of Security</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُهَيْمِنُ</div>
+                    <div class="name-transliteration">Al-Muhaymin</div>
+                    <div class="name-meaning">The Guardian, The Protector</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْعَزِيزُ</div>
+                    <div class="name-transliteration">Al-Aziz</div>
+                    <div class="name-meaning">The Almighty, The Invincible</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْجَبَّارُ</div>
+                    <div class="name-transliteration">Al-Jabbar</div>
+                    <div class="name-meaning">The Compeller, The Restorer</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُتَكَبِّرُ</div>
+                    <div class="name-transliteration">Al-Mutakabbir</div>
+                    <div class="name-meaning">The Supreme, The Majestic</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْخَالِقُ</div>
+                    <div class="name-transliteration">Al-Khaliq</div>
+                    <div class="name-meaning">The Creator</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْبَارِئُ</div>
+                    <div class="name-transliteration">Al-Bari</div>
+                    <div class="name-meaning">The Originator</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُصَوِّرُ</div>
+                    <div class="name-transliteration">Al-Musawwir</div>
+                    <div class="name-meaning">The Fashioner, The Shaper</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْغَفَّارُ</div>
+                    <div class="name-transliteration">Al-Ghaffar</div>
+                    <div class="name-meaning">The Repeatedly Forgiving</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْقَهَّارُ</div>
+                    <div class="name-transliteration">Al-Qahhar</div>
+                    <div class="name-meaning">The Subduer, The Ever-Dominating</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْوَهَّابُ</div>
+                    <div class="name-transliteration">Al-Wahhab</div>
+                    <div class="name-meaning">The Giver of Gifts</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الرَّزَّاقُ</div>
+                    <div class="name-transliteration">Ar-Razzaq</div>
+                    <div class="name-meaning">The Provider</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْفَتَّاحُ</div>
+                    <div class="name-transliteration">Al-Fattah</div>
+                    <div class="name-meaning">The Opener, The Judge</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْعَلِيمُ</div>
+                    <div class="name-transliteration">Al-Alim</div>
+                    <div class="name-meaning">The All-Knowing</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْقَابِضُ</div>
+                    <div class="name-transliteration">Al-Qabid</div>
+                    <div class="name-meaning">The Withholder</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْبَاسِطُ</div>
+                    <div class="name-transliteration">Al-Basit</div>
+                    <div class="name-meaning">The Extender</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْخَافِضُ</div>
+                    <div class="name-transliteration">Al-Khafid</div>
+                    <div class="name-meaning">The Reducer, The Abaser</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الرَّافِعُ</div>
+                    <div class="name-transliteration">Ar-Rafi</div>
+                    <div class="name-meaning">The Exalter, The Elevator</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُعِزُّ</div>
+                    <div class="name-transliteration">Al-Mu'izz</div>
+                    <div class="name-meaning">The Giver of Honor</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُذِلُّ</div>
+                    <div class="name-transliteration">Al-Mudhill</div>
+                    <div class="name-meaning">The Giver of Dishonor</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">السَّمِيعُ</div>
+                    <div class="name-transliteration">As-Sami</div>
+                    <div class="name-meaning">The All-Hearing</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْبَصِيرُ</div>
+                    <div class="name-transliteration">Al-Basir</div>
+                    <div class="name-meaning">The All-Seeing</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْحَكَمُ</div>
+                    <div class="name-transliteration">Al-Hakam</div>
+                    <div class="name-meaning">The Judge, The Arbitrator</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْعَدْلُ</div>
+                    <div class="name-transliteration">Al-Adl</div>
+                    <div class="name-meaning">The Utterly Just</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">اللَّطِيفُ</div>
+                    <div class="name-transliteration">Al-Latif</div>
+                    <div class="name-meaning">The Subtle, The Gentle</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْخَبِيرُ</div>
+                    <div class="name-transliteration">Al-Khabir</div>
+                    <div class="name-meaning">The All-Aware</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْحَلِيمُ</div>
+                    <div class="name-transliteration">Al-Halim</div>
+                    <div class="name-meaning">The Forbearing, The Clement</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْعَظِيمُ</div>
+                    <div class="name-transliteration">Al-Azim</div>
+                    <div class="name-meaning">The Magnificent, The Great</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْغَفُورُ</div>
+                    <div class="name-transliteration">Al-Ghafur</div>
+                    <div class="name-meaning">The Forgiving</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الشَّكُورُ</div>
+                    <div class="name-transliteration">Ash-Shakur</div>
+                    <div class="name-meaning">The Appreciative, The Grateful</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْعَلِيُّ</div>
+                    <div class="name-transliteration">Al-Ali</div>
+                    <div class="name-meaning">The Most High, The Exalted</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْكَبِيرُ</div>
+                    <div class="name-transliteration">Al-Kabir</div>
+                    <div class="name-meaning">The Greatest, The Most Grand</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْحَفِيظُ</div>
+                    <div class="name-transliteration">Al-Hafiz</div>
+                    <div class="name-meaning">The Preserver, The Guardian</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُقِيتُ</div>
+                    <div class="name-transliteration">Al-Muqit</div>
+                    <div class="name-meaning">The Sustainer, The Nourisher</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْحَسِيبُ</div>
+                    <div class="name-transliteration">Al-Hasib</div>
+                    <div class="name-meaning">The Reckoner, The Sufficient</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْجَلِيلُ</div>
+                    <div class="name-transliteration">Al-Jalil</div>
+                    <div class="name-meaning">The Majestic, The Revered</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْكَرِيمُ</div>
+                    <div class="name-transliteration">Al-Karim</div>
+                    <div class="name-meaning">The Generous, The Noble</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الرَّقِيبُ</div>
+                    <div class="name-transliteration">Ar-Raqib</div>
+                    <div class="name-meaning">The Watchful, The Overseer</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُجِيبُ</div>
+                    <div class="name-transliteration">Al-Mujib</div>
+                    <div class="name-meaning">The Responsive, The Answerer</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْوَاسِعُ</div>
+                    <div class="name-transliteration">Al-Wasi</div>
+                    <div class="name-meaning">The All-Encompassing</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْحَكِيمُ</div>
+                    <div class="name-transliteration">Al-Hakim</div>
+                    <div class="name-meaning">The Wise</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْوَدُودُ</div>
+                    <div class="name-transliteration">Al-Wadud</div>
+                    <div class="name-meaning">The Loving, The Affectionate</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمَجِيدُ</div>
+                    <div class="name-transliteration">Al-Majid</div>
+                    <div class="name-meaning">The Glorious, The Most Honorable</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْبَاعِثُ</div>
+                    <div class="name-transliteration">Al-Ba'ith</div>
+                    <div class="name-meaning">The Resurrector</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الشَّهِيدُ</div>
+                    <div class="name-transliteration">Ash-Shahid</div>
+                    <div class="name-meaning">The Witness</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْحَقُّ</div>
+                    <div class="name-transliteration">Al-Haqq</div>
+                    <div class="name-meaning">The Truth, The Reality</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْوَكِيلُ</div>
+                    <div class="name-transliteration">Al-Wakil</div>
+                    <div class="name-meaning">The Trustee, The Disposer of Affairs</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْقَوِيُّ</div>
+                    <div class="name-transliteration">Al-Qawi</div>
+                    <div class="name-meaning">The Strong, The Powerful</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمَتِينُ</div>
+                    <div class="name-transliteration">Al-Matin</div>
+                    <div class="name-meaning">The Firm, The Steadfast</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْوَلِيُّ</div>
+                    <div class="name-transliteration">Al-Wali</div>
+                    <div class="name-meaning">The Protecting Friend</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْحَمِيدُ</div>
+                    <div class="name-transliteration">Al-Hamid</div>
+                    <div class="name-meaning">The Praiseworthy</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُحْصِي</div>
+                    <div class="name-transliteration">Al-Muhsi</div>
+                    <div class="name-meaning">The Accounter, The Numberer</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُبْدِئُ</div>
+                    <div class="name-transliteration">Al-Mubdi</div>
+                    <div class="name-meaning">The Originator, The Initiator</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُعِيدُ</div>
+                    <div class="name-transliteration">Al-Mu'id</div>
+                    <div class="name-meaning">The Restorer, The Reinstater</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُحْيِي</div>
+                    <div class="name-transliteration">Al-Muhyi</div>
+                    <div class="name-meaning">The Giver of Life</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُمِيتُ</div>
+                    <div class="name-transliteration">Al-Mumit</div>
+                    <div class="name-meaning">The Bringer of Death</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْحَيُّ</div>
+                    <div class="name-transliteration">Al-Hayy</div>
+                    <div class="name-meaning">The Ever-Living</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْقَيُّومُ</div>
+                    <div class="name-transliteration">Al-Qayyum</div>
+                    <div class="name-meaning">The Self-Subsisting, The Sustainer</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْوَاجِدُ</div>
+                    <div class="name-transliteration">Al-Wajid</div>
+                    <div class="name-meaning">The Finder, The Perceiver</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمَاجِدُ</div>
+                    <div class="name-transliteration">Al-Majid</div>
+                    <div class="name-meaning">The Noble, The Illustrious</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْوَاحِدُ</div>
+                    <div class="name-transliteration">Al-Wahid</div>
+                    <div class="name-meaning">The One, The Unique</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الصَّمَدُ</div>
+                    <div class="name-transliteration">As-Samad</div>
+                    <div class="name-meaning">The Eternal Refuge</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْقَادِرُ</div>
+                    <div class="name-transliteration">Al-Qadir</div>
+                    <div class="name-meaning">The Capable, The Powerful</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُقْتَدِرُ</div>
+                    <div class="name-transliteration">Al-Muqtadir</div>
+                    <div class="name-meaning">The Omnipotent</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُقَدِّمُ</div>
+                    <div class="name-transliteration">Al-Muqaddim</div>
+                    <div class="name-meaning">The Expediter, The Promoter</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُؤَخِّرُ</div>
+                    <div class="name-transliteration">Al-Mu'akhkhir</div>
+                    <div class="name-meaning">The Delayer, The Retarder</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الأَوَّلُ</div>
+                    <div class="name-transliteration">Al-Awwal</div>
+                    <div class="name-meaning">The First, The Beginning</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الآخِرُ</div>
+                    <div class="name-transliteration">Al-Akhir</div>
+                    <div class="name-meaning">The Last, The End</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الظَّاهِرُ</div>
+                    <div class="name-transliteration">Az-Zahir</div>
+                    <div class="name-meaning">The Manifest, The Evident</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْبَاطِنُ</div>
+                    <div class="name-transliteration">Al-Batin</div>
+                    <div class="name-meaning">The Hidden, The Innermost</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْوَالِي</div>
+                    <div class="name-transliteration">Al-Wali</div>
+                    <div class="name-meaning">The Governor, The Protector</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُتَعَالِي</div>
+                    <div class="name-transliteration">Al-Muta'ali</div>
+                    <div class="name-meaning">The Supremely Exalted</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْبَرُّ</div>
+                    <div class="name-transliteration">Al-Barr</div>
+                    <div class="name-meaning">The Source of Goodness</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">التَّوَّابُ</div>
+                    <div class="name-transliteration">At-Tawwab</div>
+                    <div class="name-meaning">The Ever-Accepting of Repentance</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُنْتَقِمُ</div>
+                    <div class="name-transliteration">Al-Muntaqim</div>
+                    <div class="name-meaning">The Avenger</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">العَفُوُّ</div>
+                    <div class="name-transliteration">Al-Afuww</div>
+                    <div class="name-meaning">The Pardoner, The Effacer</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الرَّؤُوفُ</div>
+                    <div class="name-transliteration">Ar-Ra'uf</div>
+                    <div class="name-meaning">The Most Kind</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">مَالِكُ الْمُلْكِ</div>
+                    <div class="name-transliteration">Malik-ul-Mulk</div>
+                    <div class="name-meaning">Master of the Kingdom</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">ذُو الْجَلاَلِ وَالإِكْرَامِ</div>
+                    <div class="name-transliteration">Dhul-Jalali wal-Ikram</div>
+                    <div class="name-meaning">Possessor of Glory and Honor</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُقْسِطُ</div>
+                    <div class="name-transliteration">Al-Muqsit</div>
+                    <div class="name-meaning">The Equitable, The Requiter</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْجَامِعُ</div>
+                    <div class="name-transliteration">Al-Jami</div>
+                    <div class="name-meaning">The Gatherer, The Uniter</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْغَنِيُّ</div>
+                    <div class="name-transliteration">Al-Ghani</div>
+                    <div class="name-meaning">The Self-Sufficient</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْمُغْنِي</div>
+                    <div class="name-transliteration">Al-Mughni</div>
+                    <div class="name-meaning">The Enricher</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">المَانِعُ</div>
+                    <div class="name-transliteration">Al-Mani</div>
+                    <div class="name-meaning">The Preventer, The Withholder</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الضَّارُ</div>
+                    <div class="name-transliteration">Ad-Darr</div>
+                    <div class="name-meaning">The Distresser</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">النَّافِعُ</div>
+                    <div class="name-transliteration">An-Nafi</div>
+                    <div class="name-meaning">The Benefactor, The Propitious</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">النُّورُ</div>
+                    <div class="name-transliteration">An-Nur</div>
+                    <div class="name-meaning">The Light</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْهَادِي</div>
+                    <div class="name-transliteration">Al-Hadi</div>
+                    <div class="name-meaning">The Guide</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْبَدِيعُ</div>
+                    <div class="name-transliteration">Al-Badi</div>
+                    <div class="name-meaning">The Incomparable Originator</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْبَاقِي</div>
+                    <div class="name-transliteration">Al-Baqi</div>
+                    <div class="name-meaning">The Everlasting, The Eternal</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الْوَارِثُ</div>
+                    <div class="name-transliteration">Al-Warith</div>
+                    <div class="name-meaning">The Inheritor, The Heir</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الرَّشِيدُ</div>
+                    <div class="name-transliteration">Ar-Rashid</div>
+                    <div class="name-meaning">The Righteous Teacher</div>
+                </div>
+                <div class="name-card">
+                    <div class="name-arabic">الصَّبُورُ</div>
+                    <div class="name-transliteration">As-Sabur</div>
+                    <div class="name-meaning">The Patient, The Timeless</div>
+                </div>
+            </div>
+
+            <p style="margin-top: 1.5rem;">
+                <em>Note: There exists a 100th name known only to Allah Himself, or to those to whom He reveals it through spiritual unveiling (kashf).</em>
+        </section>
+
+        <section style="margin-top: 2rem;">
+            <h2 style="color: var(--mythos-primary);">Worship & Relationship with Creation</h2>
+
+            <h3 style="color: var(--mythos-secondary);">How to Approach Allah</h3>
+            <ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
+                <li><strong>Salah (Prayer):</strong> Five daily prayers are the pillar of worship</li>
+                <li><strong>Dhikr (Remembrance):</strong> Constant remembrance of Allah through His names and phrases</li>
+                <li><strong>Du'a (Supplication):</strong> Personal prayer and requests made directly to Allah</li>
+                <li><strong>Tawbah (Repentance):</strong> Sincere turning away from sin and returning to Allah</li>
+                <li><strong>Tawakkul (Trust):</strong> Complete reliance on Allah while taking appropriate action</li>
+                <li><strong>Ihsan (Excellence):</strong> Worshipping Allah as if you see Him; knowing He sees you</li>
+            </ul>
+
+            <h3 style="color: var(--mythos-secondary); margin-top: 1.5rem;">The Opening (Al-Fatiha) - Most Recited Prayer</h3>
+            <div class="citation" style="background: rgba(0, 128, 0, 0.05); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <p style="margin: 0.5rem 0;"><em>In the name of Allah, the Most Compassionate, the Most Merciful.</em></p>
+                <p style="margin: 0.5rem 0;"><em>All praise is for Allah—Lord of all worlds,</em></p>
+                <p style="margin: 0.5rem 0;"><em>the Most Compassionate, the Most Merciful,</em></p>
+                <p style="margin: 0.5rem 0;"><em>Master of the Day of Judgment.</em></p>
+                <p style="margin: 0.5rem 0;"><em>You alone we worship. You alone we ask for help.</em></p>
+                <p style="margin: 0.5rem 0;"><em>Guide us along the Straight Path—</em></p>
+                <p style="margin: 0.5rem 0;"><em>the path of those You have blessed, not those You are displeased with, or those who are astray.</em></p>
+                <p style="margin-top: 0.5rem;"><strong>- Quran 1:1-7</strong></p>
+        </section>
+        </section>
+
+        <section style="margin-top: 2rem; background: rgba(0, 128, 0, 0.05); padding: 1.5rem; border-radius: 10px;">
+            <h3 style="color: var(--mythos-primary);">Sources</h3>
+            <ul style="margin: 0.5rem 0 0 2rem; line-height: 1.8;">
+                <li>Quran - Complete text, especially Surah Al-Ikhlas (112), Ayat al-Kursi (2:255)</li>
+                <li>Sahih Bukhari & Sahih Muslim - Hadith on the 99 Names</li>
+                <li>Al-Ghazali - "The Ninety-Nine Beautiful Names of God" (Al-Maqsad al-Asna)</li>
+                <li>Ibn Arabi - "The Bezels of Wisdom" on divine attributes</li>
+                <li>Tafsir Ibn Kathir - Classical Quranic commentary</li>
+        </section>
+    </main>
+
+    <footer>
+        <p>
+            <strong>Allah</strong> - Islamic Theology<br>
+            <a href="../../../mythos-index.html">World Mythos Home</a> |
             <a href="../index.html">Islamic Tradition</a> |
             <a href="index.html">Browse All Divine Beings</a>
-</p>
-</footer>
+        </p>
+    </footer>
 </body>
 </html>

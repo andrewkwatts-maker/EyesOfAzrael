@@ -1,0 +1,484 @@
+/**
+ * Edit Icon Component Styles
+ * Floating edit button that appears on entity cards
+ * Only visible for content created by current user
+ * Matches Eyes of Azrael glassmorphism aesthetic
+ */
+
+/* ============================================
+   BASE ICON STYLES
+   ============================================ */
+
+.edit-icon {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Glassmorphism */
+    background: rgba(100, 255, 218, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    /* Border and shadow */
+    border: 2px solid rgba(100, 255, 218, 0.4);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(100, 255, 218, 0.2);
+
+    /* Interaction */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+
+    /* Reset button styles */
+    padding: 0;
+    margin: 0;
+    outline: none;
+}
+
+.edit-icon:hover {
+    background: rgba(100, 255, 218, 0.25);
+    border-color: rgba(100, 255, 218, 0.7);
+    transform: scale(1.1);
+    box-shadow:
+        0 6px 16px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(100, 255, 218, 0.4);
+}
+
+.edit-icon:active {
+    transform: scale(1.05);
+}
+
+.edit-icon:focus {
+    outline: 3px solid rgba(100, 255, 218, 0.5);
+    outline-offset: 2px;
+}
+
+.edit-icon:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ============================================
+   ICON SYMBOL
+   ============================================ */
+
+.edit-icon__symbol {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #64ffda;
+    filter: drop-shadow(0 0 5px rgba(100, 255, 218, 0.3));
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.edit-icon:hover .edit-icon__symbol {
+    filter: drop-shadow(0 0 10px rgba(100, 255, 218, 0.6));
+    transform: rotate(-15deg);
+}
+
+/* ============================================
+   SIZE VARIANTS
+   ============================================ */
+
+/* Small */
+.edit-icon--small {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+}
+
+.edit-icon--small .edit-icon__symbol {
+    font-size: 0.9rem;
+}
+
+/* Medium (default) */
+.edit-icon--medium {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+}
+
+.edit-icon--medium .edit-icon__symbol {
+    font-size: 1.1rem;
+}
+
+/* Large */
+.edit-icon--large {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+}
+
+.edit-icon--large .edit-icon__symbol {
+    font-size: 1.3rem;
+}
+
+/* ============================================
+   POSITION VARIANTS
+   ============================================ */
+
+/* Top Right (default) */
+.edit-icon--top-right {
+    top: 12px;
+    right: 12px;
+}
+
+/* Top Left */
+.edit-icon--top-left {
+    top: 12px;
+    left: 12px;
+}
+
+/* Bottom Right */
+.edit-icon--bottom-right {
+    bottom: 12px;
+    right: 12px;
+}
+
+/* Bottom Left */
+.edit-icon--bottom-left {
+    bottom: 12px;
+    left: 12px;
+}
+
+/* ============================================
+   VISIBILITY ANIMATIONS
+   ============================================ */
+
+.edit-icon--visible {
+    animation: fadeInScale 0.3s ease-out;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Pulse animation on first appearance */
+.edit-icon--pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow:
+            0 4px 12px rgba(0, 0, 0, 0.3),
+            0 0 20px rgba(100, 255, 218, 0.2);
+    }
+    50% {
+        box-shadow:
+            0 4px 12px rgba(0, 0, 0, 0.3),
+            0 0 30px rgba(100, 255, 218, 0.5);
+    }
+}
+
+/* ============================================
+   TOOLTIP STYLES
+   ============================================ */
+
+.edit-icon[title] {
+    position: relative;
+}
+
+.edit-icon[title]::after {
+    content: attr(title);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.9);
+    color: #64ffda;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border-radius: 6px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: all 0.2s ease;
+    z-index: 1000;
+}
+
+.edit-icon[title]:hover::after {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Tooltip arrow */
+.edit-icon[title]::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    right: 12px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid rgba(0, 0, 0, 0.9);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+}
+
+.edit-icon[title]:hover::before {
+    opacity: 1;
+}
+
+/* ============================================
+   CARD INTEGRATION
+   ============================================ */
+
+/* Ensure parent card has position context */
+.entity-card:has(.edit-icon),
+.deity-card:has(.edit-icon),
+.hero-card:has(.edit-icon),
+.creature-card:has(.edit-icon),
+.item-card:has(.edit-icon),
+.place-card:has(.edit-icon) {
+    position: relative;
+}
+
+/* Hide edit icon when card is being hovered over to go to detail page */
+/* But show it prominently when hovering over the icon itself */
+.entity-card:hover .edit-icon:not(:hover) {
+    opacity: 0.8;
+}
+
+.entity-card .edit-icon:hover {
+    opacity: 1;
+    z-index: 20;
+}
+
+/* ============================================
+   THEME VARIANTS
+   ============================================ */
+
+/* Purple variant (for theories) */
+.edit-icon--purple {
+    background: rgba(147, 51, 234, 0.15);
+    border-color: rgba(147, 51, 234, 0.4);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(147, 51, 234, 0.2);
+}
+
+.edit-icon--purple:hover {
+    background: rgba(147, 51, 234, 0.25);
+    border-color: rgba(147, 51, 234, 0.7);
+    box-shadow:
+        0 6px 16px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(147, 51, 234, 0.4);
+}
+
+.edit-icon--purple .edit-icon__symbol {
+    color: #9333ea;
+    filter: drop-shadow(0 0 5px rgba(147, 51, 234, 0.3));
+}
+
+.edit-icon--purple:hover .edit-icon__symbol {
+    filter: drop-shadow(0 0 10px rgba(147, 51, 234, 0.6));
+}
+
+/* Gold variant */
+.edit-icon--gold {
+    background: rgba(255, 193, 7, 0.15);
+    border-color: rgba(255, 193, 7, 0.4);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(255, 193, 7, 0.2);
+}
+
+.edit-icon--gold:hover {
+    background: rgba(255, 193, 7, 0.25);
+    border-color: rgba(255, 193, 7, 0.7);
+    box-shadow:
+        0 6px 16px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(255, 193, 7, 0.4);
+}
+
+.edit-icon--gold .edit-icon__symbol {
+    color: #ffc107;
+    filter: drop-shadow(0 0 5px rgba(255, 193, 7, 0.3));
+}
+
+.edit-icon--gold:hover .edit-icon__symbol {
+    filter: drop-shadow(0 0 10px rgba(255, 193, 7, 0.6));
+}
+
+/* Red variant (for delete/danger actions) */
+.edit-icon--danger {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(239, 68, 68, 0.2);
+}
+
+.edit-icon--danger:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.7);
+    box-shadow:
+        0 6px 16px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(239, 68, 68, 0.4);
+}
+
+.edit-icon--danger .edit-icon__symbol {
+    color: #ef4444;
+    filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.3));
+}
+
+.edit-icon--danger:hover .edit-icon__symbol {
+    filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.6));
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+    .edit-icon--top-right,
+    .edit-icon--bottom-right {
+        right: 8px;
+    }
+
+    .edit-icon--top-left,
+    .edit-icon--bottom-left {
+        left: 8px;
+    }
+
+    .edit-icon--top-right,
+    .edit-icon--top-left {
+        top: 8px;
+    }
+
+    .edit-icon--bottom-right,
+    .edit-icon--bottom-left {
+        bottom: 8px;
+    }
+
+    /* Slightly smaller on mobile */
+    .edit-icon--medium {
+        width: 36px;
+        height: 36px;
+    }
+
+    .edit-icon--large {
+        width: 42px;
+        height: 42px;
+    }
+}
+
+/* Touch devices - larger hit area */
+@media (hover: none) and (pointer: coarse) {
+    .edit-icon {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .edit-icon--small {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY - HIGH CONTRAST MODE
+   ============================================ */
+
+@media (prefers-contrast: high) {
+    .edit-icon {
+        border-width: 3px;
+        background: rgba(100, 255, 218, 0.3);
+    }
+
+    .edit-icon__symbol {
+        font-weight: 700;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY - REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .edit-icon,
+    .edit-icon__symbol,
+    .edit-icon::after,
+    .edit-icon::before {
+        transition: none;
+        animation: none;
+    }
+
+    .edit-icon:hover {
+        transform: none;
+    }
+
+    .edit-icon:hover .edit-icon__symbol {
+        transform: none;
+    }
+
+    .edit-icon--pulse {
+        animation: none;
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .edit-icon {
+        display: none;
+    }
+}
+
+/* ============================================
+   DARK MODE ADJUSTMENTS
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+    .edit-icon {
+        background: rgba(100, 255, 218, 0.1);
+    }
+
+    .edit-icon:hover {
+        background: rgba(100, 255, 218, 0.2);
+    }
+}
+
+/* ============================================
+   LOADING STATE
+   ============================================ */
+
+.edit-icon--loading {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.edit-icon--loading .edit-icon__symbol {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================
+   DISABLED STATE
+   ============================================ */
+
+.edit-icon--disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}

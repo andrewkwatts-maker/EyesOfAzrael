@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"/><title>The Seven Trumpets - Revelation 8-11</title>
-<link href="../../../../themes/theme-base.css" rel="stylesheet"/><link href="../../../../styles.css" rel="stylesheet"/><link href="../../../../themes/corpus-links.css" rel="stylesheet"/><link rel="stylesheet" href="../../../../themes/smart-links.css"><script defer src="../../../../themes/smart-links.js"></script><script defer src="../../../../themes/theme-animations.js"></script><script defer src="../../../../themes/theme-picker.js"></script>
+<link href="../../../../themes/theme-base.css" rel="stylesheet"/><link href="../../../../styles.css" rel="stylesheet"/><link href="../../../../themes/corpus-links.css" rel="stylesheet"/><link rel="stylesheet" href="../../../../themes/smart-links.css">
+<link rel="stylesheet" href="../../../../css/spinner.css">
+<link rel="stylesheet" href="../../../../css/user-auth.css"><script defer src="../../../../themes/smart-links.js"></script><script defer src="../../../../themes/theme-animations.js"></script><script defer src="../../../../themes/theme-picker.js"></script>
+<script defer src="../../../../js/user-auth.js"></script>
+<script defer src="../../../../js/user-theories.js"></script>
+<script defer src="../../../../js/components/theory-widget.js"></script>
 <style>h1,h2,h3{color:var(--color-primary)}.breadcrumb{position:sticky;top:60px;width:100%;z-index:999;background:rgba(var(--color-surface-rgb),.9);backdrop-filter:blur(12px);padding:var(--spacing-xs) var(--spacing-lg);font-size:var(--font-size-sm);border-bottom:1px solid rgba(var(--color-primary-rgb),.15)}.breadcrumb a{color:var(--color-primary);text-decoration:none}.glass-card{background:rgba(var(--color-surface-rgb),.6);backdrop-filter:blur(10px);border:1px solid rgba(var(--color-primary-rgb),.2);border-radius:var(--radius-lg);padding:var(--spacing-xl);margin:2rem 0;box-shadow:var(--shadow-lg)}</style></head>
 <body>
     <div id="theme-picker-container"></div><div id="theme-picker"></div><header><div class="header-content"><h1>The Seven Trumpets</h1></div></header>
@@ -21,5 +26,155 @@
 <div class="see-also-section"><h4>See Also</h4><div class="see-also-links">
 <a href="parallels/exodus-parallels.html" class="see-also-link"><span>🌊</span> Exodus Parallels</a>
 <a href="parallels/joel-parallels.html" class="see-also-link"><span>🦗</span> Joel Parallels</a>
-<a href="seven-bowls.html" class="see-also-link"><span>🏺</span> Seven Bowls</a></div></div></main>
-<footer><p><strong>World Mythos Explorer</strong> - The Seven Trumpets</p></footer></body></html>
+<a href="seven-bowls.html" class="see-also-link"><span>🏺</span> Seven Bowls</a></div></div>
+<!-- User Theory Widget Section -->
+<section class="theory-widget-container">
+  <div data-theory-widget
+       data-page="christian/texts/seven-trumpets"
+       data-title="The Seven Trumpets - Revelation 8-11"
+       data-mode="inline"></div>
+</section>
+</main>
+<footer><p><strong>World Mythos Explorer</strong> - The Seven Trumpets</p></footer>
+
+<!-- Authentication Modal -->
+<div id="auth-modal" class="auth-modal">
+    <div class="auth-modal-content">
+        <button class="auth-modal-close" onclick="window.userAuth.hideAuthModal()">&times;</button>
+
+        <h2 id="auth-modal-title" class="auth-modal-title">Login to Your Account</h2>
+
+        <div id="auth-message" class="auth-message"></div>
+
+        <!-- Login Form -->
+        <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+            <div class="auth-form-group">
+                <label for="login-username">Username</label>
+                <input type="text" id="login-username" name="username" required autocomplete="username">
+            </div>
+
+            <div class="auth-form-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" name="password" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="auth-submit-btn">Login</button>
+
+            <div class="auth-switch">
+                Don't have an account?
+                <a class="auth-switch-link" onclick="window.userAuth.switchAuthMode('signup')">Sign up</a>
+            </div>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signup-form" class="auth-form" style="display: none;" onsubmit="handleSignup(event)">
+            <div class="auth-form-group">
+                <label for="signup-username">Username</label>
+                <input type="text" id="signup-username" name="username" required
+                       minlength="3" autocomplete="username">
+            </div>
+
+            <div class="auth-form-group">
+                <label for="signup-email">Email</label>
+                <input type="email" id="signup-email" name="email" required autocomplete="email">
+            </div>
+
+            <div class="auth-form-group">
+                <label for="signup-password">Password</label>
+                <input type="password" id="signup-password" name="password" required
+                       minlength="6" autocomplete="new-password">
+            </div>
+
+            <button type="submit" class="auth-submit-btn">Create Account</button>
+
+            <div class="auth-switch">
+                Already have an account?
+                <a class="auth-switch-link" onclick="window.userAuth.switchAuthMode('login')">Login</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- User Display (shown when logged in) -->
+<div id="user-nav" style="position: fixed; top: 1rem; right: 1rem; z-index: 1000;">
+    <!-- Login/Signup buttons (shown when logged out) -->
+    <div data-auth-show="loggedOut" style="display: flex; gap: 0.5rem;">
+        <button class="auth-submit-btn" onclick="window.userAuth.showLoginModal()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+            Login
+        </button>
+        <button class="auth-submit-btn" onclick="window.userAuth.showSignupModal()" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: linear-gradient(135deg, #22c55e, #16a34a);">
+            Sign Up
+        </button>
+    </div>
+
+    <!-- User menu (shown when logged in) -->
+    <div data-auth-show="loggedIn" style="display: none;">
+        <div class="user-display" onclick="toggleUserDropdown()">
+            <img data-auth-avatar src="" alt="User Avatar" class="user-avatar">
+            <span data-auth-username class="user-username"></span>
+            <span>▼</span>
+        </div>
+
+        <div id="user-dropdown" class="user-dropdown">
+            <a href="/theories/user-submissions/index.html" class="user-dropdown-item">My Theories</a>
+            <a href="/profile.html" class="user-dropdown-item">Profile Settings</a>
+            <div style="border-top: 1px solid rgba(147, 51, 234, 0.3); margin: 0.5rem 0;"></div>
+            <button class="user-logout-btn" onclick="window.userAuth.logout()">Logout</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auth form handlers
+function handleLogin(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const username = formData.get('username');
+    const password = formData.get('password');
+
+    const result = window.userAuth.login(username, password);
+
+    if (result.success) {
+        window.userAuth.showAuthMessage(result.message, 'success');
+        setTimeout(() => {
+            window.userAuth.hideAuthModal();
+        }, 1000);
+    } else {
+        window.userAuth.showAuthMessage(result.error, 'error');
+    }
+}
+
+function handleSignup(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const username = formData.get('username');
+    const email = formData.get('email');
+    const password = formData.get('password');
+
+    const result = window.userAuth.signup(username, email, password);
+
+    if (result.success) {
+        window.userAuth.showAuthMessage(result.message + ' You can now login.', 'success');
+        setTimeout(() => {
+            window.userAuth.switchAuthMode('login');
+            window.userAuth.clearAuthMessages();
+        }, 2000);
+    } else {
+        window.userAuth.showAuthMessage(result.error, 'error');
+    }
+}
+
+// User dropdown toggle
+function toggleUserDropdown() {
+    const dropdown = document.getElementById('user-dropdown');
+    dropdown.classList.toggle('show');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.user-display') && !e.target.closest('#user-dropdown')) {
+        document.getElementById('user-dropdown')?.classList.remove('show');
+    }
+});
+</script>
+</body></html>
