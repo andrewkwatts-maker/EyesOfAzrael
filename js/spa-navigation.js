@@ -6,6 +6,8 @@
 
 class SPANavigation {
     constructor(firestore, authManager, renderer) {
+        console.log('[SPA] 🔧 Constructor called at:', new Date().toISOString());
+
         this.db = firestore;
         this.auth = authManager;
         this.renderer = renderer;
@@ -14,7 +16,12 @@ class SPANavigation {
         this.maxHistory = 50;
         this.authReady = false;
 
-        console.log('[SPA] Initializing navigation...');
+        console.log('[SPA] ✓ Properties initialized:', {
+            hasDB: !!this.db,
+            hasAuth: !!this.auth,
+            hasRenderer: !!this.renderer,
+            authReady: this.authReady
+        });
 
         // Route patterns
         this.routes = {
@@ -27,34 +34,52 @@ class SPANavigation {
             dashboard: /^#?\/dashboard\/?$/
         };
 
+        console.log('[SPA] 🔒 Starting waitForAuth()...');
+
         // Wait for auth to be ready before initializing router
-        this.waitForAuth().then(() => {
+        this.waitForAuth().then((user) => {
+            console.log('[SPA] ✅ waitForAuth() resolved with user:', user ? user.email : 'null');
             this.authReady = true;
+            console.log('[SPA] 🔓 Auth ready flag set to true');
             this.initRouter();
+        }).catch((error) => {
+            console.error('[SPA] ❌ waitForAuth() rejected with error:', error);
         });
+
+        console.log('[SPA] 🏁 Constructor completed (waitForAuth is async)');
     }
 
     /**
      * Wait for Firebase Auth to be ready
      */
     async waitForAuth() {
-        return new Promise((resolve) => {
-            console.log('[SPA] Waiting for auth to be ready...');
+        return new Promise((resolve, reject) => {
+            console.log('[SPA] ⏳ waitForAuth() promise created at:', new Date().toISOString());
 
             // Use Firebase auth directly (compatible with auth guard)
             const auth = firebase.auth();
             if (!auth) {
-                console.error('[SPA] Firebase auth not available!');
-                resolve(null);
+                console.error('[SPA] ❌ Firebase auth not available!');
+                reject(new Error('Firebase auth not available'));
                 return;
             }
 
+            console.log('[SPA] 📡 Registering onAuthStateChanged listener...');
+
             // Firebase auth ready check - just resolve, auth guard handles UI
             const unsubscribe = auth.onAuthStateChanged((user) => {
-                console.log('[SPA] Auth state ready:', user ? 'Logged in' : 'Logged out');
+                const timestamp = new Date().toISOString();
+                console.log('[SPA] 🔔 onAuthStateChanged fired at:', timestamp);
+                console.log('[SPA] 👤 User state:', user ? `Logged in as ${user.email}` : 'Logged out');
+                console.log('[SPA] 🧹 Unsubscribing from auth state listener');
+
                 unsubscribe();
+
+                console.log('[SPA] ✅ Resolving waitForAuth() promise with user:', user ? user.email : 'null');
                 resolve(user);
             });
+
+            console.log('[SPA] ⏸️ waitForAuth() promise setup complete, waiting for auth state change...');
         });
     }
 
@@ -62,26 +87,45 @@ class SPANavigation {
      * Initialize router and event listeners
      */
     initRouter() {
-        console.log('[SPA] Setting up router...');
+        console.log('[SPA] 🚀 initRouter() called at:', new Date().toISOString());
+        console.log('[SPA] 🔍 Current state:', {
+            authReady: this.authReady,
+            currentRoute: this.currentRoute,
+            hash: window.location.hash
+        });
 
         // Handle hash changes
-        window.addEventListener('hashchange', () => this.handleRoute());
-        window.addEventListener('popstate', () => this.handleRoute());
+        window.addEventListener('hashchange', () => {
+            console.log('[SPA] 📍 hashchange event triggered, hash:', window.location.hash);
+            this.handleRoute();
+        });
+
+        window.addEventListener('popstate', () => {
+            console.log('[SPA] 📍 popstate event triggered');
+            this.handleRoute();
+        });
+
+        console.log('[SPA] ✓ Event listeners registered (hashchange, popstate)');
 
         // Intercept link clicks
         document.addEventListener('click', (e) => {
             if (e.target.matches('a[href^="#"]') || e.target.closest('a[href^="#"]')) {
                 const link = e.target.matches('a') ? e.target : e.target.closest('a');
                 if (link.hash) {
+                    console.log('[SPA] 🔗 Intercepted link click:', link.hash);
                     e.preventDefault();
                     this.navigate(link.hash);
                 }
             }
         });
 
+        console.log('[SPA] ✓ Link click interceptor registered');
+
         // Initial route
-        console.log('[SPA] Router initialized, handling initial route');
+        console.log('[SPA] 🎯 Triggering initial route handler...');
         this.handleRoute();
+
+        console.log('[SPA] 🏁 initRouter() completed');
     }
 
     /**
@@ -100,65 +144,100 @@ class SPANavigation {
      * Handle current route
      */
     async handleRoute() {
+        const timestamp = new Date().toISOString();
         const hash = window.location.hash || '#/';
         const path = hash.replace('#', '');
 
-        console.log('[SPA] Handling route:', path);
+        console.log('[SPA] ═══════════════════════════════════════');
+        console.log('[SPA] 🛣️  handleRoute() called at:', timestamp);
+        console.log('[SPA] 📍 Current hash:', hash);
+        console.log('[SPA] 📍 Parsed path:', path);
+        console.log('[SPA] 🔍 Pre-check state:', {
+            authReady: this.authReady,
+            currentRoute: this.currentRoute
+        });
 
         // Double-check authentication (auth guard already handles this)
         if (!this.authReady) {
-            console.log('[SPA] Auth not ready yet, waiting...');
+            console.log('[SPA] ⚠️  EARLY RETURN: Auth not ready yet, waiting...');
+            console.log('[SPA] 💡 Tip: waitForAuth() may not have completed yet');
+            console.log('[SPA] ═══════════════════════════════════════');
             return;
         }
+
+        console.log('[SPA] ✓ Auth ready check passed');
 
         // Verify user is authenticated via Firebase
         const currentUser = firebase.auth().currentUser;
+        console.log('[SPA] 👤 Firebase currentUser:', currentUser ? currentUser.email : 'null');
+
         if (!currentUser) {
-            console.log('[SPA] No current user - auth guard will show login overlay');
+            console.log('[SPA] ⚠️  EARLY RETURN: No current user - auth guard will show login overlay');
+            console.log('[SPA] 💡 Tip: Firebase auth.currentUser is null (may be transient)');
+            console.log('[SPA] ═══════════════════════════════════════');
             return;
         }
 
+        console.log('[SPA] ✓ Current user check passed');
+
         // Add to history
         this.addToHistory(path);
+        console.log('[SPA] ✓ Added to history, total entries:', this.routeHistory.length);
 
         // Show loading
+        console.log('[SPA] 🔄 Showing loading spinner...');
         this.showLoading();
 
         try {
+            console.log('[SPA] 🔍 Matching route pattern for path:', path);
+
             // Match route
             if (this.routes.home.test(path)) {
-                console.log('[SPA] Rendering home');
+                console.log('[SPA] ✅ Matched HOME route');
+                console.log('[SPA] 🏠 Calling renderHome()...');
                 await this.renderHome();
+                console.log('[SPA] ✓ renderHome() completed');
             } else if (this.routes.entity.test(path)) {
                 const match = path.match(this.routes.entity);
-                console.log('[SPA] Rendering entity:', match[3]);
+                console.log('[SPA] ✅ Matched ENTITY route:', match[3]);
                 await this.renderEntity(match[1], match[2], match[3]);
             } else if (this.routes.category.test(path)) {
                 const match = path.match(this.routes.category);
+                console.log('[SPA] ✅ Matched CATEGORY route:', match[2]);
                 await this.renderCategory(match[1], match[2]);
             } else if (this.routes.mythology.test(path)) {
                 const match = path.match(this.routes.mythology);
+                console.log('[SPA] ✅ Matched MYTHOLOGY route:', match[1]);
                 await this.renderMythology(match[1]);
             } else if (this.routes.search.test(path)) {
+                console.log('[SPA] ✅ Matched SEARCH route');
                 await this.renderSearch();
             } else if (this.routes.compare.test(path)) {
+                console.log('[SPA] ✅ Matched COMPARE route');
                 await this.renderCompare();
             } else if (this.routes.dashboard.test(path)) {
+                console.log('[SPA] ✅ Matched DASHBOARD route');
                 await this.renderDashboard();
             } else {
+                console.log('[SPA] ⚠️  No route matched, rendering 404');
                 await this.render404();
             }
 
             // Update breadcrumb
+            console.log('[SPA] 🍞 Updating breadcrumb...');
             this.updateBreadcrumb(path);
 
             // Store current route
             this.currentRoute = path;
+            console.log('[SPA] ✓ Current route stored:', this.currentRoute);
 
-            console.log('[SPA] ✅ Route rendered successfully');
+            console.log('[SPA] ✅✅✅ Route rendered successfully ✅✅✅');
+            console.log('[SPA] ═══════════════════════════════════════');
 
         } catch (error) {
-            console.error('[SPA] ❌ Routing error:', error);
+            console.error('[SPA] ❌❌❌ Routing error:', error);
+            console.error('[SPA] Stack trace:', error.stack);
+            console.log('[SPA] ═══════════════════════════════════════');
             this.renderError(error);
         }
     }
@@ -167,42 +246,62 @@ class SPANavigation {
      * Render home page
      */
     async renderHome() {
+        console.log('[SPA] ▶️  renderHome() called at:', new Date().toISOString());
+
         const mainContent = document.getElementById('main-content');
+        console.log('[SPA] 🔍 Looking for main-content element...');
+        console.log('[SPA] 📦 main-content found:', !!mainContent);
+
         if (!mainContent) {
-            console.error('[SPA] main-content element not found!');
+            console.error('[SPA] ❌ CRITICAL: main-content element not found!');
+            console.error('[SPA] 💡 DOM may not be ready or element ID is wrong');
             return;
         }
 
+        console.log('[SPA] ✓ main-content element found:', {
+            tagName: mainContent.tagName,
+            className: mainContent.className,
+            display: mainContent.style.display,
+            innerHTML: mainContent.innerHTML.substring(0, 100) + '...'
+        });
+
         // Try PageAssetRenderer first (dynamic Firebase page loading)
         if (typeof PageAssetRenderer !== 'undefined') {
-            console.log('[SPA] Trying PageAssetRenderer for home page...');
+            console.log('[SPA] 🔧 PageAssetRenderer class available, trying...');
             try {
                 const renderer = new PageAssetRenderer(this.db);
+                console.log('[SPA] 📡 Calling renderer.loadPage("home")...');
                 const pageData = await renderer.loadPage('home');
 
                 if (pageData) {
+                    console.log('[SPA] ✅ Home page data loaded from Firebase');
                     await renderer.renderPage('home', mainContent);
-                    console.log('[SPA] Home page rendered via PageAssetRenderer');
+                    console.log('[SPA] ✅ Home page rendered via PageAssetRenderer');
                     return;
                 } else {
-                    console.log('[SPA] Home page not found in Firebase, falling back to HomeView');
+                    console.log('[SPA] ⚠️  Home page not found in Firebase, falling back to HomeView');
                 }
             } catch (error) {
-                console.warn('[SPA] PageAssetRenderer failed, falling back to HomeView:', error);
+                console.warn('[SPA] ⚠️  PageAssetRenderer failed, falling back to HomeView:', error);
             }
+        } else {
+            console.log('[SPA] ℹ️  PageAssetRenderer class not defined, skipping');
         }
 
         // Fallback to HomeView class
         if (typeof HomeView !== 'undefined') {
-            console.log('[SPA] Using HomeView class');
+            console.log('[SPA] 🔧 HomeView class available, using it...');
             const homeView = new HomeView(this.db);
+            console.log('[SPA] 📡 Calling homeView.render(mainContent)...');
             await homeView.render(mainContent);
-            console.log('[SPA] Home page rendered via HomeView');
+            console.log('[SPA] ✅ Home page rendered via HomeView');
             return;
+        } else {
+            console.log('[SPA] ℹ️  HomeView class not defined, using inline fallback');
         }
 
         // Fallback to inline rendering if HomeView not available
-        console.warn('[SPA] HomeView not found, using fallback rendering');
+        console.warn('[SPA] ⚠️  Using inline fallback rendering (no HomeView or PageAssetRenderer)');
 
         // Get all mythologies
         const mythologies = [

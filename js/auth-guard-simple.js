@@ -116,6 +116,13 @@ function handleAuthenticated(user) {
     const mainContent = document.getElementById('main-content');
     if (mainContent) {
         mainContent.style.display = 'block';
+
+        // Hide the initial loading container immediately (Agent 6 fix)
+        const loadingContainer = mainContent.querySelector('.loading-container');
+        if (loadingContainer) {
+            loadingContainer.style.display = 'none';
+            console.log('[EOA Auth Guard] Initial loading spinner hidden');
+        }
     }
 
     // Update user info display in header
