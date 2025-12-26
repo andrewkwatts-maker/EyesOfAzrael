@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic Dashboard - Eyes of Azrael</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            padding: 1rem;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 1px solid #2a2a3e;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .system-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .status-ok {
+            background: #10b981;
+            color: #fff;
+        }
+
+        .status-warning {
+            background: #f59e0b;
+            color: #000;
+        }
+
+        .status-error {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .status-unknown {
+            background: #6b7280;
+            color: #fff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: #1a1a2e;
+            border: 1px solid #2a2a3e;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #2a2a3e;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .indicator-ok {
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+        .indicator-warning {
+            background: #f59e0b;
+            box-shadow: 0 0 10px #f59e0b;
+        }
+
+        .indicator-error {
+            background: #ef4444;
+            box-shadow: 0 0 10px #ef4444;
+        }
+
+        .indicator-unknown {
+            background: #6b7280;
+        }
+
+        .card-content {
+            font-size: 0.9rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #2a2a3e;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #9ca3af;
+        }
+
+        .info-value {
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            border-radius: 4px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            color: #fca5a5;
+        }
+
+        .console-log {
+            background: #0a0a0a;
+            border: 1px solid #2a2a3e;
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .log-entry {
+            padding: 0.25rem 0.5rem;
+            margin-bottom: 0.25rem;
+            border-radius: 4px;
+        }
+
+        .log-entry.log-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+        }
+
+        .log-entry.log-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #fcd34d;
+        }
+
+        .log-entry.log-info {
+            color: #9ca3af;
+        }
+
+        .log-timestamp {
+            color: #6b7280;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+        }
+
+        .network-request {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: #0a0a0a;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .request-success {
+            border-left: 3px solid #10b981;
+        }
+
+        .request-error {
+            border-left: 3px solid #ef4444;
+        }
+
+        .request-url {
+            color: #60a5fa;
+            word-break: break-all;
+        }
+
+        .request-meta {
+            color: #9ca3af;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .controls {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #374151;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .auto-refresh-indicator {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #1a1a2e;
+            border: 1px solid #2a2a3e;
+            border-radius: 8px;
+            margin-left: auto;
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .failure-point {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .failure-point h2 {
+            color: #fca5a5;
+            margin-bottom: 0.5rem;
+        }
+
+        .scrollable {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .scrollable::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollable::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+
+        .timing-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .timing-item {
+            text-align: center;
+            padding: 1rem;
+            background: #0a0a0a;
+            border-radius: 8px;
+        }
+
+        .timing-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #3b82f6;
+        }
+
+        .timing-label {
+            font-size: 0.85rem;
+            color: #9ca3af;
+            margin-top: 0.25rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .badge-success {
+            background: #10b981;
+            color: #fff;
+        }
+
+        .badge-warning {
+            background: #f59e0b;
+            color: #000;
+        }
+
+        .badge-error {
+            background: #ef4444;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>🔍 Diagnostic Dashboard</h1>
+            <p>Real-time system monitoring and diagnostics</p>
+            <div class="system-status status-unknown" id="systemStatus">
+                Initializing...
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="refreshDiagnostics()">🔄 Refresh Now</button>
+            <button class="btn btn-secondary" onclick="exportDiagnostics()">💾 Export JSON</button>
+            <button class="btn btn-secondary" onclick="clearLogs()">🗑️ Clear Logs</button>
+            <button class="btn btn-danger" onclick="location.href='/'">← Back to Site</button>
+            <div class="auto-refresh-indicator">
+                <span class="pulse">●</span> Auto-refresh: 1s
+            </div>
+        </div>
+
+        <div id="failurePoint"></div>
+
+        <div class="grid">
+            <!-- Firebase Status -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Firebase SDK</span>
+                    <span class="status-indicator indicator-unknown" id="firebaseIndicator"></span>
+                </div>
+                <div class="card-content" id="firebaseContent">
+                    Loading...
+                </div>
+            </div>
+
+            <!-- Auth Status -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Authentication</span>
+                    <span class="status-indicator indicator-unknown" id="authIndicator"></span>
+                </div>
+                <div class="card-content" id="authContent">
+                    Loading...
+                </div>
+            </div>
+
+            <!-- Navigation Status -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Navigation</span>
+                    <span class="status-indicator indicator-unknown" id="navIndicator"></span>
+                </div>
+                <div class="card-content" id="navContent">
+                    Loading...
+                </div>
+            </div>
+
+            <!-- DOM Status -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">DOM Elements</span>
+                    <span class="status-indicator indicator-unknown" id="domIndicator"></span>
+                </div>
+                <div class="card-content" id="domContent">
+                    Loading...
+                </div>
+            </div>
+
+            <!-- Network Status -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Network</span>
+                    <span class="status-indicator indicator-unknown" id="networkIndicator"></span>
+                </div>
+                <div class="card-content scrollable" id="networkContent">
+                    Loading...
+                </div>
+            </div>
+
+            <!-- Performance -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Performance</span>
+                    <span class="status-indicator indicator-unknown" id="perfIndicator"></span>
+                </div>
+                <div class="card-content" id="perfContent">
+                    Loading...
+                </div>
+            </div>
+        </div>
+
+        <!-- Console Logs -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Console Logs (Last 50)</span>
+                <span id="logCount" style="color: #9ca3af;">0 logs</span>
+            </div>
+            <div class="console-log scrollable" id="consoleLogs">
+                No logs yet...
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+
+    <!-- Diagnostic Collector -->
+    <script src="js/diagnostic-collector.js"></script>
+
+    <!-- Dashboard Script -->
+    <script>
+        let collector;
+        let refreshInterval;
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('[Dashboard] Initializing...');
+
+            // Initialize Firebase
+            if (typeof firebase !== 'undefined' && typeof firebaseConfig !== 'undefined') {
+                if (firebase.apps.length === 0) {
+                    firebase.initializeApp(firebaseConfig);
+                    console.log('[Dashboard] Firebase initialized');
+                }
+            }
+
+            // Initialize diagnostic collector
+            collector = new DiagnosticCollector();
+            collector.init();
+
+            // Initial refresh
+            refreshDiagnostics();
+
+            // Auto-refresh every second
+            refreshInterval = setInterval(refreshDiagnostics, 1000);
+
+            console.log('[Dashboard] Dashboard ready');
+        });
+
+        /**
+         * Refresh all diagnostics
+         */
+        function refreshDiagnostics() {
+            if (!collector) return;
+
+            const diagnostics = collector.getDiagnostics();
+            const systemStatus = collector.getSystemStatus();
+            const failurePoint = collector.getFailurePoint();
+
+            // Update system status
+            updateSystemStatus(systemStatus);
+
+            // Update failure point
+            updateFailurePoint(failurePoint);
+
+            // Update each component
+            updateFirebaseStatus(diagnostics.firebase);
+            updateAuthStatus(diagnostics.auth);
+            updateNavigationStatus(diagnostics.navigation);
+            updateDOMStatus(diagnostics.dom);
+            updateNetworkStatus(diagnostics.network);
+            updatePerformanceStatus(diagnostics.performance);
+            updateConsoleLogs(diagnostics.console);
+        }
+
+        /**
+         * Update system status
+         */
+        function updateSystemStatus(status) {
+            const statusEl = document.getElementById('systemStatus');
+            if (!statusEl) return;
+
+            statusEl.className = 'system-status';
+
+            switch (status) {
+                case 'ok':
+                    statusEl.classList.add('status-ok');
+                    statusEl.textContent = '✅ All Systems Operational';
+                    break;
+                case 'warning':
+                    statusEl.classList.add('status-warning');
+                    statusEl.textContent = '⚠️ System Warnings Detected';
+                    break;
+                case 'error':
+                    statusEl.classList.add('status-error');
+                    statusEl.textContent = '❌ System Errors Detected';
+                    break;
+                default:
+                    statusEl.classList.add('status-unknown');
+                    statusEl.textContent = '❓ Status Unknown';
+            }
+        }
+
+        /**
+         * Update failure point
+         */
+        function updateFailurePoint(failurePoint) {
+            const container = document.getElementById('failurePoint');
+            if (!container) return;
+
+            if (failurePoint) {
+                container.innerHTML = `
+                    <div class="failure-point">
+                        <h2>⚠️ Critical Failure Detected</h2>
+                        <p><strong>Component:</strong> ${failurePoint.component}</p>
+                        <p><strong>Error:</strong> ${failurePoint.error}</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = '';
+            }
+        }
+
+        /**
+         * Update Firebase status
+         */
+        function updateFirebaseStatus(firebase) {
+            updateIndicator('firebaseIndicator', firebase.status);
+
+            const content = document.getElementById('firebaseContent');
+            if (!content) return;
+
+            let html = '';
+
+            if (firebase.error) {
+                html += `<div class="error-message">${firebase.error}</div>`;
+            }
+
+            html += `
+                <div class="info-row">
+                    <span class="info-label">Initialized</span>
+                    <span class="info-value">${firebase.initialized ? 'Yes' : 'No'}</span>
+                </div>
+            `;
+
+            if (firebase.config) {
+                html += `
+                    <div class="info-row">
+                        <span class="info-label">Project ID</span>
+                        <span class="info-value">${firebase.config.projectId}</span>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="info-row">
+                    <span class="info-label">Last Check</span>
+                    <span class="info-value">${formatTimestamp(firebase.timestamp)}</span>
+                </div>
+            `;
+
+            content.innerHTML = html;
+        }
+
+        /**
+         * Update Auth status
+         */
+        function updateAuthStatus(auth) {
+            updateIndicator('authIndicator', auth.status);
+
+            const content = document.getElementById('authContent');
+            if (!content) return;
+
+            let html = '';
+
+            if (auth.error) {
+                html += `<div class="error-message">${auth.error}</div>`;
+            }
+
+            if (auth.currentUser) {
+                html += `
+                    <div class="info-row">
+                        <span class="info-label">User</span>
+                        <span class="info-value">${auth.currentUser.displayName || auth.currentUser.email}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">UID</span>
+                        <span class="info-value">${auth.currentUser.uid.substring(0, 12)}...</span>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="info-row">
+                        <span class="info-label">User</span>
+                        <span class="info-value">Not signed in</span>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="info-row">
+                    <span class="info-label">Ready</span>
+                    <span class="info-value">${auth.ready ? 'Yes' : 'No'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Last Check</span>
+                    <span class="info-value">${formatTimestamp(auth.timestamp)}</span>
+                </div>
+            `;
+
+            content.innerHTML = html;
+        }
+
+        /**
+         * Update Navigation status
+         */
+        function updateNavigationStatus(nav) {
+            updateIndicator('navIndicator', nav.status);
+
+            const content = document.getElementById('navContent');
+            if (!content) return;
+
+            let html = '';
+
+            if (nav.error) {
+                html += `<div class="error-message">${nav.error}</div>`;
+            }
+
+            html += `
+                <div class="info-row">
+                    <span class="info-label">Current Route</span>
+                    <span class="info-value">${nav.currentRoute || 'None'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">History</span>
+                    <span class="info-value">${nav.history.length} routes</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Ready</span>
+                    <span class="info-value">${nav.ready ? 'Yes' : 'No'}</span>
+                </div>
+            `;
+
+            content.innerHTML = html;
+        }
+
+        /**
+         * Update DOM status
+         */
+        function updateDOMStatus(dom) {
+            updateIndicator('domIndicator', dom.status);
+
+            const content = document.getElementById('domContent');
+            if (!content) return;
+
+            let html = '';
+
+            if (dom.error) {
+                html += `<div class="error-message">${dom.error}</div>`;
+            }
+
+            html += `
+                <div class="info-row">
+                    <span class="info-label">Ready State</span>
+                    <span class="info-value">${dom.readyState}</span>
+                </div>
+            `;
+
+            if (dom.criticalElements) {
+                for (const [key, element] of Object.entries(dom.criticalElements)) {
+                    const badge = element.exists ?
+                        '<span class="badge badge-success">✓</span>' :
+                        '<span class="badge badge-error">✗</span>';
+
+                    html += `
+                        <div class="info-row">
+                            <span class="info-label">${key}</span>
+                            <span class="info-value">${badge}</span>
+                        </div>
+                    `;
+                }
+            }
+
+            content.innerHTML = html;
+        }
+
+        /**
+         * Update Network status
+         */
+        function updateNetworkStatus(network) {
+            updateIndicator('networkIndicator', network.status);
+
+            const content = document.getElementById('networkContent');
+            if (!content) return;
+
+            let html = `
+                <div class="info-row">
+                    <span class="info-label">Total Requests</span>
+                    <span class="info-value">${network.requests.length}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Errors</span>
+                    <span class="info-value">${network.errors.length}</span>
+                </div>
+            `;
+
+            // Show recent requests
+            const recentRequests = network.requests.slice(-10).reverse();
+            if (recentRequests.length > 0) {
+                html += '<div style="margin-top: 1rem; font-weight: 600;">Recent Requests:</div>';
+                recentRequests.forEach(req => {
+                    const isSuccess = req.status >= 200 && req.status < 300;
+                    html += `
+                        <div class="network-request ${isSuccess ? 'request-success' : 'request-error'}">
+                            <div class="request-url">${req.url}</div>
+                            <div class="request-meta">
+                                ${req.method || req.type} • ${req.status} • ${req.duration}ms
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            content.innerHTML = html;
+        }
+
+        /**
+         * Update Performance status
+         */
+        function updatePerformanceStatus(perf) {
+            updateIndicator('perfIndicator', perf.status);
+
+            const content = document.getElementById('perfContent');
+            if (!content) return;
+
+            let html = '';
+
+            if (perf.error) {
+                html += `<div class="error-message">${perf.error}</div>`;
+            }
+
+            if (perf.timing) {
+                html += '<div class="timing-breakdown">';
+
+                if (perf.timing.uptime) {
+                    html += `
+                        <div class="timing-item">
+                            <div class="timing-value">${formatDuration(perf.timing.uptime)}</div>
+                            <div class="timing-label">Uptime</div>
+                        </div>
+                    `;
+                }
+
+                if (perf.timing.domReady) {
+                    html += `
+                        <div class="timing-item">
+                            <div class="timing-value">${perf.timing.domReady}ms</div>
+                            <div class="timing-label">DOM Ready</div>
+                        </div>
+                    `;
+                }
+
+                if (perf.timing.pageLoad) {
+                    html += `
+                        <div class="timing-item">
+                            <div class="timing-value">${perf.timing.pageLoad}ms</div>
+                            <div class="timing-label">Page Load</div>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+            }
+
+            if (perf.memory) {
+                html += `
+                    <div style="margin-top: 1rem;">
+                        <div class="info-row">
+                            <span class="info-label">Used Memory</span>
+                            <span class="info-value">${perf.memory.usedJSHeapSize} MB</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Total Memory</span>
+                            <span class="info-value">${perf.memory.totalJSHeapSize} MB</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            content.innerHTML = html;
+        }
+
+        /**
+         * Update console logs
+         */
+        function updateConsoleLogs(console) {
+            const container = document.getElementById('consoleLogs');
+            const countEl = document.getElementById('logCount');
+
+            if (!container) return;
+
+            if (countEl) {
+                const errorCount = console.errors.length;
+                const warnCount = console.warnings.length;
+                countEl.textContent = `${console.logs.length} logs`;
+
+                if (errorCount > 0) {
+                    countEl.textContent += ` (${errorCount} errors)`;
+                }
+                if (warnCount > 0) {
+                    countEl.textContent += ` (${warnCount} warnings)`;
+                }
+            }
+
+            if (console.logs.length === 0) {
+                container.innerHTML = '<div style="color: #6b7280;">No logs yet...</div>';
+                return;
+            }
+
+            const logs = console.logs.slice().reverse();
+            let html = '';
+
+            logs.forEach(log => {
+                const className = `log-entry log-${log.level}`;
+                const timestamp = formatElapsed(log.elapsed);
+                html += `
+                    <div class="${className}">
+                        <span class="log-timestamp">${timestamp}</span>
+                        ${escapeHtml(log.message)}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // Auto-scroll to bottom on new logs
+            container.scrollTop = 0;
+        }
+
+        /**
+         * Update status indicator
+         */
+        function updateIndicator(id, status) {
+            const indicator = document.getElementById(id);
+            if (!indicator) return;
+
+            indicator.className = 'status-indicator';
+
+            switch (status) {
+                case 'ok':
+                    indicator.classList.add('indicator-ok');
+                    break;
+                case 'warning':
+                    indicator.classList.add('indicator-warning');
+                    break;
+                case 'error':
+                    indicator.classList.add('indicator-error');
+                    break;
+                default:
+                    indicator.classList.add('indicator-unknown');
+            }
+        }
+
+        /**
+         * Format timestamp
+         */
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return 'Never';
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString();
+        }
+
+        /**
+         * Format elapsed time
+         */
+        function formatElapsed(ms) {
+            if (ms < 1000) return `${ms}ms`;
+            return `${(ms / 1000).toFixed(1)}s`;
+        }
+
+        /**
+         * Format duration
+         */
+        function formatDuration(ms) {
+            if (ms < 1000) return `${ms}ms`;
+            if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
+            return `${(ms / 60000).toFixed(1)}m`;
+        }
+
+        /**
+         * Escape HTML
+         */
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        /**
+         * Export diagnostics
+         */
+        function exportDiagnostics() {
+            if (!collector) return;
+
+            const json = collector.exportJSON();
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `diagnostics-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            console.log('[Dashboard] Diagnostics exported');
+        }
+
+        /**
+         * Clear logs
+         */
+        function clearLogs() {
+            if (!collector) return;
+            collector.clearLogs();
+            console.log('[Dashboard] Logs cleared');
+        }
+
+        // Cleanup on unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>

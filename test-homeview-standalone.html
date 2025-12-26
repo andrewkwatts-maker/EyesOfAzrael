@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeView Fallback Test - Eyes of Azrael</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="css/home-view.css">
+    <link rel="stylesheet" href="css/spinner.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .test-header {
+            background: rgba(139, 127, 255, 0.1);
+            border-bottom: 2px solid rgba(139, 127, 255, 0.3);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .test-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #8b7fff;
+        }
+
+        .test-header p {
+            margin: 0.5rem 0 0 0;
+            font-size: 0.875rem;
+            color: #adb5bd;
+        }
+
+        .test-controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .test-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(139, 127, 255, 0.2);
+            border: 1px solid rgba(139, 127, 255, 0.4);
+            border-radius: 8px;
+            color: #8b7fff;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .test-btn:hover {
+            background: rgba(139, 127, 255, 0.3);
+            border-color: #8b7fff;
+        }
+
+        .test-btn.active {
+            background: #8b7fff;
+            color: white;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+
+        .status-success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            color: #22c55e;
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .status-warning {
+            background: rgba(251, 191, 36, 0.2);
+            border: 1px solid #fbbf24;
+            color: #fbbf24;
+        }
+
+        #app-container {
+            min-height: calc(100vh - 200px);
+        }
+
+        .console-output {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid rgba(139, 127, 255, 0.3);
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+        }
+
+        .console-log {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .console-log.error {
+            color: #ef4444;
+        }
+
+        .console-log.warn {
+            color: #fbbf24;
+        }
+
+        .console-log.info {
+            color: #3b82f6;
+        }
+
+        .console-log.success {
+            color: #22c55e;
+        }
+    </style>
+</head>
+<body>
+    <!-- Test Header -->
+    <div class="test-header">
+        <h1>🧪 HomeView Fallback Test</h1>
+        <p>Testing HomeView rendering WITHOUT Firebase - Pure fallback mode</p>
+
+        <div class="test-controls">
+            <button class="test-btn active" onclick="testFallback()">
+                🎯 Test Fallback
+            </button>
+            <button class="test-btn" onclick="testHTML()">
+                📝 Test HTML Generation
+            </button>
+            <button class="test-btn" onclick="testStyling()">
+                🎨 Test Styling
+            </button>
+            <button class="test-btn" onclick="testInteractivity()">
+                🖱️ Test Interactivity
+            </button>
+            <button class="test-btn" onclick="clearConsole()">
+                🧹 Clear Console
+            </button>
+        </div>
+
+        <div id="test-status"></div>
+    </div>
+
+    <!-- App Container -->
+    <div id="app-container"></div>
+
+    <!-- Console Output -->
+    <div class="console-output" id="console-output"></div>
+
+    <!-- HomeView Class (Force-Fallback Version) -->
+    <script>
+        /**
+         * Mock Firestore for Fallback Testing
+         * This always throws errors to force fallback
+         */
+        class MockFirestore {
+            collection(name) {
+                return {
+                    orderBy: () => ({
+                        get: async () => {
+                            // Simulate Firebase failure
+                            throw new Error('Firebase not available (test mode)');
+                        }
+                    })
+                };
+            }
+        }
+
+        /**
+         * Home Page View - Force Fallback Version
+         * Modified to ALWAYS use fallback mythologies
+         */
+        class HomeView {
+            constructor(firestore) {
+                this.db = firestore;
+                this.mythologies = [];
+            }
+
+            async render(container) {
+                logToConsole('🎬 Rendering home page...', 'info');
+
+                // Show loading state
+                container.innerHTML = `
+                    <div class="loading-container">
+                        <div class="spinner-container">
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                        </div>
+                        <p class="loading-message">Loading mythologies...</p>
+                    </div>
+                `;
+
+                try {
+                    // Load mythologies (will use fallback)
+                    await this.loadMythologies();
+
+                    // Render home page content
+                    container.innerHTML = this.getHomeHTML();
+
+                    // Add event listeners
+                    this.attachEventListeners();
+
+                    logToConsole(`✅ Rendered ${this.mythologies.length} mythology cards`, 'success');
+
+                } catch (error) {
+                    logToConsole(`❌ Error rendering: ${error.message}`, 'error');
+                    container.innerHTML = this.getErrorHTML(error);
+                }
+            }
+
+            async loadMythologies() {
+                logToConsole('📚 Loading mythologies...', 'info');
+
+                try {
+                    // Try to load from Firebase (will fail in test mode)
+                    const snapshot = await this.db.collection('mythologies')
+                        .orderBy('order', 'asc')
+                        .get();
+
+                    if (!snapshot.empty) {
+                        this.mythologies = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        logToConsole(`✅ Loaded ${this.mythologies.length} from Firebase`, 'success');
+                    } else {
+                        logToConsole('⚠️ Firebase empty, using fallback', 'warn');
+                        this.mythologies = this.getFallbackMythologies();
+                    }
+
+                } catch (error) {
+                    logToConsole(`⚠️ Firebase error: ${error.message}`, 'warn');
+                    logToConsole('🔄 Using fallback mythologies', 'info');
+                    this.mythologies = this.getFallbackMythologies();
+                }
+            }
+
+            getFallbackMythologies() {
+                return [
+                    {
+                        id: 'greek',
+                        name: 'Greek Mythology',
+                        icon: '🏛️',
+                        description: 'Gods of Olympus and heroes of ancient Greece',
+                        color: 'var(--color-primary, #8b7fff)',
+                        order: 1
+                    },
+                    {
+                        id: 'norse',
+                        name: 'Norse Mythology',
+                        icon: '⚔️',
+                        description: 'Warriors of Asgard and the Nine Realms',
+                        color: '#4a9eff',
+                        order: 2
+                    },
+                    {
+                        id: 'egyptian',
+                        name: 'Egyptian Mythology',
+                        icon: '𓂀',
+                        description: 'Keepers of the Nile and guardians of Ma\'at',
+                        color: '#ffd93d',
+                        order: 3
+                    },
+                    {
+                        id: 'hindu',
+                        name: 'Hindu Mythology',
+                        icon: '🕉️',
+                        description: 'The Trimurti and cosmic cycles of creation',
+                        color: '#ff7eb6',
+                        order: 4
+                    },
+                    {
+                        id: 'buddhist',
+                        name: 'Buddhist Tradition',
+                        icon: '☸️',
+                        description: 'Bodhisattvas and the path to enlightenment',
+                        color: '#51cf66',
+                        order: 5
+                    },
+                    {
+                        id: 'chinese',
+                        name: 'Chinese Mythology',
+                        icon: '🐉',
+                        description: 'Dragons, immortals, and celestial bureaucracy',
+                        color: '#f85a8f',
+                        order: 6
+                    },
+                    {
+                        id: 'japanese',
+                        name: 'Japanese Mythology',
+                        icon: '⛩️',
+                        description: 'Kami spirits and the creation of Japan',
+                        color: '#fb9f7f',
+                        order: 7
+                    },
+                    {
+                        id: 'celtic',
+                        name: 'Celtic Mythology',
+                        icon: '🍀',
+                        description: 'Druids, faeries, and the Tuatha Dé Danann',
+                        color: '#7fd9d3',
+                        order: 8
+                    },
+                    {
+                        id: 'babylonian',
+                        name: 'Babylonian Mythology',
+                        icon: '🏛️',
+                        description: 'The Enuma Elish and gods of Mesopotamia',
+                        color: '#b965e6',
+                        order: 9
+                    },
+                    {
+                        id: 'persian',
+                        name: 'Persian Mythology',
+                        icon: '🔥',
+                        description: 'Zoroastrian wisdom and the eternal flame',
+                        color: '#7fb0f9',
+                        order: 10
+                    },
+                    {
+                        id: 'christian',
+                        name: 'Christian Tradition',
+                        icon: '✟',
+                        description: 'Angels, saints, and biblical narratives',
+                        color: '#a8edea',
+                        order: 11
+                    },
+                    {
+                        id: 'islamic',
+                        name: 'Islamic Tradition',
+                        icon: '☪️',
+                        description: 'Prophets, angels, and divine revelation',
+                        color: '#fed6e3',
+                        order: 12
+                    }
+                ];
+            }
+
+            getHomeHTML() {
+                return `
+                    <div class="home-view">
+                        <!-- Hero Section -->
+                        <section class="hero-section">
+                            <div class="hero-content">
+                                <h1 class="hero-title">
+                                    <span class="hero-icon">👁️</span>
+                                    Eyes of Azrael
+                                </h1>
+                                <p class="hero-subtitle">
+                                    Explore World Mythologies
+                                </p>
+                                <p class="hero-description">
+                                    Journey through 6000+ years of human mythology, from ancient Sumer to modern traditions.
+                                    Discover deities, heroes, creatures, and sacred texts from cultures across the globe.
+                                </p>
+                                <div class="hero-actions">
+                                    <a href="#/search" class="btn-primary">
+                                        🔍 Search Database
+                                    </a>
+                                    <a href="#/compare" class="btn-secondary">
+                                        ⚖️ Compare Traditions
+                                    </a>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Mythology Cards Grid -->
+                        <section class="mythology-grid-section">
+                            <h2 class="section-title">Explore Mythologies</h2>
+                            <div class="mythology-grid">
+                                ${this.mythologies.map(myth => this.getMythologyCardHTML(myth)).join('')}
+                            </div>
+                        </section>
+
+                        <!-- Features Section -->
+                        <section class="features-section">
+                            <h2 class="section-title">Database Features</h2>
+                            <div class="features-grid">
+                                <div class="feature-card">
+                                    <div class="feature-icon">📚</div>
+                                    <h3>Comprehensive Database</h3>
+                                    <p>Thousands of entities across 12+ mythological traditions</p>
+                                </div>
+                                <div class="feature-card">
+                                    <div class="feature-icon">🔗</div>
+                                    <h3>Cross-Cultural Links</h3>
+                                    <p>Discover connections between different traditions</p>
+                                </div>
+                                <div class="feature-card">
+                                    <div class="feature-icon">🌿</div>
+                                    <h3>Sacred Herbalism</h3>
+                                    <p>Explore plants, rituals, and traditional practices</p>
+                                </div>
+                                <div class="feature-card">
+                                    <div class="feature-icon">✨</div>
+                                    <h3>Magic Systems</h3>
+                                    <p>Study mystical practices and esoteric traditions</p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                `;
+            }
+
+            getMythologyCardHTML(mythology) {
+                const borderColor = mythology.color || 'var(--color-primary, #8b7fff)';
+
+                return `
+                    <a href="#/mythology/${mythology.id}" class="mythology-card" data-mythology="${mythology.id}">
+                        <div class="mythology-card-icon" style="color: ${borderColor};">
+                            ${mythology.icon || '📖'}
+                        </div>
+                        <h3 class="mythology-card-title">${mythology.name}</h3>
+                        <p class="mythology-card-description">${mythology.description}</p>
+                        <div class="mythology-card-arrow" style="color: ${borderColor};">→</div>
+                    </a>
+                `;
+            }
+
+            getErrorHTML(error) {
+                return `
+                    <div class="error-container" style="
+                        text-align: center;
+                        padding: 4rem 2rem;
+                        max-width: 600px;
+                        margin: 0 auto;
+                    ">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
+                        <h1>Error Loading Home Page</h1>
+                        <p style="color: #ef4444; margin: 1rem 0;">${error.message}</p>
+                        <button onclick="location.reload()" class="btn-primary">Reload Page</button>
+                    </div>
+                `;
+            }
+
+            attachEventListeners() {
+                const cards = document.querySelectorAll('.mythology-card');
+                logToConsole(`🔗 Attaching listeners to ${cards.length} cards`, 'info');
+
+                cards.forEach(card => {
+                    card.addEventListener('mouseenter', () => {
+                        logToConsole(`🖱️ Hover: ${card.dataset.mythology}`, 'info');
+                    });
+                });
+            }
+        }
+
+        // =============================================
+        // Test Functions
+        // =============================================
+
+        let homeView;
+
+        async function testFallback() {
+            logToConsole('=== FALLBACK TEST STARTING ===', 'info');
+            const container = document.getElementById('app-container');
+            const mockDB = new MockFirestore();
+
+            homeView = new HomeView(mockDB);
+            await homeView.render(container);
+
+            // Validate
+            const cards = document.querySelectorAll('.mythology-card');
+            updateStatus(
+                cards.length === 12,
+                `Rendered ${cards.length}/12 cards`
+            );
+        }
+
+        function testHTML() {
+            logToConsole('=== HTML VALIDATION TEST ===', 'info');
+
+            if (!homeView) {
+                logToConsole('❌ Run Fallback Test first', 'error');
+                return;
+            }
+
+            const html = homeView.getHomeHTML();
+            logToConsole(`📝 Generated ${html.length} characters of HTML`, 'info');
+
+            // Check for required sections
+            const checks = {
+                'Hero Section': html.includes('hero-section'),
+                'Mythology Grid': html.includes('mythology-grid'),
+                'Features Section': html.includes('features-section'),
+                'Hero Title': html.includes('Eyes of Azrael'),
+                '12 Mythology Cards': (html.match(/mythology-card/g) || []).length === 12
+            };
+
+            Object.entries(checks).forEach(([name, passed]) => {
+                logToConsole(`${passed ? '✅' : '❌'} ${name}`, passed ? 'success' : 'error');
+            });
+
+            updateStatus(
+                Object.values(checks).every(v => v),
+                'HTML structure validation'
+            );
+        }
+
+        function testStyling() {
+            logToConsole('=== STYLING TEST ===', 'info');
+
+            const cards = document.querySelectorAll('.mythology-card');
+            if (cards.length === 0) {
+                logToConsole('❌ No cards found. Run Fallback Test first', 'error');
+                return;
+            }
+
+            const firstCard = cards[0];
+            const styles = window.getComputedStyle(firstCard);
+
+            const checks = {
+                'Border Radius': parseInt(styles.borderRadius) > 0,
+                'Background Color': styles.backgroundColor !== 'rgba(0, 0, 0, 0)',
+                'Padding': parseInt(styles.padding) > 0,
+                'Position Relative': styles.position === 'relative',
+                'Transition': styles.transition.includes('all')
+            };
+
+            Object.entries(checks).forEach(([name, passed]) => {
+                logToConsole(`${passed ? '✅' : '❌'} ${name}`, passed ? 'success' : 'error');
+            });
+
+            updateStatus(
+                Object.values(checks).every(v => v),
+                'CSS styling validation'
+            );
+        }
+
+        function testInteractivity() {
+            logToConsole('=== INTERACTIVITY TEST ===', 'info');
+
+            const cards = document.querySelectorAll('.mythology-card');
+            if (cards.length === 0) {
+                logToConsole('❌ No cards found', 'error');
+                return;
+            }
+
+            // Test hover effect
+            const card = cards[0];
+            const event = new MouseEvent('mouseenter', { bubbles: true });
+            card.dispatchEvent(event);
+
+            logToConsole('✅ Hover event dispatched', 'success');
+
+            // Check if card has href
+            const hasHref = card.hasAttribute('href');
+            logToConsole(`${hasHref ? '✅' : '❌'} Card has navigation link`, hasHref ? 'success' : 'error');
+
+            updateStatus(hasHref, 'Interactivity test');
+        }
+
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = '';
+            logToConsole('Console cleared', 'info');
+        }
+
+        function updateStatus(success, message) {
+            const statusDiv = document.getElementById('test-status');
+            const statusClass = success ? 'status-success' : 'status-error';
+            const icon = success ? '✅' : '❌';
+
+            statusDiv.innerHTML = `
+                <span class="status-indicator ${statusClass}">
+                    ${icon} ${message}
+                </span>
+            `;
+        }
+
+        function logToConsole(message, type = 'info') {
+            const output = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.createElement('div');
+            logDiv.className = `console-log ${type}`;
+            logDiv.textContent = `[${timestamp}] ${message}`;
+            output.appendChild(logDiv);
+            output.scrollTop = output.scrollHeight;
+
+            // Also log to browser console
+            console.log(message);
+        }
+
+        // Auto-run fallback test on load
+        document.addEventListener('DOMContentLoaded', () => {
+            logToConsole('🚀 Test environment loaded', 'success');
+            testFallback();
+        });
+    </script>
+</body>
+</html>

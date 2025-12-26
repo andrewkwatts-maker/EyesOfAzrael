@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeView Firebase Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        .test-section {
+            margin-bottom: 2rem;
+        }
+
+        .test-item {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .test-item.success {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+        }
+
+        .test-item.error {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+        }
+
+        .test-item.warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .test-item.info {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .test-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .test-result {
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: #555;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #5a67d8;
+        }
+
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .badge.success { background: #10b981; color: white; }
+        .badge.error { background: #ef4444; color: white; }
+        .badge.warning { background: #f59e0b; color: white; }
+        .badge.info { background: #3b82f6; color: white; }
+
+        #console-output {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .console-line {
+            padding: 0.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .console-line.log { color: #1e293b; }
+        .console-line.warn { color: #f59e0b; background: #fef3c7; }
+        .console-line.error { color: #ef4444; background: #fee2e2; }
+        .console-line.info { color: #3b82f6; background: #dbeafe; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 HomeView Firebase Diagnostic Test</h1>
+
+        <!-- Test Controls -->
+        <div class="card">
+            <h2>Test Controls</h2>
+            <button id="runAllTests">Run All Tests</button>
+            <button id="testFirebase">Test Firebase Connection</button>
+            <button id="testQuery">Test Mythologies Query</button>
+            <button id="testHomeView">Test HomeView Render</button>
+            <button id="clearConsole">Clear Console</button>
+        </div>
+
+        <!-- System Status -->
+        <div class="card">
+            <h2>System Status</h2>
+            <div id="systemStatus"></div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="card">
+            <h2>Test Results</h2>
+            <div id="testResults"></div>
+        </div>
+
+        <!-- Console Output -->
+        <div class="card">
+            <h2>Console Output</h2>
+            <div id="console-output"></div>
+        </div>
+
+        <!-- Query Results -->
+        <div class="card">
+            <h2>Query Results</h2>
+            <div id="queryResults"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="../firebase-config.js"></script>
+
+    <!-- HomeView Enhanced -->
+    <script src="../js/views/home-view-enhanced.js"></script>
+
+    <!-- Test Script -->
+    <script>
+        // Intercept console methods
+        const consoleOutput = document.getElementById('console-output');
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        const originalInfo = console.info;
+
+        function logToPage(message, type = 'log') {
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            line.textContent = message;
+            consoleOutput.appendChild(line);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            logToPage(args.join(' '), 'log');
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            logToPage(args.join(' '), 'warn');
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            logToPage(args.join(' '), 'error');
+        };
+
+        console.info = function(...args) {
+            originalInfo.apply(console, args);
+            logToPage(args.join(' '), 'info');
+        };
+
+        // Test functions
+        let db, auth;
+
+        async function checkSystemStatus() {
+            const status = document.getElementById('systemStatus');
+            status.innerHTML = '';
+
+            const tests = [
+                {
+                    name: 'Firebase SDK Loaded',
+                    check: () => typeof firebase !== 'undefined',
+                    required: true
+                },
+                {
+                    name: 'Firebase Config Loaded',
+                    check: () => typeof firebaseConfig !== 'undefined',
+                    required: true
+                },
+                {
+                    name: 'Firebase App Initialized',
+                    check: () => firebase.apps.length > 0,
+                    required: true
+                },
+                {
+                    name: 'Firestore Available',
+                    check: () => {
+                        db = firebase.firestore();
+                        return db !== null;
+                    },
+                    required: true
+                },
+                {
+                    name: 'Auth Available',
+                    check: () => {
+                        auth = firebase.auth();
+                        return auth !== null;
+                    },
+                    required: true
+                },
+                {
+                    name: 'User Authenticated',
+                    check: () => auth.currentUser !== null,
+                    required: false
+                },
+                {
+                    name: 'HomeViewEnhanced Loaded',
+                    check: () => typeof HomeViewEnhanced !== 'undefined',
+                    required: false
+                }
+            ];
+
+            for (const test of tests) {
+                const item = document.createElement('div');
+                item.className = 'test-item';
+
+                try {
+                    const result = test.check();
+                    if (result) {
+                        item.classList.add('success');
+                        item.innerHTML = `
+                            <div class="test-label">✅ ${test.name}</div>
+                            <div class="test-result">PASS</div>
+                        `;
+                    } else {
+                        item.classList.add(test.required ? 'error' : 'warning');
+                        item.innerHTML = `
+                            <div class="test-label">${test.required ? '❌' : '⚠️'} ${test.name}</div>
+                            <div class="test-result">FAIL${test.required ? ' (REQUIRED)' : ' (OPTIONAL)'}</div>
+                        `;
+                    }
+                } catch (error) {
+                    item.classList.add('error');
+                    item.innerHTML = `
+                        <div class="test-label">❌ ${test.name}</div>
+                        <div class="test-result">ERROR: ${error.message}</div>
+                    `;
+                }
+
+                status.appendChild(item);
+            }
+        }
+
+        async function testFirebaseConnection() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<div class="test-item info"><div class="test-label">Testing Firebase connection...</div></div>';
+
+            try {
+                console.log('🔥 Testing Firebase connection...');
+
+                // Test 1: List collections
+                console.log('📋 Attempting to list collections...');
+                const collections = await db.listCollections?.() || [];
+                console.log('Collections found:', collections.length);
+
+                // Test 2: Get a simple document
+                console.log('📄 Testing document read...');
+                const testDoc = await db.collection('test').doc('test').get();
+                console.log('Test document read:', testDoc.exists ? 'EXISTS' : 'NOT FOUND');
+
+                results.innerHTML = `
+                    <div class="test-item success">
+                        <div class="test-label">✅ Firebase Connection Test</div>
+                        <div class="test-result">
+                            Connection successful<br>
+                            Collections: ${collections.length || 'Unable to list'}<br>
+                            Read permissions: Working
+                        </div>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('❌ Firebase connection test failed:', error);
+                results.innerHTML = `
+                    <div class="test-item error">
+                        <div class="test-label">❌ Firebase Connection Test</div>
+                        <div class="test-result">
+                            Error: ${error.message}<br>
+                            Code: ${error.code || 'N/A'}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function testMythologiesQuery() {
+            const results = document.getElementById('testResults');
+            const queryResults = document.getElementById('queryResults');
+
+            results.innerHTML = '<div class="test-item info"><div class="test-label">Testing mythologies query...</div></div>';
+            queryResults.innerHTML = '';
+
+            try {
+                console.log('🔥 Testing mythologies query...');
+                console.log('📊 Collection: mythologies');
+                console.log('📊 OrderBy: order ASC');
+
+                const startTime = performance.now();
+                const snapshot = await db.collection('mythologies').orderBy('order', 'asc').get();
+                const duration = performance.now() - startTime;
+
+                console.log(`✅ Query completed in ${duration.toFixed(2)}ms`);
+                console.log(`📊 Results: ${snapshot.size} documents`);
+
+                if (snapshot.empty) {
+                    results.innerHTML = `
+                        <div class="test-item warning">
+                            <div class="test-label">⚠️ Mythologies Query Test</div>
+                            <div class="test-result">
+                                Query successful but collection is EMPTY<br>
+                                Duration: ${duration.toFixed(2)}ms<br>
+                                Documents: 0<br>
+                                <strong>Action Required:</strong> Populate mythologies collection
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const docs = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+
+                    results.innerHTML = `
+                        <div class="test-item success">
+                            <div class="test-label">✅ Mythologies Query Test</div>
+                            <div class="test-result">
+                                Query successful<br>
+                                Duration: ${duration.toFixed(2)}ms<br>
+                                Documents: ${snapshot.size}
+                            </div>
+                        </div>
+                    `;
+
+                    queryResults.innerHTML = `<pre>${JSON.stringify(docs, null, 2)}</pre>`;
+                }
+
+            } catch (error) {
+                console.error('❌ Mythologies query failed:', error);
+
+                let errorHelp = '';
+                if (error.code === 'permission-denied') {
+                    errorHelp = '<br><strong>Solution:</strong> Update Firestore rules to allow read on /mythologies';
+                } else if (error.code === 'failed-precondition') {
+                    errorHelp = '<br><strong>Solution:</strong> Create Firestore index for field "order" in collection "mythologies"';
+                }
+
+                results.innerHTML = `
+                    <div class="test-item error">
+                        <div class="test-label">❌ Mythologies Query Test</div>
+                        <div class="test-result">
+                            Error: ${error.message}<br>
+                            Code: ${error.code || 'N/A'}${errorHelp}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function testHomeViewRender() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<div class="test-item info"><div class="test-label">Testing HomeView render...</div></div>';
+
+            try {
+                console.log('🎨 Testing HomeView render...');
+
+                // Create container
+                const container = document.createElement('div');
+                document.body.appendChild(container);
+
+                // Create HomeView instance
+                const homeView = new HomeViewEnhanced(db);
+                console.log('✅ HomeViewEnhanced instance created');
+
+                // Render
+                await homeView.render(container);
+                console.log('✅ HomeView render completed');
+
+                // Check results
+                const mythologyCards = container.querySelectorAll('.mythology-card');
+                console.log(`📊 Rendered ${mythologyCards.length} mythology cards`);
+
+                results.innerHTML = `
+                    <div class="test-item success">
+                        <div class="test-label">✅ HomeView Render Test</div>
+                        <div class="test-result">
+                            Render successful<br>
+                            Mythology cards: ${mythologyCards.length}<br>
+                            Data source: ${homeView.dataSource}
+                        </div>
+                    </div>
+                `;
+
+                // Clean up
+                document.body.removeChild(container);
+
+            } catch (error) {
+                console.error('❌ HomeView render failed:', error);
+                results.innerHTML = `
+                    <div class="test-item error">
+                        <div class="test-label">❌ HomeView Render Test</div>
+                        <div class="test-result">
+                            Error: ${error.message}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function runAllTests() {
+            await checkSystemStatus();
+            await testFirebaseConnection();
+            await testMythologiesQuery();
+            await testHomeViewRender();
+        }
+
+        // Event listeners
+        document.getElementById('runAllTests').addEventListener('click', runAllTests);
+        document.getElementById('testFirebase').addEventListener('click', testFirebaseConnection);
+        document.getElementById('testQuery').addEventListener('click', testMythologiesQuery);
+        document.getElementById('testHomeView').addEventListener('click', testHomeViewRender);
+        document.getElementById('clearConsole').addEventListener('click', () => {
+            consoleOutput.innerHTML = '';
+        });
+
+        // Initialize Firebase and run initial status check
+        window.addEventListener('load', async () => {
+            console.log('🚀 Test page loaded');
+
+            try {
+                if (firebase.apps.length === 0) {
+                    firebase.initializeApp(firebaseConfig);
+                    console.log('✅ Firebase initialized');
+                }
+
+                await checkSystemStatus();
+                console.log('✅ System status check complete');
+                console.log('💡 Use the buttons above to run specific tests');
+
+            } catch (error) {
+                console.error('❌ Initialization error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
