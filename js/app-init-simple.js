@@ -115,7 +115,10 @@
         // Setup theme toggle
         setupThemeToggle();
 
-        console.log('[App] ✅ Initialization complete');
+        console.log('[App] Initialization complete');
+        
+        // Emit app-initialized event
+        document.dispatchEvent(new CustomEvent('app-initialized'));
 
         // Hide loading spinner
         const loadingContainer = document.querySelector('.loading-container');
