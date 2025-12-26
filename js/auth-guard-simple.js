@@ -121,6 +121,11 @@ function handleAuthenticated(user) {
     // Update user info display in header
     updateUserDisplay(user);
 
+    // Emit auth-ready event for app coordinator
+    document.dispatchEvent(new CustomEvent('auth-ready', {
+        detail: { user, authenticated: true }
+    }));
+
     // Let SPANavigation handle initial routing - no need for delay or manual trigger
     console.log('[EOA Auth Guard] User authenticated, SPANavigation will handle routing');
 }
@@ -154,6 +159,9 @@ function handleNotAuthenticated() {
 
     // Clear user display
     updateUserDisplay(null);
+    
+    // Emit auth-ready event (not authenticated)
+    document.dispatchEvent(new CustomEvent('auth-ready', { detail: { user: null, authenticated: false } }));
 }
 
 /**
