@@ -254,7 +254,7 @@ class HomeView {
         const borderColor = mythology.color || 'var(--color-primary, #8b7fff)';
 
         return `
-            <a href="#/mythos/${mythology.id}" class="mythology-card" data-mythology="${mythology.id}">
+            <a href="#/mythology/${mythology.id}" class="mythology-card" data-mythology="${mythology.id}">
                 <div class="mythology-card-icon" style="color: ${borderColor};">
                     ${mythology.icon || '📖'}
                 </div>

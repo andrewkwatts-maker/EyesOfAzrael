@@ -112,12 +112,8 @@ function handleAuthenticated(user) {
     // Update user info display in header
     updateUserDisplay(user);
 
-    // Trigger navigation after a short delay to ensure all scripts loaded
-    setTimeout(() => {
-        console.log('[EOA Auth Guard] Triggering initial navigation...');
-        // Trigger hashchange event to load content
-        window.dispatchEvent(new HashChangeEvent('hashchange'));
-    }, 1000);
+    // Let SPANavigation handle initial routing - no need for delay or manual trigger
+    console.log('[EOA Auth Guard] User authenticated, SPANavigation will handle routing');
 }
 
 /**
