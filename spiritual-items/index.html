@@ -6,6 +6,7 @@
     <title>Sacred Items & Relics - World Mythos Explorer</title>
     <link rel="stylesheet" href="../themes/theme-base.css">
     <link rel="stylesheet" href="../themes/corpus-links.css">
+    <link rel="stylesheet" href="../css/spinner.css">
     <link rel="stylesheet" href="../styles.css">
     <script defer src="../themes/theme-picker.js"></script>
     <script defer src="../themes/theme-animations.js"></script>
@@ -13,6 +14,18 @@
     <script defer src="../themes/smart-links.js"></script>
 
     <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
         .hero-section {
             background: linear-gradient(135deg,
                 rgba(var(--color-primary-rgb), 0.8),
@@ -217,6 +230,76 @@
         .no-results.show {
             display: block;
         }
+
+        /* Add New Card Styling */
+        .add-item-card {
+            border: 2px dashed var(--color-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            background: rgba(var(--color-surface-rgb), 0.3);
+        }
+
+        .add-item-card:hover {
+            border-color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.05);
+        }
+
+        .add-item-card .add-icon {
+            font-size: 3rem;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .add-item-card .add-text {
+            color: var(--color-text-primary);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-semibold);
+        }
+
+        /* Edit Icon for User-Owned Content */
+        .edit-icon {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            width: 24px;
+            height: 24px;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .edit-icon:hover {
+            background: var(--color-primary);
+            transform: scale(1.1);
+        }
+
+        .edit-icon svg {
+            width: 14px;
+            height: 14px;
+            fill: var(--color-text-primary);
+        }
+
+        /* Firebase Loading Container */
+        #firebase-items-container {
+            min-height: 200px;
+        }
+
+        .tradition-section {
+            background: rgba(var(--color-surface-rgb), 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-left: 4px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-lg) 0;
+        }
     </style>
 </head>
 <body>
@@ -239,6 +322,23 @@
                 From legendary weapons and holy relics to ritual objects and divine artifacts, explore the sacred items
                 that have shaped religious practice, myth, and spiritual tradition across cultures.
             </p>
+        </div>
+
+        <!-- FIREBASE-LOADED ITEMS -->
+        <div class="tradition-section" id="firebase-section">
+            <h2>⚔️ Sacred Items Collection</h2>
+            <p>Explore our growing collection of magical artifacts and sacred objects from traditions around the world.</p>
+            <div class="items-grid" id="firebase-items-container">
+                <!-- Loaded from Firebase -->
+                <div class="loading">
+                    <div class="spinner-container">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <div class="loading-text">Loading items from database...</div>
+                </div>
+            </div>
         </div>
 
         <!-- SEARCH AND FILTER -->
@@ -774,7 +874,166 @@
         </p>
     </footer>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../firebase-config.js"></script>
+    <script src="../js/firebase-init.js"></script>
+    <script src="../js/firebase-content-loader.js"></script>
+
     <script>
+        // Initialize Firebase Content Loader for Items
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Wait for Firebase to initialize
+                await waitForFirebase();
+
+                // Create content loader instance
+                const itemLoader = new FirebaseContentLoader(window.firebaseApp, {
+                    enableCache: true,
+                    enableLogging: true
+                });
+
+                // Initialize Firestore
+                itemLoader.initFirestore(window.firebaseApp);
+
+                // Load items from Firebase
+                await itemLoader.loadContent('items', {
+                    limit: 50 // Load up to 50 items
+                });
+
+                // Render items with custom rendering
+                renderItemCards(itemLoader.getData());
+
+            } catch (error) {
+                console.error('Error loading items:', error);
+                document.getElementById('firebase-items-container').innerHTML = `
+                    <div class="error-container" style="text-align: center; padding: 2rem;">
+                        <p style="color: var(--color-error);">Error loading items from database.</p>
+                        <p style="color: var(--color-text-secondary); font-size: 0.9rem;">${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+
+        /**
+         * Render item cards with edit icons and add card
+         */
+        function renderItemCards(items) {
+            const container = document.getElementById('firebase-items-container');
+            container.innerHTML = '';
+
+            // Check if user is authenticated
+            const currentUser = firebase.auth().currentUser;
+
+            // Render item cards
+            items.forEach(item => {
+                const card = createItemCard(item, currentUser);
+                container.appendChild(card);
+            });
+
+            // Add "+" card at the end if user is logged in
+            if (currentUser) {
+                const addCard = createAddItemCard();
+                container.appendChild(addCard);
+            }
+        }
+
+        /**
+         * Create an item card element
+         */
+        function createItemCard(item, currentUser) {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.setAttribute('data-id', item.id);
+            card.setAttribute('data-traditions', (item.traditions || []).join(','));
+
+            // Add edit icon if user owns this item
+            if (currentUser && item.createdBy === currentUser.uid) {
+                const editIcon = document.createElement('div');
+                editIcon.className = 'edit-icon';
+                editIcon.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                `;
+                editIcon.onclick = (e) => {
+                    e.stopPropagation();
+                    editItem(item.id);
+                };
+                card.appendChild(editIcon);
+            }
+
+            // Card content
+            const icon = document.createElement('div');
+            icon.className = 'item-icon';
+            icon.textContent = item.icon || '⚔️';
+
+            const title = document.createElement('h3');
+            title.className = 'item-title';
+            title.textContent = item.name || 'Unnamed Item';
+
+            const description = document.createElement('p');
+            description.className = 'item-description';
+            description.textContent = item.description || 'No description available.';
+
+            if (item.traditions && item.traditions.length > 0) {
+                const tags = document.createElement('div');
+                tags.className = 'tradition-tags';
+                item.traditions.forEach(tradition => {
+                    const tag = document.createElement('span');
+                    tag.className = 'tradition-tag';
+                    tag.textContent = tradition;
+                    tags.appendChild(tag);
+                });
+                card.appendChild(tags);
+            }
+
+            card.appendChild(icon);
+            card.appendChild(title);
+            card.appendChild(description);
+
+            // Add click handler to navigate to detail page
+            card.onclick = () => {
+                if (item.slug) {
+                    window.location.href = `items/${item.slug}.html`;
+                }
+            };
+
+            return card;
+        }
+
+        /**
+         * Create an "Add New Item" card
+         */
+        function createAddItemCard() {
+            const card = document.createElement('div');
+            card.className = 'item-card add-item-card';
+
+            card.innerHTML = `
+                <div class="add-icon">+</div>
+                <div class="add-text">Add New Item</div>
+                <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-top: 0.5rem;">
+                    Submit your own sacred item to the collection
+                </p>
+            `;
+
+            card.onclick = () => {
+                // Navigate to submission page with context
+                window.location.href = '../theories/user-submissions/edit.html?type=item';
+            };
+
+            return card;
+        }
+
+        /**
+         * Edit an existing item
+         */
+        function editItem(itemId) {
+            window.location.href = `../theories/user-submissions/edit.html?type=item&id=${itemId}`;
+        }
+
         // Search functionality
         const searchInput = document.getElementById('searchInput');
         const itemCards = document.querySelectorAll('.item-card');
@@ -798,9 +1057,9 @@
             let visibleCount = 0;
 
             itemCards.forEach(card => {
-                const title = card.querySelector('.item-title').textContent.toLowerCase();
-                const description = card.querySelector('.item-description').textContent.toLowerCase();
-                const traditions = card.dataset.traditions.toLowerCase();
+                const title = card.querySelector('.item-title')?.textContent.toLowerCase() || '';
+                const description = card.querySelector('.item-description')?.textContent.toLowerCase() || '';
+                const traditions = card.dataset.traditions?.toLowerCase() || '';
 
                 const matchesSearch = title.includes(searchTerm) || description.includes(searchTerm);
                 const matchesFilter = currentFilter === 'all' || traditions.includes(currentFilter.toLowerCase());

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shader System Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: monospace;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        #test-results {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 20, 0, 0.9);
+            border: 2px solid #0f0;
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            color: #0f0;
+            margin-bottom: 20px;
+        }
+
+        .test-item {
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #333;
+        }
+
+        .test-item.pass {
+            border-left-color: #0f0;
+        }
+
+        .test-item.fail {
+            border-left-color: #f00;
+            color: #f00;
+        }
+
+        .test-item.warn {
+            border-left-color: #ff0;
+            color: #ff0;
+        }
+
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0a0;
+        }
+
+        #stats {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 50, 0, 0.5);
+            border-radius: 4px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="test-results">
+        <h1>🧪 WebGL Shader System Test</h1>
+        <div id="test-output"></div>
+
+        <div style="margin-top: 20px;">
+            <button onclick="runTests()">Run Tests</button>
+            <button onclick="testWater()">Test Water</button>
+            <button onclick="testFire()">Test Fire</button>
+            <button onclick="testNight()">Test Night</button>
+            <button onclick="testEarth()">Test Earth</button>
+            <button onclick="testLight()">Test Light</button>
+            <button onclick="testDark()">Test Dark</button>
+            <button onclick="cleanup()">Cleanup</button>
+        </div>
+
+        <div id="stats"></div>
+    </div>
+
+    <script src="js/shaders/shader-themes.js"></script>
+    <script>
+        let testOutput = document.getElementById('test-output');
+        let statsDiv = document.getElementById('stats');
+        let shaderManager = null;
+
+        function log(message, status = 'info') {
+            const item = document.createElement('div');
+            item.className = 'test-item ' + status;
+            item.textContent = message;
+            testOutput.appendChild(item);
+            console.log(message);
+        }
+
+        function updateStats() {
+            if (!shaderManager) return;
+
+            const status = shaderManager.getStatus();
+            statsDiv.innerHTML = `
+                <div class="stat-row">
+                    <span>Enabled:</span>
+                    <span>${status.enabled ? 'Yes' : 'No'}</span>
+                </div>
+                <div class="stat-row">
+                    <span>WebGL Support:</span>
+                    <span>${status.supported ? 'Yes' : 'No'}</span>
+                </div>
+                <div class="stat-row">
+                    <span>Current Theme:</span>
+                    <span>${status.theme || 'None'}</span>
+                </div>
+                <div class="stat-row">
+                    <span>FPS:</span>
+                    <span>${status.fps}</span>
+                </div>
+                <div class="stat-row">
+                    <span>Quality:</span>
+                    <span>${status.quality}</span>
+                </div>
+                <div class="stat-row">
+                    <span>Intensity:</span>
+                    <span>${(status.intensity * 100).toFixed(0)}%</span>
+                </div>
+            `;
+        }
+
+        function runTests() {
+            testOutput.innerHTML = '';
+            log('Starting WebGL Shader System Tests...', 'info');
+
+            // Test 1: WebGL Support
+            log('Test 1: Checking WebGL support...', 'info');
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (gl) {
+                log('✓ WebGL is supported', 'pass');
+            } else {
+                log('✗ WebGL is NOT supported', 'fail');
+                return;
+            }
+
+            // Test 2: Initialize Manager
+            log('Test 2: Initializing ShaderThemeManager...', 'info');
+            try {
+                shaderManager = new ShaderThemeManager({
+                    intensity: 0.8,
+                    quality: 'high',
+                    adaptiveQuality: true
+                });
+                log('✓ ShaderThemeManager initialized', 'pass');
+            } catch (error) {
+                log('✗ Failed to initialize: ' + error.message, 'fail');
+                return;
+            }
+
+            // Test 3: WebGL Context
+            log('Test 3: Checking WebGL context...', 'info');
+            if (shaderManager.gl) {
+                log('✓ WebGL context created', 'pass');
+            } else {
+                log('✗ No WebGL context', 'fail');
+            }
+
+            // Test 4: Canvas Creation
+            log('Test 4: Checking canvas creation...', 'info');
+            if (shaderManager.canvas) {
+                log('✓ Canvas created', 'pass');
+            } else {
+                log('✗ No canvas', 'fail');
+            }
+
+            // Test 5: Shader Files
+            log('Test 5: Testing shader file accessibility...', 'info');
+            const shaderFiles = [
+                'water-shader.glsl',
+                'fire-shader.glsl',
+                'night-shader.glsl',
+                'earth-shader.glsl',
+                'light-shader.glsl',
+                'dark-shader.glsl'
+            ];
+
+            let filesChecked = 0;
+            shaderFiles.forEach(file => {
+                fetch(`/js/shaders/${file}`)
+                    .then(response => {
+                        if (response.ok) {
+                            log(`  ✓ ${file} accessible`, 'pass');
+                        } else {
+                            log(`  ✗ ${file} not found (${response.status})`, 'fail');
+                        }
+                        filesChecked++;
+                        if (filesChecked === shaderFiles.length) {
+                            log('Shader file check complete', 'info');
+                        }
+                    })
+                    .catch(error => {
+                        log(`  ✗ ${file} error: ${error.message}`, 'fail');
+                    });
+            });
+
+            // Test 6: Load a shader
+            log('Test 6: Loading dark shader...', 'info');
+            shaderManager.activate('dark').then(() => {
+                log('✓ Dark shader loaded and activated', 'pass');
+                updateStats();
+
+                // Start stats update interval
+                setInterval(updateStats, 1000);
+            }).catch(error => {
+                log('✗ Failed to load shader: ' + error.message, 'fail');
+            });
+
+            log('All synchronous tests complete. Shader loading is async.', 'info');
+        }
+
+        function testWater() {
+            log('Loading water shader...', 'info');
+            shaderManager.activate('water');
+            updateStats();
+        }
+
+        function testFire() {
+            log('Loading fire shader...', 'info');
+            shaderManager.activate('fire');
+            updateStats();
+        }
+
+        function testNight() {
+            log('Loading night shader...', 'info');
+            shaderManager.activate('night');
+            updateStats();
+        }
+
+        function testEarth() {
+            log('Loading earth shader...', 'info');
+            shaderManager.activate('earth');
+            updateStats();
+        }
+
+        function testLight() {
+            log('Loading light shader...', 'info');
+            shaderManager.activate('light');
+            updateStats();
+        }
+
+        function testDark() {
+            log('Loading dark shader...', 'info');
+            shaderManager.activate('dark');
+            updateStats();
+        }
+
+        function cleanup() {
+            if (shaderManager) {
+                shaderManager.destroy();
+                log('Shader manager destroyed', 'warn');
+                statsDiv.innerHTML = '';
+            }
+        }
+
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 500);
+        });
+    </script>
+</body>
+</html>

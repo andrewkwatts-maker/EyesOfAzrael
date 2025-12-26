@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="../../css/icon-picker.css">
     <link rel="stylesheet" href="../../css/svg-editor.css">
     <link rel="stylesheet" href="../../css/smart-fields.css">
+    <link rel="stylesheet" href="../../css/display-options-editor.css">
+    <link rel="stylesheet" href="../../css/display-preview.css">
 
     <!-- Theme System -->
     <script defer src="../../themes/theme-picker.js"></script>
@@ -697,6 +699,19 @@
                     <small class="form-hint">Use panels to organize your theory, add images for visual support, link to external sources, and reference texts from our corpus</small>
                 </div>
 
+                <!-- Related Entities Display Options -->
+                <div class="form-section glass-card section-locked" data-section="display-options">
+                    <div class="section-requirement-hint">
+                        <strong>📖 Add content panels first</strong> to configure display options
+                    </div>
+                    <h2 class="form-section-title">🎨 Related Entities Display</h2>
+                    <p style="margin-bottom: 1.5rem; opacity: 0.9; font-size: 0.95rem;">
+                        Customize how different types of related entities (deities, heroes, myths, etc.) are displayed on your entity page.
+                        Choose grid, list, table, or panel layouts for each relationship type.
+                    </p>
+                    <div id="display-options-container"></div>
+                </div>
+
                 <!-- Related Information -->
                 <div class="form-section glass-card section-locked" data-section="metadata">
                     <div class="section-requirement-hint">
@@ -1170,6 +1185,20 @@
                     </div>
                 </div>
 
+                <!-- Display Preview Section -->
+                <div class="form-section glass-card" data-section="preview">
+                    <h2 class="form-section-title">👁️ Display Preview</h2>
+                    <p class="form-hint">See how your submission will look in different display modes</p>
+                    <div id="display-preview-container"></div>
+                </div>
+
+                <!-- Display Options Section -->
+                <div class="form-section glass-card" data-section="display-options">
+                    <h2 class="form-section-title">⚙️ Display Options</h2>
+                    <p class="form-hint">Configure how nested entities should be displayed (optional)</p>
+                    <div id="display-options-container"></div>
+                </div>
+
                 <!-- Error/Success Messages -->
                 <div id="form-messages"></div>
 
@@ -1208,12 +1237,15 @@
     <script src="../../js/gemini-svg-generator.js"></script>
     <script src="../../js/components/svg-editor-modal.js"></script>
     <script src="../../js/components/grid-panel-editor.js"></script>
+    <script src="../../js/components/display-options-editor.js"></script>
+    <script src="../../js/components/display-preview.js"></script>
     <script src="../../js/components/theory-editor.js"></script>
     <script src="../../js/components/smart-fields.js"></script>
     <script src="../../js/form-config.js"></script>
 
     <script>
         let editor = null;
+        let displayOptionsEditor = null;
         let taxonomy = null;
         let formState = {
             contributionType: '',
@@ -1222,7 +1254,8 @@
             page: '',
             section: '',
             topic: '',
-            richContent: null
+            richContent: null,
+            displayOptions: null
         };
 
         // Context parameters from URL
@@ -1342,6 +1375,7 @@
         function updateFormState(field, value) {
             formState[field] = value;
             updateProgressiveDisclosure();
+            updateDisplayPreview();
         }
 
         /**
@@ -1460,6 +1494,40 @@
         }
 
         /**
+         * Update display preview with current form data
+         */
+        function updateDisplayPreview() {
+            if (!window.displayPreview) return;
+
+            // Gather form data for preview
+            const previewData = {
+                title: formState.title || document.getElementById('theory-title')?.value || '',
+                subtitle: formState.summary || document.getElementById('theory-summary')?.value || '',
+                description: document.getElementById('theory-content')?.value || '',
+                category: formState.contributionType || '',
+                mythology: formState.page || '',
+                customFields: [],
+                displayOptions: displayOptionsEditor ? displayOptionsEditor.getOptions() : {}
+            };
+
+            // Collect custom fields based on contribution type
+            const assetFields = document.querySelectorAll('.asset-fields:not([style*="display: none"]) input, .asset-fields:not([style*="display: none"]) textarea, .asset-fields:not([style*="display: none"]) select');
+            assetFields.forEach(field => {
+                if (field.value && field.value.trim()) {
+                    const label = field.closest('.form-group')?.querySelector('label')?.textContent || field.name;
+                    previewData.customFields.push({
+                        name: field.name,
+                        label: label.replace('*', '').trim(),
+                        value: field.value
+                    });
+                }
+            });
+
+            // Update preview
+            window.displayPreview.updatePreview(previewData);
+        }
+
+        /**
          * Initialize the form components
          */
         async function initializeForm() {
@@ -1474,6 +1542,24 @@
             const editorContainer = document.getElementById('editor-container');
             if (!editor) {
                 editor = new GridPanelEditor(editorContainer, null);
+            }
+
+            // Initialize Display Options Editor
+            const displayOptionsContainer = document.getElementById('display-options-container');
+            if (!displayOptionsEditor && displayOptionsContainer) {
+                displayOptionsEditor = new DisplayOptionsEditor(displayOptionsContainer, null);
+            }
+
+            // Initialize Display Preview
+            const displayPreviewContainer = document.getElementById('display-preview-container');
+            if (displayPreviewContainer && !window.displayPreview) {
+                window.displayPreview = new DisplayPreview(displayPreviewContainer, {
+                    initialMode: 'grid',
+                    autoUpdate: true,
+                    onModeChange: (mode) => {
+                        console.log('Preview mode changed to:', mode);
+                    }
+                });
             }
 
             // Initialize taxonomy V2 cascading selects
@@ -1978,6 +2064,9 @@
                 return;
             }
 
+            // Get display options data
+            const displayOptionsData = displayOptionsEditor ? displayOptionsEditor.getData() : null;
+
             // Get taxonomy data (new V2 system)
             const page = document.getElementById('taxonomy-page')?.value;
             const section = document.getElementById('taxonomy-section')?.value || null;
@@ -2118,6 +2207,8 @@
                 themes,
                 // Asset-specific metadata
                 assetMetadata,
+                // Display options for related entities
+                displayOptions: displayOptionsData?.displayOptions || null,
                 status: 'published'
             };
 

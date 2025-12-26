@@ -1,340 +1,285 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Sacred Texts - Jewish Tradition</title>
-<link href="../../../themes/theme-base.css" rel="stylesheet"/>
-<link href="../../../styles.css" rel="stylesheet"/>
-<link href="../../../themes/corpus-links.css" rel="stylesheet"/>
-<link rel="stylesheet" href="../../../themes/smart-links.css">
-<script defer src="../../../themes/smart-links.js"></script>
-<script defer src="../../../themes/theme-picker.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Texts - Jewish Mythology</title>
+
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="../../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="../../../css/spinner.css">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="../../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../../themes/smart-links.css">
+
+    <!-- Entity System -->
+    <link rel="stylesheet" href="../../../components/panels/panels.css">
+    <link rel="stylesheet" href="../../../components/panels/entity-panel-enhanced.css">
+    <link rel="stylesheet" href="../../../components/auto-populate.css">
+
+    <!-- Theme System -->
+    <script defer src="../../../themes/theme-picker.js"></script>
     <script defer src="../../../themes/theme-animations.js"></script>
-<style>
-:root {
-    --color-primary: #4A5EA8;
-    --color-primary-rgb: 74, 94, 168;
-    --color-secondary: #8B7BC8;
-    --color-secondary-rgb: 139, 123, 200;
-}
+    <script defer src="../../../themes/smart-links.js"></script>
 
-.hero-section {
-    background: linear-gradient(135deg,
-        rgba(var(--color-primary-rgb), 0.8),
-        rgba(var(--color-secondary-rgb), 0.8));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px solid var(--color-primary);
-    color: var(--color-text-primary);
-    padding: 3rem 2rem;
-    text-align: center;
-    border-radius: var(--radius-xl);
-    margin-bottom: 2rem;
-    box-shadow: var(--shadow-xl);
-}
+    <!-- Entity Panel Components -->
+    <script src="../../../components/panels/entity-panel-enhanced.js"></script>
+    <script src="../../../components/auto-populate.js"></script>
 
-.section-header {
-    color: var(--color-primary);
-    margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-}
+    <style>
+        :root {
+            --mythos-primary: #1E90FF;
+            --mythos-secondary: #FFD700;
+        }
 
-.glass-card {
-    background: var(--color-surface);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    padding: 2rem;
-    margin: 1rem 0;
-    transition: all var(--transition-base);
-}
+        .hero-section {
+            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: var(--radius-2xl);
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
 
-.glass-card:hover {
-    background: var(--color-surface-hover);
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-}
+        .hero-section h2 {
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
+        }
 
-.glass-card h3 {
-    color: var(--color-primary);
-    margin-top: 0;
-    margin-bottom: 0.75rem;
-    font-size: 1.25rem;
-}
+        .hero-section p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
 
-.glass-card p {
-    color: var(--color-text-secondary);
-    line-height: 1.7;
-    margin: 0.5rem 0;
-}
+        .section-divider {
+            margin: 4rem 0 2rem;
+            text-align: center;
+        }
 
-.glass-card ul {
-    color: var(--color-text-secondary);
-    line-height: 1.7;
-}
-</style>
+        .section-title {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.1),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border-radius: var(--radius-xl);
+            border: 2px solid rgba(var(--color-border-rgb), 0.3);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .entity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text-secondary);
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../../css/user-auth.css">
+    <script src="../../../js/firebase-auth.js"></script>
+    <script src="../../../js/auth-guard.js"></script>
+    <script src="../../../js/components/google-signin-button.js"></script>
+<!-- Submission Link System -->
+<script src="../../../js/submission-context.js"></script>
+<script src="../../../js/components/submission-link.js"></script>
+<link rel="stylesheet" href="../../../css/submission-link.css">
+
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="../../../js/firebase-init.js"></script>
+
+    <!-- Universal Grid System -->
+    <link rel="stylesheet" href="../../../css/universal-grid.css">
 </head>
 <body>
-<div id="theme-picker-container"></div>
-<header>
-    <div class="header-content">
-        <h1>📚 Sacred Texts</h1>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../../mythos/index.html">Home</a> →
-<a href="../index.html">Jewish</a> →
-<span>Sacred Texts</span>
-</nav>
+    <div id="theme-picker-container"></div>
 
-<main>
-<div class="hero-section">
-<h2>The Written and Oral Torah</h2>
-<p style="font-size: 1.1rem; max-width: 700px; margin: 1rem auto;">
-Jewish sacred literature spans from the ancient <a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a> revealed at Sinai to the vast sea of <a class="corpus-link" data-term="Talmud" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=talmud" title="Search corpus for 'Talmud'">Talmud</a>, mystical <a class="corpus-link" data-term="Zohar" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=kabbalah" title="Search corpus for 'Zohar'">Zohar</a>, and rabbinic commentaries. These texts form the foundation of Jewish law, theology, and spiritual practice.
-</p>
-</div>
+    <header>
+        <div class="header-content">
+            <h1>📜 Texts</h1>
+        <div id="user-auth-nav"></div>
+        </div>
+    </header>
 
-<section>
-<h2 class="section-header">📖 Tanakh (Hebrew Bible)</h2>
-<div class="grid">
-<div class="glass-card">
-<h3><a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a> (Five Books of <a class="corpus-link" data-term="Moses" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=moses" title="Search corpus for 'Moses'">Moses</a>)</h3>
-<p>The foundational text of Judaism, the Written Law given to <a class="corpus-link" data-term="Moses" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=moses" title="Search corpus for 'Moses'">Moses</a> at Mount Sinai.</p>
-<ul>
-<li><strong>Genesis (Bereishit):</strong> Creation, patriarchs</li>
-<li><strong>Exodus (Shemot):</strong> Egypt, Sinai, Tabernacle</li>
-<li><strong>Leviticus (Vayikra):</strong> Priests, sacrifices, holiness</li>
-<li><strong>Numbers (Bamidbar):</strong> Wilderness wandering</li>
-<li><strong>Deuteronomy (Devarim):</strong> Moses' final speeches</li>
-</ul>
-<p><a href="../corpus-search.html"><a class="corpus-link" data-term="Search Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=search%20torah" title="View search torah in ancient texts">Search <a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a></a> in 8 translations →</a></p>
-</div>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../../mythos/index.html">Home</a> →
+        <a href="../index.html">Jewish</a> →
+        <span>Texts</span>
+    </nav>
 
-<div class="glass-card">
-<h3>Nevi'im (Prophets)</h3>
-<p>The prophetic books spanning Israel's history from Joshua to the exile.</p>
-<p><strong>Former Prophets:</strong> Joshua, Judges, Samuel, Kings</p>
-<p><strong>Latter Prophets:</strong> <a class="corpus-link" data-term="Isaiah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=isaiah" title="Search corpus for 'Isaiah'">Isaiah</a>, <a class="corpus-link" data-term="Jeremiah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=jeremiah" title="Search corpus for 'Jeremiah'">Jeremiah</a>, <a class="corpus-link" data-term="Ezekiel" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=ezekiel" title="Search corpus for 'Ezekiel'">Ezekiel</a>, Twelve Minor Prophets</p>
-</div>
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h2>Sacred Texts & Scriptures</h2>
+            <p>Explore the ancient texts, scriptures, and sacred writings.</p>
+        </section>
 
-<div class="glass-card">
-<h3>Ketuvim (Writings)</h3>
-<p>Wisdom literature, poetry, and later historical books.</p>
-<p><strong>Poetry:</strong> Psalms, Proverbs, Job</p>
-<p><strong>Scrolls:</strong> Song of Songs, Ruth, Lamentations, Ecclesiastes, <a class="corpus-link" data-term="Esther" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=esther" title="Search corpus for 'Esther'">Esther</a></p>
-<p><strong>Other:</strong> Daniel, Ezra-Nehemiah, Chronicles</p>
-</div>
-</div>
-</section>
-
-<section style="margin-top: var(--spacing-4xl);">
-<h2 class="section-header">📜 Oral Torah & Rabbinic Literature</h2>
-<div class="grid">
-<div class="glass-card">
-<h3>Mishnah</h3>
-<p>The first written compilation of Oral Law, edited by Rabbi Judah the Prince (~200 CE). Six orders covering all aspects of Jewish law.</p>
-<p><strong>Orders:</strong> Zeraim (agriculture), Moed (festivals), Nashim (women), Nezikin (damages), Kodashim (holy things), Taharot (purities)</p>
-</div>
-
-<div class="glass-card">
-<h3><a class="corpus-link" data-term="Talmud" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=talmud" title="Search corpus for 'Talmud'">Talmud</a></h3>
-<p>Commentary and discussion on the Mishnah, the centerpiece of rabbinic Judaism.</p>
-<p><strong>Babylonian <a class="corpus-link" data-term="Talmud" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=talmud" title="Search corpus for 'Talmud'">Talmud</a>:</strong> More authoritative, completed ~500 CE</p>
-<p><strong>Jerusalem <a class="corpus-link" data-term="Talmud" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=talmud" title="Search corpus for 'Talmud'">Talmud</a>:</strong> Completed ~400 CE in Land of <a class="corpus-link" data-term="Israel" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=israel" title="Search corpus for 'Israel'">Israel</a></p>
-</div>
-
-<div class="glass-card">
-<h3>Midrash</h3>
-<p>Homiletical and exegetical interpretations of biblical texts, filling gaps and deriving lessons.</p>
-<p><strong>Midrash Rabbah:</strong> On <a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a> and Five Scrolls</p>
-<p><strong>Tanchuma:</strong> Homiletical midrash</p>
-</div>
-
-<div class="glass-card">
-<h3>Legal Codes</h3>
-<p>Systematic compilations of Jewish law from the <a class="corpus-link" data-term="Talmud" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=talmud" title="Search corpus for 'Talmud'">Talmud</a>.</p>
-<p><strong>Mishneh <a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a>:</strong> Maimonides' comprehensive code</p>
-<p><strong>Shulchan Aruch:</strong> Joseph Karo's practical code (still authoritative)</p>
-</div>
-</div>
-</section>
-
-<section style="margin-top: var(--spacing-4xl);">
-<h2 class="section-header">🔮 Kabbalistic Texts</h2>
-<div class="grid">
-<div class="glass-card">
-<h3><a class="corpus-link" data-term="Sefer Yetzirah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=kabbalah" title="Search corpus for 'Sefer Yetzirah'">Sefer Yetzirah</a> (Book of Formation)</h3>
-<p>Ancient mystical text on cosmology and the creative power of Hebrew letters and numbers.</p>
-<p><strong>Date:</strong> Unknown, possibly 2nd-6th century CE</p>
-<p><strong>Topics:</strong> 10 <a class="corpus-link" data-term="Sefirot" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=sefirot" title="Search corpus for 'Sefirot'">Sefirot</a>, 22 Hebrew letters, creation</p>
-</div>
-
-<div class="glass-card">
-<h3><a class="corpus-link" data-term="Zohar" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=kabbalah" title="Search corpus for 'Zohar'">Zohar</a> (Book of Splendor)</h3>
-<p>The foundational text of <a class="corpus-link" data-term="Kabbalah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=kabbalah" title="Search corpus for 'Kabbalah'">Kabbalah</a>, mystical commentary on <a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a> revealing hidden dimensions.</p>
-<p><strong>Author:</strong> Attributed to Shimon bar Yochai; compiled by Moses de León (13th century)</p>
-<p><strong>Content:</strong> <a class="corpus-link" data-term="Sefirot" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=sefirot" title="Search corpus for 'Sefirot'">Sefirot</a>, divine emanations, soul mysteries</p>
-</div>
-
-<div class="glass-card">
-<h3><a class="corpus-link" data-term="Etz Chaim" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=tree%20of%20life" title="Search corpus for 'Etz Chaim'">Etz Chaim</a> (<a class="corpus-link" data-term="Tree" data-tradition="christian" href="../../../mythos/christian/corpus-search.html?term=cross" title="Search corpus for 'Tree'">Tree</a> of Life)</h3>
-<p>Isaac Luria's systematic Kabbalistic teachings, foundational for Lurianic <a class="corpus-link" data-term="Kabbalah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=kabbalah" title="Search corpus for 'Kabbalah'">Kabbalah</a>.</p>
-<p><strong>Author:</strong> Chaim Vital (student of Ari, 16th century)</p>
-<p><strong>Topics:</strong> <a class="corpus-link" data-term="Tzimtzum" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=ein%20sof" title="Search corpus for 'Tzimtzum'">Tzimtzum</a>, Shevirat HaKelim, <a class="corpus-link" data-term="Tikkun" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=qliphoth" title="Search corpus for 'Tikkun'">Tikkun</a></p>
-</div>
-
-<div class="glass-card">
-<h3>Pardes Rimonim (<a class="corpus-link" data-term="Garden" data-tradition="islamic" href="../../../mythos/islamic/index.html" title="Search corpus for 'Garden'">Garden</a> of Pomegranates)</h3>
-<p>Moses Cordovero's encyclopedic work organizing pre-Lurianic <a class="corpus-link" data-term="Kabbalah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=kabbalah" title="Search corpus for 'Kabbalah'">Kabbalah</a>.</p>
-<p><strong>Author:</strong> Moses Cordovero (16th century)</p>
-<p><strong>Content:</strong> Systematic treatment of <a class="corpus-link" data-term="Sefirot" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=sefirot" title="Search corpus for 'Sefirot'">Sefirot</a>, divine names</p>
-</div>
-</div>
-</section>
-
-<section style="margin-top: var(--spacing-4xl);">
-<h2 class="section-header">💫 Chassidic & Philosophical Works</h2>
-<div class="grid">
-<div class="glass-card">
-<h3>Tanya</h3>
-<p>Foundational text of Chabad Chassidism by Rabbi Schneur Zalman of Liadi.</p>
-<p><strong>Content:</strong> Soul, divine unity, service of God</p>
-<p><strong>Impact:</strong> Bridge between <a class="corpus-link" data-term="Kabbalah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=kabbalah" title="Search corpus for 'Kabbalah'">Kabbalah</a> and daily practice</p>
-</div>
-
-<div class="glass-card">
-<h3>Moreh Nevuchim (Guide for the Perplexed)</h3>
-<p>Maimonides' philosophical masterwork reconciling reason and revelation.</p>
-<p><strong>Topics:</strong> Negative theology, prophecy, divine providence</p>
-<p><strong>Influence:</strong> Shaped medieval Jewish and Christian philosophy</p>
-</div>
-
-<div class="glass-card">
-<h3>Kuzari</h3>
-<p>Judah Halevi's philosophical dialogue defending Judaism through historical argument of Khazar conversion.</p>
-</div>
-
-<div class="glass-card">
-<h3>Duties of the Heart</h3>
-<p>Bachya ibn Paquda's work on inner spiritual dimensions of Jewish observance.</p>
-</div>
-</div>
-</section>
-
-<section class="related-concepts" style="margin-top: var(--spacing-4xl);">
-<h2 class="section-header">Related Concepts</h2>
-<div class="grid">
-<div class="glass-card">
-<h3>Within Jewish Tradition</h3>
-<ul>
-<li><a href="../corpus-search.html">Search <a class="corpus-link" data-term="Torah" data-tradition="jewish" href="../../../mythos/jewish/corpus-search.html?term=torah" title="Search corpus for 'Torah'">Torah</a>/Tanakh</a> - 8 English translations</li>
-<li><a href="../kabbalah/index.html">Kabbalah</a> - Mystical interpretations</li>
-<li><a href="../heroes/index.html">Prophets & Sages</a> - Authors and transmitters</li>
-<li><a href="../rituals/index.html">Rituals</a> - Practices based on these texts</li>
-</ul>
-</div>
-
-<div class="glass-card">
-<h3>Sacred Texts in Other Traditions</h3>
-<ul>
-<li><a href="../../christian/texts/index.html">Christian Bible</a> - Old & New Testaments</li>
-<li><a href="../../islamic/texts/index.html">Quran & Hadith</a> - Islamic revelation</li>
-<li><a href="../../hindu/texts/index.html">Vedas & Upanishads</a> - Hindu scriptures</li>
-</ul>
-</div>
-</div>
-</section>
-
-<!-- Interlink Panel Section -->
-<section class="interlink-panel" style="margin-top: 3rem;">
-    <h3 class="interlink-header">
-        <span class="interlink-icon">🔗</span>
-        Related Across the Mythos
-    </h3>
-
-    <div class="interlink-grid">
-        <div class="interlink-section">
-            <div class="interlink-section-title">Archetypes</div>
-            <a href="../../../archetypes/celestial/index.html" class="archetype-link-card">
-                <div class="archetype-badge">📜 SACRED SCRIPTURE</div>
-                <p class="archetype-context">Jewish sacred texts embody the universal archetype of divine revelation preserved in holy writings.</p>
-                <span class="see-parallels">See parallels: Quran, Vedas, Avesta →</span>
-            </a>
+        <!-- Main Entity Grid (Auto-Populated) -->
+        <div
+            data-auto-populate
+            data-mythology="jewish"
+            data-category="text"
+            data-display-mode="compact"
+            data-show-corpus="true">
+            <!-- Loading state -->
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading Texts...</p>
+            </div>
         </div>
 
-        <div class="interlink-section">
-            <div class="interlink-section-title">Kabbalah Connections</div>
-            <a href="../kabbalah/sefirot/index.html" class="item-link-card">
-                <div class="item-icon">🌳</div>
-                <div class="item-info">
-                    <h4>Sefirot</h4>
-                    <p class="item-type">Hidden in Torah</p>
+        <!-- Optional: Filtered Sections -->
+        <!-- Uncomment and customize as needed -->
+        <!--
+        <div class="section-divider">
+            <div class="section-title">Sacred Texts</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="jewish"
+            data-category="text"
+            data-subcategory="sacred"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+
+        <div class="section-divider">
+            <div class="section-title">Ritual Texts</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="jewish"
+            data-category="text"
+            data-subcategory="ritual"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+        -->
+
+        <!-- Cross-Cultural Parallels -->
+        <section class="interlink-panel" style="margin-top: 4rem;">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Texts Across Mythologies
+            </h3>
+
+            <div class="parallel-traditions glass-card">
+                <h4>🌍 Explore Other Traditions</h4>
+                <div class="parallel-grid">
+                    <!-- Add links to similar categories in other mythologies -->
+
+                    <a href="../../greek/texts/index.html" class="parallel-card">
+                        <span class="tradition-flag">🏛️</span>
+                        <span class="parallel-name">Greek Texts</span>
+                        <span class="tradition-label">Greek</span>
+                    </a>
+                    <a href="../../norse/texts/index.html" class="parallel-card">
+                        <span class="tradition-flag">⚔️</span>
+                        <span class="parallel-name">Norse Texts</span>
+                        <span class="tradition-label">Norse</span>
+                    </a>
+                    <a href="../../egyptian/texts/index.html" class="parallel-card">
+                        <span class="tradition-flag">𓂀</span>
+                        <span class="parallel-name">Egyptian Texts</span>
+                        <span class="tradition-label">Egyptian</span>
+                    </a>
+                    <a href="../../hindu/texts/index.html" class="parallel-card">
+                        <span class="tradition-flag">🕉️</span>
+                        <span class="parallel-name">Hindu Texts</span>
+                        <span class="tradition-label">Hindu</span>
+                    </a>
                 </div>
-            </a>
-            <a href="../kabbalah/names/index.html" class="item-link-card" style="margin-top: 0.5rem;">
-                <div class="item-icon">🔤</div>
-                <div class="item-info">
-                    <h4>72 Names</h4>
-                    <p class="item-type">Encoded in Exodus</p>
-                </div>
-            </a>
+            </div>
+        </section>
+
+        <!-- See Also Section -->
+        <div class="see-also-section" style="margin-top: 3rem;">
+            <h4>📚 See Also</h4>
+            <div class="see-also-links">
+                <a href="../deities/index.html" class="see-also-link">
+                    <span>⚡</span> Deities
+                </a>
+                <a href="../heroes/index.html" class="see-also-link">
+                    <span>🦸</span> Heroes
+                </a>
+                <a href="../places/index.html" class="see-also-link">
+                    <span>📍</span> Places
+                </a>
+                <a href="../index.html" class="see-also-link">
+                    <span>🏛️</span> Jewish Home
+                </a>
+            </div>
         </div>
+    </main>
 
-        <div class="interlink-section">
-            <div class="interlink-section-title">Abrahamic Parallels</div>
-            <a href="../../islamic/texts/index.html" class="magic-link-card">
-                <div class="magic-icon">☪️</div>
-                <div class="magic-info">
-                    <h4>Quran & Hadith</h4>
-                    <p class="magic-type">Islamic Scripture</p>
-                </div>
-                <span class="tradition-badge islamic">Islamic</span>
-            </a>
-        </div>
-    </div>
+    <footer>
+        <p>
+            <strong>Texts</strong> - Jewish Mythology<br>
+            <a href="../../../mythos/index.html">World Mythos Home</a> |
+            <a href="../index.html">Jewish Tradition</a>
+        </p>
+    </footer>
 
-    <div class="parallel-traditions glass-card" style="margin-top: var(--spacing-lg);">
-        <h4>🌍 Cross-Cultural Parallels</h4>
-        <div class="parallel-grid">
-            <a href="../../christian/texts/index.html" class="parallel-card">
-                <span class="tradition-flag">✝️</span>
-                <span class="parallel-name">Christian Bible</span>
-                <span class="tradition-label">Christian</span>
-            </a>
-            <a href="../../islamic/texts/index.html" class="parallel-card">
-                <span class="tradition-flag">☪️</span>
-                <span class="parallel-name">Quran</span>
-                <span class="tradition-label">Islamic</span>
-            </a>
-            <a href="../../persian/texts/index.html" class="parallel-card">
-                <span class="tradition-flag">🔥</span>
-                <span class="parallel-name">Avesta</span>
-                <span class="tradition-label">Persian</span>
-            </a>
-        </div>
-    </div>
-</section>
+    <!-- Initialize Auto-Populate -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const populator = new EntityAutoPopulator();
+            populator.populatePage();
+        });
+    </script>
 
-<div class="see-also-section">
-    <h4>📚 See Also</h4>
-    <div class="see-also-links">
-        <a href="../heroes/moses.html" class="see-also-link"><span>📜</span> Moses</a>
-        <a href="../kabbalah/index.html" class="see-also-link"><span>🌳</span> Kabbalah</a>
-        <a href="../rituals/index.html" class="see-also-link"><span>🕯️</span> Rituals</a>
-        <a href="../deities/index.html" class="see-also-link"><span>✡️</span> Divine Names</a>
-    </div>
-</div>
-</main>
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
 
-<footer>
-<p>
-<strong>Sacred Texts</strong> - Jewish Tradition<br/>
-<a href="../../../mythos/index.html">World Mythos Home</a> |
-<a href="../index.html">Jewish Tradition</a>
-</p>
-</footer>
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
 </body>
 </html>

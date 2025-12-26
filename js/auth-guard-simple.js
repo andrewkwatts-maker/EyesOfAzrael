@@ -42,6 +42,15 @@ export function setupAuthGuard() {
 
     // Set up auth state listener
     const auth = firebase.auth();
+
+    // Enable auth persistence (LOCAL = persists across sessions/tabs)
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(() => {
+            console.log('[EOA Auth Guard] Auth persistence set to LOCAL');
+        })
+        .catch((error) => {
+            console.error('[EOA Auth Guard] Failed to set persistence:', error);
+        });
     auth.onAuthStateChanged((user) => {
         // Remove loading state
         document.body.classList.remove('auth-loading');

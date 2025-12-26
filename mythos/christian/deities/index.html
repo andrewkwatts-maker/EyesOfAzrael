@@ -5,6 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Divine Beings - Christian Mythology</title>
 <link rel="stylesheet" href="../../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../../../css/spinner.css">
     <link rel="stylesheet" href="../../../themes/mythology-colors.css">
 <link rel="stylesheet" href="../../../styles.css">
 <link rel="stylesheet" href="../../../themes/corpus-links.css">
@@ -18,6 +19,18 @@
     <script src="../../../js/auth-guard.js"></script>
     <script src="../../../js/components/google-signin-button.js"></script>
 
+<!-- Submission Link System -->
+<script src="../../../js/submission-context.js"></script>
+<script src="../../../js/components/submission-link.js"></script>
+<link rel="stylesheet" href="../../../css/submission-link.css">
+
+
+    <!-- Universal Grid System -->
+    <link rel="stylesheet" href="../../../css/universal-grid.css">
+
+<!-- Universal Entity Renderer -->
+<script defer src="../../../js/universal-entity-renderer.js"></script>
+<link rel="stylesheet" href="../../../css/entity-renderer.css">
 </head>
 <body>
 <div id="theme-picker-container"></div>
@@ -81,69 +94,84 @@
                 or choirs according to medieval theology (based on Pseudo-Dionysius the Areopagite).
             </p>
 <h3 style="color: var(--color-secondary); margin-top: 1.5rem;">The <a class="corpus-link" href="../../babylonian/corpus-search.html" title="View archangels in ancient texts">Archangels</a></h3>
+
+<!-- Dynamic Entity Grid (Firebase-Powered) -->
+<div id="entity-grid" class="pantheon-grid" data-mythology="christian" data-entity-type="deity">
+    <!-- Entities will be loaded dynamically from Firebase -->
+    <div class="loading-placeholder">
+        <div class="spinner"></div>
+        <p>Loading deities...</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Firebase and renderer are available
+    if (typeof firebase === 'undefined' || !firebase.firestore) {
+        console.error('Firebase not initialized');
+        return;
+    }
+
+    if (typeof UniversalEntityRenderer === 'undefined') {
+        console.error('UniversalEntityRenderer not loaded');
+        return;
+    }
+
+    const renderer = new UniversalEntityRenderer();
+    const db = firebase.firestore();
+    const gridElement = document.getElementById('entity-grid');
+
+    // Query Firebase for christian deities
+    db.collection('deities')
+        .where('mythology', '==', 'christian')
+        .orderBy('name')
+        .get()
+        .then(snapshot => {
+            if (snapshot.empty) {
+                gridElement.innerHTML = '<p class="no-results">No deities found in database. Check back soon!</p>';
+                return;
+            }
+
+            const entities = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // Render the entities using the universal renderer
+            gridElement.innerHTML = renderer.renderGrid(entities, {
+                entityType: 'deity',
+                mythology: 'christian',
+                showIcons: true,
+                enableClick: true
+            });
+
+            console.log(`Loaded ${entities.length} christian deities from Firebase`);
+        })
+        .catch(error => {
+            console.error('Error loading deities:', error);
+            gridElement.innerHTML = '<p class="error-message">Error loading deities. Please try again later.</p>';
+        });
+});
+</script>
+
+<!-- Fallback: Static deity cards (shown if JavaScript disabled or Firebase unavailable) -->
+<noscript>
 <div class="deity-grid" style="margin-top: 1rem;">
 <div class="deity-card" onclick="window.location.href='michael.html'" style="cursor: pointer;">
 <h4 style="color: var(--color-primary);">⚔️ <a class="corpus-link" data-term="Michael" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Michael'">Michael</a></h4>
 <p><strong>"Who is like God?"</strong></p>
 <p>Leader of heavenly armies, protector, warrior against <a class="corpus-link" data-term="Satan" data-tradition="islamic" href="../../babylonian/corpus-search.html" title="Search corpus for 'Satan'">Satan</a>. Patron of soldiers, police, and the faithful.</p>
 </div>
-<div class="deity-card" onclick="window.location.href='gabriel.html'" style="cursor: pointer;">
-<h4 style="color: var(--color-primary);">📯 <a class="corpus-link" data-term="Gabriel" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Gabriel'">Gabriel</a></h4>
-<p><strong>"God is my strength"</strong></p>
-<p><a class="corpus-link" href="../../babylonian/corpus-search.html" title="View divine in ancient texts">Divine</a> <a class="corpus-link" data-term="Messenger" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Messenger'">messenger</a>, announced <a class="corpus-link" data-term="Jesus" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Jesus'">Jesus</a>'s birth to <a class="corpus-link" data-term="Mary" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Mary'">Mary</a>. Patron of messengers, diplomats, and communication.</p>
-</div>
-<div class="deity-card" onclick="window.location.href='raphael.html'" style="cursor: pointer;">
-<h4 style="color: var(--color-primary);">💚 <a class="corpus-link" data-term="Raphael" data-tradition="jewish" href="../../babylonian/corpus-search.html" title="Search corpus for 'Raphael'">Raphael</a></h4>
-<p><strong>"God heals"</strong></p>
-<p>Healer and guide, appears in <a class="corpus-link" data-term="Book of Tobit" data-tradition="jewish" href="../../babylonian/corpus-search.html" title="Search corpus for 'Book of Tobit'">Book of Tobit</a>. Patron of travelers, physicians, and the sick.</p>
-</div>
-<div class="deity-card">
-<h4 style="color: var(--color-primary);">🔥 <a class="corpus-link" data-term="Uriel" data-tradition="jewish" href="../../babylonian/corpus-search.html" title="Search corpus for 'Uriel'">Uriel</a></h4>
-<p><strong>"God is my <a class="corpus-link" data-term="Light" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Light'">light</a>"</strong></p>
-<p>Illuminator, bearer of <a class="corpus-link" href="../../babylonian/corpus-search.html" title="View divine in ancient texts">divine</a> wisdom. Associated with repentance, prophecy, and enlightenment.</p>
-</div>
-</div>
-<h3 style="color: var(--color-secondary); margin-top: 1.5rem;">Nine Choirs of <a class="corpus-link" href="../../babylonian/corpus-search.html" title="View angels in ancient texts">Angels</a></h3>
-<ul style="margin: 1rem 0 0 2rem; line-height: 2;">
-<li><strong>First Sphere (Closest to God):</strong> Seraphim (six-winged flame), Cherubim (guardians), Thrones (justice)</li>
-<li><strong>Second Sphere (Cosmic Governors):</strong> Dominions (<a class="corpus-link" href="../../babylonian/corpus-search.html" title="View divine in ancient texts">divine</a> authority), Virtues (miracles), Powers (spiritual warfare)</li>
-<li><strong>Third Sphere (Ministers):</strong> Principalities (nations), <a class="corpus-link" href="../../babylonian/corpus-search.html" title="View archangels in ancient texts">Archangels</a> (messengers), Angels (personal guardians)</li>
-</ul></section>
-<section class="category-section">
-<h2 style="color: var(--color-primary); margin-top: 0;">👸 <a class="corpus-link" data-term="Mary" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Mary'">Mary</a> - <a class="corpus-link" data-term="Mother of God" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Mother of God'">Mother of God</a> (<a class="corpus-link" data-term="Theotokos" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Theotokos'">Theotokos</a>)</h2>
-<p>
-                The Virgin <a class="corpus-link" data-term="Mary" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Mary'">Mary</a> holds a unique place in Christian devotion, especially in Catholic and Orthodox <a class="corpus-link" href="../../babylonian/corpus-search.html" title="View traditions in ancient texts">traditions</a>.
-                She is venerated as the <a class="corpus-link" data-term="Mother of God" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Mother of God'">Mother of God</a>, <a class="corpus-link" data-term="Queen of Heaven" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Queen of Heaven'">Queen of Heaven</a>, and mediatrix of <a class="corpus-link" data-term="Grace" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Grace'">grace</a>.
-            </p>
+</noscript>
+<div class="static-fallback" style="display: none;">
 <div class="deity-grid" style="margin-top: 1rem;">
-<div class="deity-card">
-<h4 style="color: var(--color-primary);">Titles &amp; Roles</h4>
-<ul style="text-align: left; margin-left: 1rem;">
-<li><a class="corpus-link" data-term="Theotokos" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Theotokos'">Theotokos</a> (God-Bearer)</li>
-<li>Queen of <a class="corpus-link" href="../../babylonian/corpus-search.html" title="View heaven in ancient texts">Heaven</a></li>
-<li><a class="corpus-link" data-term="Our Lady" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Our Lady'">Our Lady</a> of Sorrows</li>
-<li>Star of the Sea</li>
-<li>Refuge of Sinners</li>
-</ul>
+<div class="deity-card" onclick="window.location.href='michael.html'" style="cursor: pointer;">
+<h4 style="color: var(--color-primary);">⚔️ <a class="corpus-link" data-term="Michael" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Michael'">Michael</a></h4>
+<p><strong>"Who is like God?"</strong></p>
+<p>Leader of heavenly armies, protector, warrior against <a class="corpus-link" data-term="Satan" data-tradition="islamic" href="../../babylonian/corpus-search.html" title="Search corpus for 'Satan'">Satan</a>. Patron of soldiers, police, and the faithful.</p>
 </div>
-<div class="deity-card">
-<h4 style="color: var(--color-primary);">Key Mysteries</h4>
-<ul style="text-align: left; margin-left: 1rem;">
-<li>Immaculate Conception</li>
-<li>Annunciation</li>
-<li>Visitation</li>
-<li>Assumption into <a class="corpus-link" href="../../babylonian/corpus-search.html" title="View heaven in ancient texts">Heaven</a></li>
-<li>Coronation as Queen</li>
-</ul>
 </div>
-<div class="deity-card">
-<h4 style="color: var(--color-primary);">Apparitions</h4>
-<ul style="text-align: left; margin-left: 1rem;">
-<li><a class="corpus-link" data-term="Our Lady" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Our Lady'">Our Lady</a> of Guadalupe</li>
-<li><a class="corpus-link" data-term="Our Lady" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Our Lady'">Our Lady</a> of Lourdes</li>
-<li><a class="corpus-link" data-term="Our Lady" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Our Lady'">Our Lady</a> of Fatima</li>
-<li><a class="corpus-link" data-term="Our Lady" data-tradition="christian" href="../../babylonian/corpus-search.html" title="Search corpus for 'Our Lady'">Our Lady</a> of Knock</li>
-</ul></div></div></section>
+</section>
 <section class="category-section">
 <h2 style="color: var(--color-primary); margin-top: 0;">✨ <a class="corpus-link" href="../../babylonian/corpus-search.html" title="View saints in ancient texts">Saints</a> &amp; Holy Ones</h2>
 <p>
@@ -307,5 +335,13 @@
             }
         });
     </script>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
 </body>
 </html>

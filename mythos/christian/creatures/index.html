@@ -1,93 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Spiritual Beings - Christian Mythology</title>
-</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creatures - Christian Mythology</title>
 
-<link rel="stylesheet" href="../../../themes/theme-base.css">
-<link rel="stylesheet" href="../../../themes/corpus-links.css">
-<link rel="stylesheet" href="../../../themes/smart-links.css">
-<script defer src="../../../themes/smart-links.js"></script>
-<script defer src="../../../themes/theme-picker.js"></script>
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="../../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../../css/spinner.css">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="../../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../../themes/smart-links.css">
+
+    <!-- Entity System -->
+    <link rel="stylesheet" href="../../../components/panels/panels.css">
+    <link rel="stylesheet" href="../../../components/panels/entity-panel-enhanced.css">
+    <link rel="stylesheet" href="../../../components/auto-populate.css">
+
+    <!-- Theme System -->
+    <script defer src="../../../themes/theme-picker.js"></script>
     <script defer src="../../../themes/theme-animations.js"></script>
+    <script defer src="../../../themes/smart-links.js"></script>
+
+    <!-- Entity Panel Components -->
+    <script src="../../../components/panels/entity-panel-enhanced.js"></script>
+    <script src="../../../components/auto-populate.js"></script>
+
+    <style>
+        :root {
+            --mythos-primary: #8B0000;
+            --mythos-secondary: #FFD700;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: var(--radius-2xl);
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero-section h2 {
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .section-divider {
+            margin: 4rem 0 2rem;
+            text-align: center;
+        }
+
+        .section-title {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.1),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border-radius: var(--radius-xl);
+            border: 2px solid rgba(var(--color-border-rgb), 0.3);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .entity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text-secondary);
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../../css/user-auth.css">
+    <script src="../../../js/firebase-auth.js"></script>
+    <script src="../../../js/auth-guard.js"></script>
+    <script src="../../../js/components/google-signin-button.js"></script>
+<!-- Submission Link System -->
+<script src="../../../js/submission-context.js"></script>
+<script src="../../../js/components/submission-link.js"></script>
+<link rel="stylesheet" href="../../../css/submission-link.css">
+
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="../../../js/firebase-init.js"></script>
+
+    <!-- Universal Grid System -->
+    <link rel="stylesheet" href="../../../css/universal-grid.css">
 </head>
 <body>
-<div id="theme-picker-container"></div>
-<header>
-    <div class="header-content">
-        <h1>🐉 Spiritual Beings</h1>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../../mythos/index.html">Home</a> →
-                <a href="../index.html">Christian</a> →
-                <span>Spiritual Beings</span>
-</nav>
-<main>
-<div class="hero-section">
-<h2>Angels, Demons, and Apocalyptic Beasts</h2>
-<p style="font-size: 1.1rem; max-width: 700px; margin: 1rem auto;">
-                The spiritual beings of Christian mythology include the celestial hierarchy of angels,
-                fallen angels and demons, and the apocalyptic creatures described in biblical visions.
-            </p>
-</div>
-<section>
-<h2 class="section-header">Available Creatures</h2>
-<div class="grid">
-<div class="card" onclick="window.location.href='seraphim.html'">
-<h3>🔥 Seraphim</h3>
-<p>The highest order of angels, six-winged beings who surround God's throne singing "Holy, holy, holy."</p>
-<a href="seraphim.html">Read more →</a>
-</div>
-</div>
-<p style="margin-top: 2rem; padding: 1rem; background: var(--color-surface); border-radius: var(--radius-md);">
-<strong>More creatures coming soon:</strong> This section is under development. Additional spiritual beings
-                including Cherubim, Archangels, Leviathan, Behemoth, and apocalyptic beasts will be added.
-            </p>
-</section>
+    <div id="theme-picker-container"></div>
 
-<!-- Interlink Panel -->
-<section class="interlink-panel">
-<h2>Sacred Connections</h2>
-<div class="interlink-grid">
-<div class="archetype-link-card">
-<h3>Jewish Roots & Parallels</h3>
-<ul>
-<li><a href="angels.html">Jewish Angelology</a> - Angelic hierarchies in Judaism</li>
-<li><a href="../../../index.html">Cherubim</a> - Throne guardians in Jewish tradition</li>
-<li><a href="../../../index.html">Merkavah</a> - Throne chariot mysticism</li>
-<li><a href="seraphim.html">Seraphim in Isaiah</a> - Hebrew prophetic vision</li>
-</ul>
-</div>
-<div class="archetype-link-card">
-<h3>Gnostic Connections</h3>
-<ul>
-<li><a href="../gnostic/cosmology/index.html">Gnostic Aeons</a> - Divine emanations and archons</li>
-<li><a href="../gnostic/schools/index.html">Gnostic Hierarchies</a> - Valentinian angel orders</li>
-<li><a href="../gnostic/sophia/index.html">Sophia & Archons</a> - Fallen spiritual powers</li>
-</ul>
-</div>
-<div class="parallel-card">
-<h3>Cross-Cultural Parallels</h3>
-<ul>
-<li><a href="../../persian/creatures/index.html">Zoroastrian Yazatas</a> - Persian divine beings</li>
-<li><a href="angels.html">Islamic Angels</a> - Jibril, Mikail, and others</li>
-<li><a href="../../greek/creatures/index.html">Greek Daimones</a> - Divine spirits</li>
-<li><a href="../../../archetypes/index.html">Divine Messenger</a> - Universal archetype</li>
-</ul>
-</div>
-</div>
-</section>
-</main>
-<footer>
-<p>
-<strong>Spiritual Beings</strong> - Christian Mythology<br/>
-<a href="../../../mythos/index.html">World Mythos Home</a> |
-            <a href="../index.html">Christian Tradition</a> |
-            <a href="../deities/index.html">Divine Beings</a>
-</p>
-</footer>
+    <header>
+        <div class="header-content">
+            <h1>🐉 Creatures</h1>
+        <div id="user-auth-nav"></div>
+        </div>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../../mythos/index.html">Home</a> →
+        <a href="../index.html">Christian</a> →
+        <span>Creatures</span>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h2>Mythical Creatures & Beings</h2>
+            <p>Encounter the legendary creatures, monsters, and divine beasts.</p>
+        </section>
+
+        <!-- Main Entity Grid (Auto-Populated) -->
+        <div
+            data-auto-populate
+            data-mythology="christian"
+            data-category="creature"
+            data-display-mode="compact"
+            data-show-corpus="true">
+            <!-- Loading state -->
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading Creatures...</p>
+            </div>
+        </div>
+
+        <!-- Optional: Filtered Sections -->
+        <!-- Uncomment and customize as needed -->
+        <!--
+        <div class="section-divider">
+            <div class="section-title">Sacred Creatures</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="christian"
+            data-category="creature"
+            data-subcategory="sacred"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+
+        <div class="section-divider">
+            <div class="section-title">Ritual Creatures</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="christian"
+            data-category="creature"
+            data-subcategory="ritual"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+        -->
+
+        <!-- Cross-Cultural Parallels -->
+        <section class="interlink-panel" style="margin-top: 4rem;">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Creatures Across Mythologies
+            </h3>
+
+            <div class="parallel-traditions glass-card">
+                <h4>🌍 Explore Other Traditions</h4>
+                <div class="parallel-grid">
+                    <!-- Add links to similar categories in other mythologies -->
+
+                    <a href="../../greek/creatures/index.html" class="parallel-card">
+                        <span class="tradition-flag">🏛️</span>
+                        <span class="parallel-name">Greek Creatures</span>
+                        <span class="tradition-label">Greek</span>
+                    </a>
+                    <a href="../../norse/creatures/index.html" class="parallel-card">
+                        <span class="tradition-flag">⚔️</span>
+                        <span class="parallel-name">Norse Creatures</span>
+                        <span class="tradition-label">Norse</span>
+                    </a>
+                    <a href="../../egyptian/creatures/index.html" class="parallel-card">
+                        <span class="tradition-flag">𓂀</span>
+                        <span class="parallel-name">Egyptian Creatures</span>
+                        <span class="tradition-label">Egyptian</span>
+                    </a>
+                    <a href="../../hindu/creatures/index.html" class="parallel-card">
+                        <span class="tradition-flag">🕉️</span>
+                        <span class="parallel-name">Hindu Creatures</span>
+                        <span class="tradition-label">Hindu</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- See Also Section -->
+        <div class="see-also-section" style="margin-top: 3rem;">
+            <h4>📚 See Also</h4>
+            <div class="see-also-links">
+                <a href="../deities/index.html" class="see-also-link">
+                    <span>⚡</span> Deities
+                </a>
+                <a href="../heroes/index.html" class="see-also-link">
+                    <span>🦸</span> Heroes
+                </a>
+                <a href="../places/index.html" class="see-also-link">
+                    <span>📍</span> Places
+                </a>
+                <a href="../index.html" class="see-also-link">
+                    <span>🏛️</span> Christian Home
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <strong>Creatures</strong> - Christian Mythology<br>
+            <a href="../../../mythos/index.html">World Mythos Home</a> |
+            <a href="../index.html">Christian Tradition</a>
+        </p>
+    </footer>
+
+    <!-- Initialize Auto-Populate -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const populator = new EntityAutoPopulator();
+            populator.populatePage();
+        });
+    </script>
+
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
 </body>
 </html>

@@ -218,9 +218,7 @@ class FirebaseEntityRenderer {
             ${entity.relatedEntities?.length ? `
             <section>
                 <h2 style="color: var(--mythos-primary);">Related Entities</h2>
-                <div class="deity-grid">
-                    ${this.renderRelatedEntities(entity.relatedEntities)}
-                </div>
+                ${this.renderRelatedEntities(entity.relatedEntities, 'relatedEntities', entity.displayOptions)}
             </section>
             ` : ''}
 
@@ -357,19 +355,313 @@ class FirebaseEntityRenderer {
     }
 
     /**
-     * Render related entities
+     * Render related entities with display options support
      */
-    renderRelatedEntities(relatedEntities) {
-        return relatedEntities.map(related => `
-            <div class="glass-card" style="padding: 1rem;">
-                <h4 style="color: var(--mythos-primary); margin: 0 0 0.5rem 0;">
-                    ${this.escapeHtml(related.name)}
+    renderRelatedEntities(relatedEntities, relationshipType = 'relatedEntities', displayOptions = null) {
+        // Get display configuration for this relationship type
+        const config = displayOptions?.[relationshipType] || this.getDefaultDisplayConfig();
+
+        // Render based on display mode
+        switch (config.mode) {
+            case 'grid':
+                return this.renderRelatedEntitiesGrid(relatedEntities, config);
+            case 'list':
+                return this.renderRelatedEntitiesList(relatedEntities, config);
+            case 'table':
+                return this.renderRelatedEntitiesTable(relatedEntities, config);
+            case 'panel':
+                return this.renderRelatedEntitiesPanel(relatedEntities, config);
+            default:
+                return this.renderRelatedEntitiesGrid(relatedEntities, config);
+        }
+    }
+
+    /**
+     * Render related entities as grid
+     */
+    renderRelatedEntitiesGrid(entities, config) {
+        const columns = config.columns || 4;
+        const showIcons = config.showIcons !== false;
+        const cardStyle = config.cardStyle || 'compact';
+
+        // Sort entities
+        const sorted = this.sortEntities(entities, config.sort);
+
+        return `
+            <div class="entity-grid" style="display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 1rem;">
+                ${sorted.map(entity => `
+                    <div class="glass-card entity-card entity-card-${cardStyle}" style="padding: 1rem;">
+                        ${showIcons && entity.icon ? `<div class="entity-icon" style="font-size: 1.5rem; text-align: center; margin-bottom: 0.5rem;">${entity.icon}</div>` : ''}
+                        <h4 style="color: var(--mythos-primary); margin: 0 0 0.5rem 0; font-size: ${cardStyle === 'minimal' ? '0.9rem' : '1rem'};">
+                            ${this.escapeHtml(entity.name)}
+                        </h4>
+                        ${cardStyle !== 'minimal' ? `
+                            <p style="font-size: 0.85rem; margin: 0; color: var(--mythos-text-secondary);">
+                                ${this.escapeHtml(entity.relationship || entity.description || entity.type || '')}
+                            </p>
+                        ` : ''}
+                        ${cardStyle === 'detailed' && entity.mythology ? `
+                            <small style="display: block; margin-top: 0.5rem; opacity: 0.7;">
+                                ${this.escapeHtml(entity.mythology)}
+                            </small>
+                        ` : ''}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    /**
+     * Render related entities as list
+     */
+    renderRelatedEntitiesList(entities, config) {
+        const showIcons = config.showIcons !== false;
+        const compact = config.compact || false;
+        const categorize = config.categorize || 'none';
+
+        // Sort entities
+        let sorted = this.sortEntities(entities, config.sort);
+
+        // Categorize if requested
+        if (categorize !== 'none') {
+            return this.renderCategorizedList(sorted, config, categorize);
+        }
+
+        return `
+            <div class="entity-list" style="display: flex; flex-direction: column; gap: ${compact ? '0.5rem' : '1rem'};">
+                ${sorted.map(entity => `
+                    <div class="glass-card entity-list-item" style="padding: ${compact ? '0.75rem' : '1rem'}; display: flex; align-items: center; gap: 1rem;">
+                        ${showIcons && entity.icon ? `<span class="entity-icon" style="font-size: 1.25rem;">${entity.icon}</span>` : ''}
+                        <div style="flex: 1;">
+                            <strong style="color: var(--mythos-primary);">${this.escapeHtml(entity.name)}</strong>
+                            ${!compact && entity.relationship ? `
+                                <span style="margin-left: 0.5rem; opacity: 0.8;">- ${this.escapeHtml(entity.relationship)}</span>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    /**
+     * Render categorized list
+     */
+    renderCategorizedList(entities, config, categorizeBy) {
+        const categories = {};
+
+        // Group entities by category
+        entities.forEach(entity => {
+            let category = 'Other';
+
+            switch (categorizeBy) {
+                case 'by_domain':
+                    category = entity.domain || entity.type || 'Other';
+                    break;
+                case 'by_mythology':
+                    category = entity.mythology || 'Other';
+                    break;
+                case 'by_importance':
+                    category = entity.importance || 'Standard';
+                    break;
+                case 'alphabetical':
+                    category = entity.name ? entity.name.charAt(0).toUpperCase() : 'Other';
+                    break;
+            }
+
+            if (!categories[category]) {
+                categories[category] = [];
+            }
+            categories[category].push(entity);
+        });
+
+        const showIcons = config.showIcons !== false;
+        const compact = config.compact || false;
+
+        return Object.keys(categories).sort().map(category => `
+            <div class="entity-category" style="margin-bottom: 1.5rem;">
+                <h4 style="color: var(--mythos-secondary); margin-bottom: 0.75rem; font-size: 1rem;">
+                    ${this.escapeHtml(category)}
                 </h4>
-                <p style="font-size: 0.9rem; margin: 0;">
-                    ${this.escapeHtml(related.relationship || related.type)}
-                </p>
+                <div class="entity-list" style="display: flex; flex-direction: column; gap: ${compact ? '0.5rem' : '0.75rem'};">
+                    ${categories[category].map(entity => `
+                        <div class="glass-card entity-list-item" style="padding: ${compact ? '0.5rem 0.75rem' : '0.75rem 1rem'}; display: flex; align-items: center; gap: 0.75rem;">
+                            ${showIcons && entity.icon ? `<span style="font-size: 1rem;">${entity.icon}</span>` : ''}
+                            <strong style="color: var(--mythos-primary); font-size: ${compact ? '0.9rem' : '1rem'};">
+                                ${this.escapeHtml(entity.name)}
+                            </strong>
+                            ${!compact && entity.relationship ? `
+                                <span style="margin-left: 0.5rem; opacity: 0.8; font-size: 0.85rem;">
+                                    ${this.escapeHtml(entity.relationship)}
+                                </span>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
             </div>
         `).join('');
+    }
+
+    /**
+     * Render related entities as table
+     */
+    renderRelatedEntitiesTable(entities, config) {
+        const columns = config.columns || ['name', 'description', 'mythology'];
+        const sortable = config.sortable !== false;
+
+        // Sort entities
+        const sorted = this.sortEntities(entities, config.sort || 'name');
+
+        return `
+            <div class="glass-card" style="padding: 1rem; overflow-x: auto;">
+                <table class="entity-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            ${columns.map(col => `
+                                <th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--mythos-border); color: var(--mythos-primary); font-weight: 600;">
+                                    ${this.capitalize(col.replace('_', ' '))}
+                                    ${sortable ? '<span style="opacity: 0.5; margin-left: 0.25rem;">⇅</span>' : ''}
+                                </th>
+                            `).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${sorted.map(entity => `
+                            <tr style="border-bottom: 1px solid var(--mythos-border);">
+                                ${columns.map(col => {
+                                    let value = entity[col] || '-';
+                                    if (col === 'name') {
+                                        value = `<strong style="color: var(--mythos-primary);">${this.escapeHtml(entity.name)}</strong>`;
+                                    } else if (Array.isArray(value)) {
+                                        value = value.join(', ');
+                                    }
+                                    return `<td style="padding: 0.75rem;">${typeof value === 'string' && !col.includes('name') ? this.escapeHtml(value) : value}</td>`;
+                                }).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    /**
+     * Render related entities as detailed panels
+     */
+    renderRelatedEntitiesPanel(entities, config) {
+        const showAllDetails = config.showAllDetails !== false;
+        const expandable = config.expandable || false;
+        const layout = config.layout || 'stacked';
+
+        // Sort entities
+        const sorted = this.sortEntities(entities, config.sort || 'name');
+
+        if (layout === 'accordion') {
+            return this.renderAccordionPanels(sorted, showAllDetails);
+        }
+
+        return `
+            <div class="entity-panels" style="display: flex; flex-direction: column; gap: 1rem;">
+                ${sorted.map((entity, index) => `
+                    <div class="glass-card entity-panel ${expandable ? 'expandable' : ''}"
+                         style="padding: 1.5rem; ${expandable ? 'cursor: pointer;' : ''}"
+                         ${expandable ? `data-panel-id="${index}"` : ''}>
+                        <div class="panel-header" style="display: flex; align-items: center; gap: 1rem; margin-bottom: ${showAllDetails ? '1rem' : '0'};">
+                            ${entity.icon ? `<span style="font-size: 1.5rem;">${entity.icon}</span>` : ''}
+                            <h4 style="color: var(--mythos-primary); margin: 0; flex: 1;">
+                                ${this.escapeHtml(entity.name)}
+                            </h4>
+                            ${expandable ? '<span class="expand-indicator">▼</span>' : ''}
+                        </div>
+                        ${showAllDetails ? `
+                            <div class="panel-content" style="opacity: 0.9;">
+                                ${entity.relationship ? `<p style="margin: 0 0 0.5rem 0;"><strong>Relationship:</strong> ${this.escapeHtml(entity.relationship)}</p>` : ''}
+                                ${entity.description ? `<p style="margin: 0 0 0.5rem 0;">${this.escapeHtml(entity.description)}</p>` : ''}
+                                ${entity.mythology ? `<p style="margin: 0; font-size: 0.9rem; opacity: 0.7;"><strong>Mythology:</strong> ${this.escapeHtml(entity.mythology)}</p>` : ''}
+                                ${entity.domain ? `<p style="margin: 0; font-size: 0.9rem; opacity: 0.7;"><strong>Domain:</strong> ${this.escapeHtml(entity.domain)}</p>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    /**
+     * Render accordion-style panels
+     */
+    renderAccordionPanels(entities, showAllDetails) {
+        return `
+            <div class="entity-accordion" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                ${entities.map((entity, index) => `
+                    <div class="glass-card accordion-item" style="overflow: hidden;">
+                        <div class="accordion-header"
+                             style="padding: 1rem; cursor: pointer; display: flex; align-items: center; gap: 1rem;"
+                             onclick="this.parentElement.classList.toggle('expanded')">
+                            ${entity.icon ? `<span style="font-size: 1.25rem;">${entity.icon}</span>` : ''}
+                            <strong style="color: var(--mythos-primary); flex: 1;">${this.escapeHtml(entity.name)}</strong>
+                            <span class="accordion-indicator" style="transition: transform 0.3s;">▼</span>
+                        </div>
+                        <div class="accordion-content" style="max-height: 0; overflow: hidden; transition: max-height 0.3s;">
+                            <div style="padding: 0 1rem 1rem 1rem; opacity: 0.9;">
+                                ${entity.relationship ? `<p style="margin: 0 0 0.5rem 0;"><strong>Relationship:</strong> ${this.escapeHtml(entity.relationship)}</p>` : ''}
+                                ${entity.description ? `<p style="margin: 0 0 0.5rem 0;">${this.escapeHtml(entity.description)}</p>` : ''}
+                                ${entity.mythology ? `<p style="margin: 0; font-size: 0.9rem; opacity: 0.7;">${this.escapeHtml(entity.mythology)}</p>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <style>
+                .accordion-item.expanded .accordion-content {
+                    max-height: 500px;
+                }
+                .accordion-item.expanded .accordion-indicator {
+                    transform: rotate(180deg);
+                }
+            </style>
+        `;
+    }
+
+    /**
+     * Sort entities based on sort configuration
+     */
+    sortEntities(entities, sortBy) {
+        const sorted = [...entities];
+
+        switch (sortBy) {
+            case 'name':
+                sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                break;
+            case 'name-desc':
+                sorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+                break;
+            case 'importance':
+                sorted.sort((a, b) => (b.importance || 0) - (a.importance || 0));
+                break;
+            case 'date':
+                sorted.sort((a, b) => (a.date || 0) - (b.date || 0));
+                break;
+            case 'custom':
+                // Keep original order
+                break;
+            default:
+                sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        }
+
+        return sorted;
+    }
+
+    /**
+     * Get default display configuration
+     */
+    getDefaultDisplayConfig() {
+        return {
+            mode: 'grid',
+            columns: 4,
+            sort: 'name',
+            showIcons: true
+        };
     }
 
     /**

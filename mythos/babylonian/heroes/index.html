@@ -1,273 +1,284 @@
-﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Babylonian Heroes &amp; Legends</title>
-<link href="../../../styles.css" rel="stylesheet"/>
-<link href="../../../themes/theme-base.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="../../../themes/mythology-colors.css">
-<link href="../../../themes/corpus-links.css" rel="stylesheet"/>
-<link rel="stylesheet" href="../../../themes/smart-links.css">
-<script defer src="../../../themes/smart-links.js"></script>
-    <script defer src="../../../themes/theme-animations.js"></script>
-<script defer src="../../../themes/theme-picker.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heroes - Babylonian Mythology</title>
 
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="../../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../../css/spinner.css">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="../../../themes/corpus-links.css">
+    <link rel="stylesheet" href="../../../themes/smart-links.css">
+
+    <!-- Entity System -->
+    <link rel="stylesheet" href="../../../components/panels/panels.css">
+    <link rel="stylesheet" href="../../../components/panels/entity-panel-enhanced.css">
+    <link rel="stylesheet" href="../../../components/auto-populate.css">
+
+    <!-- Theme System -->
+    <script defer src="../../../themes/theme-picker.js"></script>
+    <script defer src="../../../themes/theme-animations.js"></script>
+    <script defer src="../../../themes/smart-links.js"></script>
+
+    <!-- Entity Panel Components -->
+    <script src="../../../components/panels/entity-panel-enhanced.js"></script>
+    <script src="../../../components/auto-populate.js"></script>
+
+    <style>
+        :root {
+            --mythos-primary: #8B4513;
+            --mythos-secondary: #DAA520;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--mythos-primary), var(--mythos-secondary));
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: var(--radius-2xl);
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero-section h2 {
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .section-divider {
+            margin: 4rem 0 2rem;
+            text-align: center;
+        }
+
+        .section-title {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.1),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border-radius: var(--radius-xl);
+            border: 2px solid rgba(var(--color-border-rgb), 0.3);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .entity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text-secondary);
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../../css/user-auth.css">
+    <script src="../../../js/firebase-auth.js"></script>
+    <script src="../../../js/auth-guard.js"></script>
+    <script src="../../../js/components/google-signin-button.js"></script>
+<!-- Submission Link System -->
+<script src="../../../js/submission-context.js"></script>
+<script src="../../../js/components/submission-link.js"></script>
+<link rel="stylesheet" href="../../../css/submission-link.css">
+
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="../../../js/firebase-init.js"></script>
+
+    <!-- Universal Grid System -->
+    <link rel="stylesheet" href="../../../css/universal-grid.css">
 </head>
 <body>
-<div id="theme-picker-container"></div>
-<header>
-    <div class="header-content">
-        <h1>⚔️ <a data-term="Babylonian" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> Heroes &amp; Legends</h1>
-    </div>
-</header>
-<nav class="breadcrumb" aria-label="Breadcrumb">
-    <a href="../../../mythos/index.html">Home</a> →
-                <a href="../../index.html">Babylonian</a> →
-                <span>Heroes</span>
-</nav>
-<main data-mythology="babylonian">
-<div class="hero-section">
-<h2>Legendary Mortals Who Walked with Gods</h2>
-<p style="font-size: var(--font-size-xl); max-width: 800px; margin: 1rem auto;">
-                The <a data-term="Babylonian Tradition" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=babylonian%20tradition" title="View babylonian tradition in ancient texts">Babylonian tradition</a> remembers great heroes who transcended mortal limitations—kings who
-                achieved legendary deeds, sages who possessed divine wisdom, and survivors of cosmic catastrophes.
-                These figures walked the boundary between mortal and divine, achieving fame that lasted millennia.
-            </p>
-</div>
-<section>
-<h2 style="color: var(--color-primary);">The Heroic Ideal</h2>
-<p>
-<a data-term="Babylonian" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> heroes were not mere warriors but complex figures who combined strength, wisdom, and
-                often tragic awareness of mortality. The greatest hero, <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a>, exemplifies this: a mighty
-                king whose power could not save him from death, whose quest for immortality taught him to accept
-                human limits. Other heroes—sages, builders, survivors—demonstrated that greatness comes in many forms.
-        </p></section>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--color-primary);">Legendary Kings &amp; Warriors</h2>
-<div class="hero-card">
-<div class="hero-icon">👑</div>
-<h3><a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a></h3>
-<p><strong>The Two-Thirds <a data-term="Divine" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=divine" title="View divine in ancient texts">Divine</a> King</strong></p>
-<p>
-<a class="corpus-link" data-term="King of Uruk" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'King of Uruk'">King of Uruk</a>, <a class="corpus-link" data-term="Two-thirds God" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Two-thirds God'">two-thirds god</a> and one-third human, <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a> was the mightiest hero of ancient
-                    Mesopotamia. Born of the goddess Ninsun and mortal king <a class="corpus-link" data-term="Lugalbanda" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=lugalbanda" title="Search corpus for 'Lugalbanda'">Lugalbanda</a>, he possessed superhuman
-                    strength and beauty but struggled with tyranny and mortality. After the death of his beloved
-                    companion <a class="corpus-link" data-term="Enkidu" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=enkidu" title="Search corpus for 'Enkidu'">Enkidu</a>, <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a> embarked on a legendary quest for immortality, journeying to the
-                    ends of the earth to find <a class="corpus-link" data-term="Utnapishtim" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=utnapishtim" title="Search corpus for 'Utnapishtim'">Utnapishtim</a>, the flood survivor. Though he failed to achieve eternal
-                    life, he gained wisdom and acceptance, returning to Uruk to rule justly and build its legendary walls.
-                </p>
-<p style="margin-top: 1rem;"><strong>Key Achievements:</strong> Slayer of Humbaba (guardian of the Cedar Forest),
-                defeated the Bull of Heaven sent by <a data-term="Ishtar" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=ishtar" title="View ishtar in ancient texts">Ishtar</a>, crossed the Waters of Death, found the plant of youth (though lost it to a serpent)</p>
-<p style="margin-top: 0.5rem;"><em><a data-term="Primary" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=primary" title="View primary in ancient texts">Primary</a> Source: Epic of <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a> (twelve tablets, among the oldest literary works)</em></p>
-</div>
-<div class="hero-card">
-<div class="hero-icon">🌳</div>
-<h3><a class="corpus-link" data-term="Enkidu" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=enkidu" title="Search corpus for 'Enkidu'">Enkidu</a></h3>
-<p><strong>The <a class="corpus-link" data-term="Wild Man" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=enkidu" title="Search corpus for 'Wild Man'">Wild Man</a> Civilized</strong></p>
-<p>
-                    Created by the gods from clay to rival <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a>, <a class="corpus-link" data-term="Enkidu" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=enkidu" title="Search corpus for 'Enkidu'">Enkidu</a> began as a <a class="corpus-link" data-term="Wild Man" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=enkidu" title="Search corpus for 'Wild Man'">wild man</a> who lived among
-                    animals in the wilderness. Through the temple priestess Shamhat, he was civilized—learning to
-                    eat bread, drink beer, wear clothes, and understand human ways. He became <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a>'s closest
-                    companion and equal, tempering the king's arrogance. Together they achieved legendary deeds,
-                    but <a class="corpus-link" data-term="Enkidu" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=enkidu" title="Search corpus for 'Enkidu'">Enkidu</a> was struck down by the gods as punishment for killing the Bull of Heaven. His death
-                    and descent to the underworld transformed <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a>, showing that even demigods cannot escape
-                    mortality.
-                </p>
-<p style="margin-top: 1rem;"><strong>Significance:</strong> Represents the transition from nature to
-                civilization, the power of friendship, and the tragedy of mortality</p>
-</div>
-<div class="hero-card">
-<div class="hero-icon">🦁</div>
-<h3><a class="corpus-link" data-term="Lugalbanda" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=lugalbanda" title="Search corpus for 'Lugalbanda'">Lugalbanda</a></h3>
-<p><strong><a class="corpus-link" data-term="The Shepherd" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=dumuzi" title="Search corpus for 'The Shepherd'">The Shepherd</a> King</strong></p>
-<p>
-                    Father of <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a> and legendary <a class="corpus-link" data-term="King of Uruk" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'King of Uruk'">king of Uruk</a>. <a class="corpus-link" data-term="Lugalbanda" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=lugalbanda" title="Search corpus for 'Lugalbanda'">Lugalbanda</a>'s own heroic journey included traveling
-                    through mountains where he befriended the Anzû bird (a <a data-term="Divine" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=divine" title="View divine in ancient texts">divine</a> storm-bird), gaining its blessing
-                    and supernatural speed. He combined pastoral wisdom (shepherd origins) with royal power, embodying
-                    the ideal of <a class="corpus-link" data-term="The Shepherd" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=dumuzi" title="Search corpus for 'The Shepherd'">the shepherd</a>-king who guides his people. Later deified after death, he became patron
-                    of shepherds and travelers.
-        </p></div></section>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--color-primary);"><a data-term="Divine" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=divine" title="View divine in ancient texts">Divine</a> Sages &amp; Culture Heroes</h2>
-<div class="hero-card">
-<div class="hero-icon">📜</div>
-<h3>Adapa</h3>
-<p><strong>The Sage Who Lost Immortality</strong></p>
-<p>
-                    Adapa was a legendary sage and priest of <a class="corpus-link" data-term="Ea" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=ea" title="Search corpus for 'Ea'">Ea</a>, the first of the Seven Sages (Apkallu) who brought
-                    civilization to humanity. Blessed with supreme wisdom but denied immortality, Adapa served as
-                    <a class="corpus-link" data-term="Ea" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=ea" title="Search corpus for 'Ea'">Ea</a>'s priest in Eridu. One day while fishing, the South Wind overturned his boat. In anger, Adapa
-                    broke the South Wind's wing with a curse. Summoned before <a class="corpus-link" data-term="Anu" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'Anu'">Anu</a> to answer for this offense, Adapa
-                    was counseled by <a class="corpus-link" data-term="Ea" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=ea" title="Search corpus for 'Ea'">Ea</a> not to accept food or drink. However, <a class="corpus-link" data-term="Anu" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'Anu'">Anu</a> offered the bread and water of
-                    eternal life—which Adapa refused, following <a class="corpus-link" data-term="Ea" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=ea" title="Search corpus for 'Ea'">Ea</a>'s advice. Thus humanity lost its chance at
-                    immortality through either <a class="corpus-link" data-term="Ea" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=ea" title="Search corpus for 'Ea'">Ea</a>'s deception or mistake.
-                </p>
-<p style="margin-top: 1rem;"><strong>Legacy:</strong> First of the Apkallu (Seven Sages), bringer of
-                civilization, cautionary tale about lost immortality</p>
-</div>
-<div class="hero-card">
-<div class="hero-icon">🦅</div>
-<h3><a class="corpus-link" data-term="Etana" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=etana" title="Search corpus for 'Etana'">Etana</a></h3>
-<p><strong>The King Who Flew to Heaven</strong></p>
-<p>
-<a class="corpus-link" data-term="Etana" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=etana" title="Search corpus for 'Etana'">Etana</a> was a legendary <a class="corpus-link" data-term="King of Kish" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=etana" title="Search corpus for 'King of Kish'">king of Kish</a> who sought the "plant of birth" to cure his wife's barrenness.
-                    He befriended <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">an</a> eagle who had been cast into a pit by a serpent whose young the eagle had devoured.
-                    <a class="corpus-link" data-term="Etana" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=etana" title="Search corpus for 'Etana'">Etana</a> rescued the eagle, and in gratitude, the eagle carried <a class="corpus-link" data-term="Etana" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=etana" title="Search corpus for 'Etana'">Etana</a> on his back up to heaven itself
-                    to petition <a data-term="Ishtar" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=ishtar" title="View ishtar in ancient texts">Ishtar</a> for the plant of birth. They flew so high the earth vanished below, reaching the
-                    gates of heaven. Though the ending is fragmented, tradition held that <a class="corpus-link" data-term="Etana" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=etana" title="Search corpus for 'Etana'">Etana</a> succeeded and fathered
-                    a royal line, establishing him as patron of kings and symbol of divine favor.
-                </p>
-<p style="margin-top: 1rem;"><strong>Significance:</strong> First king blessed by the gods, established
-                <a data-term="Divine" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=divine" title="View divine in ancient texts">divine</a> kingship, journeyed between earth and heaven</p>
-</div>
-<div class="hero-card">
-<div class="hero-icon">🏺</div>
-<h3>The Seven Apkallu (Sages)</h3>
-<p><strong>Bringers of Civilization</strong></p>
-<p>
-                    According to tradition, before the Great Flood, seven apkallu (sages) were sent by <a class="corpus-link" data-term="Ea" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=ea" title="Search corpus for 'Ea'">Ea</a> to teach
-                    humanity the arts of civilization. Led by Adapa, these semi-<a data-term="Divine" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=divine" title="View divine in ancient texts">divine</a> beings taught writing,
-                    mathematics, architecture, agriculture, medicine, divination, and all crafts. They were depicted
-                    as fish-men or bird-men, supernatural beings who emerged from the sea (the <a class="corpus-link" data-term="Apsû" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=apsu" title="Search corpus for 'Apsû'">Apsû</a>, <a class="corpus-link" data-term="Ea" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=ea" title="Search corpus for 'Ea'">Ea</a>'s realm).
-                    After the Flood, their wisdom was preserved by human sages who continued their legacy. The apkallu
-                    represent divine gift of knowledge, showing that civilization came from the gods, not human invention alone.
-                </p>
-<p style="margin-top: 1rem;"><em>The seven: Adapa (U-<a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">an</a>), Uanna-dugga, En-<a class="corpus-link" data-term="Me" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=me" title="Search corpus for 'Me'">me</a>-duga, En-<a class="corpus-link" data-term="Me" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=me" title="Search corpus for 'Me'">me</a>-galanna,
-                En-<a class="corpus-link" data-term="Me" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=me" title="Search corpus for 'Me'">me</a>-buluga, <a class="corpus-link" data-term="An" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anu" title="Search corpus for 'An'">An</a>-enlilda, <a class="corpus-link" data-term="Utu" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=shamash" title="Search corpus for 'Utu'">Utu</a>-<a class="corpus-link" data-term="Abzu" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=apsu" title="Search corpus for 'Abzu'">abzu</a></em></p>
-</div></section>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--color-primary);">Flood Survivors &amp; Immortals</h2>
-<div class="hero-card">
-<div class="hero-icon">🚢</div>
-<h3><a class="corpus-link" data-term="Utnapishtim" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=utnapishtim" title="Search corpus for 'Utnapishtim'">Utnapishtim</a> (<a class="corpus-link" data-term="Atrahasis" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=utnapishtim" title="Search corpus for 'Atrahasis'">Atrahasis</a>)</h3>
-<p><strong>The <a class="corpus-link" data-term="Immortal" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=utnapishtim" title="Search corpus for 'Immortal'">Immortal</a> Flood Survivor</strong></p>
-<p>
-                    When the <a class="corpus-link" data-term="Great Gods" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=anunnaki" title="Search corpus for 'Great Gods'">great gods</a> decided to destroy humanity through a flood, only <a class="corpus-link" data-term="Utnapishtim" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=utnapishtim" title="Search corpus for 'Utnapishtim'">Utnapishtim</a> (called <a class="corpus-link" data-term="Atrahasis" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=utnapishtim" title="Search corpus for 'Atrahasis'">Atrahasis</a>,
-                    "exceeding wise," in earlier versions) was saved. Warned by <a class="corpus-link" data-term="Ea" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=ea" title="Search corpus for 'Ea'">Ea</a> through a reed wall, <a class="corpus-link" data-term="Utnapishtim" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=utnapishtim" title="Search corpus for 'Utnapishtim'">Utnapishtim</a>
-                    built a great boat, loading it with his family, craftsmen, and animals of all kinds. The deluge
-                    lasted seven days and nights, drowning all other humans. When the waters receded, <a class="corpus-link" data-term="Utnapishtim" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=utnapishtim" title="Search corpus for 'Utnapishtim'">Utnapishtim</a>
-                    made <a data-term="Offerings" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=offerings" title="View offerings in ancient texts">offerings</a> to the gods, who smelled the sweet savor and gathered like flies. Moved by his
-                    piety, the gods granted <a class="corpus-link" data-term="Utnapishtim" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=utnapishtim" title="Search corpus for 'Utnapishtim'">Utnapishtim</a> and his wife immortality, placing them to dwell at the ends
-                    of the earth where the sun rises.
-                </p>
-<p style="margin-top: 1rem;">When <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a> sought him out, <a class="corpus-link" data-term="Utnapishtim" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=utnapishtim" title="Search corpus for 'Utnapishtim'">Utnapishtim</a> taught that immortality
-                was a unique gift, not achievable through heroism. He challenged <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a> to stay awake for seven
-                days—<a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a> failed immediately, proving mortals cannot even conquer sleep, let alone death.</p>
-<p style="margin-top: 1rem;"><strong>Legacy:</strong> Only mortal to achieve immortality, keeper of
-                pre-flood wisdom, inspiration for Noah's Ark narrative</p>
-<p style="margin-top: 0.5rem;"><em><a data-term="Primary" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=primary" title="View primary in ancient texts">Primary</a> Source: Epic of <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a> Tablet XI, <a class="corpus-link" data-term="Atrahasis" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=utnapishtim" title="Search corpus for 'Atrahasis'">Atrahasis</a> Epic</em></p>
-</div></section>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--color-primary);">Historical Kings Elevated to Legend</h2>
-<div class="hero-card">
-<div class="hero-icon">🏛️</div>
-<h3>Sargon of Akkad</h3>
-<p><strong>The First Empire Builder</strong></p>
-<p>
-                    Sargon (c. 2334-2279 BCE) founded the Akkadian Empire, the first multi-ethnic empire in history.
-                    His legendary biography claims he was born in secret to a high priestess, set adrift in a basket
-                    on the river (like Moses), and raised by a gardener. Through ability alone, he rose to become
-                    cupbearer to the <a class="corpus-link" data-term="King of Kish" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=etana" title="Search corpus for 'King of Kish'">king of Kish</a>, then seized power and conquered all of Mesopotamia. His legendary
-                    status made him a model for later conquerors who claimed to follow in his footsteps.
-                </p>
-</div>
-<div class="hero-card">
-<div class="hero-icon">⚖️</div>
-<h3><a class="corpus-link" data-term="Hammurabi" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=hammurabi" title="Search corpus for 'Hammurabi'">Hammurabi</a></h3>
-<p><strong>The Lawgiver</strong></p>
-<p>
-<a class="corpus-link" data-term="Hammurabi" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=hammurabi" title="Search corpus for 'Hammurabi'">Hammurabi</a> (r. 1792-1750 BCE) unified Babylonia and established its legal code, the famous Code
-                    of <a class="corpus-link" data-term="Hammurabi" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=hammurabi" title="Search corpus for 'Hammurabi'">Hammurabi</a>. Depicted receiving the laws from the sun god <a class="corpus-link" data-term="Shamash" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=shamash" title="Search corpus for 'Shamash'">Shamash</a>, <a class="corpus-link" data-term="Hammurabi" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=hammurabi" title="Search corpus for 'Hammurabi'">Hammurabi</a> embodied the ideal
-                    of the just king who rules through divine authority and written law. His code became legendary,
-                    influencing legal systems throughout the ancient Near East. <a class="corpus-link" data-term="Hammurabi" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=hammurabi" title="Search corpus for 'Hammurabi'">Hammurabi</a>'s reign represented
-                    <a data-term="Babylonian" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> power at its height and served as a golden age to which later kings aspired.
-        </p></div></section>
-<section style="margin-top: 3rem;">
-<h2 style="color: var(--color-primary);">The Hero's Path</h2>
-<p>
-<a data-term="Babylonian" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> heroes typically follow certain patterns:
-            </p>
-<ul style="margin: var(--spacing-md) 0 0 2rem; line-height: 1.8;">
-<li><strong><a data-term="Divine" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=divine" title="View divine in ancient texts">Divine</a> Connection:</strong> Heroes often have <a data-term="Divine" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=divine" title="View divine in ancient texts">divine</a> parentage or divine favor (<a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a>,
-                <a class="corpus-link" data-term="Lugalbanda" data-tradition="sumerian" href="../../../mythos/sumerian/corpus-search.html?term=lugalbanda" title="Search corpus for 'Lugalbanda'">Lugalbanda</a>), or serve the gods directly (Adapa, <a class="corpus-link" data-term="Utnapishtim" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=utnapishtim" title="Search corpus for 'Utnapishtim'">Utnapishtim</a>)</li>
-<li><strong>Overcoming Hubris:</strong> Great power leads to arrogance which must be tempered through
-                suffering or wisdom (<a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a>'s journey)</li>
-<li><strong>Acceptance of Mortality:</strong> Unlike Greek heroes who might achieve immortality through
-                great deeds, <a data-term="Babylonian" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> heroes ultimately accept human limits. Immortality is extremely rare (only
-                <a class="corpus-link" data-term="Utnapishtim" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=utnapishtim" title="Search corpus for 'Utnapishtim'">Utnapishtim</a> achieved it), and the heroes' greatness lies in accepting this truth</li>
-<li><strong>Civilizing Influence:</strong> Heroes bring <a data-term="Order" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=order" title="View order in ancient texts">order</a> from chaos, knowledge from ignorance,
-                civilization from wilderness (the Seven Apkallu, <a class="corpus-link" data-term="Enkidu" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=enkidu" title="Search corpus for 'Enkidu'">Enkidu</a>'s transformation)</li>
-<li><strong>Legacy Through Memory:</strong> Since physical immortality is impossible, heroes achieve
-                lasting life through fame, accomplishments, and descendants who remember them</li>
-</ul></section>
-<section class="related-concepts" style="margin-top: 3rem;">
-<h2>🔗 <a data-term="Related Concepts" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=related%20concepts" title="View related concepts in ancient texts">Related Concepts</a></h2>
-<div class="grid">
-<div class="related-card">
-<h3>Within <a data-term="Babylonian" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> Mythology</h3>
-<ul>
-<li><a href="../deities/index.html">The Gods</a> - <a data-term="Divine" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=divine" title="View divine in ancient texts">Divine</a> patrons and opponents of heroes</li>
-<li><a href="../cosmology/afterlife.html">The Afterlife</a> - Where heroes go after death</li>
-<li><a href="../texts/index.html">Epic Literature</a> - <a data-term="Stories" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=stories" title="View stories in ancient texts">Stories</a> preserving heroic deeds</li>
-<li><a href="../creatures/index.html">Monsters</a> - Creatures heroes must overcome</li>
-</ul>
-</div>
-<div class="related-card">
-<h3>Heroes in Other <a data-term="Traditions" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=traditions" title="View traditions in ancient texts">Traditions</a></h3>
-<ul>
-<li><a href="../../sumerian/heroes/index.html">Sumerian Heroes</a> - Earlier versions of same figures</li>
-<li><a href="../../greek/heroes/index.html">Greek Heroes</a> - Demigods and monster-slayers</li>
-<li><a href="../../norse/heroes/index.html">Norse Heroes</a> - Legendary warriors and kings</li>
-<li><a href="../../egyptian/heroes/index.html">Egyptian Heroes</a> - <a data-term="Divine" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=divine" title="View divine in ancient texts">Divine</a> kings and sages</li>
-</ul>
-<p style="margin-top: 1rem; font-style: italic;">
-<strong>Compare:</strong> <a data-term="Babylonian" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> heroes differ from Greek heroes in their emphasis on accepting
-                        mortality rather than defying it. Where Greek heroes like Heracles might ascend to godhood,
-                        Babylonian heroes like <a class="corpus-link" data-term="Gilgamesh" data-tradition="babylonian" href="../../../mythos/babylonian/corpus-search.html?term=gilgamesh" title="Search corpus for 'Gilgamesh'">Gilgamesh</a> learn that death is inevitable. The focus shifts from achieving
-                        immortality to achieving wisdom and leaving lasting accomplishments. This reflects Babylonian
-                        afterlife belief—a grim underworld awaiting all, making earthly achievements all the more important.
-        </p></div></div></section>
+    <div id="theme-picker-container"></div>
 
-<section class="interlink-panel">
-    <h3 class="interlink-title">Related Content</h3>
-    <div class="interlink-grid">
-        <div class="archetype-link-card">
-            <h4>Cross-Cultural Parallels</h4>
-            <ul>
-                <li><a href="../../sumerian/heroes/index.html">Sumerian Heroes</a> - Earlier Mesopotamian heroic traditions</li>
-                <li><a href="../../greek/heroes/index.html">Greek Heroes</a> - Demigods and legendary warriors</li>
-                <li><a href="../../norse/heroes/index.html">Norse Heroes</a> - Warriors and legendary kings</li>
-                <li><a href="../../egyptian/heroes/index.html">Egyptian Heroes</a> - Divine pharaohs and sages</li>
-            </ul>
+    <header>
+        <div class="header-content">
+            <h1>🦸 Heroes</h1>
+        <div id="user-auth-nav"></div>
         </div>
-        <div class="archetype-link-card">
-            <h4>Related Archetypes</h4>
-            <ul>
-                <li><a href="../../../archetypes/celestial/index.html">The Hero</a> - Universal heroic journey</li>
-                <li><a href="../../../archetypes/celestial/index.html">The Ruler</a> - Divine kingship pattern</li>
-                <li><a href="../../../archetypes/celestial/index.html">The Sage</a> - Wisdom and civilization</li>
-            </ul>
+    </header>
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../../../mythos/index.html">Home</a> →
+        <a href="../index.html">Babylonian</a> →
+        <span>Heroes</span>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h2>Heroes & Legendary Figures</h2>
+            <p>Discover the legendary heroes, warriors, and mortal champions.</p>
+        </section>
+
+        <!-- Main Entity Grid (Auto-Populated) -->
+        <div
+            data-auto-populate
+            data-mythology="babylonian"
+            data-category="hero"
+            data-display-mode="compact"
+            data-show-corpus="true">
+            <!-- Loading state -->
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading Heroes...</p>
+            </div>
         </div>
-    </div>
-    <div class="see-also-section">
-        <h4>See Also</h4>
-        <ul>
-            <li><a href="../deities/index.html">Babylonian Deities</a> - Gods who guided and opposed heroes</li>
-            <li><a href="../creatures/index.html">Babylonian Creatures</a> - Monsters heroes confronted</li>
-            <li><a href="../cosmology/afterlife.html">The Afterlife</a> - Fate awaiting mortal heroes</li>
-            <li><a href="../texts/index.html">Babylonian Texts</a> - Epic literature preserving heroic tales</li>
-        </ul>
-    </div>
-</section>
-</main>
-<footer>
-<p>
-<strong><a data-term="Babylonian" data-tradition="babylonian" class="corpus-link" href="../../../mythos/babylonian/corpus-search.html?term=babylonian" title="View babylonian in ancient texts">Babylonian</a> Heroes &amp; Legends</strong> - World Mythos Explorer<br/>
-<a href="../../../mythos/index.html">World Mythos Home</a> |
-            <a href="../../index.html">Babylonian Tradition</a> |
-            <span>Heroic Legends</span>
-</p>
-</footer>
+
+        <!-- Optional: Filtered Sections -->
+        <!-- Uncomment and customize as needed -->
+        <!--
+        <div class="section-divider">
+            <div class="section-title">Sacred Heroes</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="babylonian"
+            data-category="hero"
+            data-subcategory="sacred"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+
+        <div class="section-divider">
+            <div class="section-title">Ritual Heroes</div>
+        </div>
+        <div
+            data-auto-populate
+            data-mythology="babylonian"
+            data-category="hero"
+            data-subcategory="ritual"
+            data-display-mode="compact"
+            class="entity-grid">
+        </div>
+        -->
+
+        <!-- Cross-Cultural Parallels -->
+        <section class="interlink-panel" style="margin-top: 4rem;">
+            <h3 class="interlink-header">
+                <span class="interlink-icon">🔗</span>
+                Heroes Across Mythologies
+            </h3>
+
+            <div class="parallel-traditions glass-card">
+                <h4>🌍 Explore Other Traditions</h4>
+                <div class="parallel-grid">
+                    <!-- Add links to similar categories in other mythologies -->
+
+                    <a href="../../greek/heroes/index.html" class="parallel-card">
+                        <span class="tradition-flag">🏛️</span>
+                        <span class="parallel-name">Greek Heroes</span>
+                        <span class="tradition-label">Greek</span>
+                    </a>
+                    <a href="../../norse/heroes/index.html" class="parallel-card">
+                        <span class="tradition-flag">⚔️</span>
+                        <span class="parallel-name">Norse Heroes</span>
+                        <span class="tradition-label">Norse</span>
+                    </a>
+                    <a href="../../egyptian/heroes/index.html" class="parallel-card">
+                        <span class="tradition-flag">𓂀</span>
+                        <span class="parallel-name">Egyptian Heroes</span>
+                        <span class="tradition-label">Egyptian</span>
+                    </a>
+                    <a href="../../hindu/heroes/index.html" class="parallel-card">
+                        <span class="tradition-flag">🕉️</span>
+                        <span class="parallel-name">Hindu Heroes</span>
+                        <span class="tradition-label">Hindu</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- See Also Section -->
+        <div class="see-also-section" style="margin-top: 3rem;">
+            <h4>📚 See Also</h4>
+            <div class="see-also-links">
+                <a href="../deities/index.html" class="see-also-link">
+                    <span>⚡</span> Deities
+                </a>
+                <a href="../heroes/index.html" class="see-also-link">
+                    <span>🦸</span> Heroes
+                </a>
+                <a href="../places/index.html" class="see-also-link">
+                    <span>📍</span> Places
+                </a>
+                <a href="../index.html" class="see-also-link">
+                    <span>🏛️</span> Babylonian Home
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <strong>Heroes</strong> - Babylonian Mythology<br>
+            <a href="../../../mythos/index.html">World Mythos Home</a> |
+            <a href="../index.html">Babylonian Tradition</a>
+        </p>
+    </footer>
+
+    <!-- Initialize Auto-Populate -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const populator = new EntityAutoPopulator();
+            populator.populatePage();
+        });
+    </script>
+
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
 </body>
 </html>

@@ -1,0 +1,279 @@
+# Exact Changes to Fix Script Loading Issues
+
+## File 1: index.html
+
+### Location: Lines 109-134
+
+```diff
+     <!-- Core Scripts -->
+     <script src="js/seo.js"></script>
+     <script src="js/toast.js"></script>
+     <script src="js/image-optimizer.js"></script>
+
+-    <!-- Authentication Guard (must load before everything else) -->
+-    <script src="js/auth-guard-simple.js" type="module"></script>
++    <!-- Authentication Guard -->
++    <script src="js/auth-guard-simple.js"></script>
++
++    <!-- Authentication Manager -->
++    <script src="js/auth-manager.js"></script>
++
++    <!-- Theme System -->
+     <script src="js/header-theme-picker.js"></script>
+-
+-    <!-- Authentication -->
+-    <script src="js/auth-manager.js"></script>
++    <script src="js/shaders/shader-themes.js"></script>
+
+     <!-- Component Scripts -->
++    <script src="js/entity-renderer-firebase.js"></script>
+     <script src="js/views/home-view.js"></script>
+-    <script src="js/entity-renderer-firebase.js"></script>
+-    <script src="js/search-firebase.js"></script>
+     <script src="js/spa-navigation.js"></script>
+-    <script src="js/shader-manager.js"></script>
+-    <script src="js/theme-manager.js"></script>
++
++    <!-- Search System -->
++    <script src="js/components/corpus-search-enhanced.js"></script>
+
+     <!-- CRUD System -->
+     <script src="js/firebase-crud-manager.js"></script>
+     <script src="js/components/entity-form.js"></script>
+     <script src="js/components/user-dashboard.js"></script>
+
+-    <!-- App Initialization -->
++    <!-- App Initialization (MUST BE LAST) -->
+     <script src="js/app-init-simple.js"></script>
+```
+
+---
+
+## File 2: js/auth-guard-simple.js
+
+### Location: Line 15
+
+```diff
+ /**
+  * Initialize the auth guard
+  */
+-export function setupAuthGuard() {
++function setupAuthGuard() {
+     console.log('[EOA Auth Guard] Setting up...');
+```
+
+### Location: Line 290
+
+```diff
+ /**
+  * Check if user is currently authenticated
+  * @returns {boolean}
+  */
+-export function isUserAuthenticated() {
++function isUserAuthenticated() {
+     return isAuthenticated;
+ }
+```
+
+### Location: Line 298
+
+```diff
+ /**
+  * Get current user
+  * @returns {Object|null}
+  */
+-export function getCurrentUser() {
++function getCurrentUser() {
+     return currentUser;
+ }
+```
+
+### Location: After line 307 (at end of file)
+
+```diff
+ // Auto-initialize when DOM is ready
+ if (document.readyState === 'loading') {
+     document.addEventListener('DOMContentLoaded', setupAuthGuard);
+ } else {
+     setupAuthGuard();
+ }
++
++// Make functions available globally
++window.EyesOfAzrael = window.EyesOfAzrael || {};
++window.EyesOfAzrael.setupAuthGuard = setupAuthGuard;
++window.EyesOfAzrael.isUserAuthenticated = isUserAuthenticated;
++window.EyesOfAzrael.getCurrentUser = getCurrentUser;
+```
+
+---
+
+## File 3: js/app-init-simple.js (OPTIONAL BUT RECOMMENDED)
+
+### Location: After line 15
+
+```diff
+     // Wait for DOM to be ready
+     if (document.readyState === 'loading') {
+         await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+     }
++
++    // Verify all required dependencies are loaded
++    const requiredClasses = [
++        'AuthManager',
++        'FirebaseCRUDManager',
++        'HomeView',
++        'SPANavigation',
++        'ShaderThemeManager'
++    ];
++
++    const missing = requiredClasses.filter(className => typeof window[className] === 'undefined');
++
++    if (missing.length > 0) {
++        console.error('[App] ❌ Missing required classes:', missing);
++        console.error('[App] Check that all script tags are present and paths are correct');
++        throw new Error(`Missing dependencies: ${missing.join(', ')}`);
++    }
++
++    console.log('[App] ✅ All dependencies loaded');
+
+     try {
+         // Check if Firebase is loaded
+```
+
+---
+
+## Summary of Changes
+
+### Changed Files:
+1. ✏️ `index.html` (11 line changes)
+2. ✏️ `js/auth-guard-simple.js` (4 changes: remove 3 "export" keywords, add 4 lines at end)
+3. ✏️ `js/app-init-simple.js` (optional: add dependency check)
+
+### Changes by Type:
+
+**index.html:**
+- Remove `type="module"` from line 114
+- Change `js/search-firebase.js` → `js/components/corpus-search-enhanced.js`
+- Change `js/shader-manager.js` → `js/shaders/shader-themes.js`
+- Remove `js/theme-manager.js` reference
+- Reorder scripts for proper dependencies
+
+**auth-guard-simple.js:**
+- Remove `export` keyword from 3 function declarations
+- Add global exports at end of file
+
+**app-init-simple.js (optional):**
+- Add dependency validation before initialization
+
+---
+
+## Testing Commands
+
+### Step 1: Apply changes
+```bash
+# Edit the 3 files above
+```
+
+### Step 2: Open browser to index.html
+```bash
+# Open http://localhost:8000/index.html (or your local server)
+```
+
+### Step 3: Open browser console
+```javascript
+// Should see:
+✅ Firebase config loaded
+✅ Firebase initialized
+✅ AuthManager initialized
+✅ All dependencies loaded
+✅ CRUD Manager initialized
+✅ Renderer initialized
+✅ Navigation initialized
+✅ Search initialized
+✅ Shaders initialized
+✅ Initialization complete
+
+// Should NOT see:
+❌ 404 errors
+❌ "is not defined" errors
+❌ Module import errors
+```
+
+### Step 4: Test functionality
+```javascript
+// Run in console:
+debugApp()
+
+// Should return:
+{
+  db: Firestore {...},
+  firebaseAuth: Auth {...},
+  auth: AuthManager {...},
+  crudManager: FirebaseCRUDManager {...},
+  renderer: UniversalDisplayRenderer {...},
+  navigation: SPANavigation {...},
+  search: EnhancedCorpusSearch {...},
+  shaders: ShaderThemeManager {...}
+}
+```
+
+---
+
+## Rollback Plan
+
+If issues occur, revert changes:
+
+```bash
+git checkout HEAD -- index.html js/auth-guard-simple.js js/app-init-simple.js
+```
+
+Or manually revert:
+
+**index.html line 114:**
+```html
+<script src="js/auth-guard-simple.js" type="module"></script>
+```
+
+**auth-guard-simple.js lines 15, 290, 298:**
+```javascript
+export function setupAuthGuard() {
+export function isUserAuthenticated() {
+export function getCurrentUser() {
+```
+
+Remove the 4 lines added at the end of auth-guard-simple.js.
+
+---
+
+## Expected Outcome
+
+### Before:
+- 3 x 404 errors in console
+- Race condition between auth systems
+- Unpredictable initialization order
+- Intermittent failures
+
+### After:
+- 0 errors in console
+- Deterministic initialization
+- All dependencies loaded in correct order
+- Reliable, predictable behavior
+
+---
+
+## Time Estimate
+
+- Reading this document: 5 minutes
+- Applying changes: 10 minutes
+- Testing: 5 minutes
+- **Total: 20 minutes**
+
+---
+
+## Questions?
+
+Check these documents:
+- `AGENT_4_SCRIPT_LOADING_ANALYSIS.md` - Full technical details
+- `SCRIPT_LOADING_FIXES_QUICK_REFERENCE.md` - Step-by-step guide
+- `SCRIPT_LOADING_VISUAL_DIAGRAM.md` - Visual explanation
+- `AGENT_4_EXECUTIVE_SUMMARY.md` - High-level overview

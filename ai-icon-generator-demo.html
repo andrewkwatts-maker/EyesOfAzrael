@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Icon Generator - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e5e7eb;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #f59e0b;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #9ca3af;
+            margin-bottom: 2rem;
+        }
+
+        .demo-section {
+            background: rgba(26, 31, 58, 0.8);
+            border: 2px solid rgba(139, 127, 255, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .demo-section h2 {
+            color: #8b7fff;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .icon-card {
+            background: rgba(10, 14, 39, 0.6);
+            border: 2px solid rgba(139, 127, 255, 0.3);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .icon-card:hover {
+            border-color: #8b7fff;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(139, 127, 255, 0.3);
+        }
+
+        .icon-display {
+            width: 100%;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .icon-display svg {
+            max-width: 80px;
+            max-height: 80px;
+        }
+
+        .icon-name {
+            font-weight: 600;
+            color: #f59e0b;
+            margin-bottom: 0.25rem;
+        }
+
+        .icon-domains {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-bottom: 0.5rem;
+        }
+
+        .icon-mythology {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(139, 127, 255, 0.2);
+            border: 1px solid rgba(139, 127, 255, 0.4);
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            color: #a78bfa;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #8b7fff, #a78bfa);
+            border: none;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 127, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(139, 127, 255, 0.1);
+            border: 1px solid rgba(139, 127, 255, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #8b7fff;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            margin-top: 0.25rem;
+        }
+
+        .code-block {
+            background: rgba(10, 14, 39, 0.8);
+            border: 1px solid rgba(139, 127, 255, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            color: #86efac;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #9ca3af;
+        }
+
+        .mythology-filter {
+            padding: 0.5rem 1rem;
+            background: rgba(26, 31, 58, 0.8);
+            border: 2px solid rgba(139, 127, 255, 0.3);
+            border-radius: 0.5rem;
+            color: #e5e7eb;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 AI Icon Generator Demo</h1>
+        <p class="subtitle">Automated SVG Icon Generation for Mythology Entities</p>
+
+        <!-- Stats Section -->
+        <div class="demo-section">
+            <h2>System Statistics</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-domains">80+</div>
+                    <div class="stat-label">Visual Domains</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-mythologies">15</div>
+                    <div class="stat-label">Mythologies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-generated">0</div>
+                    <div class="stat-label">Icons Generated</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-time">0ms</div>
+                    <div class="stat-label">Avg Gen Time</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="demo-section">
+            <h2>Demo Controls</h2>
+            <div class="controls">
+                <button class="btn" onclick="generateExamples()">Generate Example Icons</button>
+                <button class="btn btn-secondary" onclick="generateCustom()">Generate Custom Icon</button>
+                <button class="btn" onclick="regenerateAll()">Regenerate All</button>
+                <button class="btn" onclick="clearIcons()">Clear All</button>
+                <select class="mythology-filter" id="mythology-filter" onchange="filterByMythology()">
+                    <option value="all">All Mythologies</option>
+                    <option value="greek">Greek</option>
+                    <option value="norse">Norse</option>
+                    <option value="egyptian">Egyptian</option>
+                    <option value="roman">Roman</option>
+                    <option value="hindu">Hindu</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Icon Gallery -->
+        <div class="demo-section">
+            <h2>Generated Icons</h2>
+            <div id="icon-gallery" class="icon-grid">
+                <div class="loading">Click "Generate Example Icons" to see the system in action</div>
+            </div>
+        </div>
+
+        <!-- Code Example -->
+        <div class="demo-section">
+            <h2>Usage Example</h2>
+            <div class="code-block" id="code-example">
+// Initialize generator
+const generator = new AIIconGenerator();
+
+// Generate icon from entity
+const zeus = {
+    name: 'Zeus',
+    type: 'deity',
+    mythology: 'greek',
+    domains: ['sky', 'thunder', 'justice'],
+    symbols: ['lightning bolt', 'eagle', 'oak']
+};
+
+const svg = generator.generateIcon(zeus);
+console.log(svg); // SVG code ready to use
+            </div>
+        </div>
+    </div>
+
+    <!-- Include the AI Icon Generator -->
+    <script src="js/ai-icon-generator.js"></script>
+
+    <script>
+        let generator;
+        let generatedIcons = [];
+        let totalGenerationTime = 0;
+        let generationCount = 0;
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            generator = new AIIconGenerator();
+            console.log('AI Icon Generator initialized');
+        });
+
+        // Generate example icons
+        function generateExamples() {
+            const examples = AIIconGenerator.getExampleEntities();
+            generatedIcons = [];
+
+            const startTime = performance.now();
+
+            examples.forEach(entity => {
+                const result = generator.generateWithOptions(entity);
+                if (result.success) {
+                    generatedIcons.push({
+                        entity,
+                        svg: result.svgCode,
+                        metadata: result.metadata
+                    });
+                }
+            });
+
+            const endTime = performance.now();
+            const avgTime = (endTime - startTime) / examples.length;
+
+            updateStats(avgTime);
+            renderIcons();
+        }
+
+        // Generate custom icon
+        function generateCustom() {
+            const name = prompt('Entity name:', 'Custom Deity');
+            const mythology = prompt('Mythology:', 'greek');
+            const domains = prompt('Domains (comma separated):', 'wisdom,war').split(',').map(s => s.trim());
+
+            if (!name || !mythology || !domains.length) return;
+
+            const customEntity = {
+                name,
+                type: 'deity',
+                mythology,
+                domains,
+                symbols: domains,
+                description: `Custom ${mythology} deity with domains: ${domains.join(', ')}`
+            };
+
+            const startTime = performance.now();
+            const result = generator.generateWithOptions(customEntity);
+            const endTime = performance.now();
+
+            if (result.success) {
+                generatedIcons.push({
+                    entity: customEntity,
+                    svg: result.svgCode,
+                    metadata: result.metadata
+                });
+
+                updateStats(endTime - startTime);
+                renderIcons();
+            }
+        }
+
+        // Regenerate all icons
+        function regenerateAll() {
+            const entities = generatedIcons.map(i => i.entity);
+            generatedIcons = [];
+
+            const startTime = performance.now();
+
+            entities.forEach(entity => {
+                const result = generator.generateWithOptions(entity);
+                if (result.success) {
+                    generatedIcons.push({
+                        entity,
+                        svg: result.svgCode,
+                        metadata: result.metadata
+                    });
+                }
+            });
+
+            const endTime = performance.now();
+            const avgTime = (endTime - startTime) / entities.length;
+
+            updateStats(avgTime);
+            renderIcons();
+        }
+
+        // Clear all icons
+        function clearIcons() {
+            generatedIcons = [];
+            document.getElementById('icon-gallery').innerHTML = '<div class="loading">No icons generated yet</div>';
+        }
+
+        // Filter by mythology
+        function filterByMythology() {
+            const mythology = document.getElementById('mythology-filter').value;
+            renderIcons(mythology);
+        }
+
+        // Update statistics
+        function updateStats(generationTime) {
+            generationCount = generatedIcons.length;
+            totalGenerationTime += generationTime;
+
+            document.getElementById('stat-generated').textContent = generationCount;
+            document.getElementById('stat-time').textContent =
+                Math.round(totalGenerationTime / generationCount) + 'ms';
+        }
+
+        // Render icons to gallery
+        function renderIcons(mythologyFilter = 'all') {
+            const gallery = document.getElementById('icon-gallery');
+
+            let iconsToShow = generatedIcons;
+            if (mythologyFilter !== 'all') {
+                iconsToShow = generatedIcons.filter(i => i.entity.mythology === mythologyFilter);
+            }
+
+            if (iconsToShow.length === 0) {
+                gallery.innerHTML = '<div class="loading">No icons match the filter</div>';
+                return;
+            }
+
+            gallery.innerHTML = iconsToShow.map(icon => `
+                <div class="icon-card" data-mythology="${icon.entity.mythology}">
+                    <div class="icon-display">
+                        ${icon.svg}
+                    </div>
+                    <div class="icon-name">${icon.entity.name}</div>
+                    <div class="icon-domains">${icon.entity.domains.slice(0, 3).join(', ')}</div>
+                    <div class="icon-mythology">${icon.entity.mythology}</div>
+                </div>
+            `).join('');
+        }
+
+        // Console helpers
+        window.testGenerator = generator;
+        console.log('Demo ready! Try these commands:');
+        console.log('- generateExamples()');
+        console.log('- generateCustom()');
+        console.log('- testGenerator.generateIcon({ name: "Test", type: "deity", mythology: "greek", domains: ["war", "wisdom"] })');
+    </script>
+</body>
+</html>
