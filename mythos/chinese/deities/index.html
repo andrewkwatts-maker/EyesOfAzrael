@@ -6,6 +6,7 @@
 <title>Chinese Deities - The</title>
 <link href="../../../themes/theme-base.css" rel="stylesheet"/>
     <link rel="stylesheet" href="../../../themes/mythology-colors.css">
+    <link rel="stylesheet" href="../../../../css/spinner.css">
 <link href="../../../styles.css" rel="stylesheet"/>
 <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../themes/smart-links.css">
@@ -18,6 +19,18 @@
     <script src="../../../js/auth-guard.js"></script>
     <script src="../../../js/components/google-signin-button.js"></script>
 
+<!-- Submission Link System -->
+<script src="../../../js/submission-context.js"></script>
+<script src="../../../js/components/submission-link.js"></script>
+<link rel="stylesheet" href="../../../css/submission-link.css">
+
+
+    <!-- Universal Grid System -->
+    <link rel="stylesheet" href="../../../css/universal-grid.css">
+
+<!-- Universal Entity Renderer -->
+<script defer src="../../../js/universal-entity-renderer.js"></script>
+<link rel="stylesheet" href="../../../css/entity-renderer.css">
 </head>
 <body>
 <div id="theme-picker-container"></div>
@@ -91,73 +104,78 @@
 </ul></div></section>
 <section>
 <h2 style="color: var(--color-primary);">🏮 Featured <a data-term="Deities" data-tradition="chinese" class="corpus-link" href="../../../mythos/chinese/corpus-search.html?term=deities" title="View deities in ancient texts">Deities</a></h2>
+
+<!-- Dynamic Entity Grid (Firebase-Powered) -->
+<div id="entity-grid" class="pantheon-grid" data-mythology="chinese" data-entity-type="deity">
+    <!-- Entities will be loaded dynamically from Firebase -->
+    <div class="loading-placeholder">
+        <div class="spinner"></div>
+        <p>Loading deities...</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Firebase and renderer are available
+    if (typeof firebase === 'undefined' || !firebase.firestore) {
+        console.error('Firebase not initialized');
+        return;
+    }
+
+    if (typeof UniversalEntityRenderer === 'undefined') {
+        console.error('UniversalEntityRenderer not loaded');
+        return;
+    }
+
+    const renderer = new UniversalEntityRenderer();
+    const db = firebase.firestore();
+    const gridElement = document.getElementById('entity-grid');
+
+    // Query Firebase for chinese deities
+    db.collection('deities')
+        .where('mythology', '==', 'chinese')
+        .orderBy('name')
+        .get()
+        .then(snapshot => {
+            if (snapshot.empty) {
+                gridElement.innerHTML = '<p class="no-results">No deities found in database. Check back soon!</p>';
+                return;
+            }
+
+            const entities = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // Render the entities using the universal renderer
+            gridElement.innerHTML = renderer.renderGrid(entities, {
+                entityType: 'deity',
+                mythology: 'chinese',
+                showIcons: true,
+                enableClick: true
+            });
+
+            console.log(`Loaded ${entities.length} chinese deities from Firebase`);
+        })
+        .catch(error => {
+            console.error('Error loading deities:', error);
+            gridElement.innerHTML = '<p class="error-message">Error loading deities. Please try again later.</p>';
+        });
+});
+</script>
+
+<!-- Fallback: Static deity cards (shown if JavaScript disabled or Firebase unavailable) -->
+<noscript>
 <div class="deity-grid">
 <a class="deity-card" href="jade-emperor.html" data-smart="chinese" style="text-decoration: none;">
 <div class="hero-icon-display">👑</div>
-<h3><a class="corpus-link" data-term="Jade Emperor" data-tradition="chinese" href="../../../mythos/chinese/corpus-search.html?term=jade_emperor" title="Search corpus for 'Jade Emperor'">Jade Emperor</a></h3>
-<p class="deity-title">玉皇大帝 (Yù Huáng Dàdì)</p>
-<p>Supreme ruler of <a class="corpus-link" data-term="Heaven" data-tradition="chinese" href="../../../mythos/chinese/corpus-search.html?term=tian" title="Search corpus for 'Heaven'">heaven</a> and earth, head of the <a class="corpus-link" data-term="Celestial Bureaucracy" data-tradition="chinese" href="../../../mythos/chinese/corpus-search.html?term=celestial_bureaucracy" title="Search corpus for 'Celestial Bureaucracy'">celestial bureaucracy</a>, embodiment of imperial authority.</p>
-</a>
-<a class="deity-card" href="guanyin.html" data-smart="chinese" style="text-decoration: none;">
-<div class="hero-icon-display">🙏</div>
-<h3><a class="corpus-link" data-term="Guanyin" data-tradition="chinese" href="../../../mythos/chinese/corpus-search.html?term=guanyin" title="Search corpus for 'Guanyin'">Guanyin</a></h3>
-<p class="deity-title">觀音 (Guānyīn)</p>
-<p><a class="corpus-link" data-term="Goddess of Mercy" data-tradition="chinese" href="../../../mythos/chinese/corpus-search.html?term=guanyin" title="Search corpus for 'Goddess of Mercy'">Goddess of Mercy</a> and Compassion, hearer of cries, savior of those in distress, most beloved deity.</p>
-</a>
-<a class="deity-card" href="guan-yu.html" style="text-decoration: none;">
-<div class="hero-icon-display">⚔️</div>
-<h3><a class="corpus-link" data-term="Guan Yu" data-tradition="chinese" href="../../../mythos/chinese/corpus-search.html?term=guan_yu" title="Search corpus for 'Guan Yu'">Guan Yu</a></h3>
-<p class="deity-title">關羽 (Guān Yǔ)</p>
-<p>God of War and Righteousness, patron of warriors and merchants, exemplar of loyalty and honor.</p>
-</a>
-<a class="deity-card" href="xi-wangmu.html" data-smart="chinese" style="text-decoration: none;">
-<div class="hero-icon-display">🦊</div>
-<h3><a class="corpus-link" data-term="Queen Mother of the West" data-tradition="chinese" href="../../../mythos/chinese/corpus-search.html?term=xi_wangmu" title="Search corpus for 'Queen Mother of the West'">Queen Mother of the West</a></h3>
-<p class="deity-title">西王母 (Xī Wángmǔ)</p>
-<p>Keeper of the Peaches of <a data-term="Immortality" data-tradition="chinese" class="corpus-link" href="../../../mythos/chinese/corpus-search.html?term=immortality" title="View immortality in ancient texts">Immortality</a>, ruler of immortals, goddess of longevity.</p>
-</a>
-<a class="deity-card" href="dragon-kings.html" data-smart="chinese" style="text-decoration: none;">
-<div class="hero-icon-display">🐉</div>
-<h3><a data-term="Dragon" data-tradition="chinese" class="corpus-link" href="../../../mythos/chinese/corpus-search.html?term=dragon" title="View dragon in ancient texts">Dragon</a> Kings</h3>
-<p class="deity-title">龍王 (Lóng Wáng)</p>
-<p>Four brothers ruling the seas and controlling weather, rain, and floods.</p>
-</a>
-<a class="deity-card" href="zao-jun.html" data-smart="chinese" style="text-decoration: none;">
-<div class="hero-icon-display">🍳</div>
-<h3>Kitchen God (Zao Jun)</h3>
-<p class="deity-title">灶神 (Zào Shén)</p>
-<p>Household deity who reports each family's behavior to the <a data-term="Jade Emperor" data-tradition="chinese" class="corpus-link" href="../../../mythos/chinese/corpus-search.html?term=jade%20emperor" title="View jade emperor in ancient texts">Jade Emperor</a> annually.</p>
-</a>
-<a class="deity-card" href="nezha.html" data-smart="chinese" style="text-decoration: none;">
-<div class="hero-icon-display">🔥</div>
-<h3>Nezha</h3>
-<p class="deity-title">哪吒 (Né Zhā)</p>
-<p>Rebellious youth deity, lotus prince reborn, divine protector with fiery wheels and cosmic ribbons.</p>
-</a>
-<a class="deity-card" href="erlang-shen.html" data-smart="chinese" style="text-decoration: none;">
-<div class="hero-icon-display">👁️</div>
-<h3>Erlang Shen</h3>
-<p class="deity-title">二郎神 (Èrláng Shén)</p>
-<p>Warrior god with third truth-seeing eye, celestial enforcer, demon hunter with celestial hound.</p>
-</a>
-<div class="deity-card" style="opacity: 0.6;">
-<div class="hero-icon-display">💰</div>
-<h3>God of Wealth</h3>
-<p class="deity-title">財神 (Cái Shén)</p>
-<p>Brings prosperity and fortune, widely worshipped by merchants and business owners. <em>(Coming Soon)</em></p>
+</noscript>
+<div class="static-fallback" style="display: none;">
+<div class="deity-grid">
+<a class="deity-card" href="jade-emperor.html" data-smart="chinese" style="text-decoration: none;">
+<div class="hero-icon-display">👑</div>
 </div>
-<div class="deity-card" style="opacity: 0.6;">
-<div class="hero-icon-display">⚡</div>
-<h3>Lei Gong</h3>
-<p class="deity-title">雷公 (Léi Gōng)</p>
-<p>Thunder God who punishes evildoers with lightning, executioner of <a class="corpus-link" data-term="Heaven" data-tradition="chinese" href="../../../mythos/chinese/corpus-search.html?term=tian" title="Search corpus for 'Heaven'">heaven</a>'s justice. <em>(Coming Soon)</em></p>
-</div>
-<div class="deity-card" style="opacity: 0.6;">
-<div class="hero-icon-display">🌊</div>
-<h3>Mazu</h3>
-<p class="deity-title">媽祖 (Mā Zǔ)</p>
-<p>Goddess of the Sea, protector of fishermen and sailors, deified mortal woman. <em>(Coming Soon)</em></p>
-</div></div></section>
+</section>
 <section style="margin-top: 3rem;">
 <h2 style="color: var(--color-primary);">🔄 Key <a data-term="Concepts" data-tradition="chinese" class="corpus-link" href="../../../mythos/chinese/corpus-search.html?term=concepts" title="View concepts in ancient texts">Concepts</a></h2>
 <h3 style="color: var(--color-secondary); margin-top: 1rem;">Merit-Based Apotheosis</h3>
@@ -322,5 +340,13 @@ Related Across the Mythos
             }
         });
     </script>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
 </body>
 </html>

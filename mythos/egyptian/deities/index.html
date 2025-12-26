@@ -6,6 +6,7 @@
 <title>Egyptian Deities - The Egyptian Pantheon</title>
 <link href="../../../themes/theme-base.css" rel="stylesheet"/>
     <link rel="stylesheet" href="../../../themes/mythology-colors.css">
+<link href="../../../css/spinner.css" rel="stylesheet"/>
 <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../themes/smart-links.css">
 <script defer src="../../../themes/smart-links.js"></script>
@@ -23,6 +24,13 @@
 <script src="../../../js/components/submission-link.js"></script>
 <link rel="stylesheet" href="../../../css/submission-link.css">
 
+
+    <!-- Universal Grid System -->
+    <link rel="stylesheet" href="../../../css/universal-grid.css">
+
+<!-- Universal Entity Renderer -->
+<script defer src="../../../js/universal-entity-renderer.js"></script>
+<link rel="stylesheet" href="../../../css/entity-renderer.css">
 </head>
 <body>
 <div id="theme-picker-container"></div>
@@ -67,148 +75,78 @@
 <section>
 <h2 style="color: var(--color-primary);">Major <a data-term="Deities" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=deities" title="View deities in ancient texts">Deities</a></h2>
 <p>Explore the gods and goddesses who shaped <a data-term="Egyptian" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=egyptian" title="View egyptian in ancient texts">Egyptian</a> religion and daily <a class="corpus-link" data-term="Life" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=ankh" title="Search corpus for 'Life'">life</a>.</p>
+
+<!-- Dynamic Entity Grid (Firebase-Powered) -->
+<div id="entity-grid" class="pantheon-grid" data-mythology="egyptian" data-entity-type="deity">
+    <!-- Entities will be loaded dynamically from Firebase -->
+    <div class="loading-placeholder">
+        <div class="spinner"></div>
+        <p>Loading deities...</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Firebase and renderer are available
+    if (typeof firebase === 'undefined' || !firebase.firestore) {
+        console.error('Firebase not initialized');
+        return;
+    }
+
+    if (typeof UniversalEntityRenderer === 'undefined') {
+        console.error('UniversalEntityRenderer not loaded');
+        return;
+    }
+
+    const renderer = new UniversalEntityRenderer();
+    const db = firebase.firestore();
+    const gridElement = document.getElementById('entity-grid');
+
+    // Query Firebase for egyptian deities
+    db.collection('deities')
+        .where('mythology', '==', 'egyptian')
+        .orderBy('name')
+        .get()
+        .then(snapshot => {
+            if (snapshot.empty) {
+                gridElement.innerHTML = '<p class="no-results">No deities found in database. Check back soon!</p>';
+                return;
+            }
+
+            const entities = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // Render the entities using the universal renderer
+            gridElement.innerHTML = renderer.renderGrid(entities, {
+                entityType: 'deity',
+                mythology: 'egyptian',
+                showIcons: true,
+                enableClick: true
+            });
+
+            console.log(`Loaded ${entities.length} egyptian deities from Firebase`);
+        })
+        .catch(error => {
+            console.error('Error loading deities:', error);
+            gridElement.innerHTML = '<p class="error-message">Error loading deities. Please try again later.</p>';
+        });
+});
+</script>
+
+<!-- Fallback: Static deity cards (shown if JavaScript disabled or Firebase unavailable) -->
+<noscript>
 <div class="deity-grid">
 <div class="deity-card">
 <div class="hieroglyph-tooltip">rꜥ</div>
-<div class="hieroglyph-name">𓇳𓏺</div>
-<div class="hero-icon-display">☀️</div>
-<h3 style="color: var(--color-primary);"><a href="ra.html">Ra (Re)</a></h3>
-<p><strong>The Sun God, Creator</strong></p>
-<p>Supreme solar deity who travels across the sky in his solar barque. The ultimate source of light,
-                    <a class="corpus-link" data-term="Life" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=ankh" title="Search corpus for 'Life'">life</a>, and <a class="corpus-link" data-term="Order" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=maat" title="Search corpus for 'Order'">order</a>. Self-created from the primordial waters.</p>
-<p><em>Domains:</em> Sun, <a data-term="Creation" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=creation" title="View creation in ancient texts">creation</a>, kingship, <a class="corpus-link" data-term="Order" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=maat" title="Search corpus for 'Order'">order</a></p>
-<p><em>Symbol:</em> Solar disk, falcon, scarab beetle</p>
-</div>
+</noscript>
+<div class="static-fallback" style="display: none;">
+<div class="deity-grid">
 <div class="deity-card">
-<div class="hieroglyph-tooltip">wsjr</div>
-<div class="hieroglyph-name">𓊨𓁹𓀭</div>
-<div class="hero-icon-display">👑</div>
-<h3 style="color: var(--color-primary);"><a href="osiris.html">Osiris</a></h3>
-<p><strong>Lord of the <a data-term="Afterlife" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=afterlife" title="View afterlife in ancient texts">Afterlife</a></strong></p>
-<p>Judge of the dead and king of the <a class="corpus-link" data-term="Underworld" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=duat" title="Search corpus for 'Underworld'">underworld</a>. Murdered by <a class="corpus-link" data-term="Set" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=set" title="Search corpus for 'Set'">Set</a>, resurrected by <a class="corpus-link" data-term="Isis" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=isis" title="Search corpus for 'Isis'">Isis</a>. Embodies
-                    the eternal cycle of death and rebirth, like grain that dies and sprouts.</p>
-<p><em>Domains:</em> Death, resurrection, agriculture, judgment</p>
-<p><em>Symbol:</em> Crook, flail, atef crown, green skin</p>
+<div class="hieroglyph-tooltip">rꜥ</div>
 </div>
-<div class="deity-card">
-<div class="hieroglyph-tooltip">ꜣst</div>
-<div class="hieroglyph-name">𓊨𓏏𓁐</div>
-<div class="hero-icon-display">✨</div>
-<h3 style="color: var(--color-primary);"><a href="isis.html">Isis (Aset)</a></h3>
-<p><strong>Goddess of Magic &amp; Motherhood</strong></p>
-<p>The great sorceress who resurrected <a data-term="Osiris" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=osiris" title="View osiris in ancient texts">Osiris</a> and protected <a class="corpus-link" data-term="Horus" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=horus" title="Search corpus for 'Horus'">Horus</a>. Patron of mothers, healers,
-                    and magicians. Her cult spread throughout the ancient world.</p>
-<p><em>Domains:</em> Magic, motherhood, healing, protection</p>
-<p><em>Symbol:</em> Throne headdress, sistrum, wings</p>
-</div>
-<div class="deity-card">
-<div class="hieroglyph-tooltip">ḥrw</div>
-<div class="hieroglyph-name">𓅃𓀭</div>
-<div class="hero-icon-display">🦅</div>
-<h3 style="color: var(--color-primary);"><a class="corpus-link" data-term="Horus" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=horus" title="Search corpus for 'Horus'">Horus</a></h3>
-<p><strong>The Sky God</strong></p>
-<p>Son of <a data-term="Osiris" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=osiris" title="View osiris in ancient texts">Osiris</a> and <a class="corpus-link" data-term="Isis" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=isis" title="Search corpus for 'Isis'">Isis</a>. Avenged his father by defeating <a class="corpus-link" data-term="Set" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=set" title="Search corpus for 'Set'">Set</a>. The living pharaoh is <a class="corpus-link" data-term="Horus" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=horus" title="Search corpus for 'Horus'">Horus</a>
-                    incarnate. His eyes are the sun and moon.</p>
-<p><em>Domains:</em> Sky, kingship, war, protection</p>
-<p><em>Symbol:</em> Falcon, Eye of <a data-term="Horus" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=horus" title="View horus in ancient texts">Horus</a> (wadjet)</p>
-<p><em>Status:</em> Coming Soon</p>
-</div>
-<div class="deity-card">
-<div class="hieroglyph-tooltip">stẖ</div>
-<div class="hieroglyph-name">𓃩𓁣</div>
-<div class="hero-icon-display">🐺</div>
-<h3 style="color: var(--color-primary);"><a class="corpus-link" data-term="Set" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=set" title="Search corpus for 'Set'">Set</a> (<a class="corpus-link" data-term="Seth" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=set" title="Search corpus for 'Seth'">Seth</a>)</h3>
-<p><strong>God of Chaos &amp; Desert</strong></p>
-<p>Murdered <a data-term="Osiris" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=osiris" title="View osiris in ancient texts">Osiris</a> but also defends <a class="corpus-link" data-term="Ra" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=ra" title="Search corpus for 'Ra'">Ra</a>'s solar barque from the chaos serpent <a class="corpus-link" data-term="Apep" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=apep" title="Search corpus for 'Apep'">Apep</a>. Embodies
-                    necessary chaos, storms, and the harsh desert.</p>
-<p><em>Domains:</em> Chaos, desert, storms, foreigners</p>
-<p><em>Symbol:</em> <a class="corpus-link" data-term="Set" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=set" title="Search corpus for 'Set'">Set</a> animal (mythical creature), <a class="corpus-link" data-term="Was" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=was" title="Search corpus for 'Was'">was</a> scepter</p>
-<p><em>Status:</em> Coming Soon</p>
-</div>
-<div class="deity-card">
-<div class="hieroglyph-tooltip">jnpw</div>
-<div class="hieroglyph-name">𓇋𓈖𓊪𓅱𓃣</div>
-<div class="hero-icon-display">⚰️</div>
-<h3 style="color: var(--color-primary);"><a data-term="Anubis" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=anubis" title="View anubis in ancient texts">Anubis</a> (<a class="corpus-link" data-term="Inpu" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=anubis" title="Search corpus for 'Inpu'">Inpu</a>)</h3>
-<p><strong>God of Mummification</strong></p>
-<p>Jackal-headed psychopomp who guides souls to the <a data-term="Afterlife" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=afterlife" title="View afterlife in ancient texts">afterlife</a>. Inventor of mummification.
-                    Performs the weighing of the heart ceremony.</p>
-<p><em>Domains:</em> Mummification, death, embalming</p>
-<p><em>Symbol:</em> Black jackal, canopic jars</p>
-<p><em>Status:</em> Coming Soon</p>
-</div>
-<div class="deity-card">
-<div class="hieroglyph-tooltip">ḏḥwtj</div>
-<div class="hieroglyph-name">𓅤𓀭</div>
-<div class="hero-icon-display">📚</div>
-<h3 style="color: var(--color-primary);"><a data-term="Thoth" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=thoth" title="View thoth in ancient texts">Thoth</a> (<a class="corpus-link" data-term="Djehuty" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=thoth" title="Search corpus for 'Djehuty'">Djehuty</a>)</h3>
-<p><strong>God of Wisdom &amp; Writing</strong></p>
-<p>Inventor of hieroglyphs, mathematics, and magic. Scribe of the gods who records the judgment
-                    of the dead. Keeper of cosmic knowledge.</p>
-<p><em>Domains:</em> Wisdom, writing, magic, science</p>
-<p><em>Symbol:</em> Ibis, baboon, writing palette</p>
-<p><em>Status:</em> Coming Soon</p>
-</div>
-<div class="deity-card">
-<div class="hieroglyph-tooltip">ḥwt-ḥr</div>
-<div class="hieroglyph-name">𓉡𓏏𓂋</div>
-<div class="hero-icon-display">🎭</div>
-<h3 style="color: var(--color-primary);"><a class="corpus-link" data-term="Hathor" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=hathor" title="Search corpus for 'Hathor'">Hathor</a></h3>
-<p><strong>Goddess of Love &amp; Joy</strong></p>
-<p>Cow goddess of music, dance, love, and motherhood. Also manifests as fierce Sekhmet.
-                    Protector of women and patron of foreign lands.</p>
-<p><em>Domains:</em> Love, joy, music, dance, motherhood</p>
-<p><em>Symbol:</em> Cow horns with sun disk, sistrum</p>
-<p><em>Status:</em> Coming Soon</p>
-</div>
-<div class="deity-card">
-<div class="hieroglyph-tooltip">sḫmt</div>
-<div class="hieroglyph-name">𓌂𓐍𓏏𓁐</div>
-<div class="hero-icon-display">🦁</div>
-<h3 style="color: var(--color-primary);">Sekhmet</h3>
-<p><strong>Lioness Goddess of War</strong></p>
-<p>Fierce protector and destroyer. The <a class="corpus-link" data-term="Eye of Ra" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=bastet" title="Search corpus for 'Eye of Ra'">Eye of Ra</a> unleashed. Brings plagues but also heals them.
-                    Calmed by beer dyed red to look like blood.</p>
-<p><em>Domains:</em> War, plague, healing, protection</p>
-<p><em>Symbol:</em> Lioness, sun disk</p>
-<p><em>Status:</em> Coming Soon</p>
-</div>
-<div class="deity-card">
-<div class="hieroglyph-tooltip">mꜣꜥt</div>
-<div class="hieroglyph-name">𓐙𓏏𓁐</div>
-<div class="hero-icon-display">🪶</div>
-<h3 style="color: var(--color-primary);"><a class="corpus-link" data-term="Ma'at" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=maat" title="Search corpus for 'Ma'at'">Ma'at</a></h3>
-<p><strong>Goddess of <a class="corpus-link" data-term="Truth" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=maat" title="Search corpus for 'Truth'">Truth</a> &amp; <a class="corpus-link" data-term="Order" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=maat" title="Search corpus for 'Order'">Order</a></strong></p>
-<p>Personification of cosmic <a class="corpus-link" data-term="Order" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=maat" title="Search corpus for 'Order'">order</a>, <a class="corpus-link" data-term="Truth" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=maat" title="Search corpus for 'Truth'">truth</a>, and <a class="corpus-link" data-term="Justice" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=maat" title="Search corpus for 'Justice'">justice</a>. Her feather is weighed against the heart
-                    of the deceased. Upholds <a data-term="Creation" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=creation" title="View creation in ancient texts">creation</a> from chaos.</p>
-<p><em>Domains:</em> <a class="corpus-link" data-term="Truth" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=maat" title="Search corpus for 'Truth'">Truth</a>, <a class="corpus-link" data-term="Justice" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=maat" title="Search corpus for 'Justice'">justice</a>, <a class="corpus-link" data-term="Order" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=maat" title="Search corpus for 'Order'">order</a>, balance</p>
-<p><em>Symbol:</em> Ostrich feather, scales</p>
-<p><em>Status:</em> Coming Soon</p>
-</div>
-<div class="deity-card">
-<div class="hieroglyph-tooltip">sbk</div>
-<div class="hieroglyph-name">𓋴𓃀𓎡</div>
-<div class="hero-icon-display">🐊</div>
-<h3 style="color: var(--color-primary);"><a class="corpus-link" data-term="Sobek" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=sobek" title="Search corpus for 'Sobek'">Sobek</a></h3>
-<p><strong>Crocodile God</strong></p>
-<p>God of the Nile's fertility and military prowess. Dual nature as both dangerous predator
-                    and protector. Patron of pharaohs.</p>
-<p><em>Domains:</em> Nile, fertility, military, protection</p>
-<p><em>Symbol:</em> Crocodile</p>
-<p><em>Status:</em> Coming Soon</p>
-</div>
-<div class="deity-card">
-<div class="hieroglyph-tooltip">ptḥ</div>
-<div class="hieroglyph-name">𓊪𓏏𓎛</div>
-<div class="hero-icon-display">🌀</div>
-<h3 style="color: var(--color-primary);"><a class="corpus-link" data-term="Ptah" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=ptah" title="Search corpus for 'Ptah'">Ptah</a></h3>
-<p><strong>Creator God &amp; Master Craftsman</strong></p>
-<p>Created the world <a data-term="Through" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=through" title="View through in ancient texts">through</a> thought and word according to Memphite theology. Patron of
-                    craftsmen, artists, and architects.</p>
-<p><em>Domains:</em> <a data-term="Creation" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=creation" title="View creation in ancient texts">Creation</a>, craftsmanship, architecture</p>
-<p><em>Symbol:</em> <a class="corpus-link" data-term="Was" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=was" title="Search corpus for 'Was'">Was</a> scepter, <a class="corpus-link" data-term="Djed" data-tradition="egyptian" href="../../../mythos/egyptian/corpus-search.html?term=djed" title="Search corpus for 'Djed'">djed</a> pillar</p>
-<p><em>Status:</em> Coming Soon</p>
-</div></div></section>
+</section>
 <section style="margin-top: 3rem;">
 <h2 style="color: var(--color-primary);">Understanding <a data-term="Egyptian" data-tradition="egyptian" class="corpus-link" href="../../../mythos/egyptian/corpus-search.html?term=egyptian" title="View egyptian in ancient texts">Egyptian</a> Deities</h2>
 <h3 style="color: var(--color-secondary);">Syncretic Nature</h3>

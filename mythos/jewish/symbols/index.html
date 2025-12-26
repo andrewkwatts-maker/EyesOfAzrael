@@ -6,6 +6,7 @@
 <title>Sacred Symbols - Jewish Tradition</title>
 <link href="../../../themes/theme-base.css" rel="stylesheet"/>
 <link href="../../../styles.css" rel="stylesheet"/>
+<link rel="stylesheet" href="../../../css/spinner.css">
 <link href="../../../themes/corpus-links.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../../themes/smart-links.css">
 <script defer src="../../../themes/smart-links.js"></script>
@@ -75,12 +76,29 @@
     line-height: 1.7;
 }
 </style>
+    <!-- Firebase Auth System -->
+    <link rel="stylesheet" href="../../../css/user-auth.css">
+    <script src="../../../js/firebase-auth.js"></script>
+    <script src="../../../js/auth-guard.js"></script>
+    <script src="../../../js/components/google-signin-button.js"></script>
+<!-- Submission Link System -->
+<script src="../../../js/submission-context.js"></script>
+<script src="../../../js/components/submission-link.js"></script>
+<link rel="stylesheet" href="../../../css/submission-link.css">
+
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="../../../js/firebase-init.js"></script>
 </head>
 <body>
 <div id="theme-picker-container"></div>
 <header>
     <div class="header-content">
         <h1>✡️ Sacred Symbols</h1>
+        <div id="user-auth-nav"></div>
     </div>
 </header>
 <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -371,5 +389,30 @@ Jewish symbolism encompasses ancient biblical signs, kabbalistic diagrams, ritua
 <a href="../index.html">Jewish Tradition</a>
 </p>
 </footer>
+
+    <!-- Initialize Auth UI -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Google Sign-In button in header
+            if (window.GoogleSignInButton) {
+                const authNav = document.getElementById('user-auth-nav');
+                if (authNav) {
+                    window.GoogleSignInButton.injectIntoElement(authNav, {
+                        showUserInfo: true,
+                        showAvatar: true,
+                        compact: true
+                    });
+                }
+            }
+        });
+    </script>
+
+<!-- Auto-inject submission button -->
+<script>
+    if (window.SubmissionLink) {
+        window.SubmissionLink.autoInject();
+    }
+</script>
+
 </body>
 </html>
