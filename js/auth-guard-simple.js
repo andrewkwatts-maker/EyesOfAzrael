@@ -1,37 +1,76 @@
 /**
- * Authentication Guard Module for Eyes of Azrael
+ * Optimized Authentication Guard Module for Eyes of Azrael
  *
- * Protects page content until user is authenticated.
- * Shows login overlay when not authenticated, reveals content when authenticated.
+ * PERFORMANCE OPTIMIZATIONS:
+ * 1. Instant display (<100ms) - No waiting for Firebase
+ * 2. Synchronous localStorage check for cached auth state
+ * 3. Pre-populated email from last login (instant auto-fill)
+ * 4. Background Firebase auth check with smooth transitions
+ * 5. Progressive enhancement - show UI first, verify later
  */
 
 // Auth state
 let isAuthenticated = false;
 let currentUser = null;
 
+// Performance tracking
+const perfMarks = {
+    scriptStart: performance.now(),
+    overlayVisible: null,
+    firebaseReady: null,
+    authResolved: null
+};
+
+// LocalStorage keys
+const STORAGE_KEYS = {
+    LAST_USER_EMAIL: 'eoa_last_user_email',
+    LAST_USER_NAME: 'eoa_last_user_name',
+    LAST_USER_PHOTO: 'eoa_last_user_photo',
+    AUTH_CACHED: 'eoa_auth_cached',
+    AUTH_TIMESTAMP: 'eoa_auth_timestamp'
+};
+
+// Cache duration (5 minutes)
+const AUTH_CACHE_DURATION = 5 * 60 * 1000;
+
 /**
- * Initialize the auth guard
+ * PHASE 1: INSTANT DISPLAY
+ * This runs synchronously before any async Firebase operations
+ */
+function instantDisplay() {
+    console.log('[EOA Auth Guard OPTIMIZED] Phase 1: Instant Display');
+
+    // Check cached auth state from localStorage (synchronous, instant)
+    const cachedAuth = getCachedAuthState();
+
+    if (cachedAuth.isValid && cachedAuth.wasAuthenticated) {
+        // User was recently authenticated - show content immediately, verify in background
+        console.log('[EOA Auth Guard] Using cached auth - showing content optimistically');
+        document.body.classList.add('auth-loading');
+        showLoadingScreen();
+    } else {
+        // No valid cache - show login overlay immediately
+        console.log('[EOA Auth Guard] No valid cache - showing login immediately');
+        document.body.classList.add('not-authenticated');
+        showAuthOverlay();
+        prefillLastUserEmail(); // Instant auto-fill from localStorage
+    }
+
+    perfMarks.overlayVisible = performance.now();
+    console.log(`[EOA Auth Guard] Display time: ${(perfMarks.overlayVisible - perfMarks.scriptStart).toFixed(2)}ms`);
+}
+
+/**
+ * PHASE 2: FIREBASE VERIFICATION
+ * This runs asynchronously in the background after UI is visible
  */
 export function setupAuthGuard() {
-    console.log('[EOA Auth Guard] Setting up...');
-
-    // Start with loading state (prevents flicker)
-    document.body.classList.add('auth-loading');
-    document.body.classList.remove('not-authenticated', 'authenticated');
-
-    // Create and inject loading screen if it doesn't exist
-    if (!document.getElementById('auth-loading-screen')) {
-        injectLoadingScreen();
-    }
-
-    // Create and inject auth overlay if it doesn't exist
-    if (!document.getElementById('auth-overlay')) {
-        injectAuthOverlay();
-    }
+    console.log('[EOA Auth Guard OPTIMIZED] Phase 2: Firebase Verification');
 
     // Wait for Firebase to be ready
     if (typeof firebase === 'undefined') {
         console.error('[EOA Auth Guard] Firebase not loaded!');
+        handleNotAuthenticated();
         return;
     }
 
@@ -40,25 +79,32 @@ export function setupAuthGuard() {
         firebase.initializeApp(firebaseConfig);
     }
 
-    // Set up auth state listener
     const auth = firebase.auth();
 
     // Enable auth persistence (LOCAL = persists across sessions/tabs)
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
         .then(() => {
             console.log('[EOA Auth Guard] Auth persistence set to LOCAL');
+            perfMarks.firebaseReady = performance.now();
         })
         .catch((error) => {
             console.error('[EOA Auth Guard] Failed to set persistence:', error);
         });
+
+    // Set up auth state listener
     auth.onAuthStateChanged((user) => {
+        perfMarks.authResolved = performance.now();
+        console.log(`[EOA Auth Guard] Auth resolved in ${(perfMarks.authResolved - perfMarks.scriptStart).toFixed(2)}ms`);
+
         // Remove loading state
         document.body.classList.remove('auth-loading');
 
         if (user) {
             handleAuthenticated(user);
+            cacheAuthState(true, user);
         } else {
             handleNotAuthenticated();
+            cacheAuthState(false, null);
         }
     });
 
@@ -70,10 +116,110 @@ export function setupAuthGuard() {
 }
 
 /**
+ * Get cached auth state from localStorage (synchronous)
+ */
+function getCachedAuthState() {
+    try {
+        const cached = localStorage.getItem(STORAGE_KEYS.AUTH_CACHED);
+        const timestamp = localStorage.getItem(STORAGE_KEYS.AUTH_TIMESTAMP);
+
+        if (!cached || !timestamp) {
+            return { isValid: false, wasAuthenticated: false };
+        }
+
+        const age = Date.now() - parseInt(timestamp, 10);
+        const isValid = age < AUTH_CACHE_DURATION;
+        const wasAuthenticated = cached === 'true';
+
+        return { isValid, wasAuthenticated, age };
+    } catch (error) {
+        console.error('[EOA Auth Guard] Error reading cache:', error);
+        return { isValid: false, wasAuthenticated: false };
+    }
+}
+
+/**
+ * Cache auth state to localStorage
+ */
+function cacheAuthState(authenticated, user) {
+    try {
+        localStorage.setItem(STORAGE_KEYS.AUTH_CACHED, authenticated.toString());
+        localStorage.setItem(STORAGE_KEYS.AUTH_TIMESTAMP, Date.now().toString());
+
+        if (user) {
+            // Cache user info for instant pre-fill on next visit
+            if (user.email) localStorage.setItem(STORAGE_KEYS.LAST_USER_EMAIL, user.email);
+            if (user.displayName) localStorage.setItem(STORAGE_KEYS.LAST_USER_NAME, user.displayName);
+            if (user.photoURL) localStorage.setItem(STORAGE_KEYS.LAST_USER_PHOTO, user.photoURL);
+        }
+    } catch (error) {
+        console.error('[EOA Auth Guard] Error caching auth state:', error);
+    }
+}
+
+/**
+ * Pre-fill last user email (instant, synchronous)
+ */
+function prefillLastUserEmail() {
+    try {
+        const lastEmail = localStorage.getItem(STORAGE_KEYS.LAST_USER_EMAIL);
+        const lastName = localStorage.getItem(STORAGE_KEYS.LAST_USER_NAME);
+
+        if (lastEmail || lastName) {
+            console.log('[EOA Auth Guard] Pre-filling last user info');
+
+            // Add a "Welcome back" message to the auth card
+            const authCard = document.querySelector('.auth-card');
+            if (authCard && (lastEmail || lastName)) {
+                const welcomeMsg = document.createElement('div');
+                welcomeMsg.className = 'welcome-back-msg';
+                welcomeMsg.innerHTML = `
+                    <p class="welcome-text">Welcome back${lastName ? ', ' + lastName : ''}!</p>
+                    ${lastEmail ? `<p class="last-email">${lastEmail}</p>` : ''}
+                `;
+
+                // Insert before the login button
+                const loginBtn = authCard.querySelector('.google-login-btn');
+                if (loginBtn) {
+                    authCard.insertBefore(welcomeMsg, loginBtn);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('[EOA Auth Guard] Error pre-filling email:', error);
+    }
+}
+
+/**
+ * Show loading screen (instant)
+ */
+function showLoadingScreen() {
+    if (!document.getElementById('auth-loading-screen')) {
+        injectLoadingScreen();
+    }
+    const loadingScreen = document.getElementById('auth-loading-screen');
+    if (loadingScreen) {
+        loadingScreen.style.display = 'flex';
+    }
+}
+
+/**
+ * Show auth overlay (instant)
+ */
+function showAuthOverlay() {
+    if (!document.getElementById('auth-overlay')) {
+        injectAuthOverlay();
+    }
+    const overlay = document.getElementById('auth-overlay');
+    if (overlay) {
+        overlay.style.display = 'flex';
+    }
+}
+
+/**
  * Set up login button handlers
  */
 function setupLoginHandlers() {
-    // Overlay login button
     const overlayLoginBtn = document.getElementById('google-login-btn-overlay');
     if (overlayLoginBtn) {
         overlayLoginBtn.addEventListener('click', handleLogin);
@@ -92,36 +238,50 @@ function setupLogoutHandler() {
 
 /**
  * Handle authenticated state
- * @param {Object} user - Firebase user object
  */
 function handleAuthenticated(user) {
     console.log(`[EOA Auth Guard] User authenticated: ${user.email}`);
     isAuthenticated = true;
     currentUser = user;
 
-    // Hide overlay, show content
-    document.body.classList.remove('not-authenticated');
+    // Smooth transition to authenticated state
+    document.body.classList.remove('not-authenticated', 'auth-loading');
     document.body.classList.add('authenticated');
 
     const overlay = document.getElementById('auth-overlay');
     if (overlay) {
-        overlay.style.display = 'none';
+        // Fade out animation
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 300);
     }
 
     const loadingScreen = document.getElementById('auth-loading-screen');
     if (loadingScreen) {
-        loadingScreen.style.display = 'none';
+        loadingScreen.style.opacity = '0';
+        loadingScreen.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+        }, 300);
     }
 
     const mainContent = document.getElementById('main-content');
     if (mainContent) {
         mainContent.style.display = 'block';
+        mainContent.style.opacity = '0';
+        mainContent.style.transition = 'opacity 0.3s ease';
 
-        // Hide the initial loading container immediately (Agent 6 fix)
+        // Fade in
+        setTimeout(() => {
+            mainContent.style.opacity = '1';
+        }, 50);
+
+        // Hide the initial loading container
         const loadingContainer = mainContent.querySelector('.loading-container');
         if (loadingContainer) {
             loadingContainer.style.display = 'none';
-            console.log('[EOA Auth Guard] Initial loading spinner hidden');
         }
     }
 
@@ -133,7 +293,6 @@ function handleAuthenticated(user) {
         detail: { user, authenticated: true }
     }));
 
-    // Let SPANavigation handle initial routing - no need for delay or manual trigger
     console.log('[EOA Auth Guard] User authenticated, SPANavigation will handle routing');
 }
 
@@ -145,13 +304,15 @@ function handleNotAuthenticated() {
     isAuthenticated = false;
     currentUser = null;
 
-    // Show overlay, hide content
+    // Smooth transition to not-authenticated state
     document.body.classList.add('not-authenticated');
-    document.body.classList.remove('authenticated');
+    document.body.classList.remove('authenticated', 'auth-loading');
 
     const overlay = document.getElementById('auth-overlay');
     if (overlay) {
         overlay.style.display = 'flex';
+        overlay.style.opacity = '1';
+        prefillLastUserEmail(); // Re-apply in case overlay was just created
     }
 
     const loadingScreen = document.getElementById('auth-loading-screen');
@@ -166,9 +327,11 @@ function handleNotAuthenticated() {
 
     // Clear user display
     updateUserDisplay(null);
-    
+
     // Emit auth-ready event (not authenticated)
-    document.dispatchEvent(new CustomEvent('auth-ready', { detail: { user: null, authenticated: false } }));
+    document.dispatchEvent(new CustomEvent('auth-ready', {
+        detail: { user: null, authenticated: false }
+    }));
 }
 
 /**
@@ -187,8 +350,13 @@ async function handleLogin() {
         provider.addScope('profile');
         provider.addScope('email');
 
-        await auth.signInWithPopup(provider);
+        const result = await auth.signInWithPopup(provider);
         console.log('[EOA Auth Guard] Login successful');
+
+        // Cache user info immediately
+        if (result.user) {
+            cacheAuthState(true, result.user);
+        }
     } catch (error) {
         console.error('[EOA Auth Guard] Login failed:', error);
         alert('Login failed: ' + error.message);
@@ -200,7 +368,7 @@ async function handleLogin() {
                     <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
                     <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
                     <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.30-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
                 </svg>
                 Sign in with Google
             `;
@@ -216,6 +384,9 @@ async function handleLogout() {
         const auth = firebase.auth();
         await auth.signOut();
         console.log('[EOA Auth Guard] Logout successful');
+
+        // Clear cache
+        cacheAuthState(false, null);
     } catch (error) {
         console.error('[EOA Auth Guard] Logout failed:', error);
     }
@@ -223,7 +394,6 @@ async function handleLogout() {
 
 /**
  * Update user display in header
- * @param {Object|null} user - Firebase user object or null
  */
 function updateUserDisplay(user) {
     const userInfo = document.getElementById('userInfo');
@@ -256,7 +426,6 @@ function injectLoadingScreen() {
         <p class="loading-text">Loading Eyes of Azrael...</p>
     `;
 
-    // Insert at beginning of body
     document.body.insertBefore(loadingScreen, document.body.firstChild);
 }
 
@@ -299,13 +468,11 @@ function injectAuthOverlay() {
         </div>
     `;
 
-    // Insert at beginning of body
     document.body.insertBefore(overlay, document.body.firstChild);
 }
 
 /**
  * Check if user is currently authenticated
- * @returns {boolean}
  */
 export function isUserAuthenticated() {
     return isAuthenticated;
@@ -313,13 +480,27 @@ export function isUserAuthenticated() {
 
 /**
  * Get current user
- * @returns {Object|null}
  */
 export function getCurrentUser() {
     return currentUser;
 }
 
-// Auto-initialize when DOM is ready
+/**
+ * Get performance metrics
+ */
+export function getPerformanceMetrics() {
+    return {
+        displayTime: perfMarks.overlayVisible - perfMarks.scriptStart,
+        firebaseReadyTime: perfMarks.firebaseReady - perfMarks.scriptStart,
+        totalAuthTime: perfMarks.authResolved - perfMarks.scriptStart,
+        marks: perfMarks
+    };
+}
+
+// PHASE 1: Execute instantly when script loads (synchronous)
+instantDisplay();
+
+// PHASE 2: Set up Firebase verification (async, after DOM ready)
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupAuthGuard);
 } else {

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eyes of Azrael - Test Runner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        .stat-passed { color: #4caf50; }
+        .stat-failed { color: #f44336; }
+        .stat-skipped { color: #ff9800; }
+        .stat-total { color: #2196f3; }
+
+        .results {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .suite {
+            margin-bottom: 30px;
+        }
+
+        .suite-header {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .test {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .test-icon {
+            font-size: 1.2rem;
+            width: 25px;
+        }
+
+        .test-name {
+            flex: 1;
+        }
+
+        .test-duration {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        .test.passed {
+            border-left: 3px solid #4caf50;
+        }
+
+        .test.failed {
+            border-left: 3px solid #f44336;
+            background: rgba(244, 67, 54, 0.1);
+        }
+
+        .test.skipped {
+            border-left: 3px solid #ff9800;
+            opacity: 0.6;
+        }
+
+        .error-message {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(244, 67, 54, 0.2);
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #ff8a80;
+        }
+
+        #console-output {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #a0a0a0;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #667eea;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .filter-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧪 Test Runner</h1>
+            <p class="subtitle">Eyes of Azrael Comprehensive Test Suite</p>
+        </header>
+
+        <div class="controls">
+            <button class="btn-primary" onclick="runAllTests()">▶️ Run All Tests</button>
+            <button class="btn-secondary" onclick="runUnitTests()">🔬 Run Unit Tests</button>
+            <button class="btn-secondary" onclick="runIntegrationTests()">🔗 Run Integration Tests</button>
+            <button class="btn-secondary" onclick="clearResults()">🗑️ Clear Results</button>
+            <button class="btn-secondary" onclick="exportResults()">📥 Export Results</button>
+        </div>
+
+        <div class="filter-section">
+            <strong>Filter Tests:</strong>
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="show-passed" checked onchange="filterTests()">
+                    <span>Show Passed</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="show-failed" checked onchange="filterTests()">
+                    <span>Show Failed</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="show-skipped" onchange="filterTests()">
+                    <span>Show Skipped</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="stats" id="stats"></div>
+
+        <div class="results" id="results">
+            <div class="loading">
+                Click "Run All Tests" to begin testing
+            </div>
+        </div>
+
+        <div id="console-output"></div>
+    </div>
+
+    <!-- Load Test Framework -->
+    <script src="test-framework.js"></script>
+
+    <!-- Load Mocks -->
+    <script src="mocks/mock-firebase.js"></script>
+
+    <!-- Load Source Files (in correct order) -->
+    <script src="../js/firebase-cache-manager.js"></script>
+    <script src="../js/performance-monitor.js"></script>
+    <script src="../js/entity-renderer-firebase.js"></script>
+    <script src="../js/spa-navigation.js"></script>
+
+    <!-- Load Tests -->
+    <script src="unit/firebase-cache-manager.test.js"></script>
+    <script src="unit/performance-monitor.test.js"></script>
+    <script src="unit/entity-renderer.test.js"></script>
+    <script src="unit/spa-navigation.test.js"></script>
+    <script src="integration/login-flow.test.js"></script>
+    <script src="integration/mythology-browsing.test.js"></script>
+
+    <script>
+        const consoleOutput = document.getElementById('console-output');
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+
+        // Capture console output
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            const message = args.map(arg =>
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            consoleOutput.innerHTML += message + '\n';
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            const message = args.map(arg =>
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            consoleOutput.innerHTML += `<span style="color: #ff5555">${message}</span>\n`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+
+        async function runAllTests() {
+            clearResults();
+            showLoading();
+
+            testFramework.reset();
+            await loadAllTests();
+            const results = await testFramework.run();
+
+            displayResults(results);
+        }
+
+        async function runUnitTests() {
+            clearResults();
+            showLoading();
+
+            // Filter to only unit tests
+            testFramework.suites = testFramework.suites.filter(suite =>
+                !suite.name.includes('Integration')
+            );
+
+            const results = await testFramework.run();
+            displayResults(results);
+        }
+
+        async function runIntegrationTests() {
+            clearResults();
+            showLoading();
+
+            // Filter to only integration tests
+            testFramework.suites = testFramework.suites.filter(suite =>
+                suite.name.includes('Integration')
+            );
+
+            const results = await testFramework.run();
+            displayResults(results);
+        }
+
+        function loadAllTests() {
+            // Tests are already loaded via script tags
+            return Promise.resolve();
+        }
+
+        function showLoading() {
+            document.getElementById('results').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Running tests...</div>
+                </div>
+            `;
+        }
+
+        function displayResults(results) {
+            // Update stats
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value stat-total">${results.total}</div>
+                    <div class="stat-label">Total Tests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-passed">${results.passed}</div>
+                    <div class="stat-label">Passed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-failed">${results.failed}</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-skipped">${results.skipped}</div>
+                    <div class="stat-label">Skipped</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${results.duration.toFixed(2)}ms</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value ${results.failed === 0 ? 'stat-passed' : 'stat-failed'}">
+                        ${results.failed === 0 ? '✅' : '❌'}
+                    </div>
+                    <div class="stat-label">Status</div>
+                </div>
+            `;
+
+            // Display test results
+            let html = '';
+            testFramework.suites.forEach(suite => {
+                html += `
+                    <div class="suite">
+                        <div class="suite-header">📦 ${suite.name}</div>
+                `;
+
+                suite.tests.forEach(test => {
+                    const icon = test.status === 'passed' ? '✓' :
+                                test.status === 'failed' ? '✗' : '⊘';
+
+                    html += `
+                        <div class="test ${test.status}" data-status="${test.status}">
+                            <div class="test-icon">${icon}</div>
+                            <div class="test-name">${test.description}</div>
+                            ${test.duration ? `<div class="test-duration">${test.duration.toFixed(2)}ms</div>` : ''}
+                        </div>
+                    `;
+
+                    if (test.error) {
+                        html += `
+                            <div class="error-message">
+                                ${test.error.message}<br>
+                                ${test.error.stack || ''}
+                            </div>
+                        `;
+                    }
+                });
+
+                html += '</div>';
+            });
+
+            document.getElementById('results').innerHTML = html;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('stats').innerHTML = '';
+            consoleOutput.innerHTML = '';
+        }
+
+        function filterTests() {
+            const showPassed = document.getElementById('show-passed').checked;
+            const showFailed = document.getElementById('show-failed').checked;
+            const showSkipped = document.getElementById('show-skipped').checked;
+
+            document.querySelectorAll('.test').forEach(test => {
+                const status = test.getAttribute('data-status');
+                let show = false;
+
+                if (status === 'passed' && showPassed) show = true;
+                if (status === 'failed' && showFailed) show = true;
+                if (status === 'skipped' && showSkipped) show = true;
+
+                test.style.display = show ? 'flex' : 'none';
+            });
+        }
+
+        function exportResults() {
+            const results = {
+                timestamp: new Date().toISOString(),
+                stats: testFramework.results,
+                suites: testFramework.suites.map(suite => ({
+                    name: suite.name,
+                    tests: suite.tests.map(test => ({
+                        description: test.description,
+                        status: test.status,
+                        duration: test.duration,
+                        error: test.error ? test.error.message : null
+                    }))
+                }))
+            };
+
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `test-results-${Date.now()}.json`;
+            a.click();
+        }
+
+        // Auto-load on page load if URL contains ?autorun
+        if (window.location.search.includes('autorun')) {
+            window.addEventListener('load', () => {
+                setTimeout(runAllTests, 100);
+            });
+        }
+    </script>
+</body>
+</html>

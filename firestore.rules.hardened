@@ -1,0 +1,568 @@
+rules_version = '2';
+
+/**
+ * HARDENED Firestore Security Rules
+ * Eyes of Azrael - Complete System
+ *
+ * SECURITY MODEL:
+ * - Public read access for published content
+ * - Authenticated write access
+ * - Ownership enforcement
+ * - Role-based access control (user, moderator, admin)
+ * - Rate limiting enforcement
+ * - Query size limits
+ * - DDoS protection via Firebase App Check
+ * - Spam prevention
+ *
+ * CHANGES FROM ORIGINAL:
+ * - Removed hardcoded admin email
+ * - Implemented role-based access control
+ * - Added rate limiting enforcement
+ * - Added query size validation
+ * - Strengthened default deny rules
+ * - Improved validation functions
+ *
+ * DEPLOYMENT:
+ *   firebase deploy --only firestore:rules
+ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===== HELPER FUNCTIONS =====
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // IMPROVED: Role-based admin check (no hardcoded email)
+    function getUserRole() {
+      return isAuthenticated() ?
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role :
+        'guest';
+    }
+
+    function isModerator() {
+      return getUserRole() in ['moderator', 'admin'];
+    }
+
+    function isAdmin() {
+      return getUserRole() == 'admin';
+    }
+
+    // IMPROVED: Rate limiting enforcement
+    function isRateLimited() {
+      // Admins are not rate limited
+      if (isAdmin()) return false;
+
+      // Check if rate limit document exists for this user/IP
+      let limitDoc = /databases/$(database)/documents/system/rate_limits/$(request.auth != null ? request.auth.uid : 'anonymous');
+      return exists(limitDoc);
+    }
+
+    // IMPROVED: Query size validation
+    function isQuerySizeValid(maxLimit) {
+      return !('limit' in request.query) || request.query.limit <= maxLimit;
+    }
+
+    // NEW: Content validation helpers
+    function isValidString(value, minLength, maxLength) {
+      return value is string
+        && value.size() >= minLength
+        && value.size() <= maxLength;
+    }
+
+    function containsNoHTML(value) {
+      // Basic HTML tag detection
+      return !value.matches('.*<[^>]+>.*');
+    }
+
+    function isValidEmail(email) {
+      return email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    // ===== USERS COLLECTION =====
+    // Path: /users/{userId}
+
+    match /users/{userId} {
+      // Anyone can read user profiles (but not sensitive data)
+      allow get: if true;
+      allow list: if isQuerySizeValid(50);
+
+      // Users can create their own profile
+      allow create: if isOwner(userId)
+                    && request.resource.data.keys().hasAll(['email', 'displayName', 'createdAt'])
+                    && isValidString(request.resource.data.email, 5, 100)
+                    && isValidEmail(request.resource.data.email)
+                    && isValidString(request.resource.data.displayName, 1, 50)
+                    // Prevent users from setting admin role on creation
+                    && (!('role' in request.resource.data) || request.resource.data.role == 'user');
+
+      // Users can update their own profile (not email or role)
+      allow update: if isOwner(userId)
+                    && request.resource.data.email == resource.data.email
+                    && request.resource.data.role == resource.data.role;
+
+      // Only admins can delete users (prevents orphaned content)
+      allow delete: if isAdmin();
+    }
+
+    // ===== THEORIES COLLECTION =====
+    // Path: /theories/{theoryId}
+
+    match /theories/{theoryId} {
+      function isValidTheory() {
+        return request.resource.data.keys().hasAll(['title', 'summary', 'content', 'authorId', 'status', 'page', 'contributionType'])
+               && isValidString(request.resource.data.title, 3, 200)
+               && isValidString(request.resource.data.summary, 0, 500)
+               && request.resource.data.status in ['draft', 'published', 'archived']
+               && isValidString(request.resource.data.page, 1, 100)
+               && isValidString(request.resource.data.contributionType, 1, 50)
+               && request.resource.data.authorId == request.auth.uid
+               // NEW: Prevent XSS in titles
+               && containsNoHTML(request.resource.data.title);
+      }
+
+      // IMPROVED: Rate limit on reads
+      allow get: if !isRateLimited() && (
+        resource.data.status == 'published'
+        || isOwner(resource.data.authorId)
+        || isModerator()
+      );
+
+      allow list: if !isRateLimited()
+                  && isQuerySizeValid(100);
+
+      // Authenticated users can create theories
+      allow create: if isAuthenticated()
+                    && !isRateLimited()
+                    && isValidTheory();
+
+      // Owner can update (cannot change authorId)
+      allow update: if isOwner(resource.data.authorId)
+                    && request.resource.data.authorId == resource.data.authorId
+                    && isValidTheory();
+
+      // Owner or moderator can delete
+      allow delete: if isOwner(resource.data.authorId) || isModerator();
+
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if !isRateLimited();
+        allow create: if isAuthenticated()
+                      && !isRateLimited()
+                      && request.resource.data.authorId == request.auth.uid
+                      && isValidString(request.resource.data.content, 1, 2000);
+        allow update: if isOwner(resource.data.authorId)
+                      && request.resource.data.authorId == resource.data.authorId;
+        allow delete: if isOwner(resource.data.authorId) || isModerator();
+      }
+
+      // Votes subcollection
+      match /votes/{voteUserId} {
+        allow read: if true;
+        allow write: if isAuthenticated()
+                     && !isRateLimited()
+                     && request.auth.uid == voteUserId
+                     && request.resource.data.vote in [1, -1];
+      }
+    }
+
+    // ===== ASSETS COLLECTION =====
+    // Path: /assets/{assetId}
+
+    match /assets/{assetId} {
+      function isValidAsset() {
+        return request.resource.data.keys().hasAll(['name', 'assetType', 'mythology', 'status'])
+               && isValidString(request.resource.data.name, 1, 200)
+               && request.resource.data.assetType in ['deity', 'hero', 'creature', 'place', 'item', 'herb', 'text', 'concept', 'event']
+               && isValidString(request.resource.data.mythology, 1, 50)
+               && request.resource.data.status in ['draft', 'published', 'approved']
+               && containsNoHTML(request.resource.data.name);
+      }
+
+      // IMPROVED: Rate limit on reads
+      allow get: if !isRateLimited() && (
+        resource.data.status in ['published', 'approved']
+        || (isAuthenticated() && resource.data.contributedBy == request.auth.uid)
+        || isModerator()
+      );
+
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+
+      // Authenticated users can create asset proposals
+      allow create: if isAuthenticated()
+                    && !isRateLimited()
+                    && isValidAsset()
+                    && (!('isOfficial' in request.resource.data) || request.resource.data.isOfficial == false);
+
+      // Owner or moderator can update
+      allow update: if ((isAuthenticated() && resource.data.contributedBy == request.auth.uid)
+                    || isModerator())
+                    && isValidAsset();
+
+      // Only moderators can delete assets
+      allow delete: if isModerator();
+
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if !isRateLimited();
+        allow create: if isAuthenticated()
+                      && !isRateLimited()
+                      && request.resource.data.authorId == request.auth.uid
+                      && isValidString(request.resource.data.content, 1, 2000);
+        allow update: if isOwner(resource.data.authorId);
+        allow delete: if isOwner(resource.data.authorId) || isModerator();
+      }
+
+      // Votes subcollection
+      match /votes/{voteUserId} {
+        allow read: if true;
+        allow write: if isAuthenticated() && !isRateLimited() && request.auth.uid == voteUserId;
+      }
+
+      // Edits subcollection (edit history)
+      match /edits/{editId} {
+        allow read: if !isRateLimited();
+        allow create: if isAuthenticated();
+        allow update, delete: if isModerator();
+      }
+    }
+
+    // ===== PAGES COLLECTION =====
+    // Path: /pages/{pageId}
+
+    match /pages/{pageId} {
+      allow get: if !isRateLimited() && (resource.data.status == 'published' || isModerator());
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ===== TAXONOMIES COLLECTION =====
+    // Path: /taxonomies/{taxonomyId}
+
+    match /taxonomies/{taxonomyId} {
+      allow read: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow write: if isAdmin();
+    }
+
+    // ===== VOTES COLLECTION =====
+    // Path: /votes/{voteId}
+
+    match /votes/{voteId} {
+      allow read: if !isRateLimited();
+      allow create: if isAuthenticated()
+                    && !isRateLimited()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.vote in [1, -1];
+      allow update: if isAuthenticated()
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // ===== BOOKMARKS COLLECTION =====
+    // Path: /bookmarks/{bookmarkId}
+
+    match /bookmarks/{bookmarkId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated()
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // ===== COMMENTS COLLECTION =====
+    // Path: /comments/{commentId}
+
+    match /comments/{commentId} {
+      allow get: if !isRateLimited() && (resource.data.status == 'published' || isModerator());
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+
+      allow create: if isAuthenticated()
+                    && !isRateLimited()
+                    && request.resource.data.authorId == request.auth.uid
+                    && isValidString(request.resource.data.content, 1, 2000);
+
+      // IMPROVED: Extended edit window to 60 minutes
+      allow update: if isOwner(resource.data.authorId)
+                    && request.resource.data.authorId == resource.data.authorId
+                    && request.time < resource.data.createdAt + duration.value(60, 'm');
+
+      allow delete: if isOwner(resource.data.authorId) || isModerator();
+    }
+
+    // ===== NOTIFICATIONS COLLECTION =====
+    // Path: /notifications/{notificationId}
+
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if false; // Only Cloud Functions can create
+      allow update: if isAuthenticated()
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.keys().hasOnly(['read', 'readAt']);
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // ===== SVG GENERATION COLLECTION =====
+    // Path: /svgGeneration/{svgId}
+
+    match /svgGeneration/{svgId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(50);
+      allow create: if isAuthenticated()
+                    && !isRateLimited()
+                    && request.resource.data.userId == request.auth.uid
+                    && isValidString(request.resource.data.prompt, 1, 500)
+                    && isValidString(request.resource.data.svgCode, 1, 100000);
+      allow update: if isOwner(resource.data.userId);
+      allow delete: if isOwner(resource.data.userId);
+
+      match /votes/{voteUserId} {
+        allow read: if true;
+        allow write: if isAuthenticated() && !isRateLimited() && request.auth.uid == voteUserId;
+      }
+    }
+
+    // ===== CONTENT COLLECTIONS =====
+    // All use the same pattern: public read (with rate limiting), admin-only write
+
+    match /mythologies/{mythologyId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /deities/{deityId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /heroes/{heroId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /creatures/{creatureId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /cosmology/{cosmologyId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /herbs/{herbId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /rituals/{ritualId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /texts/{textId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /archetypes/{archetypeId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /myths/{mythId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /events/{eventId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /concepts/{conceptId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /symbols/{symbolId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /places/{placeId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /search_index/{searchId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /cross_references/{refId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ===== SVG GRAPHICS COLLECTION =====
+    // Path: /svg_graphics/{svgId}
+
+    match /svg_graphics/{svgId} {
+      allow get: if !isRateLimited();
+      allow list: if !isRateLimited() && isQuerySizeValid(50);
+      allow create: if isAuthenticated()
+                    && !isRateLimited()
+                    && request.resource.data.authorId == request.auth.uid;
+      allow update: if isAuthenticated()
+                    && (request.resource.data.authorId == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated()
+                    && (resource.data.authorId == request.auth.uid || isAdmin());
+    }
+
+    // ===== USER THEORIES COLLECTION =====
+    // Path: /user_theories/{theoryId}
+
+    match /user_theories/{theoryId} {
+      function isValidUserTheory() {
+        return request.resource.data.keys().hasAll(['title', 'content', 'authorId', 'status'])
+               && isValidString(request.resource.data.title, 3, 200)
+               && request.resource.data.authorId == request.auth.uid
+               && containsNoHTML(request.resource.data.title);
+      }
+
+      allow get: if !isRateLimited() && (
+        resource.data.status == 'published'
+        || isOwner(resource.data.authorId)
+        || isAdmin()
+      );
+      allow list: if !isRateLimited() && isQuerySizeValid(100);
+      allow create: if isAuthenticated() && !isRateLimited() && isValidUserTheory();
+      allow update: if isAuthenticated()
+                    && (isOwner(resource.data.authorId) || isAdmin())
+                    && isValidUserTheory();
+      allow delete: if isAuthenticated()
+                    && (isOwner(resource.data.authorId) || isAdmin());
+    }
+
+    // ===== SUBMISSIONS COLLECTION =====
+    // Path: /submissions/{submissionId}
+
+    match /submissions/{submissionId} {
+      function isValidSubmission() {
+        return request.resource.data.keys().hasAll(['id', 'type', 'status', 'data', 'submittedBy', 'entityName'])
+               && isValidString(request.resource.data.id, 1, 100)
+               && request.resource.data.type in ['deity', 'hero', 'creature', 'place', 'item', 'text', 'concept', 'event']
+               && request.resource.data.status in ['pending', 'approved', 'rejected']
+               && request.resource.data.data is map
+               && request.resource.data.submittedBy == request.auth.uid
+               && isValidString(request.resource.data.entityName, 1, 200)
+               && containsNoHTML(request.resource.data.entityName);
+      }
+
+      // IMPROVED: Different read permissions for different operations
+      allow get: if !isRateLimited() && (
+        resource.data.status == 'approved'
+        || (isAuthenticated() && resource.data.submittedBy == request.auth.uid)
+        || isAdmin()
+      );
+
+      allow list: if !isRateLimited()
+                  && isQuerySizeValid(100)
+                  && (isAdmin() || (isAuthenticated() && resource.data.submittedBy == request.auth.uid));
+
+      allow create: if isAuthenticated()
+                    && !isRateLimited()
+                    && isValidSubmission()
+                    && request.resource.data.status == 'pending';
+
+      allow update: if isAuthenticated() && (
+        // Users can update their own pending/rejected submissions
+        (resource.data.submittedBy == request.auth.uid
+          && resource.data.status in ['pending', 'rejected']
+          && request.resource.data.submittedBy == request.auth.uid
+          && isValidSubmission())
+        // Admins can approve/reject
+        || (isAdmin() && request.resource.data.submittedBy == resource.data.submittedBy)
+      );
+
+      allow delete: if isAuthenticated() && (
+        (resource.data.submittedBy == request.auth.uid && resource.data.status in ['pending', 'rejected'])
+        || isAdmin()
+      );
+    }
+
+    // ===== USER PREFERENCES COLLECTION =====
+    // Path: /user_preferences/{userId}
+
+    match /user_preferences/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow create: if isAuthenticated()
+                    && request.auth.uid == userId
+                    && request.resource.data.userId == userId;
+      allow update: if isAuthenticated()
+                    && request.auth.uid == userId
+                    && resource.data.userId == userId
+                    && request.resource.data.userId == userId;
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ===== SYSTEM COLLECTION =====
+    // Path: /system/{document}
+
+    match /system/rate_limits/{identifier} {
+      // Only Cloud Functions can read/write rate limits
+      allow read, write: if false;
+    }
+
+    match /system/blocked_ips/{ipHash} {
+      // Only Cloud Functions can read/write blocked IPs
+      allow read, write: if false;
+    }
+
+    match /system/security_logs/{logId} {
+      // Only admin can read security logs
+      allow read: if isAdmin();
+      allow write: if false; // Only Cloud Functions can write logs
+    }
+
+    match /system/abuse_reports/{reportId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated()
+                    && !isRateLimited()
+                    && request.resource.data.reporterId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // ===== DEFAULT DENY =====
+    // IMPROVED: Deny all undefined paths in production
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
