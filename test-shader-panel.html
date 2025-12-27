@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shader Panel Test - Eyes of Azrael</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #e5e7eb;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        /* Test container */
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .test-header {
+            background: rgba(26, 31, 58, 0.85);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(139, 127, 255, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .test-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+
+        .status-indicator.success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            color: #22c55e;
+        }
+
+        .status-indicator.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #ef4444;
+        }
+
+        /* Test grid */
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Panel with shader background */
+        .shader-panel {
+            position: relative;
+            background: rgba(26, 31, 58, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(139, 127, 255, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            overflow: hidden;
+            min-height: 300px;
+            transition: all 0.3s ease;
+        }
+
+        .shader-panel:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(102, 126, 234, 0.4);
+            border-color: rgba(139, 127, 255, 0.6);
+        }
+
+        /* Panel shader canvas - positioned absolutely within panel */
+        .panel-shader-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Panel content above shader */
+        .panel-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .panel-description {
+            color: #9ca3af;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .panel-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(139, 127, 255, 0.2);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        /* Control panel */
+        .control-panel {
+            background: rgba(26, 31, 58, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(139, 127, 255, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            display: block;
+            color: #9ca3af;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            border-radius: 0.5rem;
+            color: #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+
+        .btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .btn.active {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+
+        /* Diagnostic info */
+        .diagnostic-info {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(139, 127, 255, 0.2);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            margin-top: 1.5rem;
+        }
+
+        .diagnostic-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(139, 127, 255, 0.1);
+        }
+
+        .diagnostic-item:last-child {
+            border-bottom: none;
+        }
+
+        .diagnostic-label {
+            color: #9ca3af;
+        }
+
+        .diagnostic-value {
+            color: #22c55e;
+        }
+
+        .diagnostic-value.error {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <!-- Test Header -->
+        <div class="test-header">
+            <h1>🎨 Shader Panel Integration Test</h1>
+            <p style="color: #9ca3af; margin-top: 0.5rem;">Testing WebGL shader application to individual panels</p>
+            <div id="overallStatus" class="status-indicator">
+                <span>⏳</span>
+                <span>Initializing...</span>
+            </div>
+        </div>
+
+        <!-- Test Panels with Shaders -->
+        <div class="test-grid">
+            <!-- Water Panel -->
+            <div class="shader-panel" data-shader="water">
+                <canvas class="panel-shader-canvas" data-panel-shader="water"></canvas>
+                <div class="panel-content">
+                    <div class="panel-title">💧 Water Shader</div>
+                    <p class="panel-description">
+                        Realistic water effects with waves, caustics, and rising bubbles.
+                        Perfect for ocean and water-related mythologies.
+                    </p>
+                    <div class="panel-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Theme</span>
+                            <span class="stat-value">Water</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Status</span>
+                            <span class="stat-value" data-stat="water-status">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fire Panel -->
+            <div class="shader-panel" data-shader="fire">
+                <canvas class="panel-shader-canvas" data-panel-shader="fire"></canvas>
+                <div class="panel-content">
+                    <div class="panel-title">🔥 Fire Shader</div>
+                    <p class="panel-description">
+                        Flames at edges with rising embers throughout.
+                        Ideal for fire-based mythologies and deities.
+                    </p>
+                    <div class="panel-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Theme</span>
+                            <span class="stat-value">Fire</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Status</span>
+                            <span class="stat-value" data-stat="fire-status">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Night Panel -->
+            <div class="shader-panel" data-shader="night">
+                <canvas class="panel-shader-canvas" data-panel-shader="night"></canvas>
+                <div class="panel-content">
+                    <div class="panel-title">✨ Night Shader</div>
+                    <p class="panel-description">
+                        Twinkling stars with subtle aurora effects.
+                        Great for celestial and sky mythologies.
+                    </p>
+                    <div class="panel-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Theme</span>
+                            <span class="stat-value">Night</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Status</span>
+                            <span class="stat-value" data-stat="night-status">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="control-panel">
+            <h3 style="color: #667eea; margin-bottom: 1rem;">⚙️ Controls</h3>
+
+            <div class="control-group">
+                <label class="control-label">Theme Selection</label>
+                <div class="button-group">
+                    <button class="btn" onclick="switchAllPanels('water')">Water</button>
+                    <button class="btn" onclick="switchAllPanels('fire')">Fire</button>
+                    <button class="btn" onclick="switchAllPanels('night')">Night</button>
+                    <button class="btn" onclick="switchAllPanels('earth')">Earth</button>
+                    <button class="btn" onclick="switchAllPanels('light')">Light</button>
+                    <button class="btn" onclick="switchAllPanels('dark')">Dark</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">Actions</label>
+                <div class="button-group">
+                    <button class="btn" onclick="pauseAllShaders()">⏸ Pause All</button>
+                    <button class="btn" onclick="resumeAllShaders()">▶️ Resume All</button>
+                    <button class="btn" onclick="runDiagnostics()">🔍 Diagnostics</button>
+                </div>
+            </div>
+
+            <!-- Diagnostic Info -->
+            <div id="diagnosticInfo" class="diagnostic-info" style="display: none;">
+                <div style="color: #667eea; margin-bottom: 0.5rem; font-weight: 700;">Diagnostic Information</div>
+                <div id="diagnosticContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shader System -->
+    <script src="js/shaders/shader-themes.js"></script>
+
+    <script>
+        // Panel shader managers (one per panel)
+        const panelShaders = new Map();
+        let diagnosticsVisible = false;
+
+        // Initialize panel shaders
+        function initPanelShaders() {
+            const canvases = document.querySelectorAll('[data-panel-shader]');
+            let successCount = 0;
+            let failCount = 0;
+
+            canvases.forEach(canvas => {
+                const theme = canvas.dataset.panelShader;
+
+                try {
+                    // Create shader manager for this panel
+                    const manager = new ShaderThemeManager({
+                        intensity: 0.6,
+                        quality: 'high',
+                        adaptiveQuality: false
+                    });
+
+                    // Override canvas creation to use existing canvas
+                    manager.canvas = canvas;
+                    manager.canvas.id = `shader-${theme}-${Date.now()}`;
+
+                    // Initialize WebGL context
+                    manager.gl = canvas.getContext('webgl', {
+                        alpha: true,
+                        antialias: false,
+                        depth: false,
+                        stencil: false,
+                        premultipliedAlpha: true
+                    }) || canvas.getContext('experimental-webgl');
+
+                    if (!manager.gl) {
+                        throw new Error('Failed to get WebGL context');
+                    }
+
+                    // Setup resize handler for this canvas
+                    const resizeCanvas = () => {
+                        const rect = canvas.parentElement.getBoundingClientRect();
+                        const dpr = window.devicePixelRatio || 1;
+                        canvas.width = rect.width * dpr;
+                        canvas.height = rect.height * dpr;
+                        canvas.style.width = rect.width + 'px';
+                        canvas.style.height = rect.height + 'px';
+                        if (manager.gl) {
+                            manager.gl.viewport(0, 0, canvas.width, canvas.height);
+                        }
+                    };
+
+                    resizeCanvas();
+                    window.addEventListener('resize', resizeCanvas);
+
+                    // Store manager
+                    panelShaders.set(theme, {
+                        manager: manager,
+                        canvas: canvas,
+                        resize: resizeCanvas
+                    });
+
+                    // Load and activate theme
+                    manager.loadTheme(theme).then(success => {
+                        if (success) {
+                            manager.enabled = true;
+                            manager.resume();
+                            updatePanelStatus(theme, 'Active', true);
+                            successCount++;
+                        } else {
+                            updatePanelStatus(theme, 'Failed', false);
+                            failCount++;
+                        }
+                        updateOverallStatus(successCount, failCount);
+                    });
+
+                } catch (error) {
+                    console.error(`Failed to initialize ${theme} panel shader:`, error);
+                    updatePanelStatus(theme, 'Error', false);
+                    failCount++;
+                    updateOverallStatus(successCount, failCount);
+                }
+            });
+        }
+
+        // Update panel status
+        function updatePanelStatus(theme, status, success) {
+            const statusElement = document.querySelector(`[data-stat="${theme}-status"]`);
+            if (statusElement) {
+                statusElement.textContent = status;
+                statusElement.style.color = success ? '#22c55e' : '#ef4444';
+            }
+        }
+
+        // Update overall status
+        function updateOverallStatus(successCount, failCount) {
+            const total = panelShaders.size;
+            const statusElement = document.getElementById('overallStatus');
+
+            if (successCount + failCount >= total) {
+                if (failCount === 0) {
+                    statusElement.className = 'status-indicator success';
+                    statusElement.innerHTML = '<span>✓</span><span>All shaders loaded successfully</span>';
+                } else {
+                    statusElement.className = 'status-indicator error';
+                    statusElement.innerHTML = `<span>⚠</span><span>${successCount}/${total} shaders loaded</span>`;
+                }
+            }
+        }
+
+        // Switch all panels to a theme
+        function switchAllPanels(theme) {
+            panelShaders.forEach((data, key) => {
+                data.manager.loadTheme(theme).then(success => {
+                    if (success) {
+                        data.manager.enabled = true;
+                        data.manager.resume();
+                        updatePanelStatus(key, `Active (${theme})`, true);
+                    }
+                });
+            });
+        }
+
+        // Pause all shaders
+        function pauseAllShaders() {
+            panelShaders.forEach((data, key) => {
+                data.manager.pause();
+                updatePanelStatus(key, 'Paused', false);
+            });
+        }
+
+        // Resume all shaders
+        function resumeAllShaders() {
+            panelShaders.forEach((data, key) => {
+                data.manager.resume();
+                updatePanelStatus(key, 'Active', true);
+            });
+        }
+
+        // Run diagnostics
+        function runDiagnostics() {
+            diagnosticsVisible = !diagnosticsVisible;
+            const diagDiv = document.getElementById('diagnosticInfo');
+            const diagContent = document.getElementById('diagnosticContent');
+
+            if (diagnosticsVisible) {
+                diagDiv.style.display = 'block';
+
+                let html = '';
+                panelShaders.forEach((data, key) => {
+                    const status = data.manager.getStatus();
+                    html += `
+                        <div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(139,127,255,0.1);">
+                            <div style="color: #667eea; font-weight: 700; margin-bottom: 0.5rem;">${key.toUpperCase()}</div>
+                            <div class="diagnostic-item">
+                                <span class="diagnostic-label">Enabled:</span>
+                                <span class="diagnostic-value ${status.enabled ? '' : 'error'}">${status.enabled}</span>
+                            </div>
+                            <div class="diagnostic-item">
+                                <span class="diagnostic-label">WebGL:</span>
+                                <span class="diagnostic-value ${status.supported ? '' : 'error'}">${status.supported}</span>
+                            </div>
+                            <div class="diagnostic-item">
+                                <span class="diagnostic-label">Theme:</span>
+                                <span class="diagnostic-value">${status.theme || 'None'}</span>
+                            </div>
+                            <div class="diagnostic-item">
+                                <span class="diagnostic-label">FPS:</span>
+                                <span class="diagnostic-value">${status.fps}</span>
+                            </div>
+                            <div class="diagnostic-item">
+                                <span class="diagnostic-label">Canvas Size:</span>
+                                <span class="diagnostic-value">${data.canvas.width}x${data.canvas.height}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                diagContent.innerHTML = html;
+            } else {
+                diagDiv.style.display = 'none';
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            setTimeout(initPanelShaders, 100);
+        });
+    </script>
+</body>
+</html>

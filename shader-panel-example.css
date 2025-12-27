@@ -1,0 +1,408 @@
+/**
+ * Shader Panel Example CSS
+ * Demonstrates how to apply shader effects to individual panels
+ *
+ * IMPORTANT: This is for PANEL-SPECIFIC shaders, not background shaders.
+ * The current system (shader-backgrounds.css) applies shaders globally.
+ * Use this as a reference for implementing per-panel shader canvases.
+ */
+
+/* ============================================================================
+   PANEL WITH SHADER CANVAS
+   ============================================================================ */
+
+/**
+ * Basic panel structure for shader integration
+ * - position: relative (to contain absolutely positioned canvas)
+ * - overflow: hidden (to clip canvas to panel bounds)
+ * - backdrop-filter: blur() (for glass effect over shader)
+ */
+.shader-enabled-panel {
+    position: relative;
+    background: rgba(26, 31, 58, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 2px solid rgba(139, 127, 255, 0.3);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    overflow: hidden; /* CRITICAL: clips canvas to panel */
+    min-height: 250px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/**
+ * Shader canvas within panel
+ * - position: absolute (positioned relative to panel)
+ * - z-index: 0 (behind panel content)
+ * - pointer-events: none (allows clicking through to content)
+ */
+.panel-shader-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.8; /* Subtle effect */
+}
+
+/**
+ * Panel content layer
+ * - position: relative (creates stacking context)
+ * - z-index: 1 (above shader canvas)
+ */
+.panel-content {
+    position: relative;
+    z-index: 1;
+}
+
+/* ============================================================================
+   HOVER EFFECTS
+   ============================================================================ */
+
+.shader-enabled-panel:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 12px 48px rgba(102, 126, 234, 0.3),
+        0 0 0 1px rgba(139, 127, 255, 0.2);
+    border-color: rgba(139, 127, 255, 0.6);
+}
+
+/* Increase shader opacity on hover */
+.shader-enabled-panel:hover .panel-shader-canvas {
+    opacity: 1;
+}
+
+/* ============================================================================
+   MYTHOLOGY-SPECIFIC PANEL VARIANTS
+   ============================================================================ */
+
+/* Greek Mythology - Ocean Blue */
+.shader-panel[data-mythology="greek"] {
+    border-left: 4px solid rgba(255, 215, 0, 0.7);
+}
+
+.shader-panel[data-mythology="greek"] .panel-shader-canvas {
+    /* Water shader would be applied via JavaScript */
+    filter: brightness(1.1) saturate(1.2);
+}
+
+/* Norse Mythology - Ice Blue */
+.shader-panel[data-mythology="norse"] {
+    border-left: 4px solid rgba(100, 149, 237, 0.7);
+}
+
+.shader-panel[data-mythology="norse"] .panel-shader-canvas {
+    /* Night/aurora shader would be applied */
+    filter: brightness(0.9) hue-rotate(210deg);
+}
+
+/* Egyptian Mythology - Desert Gold */
+.shader-panel[data-mythology="egyptian"] {
+    border-left: 4px solid rgba(218, 165, 32, 0.7);
+}
+
+.shader-panel[data-mythology="egyptian"] .panel-shader-canvas {
+    /* Light/sun shader would be applied */
+    filter: brightness(1.2) sepia(0.3);
+}
+
+/* Hindu Mythology - Sacred Fire */
+.shader-panel[data-mythology="hindu"] {
+    border-left: 4px solid rgba(255, 99, 71, 0.7);
+}
+
+.shader-panel[data-mythology="hindu"] .panel-shader-canvas {
+    /* Fire shader would be applied */
+    filter: saturate(1.3) contrast(1.1);
+}
+
+/* ============================================================================
+   PANEL CONTENT STYLING
+   ============================================================================ */
+
+.panel-content .panel-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+}
+
+.panel-content .panel-description {
+    color: #e5e7eb;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.5),
+        0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.panel-content .panel-icon {
+    font-size: 3rem;
+    line-height: 1;
+    margin-bottom: 1rem;
+    text-align: center;
+    filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.5));
+}
+
+/* ============================================================================
+   GRID LAYOUT FOR SHADER PANELS
+   ============================================================================ */
+
+.shader-panel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+@media (max-width: 768px) {
+    .shader-panel-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* ============================================================================
+   LOADING STATES
+   ============================================================================ */
+
+.shader-enabled-panel.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.shader-enabled-panel.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(26, 31, 58, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Loading spinner */
+.shader-enabled-panel.loading::before {
+    content: '⏳';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    z-index: 11;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ============================================================================
+   ERROR STATES
+   ============================================================================ */
+
+.shader-enabled-panel.error {
+    border-color: rgba(239, 68, 68, 0.6);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.shader-enabled-panel.error .panel-shader-canvas {
+    opacity: 0.2;
+    filter: grayscale(1);
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .panel-shader-canvas {
+        display: none;
+    }
+
+    .shader-enabled-panel {
+        /* Fallback gradient background */
+        background: linear-gradient(
+            135deg,
+            rgba(26, 31, 58, 0.9) 0%,
+            rgba(36, 41, 68, 0.9) 100%
+        );
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .shader-enabled-panel {
+        background: rgba(26, 31, 58, 0.98);
+        border: 2px solid #667eea;
+    }
+
+    .panel-shader-canvas {
+        opacity: 0.3;
+    }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+    .panel-shader-canvas {
+        display: none !important;
+    }
+
+    .shader-enabled-panel {
+        background: white !important;
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+    }
+}
+
+/* ============================================================================
+   USAGE EXAMPLE (HTML)
+   ============================================================================
+
+<!-- Basic Panel with Shader -->
+<div class="shader-enabled-panel" data-mythology="greek">
+    <!-- Shader canvas (created by JavaScript) -->
+    <canvas class="panel-shader-canvas" data-shader="water"></canvas>
+
+    <!-- Panel content (above shader) -->
+    <div class="panel-content">
+        <div class="panel-icon">🌊</div>
+        <h3 class="panel-title">Poseidon</h3>
+        <p class="panel-description">
+            God of the sea, earthquakes, and horses in Greek mythology.
+        </p>
+    </div>
+</div>
+
+<!-- Grid of Shader Panels -->
+<div class="shader-panel-grid">
+    <div class="shader-enabled-panel" data-mythology="greek">
+        <canvas class="panel-shader-canvas" data-shader="water"></canvas>
+        <div class="panel-content">...</div>
+    </div>
+
+    <div class="shader-enabled-panel" data-mythology="norse">
+        <canvas class="panel-shader-canvas" data-shader="night"></canvas>
+        <div class="panel-content">...</div>
+    </div>
+
+    <div class="shader-enabled-panel" data-mythology="egyptian">
+        <canvas class="panel-shader-canvas" data-shader="light"></canvas>
+        <div class="panel-content">...</div>
+    </div>
+</div>
+
+   ============================================================================ */
+
+/* ============================================================================
+   JAVASCRIPT INTEGRATION EXAMPLE
+   ============================================================================
+
+// Initialize shader for a panel
+function initPanelShader(panelElement) {
+    const canvas = panelElement.querySelector('.panel-shader-canvas');
+    const shaderType = canvas.dataset.shader || 'dark';
+
+    // Create shader manager instance for this panel
+    const shaderManager = new ShaderThemeManager({
+        intensity: 0.6,
+        quality: 'high',
+        adaptiveQuality: false
+    });
+
+    // Use the existing canvas
+    shaderManager.canvas = canvas;
+
+    // Initialize WebGL context
+    shaderManager.gl = canvas.getContext('webgl', {
+        alpha: true,
+        antialias: false,
+        premultipliedAlpha: true
+    });
+
+    // Resize canvas to panel size
+    const resizeCanvas = () => {
+        const rect = panelElement.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = rect.height + 'px';
+        shaderManager.gl.viewport(0, 0, canvas.width, canvas.height);
+    };
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Load and activate shader
+    shaderManager.loadTheme(shaderType).then(() => {
+        shaderManager.resume();
+    });
+
+    return shaderManager;
+}
+
+// Initialize all shader panels
+document.querySelectorAll('.shader-enabled-panel').forEach(panel => {
+    initPanelShader(panel);
+});
+
+   ============================================================================ */
+
+/* ============================================================================
+   PERFORMANCE NOTES
+   ============================================================================
+
+1. Each panel shader requires its own WebGL context
+2. Maximum recommended: 6-8 shader panels per page
+3. Consider lazy loading shaders for off-screen panels
+4. Use Intersection Observer to pause off-screen shaders
+
+Example lazy loading:
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        const shaderManager = entry.target.shaderManager;
+        if (entry.isIntersecting) {
+            shaderManager.resume();
+        } else {
+            shaderManager.pause();
+        }
+    });
+});
+
+document.querySelectorAll('.shader-enabled-panel').forEach(panel => {
+    panel.shaderManager = initPanelShader(panel);
+    observer.observe(panel);
+});
+
+   ============================================================================ */
+
+/* ============================================================================
+   Z-INDEX REFERENCE
+   ============================================================================
+
+-1    ← Global shader background (body level)
+0     ← Panel shader canvas (within panel)
+1     ← Panel content (text, images, buttons)
+10    ← Panel actions (edit, delete buttons)
+100   ← Tooltips, dropdowns
+1000  ← Modals, overlays
+
+   ============================================================================ */

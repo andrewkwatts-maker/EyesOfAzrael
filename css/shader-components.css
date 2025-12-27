@@ -1,0 +1,640 @@
+/**
+ * Shader Components CSS
+ * Utility classes and components for shader-integrated panels
+ */
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+/* Glass panel utility */
+.shader-glass {
+    background: rgba(26, 31, 58, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(139, 127, 255, 0.3);
+    border-radius: var(--radius-xl, 1rem);
+    padding: var(--spacing-lg, 1.5rem);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shader-glass:hover {
+    background: rgba(26, 31, 58, 0.92);
+    border-color: rgba(139, 127, 255, 0.6);
+    box-shadow:
+        0 12px 48px rgba(102, 126, 234, 0.3),
+        0 0 0 1px rgba(139, 127, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Frosted glass utility */
+.shader-frosted {
+    background: rgba(26, 31, 58, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 127, 255, 0.2);
+}
+
+/* Heavy glass utility */
+.shader-heavy {
+    background: rgba(26, 31, 58, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2px solid rgba(139, 127, 255, 0.5);
+}
+
+/* Text shadow for readability over shaders */
+.shader-text-shadow {
+    text-shadow:
+        0 0 20px rgba(0, 0, 0, 0.8),
+        0 2px 4px rgba(0, 0, 0, 0.9),
+        0 0 10px rgba(102, 126, 234, 0.5);
+}
+
+/* Gradient text */
+.shader-gradient-text {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Three-color gradient text */
+.shader-gradient-text-3 {
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ============================================================================
+   PANEL COMPONENTS
+   ============================================================================ */
+
+/* Shader-aware card */
+.shader-card {
+    position: relative;
+    background: rgba(26, 31, 58, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(139, 127, 255, 0.3);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shader-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.05) 0%,
+        rgba(118, 75, 162, 0.05) 100%
+    );
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.shader-card:hover::before {
+    opacity: 1;
+}
+
+.shader-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.shader-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 48px rgba(102, 126, 234, 0.4);
+    border-color: rgba(139, 127, 255, 0.6);
+}
+
+/* Shader-aware hero section */
+.shader-hero {
+    position: relative;
+    background: rgba(26, 31, 58, 0.75);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 2px solid rgba(139, 127, 255, 0.4);
+    border-radius: 1.5rem;
+    padding: 3rem 2rem;
+    text-align: center;
+    overflow: hidden;
+}
+
+.shader-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+        circle at center,
+        rgba(102, 126, 234, 0.1) 0%,
+        transparent 70%
+    );
+    pointer-events: none;
+}
+
+.shader-hero > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Shader border panel */
+.shader-border {
+    position: relative;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 1rem;
+}
+
+.shader-border-content {
+    position: relative;
+    background: rgba(26, 31, 58, 0.95);
+    border-radius: calc(1rem - 2px);
+    padding: 1.5rem;
+}
+
+/* Animated shader border */
+.shader-border-animated {
+    position: relative;
+    padding: 2px;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.shader-border-animated::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        45deg,
+        #667eea 0%,
+        #764ba2 25%,
+        #f093fb 50%,
+        #667eea 75%,
+        #764ba2 100%
+    );
+    background-size: 200% 200%;
+    animation: shaderBorderFlow 3s linear infinite;
+    border-radius: 1rem;
+}
+
+@keyframes shaderBorderFlow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+.shader-border-animated-content {
+    position: relative;
+    background: rgba(26, 31, 58, 0.95);
+    border-radius: calc(1rem - 2px);
+    padding: 1.5rem;
+    z-index: 1;
+}
+
+/* ============================================================================
+   MODAL / OVERLAY COMPONENTS
+   ============================================================================ */
+
+/* Shader modal overlay */
+.shader-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.shader-modal-overlay.active {
+    opacity: 1;
+}
+
+.shader-modal-content {
+    background: rgba(26, 31, 58, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 2px solid rgba(139, 127, 255, 0.5);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6);
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shader-modal-overlay.active .shader-modal-content {
+    transform: scale(1);
+}
+
+/* ============================================================================
+   BUTTON COMPONENTS
+   ============================================================================ */
+
+/* Shader-aware button */
+.shader-btn {
+    position: relative;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.shader-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.shader-btn:hover::before {
+    left: 100%;
+}
+
+.shader-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.shader-btn:active {
+    transform: translateY(0);
+}
+
+/* Secondary shader button */
+.shader-btn-secondary {
+    background: rgba(102, 126, 234, 0.2);
+    border: 2px solid #667eea;
+    color: #667eea;
+}
+
+.shader-btn-secondary:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* Glass button */
+.shader-btn-glass {
+    background: rgba(102, 126, 234, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    color: #e5e7eb;
+}
+
+.shader-btn-glass:hover {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
+}
+
+/* ============================================================================
+   INPUT COMPONENTS
+   ============================================================================ */
+
+/* Shader-aware input */
+.shader-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(26, 31, 58, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(139, 127, 255, 0.3);
+    border-radius: 0.5rem;
+    color: #e5e7eb;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.shader-input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: rgba(26, 31, 58, 0.8);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.shader-input::placeholder {
+    color: rgba(229, 231, 235, 0.5);
+}
+
+/* Shader-aware textarea */
+.shader-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 0.75rem 1rem;
+    background: rgba(26, 31, 58, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(139, 127, 255, 0.3);
+    border-radius: 0.5rem;
+    color: #e5e7eb;
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: all 0.3s ease;
+}
+
+.shader-textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    background: rgba(26, 31, 58, 0.8);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+/* ============================================================================
+   BADGE / TAG COMPONENTS
+   ============================================================================ */
+
+/* Shader tag/badge */
+.shader-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(102, 126, 234, 0.2);
+    border: 1px solid rgba(102, 126, 234, 0.4);
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    color: #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.shader-badge:hover {
+    background: rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
+    transform: translateY(-1px);
+}
+
+/* Badge variants */
+.shader-badge-success {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: #22c55e;
+}
+
+.shader-badge-warning {
+    background: rgba(245, 158, 11, 0.2);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #f59e0b;
+}
+
+.shader-badge-danger {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+}
+
+.shader-badge-info {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.4);
+    color: #3b82f6;
+}
+
+/* ============================================================================
+   SECTION DIVIDERS
+   ============================================================================ */
+
+/* Shader section divider */
+.shader-divider {
+    height: 1px;
+    margin: 2rem 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(139, 127, 255, 0.5),
+        transparent
+    );
+}
+
+/* Shader section with title */
+.shader-section {
+    margin: 2rem 0;
+}
+
+.shader-section-title {
+    position: relative;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+}
+
+.shader-section-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #667eea, #764ba2);
+    border-radius: 2px;
+}
+
+/* ============================================================================
+   LOADING / SPINNER COMPONENTS
+   ============================================================================ */
+
+/* Shader loading spinner */
+.shader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(139, 127, 255, 0.2);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: shaderSpin 1s linear infinite;
+}
+
+@keyframes shaderSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* Gradient spinner */
+.shader-spinner-gradient {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        transparent,
+        #667eea,
+        #764ba2,
+        transparent
+    );
+    animation: shaderSpin 1.5s linear infinite;
+    position: relative;
+}
+
+.shader-spinner-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: rgba(26, 31, 58, 0.9);
+    border-radius: 50%;
+}
+
+/* ============================================================================
+   TOOLTIP COMPONENTS
+   ============================================================================ */
+
+/* Shader tooltip */
+.shader-tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.shader-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    padding: 0.5rem 0.75rem;
+    background: rgba(26, 31, 58, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(139, 127, 255, 0.5);
+    border-radius: 0.5rem;
+    color: #e5e7eb;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.shader-tooltip:hover::after {
+    opacity: 1;
+}
+
+/* ============================================================================
+   GRID LAYOUTS
+   ============================================================================ */
+
+/* Shader card grid */
+.shader-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+/* Responsive grid */
+@media (max-width: 768px) {
+    .shader-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================================
+   RESPONSIVE & ACCESSIBILITY
+   ============================================================================ */
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .shader-glass,
+    .shader-card,
+    .shader-border-content {
+        padding: 1rem;
+    }
+
+    .shader-hero {
+        padding: 2rem 1rem;
+    }
+
+    .shader-modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .shader-card,
+    .shader-glass,
+    .shader-btn,
+    .shader-badge,
+    .shader-modal-content {
+        transition: none;
+    }
+
+    .shader-spinner,
+    .shader-spinner-gradient,
+    .shader-border-animated::before {
+        animation: none;
+    }
+
+    .shader-card:hover,
+    .shader-glass:hover {
+        transform: none;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .shader-glass,
+    .shader-card,
+    .shader-modal-content,
+    .shader-input,
+    .shader-textarea {
+        background: rgba(26, 31, 58, 0.98);
+    }
+}
+
+/* Print styles */
+@media print {
+    .shader-glass,
+    .shader-card,
+    .shader-border-content,
+    .shader-modal-content {
+        background: white !important;
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+    }
+
+    .shader-glass::before,
+    .shader-card::before,
+    .shader-hero::before {
+        display: none !important;
+    }
+
+    .shader-btn {
+        background: #667eea !important;
+    }
+}

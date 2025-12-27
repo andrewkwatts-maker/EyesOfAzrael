@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shader System Validation Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(0, 20, 0, 0.95);
+            border: 3px solid #0f0;
+            border-radius: 10px;
+            padding: 30px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #0a0;
+            border-radius: 5px;
+            background: rgba(0, 10, 0, 0.5);
+        }
+
+        .test-section h2 {
+            color: #0ff;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .test-item {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 3px solid #333;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .test-item.pass {
+            border-left-color: #0f0;
+            color: #0f0;
+        }
+
+        .test-item.fail {
+            border-left-color: #f00;
+            color: #f00;
+        }
+
+        .test-item.warn {
+            border-left-color: #ff0;
+            color: #ff0;
+        }
+
+        .test-item .label {
+            font-weight: bold;
+            display: inline-block;
+            width: 200px;
+        }
+
+        .test-item .value {
+            color: #fff;
+        }
+
+        .commands {
+            background: rgba(0, 30, 0, 0.7);
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .commands h3 {
+            color: #0ff;
+            margin-bottom: 10px;
+        }
+
+        .commands code {
+            display: block;
+            background: #000;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 3px;
+            color: #0f0;
+            border: 1px solid #0a0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .commands code:hover {
+            background: #0a0a0a;
+            border-color: #0f0;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #0a0;
+            box-shadow: 0 0 10px #0f0;
+        }
+
+        .status-good { color: #0f0; }
+        .status-warn { color: #ff0; }
+        .status-bad { color: #f00; }
+
+        .visual-check {
+            background: rgba(0, 20, 40, 0.5);
+            border: 2px dashed #0ff;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .shader-preview {
+            width: 100%;
+            height: 200px;
+            border: 2px solid #0a0;
+            border-radius: 5px;
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Shader System Validation Test</h1>
+
+        <div class="test-section">
+            <h2>📋 Pre-Flight Checks</h2>
+            <div id="preflightTests"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 System Status</h2>
+            <div id="systemStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>👁️ Visual Verification</h2>
+            <div class="visual-check">
+                <p>Look behind this panel. Do you see an animated background?</p>
+                <p><strong>Expected:</strong> Twinkling stars OR moving clouds (depending on time)</p>
+                <button onclick="highlightCanvas()">Highlight Shader Canvas</button>
+                <button onclick="toggleShaderVisibility()">Toggle Shader On/Off</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎨 Theme Testing</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                <button onclick="testTheme('water')">🌊 Water</button>
+                <button onclick="testTheme('fire')">🔥 Fire</button>
+                <button onclick="testTheme('night')">✨ Night</button>
+                <button onclick="testTheme('earth')">🌿 Earth</button>
+                <button onclick="testTheme('day')">☀️ Day</button>
+                <button onclick="testTheme('chaos')">🌀 Chaos</button>
+                <button onclick="testTheme('order')">⚡ Order</button>
+                <button onclick="testTheme('air')">💨 Air</button>
+            </div>
+            <div id="currentTheme" style="margin-top: 10px; text-align: center; font-size: 1.2rem;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Performance Monitor</h2>
+            <div id="performanceStats"></div>
+        </div>
+
+        <div class="commands">
+            <h3>💻 Console Commands</h3>
+            <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 10px;">
+                Click any command to copy to clipboard, then paste in browser console:
+            </p>
+            <code onclick="copyCommand(this)">window.EyesOfAzrael.shaders.getStatus()</code>
+            <code onclick="copyCommand(this)">window.EyesOfAzrael.shaders.activate('chaos')</code>
+            <code onclick="copyCommand(this)">window.EyesOfAzrael.shaders.setIntensity(0.5)</code>
+            <code onclick="copyCommand(this)">window.EyesOfAzrael.shaders.toggle()</code>
+        </div>
+
+        <div class="test-section">
+            <h2>🚨 Common Issues</h2>
+            <div id="troubleshooting"></div>
+        </div>
+    </div>
+
+    <!-- Load Shader System (Testing the fix) -->
+    <script src="js/shaders/shader-themes.js"></script>
+
+    <script>
+        let shaderManager = null;
+        let statsInterval = null;
+
+        // Run tests on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                runPreflightTests();
+                initializeShaderSystem();
+                checkSystemStatus();
+                startPerformanceMonitoring();
+                checkCommonIssues();
+            }, 500);
+        });
+
+        function runPreflightTests() {
+            const container = document.getElementById('preflightTests');
+            const tests = [];
+
+            // Test 1: WebGL Support
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            tests.push({
+                label: 'WebGL Support',
+                value: gl ? 'Supported ✓' : 'Not Supported ✗',
+                status: gl ? 'pass' : 'fail'
+            });
+
+            // Test 2: ShaderThemeManager Class
+            tests.push({
+                label: 'ShaderThemeManager Class',
+                value: typeof ShaderThemeManager !== 'undefined' ? 'Loaded ✓' : 'Missing ✗',
+                status: typeof ShaderThemeManager !== 'undefined' ? 'pass' : 'fail'
+            });
+
+            // Test 3: Canvas Element
+            const shaderCanvas = document.getElementById('shader-background');
+            tests.push({
+                label: 'Shader Canvas Element',
+                value: shaderCanvas ? 'Created ✓' : 'Not Yet Created',
+                status: shaderCanvas ? 'pass' : 'warn'
+            });
+
+            // Render results
+            container.innerHTML = tests.map(test => `
+                <div class="test-item ${test.status}">
+                    <span class="label">${test.label}:</span>
+                    <span class="value">${test.value}</span>
+                </div>
+            `).join('');
+        }
+
+        function initializeShaderSystem() {
+            try {
+                if (typeof ShaderThemeManager === 'undefined') {
+                    console.error('[Validation] ShaderThemeManager not found!');
+                    return;
+                }
+
+                shaderManager = new ShaderThemeManager({
+                    intensity: 0.8,
+                    quality: 'high',
+                    adaptiveQuality: true
+                });
+
+                // Auto-activate based on time
+                const hour = new Date().getHours();
+                const theme = (hour >= 6 && hour < 18) ? 'day' : 'night';
+                shaderManager.activate(theme);
+
+                console.log('[Validation] ✓ Shader system initialized successfully');
+            } catch (error) {
+                console.error('[Validation] ✗ Initialization error:', error);
+            }
+        }
+
+        function checkSystemStatus() {
+            const container = document.getElementById('systemStatus');
+
+            if (!shaderManager) {
+                container.innerHTML = '<div class="test-item fail">System not initialized</div>';
+                return;
+            }
+
+            const status = shaderManager.getStatus();
+            const items = [
+                { label: 'System Status', value: status.enabled ? 'Active' : 'Inactive', status: status.enabled ? 'pass' : 'warn' },
+                { label: 'WebGL Support', value: status.supported ? 'Yes' : 'No', status: status.supported ? 'pass' : 'fail' },
+                { label: 'Current Theme', value: status.theme || 'None', status: status.theme ? 'pass' : 'warn' },
+                { label: 'Quality', value: status.quality, status: 'pass' },
+                { label: 'Intensity', value: `${(status.intensity * 100).toFixed(0)}%`, status: 'pass' }
+            ];
+
+            container.innerHTML = items.map(item => `
+                <div class="test-item ${item.status}">
+                    <span class="label">${item.label}:</span>
+                    <span class="value">${item.value}</span>
+                </div>
+            `).join('');
+        }
+
+        function startPerformanceMonitoring() {
+            const container = document.getElementById('performanceStats');
+
+            statsInterval = setInterval(() => {
+                if (!shaderManager) return;
+
+                const status = shaderManager.getStatus();
+                const fpsClass = status.fps >= 50 ? 'status-good' : status.fps >= 30 ? 'status-warn' : 'status-bad';
+
+                container.innerHTML = `
+                    <div class="test-item pass">
+                        <span class="label">FPS:</span>
+                        <span class="value ${fpsClass}">${status.fps}</span>
+                    </div>
+                    <div class="test-item pass">
+                        <span class="label">Performance:</span>
+                        <span class="value">${status.fps >= 50 ? 'Excellent' : status.fps >= 30 ? 'Good' : 'Poor'}</span>
+                    </div>
+                `;
+            }, 1000);
+        }
+
+        function testTheme(themeName) {
+            if (!shaderManager) {
+                alert('Shader system not initialized!');
+                return;
+            }
+
+            shaderManager.activate(themeName);
+            document.getElementById('currentTheme').innerHTML = `
+                Current Theme: <span class="status-good">${themeName}</span>
+            `;
+            console.log(`[Validation] Activated theme: ${themeName}`);
+        }
+
+        function highlightCanvas() {
+            const canvas = document.getElementById('shader-background');
+            if (!canvas) {
+                alert('Shader canvas not found!');
+                return;
+            }
+
+            // Flash border for visibility
+            canvas.style.border = '5px solid #0f0';
+            canvas.style.zIndex = '9999';
+
+            setTimeout(() => {
+                canvas.style.border = 'none';
+                canvas.style.zIndex = '-1';
+            }, 2000);
+        }
+
+        function toggleShaderVisibility() {
+            if (!shaderManager) return;
+            const enabled = shaderManager.toggle();
+            console.log(`[Validation] Shaders ${enabled ? 'enabled' : 'disabled'}`);
+        }
+
+        function copyCommand(element) {
+            const text = element.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const original = element.style.background;
+                element.style.background = '#0a0';
+                setTimeout(() => {
+                    element.style.background = original;
+                }, 200);
+                console.log('Copied:', text);
+            });
+        }
+
+        function checkCommonIssues() {
+            const container = document.getElementById('troubleshooting');
+            const issues = [];
+
+            // Check if script is loaded
+            if (typeof ShaderThemeManager === 'undefined') {
+                issues.push({
+                    problem: 'ShaderThemeManager not defined',
+                    solution: 'Check if js/shaders/shader-themes.js is loaded in HTML',
+                    status: 'fail'
+                });
+            }
+
+            // Check WebGL
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl');
+            if (!gl) {
+                issues.push({
+                    problem: 'WebGL not supported',
+                    solution: 'Browser doesn\'t support WebGL. CSS fallbacks will be used.',
+                    status: 'warn'
+                });
+            }
+
+            // Check reduced motion
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                issues.push({
+                    problem: 'Reduced motion preference detected',
+                    solution: 'Shaders are disabled for accessibility. This is expected.',
+                    status: 'warn'
+                });
+            }
+
+            // Check canvas creation
+            if (shaderManager && !document.getElementById('shader-background')) {
+                issues.push({
+                    problem: 'Shader canvas not in DOM',
+                    solution: 'Canvas should be automatically created. Check console for errors.',
+                    status: 'fail'
+                });
+            }
+
+            if (issues.length === 0) {
+                container.innerHTML = '<div class="test-item pass">✓ No issues detected! System is working correctly.</div>';
+            } else {
+                container.innerHTML = issues.map(issue => `
+                    <div class="test-item ${issue.status}">
+                        <strong>Problem:</strong> ${issue.problem}<br>
+                        <strong>Solution:</strong> ${issue.solution}
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Cleanup
+        window.addEventListener('beforeunload', () => {
+            if (statsInterval) clearInterval(statsInterval);
+        });
+    </script>
+</body>
+</html>

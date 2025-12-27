@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shader Pattern Examples - Eyes of Azrael</title>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../css/shader-backgrounds.css">
+    <link rel="stylesheet" href="../css/panel-shaders.css">
+    <link rel="stylesheet" href="../css/shader-components.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: #e5e7eb;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .page-header p {
+            font-size: 1.25rem;
+            color: #9ca3af;
+        }
+
+        .example-section {
+            margin: 4rem 0;
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+            color: #9ca3af;
+        }
+
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(139, 127, 255, 0.2);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            margin: 0;
+            color: #e5e7eb;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .theme-switcher {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 100;
+        }
+
+        .theme-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            max-width: 400px;
+        }
+
+        .theme-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(139, 127, 255, 0.3);
+            background: rgba(26, 31, 58, 0.8);
+            backdrop-filter: blur(10px);
+            color: #e5e7eb;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+
+        .theme-btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+
+        .theme-btn.active {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .example-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .theme-switcher {
+                position: static;
+                margin-bottom: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Switcher -->
+    <div class="theme-switcher shader-glass">
+        <h3 style="margin-bottom: 1rem;">Active Shader Theme</h3>
+        <div class="theme-buttons">
+            <button class="theme-btn" data-theme="water">🌊 Water</button>
+            <button class="theme-btn" data-theme="fire">🔥 Fire</button>
+            <button class="theme-btn active" data-theme="night">✨ Night</button>
+            <button class="theme-btn" data-theme="earth">🌿 Earth</button>
+            <button class="theme-btn" data-theme="light">☀️ Light</button>
+            <button class="theme-btn" data-theme="dark">🌑 Dark</button>
+            <button class="theme-btn" data-theme="day">🌤️ Day</button>
+            <button class="theme-btn" data-theme="air">💨 Air</button>
+            <button class="theme-btn" data-theme="chaos">🌀 Chaos</button>
+            <button class="theme-btn" data-theme="order">✨ Order</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header shader-glass">
+            <h1 class="shader-gradient-text-3">Shader Pattern Examples</h1>
+            <p>Live examples of shader-integrated components</p>
+        </div>
+
+        <!-- Example 1: Glass Panels -->
+        <section class="example-section">
+            <div class="section-header shader-glass">
+                <h2>1. Glass-Morphism Panels</h2>
+                <p>Semi-transparent panels with backdrop blur</p>
+            </div>
+
+            <div class="example-grid">
+                <div class="glass-card">
+                    <h3>Default Glass Panel</h3>
+                    <p>This panel uses the standard glass-card class with 85% opacity and 12px backdrop blur.</p>
+                    <div class="shader-badge">Standard</div>
+                </div>
+
+                <div class="shader-glass">
+                    <h3>Utility Class</h3>
+                    <p>Using the .shader-glass utility class for quick styling.</p>
+                    <div class="shader-badge-success">Utility</div>
+                </div>
+
+                <div class="shader-frosted">
+                    <h3>Frosted Glass</h3>
+                    <p>Lighter opacity (70%) with stronger blur (20px) for a frosted effect.</p>
+                    <div class="shader-badge-info">Frosted</div>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <pre>&lt;div class="glass-card"&gt;
+  &lt;h3&gt;Panel Title&lt;/h3&gt;
+  &lt;p&gt;Panel content...&lt;/p&gt;
+&lt;/div&gt;</pre>
+            </div>
+        </section>
+
+        <!-- Example 2: Entity Panels -->
+        <section class="example-section">
+            <div class="section-header shader-glass">
+                <h2>2. Entity Panels</h2>
+                <p>Mythology-specific deity/hero panels</p>
+            </div>
+
+            <div class="example-grid">
+                <div class="entity-panel" data-mythology="greek">
+                    <div class="entity-panel-header">
+                        <span style="font-size: 2rem;">⚡</span>
+                        <h3>Zeus</h3>
+                    </div>
+                    <p>King of the Greek gods, ruler of Mount Olympus and god of the sky and thunder.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="shader-badge">Thunder</span>
+                        <span class="shader-badge">Sky</span>
+                    </div>
+                </div>
+
+                <div class="entity-panel" data-mythology="norse">
+                    <div class="entity-panel-header">
+                        <span style="font-size: 2rem;">🔨</span>
+                        <h3>Thor</h3>
+                    </div>
+                    <p>Norse god of thunder, lightning, storms, and strength. Wielder of Mjolnir.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="shader-badge">Thunder</span>
+                        <span class="shader-badge">Strength</span>
+                    </div>
+                </div>
+
+                <div class="entity-panel" data-mythology="egyptian">
+                    <div class="entity-panel-header">
+                        <span style="font-size: 2rem;">☀️</span>
+                        <h3>Ra</h3>
+                    </div>
+                    <p>Egyptian sun god, creator deity and king of the gods in Egyptian mythology.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="shader-badge">Sun</span>
+                        <span class="shader-badge">Creation</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <pre>&lt;div class="entity-panel" data-mythology="greek"&gt;
+  &lt;div class="entity-panel-header"&gt;
+    &lt;span&gt;⚡&lt;/span&gt;
+    &lt;h3&gt;Zeus&lt;/h3&gt;
+  &lt;/div&gt;
+  &lt;p&gt;Description...&lt;/p&gt;
+&lt;/div&gt;</pre>
+            </div>
+        </section>
+
+        <!-- Example 3: Shader Cards -->
+        <section class="example-section">
+            <div class="section-header shader-glass">
+                <h2>3. Shader Cards with Hover Effects</h2>
+                <p>Interactive cards with gradient overlays</p>
+            </div>
+
+            <div class="example-grid">
+                <div class="shader-card">
+                    <h3>Hover Me!</h3>
+                    <p>This card reveals a gradient overlay on hover and lifts slightly.</p>
+                </div>
+
+                <div class="shader-border">
+                    <div class="shader-border-content">
+                        <h3>Gradient Border</h3>
+                        <p>This card has an animated gradient border effect.</p>
+                    </div>
+                </div>
+
+                <div class="shader-border-animated">
+                    <div class="shader-border-animated-content">
+                        <h3>Animated Border</h3>
+                        <p>The border gradient flows continuously around the panel.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <pre>&lt;div class="shader-card"&gt;
+  &lt;h3&gt;Title&lt;/h3&gt;
+  &lt;p&gt;Content&lt;/p&gt;
+&lt;/div&gt;</pre>
+            </div>
+        </section>
+
+        <!-- Example 4: Hero Sections -->
+        <section class="example-section">
+            <div class="section-header shader-glass">
+                <h2>4. Hero Sections</h2>
+                <p>Large, prominent content areas</p>
+            </div>
+
+            <div class="shader-hero">
+                <h2 style="font-size: 2.5rem; margin-bottom: 1rem;" class="shader-gradient-text-3">
+                    Explore World Mythologies
+                </h2>
+                <p style="font-size: 1.25rem; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    Discover gods, heroes, and legends from cultures around the world. Journey through 6000 years of human mythology.
+                </p>
+                <button class="shader-btn">Get Started</button>
+            </div>
+
+            <div class="code-block">
+                <pre>&lt;div class="shader-hero"&gt;
+  &lt;h2 class="shader-gradient-text-3"&gt;Hero Title&lt;/h2&gt;
+  &lt;p&gt;Description&lt;/p&gt;
+  &lt;button class="shader-btn"&gt;CTA&lt;/button&gt;
+&lt;/div&gt;</pre>
+            </div>
+        </section>
+
+        <!-- Example 5: Buttons -->
+        <section class="example-section">
+            <div class="section-header shader-glass">
+                <h2>5. Buttons</h2>
+                <p>Shader-integrated button styles</p>
+            </div>
+
+            <div class="shader-glass" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                <button class="shader-btn">Primary Button</button>
+                <button class="shader-btn-secondary">Secondary Button</button>
+                <button class="shader-btn-glass">Glass Button</button>
+            </div>
+
+            <div class="code-block">
+                <pre>&lt;button class="shader-btn"&gt;Primary&lt;/button&gt;
+&lt;button class="shader-btn-secondary"&gt;Secondary&lt;/button&gt;
+&lt;button class="shader-btn-glass"&gt;Glass&lt;/button&gt;</pre>
+            </div>
+        </section>
+
+        <!-- Example 6: Forms -->
+        <section class="example-section">
+            <div class="section-header shader-glass">
+                <h2>6. Form Components</h2>
+                <p>Input fields with shader integration</p>
+            </div>
+
+            <div class="shader-glass" style="max-width: 600px;">
+                <h3 style="margin-bottom: 1.5rem;">Example Form</h3>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #9ca3af; font-size: 0.875rem;">
+                        Name
+                    </label>
+                    <input type="text" class="shader-input" placeholder="Enter your name">
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #9ca3af; font-size: 0.875rem;">
+                        Message
+                    </label>
+                    <textarea class="shader-textarea" placeholder="Enter your message"></textarea>
+                </div>
+
+                <button class="shader-btn">Submit</button>
+            </div>
+
+            <div class="code-block">
+                <pre>&lt;input type="text" class="shader-input" placeholder="..."&gt;
+&lt;textarea class="shader-textarea" placeholder="..."&gt;&lt;/textarea&gt;</pre>
+            </div>
+        </section>
+
+        <!-- Example 7: Badges & Tags -->
+        <section class="example-section">
+            <div class="section-header shader-glass">
+                <h2>7. Badges & Tags</h2>
+                <p>Tag components with variants</p>
+            </div>
+
+            <div class="shader-glass" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                <span class="shader-badge">Default</span>
+                <span class="shader-badge-success">Success</span>
+                <span class="shader-badge-warning">Warning</span>
+                <span class="shader-badge-danger">Danger</span>
+                <span class="shader-badge-info">Info</span>
+            </div>
+
+            <div class="code-block">
+                <pre>&lt;span class="shader-badge"&gt;Default&lt;/span&gt;
+&lt;span class="shader-badge-success"&gt;Success&lt;/span&gt;
+&lt;span class="shader-badge-warning"&gt;Warning&lt;/span&gt;</pre>
+            </div>
+        </section>
+
+        <!-- Example 8: Web Components -->
+        <section class="example-section">
+            <div class="section-header shader-glass">
+                <h2>8. Web Components</h2>
+                <p>Custom shader panel components</p>
+            </div>
+
+            <div class="example-grid">
+                <shader-panel type="glass" mythology="greek">
+                    <shader-panel-header icon="⚡" title="Zeus"></shader-panel-header>
+                    <shader-panel-section title="Overview">
+                        <p>King of the gods, using web components for easy reuse.</p>
+                    </shader-panel-section>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <shader-tag>Thunder</shader-tag>
+                        <shader-tag variant="success">Sky</shader-tag>
+                    </div>
+                </shader-panel>
+
+                <shader-panel type="entity" mythology="norse">
+                    <shader-panel-header icon="🔨" title="Thor"></shader-panel-header>
+                    <shader-panel-section title="Powers">
+                        <p>God of thunder using custom web component syntax.</p>
+                    </shader-panel-section>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <shader-tag>Thunder</shader-tag>
+                        <shader-tag variant="warning">Strength</shader-tag>
+                    </div>
+                </shader-panel>
+
+                <shader-panel type="detail" mythology="egyptian">
+                    <shader-panel-header icon="☀️" title="Ra"></shader-panel-header>
+                    <shader-panel-section title="Domain">
+                        <p>Sun god demonstrating detail panel type.</p>
+                    </shader-panel-section>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <shader-tag>Sun</shader-tag>
+                        <shader-tag variant="danger">Fire</shader-tag>
+                    </div>
+                </shader-panel>
+            </div>
+
+            <div class="code-block">
+                <pre>&lt;shader-panel type="glass" mythology="greek"&gt;
+  &lt;shader-panel-header icon="⚡" title="Zeus"&gt;&lt;/shader-panel-header&gt;
+  &lt;shader-panel-section title="Overview"&gt;
+    &lt;p&gt;Content...&lt;/p&gt;
+  &lt;/shader-panel-section&gt;
+  &lt;shader-tag&gt;Thunder&lt;/shader-tag&gt;
+&lt;/shader-panel&gt;</pre>
+            </div>
+        </section>
+
+        <!-- Example 9: Sections & Dividers -->
+        <section class="example-section">
+            <div class="section-header shader-glass">
+                <h2>9. Sections & Dividers</h2>
+                <p>Organizing content with shader-aware dividers</p>
+            </div>
+
+            <div class="shader-glass">
+                <div class="shader-section">
+                    <h3 class="shader-section-title">First Section</h3>
+                    <p>Content in the first section with gradient accent bar.</p>
+                </div>
+
+                <div class="shader-divider"></div>
+
+                <div class="shader-section">
+                    <h3 class="shader-section-title">Second Section</h3>
+                    <p>Content in the second section after a gradient divider.</p>
+                </div>
+
+                <div class="shader-divider"></div>
+
+                <div class="shader-section">
+                    <h3 class="shader-section-title">Third Section</h3>
+                    <p>Content in the third section demonstrating structure.</p>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <pre>&lt;div class="shader-section"&gt;
+  &lt;h3 class="shader-section-title"&gt;Section Title&lt;/h3&gt;
+  &lt;p&gt;Content...&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="shader-divider"&gt;&lt;/div&gt;</pre>
+            </div>
+        </section>
+
+        <!-- Example 10: Modal -->
+        <section class="example-section">
+            <div class="section-header shader-glass">
+                <h2>10. Modal / Overlay</h2>
+                <p>Shader-integrated modal dialogs</p>
+            </div>
+
+            <div class="shader-glass">
+                <button class="shader-btn" onclick="document.getElementById('exampleModal').classList.add('active')">
+                    Open Modal
+                </button>
+            </div>
+
+            <div class="shader-modal-overlay" id="exampleModal">
+                <div class="shader-modal-content">
+                    <h2 style="margin-bottom: 1rem;">Example Modal</h2>
+                    <p style="margin-bottom: 1.5rem;">This is a modal dialog with shader-integrated styling and backdrop blur.</p>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="shader-btn" onclick="document.getElementById('exampleModal').classList.remove('active')">
+                            Close
+                        </button>
+                        <button class="shader-btn-secondary" onclick="alert('Action!'); document.getElementById('exampleModal').classList.remove('active')">
+                            Confirm
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <pre>&lt;div class="shader-modal-overlay active"&gt;
+  &lt;div class="shader-modal-content"&gt;
+    &lt;h2&gt;Modal Title&lt;/h2&gt;
+    &lt;p&gt;Content...&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+            </div>
+        </section>
+
+        <!-- Example 11: Text Styles -->
+        <section class="example-section">
+            <div class="section-header shader-glass">
+                <h2>11. Text Styling</h2>
+                <p>Gradient and shadow text effects</p>
+            </div>
+
+            <div class="shader-glass">
+                <h2 class="shader-gradient-text" style="margin-bottom: 1rem;">
+                    Gradient Text (2 Colors)
+                </h2>
+                <h2 class="shader-gradient-text-3" style="margin-bottom: 1rem;">
+                    Gradient Text (3 Colors)
+                </h2>
+                <h2 class="shader-text-shadow" style="margin-bottom: 1rem;">
+                    Text with Shadow Glow
+                </h2>
+                <h2 class="shader-gradient-text-3 shader-text-shadow">
+                    Combined Effects
+                </h2>
+            </div>
+
+            <div class="code-block">
+                <pre>&lt;h2 class="shader-gradient-text"&gt;Gradient Text&lt;/h2&gt;
+&lt;h2 class="shader-gradient-text-3"&gt;3-Color Gradient&lt;/h2&gt;
+&lt;h2 class="shader-text-shadow"&gt;Shadow Glow&lt;/h2&gt;</pre>
+            </div>
+        </section>
+
+        <!-- Example 12: Loading States -->
+        <section class="example-section">
+            <div class="section-header shader-glass">
+                <h2>12. Loading States</h2>
+                <p>Shader-integrated spinners and loaders</p>
+            </div>
+
+            <div class="shader-glass" style="display: flex; gap: 3rem; align-items: center; justify-content: center; padding: 3rem;">
+                <div>
+                    <p style="margin-bottom: 1rem; text-align: center;">Standard Spinner</p>
+                    <div class="shader-spinner"></div>
+                </div>
+
+                <div>
+                    <p style="margin-bottom: 1rem; text-align: center;">Gradient Spinner</p>
+                    <div class="shader-spinner-gradient"></div>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <pre>&lt;div class="shader-spinner"&gt;&lt;/div&gt;
+&lt;div class="shader-spinner-gradient"&gt;&lt;/div&gt;</pre>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <div class="shader-glass" style="margin-top: 4rem; text-align: center; padding: 2rem;">
+            <h3 style="margin-bottom: 1rem;">Ready to Use Shader Patterns</h3>
+            <p style="color: #9ca3af; margin-bottom: 1.5rem;">
+                All examples are fully functional and can be copied directly into your project.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="../SHADER_PATTERNS.md" class="shader-btn-secondary">View Documentation</a>
+                <a href="../shader-demo.html" class="shader-btn">Interactive Demo</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shader System -->
+    <script src="../js/shaders/shader-themes.js"></script>
+    <script src="../js/components/shader-panel.js"></script>
+
+    <script>
+        // Initialize shader manager
+        const shaderManager = new ShaderThemeManager({
+            intensity: 0.7,
+            quality: 'high',
+            adaptiveQuality: true
+        });
+
+        // Activate default theme
+        shaderManager.activate('night');
+
+        // Theme switcher
+        const themeButtons = document.querySelectorAll('.theme-btn');
+        themeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const theme = btn.dataset.theme;
+
+                // Update active state
+                themeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Switch shader
+                shaderManager.activate(theme);
+            });
+        });
+
+        // Close modal on overlay click
+        document.getElementById('exampleModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                e.currentTarget.classList.remove('active');
+            }
+        });
+
+        // Keyboard accessibility for modal
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('exampleModal');
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                modal.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
