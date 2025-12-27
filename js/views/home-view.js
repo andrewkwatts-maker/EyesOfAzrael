@@ -6,6 +6,7 @@
 class HomeView {
     constructor(firestore) {
         this.db = firestore;
+        this.cache = window.cacheManager || new FirebaseCacheManager({ db: firestore });
         this.mythologies = [];
         this.loadingTimeout = null;
         this.loadingStartTime = null;
@@ -196,10 +197,10 @@ class HomeView {
     }
 
     /**
-     * Load mythologies from Firebase with caching
+     * Load mythologies from Firebase with intelligent caching
      */
     async loadMythologies() {
-        console.log('[Home View] Loading mythologies from Firebase...');
+        console.log('[Home View] Loading mythologies with cache manager...');
 
         try {
             // Try cache first for instant display
@@ -209,20 +210,22 @@ class HomeView {
                 this.mythologies = cached;
             }
 
-            // Try to load from mythologies collection
-            const snapshot = await this.db.collection('mythologies')
-                .orderBy('order', 'asc')
-                .get();
+            // Try to load from cache manager (multi-layer cache)
+            const mythologies = await this.cache.getList('mythologies', {}, {
+                ttl: this.cache.defaultTTL.mythologies,
+                orderBy: 'order asc',
+                limit: 50
+            });
 
-            if (!snapshot.empty) {
-                this.mythologies = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                console.log(`[Home View] Loaded ${this.mythologies.length} mythologies from Firebase`);
+            if (mythologies && mythologies.length > 0) {
+                this.mythologies = mythologies;
+                console.log(`[Home View] Loaded ${mythologies.length} mythologies from cache manager`);
+
+                // Load counts from metadata collection in background
+                this.loadCountsInBackground();
             } else {
                 // Use fallback hardcoded list
-                console.warn('[Home View] No mythologies found in Firebase, using fallback');
+                console.warn('[Home View] No mythologies found, using fallback');
                 this.useFallbackData();
             }
 
@@ -230,6 +233,36 @@ class HomeView {
             console.error('[Home View] Error loading from Firebase:', error);
             console.log('[Home View] Using fallback mythologies');
             this.useFallbackData();
+        }
+    }
+
+    /**
+     * Load entity counts from metadata collection (background)
+     */
+    async loadCountsInBackground() {
+        try {
+            const metadata = await this.cache.getMetadata('mythology_counts');
+
+            if (metadata && metadata.length > 0) {
+                // Map metadata to mythologies
+                this.mythologies.forEach(myth => {
+                    const meta = metadata.find(m => m.mythology === myth.id);
+                    if (meta) {
+                        myth.counts = meta.counts || {
+                            deities: 0,
+                            heroes: 0,
+                            creatures: 0,
+                            total: 0
+                        };
+                    }
+                });
+                console.log('[Home View] Counts loaded from metadata');
+
+                // Update cache
+                this.saveMythologiesCache(this.mythologies);
+            }
+        } catch (error) {
+            console.warn('[Home View] Could not load counts from metadata:', error);
         }
     }
 
