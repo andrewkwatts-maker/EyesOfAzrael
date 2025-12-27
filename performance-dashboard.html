@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Dashboard - Eyes of Azrael</title>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="themes/theme-base.css">
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Firebase SDK (for testing) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    <script src="js/firebase-init.js"></script>
+
+    <!-- Performance Monitor -->
+    <script src="js/performance-monitor.js"></script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, rgba(147, 112, 219, 0.3), rgba(218, 165, 32, 0.2));
+            border: 2px solid #9370DB;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #c0b5f0, #daa520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(147, 112, 219, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .stat-card.warning {
+            border-color: rgba(251, 191, 36, 0.6);
+        }
+
+        .stat-card.error {
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+
+        .stat-card.success {
+            border-color: rgba(34, 197, 94, 0.6);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #c0c0c0;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #9370DB, #DAA520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-subtext {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 0.5rem;
+        }
+
+        .section {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #9370DB;
+            margin: 0;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(147, 112, 219, 0.2);
+        }
+
+        .table th {
+            color: #9370DB;
+            font-weight: 600;
+        }
+
+        .table tr:hover {
+            background: rgba(147, 112, 219, 0.1);
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid #22c55e;
+        }
+
+        .badge-warning {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid #fbbf24;
+        }
+
+        .badge-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .badge-info {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: linear-gradient(135deg, #9370DB, #8B7FDB);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(147, 112, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(147, 112, 219, 0.2);
+            border: 2px solid rgba(147, 112, 219, 0.4);
+            color: #9370DB;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-warning {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid #fbbf24;
+            color: #fbbf24;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid #3b82f6;
+            color: #3b82f6;
+        }
+
+        .waterfall-bar {
+            height: 24px;
+            background: linear-gradient(90deg, #9370DB, #DAA520);
+            border-radius: 4px;
+            position: relative;
+            margin: 4px 0;
+        }
+
+        .waterfall-label {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 0 0.5rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            color: white;
+            font-weight: 600;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            border-radius: 999px;
+            color: #22c55e;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .metric-bar {
+            height: 8px;
+            background: rgba(147, 112, 219, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .metric-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #9370DB, #DAA520);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1>⚡ Performance Dashboard</h1>
+                <div class="live-indicator">
+                    <span class="live-dot"></span>
+                    Live Monitoring
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn" onclick="refreshDashboard()">🔄 Refresh</button>
+                <button class="btn-secondary btn" onclick="exportMetrics()">📊 Export</button>
+                <button class="btn-secondary btn" onclick="clearMetrics()">🗑️ Clear</button>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="stats-grid">
+            <div class="stat-card" id="stat-page-load">
+                <div class="stat-label">Page Load Time</div>
+                <div class="stat-value" id="value-page-load">--</div>
+                <div class="stat-subtext">Target: &lt;3s</div>
+                <div class="metric-bar">
+                    <div class="metric-bar-fill" id="bar-page-load" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="stat-card" id="stat-fcp">
+                <div class="stat-label">First Contentful Paint</div>
+                <div class="stat-value" id="value-fcp">--</div>
+                <div class="stat-subtext">Target: &lt;2s</div>
+                <div class="metric-bar">
+                    <div class="metric-bar-fill" id="bar-fcp" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="stat-card" id="stat-tti">
+                <div class="stat-label">Time to Interactive</div>
+                <div class="stat-value" id="value-tti">--</div>
+                <div class="stat-subtext">Target: &lt;5s</div>
+                <div class="metric-bar">
+                    <div class="metric-bar-fill" id="bar-tti" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Firebase Queries</div>
+                <div class="stat-value" id="value-firebase-queries">0</div>
+                <div class="stat-subtext">Avg: <span id="value-firebase-avg">--</span>ms</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Total Resources</div>
+                <div class="stat-value" id="value-resources">0</div>
+                <div class="stat-subtext">Size: <span id="value-resources-size">--</span></div>
+            </div>
+
+            <div class="stat-card" id="stat-alerts">
+                <div class="stat-label">Performance Alerts</div>
+                <div class="stat-value" id="value-alerts">0</div>
+                <div class="stat-subtext">Warnings & Errors</div>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="section" id="alerts-section" style="display: none;">
+            <div class="section-header">
+                <h2 class="section-title">🚨 Performance Alerts</h2>
+            </div>
+            <div id="alerts-container"></div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid-2col">
+            <!-- Firebase Query Performance -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📊 Firebase Query Performance</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="firebase-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Resource Load Times -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📦 Resource Load Distribution</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="resources-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Timing Breakdown -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">⏱️ Navigation Timing Breakdown</h2>
+            </div>
+            <div class="chart-container" style="height: 400px;">
+                <canvas id="navigation-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Firebase Queries Table -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">🔥 Firebase Query Details</h2>
+                <span class="badge badge-info" id="firebase-count-badge">0 queries</span>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Collection</th>
+                            <th>Operation</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Results</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="firebase-table-body">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #999;">No Firebase queries yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Script Load Waterfall -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">📜 Script Loading Waterfall</h2>
+            </div>
+            <div id="waterfall-container">
+                <p style="color: #999; text-align: center;">Loading waterfall data...</p>
+            </div>
+        </div>
+
+        <!-- Resource Summary -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">🗂️ Resource Summary</h2>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Count</th>
+                            <th>Total Size</th>
+                            <th>Avg Duration</th>
+                            <th>Cached</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resource-summary-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let charts = {};
+        let refreshInterval;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDashboard();
+
+            // Auto-refresh every 2 seconds
+            refreshInterval = setInterval(refreshDashboard, 2000);
+
+            // Listen for performance alerts
+            window.addEventListener('performanceAlert', (event) => {
+                showAlert(event.detail);
+            });
+        });
+
+        function initializeDashboard() {
+            refreshDashboard();
+        }
+
+        function refreshDashboard() {
+            const metrics = window.performanceMonitor.getMetrics();
+            const summary = window.performanceMonitor.getSummary();
+
+            updateKeyMetrics(summary);
+            updateAlerts(metrics.alerts);
+            updateCharts(metrics);
+            updateFirebaseTable(metrics.firebase);
+            updateWaterfall(metrics.resources);
+            updateResourceSummary(metrics.resources);
+        }
+
+        function updateKeyMetrics(summary) {
+            // Page Load
+            const pageLoad = summary.pageLoad || 0;
+            document.getElementById('value-page-load').textContent = pageLoad > 0 ? `${Math.round(pageLoad)}ms` : '--';
+            updateMetricBar('bar-page-load', 'stat-page-load', pageLoad, 3000);
+
+            // First Contentful Paint
+            const fcp = summary.firstContentfulPaint || 0;
+            document.getElementById('value-fcp').textContent = fcp > 0 ? `${Math.round(fcp)}ms` : '--';
+            updateMetricBar('bar-fcp', 'stat-fcp', fcp, 2000);
+
+            // Time to Interactive
+            const tti = summary.timeToInteractive || 0;
+            document.getElementById('value-tti').textContent = tti > 0 ? `${Math.round(tti)}ms` : '--';
+            updateMetricBar('bar-tti', 'stat-tti', tti, 5000);
+
+            // Firebase
+            document.getElementById('value-firebase-queries').textContent = summary.firebaseQueries;
+            document.getElementById('value-firebase-avg').textContent =
+                summary.avgFirebaseQueryTime > 0 ? Math.round(summary.avgFirebaseQueryTime) : '--';
+
+            // Resources
+            document.getElementById('value-resources').textContent = summary.totalResources;
+            document.getElementById('value-resources-size').textContent = formatBytes(summary.totalSize);
+
+            // Alerts
+            document.getElementById('value-alerts').textContent = summary.alerts;
+            const alertCard = document.getElementById('stat-alerts');
+            if (summary.alerts > 0) {
+                alertCard.classList.add('warning');
+            } else {
+                alertCard.classList.remove('warning');
+            }
+        }
+
+        function updateMetricBar(barId, cardId, value, threshold) {
+            const percentage = Math.min((value / threshold) * 100, 100);
+            const bar = document.getElementById(barId);
+            const card = document.getElementById(cardId);
+
+            bar.style.width = `${percentage}%`;
+
+            // Update card status
+            card.classList.remove('success', 'warning', 'error');
+            if (value === 0) {
+                // No data yet
+            } else if (value < threshold * 0.7) {
+                card.classList.add('success');
+            } else if (value < threshold) {
+                card.classList.add('warning');
+            } else {
+                card.classList.add('error');
+            }
+        }
+
+        function updateAlerts(alerts) {
+            const section = document.getElementById('alerts-section');
+            const container = document.getElementById('alerts-container');
+
+            if (alerts.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+
+            const html = alerts.slice(-10).reverse().map(alert => {
+                const icon = alert.level === 'error' ? '❌' : alert.level === 'warning' ? '⚠️' : 'ℹ️';
+                const className = `alert-${alert.level}`;
+                const time = new Date(alert.timestamp).toLocaleTimeString();
+
+                return `
+                    <div class="alert ${className}">
+                        <span>${icon}</span>
+                        <div style="flex: 1;">
+                            <div>${alert.message}</div>
+                            <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 0.25rem;">${time}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        function updateCharts(metrics) {
+            updateFirebaseChart(metrics.firebase);
+            updateResourcesChart(metrics.resources);
+            updateNavigationChart(metrics.navigation);
+        }
+
+        function updateFirebaseChart(firebaseQueries) {
+            const ctx = document.getElementById('firebase-chart');
+
+            if (firebaseQueries.length === 0) {
+                return;
+            }
+
+            // Group by collection
+            const collections = {};
+            firebaseQueries.forEach(query => {
+                const collection = query.collection.split('/')[0];
+                if (!collections[collection]) {
+                    collections[collection] = [];
+                }
+                collections[collection].push(query.duration);
+            });
+
+            const labels = Object.keys(collections);
+            const avgTimes = labels.map(label => {
+                const times = collections[label];
+                return times.reduce((a, b) => a + b, 0) / times.length;
+            });
+
+            if (charts.firebase) {
+                charts.firebase.destroy();
+            }
+
+            charts.firebase = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Avg Query Time (ms)',
+                        data: avgTimes,
+                        backgroundColor: 'rgba(147, 112, 219, 0.6)',
+                        borderColor: '#9370DB',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#c0c0c0' },
+                            grid: { color: 'rgba(147, 112, 219, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#c0c0c0' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateResourcesChart(resources) {
+            const ctx = document.getElementById('resources-chart');
+
+            if (resources.length === 0) {
+                return;
+            }
+
+            // Group by type
+            const types = {};
+            resources.forEach(resource => {
+                if (!types[resource.type]) {
+                    types[resource.type] = 0;
+                }
+                types[resource.type]++;
+            });
+
+            const labels = Object.keys(types);
+            const counts = Object.values(types);
+
+            if (charts.resources) {
+                charts.resources.destroy();
+            }
+
+            charts.resources = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: [
+                            'rgba(147, 112, 219, 0.8)',
+                            'rgba(218, 165, 32, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(251, 191, 36, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { color: '#c0c0c0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateNavigationChart(navigation) {
+            const ctx = document.getElementById('navigation-chart');
+
+            if (!navigation.pageLoad) {
+                return;
+            }
+
+            const data = {
+                'DNS Lookup': navigation.dnsLookup || 0,
+                'TCP Connection': navigation.tcpConnection || 0,
+                'Server Response': navigation.serverResponse || 0,
+                'DOM Processing': navigation.domProcessing || 0
+            };
+
+            if (charts.navigation) {
+                charts.navigation.destroy();
+            }
+
+            charts.navigation = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data),
+                    datasets: [{
+                        label: 'Duration (ms)',
+                        data: Object.values(data),
+                        backgroundColor: 'rgba(218, 165, 32, 0.6)',
+                        borderColor: '#DAA520',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { color: '#c0c0c0' },
+                            grid: { color: 'rgba(147, 112, 219, 0.1)' }
+                        },
+                        y: {
+                            ticks: { color: '#c0c0c0' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateFirebaseTable(queries) {
+            const tbody = document.getElementById('firebase-table-body');
+            const badge = document.getElementById('firebase-count-badge');
+
+            badge.textContent = `${queries.length} queries`;
+
+            if (queries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">No Firebase queries yet</td></tr>';
+                return;
+            }
+
+            const html = queries.slice(-20).reverse().map(query => {
+                const status = query.success ?
+                    '<span class="badge badge-success">Success</span>' :
+                    '<span class="badge badge-error">Error</span>';
+
+                const durationClass = query.duration > 1000 ? 'badge-error' :
+                                     query.duration > 500 ? 'badge-warning' : 'badge-success';
+
+                const time = new Date(query.timestamp).toLocaleTimeString();
+
+                return `
+                    <tr>
+                        <td>${query.collection}</td>
+                        <td>${query.operation}</td>
+                        <td><span class="badge ${durationClass}">${Math.round(query.duration)}ms</span></td>
+                        <td>${status}</td>
+                        <td>${query.resultCount !== undefined ? query.resultCount : query.exists ? 'Yes' : 'No'}</td>
+                        <td>${time}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            tbody.innerHTML = html;
+        }
+
+        function updateWaterfall(resources) {
+            const container = document.getElementById('waterfall-container');
+
+            const scripts = resources
+                .filter(r => r.type === 'script')
+                .sort((a, b) => b.duration - a.duration)
+                .slice(0, 15);
+
+            if (scripts.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center;">No script data yet</p>';
+                return;
+            }
+
+            const maxDuration = Math.max(...scripts.map(s => s.duration));
+
+            const html = scripts.map(script => {
+                const name = script.name.split('/').pop();
+                const width = (script.duration / maxDuration) * 100;
+
+                return `
+                    <div style="margin-bottom: 0.5rem;">
+                        <div style="font-size: 0.75rem; color: #c0c0c0; margin-bottom: 0.25rem;">
+                            ${name} - ${Math.round(script.duration)}ms
+                        </div>
+                        <div class="waterfall-bar" style="width: ${width}%">
+                            <div class="waterfall-label">${Math.round(script.duration)}ms</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        function updateResourceSummary(resources) {
+            const tbody = document.getElementById('resource-summary-body');
+
+            // Group by type
+            const summary = {};
+            resources.forEach(resource => {
+                if (!summary[resource.type]) {
+                    summary[resource.type] = {
+                        count: 0,
+                        totalSize: 0,
+                        totalDuration: 0,
+                        cached: 0
+                    };
+                }
+                summary[resource.type].count++;
+                summary[resource.type].totalSize += resource.size;
+                summary[resource.type].totalDuration += resource.duration;
+                if (resource.cached) summary[resource.type].cached++;
+            });
+
+            const html = Object.keys(summary).map(type => {
+                const data = summary[type];
+                const avgDuration = data.totalDuration / data.count;
+
+                return `
+                    <tr>
+                        <td><strong>${type}</strong></td>
+                        <td>${data.count}</td>
+                        <td>${formatBytes(data.totalSize)}</td>
+                        <td>${Math.round(avgDuration)}ms</td>
+                        <td>${data.cached} / ${data.count}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            tbody.innerHTML = html;
+        }
+
+        function showAlert(alert) {
+            // Alert is already shown in the alerts section
+            console.log('Performance alert:', alert);
+        }
+
+        function exportMetrics() {
+            const report = window.performanceMonitor.exportReport();
+            const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `performance-report-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearMetrics() {
+            if (confirm('Are you sure you want to clear all metrics?')) {
+                window.performanceMonitor.clear();
+                refreshDashboard();
+            }
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            clearInterval(refreshInterval);
+        });
+    </script>
+</body>
+</html>

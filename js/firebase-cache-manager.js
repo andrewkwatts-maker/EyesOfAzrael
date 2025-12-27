@@ -1,643 +1,595 @@
 /**
- * Firebase Cache Manager - Eyes of Azrael
+ * Firebase Cache Manager
+ * Intelligent multi-layer caching system for Firebase queries
  *
- * Comprehensive client-side caching system for Firebase queries with:
- * - Hourly cache invalidation
- * - Version-based invalidation
- * - TTL management
- * - Size limits
- * - Metrics tracking
+ * Features:
+ * - Memory cache (fastest, session lifetime)
+ * - SessionStorage cache (tab lifetime)
+ * - LocalStorage cache (persistent)
+ * - TTL-based expiration
+ * - Cache invalidation
+ * - Performance metrics
+ * - Automatic cache warming
  *
- * @module FirebaseCacheManager
+ * Usage:
+ *   const cache = new FirebaseCacheManager();
+ *   const data = await cache.get('deities', 'zeus', { ttl: 300000 });
+ *   await cache.set('deities', 'zeus', data, { ttl: 300000 });
+ *   cache.invalidate('deities', 'zeus');
  */
 
 class FirebaseCacheManager {
-  /**
-   * Initialize the cache manager
-   * @param {Object} options - Configuration options
-   */
-  constructor(options = {}) {
-    this.options = {
-      storage: options.storage || 'localStorage', // 'localStorage' or 'sessionStorage'
-      maxSize: options.maxSize || 5 * 1024 * 1024, // 5MB default
-      defaultTTL: options.defaultTTL || 3600000, // 1 hour in milliseconds
-      keyPrefix: options.keyPrefix || 'eoa_cache_',
-      versionKey: options.versionKey || 'eoa_cache_version',
-      statsKey: options.statsKey || 'eoa_cache_stats',
-      enableMetrics: options.enableMetrics !== false,
-      enableLogging: options.enableLogging || false,
-      hourlyInvalidation: options.hourlyInvalidation !== false
-    };
+    constructor(options = {}) {
+        this.db = options.db || (typeof firebase !== 'undefined' && firebase.firestore());
 
-    // Get storage interface
-    this.storage = this.options.storage === 'sessionStorage'
-      ? window.sessionStorage
-      : window.localStorage;
+        // Memory cache (fastest, cleared on page reload)
+        this.memoryCache = new Map();
 
-    // Initialize metrics
-    this.stats = this.loadStats();
+        // Default TTL values (milliseconds)
+        this.defaultTTL = {
+            mythologies: 86400000,    // 24 hours - static content
+            metadata: 3600000,        // 1 hour - counts/stats
+            entities: 300000,         // 5 minutes - entity details
+            lists: 600000,            // 10 minutes - entity lists
+            search: 604800000,        // 7 days - search index
+            temporary: 60000          // 1 minute - temporary data
+        };
 
-    // Initialize version tracker
-    this.currentVersion = null;
+        // Performance metrics
+        this.metrics = {
+            hits: 0,
+            misses: 0,
+            sets: 0,
+            invalidations: 0,
+            queries: 0,
+            avgResponseTime: 0,
+            totalResponseTime: 0
+        };
 
-    // Cleanup expired entries on initialization
-    this.cleanupExpired();
+        // Load metrics from storage
+        this.loadMetrics();
 
-    // Setup hourly invalidation
-    if (this.options.hourlyInvalidation) {
-      this.setupHourlyInvalidation();
+        console.log('[CacheManager] Initialized with default TTLs:', this.defaultTTL);
     }
 
-    this.log('Cache manager initialized', this.options);
-  }
+    /**
+     * Get data from cache or fetch from Firebase
+     * @param {string} collection - Firestore collection name
+     * @param {string} id - Document ID
+     * @param {object} options - Cache options
+     * @returns {Promise<object|null>}
+     */
+    async get(collection, id, options = {}) {
+        const startTime = performance.now();
+        const cacheKey = this.generateKey(collection, id);
+        const ttl = options.ttl || this.getDefaultTTL(collection);
+        const forceRefresh = options.forceRefresh || false;
 
-  /**
-   * Get data from cache or execute query function
-   * @param {string} cacheKey - Unique cache key
-   * @param {Function} queryFn - Async function to execute if cache miss
-   * @param {Object} options - Cache options
-   * @returns {Promise<*>} Cached or fresh data
-   */
-  async get(cacheKey, queryFn, options = {}) {
-    const fullKey = this.options.keyPrefix + cacheKey;
-    const ttl = options.ttl || this.options.defaultTTL;
-    const bypassCache = options.bypassCache || false;
-    const tags = options.tags || [];
-
-    this.log(`Cache GET: ${cacheKey}`, { bypassCache, ttl });
-
-    // Check version first
-    if (!bypassCache && !(await this.isVersionValid())) {
-      this.log('Version mismatch detected, invalidating all caches');
-      this.invalidateAll();
-    }
-
-    // Try to get from cache
-    if (!bypassCache) {
-      const cached = this.getFromCache(fullKey);
-      if (cached !== null) {
-        this.recordHit();
-        this.log(`Cache HIT: ${cacheKey}`);
-        return cached.data;
-      }
-    }
-
-    // Cache miss - execute query
-    this.recordMiss();
-    this.log(`Cache MISS: ${cacheKey}`);
-
-    try {
-      const data = await queryFn();
-
-      // Store in cache
-      this.setInCache(fullKey, data, ttl, tags);
-
-      return data;
-    } catch (error) {
-      this.log(`Query error for ${cacheKey}:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get item from cache with expiry check
-   * @param {string} key - Cache key
-   * @returns {Object|null} Cached item or null
-   */
-  getFromCache(key) {
-    try {
-      const item = this.storage.getItem(key);
-      if (!item) {
-        return null;
-      }
-
-      const parsed = JSON.parse(item);
-
-      // Check expiry
-      if (Date.now() > parsed.expiry) {
-        this.log(`Cache expired: ${key}`);
-        this.storage.removeItem(key);
-        return null;
-      }
-
-      return parsed;
-    } catch (error) {
-      this.log(`Error reading cache ${key}:`, error);
-      return null;
-    }
-  }
-
-  /**
-   * Store item in cache with expiry
-   * @param {string} key - Cache key
-   * @param {*} data - Data to cache
-   * @param {number} ttl - Time to live in milliseconds
-   * @param {Array<string>} tags - Tags for categorization
-   */
-  setInCache(key, data, ttl, tags = []) {
-    try {
-      // Calculate expiry time
-      const expiry = this.options.hourlyInvalidation
-        ? this.getNextHourTimestamp()
-        : Date.now() + ttl;
-
-      const cacheItem = {
-        data,
-        expiry,
-        created: Date.now(),
-        ttl,
-        tags,
-        version: this.currentVersion
-      };
-
-      const serialized = JSON.stringify(cacheItem);
-
-      // Check size before storing
-      if (!this.canStore(serialized.length)) {
-        this.log('Cache full, cleaning up...');
-        this.cleanupLRU();
-      }
-
-      this.storage.setItem(key, serialized);
-      this.log(`Cache SET: ${key} (expires: ${new Date(expiry).toISOString()})`);
-
-      // Update stats
-      this.updateStorageSize();
-    } catch (error) {
-      this.log(`Error setting cache ${key}:`, error);
-
-      // Try to free up space if quota exceeded
-      if (error.name === 'QuotaExceededError') {
-        this.cleanupLRU();
         try {
-          this.storage.setItem(key, JSON.stringify({ data, expiry, created: Date.now(), ttl, tags }));
-        } catch (retryError) {
-          this.log('Failed to cache after cleanup:', retryError);
+            // Check if force refresh requested
+            if (!forceRefresh) {
+                // 1. Check memory cache first (fastest)
+                const memoryData = this.getFromMemory(cacheKey);
+                if (memoryData && !this.isExpired(memoryData, ttl)) {
+                    this.recordHit(startTime);
+                    console.log(`[CacheManager] =š Memory hit: ${cacheKey}`);
+                    return memoryData.data;
+                }
+
+                // 2. Check sessionStorage (tab lifetime)
+                const sessionData = this.getFromSessionStorage(cacheKey);
+                if (sessionData && !this.isExpired(sessionData, ttl)) {
+                    // Promote to memory cache
+                    this.memoryCache.set(cacheKey, sessionData);
+                    this.recordHit(startTime);
+                    console.log(`[CacheManager] =™ Session hit: ${cacheKey}`);
+                    return sessionData.data;
+                }
+
+                // 3. Check localStorage (persistent)
+                const localData = this.getFromLocalStorage(cacheKey);
+                if (localData && !this.isExpired(localData, ttl)) {
+                    // Promote to memory and session cache
+                    this.memoryCache.set(cacheKey, localData);
+                    this.setToSessionStorage(cacheKey, localData);
+                    this.recordHit(startTime);
+                    console.log(`[CacheManager] =› Local hit: ${cacheKey}`);
+                    return localData.data;
+                }
+            }
+
+            // 4. Cache miss - fetch from Firebase
+            this.recordMiss();
+            console.log(`[CacheManager] L Cache miss: ${cacheKey}, fetching from Firebase...`);
+
+            const data = await this.fetchFromFirebase(collection, id);
+
+            if (data) {
+                // Store in all cache layers
+                await this.set(collection, id, data, { ttl });
+
+                const responseTime = performance.now() - startTime;
+                this.recordQuery(responseTime);
+                console.log(`[CacheManager]  Fetched and cached: ${cacheKey} (${responseTime.toFixed(2)}ms)`);
+            }
+
+            return data;
+
+        } catch (error) {
+            console.error(`[CacheManager] Error getting ${cacheKey}:`, error);
+            throw error;
         }
-      }
     }
-  }
 
-  /**
-   * Calculate next hour boundary timestamp
-   * @returns {number} Timestamp of next hour
-   */
-  getNextHourTimestamp() {
-    const now = new Date();
-    const nextHour = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      now.getHours() + 1,
-      0, 0, 0
-    );
-    return nextHour.getTime();
-  }
+    /**
+     * Store data in cache
+     * @param {string} collection - Collection name
+     * @param {string} id - Document ID
+     * @param {object} data - Data to cache
+     * @param {object} options - Cache options
+     */
+    async set(collection, id, data, options = {}) {
+        const cacheKey = this.generateKey(collection, id);
+        const ttl = options.ttl || this.getDefaultTTL(collection);
 
-  /**
-   * Setup automatic hourly cache invalidation
-   */
-  setupHourlyInvalidation() {
-    const scheduleNextCleanup = () => {
-      const now = Date.now();
-      const nextHour = this.getNextHourTimestamp();
-      const delay = nextHour - now;
+        const cacheEntry = {
+            data: data,
+            timestamp: Date.now(),
+            ttl: ttl,
+            collection: collection,
+            id: id
+        };
 
-      this.log(`Next hourly cleanup scheduled in ${Math.round(delay / 60000)} minutes`);
+        try {
+            // Store in all layers
+            this.memoryCache.set(cacheKey, cacheEntry);
+            this.setToSessionStorage(cacheKey, cacheEntry);
+            this.setToLocalStorage(cacheKey, cacheEntry);
 
-      setTimeout(() => {
-        this.log('Hourly cache cleanup triggered');
-        this.cleanupExpired();
-        scheduleNextCleanup(); // Schedule next cleanup
-      }, delay);
-    };
+            this.metrics.sets++;
+            console.log(`[CacheManager] =¾ Cached: ${cacheKey} (TTL: ${ttl}ms)`);
 
-    scheduleNextCleanup();
-  }
-
-  /**
-   * Invalidate cache entries matching pattern
-   * @param {string|RegExp} pattern - Pattern to match keys
-   */
-  invalidate(pattern) {
-    const regex = pattern instanceof RegExp
-      ? pattern
-      : new RegExp(pattern.replace(/\*/g, '.*'));
-
-    let count = 0;
-    const keys = this.getAllCacheKeys();
-
-    keys.forEach(key => {
-      const shortKey = key.replace(this.options.keyPrefix, '');
-      if (regex.test(shortKey)) {
-        this.storage.removeItem(key);
-        count++;
-      }
-    });
-
-    this.log(`Invalidated ${count} cache entries matching pattern: ${pattern}`);
-    this.updateStorageSize();
-  }
-
-  /**
-   * Invalidate all cache entries
-   */
-  invalidateAll() {
-    const keys = this.getAllCacheKeys();
-    keys.forEach(key => this.storage.removeItem(key));
-
-    this.log(`Invalidated all ${keys.length} cache entries`);
-    this.updateStorageSize();
-  }
-
-  /**
-   * Invalidate cache entries by tag
-   * @param {string} tag - Tag to match
-   */
-  invalidateByTag(tag) {
-    let count = 0;
-    const keys = this.getAllCacheKeys();
-
-    keys.forEach(key => {
-      try {
-        const item = this.storage.getItem(key);
-        if (item) {
-          const parsed = JSON.parse(item);
-          if (parsed.tags && parsed.tags.includes(tag)) {
-            this.storage.removeItem(key);
-            count++;
-          }
+        } catch (error) {
+            console.error(`[CacheManager] Error caching ${cacheKey}:`, error);
         }
-      } catch (error) {
-        this.log(`Error checking tags for ${key}:`, error);
-      }
-    });
+    }
 
-    this.log(`Invalidated ${count} cache entries with tag: ${tag}`);
-    this.updateStorageSize();
-  }
+    /**
+     * Invalidate cached data
+     * @param {string} collection - Collection name
+     * @param {string} id - Document ID (optional, invalidates all if omitted)
+     */
+    invalidate(collection, id = null) {
+        if (id) {
+            // Invalidate specific document
+            const cacheKey = this.generateKey(collection, id);
+            this.memoryCache.delete(cacheKey);
+            sessionStorage.removeItem(cacheKey);
+            localStorage.removeItem(cacheKey);
+            console.log(`[CacheManager] =Ñ Invalidated: ${cacheKey}`);
+        } else {
+            // Invalidate entire collection
+            const prefix = `cache_${collection}_`;
 
-  /**
-   * Clean up expired cache entries
-   */
-  cleanupExpired() {
-    const now = Date.now();
-    let count = 0;
-    const keys = this.getAllCacheKeys();
+            // Clear from memory
+            for (const key of this.memoryCache.keys()) {
+                if (key.startsWith(prefix)) {
+                    this.memoryCache.delete(key);
+                }
+            }
 
-    keys.forEach(key => {
-      try {
-        const item = this.storage.getItem(key);
-        if (item) {
-          const parsed = JSON.parse(item);
-          if (now > parsed.expiry) {
-            this.storage.removeItem(key);
-            count++;
-          }
+            // Clear from sessionStorage
+            this.clearStorageByPrefix(sessionStorage, prefix);
+
+            // Clear from localStorage
+            this.clearStorageByPrefix(localStorage, prefix);
+
+            console.log(`[CacheManager] =Ñ Invalidated collection: ${collection}`);
         }
-      } catch (error) {
-        this.log(`Error cleaning up ${key}:`, error);
-        // Remove corrupted entries
-        this.storage.removeItem(key);
-        count++;
-      }
-    });
 
-    if (count > 0) {
-      this.log(`Cleaned up ${count} expired cache entries`);
-      this.updateStorageSize();
+        this.metrics.invalidations++;
     }
-  }
 
-  /**
-   * Clean up using LRU (Least Recently Used) strategy
-   * @param {number} targetSize - Target size in bytes (optional)
-   */
-  cleanupLRU(targetSize = null) {
-    const keys = this.getAllCacheKeys();
-    const items = [];
+    /**
+     * Clear all caches
+     */
+    clearAll() {
+        this.memoryCache.clear();
 
-    // Collect all cache items with their access time
-    keys.forEach(key => {
-      try {
-        const item = this.storage.getItem(key);
-        if (item) {
-          const parsed = JSON.parse(item);
-          items.push({
-            key,
-            created: parsed.created || 0,
-            size: item.length
-          });
+        // Clear cache entries from storage (keep metrics)
+        this.clearStorageByPrefix(sessionStorage, 'cache_');
+        this.clearStorageByPrefix(localStorage, 'cache_');
+
+        console.log('[CacheManager] =Ñ All caches cleared');
+    }
+
+    /**
+     * Fetch data from Firebase
+     */
+    async fetchFromFirebase(collection, id) {
+        if (!this.db) {
+            throw new Error('Firebase Firestore not initialized');
         }
-      } catch (error) {
-        this.log(`Error in LRU cleanup for ${key}:`, error);
-      }
-    });
 
-    // Sort by creation time (oldest first)
-    items.sort((a, b) => a.created - b.created);
+        try {
+            const doc = await this.db.collection(collection).doc(id).get();
 
-    // Remove oldest items until we reach target
-    const target = targetSize || (this.options.maxSize * 0.7); // Clean to 70% capacity
-    let currentSize = this.getCurrentSize();
-    let removed = 0;
+            if (!doc.exists) {
+                return null;
+            }
 
-    for (const item of items) {
-      if (currentSize <= target) {
-        break;
-      }
-      this.storage.removeItem(item.key);
-      currentSize -= item.size;
-      removed++;
-    }
+            return { id: doc.id, ...doc.data() };
 
-    this.log(`LRU cleanup removed ${removed} entries`);
-    this.updateStorageSize();
-  }
-
-  /**
-   * Check if we can store data of given size
-   * @param {number} size - Size in bytes
-   * @returns {boolean} Whether we can store
-   */
-  canStore(size) {
-    return (this.getCurrentSize() + size) <= this.options.maxSize;
-  }
-
-  /**
-   * Get current cache size in bytes
-   * @returns {number} Size in bytes
-   */
-  getCurrentSize() {
-    let size = 0;
-    const keys = this.getAllCacheKeys();
-
-    keys.forEach(key => {
-      const item = this.storage.getItem(key);
-      if (item) {
-        size += item.length;
-      }
-    });
-
-    return size;
-  }
-
-  /**
-   * Get all cache keys
-   * @returns {Array<string>} Array of cache keys
-   */
-  getAllCacheKeys() {
-    const keys = [];
-    for (let i = 0; i < this.storage.length; i++) {
-      const key = this.storage.key(i);
-      if (key && key.startsWith(this.options.keyPrefix)) {
-        keys.push(key);
-      }
-    }
-    return keys;
-  }
-
-  /**
-   * Check if cached version matches current version
-   * @returns {Promise<boolean>} Whether version is valid
-   */
-  async isVersionValid() {
-    // If no version tracking, always valid
-    if (!this.currentVersion) {
-      return true;
-    }
-
-    // Get stored version
-    const storedVersion = this.storage.getItem(this.options.versionKey);
-
-    if (!storedVersion) {
-      // First time - store current version
-      this.storage.setItem(this.options.versionKey, String(this.currentVersion));
-      return true;
-    }
-
-    return String(this.currentVersion) === storedVersion;
-  }
-
-  /**
-   * Update cached version
-   * @param {number|string} version - New version
-   */
-  setVersion(version) {
-    this.currentVersion = version;
-    this.storage.setItem(this.options.versionKey, String(version));
-    this.log(`Cache version updated to: ${version}`);
-  }
-
-  /**
-   * Record cache hit
-   */
-  recordHit() {
-    if (!this.options.enableMetrics) return;
-    this.stats.hits++;
-    this.stats.lastHit = Date.now();
-    this.saveStats();
-  }
-
-  /**
-   * Record cache miss
-   */
-  recordMiss() {
-    if (!this.options.enableMetrics) return;
-    this.stats.misses++;
-    this.stats.lastMiss = Date.now();
-    this.saveStats();
-  }
-
-  /**
-   * Get cache statistics
-   * @returns {Object} Cache statistics
-   */
-  getStats() {
-    const total = this.stats.hits + this.stats.misses;
-    const hitRate = total > 0 ? (this.stats.hits / total * 100).toFixed(2) : 0;
-    const size = this.getCurrentSize();
-    const keys = this.getAllCacheKeys();
-
-    return {
-      hits: this.stats.hits,
-      misses: this.stats.misses,
-      total,
-      hitRate: `${hitRate}%`,
-      size,
-      sizeFormatted: this.formatBytes(size),
-      maxSize: this.options.maxSize,
-      maxSizeFormatted: this.formatBytes(this.options.maxSize),
-      utilization: `${(size / this.options.maxSize * 100).toFixed(2)}%`,
-      entries: keys.length,
-      lastHit: this.stats.lastHit ? new Date(this.stats.lastHit).toISOString() : null,
-      lastMiss: this.stats.lastMiss ? new Date(this.stats.lastMiss).toISOString() : null,
-      version: this.currentVersion,
-      storage: this.options.storage
-    };
-  }
-
-  /**
-   * Get detailed cache entries info
-   * @returns {Array<Object>} Array of cache entry details
-   */
-  getCacheEntries() {
-    const keys = this.getAllCacheKeys();
-    const entries = [];
-
-    keys.forEach(key => {
-      try {
-        const item = this.storage.getItem(key);
-        if (item) {
-          const parsed = JSON.parse(item);
-          entries.push({
-            key: key.replace(this.options.keyPrefix, ''),
-            size: item.length,
-            sizeFormatted: this.formatBytes(item.length),
-            created: new Date(parsed.created).toISOString(),
-            expiry: new Date(parsed.expiry).toISOString(),
-            ttl: parsed.ttl,
-            tags: parsed.tags || [],
-            version: parsed.version
-          });
+        } catch (error) {
+            console.error(`[CacheManager] Firebase fetch error (${collection}/${id}):`, error);
+            throw error;
         }
-      } catch (error) {
-        this.log(`Error getting entry info for ${key}:`, error);
-      }
-    });
-
-    // Sort by creation time (newest first)
-    entries.sort((a, b) => new Date(b.created) - new Date(a.created));
-
-    return entries;
-  }
-
-  /**
-   * Load statistics from storage
-   * @returns {Object} Stats object
-   */
-  loadStats() {
-    try {
-      const stats = this.storage.getItem(this.options.statsKey);
-      if (stats) {
-        return JSON.parse(stats);
-      }
-    } catch (error) {
-      this.log('Error loading stats:', error);
     }
 
-    return {
-      hits: 0,
-      misses: 0,
-      lastHit: null,
-      lastMiss: null,
-      created: Date.now()
-    };
-  }
+    /**
+     * Fetch list from Firebase with caching
+     */
+    async getList(collection, filters = {}, options = {}) {
+        const cacheKey = this.generateListKey(collection, filters);
+        const ttl = options.ttl || this.defaultTTL.lists;
+        const forceRefresh = options.forceRefresh || false;
 
-  /**
-   * Save statistics to storage
-   */
-  saveStats() {
-    try {
-      this.storage.setItem(this.options.statsKey, JSON.stringify(this.stats));
-    } catch (error) {
-      this.log('Error saving stats:', error);
+        try {
+            // Check cache
+            if (!forceRefresh) {
+                const cached = this.getFromMemory(cacheKey) ||
+                               this.getFromSessionStorage(cacheKey) ||
+                               this.getFromLocalStorage(cacheKey);
+
+                if (cached && !this.isExpired(cached, ttl)) {
+                    this.recordHit(performance.now());
+                    console.log(`[CacheManager] =š List cache hit: ${cacheKey}`);
+                    return cached.data;
+                }
+            }
+
+            // Fetch from Firebase
+            this.recordMiss();
+            const startTime = performance.now();
+
+            let query = this.db.collection(collection);
+
+            // Apply filters
+            if (filters.mythology) {
+                query = query.where('mythology', '==', filters.mythology);
+            }
+
+            if (filters.type) {
+                query = query.where('type', '==', filters.type);
+            }
+
+            // Apply ordering
+            if (options.orderBy) {
+                const [field, direction = 'asc'] = options.orderBy.split(' ');
+                query = query.orderBy(field, direction);
+            }
+
+            // Apply limit (default 20)
+            const limit = options.limit || 20;
+            query = query.limit(limit);
+
+            // Apply pagination
+            if (options.startAfter) {
+                query = query.startAfter(options.startAfter);
+            }
+
+            const snapshot = await query.get();
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            // Cache the results
+            const cacheEntry = {
+                data: data,
+                timestamp: Date.now(),
+                ttl: ttl,
+                collection: collection,
+                filters: filters
+            };
+
+            this.memoryCache.set(cacheKey, cacheEntry);
+            this.setToSessionStorage(cacheKey, cacheEntry);
+
+            const responseTime = performance.now() - startTime;
+            this.recordQuery(responseTime);
+            console.log(`[CacheManager]  List fetched: ${cacheKey} (${data.length} items, ${responseTime.toFixed(2)}ms)`);
+
+            return data;
+
+        } catch (error) {
+            console.error(`[CacheManager] Error fetching list ${cacheKey}:`, error);
+            throw error;
+        }
     }
-  }
 
-  /**
-   * Update storage size in stats
-   */
-  updateStorageSize() {
-    this.stats.currentSize = this.getCurrentSize();
-    this.saveStats();
-  }
+    /**
+     * Get metadata (counts, stats)
+     */
+    async getMetadata(type, id = null) {
+        const cacheKey = id ? `cache_metadata_${type}_${id}` : `cache_metadata_${type}`;
+        const ttl = this.defaultTTL.metadata;
 
-  /**
-   * Reset all statistics
-   */
-  resetStats() {
-    this.stats = {
-      hits: 0,
-      misses: 0,
-      lastHit: null,
-      lastMiss: null,
-      created: Date.now(),
-      currentSize: this.getCurrentSize()
-    };
-    this.saveStats();
-    this.log('Statistics reset');
-  }
+        try {
+            // Check cache
+            const cached = this.getFromMemory(cacheKey) ||
+                          this.getFromLocalStorage(cacheKey);
 
-  /**
-   * Format bytes to human-readable string
-   * @param {number} bytes - Bytes to format
-   * @returns {string} Formatted string
-   */
-  formatBytes(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-  }
+            if (cached && !this.isExpired(cached, ttl)) {
+                this.recordHit(performance.now());
+                return cached.data;
+            }
 
-  /**
-   * Generate cache key from query parameters
-   * @param {string} collection - Collection name
-   * @param {Object} params - Query parameters
-   * @returns {string} Cache key
-   */
-  static generateKey(collection, params = {}) {
-    const sortedParams = Object.keys(params)
-      .sort()
-      .reduce((acc, key) => {
-        acc[key] = params[key];
-        return acc;
-      }, {});
+            // Fetch from Firebase metadata collection
+            this.recordMiss();
 
-    const paramString = JSON.stringify(sortedParams);
-    return `${collection}_${this.hashString(paramString)}`;
-  }
+            let data;
+            if (id) {
+                const doc = await this.db.collection('metadata').doc(`${type}_${id}`).get();
+                data = doc.exists ? doc.data() : null;
+            } else {
+                const snapshot = await this.db.collection('metadata')
+                    .where('type', '==', type)
+                    .get();
+                data = snapshot.docs.map(doc => doc.data());
+            }
 
-  /**
-   * Simple string hash function
-   * @param {string} str - String to hash
-   * @returns {string} Hash string
-   */
-  static hashString(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
+            if (data) {
+                const cacheEntry = {
+                    data: data,
+                    timestamp: Date.now(),
+                    ttl: ttl
+                };
+
+                this.memoryCache.set(cacheKey, cacheEntry);
+                this.setToLocalStorage(cacheKey, cacheEntry);
+            }
+
+            return data;
+
+        } catch (error) {
+            console.error(`[CacheManager] Error fetching metadata:`, error);
+            return null;
+        }
     }
-    return Math.abs(hash).toString(36);
-  }
 
-  /**
-   * Log message if logging enabled
-   * @param {...*} args - Arguments to log
-   */
-  log(...args) {
-    if (this.options.enableLogging) {
-      console.log('[CacheManager]', ...args);
+    /**
+     * Warm cache for frequently accessed data
+     */
+    async warmCache() {
+        console.log('[CacheManager] =% Warming cache...');
+
+        try {
+            // Warm mythology list
+            const mythologies = await this.getList('mythologies', {}, { ttl: this.defaultTTL.mythologies });
+            console.log(`[CacheManager] Cached ${mythologies.length} mythologies`);
+
+            // Warm metadata
+            const metadata = await this.getMetadata('mythology_counts');
+            console.log(`[CacheManager] Cached mythology metadata`);
+
+            console.log('[CacheManager] =% Cache warming complete');
+
+        } catch (error) {
+            console.error('[CacheManager] Error warming cache:', error);
+        }
     }
-  }
 
-  /**
-   * Clear all cache data and reset
-   */
-  destroy() {
-    this.invalidateAll();
-    this.storage.removeItem(this.options.versionKey);
-    this.storage.removeItem(this.options.statsKey);
-    this.log('Cache manager destroyed');
-  }
+    /**
+     * Get cache statistics
+     */
+    getStats() {
+        const hitRate = this.metrics.hits + this.metrics.misses > 0
+            ? (this.metrics.hits / (this.metrics.hits + this.metrics.misses) * 100).toFixed(2)
+            : 0;
+
+        return {
+            ...this.metrics,
+            hitRate: hitRate + '%',
+            memoryCacheSize: this.memoryCache.size,
+            avgResponseTime: this.metrics.queries > 0
+                ? (this.metrics.totalResponseTime / this.metrics.queries).toFixed(2) + 'ms'
+                : '0ms'
+        };
+    }
+
+    /**
+     * Print statistics
+     */
+    printStats() {
+        const stats = this.getStats();
+        console.log('[CacheManager] =Ê Performance Statistics:');
+        console.log(`  Cache Hits: ${stats.hits} (${stats.hitRate})`);
+        console.log(`  Cache Misses: ${stats.misses}`);
+        console.log(`  Cache Sets: ${stats.sets}`);
+        console.log(`  Invalidations: ${stats.invalidations}`);
+        console.log(`  Firebase Queries: ${stats.queries}`);
+        console.log(`  Avg Response Time: ${stats.avgResponseTime}`);
+        console.log(`  Memory Cache Size: ${stats.memoryCacheSize} entries`);
+    }
+
+    // ==================== HELPER METHODS ====================
+
+    generateKey(collection, id) {
+        return `cache_${collection}_${id}`;
+    }
+
+    generateListKey(collection, filters) {
+        const filterStr = Object.entries(filters)
+            .sort()
+            .map(([k, v]) => `${k}:${v}`)
+            .join('_');
+        return `cache_list_${collection}_${filterStr}`;
+    }
+
+    getDefaultTTL(collection) {
+        return this.defaultTTL[collection] || this.defaultTTL.temporary;
+    }
+
+    isExpired(cacheEntry, ttl) {
+        if (!cacheEntry || !cacheEntry.timestamp) return true;
+        const age = Date.now() - cacheEntry.timestamp;
+        return age > ttl;
+    }
+
+    getFromMemory(key) {
+        return this.memoryCache.get(key);
+    }
+
+    getFromSessionStorage(key) {
+        try {
+            const item = sessionStorage.getItem(key);
+            return item ? JSON.parse(item) : null;
+        } catch (error) {
+            console.warn(`[CacheManager] SessionStorage read error (${key}):`, error);
+            return null;
+        }
+    }
+
+    getFromLocalStorage(key) {
+        try {
+            const item = localStorage.getItem(key);
+            return item ? JSON.parse(item) : null;
+        } catch (error) {
+            console.warn(`[CacheManager] LocalStorage read error (${key}):`, error);
+            return null;
+        }
+    }
+
+    setToSessionStorage(key, data) {
+        try {
+            sessionStorage.setItem(key, JSON.stringify(data));
+        } catch (error) {
+            if (error.name === 'QuotaExceededError') {
+                console.warn('[CacheManager] SessionStorage quota exceeded, clearing old entries');
+                this.clearOldestEntries(sessionStorage);
+                // Retry
+                try {
+                    sessionStorage.setItem(key, JSON.stringify(data));
+                } catch (retryError) {
+                    console.error('[CacheManager] SessionStorage write failed after cleanup');
+                }
+            }
+        }
+    }
+
+    setToLocalStorage(key, data) {
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+        } catch (error) {
+            if (error.name === 'QuotaExceededError') {
+                console.warn('[CacheManager] LocalStorage quota exceeded, clearing old entries');
+                this.clearOldestEntries(localStorage);
+                // Retry
+                try {
+                    localStorage.setItem(key, JSON.stringify(data));
+                } catch (retryError) {
+                    console.error('[CacheManager] LocalStorage write failed after cleanup');
+                }
+            }
+        }
+    }
+
+    clearStorageByPrefix(storage, prefix) {
+        const keysToRemove = [];
+
+        for (let i = 0; i < storage.length; i++) {
+            const key = storage.key(i);
+            if (key && key.startsWith(prefix)) {
+                keysToRemove.push(key);
+            }
+        }
+
+        keysToRemove.forEach(key => storage.removeItem(key));
+    }
+
+    clearOldestEntries(storage) {
+        const entries = [];
+
+        for (let i = 0; i < storage.length; i++) {
+            const key = storage.key(i);
+            if (key && key.startsWith('cache_')) {
+                try {
+                    const data = JSON.parse(storage.getItem(key));
+                    entries.push({ key, timestamp: data.timestamp || 0 });
+                } catch (error) {
+                    // Invalid entry, mark for removal
+                    entries.push({ key, timestamp: 0 });
+                }
+            }
+        }
+
+        // Sort by timestamp and remove oldest 25%
+        entries.sort((a, b) => a.timestamp - b.timestamp);
+        const toRemove = Math.ceil(entries.length * 0.25);
+
+        for (let i = 0; i < toRemove; i++) {
+            storage.removeItem(entries[i].key);
+        }
+
+        console.log(`[CacheManager] Cleared ${toRemove} oldest entries from storage`);
+    }
+
+    recordHit(startTime) {
+        this.metrics.hits++;
+        const responseTime = performance.now() - startTime;
+        this.recordQuery(responseTime);
+    }
+
+    recordMiss() {
+        this.metrics.misses++;
+    }
+
+    recordQuery(responseTime) {
+        this.metrics.queries++;
+        this.metrics.totalResponseTime += responseTime;
+        this.metrics.avgResponseTime = this.metrics.totalResponseTime / this.metrics.queries;
+
+        // Save metrics periodically (every 10 queries)
+        if (this.metrics.queries % 10 === 0) {
+            this.saveMetrics();
+        }
+    }
+
+    saveMetrics() {
+        try {
+            localStorage.setItem('cache_metrics', JSON.stringify(this.metrics));
+        } catch (error) {
+            // Metrics are not critical, ignore errors
+        }
+    }
+
+    loadMetrics() {
+        try {
+            const saved = localStorage.getItem('cache_metrics');
+            if (saved) {
+                this.metrics = { ...this.metrics, ...JSON.parse(saved) };
+            }
+        } catch (error) {
+            // Ignore errors
+        }
+    }
 }
 
-// Export for use in other modules
+// Create global instance
+if (typeof window !== 'undefined') {
+    window.FirebaseCacheManager = FirebaseCacheManager;
+
+    // Auto-initialize on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.cacheManager = new FirebaseCacheManager();
+            console.log('[CacheManager] Global instance created: window.cacheManager');
+        });
+    } else {
+        window.cacheManager = new FirebaseCacheManager();
+        console.log('[CacheManager] Global instance created: window.cacheManager');
+    }
+}
+
+// Export for modules
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = FirebaseCacheManager;
+    module.exports = FirebaseCacheManager;
 }

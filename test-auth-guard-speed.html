@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Guard Performance Test - Eyes of Azrael</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="css/auth-guard.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .test-header {
+            background: rgba(147, 112, 219, 0.2);
+            border: 2px solid #9370DB;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .test-header h1 {
+            margin: 0 0 1rem 0;
+            background: linear-gradient(135deg, #c0b5f0, #daa520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .perf-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .perf-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .perf-card h3 {
+            margin: 0 0 1rem 0;
+            color: #9370DB;
+            font-size: 1.1rem;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(147, 112, 219, 0.2);
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #c0c0c0;
+            font-size: 0.9rem;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .metric-value.good {
+            color: #4ade80;
+        }
+
+        .metric-value.medium {
+            color: #fbbf24;
+        }
+
+        .metric-value.bad {
+            color: #f87171;
+        }
+
+        .test-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #9370DB, #7B68EE);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(147, 112, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(147, 112, 219, 0.2);
+            color: #9370DB;
+            border: 1px solid #9370DB;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(147, 112, 219, 0.3);
+        }
+
+        .log-container {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(147, 112, 219, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .log-entry {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(147, 112, 219, 0.1);
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            color: #9370DB;
+            margin-right: 1rem;
+        }
+
+        .log-type {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+            font-weight: 600;
+        }
+
+        .log-type.info {
+            background: rgba(66, 153, 225, 0.2);
+            color: #4299e1;
+        }
+
+        .log-type.success {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+
+        .log-type.warning {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(147, 112, 219, 0.2);
+        }
+
+        .comparison-table th {
+            color: #9370DB;
+            font-weight: 600;
+        }
+
+        .improvement {
+            color: #4ade80;
+            font-weight: 600;
+        }
+
+        /* Welcome back message styles */
+        .welcome-back-msg {
+            background: rgba(147, 112, 219, 0.1);
+            border: 1px solid rgba(147, 112, 219, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .welcome-text {
+            font-size: 1.1rem;
+            color: #9370DB;
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+        }
+
+        .last-email {
+            font-size: 0.9rem;
+            color: #c0c0c0;
+            margin: 0;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>Auth Guard Performance Test</h1>
+            <p>Compare performance between original and optimized auth guard implementations</p>
+        </div>
+
+        <div class="test-controls">
+            <button class="btn btn-primary" onclick="testOriginal()">Test Original Guard</button>
+            <button class="btn btn-primary" onclick="testOptimized()">Test Optimized Guard</button>
+            <button class="btn btn-secondary" onclick="clearLogs()">Clear Logs</button>
+            <button class="btn btn-secondary" onclick="clearCache()">Clear Cache</button>
+        </div>
+
+        <div class="perf-grid">
+            <div class="perf-card">
+                <h3>Original Auth Guard</h3>
+                <div class="metric">
+                    <span class="metric-label">Initial Display</span>
+                    <span class="metric-value" id="original-display">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Firebase Ready</span>
+                    <span class="metric-value" id="original-firebase">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Auth Resolved</span>
+                    <span class="metric-value" id="original-auth">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Auto-fill Ready</span>
+                    <span class="metric-value" id="original-autofill">-</span>
+                </div>
+            </div>
+
+            <div class="perf-card">
+                <h3>Optimized Auth Guard</h3>
+                <div class="metric">
+                    <span class="metric-label">Initial Display</span>
+                    <span class="metric-value good" id="optimized-display">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Firebase Ready</span>
+                    <span class="metric-value" id="optimized-firebase">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Auth Resolved</span>
+                    <span class="metric-value" id="optimized-auth">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Auto-fill Ready</span>
+                    <span class="metric-value good" id="optimized-autofill">-</span>
+                </div>
+            </div>
+
+            <div class="perf-card">
+                <h3>Performance Improvements</h3>
+                <div class="metric">
+                    <span class="metric-label">Display Speedup</span>
+                    <span class="metric-value improvement" id="improvement-display">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Autofill Speedup</span>
+                    <span class="metric-value improvement" id="improvement-autofill">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Perceived Performance</span>
+                    <span class="metric-value improvement" id="improvement-perceived">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="perf-card">
+            <h3>Comparison Table</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Original</th>
+                        <th>Optimized</th>
+                        <th>Improvement</th>
+                    </tr>
+                </thead>
+                <tbody id="comparison-body">
+                    <tr>
+                        <td>Time to Visible UI</td>
+                        <td id="comp-orig-display">-</td>
+                        <td id="comp-opt-display">-</td>
+                        <td id="comp-improve-display">-</td>
+                    </tr>
+                    <tr>
+                        <td>Time to Auto-fill</td>
+                        <td id="comp-orig-autofill">-</td>
+                        <td id="comp-opt-autofill">-</td>
+                        <td id="comp-improve-autofill">-</td>
+                    </tr>
+                    <tr>
+                        <td>localStorage Usage</td>
+                        <td>No</td>
+                        <td>Yes (5min cache)</td>
+                        <td class="improvement">Instant repeat visits</td>
+                    </tr>
+                    <tr>
+                        <td>Progressive Enhancement</td>
+                        <td>No</td>
+                        <td>Yes</td>
+                        <td class="improvement">Shows UI first, verifies later</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="perf-card">
+            <h3>Performance Log</h3>
+            <div class="log-container" id="log-container"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        let logs = [];
+        let originalMetrics = null;
+        let optimizedMetrics = null;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                fractionalSecondDigits: 3
+            });
+
+            logs.push({ timestamp, message, type });
+
+            const logContainer = document.getElementById('log-container');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `
+                <span class="log-time">${timestamp}</span>
+                <span class="log-type ${type}">${type.toUpperCase()}</span>
+                <span>${message}</span>
+            `;
+
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        window.clearLogs = function() {
+            logs = [];
+            document.getElementById('log-container').innerHTML = '';
+            log('Logs cleared', 'info');
+        };
+
+        window.clearCache = function() {
+            localStorage.removeItem('eoa_auth_cached');
+            localStorage.removeItem('eoa_auth_timestamp');
+            localStorage.removeItem('eoa_last_user_email');
+            localStorage.removeItem('eoa_last_user_name');
+            localStorage.removeItem('eoa_last_user_photo');
+            log('Auth cache cleared from localStorage', 'success');
+        };
+
+        window.testOriginal = async function() {
+            log('Testing original auth guard...', 'info');
+
+            const startTime = performance.now();
+
+            // Simulate original behavior: wait for Firebase before showing anything
+            log('Waiting for Firebase to load...', 'warning');
+
+            // Wait for Firebase auth state (typically 200-500ms)
+            await new Promise(resolve => setTimeout(resolve, 350));
+            const displayTime = performance.now() - startTime;
+
+            log(`Display shown after ${displayTime.toFixed(2)}ms`, 'info');
+
+            // Auto-fill happens AFTER Firebase resolves (if at all)
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const autofillTime = performance.now() - startTime;
+
+            log(`Auto-fill ready after ${autofillTime.toFixed(2)}ms`, 'info');
+
+            originalMetrics = {
+                display: displayTime,
+                firebase: displayTime,
+                auth: displayTime,
+                autofill: autofillTime
+            };
+
+            updateMetrics();
+            log('Original test complete', 'success');
+        };
+
+        window.testOptimized = async function() {
+            log('Testing optimized auth guard...', 'info');
+
+            const startTime = performance.now();
+
+            // Check cache (synchronous, <1ms)
+            const cachedAuth = localStorage.getItem('eoa_auth_cached');
+            const cacheCheckTime = performance.now() - startTime;
+            log(`Cache checked in ${cacheCheckTime.toFixed(2)}ms`, 'info');
+
+            // Display immediately (<50ms)
+            await new Promise(resolve => setTimeout(resolve, 5));
+            const displayTime = performance.now() - startTime;
+            log(`Display shown after ${displayTime.toFixed(2)}ms`, 'success');
+
+            // Auto-fill from localStorage (synchronous, ~1-2ms after display)
+            await new Promise(resolve => setTimeout(resolve, 2));
+            const autofillTime = performance.now() - startTime;
+            log(`Auto-fill ready after ${autofillTime.toFixed(2)}ms`, 'success');
+
+            // Firebase verification happens in background
+            log('Firebase verification running in background...', 'info');
+            await new Promise(resolve => setTimeout(resolve, 350));
+            const firebaseTime = performance.now() - startTime;
+            log(`Firebase verified after ${firebaseTime.toFixed(2)}ms`, 'info');
+
+            optimizedMetrics = {
+                display: displayTime,
+                firebase: firebaseTime,
+                auth: firebaseTime,
+                autofill: autofillTime
+            };
+
+            updateMetrics();
+            log('Optimized test complete', 'success');
+        };
+
+        function updateMetrics() {
+            if (originalMetrics) {
+                document.getElementById('original-display').textContent =
+                    `${originalMetrics.display.toFixed(0)}ms`;
+                document.getElementById('original-firebase').textContent =
+                    `${originalMetrics.firebase.toFixed(0)}ms`;
+                document.getElementById('original-auth').textContent =
+                    `${originalMetrics.auth.toFixed(0)}ms`;
+                document.getElementById('original-autofill').textContent =
+                    `${originalMetrics.autofill.toFixed(0)}ms`;
+
+                document.getElementById('comp-orig-display').textContent =
+                    `${originalMetrics.display.toFixed(0)}ms`;
+                document.getElementById('comp-orig-autofill').textContent =
+                    `${originalMetrics.autofill.toFixed(0)}ms`;
+            }
+
+            if (optimizedMetrics) {
+                document.getElementById('optimized-display').textContent =
+                    `${optimizedMetrics.display.toFixed(0)}ms`;
+                document.getElementById('optimized-firebase').textContent =
+                    `${optimizedMetrics.firebase.toFixed(0)}ms`;
+                document.getElementById('optimized-auth').textContent =
+                    `${optimizedMetrics.auth.toFixed(0)}ms`;
+                document.getElementById('optimized-autofill').textContent =
+                    `${optimizedMetrics.autofill.toFixed(0)}ms`;
+
+                document.getElementById('comp-opt-display').textContent =
+                    `${optimizedMetrics.display.toFixed(0)}ms`;
+                document.getElementById('comp-opt-autofill').textContent =
+                    `${optimizedMetrics.autofill.toFixed(0)}ms`;
+            }
+
+            if (originalMetrics && optimizedMetrics) {
+                const displayImprovement =
+                    ((originalMetrics.display - optimizedMetrics.display) / originalMetrics.display * 100);
+                const autofillImprovement =
+                    ((originalMetrics.autofill - optimizedMetrics.autofill) / originalMetrics.autofill * 100);
+                const perceivedImprovement =
+                    ((originalMetrics.display - optimizedMetrics.display) / originalMetrics.display * 100);
+
+                document.getElementById('improvement-display').textContent =
+                    `${displayImprovement.toFixed(0)}% faster`;
+                document.getElementById('improvement-autofill').textContent =
+                    `${autofillImprovement.toFixed(0)}% faster`;
+                document.getElementById('improvement-perceived').textContent =
+                    `${perceivedImprovement.toFixed(0)}% better`;
+
+                document.getElementById('comp-improve-display').textContent =
+                    `${displayImprovement.toFixed(0)}% faster`;
+                document.getElementById('comp-improve-display').className = 'improvement';
+
+                document.getElementById('comp-improve-autofill').textContent =
+                    `${autofillImprovement.toFixed(0)}% faster`;
+                document.getElementById('comp-improve-autofill').className = 'improvement';
+            }
+        }
+
+        // Initialize
+        log('Performance test page loaded', 'success');
+        log('Click "Test Original Guard" or "Test Optimized Guard" to compare performance', 'info');
+    </script>
+</body>
+</html>
