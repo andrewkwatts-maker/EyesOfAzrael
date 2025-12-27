@@ -497,12 +497,15 @@ export function getPerformanceMetrics() {
     };
 }
 
-// PHASE 1: Execute instantly when script loads (synchronous)
-instantDisplay();
-
-// PHASE 2: Set up Firebase verification (async, after DOM ready)
+// PHASE 1 & 2: Execute when DOM body is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupAuthGuard);
+    // DOM not ready yet - wait for DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+        instantDisplay();
+        setupAuthGuard();
+    });
 } else {
+    // DOM is already ready - execute immediately
+    instantDisplay();
     setupAuthGuard();
 }

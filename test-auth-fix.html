@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Fix Test - Eyes of Azrael</title>
+
+    <style>
+        :root {
+            --color-bg-primary: #0a0e27;
+            --color-bg-card: #1a1f3a;
+            --color-bg-card-rgb: 26, 31, 58;
+            --color-text-primary: #f8f9fa;
+            --color-text-secondary: #adb5bd;
+            --color-primary: #8b7fff;
+            --color-primary-rgb: 139, 127, 255;
+            --color-secondary: #ff7eb6;
+            --color-secondary-rgb: 255, 126, 182;
+            --color-border-primary: #2a2f4a;
+            --color-border-primary-rgb: 42, 47, 74;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+        }
+
+        #main-content {
+            padding: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1f3a;
+            padding: 1rem;
+            border-top: 1px solid #2a2f4a;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .status-item {
+            display: inline-block;
+            margin-right: 2rem;
+        }
+
+        .status-item.pass { color: #51cf66; }
+        .status-item.fail { color: #ff6b6b; }
+    </style>
+
+    <!-- Auth Guard CSS -->
+    <link rel="stylesheet" href="css/auth-guard.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+
+    <!-- Auth Guard (THE FIX) -->
+    <script src="js/auth-guard-simple.js" type="module"></script>
+</head>
+<body>
+    <div id="main-content">
+        <h1>Auth Fix Test Page</h1>
+        <p>If you see this without logging in, the auth guard is broken.</p>
+        <p>If you see a login popup, the auth guard is working!</p>
+
+        <h2>Expected Behavior:</h2>
+        <ul>
+            <li>✅ Login popup should appear immediately</li>
+            <li>✅ Main content should be hidden behind popup</li>
+            <li>✅ After login, popup should fade out and show content</li>
+        </ul>
+    </div>
+
+    <div class="status-bar" id="statusBar">
+        <span class="status-item" id="status1">⏳ Waiting for auth guard...</span>
+    </div>
+
+    <script>
+        // Monitor auth guard execution
+        let authOverlayDetected = false;
+        let mainContentHidden = false;
+
+        // Check every 100ms for 3 seconds
+        let checks = 0;
+        const maxChecks = 30;
+
+        const checkInterval = setInterval(() => {
+            checks++;
+
+            const overlay = document.getElementById('auth-overlay');
+            const mainContent = document.getElementById('main-content');
+
+            if (overlay && overlay.style.display === 'flex') {
+                authOverlayDetected = true;
+            }
+
+            if (mainContent && mainContent.style.display === 'none') {
+                mainContentHidden = true;
+            }
+
+            // Update status
+            const statusBar = document.getElementById('status1');
+            if (authOverlayDetected && mainContentHidden) {
+                statusBar.className = 'status-item pass';
+                statusBar.textContent = '✅ Auth guard working! Login popup shown.';
+                clearInterval(checkInterval);
+            } else if (checks >= maxChecks) {
+                statusBar.className = 'status-item fail';
+                statusBar.textContent = `❌ Auth guard failed. Overlay: ${!!overlay}, Main hidden: ${mainContentHidden}`;
+                clearInterval(checkInterval);
+            } else {
+                statusBar.textContent = `⏳ Checking... (${checks}/${maxChecks}) Overlay: ${authOverlayDetected}, Hidden: ${mainContentHidden}`;
+            }
+        }, 100);
+
+        // Log to console
+        console.log('[Test] Page loaded, monitoring auth guard...');
+    </script>
+</body>
+</html>
