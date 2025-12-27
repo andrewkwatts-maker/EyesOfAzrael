@@ -1,150 +1,49 @@
 /**
- * Home Page View
+ * Home Page View with Shader Activation
  * Displays mythology topic cards loaded from Firebase
+ * ENHANCED: Explicitly activates shader background on render
  */
 
 class HomeView {
     constructor(firestore) {
         this.db = firestore;
         this.mythologies = [];
-        this.loadingTimeout = null;
-        this.loadingStartTime = null;
-        this.minLoadingTime = 300; // Minimum time to show spinner (prevents flash)
-        this.maxLoadingTime = 5000; // Timeout after 5 seconds
     }
 
     /**
-     * Render the home page with enhanced loading states
+     * Render the home page
      */
     async render(container) {
         console.log('[Home View] Rendering home page...');
-        this.loadingStartTime = Date.now();
 
-        // Show loading state with ARIA attributes
+        // Show loading state
         container.innerHTML = `
-            <div class="loading-container" role="status" aria-live="polite" aria-label="Loading mythologies">
-                <div class="spinner-container" aria-hidden="true">
+            <div class="loading-container">
+                <div class="spinner-container">
                     <div class="spinner-ring"></div>
                     <div class="spinner-ring"></div>
                     <div class="spinner-ring"></div>
                 </div>
                 <p class="loading-message">Loading mythologies...</p>
-                <p class="loading-submessage">Connecting to Firebase...</p>
             </div>
         `;
-
-        // Set timeout fallback
-        this.loadingTimeout = setTimeout(() => {
-            this.handleLoadingTimeout(container);
-        }, this.maxLoadingTime);
 
         try {
             // Load mythologies from Firebase
             await this.loadMythologies();
 
-            // Clear timeout
-            clearTimeout(this.loadingTimeout);
+            // Render home page content
+            container.innerHTML = this.getHomeHTML();
 
-            // Ensure minimum loading time for smooth UX
-            const elapsedTime = Date.now() - this.loadingStartTime;
-            if (elapsedTime < this.minLoadingTime) {
-                await this.delay(this.minLoadingTime - elapsedTime);
-            }
+            // ENHANCEMENT: Activate shader background
+            this.activateShaderBackground();
 
-            // Smooth transition to content
-            await this.transitionToContent(container);
+            // Add event listeners
+            this.attachEventListeners();
 
         } catch (error) {
-            clearTimeout(this.loadingTimeout);
             console.error('[Home View] Error rendering home page:', error);
-            this.showError(container, error);
-        }
-    }
-
-    /**
-     * Smooth transition from loading to content
-     */
-    async transitionToContent(container) {
-        // Add fade-out to loading spinner
-        const loadingContainer = container.querySelector('.loading-container');
-        if (loadingContainer) {
-            loadingContainer.classList.add('loading-fade-out');
-            await this.delay(300);
-        }
-
-        // Render content with fade-in
-        container.innerHTML = this.getHomeHTML();
-        const homeView = container.querySelector('.home-view');
-        if (homeView) {
-            homeView.classList.add('loading-fade-in');
-        }
-
-        // ENHANCEMENT: Activate shader background
-        this.activateShaderBackground();
-
-        // Add event listeners
-        this.attachEventListeners();
-
-        // Save to cache
-        this.saveMythologiesCache(this.mythologies);
-    }
-
-    /**
-     * Handle loading timeout (>5 seconds)
-     */
-    handleLoadingTimeout(container) {
-        console.warn('[Home View] Loading timeout - Firebase taking too long');
-
-        // Check if we already have data (slow but successful load)
-        if (this.mythologies.length > 0) {
-            this.transitionToContent(container);
-            return;
-        }
-
-        // Show timeout warning
-        container.innerHTML = `
-            <div class="loading-container">
-                <div class="timeout-warning" style="
-                    text-align: center;
-                    padding: 2rem;
-                    background: rgba(255, 193, 7, 0.1);
-                    border: 2px solid rgba(255, 193, 7, 0.4);
-                    border-radius: 16px;
-                    margin-bottom: 2rem;
-                    max-width: 600px;
-                    margin-left: auto;
-                    margin-right: auto;
-                ">
-                    <div class="warning-icon" style="font-size: 4rem; margin-bottom: 1rem;">⏱️</div>
-                    <h2 style="color: #ffc107; margin-bottom: 1rem;">Loading is taking longer than expected</h2>
-                    <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 1.5rem;">
-                        This could be due to a slow connection or Firebase issues.
-                    </p>
-                    <div class="timeout-actions" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                        <button class="btn-primary" onclick="location.reload()">
-                            🔄 Retry Loading
-                        </button>
-                        <button class="btn-secondary" id="useCachedDataBtn">
-                            💾 Use Cached Data
-                        </button>
-                    </div>
-                </div>
-                <div class="spinner-container" aria-hidden="true" style="--spinner-size: 60px;">
-                    <div class="spinner-ring"></div>
-                    <div class="spinner-ring"></div>
-                    <div class="spinner-ring"></div>
-                </div>
-                <p class="loading-message">Still trying to connect...</p>
-            </div>
-        `;
-
-        // Attach cached data button handler
-        const cachedBtn = container.querySelector('#useCachedDataBtn');
-        if (cachedBtn) {
-            cachedBtn.addEventListener('click', () => {
-                this.useFallbackData();
-                this.transitionToContent(container);
-            });
+            container.innerHTML = this.getErrorHTML(error);
         }
     }
 
@@ -196,19 +95,12 @@ class HomeView {
     }
 
     /**
-     * Load mythologies from Firebase with caching
+     * Load mythologies from Firebase
      */
     async loadMythologies() {
         console.log('[Home View] Loading mythologies from Firebase...');
 
         try {
-            // Try cache first for instant display
-            const cached = this.loadFromCache();
-            if (cached) {
-                console.log('[Home View] Using cached mythologies while fetching fresh data');
-                this.mythologies = cached;
-            }
-
             // Try to load from mythologies collection
             const snapshot = await this.db.collection('mythologies')
                 .orderBy('order', 'asc')
@@ -223,75 +115,13 @@ class HomeView {
             } else {
                 // Use fallback hardcoded list
                 console.warn('[Home View] No mythologies found in Firebase, using fallback');
-                this.useFallbackData();
+                this.mythologies = this.getFallbackMythologies();
             }
 
         } catch (error) {
             console.error('[Home View] Error loading from Firebase:', error);
             console.log('[Home View] Using fallback mythologies');
-            this.useFallbackData();
-        }
-    }
-
-    /**
-     * Use fallback mythologies (cache or hardcoded)
-     */
-    useFallbackData() {
-        // Try cache first
-        const cached = this.loadFromCache();
-        if (cached && cached.length > 0) {
-            console.log('[Home View] Using cached mythologies');
-            this.mythologies = cached;
-            return;
-        }
-
-        // Use hardcoded fallback
-        console.log('[Home View] Using hardcoded fallback mythologies');
-        this.mythologies = this.getFallbackMythologies();
-    }
-
-    /**
-     * Save mythologies to localStorage cache
-     */
-    saveMythologiesCache(mythologies) {
-        if (!mythologies || mythologies.length === 0) return;
-
-        try {
-            localStorage.setItem('mythologies_cache', JSON.stringify({
-                data: mythologies,
-                timestamp: Date.now()
-            }));
-            console.log('[Home View] Cached mythologies to localStorage');
-        } catch (e) {
-            console.warn('[Home View] Could not cache mythologies:', e);
-        }
-    }
-
-    /**
-     * Load mythologies from cache
-     */
-    loadFromCache() {
-        try {
-            const cacheStr = localStorage.getItem('mythologies_cache');
-            if (!cacheStr) return null;
-
-            const cache = JSON.parse(cacheStr);
-            const cacheAge = Date.now() - cache.timestamp;
-            const maxAge = 3600000; // 1 hour
-
-            if (cacheAge < maxAge && cache.data && cache.data.length > 0) {
-                const ageInSeconds = Math.round(cacheAge / 1000);
-                console.log(`[Home View] Found cached mythologies (age: ${ageInSeconds}s)`);
-                return cache.data;
-            }
-
-            // Cache expired
-            console.log('[Home View] Cache expired, will fetch fresh data');
-            return null;
-
-        } catch (e) {
-            console.warn('[Home View] Error loading cache:', e);
-            return null;
+            this.mythologies = this.getFallbackMythologies();
         }
     }
 
@@ -487,42 +317,22 @@ class HomeView {
     }
 
     /**
-     * Show error HTML with retry options
+     * Get error HTML
      */
-    showError(container, error) {
-        container.innerHTML = `
-            <div class="error-container">
-                <div class="error-state">
-                    <div class="error-icon">⚠️</div>
-                    <h2 class="error-title">Error Loading Home Page</h2>
-                    <p class="error-message">${error.message || 'Unknown error occurred'}</p>
-                    <div class="error-actions" style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap;">
-                        <button class="error-retry-btn" onclick="location.reload()">
-                            🔄 Reload Page
-                        </button>
-                        <button class="btn-secondary" id="useFallbackBtn">
-                            💾 Use Fallback Data
-                        </button>
-                    </div>
-                </div>
+    getErrorHTML(error) {
+        return `
+            <div class="error-container" style="
+                text-align: center;
+                padding: 4rem 2rem;
+                max-width: 600px;
+                margin: 0 auto;
+            ">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
+                <h1>Error Loading Home Page</h1>
+                <p style="color: #ef4444; margin: 1rem 0;">${error.message}</p>
+                <button onclick="location.reload()" class="btn-primary">Reload Page</button>
             </div>
         `;
-
-        // Attach fallback button handler
-        const fallbackBtn = container.querySelector('#useFallbackBtn');
-        if (fallbackBtn) {
-            fallbackBtn.addEventListener('click', () => {
-                this.useFallbackData();
-                this.transitionToContent(container);
-            });
-        }
-    }
-
-    /**
-     * Utility: Delay helper
-     */
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     /**

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Data Verification Tool - Eyes of Azrael</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1f3a 0%, #0d1117 100%);
+            color: #f8f9fa;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #8b7fff 0%, #ff7eb6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section {
+            background: rgba(26, 31, 58, 0.6);
+            border: 1px solid rgba(42, 47, 74, 0.8);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            margin-bottom: 1rem;
+            color: #8b7fff;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .status-success {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+            border: 1px solid #2ed573;
+        }
+
+        .status-error {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            border: 1px solid #ff4757;
+        }
+
+        .status-warning {
+            background: rgba(255, 159, 67, 0.2);
+            color: #ff9f43;
+            border: 1px solid #ff9f43;
+        }
+
+        .status-info {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            border: 1px solid #3498db;
+        }
+
+        .btn {
+            background: #8b7fff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #7a6fee;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .log-output {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .log-line {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+        }
+
+        .log-success { color: #2ed573; }
+        .log-error { color: #ff4757; }
+        .log-warning { color: #ff9f43; }
+        .log-info { color: #3498db; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(42, 47, 74, 0.8);
+        }
+
+        th {
+            background: rgba(139, 127, 255, 0.2);
+            color: #8b7fff;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(139, 127, 255, 0.05);
+        }
+
+        .spinner {
+            border: 3px solid rgba(139, 127, 255, 0.3);
+            border-top: 3px solid #8b7fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        pre {
+            background: #0d1117;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .card {
+            background: rgba(42, 47, 74, 0.4);
+            border: 1px solid rgba(139, 127, 255, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .card h3 {
+            color: #8b7fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Firebase Data Verification Tool</h1>
+
+        <!-- Firebase Connection Status -->
+        <div class="section">
+            <h2>🔌 Firebase Connection Status</h2>
+            <div id="connectionStatus">
+                <div class="spinner"></div>
+                <p>Checking Firebase connection...</p>
+            </div>
+        </div>
+
+        <!-- Mythologies Collection -->
+        <div class="section">
+            <h2>📚 Mythologies Collection</h2>
+            <button id="checkMythologies" class="btn">Check Mythologies</button>
+            <div id="mythologiesResult" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Collections Overview -->
+        <div class="section">
+            <h2>📊 Collections Overview</h2>
+            <button id="checkCollections" class="btn">Check All Collections</button>
+            <div id="collectionsResult" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Firebase Query Test -->
+        <div class="section">
+            <h2>🧪 Firebase Query Test</h2>
+            <p style="margin-bottom: 1rem;">Test various Firebase queries to diagnose issues:</p>
+            <button id="testQueries" class="btn">Run Query Tests</button>
+            <div id="queryTestResult" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Debug Log -->
+        <div class="section">
+            <h2>📝 Debug Log</h2>
+            <div id="debugLog" class="log-output"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+
+    <script>
+        // Debug logger
+        const debugLog = [];
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = { timestamp, message, type };
+            debugLog.push(logEntry);
+
+            const logContainer = document.getElementById('debugLog');
+            const logLine = document.createElement('div');
+            logLine.className = `log-line log-${type}`;
+            logLine.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logLine);
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
+
+        // Initialize Firebase
+        let db, auth, app;
+
+        async function initFirebase() {
+            log('Initializing Firebase...', 'info');
+
+            try {
+                // Check if Firebase SDK is loaded
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase SDK not loaded');
+                }
+                log('✓ Firebase SDK loaded', 'success');
+
+                // Check if config is loaded
+                if (typeof firebaseConfig === 'undefined') {
+                    throw new Error('Firebase config not found');
+                }
+                log('✓ Firebase config loaded', 'success');
+
+                // Initialize Firebase
+                app = firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                auth = firebase.auth();
+
+                log('✓ Firebase initialized successfully', 'success');
+
+                // Update connection status
+                updateConnectionStatus(true);
+
+                return true;
+            } catch (error) {
+                log(`✗ Firebase initialization failed: ${error.message}`, 'error');
+                updateConnectionStatus(false, error.message);
+                return false;
+            }
+        }
+
+        function updateConnectionStatus(connected, errorMessage = null) {
+            const statusDiv = document.getElementById('connectionStatus');
+
+            if (connected) {
+                statusDiv.innerHTML = `
+                    <div class="status-badge status-success">✓ Connected</div>
+                    <p>Firebase is connected and ready to use.</p>
+                    <div class="grid">
+                        <div class="card">
+                            <h3>Project ID</h3>
+                            <div class="card-value">${firebaseConfig.projectId}</div>
+                        </div>
+                        <div class="card">
+                            <h3>Auth Domain</h3>
+                            <div class="card-value">${firebaseConfig.authDomain.split('.')[0]}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="status-badge status-error">✗ Not Connected</div>
+                    <p>Failed to connect to Firebase.</p>
+                    ${errorMessage ? `<p style="color: #ff4757; font-family: monospace;">${errorMessage}</p>` : ''}
+                `;
+            }
+        }
+
+        // Check mythologies collection
+        async function checkMythologies() {
+            log('Checking mythologies collection...', 'info');
+            const resultDiv = document.getElementById('mythologiesResult');
+            resultDiv.innerHTML = '<div class="spinner"></div>';
+
+            try {
+                log('Querying mythologies collection...', 'info');
+                const snapshot = await db.collection('mythologies')
+                    .orderBy('order', 'asc')
+                    .get();
+
+                log(`Query completed. Found ${snapshot.size} documents`, 'success');
+
+                if (snapshot.empty) {
+                    resultDiv.innerHTML = `
+                        <div class="status-badge status-warning">⚠ Empty Collection</div>
+                        <p>The "mythologies" collection exists but has no documents.</p>
+                        <p style="margin-top: 1rem;">You need to add mythology documents to Firebase Firestore.</p>
+                    `;
+                } else {
+                    const mythologies = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+
+                    log(`Successfully loaded ${mythologies.length} mythologies`, 'success');
+
+                    resultDiv.innerHTML = `
+                        <div class="status-badge status-success">✓ ${mythologies.length} Documents Found</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Icon</th>
+                                    <th>Order</th>
+                                    <th>Color</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${mythologies.map(m => `
+                                    <tr>
+                                        <td>${m.id}</td>
+                                        <td>${m.name || 'N/A'}</td>
+                                        <td>${m.icon || 'N/A'}</td>
+                                        <td>${m.order || 'N/A'}</td>
+                                        <td><span style="color: ${m.color || '#fff'}">${m.color || 'N/A'}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+
+            } catch (error) {
+                log(`Error checking mythologies: ${error.message}`, 'error');
+                log(`Error code: ${error.code}`, 'error');
+
+                let errorExplanation = '';
+                if (error.code === 'permission-denied') {
+                    errorExplanation = 'Firestore security rules are blocking this query. Check your Firebase Console → Firestore → Rules.';
+                } else if (error.code === 'failed-precondition') {
+                    errorExplanation = 'This query requires a Firestore index. Check the error message for an index creation link.';
+                } else if (error.code === 'unavailable') {
+                    errorExplanation = 'Cannot reach Firebase servers. Check your internet connection.';
+                }
+
+                resultDiv.innerHTML = `
+                    <div class="status-badge status-error">✗ Error</div>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    ${error.code ? `<p><strong>Code:</strong> ${error.code}</p>` : ''}
+                    ${errorExplanation ? `<p style="margin-top: 1rem; color: #ff9f43;">${errorExplanation}</p>` : ''}
+                    <pre>${error.stack}</pre>
+                `;
+            }
+        }
+
+        // Check all collections
+        async function checkAllCollections() {
+            log('Checking all collections...', 'info');
+            const resultDiv = document.getElementById('collectionsResult');
+            resultDiv.innerHTML = '<div class="spinner"></div>';
+
+            const collections = [
+                'mythologies',
+                'deities',
+                'heroes',
+                'creatures',
+                'texts',
+                'cosmology',
+                'rituals',
+                'herbs',
+                'magic',
+                'symbols'
+            ];
+
+            const results = [];
+
+            for (const collectionName of collections) {
+                try {
+                    log(`Checking ${collectionName}...`, 'info');
+                    const snapshot = await db.collection(collectionName).limit(1).get();
+                    const count = snapshot.size;
+                    results.push({ name: collectionName, count, exists: !snapshot.empty, error: null });
+                    log(`✓ ${collectionName}: ${count} document(s)`, count > 0 ? 'success' : 'warning');
+                } catch (error) {
+                    results.push({ name: collectionName, count: 0, exists: false, error: error.message });
+                    log(`✗ ${collectionName}: ${error.message}`, 'error');
+                }
+            }
+
+            resultDiv.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Collection</th>
+                            <th>Status</th>
+                            <th>Sample Count</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${results.map(r => `
+                            <tr>
+                                <td>${r.name}</td>
+                                <td>
+                                    ${r.error ?
+                                        '<span class="status-badge status-error">Error</span>' :
+                                        r.exists ?
+                                            '<span class="status-badge status-success">Exists</span>' :
+                                            '<span class="status-badge status-warning">Empty</span>'
+                                    }
+                                </td>
+                                <td>${r.count}</td>
+                                <td>${r.error || (r.exists ? 'OK' : 'No documents')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // Run query tests
+        async function runQueryTests() {
+            log('Running query tests...', 'info');
+            const resultDiv = document.getElementById('queryTestResult');
+            resultDiv.innerHTML = '<div class="spinner"></div>';
+
+            const tests = [
+                {
+                    name: 'Basic Query (no orderBy)',
+                    fn: () => db.collection('mythologies').get()
+                },
+                {
+                    name: 'OrderBy Query',
+                    fn: () => db.collection('mythologies').orderBy('order', 'asc').get()
+                },
+                {
+                    name: 'Limit Query',
+                    fn: () => db.collection('mythologies').limit(5).get()
+                },
+                {
+                    name: 'Where Query',
+                    fn: () => db.collection('mythologies').where('order', '==', 1).get()
+                }
+            ];
+
+            const testResults = [];
+
+            for (const test of tests) {
+                try {
+                    log(`Testing: ${test.name}`, 'info');
+                    const startTime = Date.now();
+                    const snapshot = await test.fn();
+                    const duration = Date.now() - startTime;
+
+                    testResults.push({
+                        name: test.name,
+                        success: true,
+                        duration,
+                        count: snapshot.size,
+                        error: null
+                    });
+
+                    log(`✓ ${test.name}: ${snapshot.size} docs in ${duration}ms`, 'success');
+                } catch (error) {
+                    testResults.push({
+                        name: test.name,
+                        success: false,
+                        duration: 0,
+                        count: 0,
+                        error: error.message
+                    });
+
+                    log(`✗ ${test.name}: ${error.message}`, 'error');
+                }
+            }
+
+            resultDiv.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Test</th>
+                            <th>Status</th>
+                            <th>Duration</th>
+                            <th>Results</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${testResults.map(r => `
+                            <tr>
+                                <td>${r.name}</td>
+                                <td>
+                                    ${r.success ?
+                                        '<span class="status-badge status-success">Pass</span>' :
+                                        '<span class="status-badge status-error">Fail</span>'
+                                    }
+                                </td>
+                                <td>${r.duration}ms</td>
+                                <td>${r.error || `${r.count} documents`}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // Event listeners
+        document.getElementById('checkMythologies').addEventListener('click', checkMythologies);
+        document.getElementById('checkCollections').addEventListener('click', checkAllCollections);
+        document.getElementById('testQueries').addEventListener('click', runQueryTests);
+
+        // Initialize on load
+        window.addEventListener('load', async () => {
+            log('Page loaded', 'info');
+            const initialized = await initFirebase();
+
+            if (initialized) {
+                // Auto-run basic checks
+                setTimeout(() => {
+                    log('Running automatic checks...', 'info');
+                    checkMythologies();
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>

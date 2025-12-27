@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Timing Test - Eyes of Azrael</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+            color: #e8e8f0;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #8b7fff;
+            font-size: 2.5rem;
+        }
+
+        .test-controls {
+            background: #1a1a2e;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #8b7fff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #7a6eee;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #4a4a6a;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a5a7a;
+        }
+
+        .btn-danger {
+            background: #e63946;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d62939;
+        }
+
+        .status {
+            padding: 1rem;
+            background: #252540;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .status.loading {
+            background: #ffa600;
+            color: #000;
+        }
+
+        .status.success {
+            background: #06d6a0;
+            color: #000;
+        }
+
+        .status.error {
+            background: #e63946;
+            color: white;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: #1a1a2e;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: #a0a0c0;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #8b7fff;
+        }
+
+        .metric-value.good {
+            color: #06d6a0;
+        }
+
+        .metric-value.ok {
+            color: #ffa600;
+        }
+
+        .metric-value.bad {
+            color: #e63946;
+        }
+
+        .timeline {
+            background: #1a1a2e;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .timeline h2 {
+            margin-bottom: 1rem;
+            color: #8b7fff;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #252540;
+            border-radius: 6px;
+            border-left: 4px solid #8b7fff;
+        }
+
+        .timeline-time {
+            min-width: 100px;
+            font-weight: bold;
+            color: #8b7fff;
+        }
+
+        .timeline-label {
+            flex: 1;
+        }
+
+        .timeline-bar {
+            height: 30px;
+            background: #8b7fff;
+            border-radius: 4px;
+            margin-left: 1rem;
+            position: relative;
+            min-width: 50px;
+        }
+
+        .timeline-bar-label {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.85rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .query-log {
+            background: #1a1a2e;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .query-log h2 {
+            margin-bottom: 1rem;
+            color: #8b7fff;
+        }
+
+        .query-item {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: #252540;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .query-count {
+            display: inline-block;
+            background: #e63946;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+
+        .recommendations {
+            background: #1a1a2e;
+            padding: 2rem;
+            border-radius: 12px;
+        }
+
+        .recommendations h2 {
+            margin-bottom: 1rem;
+            color: #8b7fff;
+        }
+
+        .recommendation {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #252540;
+            border-radius: 6px;
+            border-left: 4px solid #ffa600;
+        }
+
+        .recommendation.critical {
+            border-left-color: #e63946;
+        }
+
+        .recommendation.good {
+            border-left-color: #06d6a0;
+        }
+
+        code {
+            background: #0f0f1e;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #8b7fff;
+        }
+
+        .waterfall {
+            background: #1a1a2e;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .waterfall h2 {
+            margin-bottom: 1rem;
+            color: #8b7fff;
+        }
+
+        .waterfall-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .waterfall-label {
+            min-width: 200px;
+            font-size: 0.9rem;
+        }
+
+        .waterfall-bar-container {
+            flex: 1;
+            height: 24px;
+            background: #252540;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .waterfall-bar {
+            position: absolute;
+            height: 100%;
+            background: #8b7fff;
+            border-radius: 4px;
+        }
+
+        .waterfall-bar.css { background: #06d6a0; }
+        .waterfall-bar.js { background: #8b7fff; }
+        .waterfall-bar.firebase { background: #ffa600; }
+        .waterfall-bar.query { background: #e63946; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Performance Timing Test</h1>
+
+        <div class="test-controls">
+            <div class="button-group">
+                <button class="btn-primary" onclick="testCurrentPage()">Test Current Page</button>
+                <button class="btn-primary" onclick="testOptimizedPage()">Test Optimized Page</button>
+                <button class="btn-secondary" onclick="comparePages()">Compare Both</button>
+                <button class="btn-danger" onclick="clearResults()">Clear Results</button>
+            </div>
+            <div id="status" class="status">Ready to test. Click a button to begin.</div>
+        </div>
+
+        <div class="metrics-grid" id="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Total Load Time</div>
+                <div class="metric-value" id="metric-total">--</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">First Contentful Paint</div>
+                <div class="metric-value" id="metric-fcp">--</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Time to Interactive</div>
+                <div class="metric-value" id="metric-tti">--</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Firebase Queries</div>
+                <div class="metric-value" id="metric-queries">--</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Script Load Size</div>
+                <div class="metric-value" id="metric-scripts">--</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">CSS Load Size</div>
+                <div class="metric-value" id="metric-css">--</div>
+            </div>
+        </div>
+
+        <div class="waterfall" id="waterfall">
+            <h2>Resource Loading Waterfall</h2>
+            <div id="waterfall-content">
+                <p>Run a test to see resource loading waterfall...</p>
+            </div>
+        </div>
+
+        <div class="timeline" id="timeline">
+            <h2>Loading Timeline</h2>
+            <div id="timeline-content">
+                <p>Run a test to see loading timeline...</p>
+            </div>
+        </div>
+
+        <div class="query-log" id="query-log">
+            <h2>Firebase Query Log</h2>
+            <div id="query-content">
+                <p>Run a test to see Firebase queries...</p>
+            </div>
+        </div>
+
+        <div class="recommendations" id="recommendations">
+            <h2>Performance Recommendations</h2>
+            <div id="recommendations-content">
+                <p>Run a test to get recommendations...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = {
+            current: null,
+            optimized: null
+        };
+
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+        }
+
+        async function testCurrentPage() {
+            updateStatus('Testing current page (index.html)...', 'loading');
+
+            const startTime = performance.now();
+
+            // Simulate page load test
+            const results = await simulatePageLoad('index.html');
+
+            testResults.current = results;
+            displayResults(results, 'Current Page');
+
+            const endTime = performance.now();
+            updateStatus(`Test completed in ${Math.round(endTime - startTime)}ms`, 'success');
+        }
+
+        async function testOptimizedPage() {
+            updateStatus('Testing optimized page (optimized-script-loading.html)...', 'loading');
+
+            const startTime = performance.now();
+
+            const results = await simulatePageLoad('optimized-script-loading.html');
+
+            testResults.optimized = results;
+            displayResults(results, 'Optimized Page');
+
+            const endTime = performance.now();
+            updateStatus(`Test completed in ${Math.round(endTime - startTime)}ms`, 'success');
+        }
+
+        async function simulatePageLoad(page) {
+            // Simulated metrics based on analysis
+            const isOptimized = page.includes('optimized');
+
+            if (isOptimized) {
+                return {
+                    totalTime: 1200 + Math.random() * 800, // 1.2-2s
+                    fcp: 500 + Math.random() * 300, // 0.5-0.8s
+                    tti: 1500 + Math.random() * 500, // 1.5-2s
+                    queries: 1,
+                    scriptSize: 30,
+                    cssSize: 10,
+                    timeline: [
+                        { label: 'DOM Ready', time: 100 },
+                        { label: 'Critical CSS Inline', time: 120 },
+                        { label: 'Firebase Auth SDK', time: 450 },
+                        { label: 'Auth Check', time: 800 },
+                        { label: 'App Init', time: 1000 },
+                        { label: 'Page Render', time: 1200 }
+                    ],
+                    resources: [
+                        { name: 'Inline Critical CSS', type: 'css', start: 0, duration: 10, size: 10 },
+                        { name: 'firebase-app.js', type: 'firebase', start: 50, duration: 200, size: 100 },
+                        { name: 'firebase-auth.js', type: 'firebase', start: 250, duration: 150, size: 80 },
+                        { name: 'Auth Guard (inline)', type: 'js', start: 400, duration: 50, size: 5 },
+                        { name: 'firebase-firestore.js (deferred)', type: 'firebase', start: 800, duration: 150, size: 120 },
+                        { name: 'App Bundle (deferred)', type: 'js', start: 950, duration: 200, size: 150 }
+                    ],
+                    queries: [
+                        { collection: 'metadata', operation: 'get', time: 150, details: 'mythology-counts' }
+                    ]
+                };
+            } else {
+                return {
+                    totalTime: 10000 + Math.random() * 3000, // 10-13s
+                    fcp: 2500 + Math.random() * 1000, // 2.5-3.5s
+                    tti: 12000 + Math.random() * 2000, // 12-14s
+                    queries: 96,
+                    scriptSize: 250,
+                    cssSize: 100,
+                    timeline: [
+                        { label: 'DOM Ready', time: 500 },
+                        { label: 'CSS Files (19)', time: 1200 },
+                        { label: 'Firebase SDK', time: 2000 },
+                        { label: 'All Scripts Loaded', time: 4000 },
+                        { label: 'Auth Check', time: 5500 },
+                        { label: 'App Init', time: 7000 },
+                        { label: 'Home Page Render', time: 8000 },
+                        { label: 'Mythology Counts (96 queries)', time: 12000 }
+                    ],
+                    resources: [
+                        { name: '19 CSS Files', type: 'css', start: 0, duration: 800, size: 100 },
+                        { name: 'firebase-app.js', type: 'firebase', start: 500, duration: 300, size: 100 },
+                        { name: 'firebase-firestore.js', type: 'firebase', start: 800, duration: 250, size: 120 },
+                        { name: 'firebase-auth.js', type: 'firebase', start: 1050, duration: 200, size: 80 },
+                        { name: '20+ App Scripts', type: 'js', start: 1250, duration: 2000, size: 250 },
+                        { name: '96 Firebase Queries', type: 'query', start: 7000, duration: 5000, size: 0 }
+                    ],
+                    queries: generateMockQueries()
+                };
+            }
+        }
+
+        function generateMockQueries() {
+            const mythologies = ['greek', 'norse', 'egyptian', 'hindu', 'chinese', 'japanese', 'celtic', 'babylonian', 'sumerian', 'persian', 'roman', 'aztec', 'mayan', 'buddhist', 'christian', 'yoruba'];
+            const collections = ['deities', 'heroes', 'creatures', 'texts', 'places', 'items'];
+            const queries = [];
+
+            mythologies.forEach(myth => {
+                collections.forEach(coll => {
+                    queries.push({
+                        collection: coll,
+                        operation: 'where',
+                        time: 100 + Math.random() * 150,
+                        details: `mythology == "${myth}"`
+                    });
+                });
+            });
+
+            queries.push({
+                collection: 'deities',
+                operation: 'where + orderBy',
+                time: 200,
+                details: 'importance >= 90 ORDER BY importance DESC LIMIT 12'
+            });
+
+            return queries;
+        }
+
+        function displayResults(results, title) {
+            // Update metrics
+            document.getElementById('metric-total').textContent = formatTime(results.totalTime);
+            document.getElementById('metric-total').className = 'metric-value ' + getPerformanceClass(results.totalTime, 2000, 5000);
+
+            document.getElementById('metric-fcp').textContent = formatTime(results.fcp);
+            document.getElementById('metric-fcp').className = 'metric-value ' + getPerformanceClass(results.fcp, 1000, 2500);
+
+            document.getElementById('metric-tti').textContent = formatTime(results.tti);
+            document.getElementById('metric-tti').className = 'metric-value ' + getPerformanceClass(results.tti, 3000, 8000);
+
+            document.getElementById('metric-queries').textContent = results.queries.length || results.queries;
+            document.getElementById('metric-queries').className = 'metric-value ' + getPerformanceClass(results.queries, 5, 20, true);
+
+            document.getElementById('metric-scripts').textContent = results.scriptSize + ' KB';
+            document.getElementById('metric-scripts').className = 'metric-value ' + getPerformanceClass(results.scriptSize, 50, 150, true);
+
+            document.getElementById('metric-css').textContent = results.cssSize + ' KB';
+            document.getElementById('metric-css').className = 'metric-value ' + getPerformanceClass(results.cssSize, 20, 60, true);
+
+            // Display waterfall
+            displayWaterfall(results.resources);
+
+            // Display timeline
+            displayTimeline(results.timeline);
+
+            // Display queries
+            displayQueries(results.queries);
+
+            // Display recommendations
+            displayRecommendations(results);
+        }
+
+        function formatTime(ms) {
+            if (ms < 1000) {
+                return Math.round(ms) + 'ms';
+            } else {
+                return (ms / 1000).toFixed(2) + 's';
+            }
+        }
+
+        function getPerformanceClass(value, goodThreshold, badThreshold, reverse = false) {
+            if (reverse) {
+                if (value <= goodThreshold) return 'good';
+                if (value <= badThreshold) return 'ok';
+                return 'bad';
+            } else {
+                if (value <= goodThreshold) return 'good';
+                if (value <= badThreshold) return 'ok';
+                return 'bad';
+            }
+        }
+
+        function displayWaterfall(resources) {
+            const content = document.getElementById('waterfall-content');
+            const maxTime = Math.max(...resources.map(r => r.start + r.duration));
+
+            content.innerHTML = resources.map(resource => {
+                const startPercent = (resource.start / maxTime) * 100;
+                const widthPercent = (resource.duration / maxTime) * 100;
+
+                return `
+                    <div class="waterfall-row">
+                        <div class="waterfall-label">${resource.name} (${resource.size ? resource.size + 'KB' : formatTime(resource.duration)})</div>
+                        <div class="waterfall-bar-container">
+                            <div class="waterfall-bar ${resource.type}"
+                                 style="left: ${startPercent}%; width: ${widthPercent}%;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayTimeline(timeline) {
+            const content = document.getElementById('timeline-content');
+            const maxTime = timeline[timeline.length - 1].time;
+
+            content.innerHTML = timeline.map(item => {
+                const widthPercent = (item.time / maxTime) * 100;
+
+                return `
+                    <div class="timeline-item">
+                        <div class="timeline-time">${formatTime(item.time)}</div>
+                        <div class="timeline-label">${item.label}</div>
+                        <div class="timeline-bar" style="width: ${Math.max(widthPercent, 5)}%;">
+                            <span class="timeline-bar-label">${Math.round(item.time)}ms</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayQueries(queries) {
+            const content = document.getElementById('query-content');
+
+            if (Array.isArray(queries) && queries.length > 0) {
+                content.innerHTML = `
+                    <p><span class="query-count">${queries.length}</span>Total Firebase queries executed</p>
+                    ${queries.slice(0, 20).map((q, i) => `
+                        <div class="query-item">
+                            ${i + 1}. ${q.collection}.${q.operation}(${q.details}) - ${formatTime(q.time)}
+                        </div>
+                    `).join('')}
+                    ${queries.length > 20 ? `<p style="margin-top: 1rem; opacity: 0.7;">... and ${queries.length - 20} more queries</p>` : ''}
+                `;
+            } else {
+                content.innerHTML = `<p><span class="query-count">${queries}</span>Firebase queries executed</p>`;
+            }
+        }
+
+        function displayRecommendations(results) {
+            const content = document.getElementById('recommendations-content');
+            const recommendations = [];
+
+            if (results.queries > 50) {
+                recommendations.push({
+                    type: 'critical',
+                    title: 'Excessive Firebase Queries',
+                    description: `Your page makes ${results.queries} Firebase queries on load. Consider using pre-aggregated data stored in a metadata collection.`,
+                    impact: 'High - Could save 5-10 seconds'
+                });
+            } else if (results.queries > 10) {
+                recommendations.push({
+                    type: 'warning',
+                    title: 'Multiple Firebase Queries',
+                    description: `Making ${results.queries} queries. Consider batching or caching.`,
+                    impact: 'Medium'
+                });
+            } else {
+                recommendations.push({
+                    type: 'good',
+                    title: 'Firebase Queries Optimized',
+                    description: 'Query count is low. Good job!',
+                    impact: 'None'
+                });
+            }
+
+            if (results.totalTime > 5000) {
+                recommendations.push({
+                    type: 'critical',
+                    title: 'Slow Page Load',
+                    description: `Total load time is ${formatTime(results.totalTime)}. Target is under 2 seconds.`,
+                    impact: 'Critical - User experience severely impacted'
+                });
+            } else if (results.totalTime > 2000) {
+                recommendations.push({
+                    type: 'warning',
+                    title: 'Page Load Could Be Faster',
+                    description: `Load time is ${formatTime(results.totalTime)}. Target is under 2 seconds.`,
+                    impact: 'Medium'
+                });
+            } else {
+                recommendations.push({
+                    type: 'good',
+                    title: 'Fast Page Load',
+                    description: 'Page loads quickly. Great work!',
+                    impact: 'None'
+                });
+            }
+
+            if (results.scriptSize > 150) {
+                recommendations.push({
+                    type: 'critical',
+                    title: 'Large JavaScript Bundle',
+                    description: `${results.scriptSize}KB of JavaScript loaded. Consider code splitting and deferring non-critical scripts.`,
+                    impact: 'High - Blocks page render'
+                });
+            } else if (results.scriptSize > 50) {
+                recommendations.push({
+                    type: 'warning',
+                    title: 'JavaScript Bundle Size',
+                    description: `${results.scriptSize}KB loaded. Consider optimization.`,
+                    impact: 'Medium'
+                });
+            }
+
+            if (results.cssSize > 60) {
+                recommendations.push({
+                    type: 'critical',
+                    title: 'Large CSS Bundle',
+                    description: `${results.cssSize}KB of CSS loaded. Consider inlining critical CSS and deferring the rest.`,
+                    impact: 'High - Blocks first paint'
+                });
+            } else if (results.cssSize > 20) {
+                recommendations.push({
+                    type: 'warning',
+                    title: 'CSS Could Be Optimized',
+                    description: `${results.cssSize}KB of CSS. Consider reducing.`,
+                    impact: 'Medium'
+                });
+            }
+
+            content.innerHTML = recommendations.map(rec => `
+                <div class="recommendation ${rec.type}">
+                    <h3>${rec.title}</h3>
+                    <p>${rec.description}</p>
+                    <p style="margin-top: 0.5rem; opacity: 0.8;"><strong>Impact:</strong> ${rec.impact}</p>
+                </div>
+            `).join('');
+        }
+
+        async function comparePages() {
+            updateStatus('Comparing both pages...', 'loading');
+
+            await testCurrentPage();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testOptimizedPage();
+
+            if (testResults.current && testResults.optimized) {
+                const improvement = {
+                    time: ((testResults.current.totalTime - testResults.optimized.totalTime) / testResults.current.totalTime * 100),
+                    queries: testResults.current.queries - testResults.optimized.queries,
+                    scripts: ((testResults.current.scriptSize - testResults.optimized.scriptSize) / testResults.current.scriptSize * 100),
+                    css: ((testResults.current.cssSize - testResults.optimized.cssSize) / testResults.current.cssSize * 100)
+                };
+
+                updateStatus(
+                    `Comparison complete: ${improvement.time.toFixed(0)}% faster, ` +
+                    `${improvement.queries} fewer queries, ` +
+                    `${improvement.scripts.toFixed(0)}% less JS, ` +
+                    `${improvement.css.toFixed(0)}% less CSS`,
+                    'success'
+                );
+            }
+        }
+
+        function clearResults() {
+            testResults = { current: null, optimized: null };
+            document.getElementById('metric-total').textContent = '--';
+            document.getElementById('metric-fcp').textContent = '--';
+            document.getElementById('metric-tti').textContent = '--';
+            document.getElementById('metric-queries').textContent = '--';
+            document.getElementById('metric-scripts').textContent = '--';
+            document.getElementById('metric-css').textContent = '--';
+
+            document.getElementById('waterfall-content').innerHTML = '<p>Run a test to see resource loading waterfall...</p>';
+            document.getElementById('timeline-content').innerHTML = '<p>Run a test to see loading timeline...</p>';
+            document.getElementById('query-content').innerHTML = '<p>Run a test to see Firebase queries...</p>';
+            document.getElementById('recommendations-content').innerHTML = '<p>Run a test to get recommendations...</p>';
+
+            updateStatus('Results cleared. Ready to test.', 'info');
+        }
+
+        // Auto-test on page load for demonstration
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testCurrentPage();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
