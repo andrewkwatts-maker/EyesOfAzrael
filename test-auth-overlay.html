@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Overlay Test</title>
+
+    <!-- Auth Guard CSS -->
+    <link rel="stylesheet" href="css/auth-guard.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e27;
+            color: #f8f9fa;
+        }
+
+        :root {
+            --color-bg-primary: #0a0e27;
+            --color-bg-secondary: #151a35;
+            --color-bg-card: #1a1f3a;
+            --color-bg-card-rgb: 26, 31, 58;
+            --color-text-primary: #f8f9fa;
+            --color-text-secondary: #adb5bd;
+            --color-primary: #8b7fff;
+            --color-primary-rgb: 139, 127, 255;
+            --color-secondary: #ff7eb6;
+            --color-secondary-rgb: 255, 126, 182;
+            --color-border-primary: #2a2f4a;
+            --color-border-primary-rgb: 42, 47, 74;
+        }
+
+        #main-content {
+            padding: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .test-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1a1f3a;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #2a2f4a;
+            z-index: 100000;
+        }
+
+        .test-controls button {
+            display: block;
+            width: 100%;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #8b7fff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .test-controls button:hover {
+            background: #9d8fff;
+        }
+
+        .status-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #0f1424;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+    </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="test-controls">
+        <h3>Auth Overlay Test</h3>
+        <button onclick="showOverlay()">Show Overlay</button>
+        <button onclick="hideOverlay()">Hide Overlay</button>
+        <button onclick="testAuthGuard()">Test Auth Guard Script</button>
+        <button onclick="checkDOMState()">Check DOM State</button>
+
+        <div class="status-info">
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <h1>Main Content</h1>
+        <p>This should be hidden when auth overlay is shown.</p>
+        <p>Test the auth overlay using the controls in the top-right corner.</p>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const timestamp = new Date().toISOString().substr(11, 12);
+            const color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#ffd93d';
+            statusDiv.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            console.log(message);
+        }
+
+        function showOverlay() {
+            log('Showing overlay...', 'info');
+
+            if (!document.getElementById('auth-overlay')) {
+                log('Overlay does not exist, creating...', 'info');
+                injectAuthOverlay();
+            }
+
+            const overlay = document.getElementById('auth-overlay');
+            if (overlay) {
+                overlay.style.display = 'flex';
+                log('Overlay shown', 'success');
+            } else {
+                log('Failed to create overlay', 'error');
+            }
+
+            const mainContent = document.getElementById('main-content');
+            if (mainContent) {
+                mainContent.style.display = 'none';
+                log('Main content hidden', 'success');
+            }
+        }
+
+        function hideOverlay() {
+            log('Hiding overlay...', 'info');
+
+            const overlay = document.getElementById('auth-overlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+                log('Overlay hidden', 'success');
+            }
+
+            const mainContent = document.getElementById('main-content');
+            if (mainContent) {
+                mainContent.style.display = 'block';
+                log('Main content shown', 'success');
+            }
+        }
+
+        function injectAuthOverlay() {
+            const overlay = document.createElement('div');
+            overlay.id = 'auth-overlay';
+            overlay.className = 'auth-overlay';
+            overlay.innerHTML = `
+                <div class="auth-card">
+                    <div class="auth-logo">👁️</div>
+
+                    <h1 class="auth-title">Eyes of Azrael</h1>
+                    <p class="auth-subtitle">Explore World Mythologies</p>
+
+                    <p class="auth-description">
+                        Discover deities, heroes, creatures, and sacred texts from cultures across the globe
+                    </p>
+
+                    <button id="google-login-btn-overlay" class="google-login-btn" onclick="handleTestLogin()">
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" style="width: 20px; height: 20px; margin-right: 12px;">
+                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.30-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                        </svg>
+                        Sign in with Google (Test)
+                    </button>
+
+                    <div class="auth-tos">
+                        <p class="tos-notice">By logging in, you agree to the <a href="/terms.html" target="_blank">Terms of Service</a></p>
+                        <p class="tos-summary">All content is protected. Redistribution prohibited.</p>
+                    </div>
+
+                    <footer class="auth-footer">
+                        <p>Copyright © Eyes of Azrael 2025</p>
+                    </footer>
+                </div>
+            `;
+
+            document.body.insertBefore(overlay, document.body.firstChild);
+            log('Auth overlay injected into DOM', 'success');
+        }
+
+        function handleTestLogin() {
+            log('Test login button clicked', 'info');
+            alert('In production, this would trigger Google sign-in');
+            hideOverlay();
+        }
+
+        function testAuthGuard() {
+            log('Testing if auth guard script would work...', 'info');
+
+            // Check if Firebase is loaded
+            if (typeof firebase !== 'undefined') {
+                log('✅ Firebase SDK loaded', 'success');
+            } else {
+                log('❌ Firebase SDK not loaded', 'error');
+                return;
+            }
+
+            // Check if config is loaded
+            if (typeof firebaseConfig !== 'undefined') {
+                log('✅ Firebase config loaded', 'success');
+            } else {
+                log('❌ Firebase config not loaded', 'error');
+                return;
+            }
+
+            // Initialize Firebase
+            if (firebase.apps.length === 0) {
+                firebase.initializeApp(firebaseConfig);
+                log('✅ Firebase initialized', 'success');
+            } else {
+                log('✅ Firebase already initialized', 'success');
+            }
+
+            // Check auth state
+            const auth = firebase.auth();
+            const user = auth.currentUser;
+
+            if (user) {
+                log(`✅ User logged in: ${user.email || 'Anonymous'}`, 'success');
+            } else {
+                log('⚠️ No user logged in - overlay should be shown', 'info');
+                showOverlay();
+            }
+        }
+
+        function checkDOMState() {
+            log('Checking DOM state...', 'info');
+
+            const overlay = document.getElementById('auth-overlay');
+            const mainContent = document.getElementById('main-content');
+
+            log(`Overlay exists: ${!!overlay}`, overlay ? 'success' : 'error');
+            if (overlay) {
+                log(`Overlay display: ${overlay.style.display}`, 'info');
+                log(`Overlay in DOM: ${document.body.contains(overlay)}`, 'success');
+            }
+
+            log(`Main content exists: ${!!mainContent}`, mainContent ? 'success' : 'error');
+            if (mainContent) {
+                log(`Main content display: ${mainContent.style.display || 'default'}`, 'info');
+            }
+        }
+
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            log('Page loaded, running tests...', 'info');
+            setTimeout(() => {
+                testAuthGuard();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
