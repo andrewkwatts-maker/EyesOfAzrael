@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Monitor Test - Eyes of Azrael</title>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="themes/theme-base.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    <script src="js/firebase-init.js"></script>
+
+    <!-- Performance Monitor -->
+    <script src="js/performance-monitor.js"></script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, rgba(147, 112, 219, 0.3), rgba(218, 165, 32, 0.2));
+            border: 2px solid #9370DB;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            margin: 0 0 0.5rem 0;
+            background: linear-gradient(135deg, #c0b5f0, #daa520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            color: #9370DB;
+            margin-top: 0;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            margin: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: linear-gradient(135deg, #9370DB, #8B7FDB);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(147, 112, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(147, 112, 219, 0.2);
+            border: 2px solid rgba(147, 112, 219, 0.4);
+            color: #9370DB;
+        }
+
+        .test-results {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(147, 112, 219, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(147, 112, 219, 0.1);
+        }
+
+        .metric-label {
+            color: #c0c0c0;
+        }
+
+        .metric-value {
+            color: #9370DB;
+            font-weight: 600;
+        }
+
+        .success {
+            color: #22c55e;
+        }
+
+        .warning {
+            color: #fbbf24;
+        }
+
+        .error {
+            color: #ef4444;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Performance Monitor Test Suite</h1>
+            <p>Test various performance scenarios and view real-time metrics</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section">
+            <h2>🚀 Quick Actions</h2>
+            <div>
+                <button class="btn" onclick="viewDashboard()">📊 Open Dashboard</button>
+                <button class="btn-secondary btn" onclick="showCurrentMetrics()">📈 Show Current Metrics</button>
+                <button class="btn-secondary btn" onclick="exportData()">💾 Export Report</button>
+                <button class="btn-secondary btn" onclick="clearAll()">🗑️ Clear All Data</button>
+            </div>
+        </div>
+
+        <!-- Test Scenarios -->
+        <div class="section">
+            <h2>🧪 Test Scenarios</h2>
+            <div class="grid">
+                <button class="btn-secondary btn" onclick="testFirebaseQuery()">Test Firebase Query</button>
+                <button class="btn-secondary btn" onclick="testSlowQuery()">Test Slow Query (simulated)</button>
+                <button class="btn-secondary btn" onclick="testMultipleQueries()">Test Multiple Queries</button>
+                <button class="btn-secondary btn" onclick="testCustomMark()">Test Custom Marks</button>
+                <button class="btn-secondary btn" onclick="testAsyncOperation()">Test Async Operation</button>
+                <button class="btn-secondary btn" onclick="testInteraction()">Test User Interaction</button>
+                <button class="btn-secondary btn" onclick="stressTest()">Stress Test (10 queries)</button>
+                <button class="btn-secondary btn" onclick="testThresholds()">Test All Thresholds</button>
+            </div>
+        </div>
+
+        <!-- Current Metrics -->
+        <div class="section">
+            <h2>📊 Current Performance Metrics</h2>
+            <div id="current-metrics" class="test-results">
+                <p style="color: #999;">Run tests to see metrics...</p>
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="section">
+            <h2>📋 Test Results Log</h2>
+            <div id="test-log" class="test-results">
+                <p style="color: #999;">Waiting for test execution...</p>
+            </div>
+        </div>
+
+        <!-- Firebase Queries -->
+        <div class="section">
+            <h2>🔥 Firebase Query Log</h2>
+            <div id="firebase-log" class="test-results">
+                <p style="color: #999;">No Firebase queries yet...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test functions
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#3b82f6',
+                success: '#22c55e',
+                warning: '#fbbf24',
+                error: '#ef4444'
+            };
+
+            const entry = `<div style="color: ${colors[type]}; margin: 0.25rem 0;">
+                [${timestamp}] ${message}
+            </div>`;
+
+            if (logEl.innerHTML.includes('Waiting for test')) {
+                logEl.innerHTML = entry;
+            } else {
+                logEl.innerHTML = entry + logEl.innerHTML;
+            }
+
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        async function testFirebaseQuery() {
+            log('Testing Firebase query...', 'info');
+
+            try {
+                // Query a random collection
+                const snapshot = await db.collection('deities').limit(5).get();
+
+                log(`✅ Firebase query completed: ${snapshot.size} results`, 'success');
+                updateMetrics();
+                updateFirebaseLog();
+            } catch (error) {
+                log(`❌ Firebase query failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSlowQuery() {
+            log('Simulating slow query...', 'warning');
+
+            // Create artificial delay
+            await performanceMonitor.timeOperation('slow_operation', async () => {
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                return { simulated: true };
+            });
+
+            log('⚠️ Slow operation completed (1500ms) - should trigger alert', 'warning');
+            updateMetrics();
+        }
+
+        async function testMultipleQueries() {
+            log('Testing multiple concurrent queries...', 'info');
+
+            try {
+                await performanceMonitor.timeOperation('batch_queries', async () => {
+                    const queries = [
+                        db.collection('deities').limit(3).get(),
+                        db.collection('heroes').limit(3).get(),
+                        db.collection('creatures').limit(3).get()
+                    ];
+
+                    return await Promise.all(queries);
+                });
+
+                log('✅ Batch queries completed', 'success');
+                updateMetrics();
+                updateFirebaseLog();
+            } catch (error) {
+                log(`❌ Batch queries failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testCustomMark() {
+            log('Testing custom performance marks...', 'info');
+
+            performanceMonitor.mark('test_start');
+
+            // Simulate some work
+            let sum = 0;
+            for (let i = 0; i < 1000000; i++) {
+                sum += i;
+            }
+
+            performanceMonitor.mark('test_end');
+            const duration = performanceMonitor.measure('custom_test', 'test_start', 'test_end');
+
+            log(`✅ Custom measurement: ${Math.round(duration)}ms`, 'success');
+            updateMetrics();
+        }
+
+        async function testAsyncOperation() {
+            log('Testing async operation timing...', 'info');
+
+            const result = await performanceMonitor.timeOperation(
+                'test_async_op',
+                async () => {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    return { data: 'test result' };
+                }
+            );
+
+            log(`✅ Async operation tracked: ~500ms`, 'success');
+            updateMetrics();
+        }
+
+        function testInteraction() {
+            log('Recording user interaction...', 'info');
+
+            performanceMonitor.recordInteraction({
+                name: 'test_button_click',
+                duration: Math.random() * 100,
+                action: 'test_interaction',
+                timestamp: Date.now()
+            });
+
+            log('✅ User interaction recorded', 'success');
+            updateMetrics();
+        }
+
+        async function stressTest() {
+            log('🔥 Starting stress test (10 queries)...', 'warning');
+
+            try {
+                const queries = [];
+                for (let i = 0; i < 10; i++) {
+                    queries.push(
+                        db.collection('deities').limit(1).get()
+                    );
+                }
+
+                await performanceMonitor.timeOperation('stress_test', async () => {
+                    await Promise.all(queries);
+                });
+
+                log('✅ Stress test completed', 'success');
+                updateMetrics();
+                updateFirebaseLog();
+            } catch (error) {
+                log(`❌ Stress test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testThresholds() {
+            log('Testing all threshold alerts...', 'warning');
+
+            // Simulate operations that should trigger alerts
+            await performanceMonitor.timeOperation('threshold_test_1', async () => {
+                await new Promise(resolve => setTimeout(resolve, 1100)); // > 1000ms
+            });
+
+            await performanceMonitor.timeOperation('threshold_test_2', async () => {
+                await new Promise(resolve => setTimeout(resolve, 1600)); // > 1500ms
+            });
+
+            log('⚠️ Threshold tests completed - check alerts', 'warning');
+            updateMetrics();
+        }
+
+        function updateMetrics() {
+            const summary = performanceMonitor.getSummary();
+            const metrics = performanceMonitor.getMetrics();
+
+            const html = `
+                <div class="metric-row">
+                    <span class="metric-label">Page Load:</span>
+                    <span class="metric-value ${getStatusClass(summary.pageLoad, 3000)}">${summary.pageLoad > 0 ? summary.pageLoad + 'ms' : 'N/A'}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">First Contentful Paint:</span>
+                    <span class="metric-value ${getStatusClass(summary.firstContentfulPaint, 2000)}">${summary.firstContentfulPaint > 0 ? summary.firstContentfulPaint + 'ms' : 'N/A'}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Time to Interactive:</span>
+                    <span class="metric-value ${getStatusClass(summary.timeToInteractive, 5000)}">${summary.timeToInteractive > 0 ? summary.timeToInteractive + 'ms' : 'N/A'}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Firebase Queries:</span>
+                    <span class="metric-value">${summary.firebaseQueries}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Avg Firebase Query Time:</span>
+                    <span class="metric-value ${getStatusClass(summary.avgFirebaseQueryTime, 1000)}">${summary.avgFirebaseQueryTime > 0 ? Math.round(summary.avgFirebaseQueryTime) + 'ms' : 'N/A'}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Slow Firebase Queries:</span>
+                    <span class="metric-value ${summary.slowFirebaseQueries.length > 0 ? 'warning' : 'success'}">${summary.slowFirebaseQueries.length}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Total Resources:</span>
+                    <span class="metric-value">${summary.totalResources}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Total Size:</span>
+                    <span class="metric-value">${formatBytes(summary.totalSize)}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Performance Alerts:</span>
+                    <span class="metric-value ${summary.alerts > 0 ? 'warning' : 'success'}">${summary.alerts}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Custom Measurements:</span>
+                    <span class="metric-value">${metrics.custom.length}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">User Interactions:</span>
+                    <span class="metric-value">${metrics.interactions.length}</span>
+                </div>
+            `;
+
+            document.getElementById('current-metrics').innerHTML = html;
+        }
+
+        function updateFirebaseLog() {
+            const queries = performanceMonitor.metrics.firebase;
+
+            if (queries.length === 0) {
+                document.getElementById('firebase-log').innerHTML = '<p style="color: #999;">No Firebase queries yet...</p>';
+                return;
+            }
+
+            const html = queries.slice(-10).reverse().map(query => {
+                const statusClass = query.success ? 'success' : 'error';
+                const durationClass = query.duration > 1000 ? 'error' : query.duration > 500 ? 'warning' : 'success';
+                const time = new Date(query.timestamp).toLocaleTimeString();
+
+                return `
+                    <div style="margin: 0.5rem 0; padding: 0.5rem; background: rgba(0,0,0,0.3); border-radius: 4px;">
+                        <div><strong>${query.collection}</strong> - ${query.operation}</div>
+                        <div style="font-size: 0.8rem; opacity: 0.8;">
+                            Duration: <span class="${durationClass}">${Math.round(query.duration)}ms</span> |
+                            Status: <span class="${statusClass}">${query.success ? 'Success' : 'Error'}</span> |
+                            Time: ${time}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('firebase-log').innerHTML = html;
+        }
+
+        function getStatusClass(value, threshold) {
+            if (value === 0) return '';
+            if (value < threshold * 0.7) return 'success';
+            if (value < threshold) return 'warning';
+            return 'error';
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function viewDashboard() {
+            window.open('performance-dashboard.html', '_blank');
+        }
+
+        function showCurrentMetrics() {
+            const metrics = performanceMonitor.getMetrics();
+            console.log('Current Metrics:', metrics);
+            alert('Metrics logged to console. Press F12 to view.');
+            updateMetrics();
+        }
+
+        function exportData() {
+            const report = performanceMonitor.exportReport();
+            const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `performance-test-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            log('✅ Report exported', 'success');
+        }
+
+        function clearAll() {
+            if (confirm('Clear all performance data?')) {
+                performanceMonitor.clear();
+                document.getElementById('current-metrics').innerHTML = '<p style="color: #999;">Metrics cleared</p>';
+                document.getElementById('firebase-log').innerHTML = '<p style="color: #999;">No Firebase queries yet...</p>';
+                log('🗑️ All data cleared', 'info');
+            }
+        }
+
+        // Listen for performance alerts
+        window.addEventListener('performanceAlert', (event) => {
+            const { level, message } = event.detail;
+            const icon = level === 'error' ? '❌' : level === 'warning' ? '⚠️' : 'ℹ️';
+            log(`${icon} ALERT: ${message}`, level);
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            log('✅ Performance test page loaded', 'success');
+            updateMetrics();
+
+            // Auto-update metrics every 2 seconds
+            setInterval(updateMetrics, 2000);
+        });
+    </script>
+</body>
+</html>

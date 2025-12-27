@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eyes of Azrael - Optimized Loading</title>
+    <meta name="description" content="A comprehensive encyclopedia of world mythologies - OPTIMIZED">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#9370DB">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         CRITICAL CSS ONLY - Inline for fastest first paint
+         ═══════════════════════════════════════════════════════════ -->
+    <style>
+        /* Critical CSS - Auth Guard, Spinner, Basic Layout */
+        /* Only what's needed for initial render (~5-10KB) */
+
+        :root {
+            --color-bg: #0f0f1e;
+            --color-surface: #1a1a2e;
+            --color-primary: #8b7fff;
+            --color-text: #e8e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        /* Auth Loading Screen */
+        .auth-loading-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--color-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        body.authenticated .auth-loading-screen,
+        body.not-authenticated .auth-loading-screen {
+            display: none;
+        }
+
+        /* Loading Spinner */
+        .auth-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(139, 127, 255, 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 1.5rem;
+            color: var(--color-text);
+            opacity: 0.8;
+        }
+
+        /* Auth Overlay */
+        .auth-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        body.not-authenticated .auth-overlay {
+            display: flex;
+        }
+
+        .auth-card {
+            background: var(--color-surface);
+            padding: 3rem;
+            border-radius: 12px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .auth-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-primary);
+        }
+
+        .auth-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .google-login-btn {
+            background: white;
+            color: #333;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .google-login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Site Header */
+        .site-header {
+            background: var(--color-surface);
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .site-logo {
+            font-size: 1.5rem;
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        /* Main Content */
+        #main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        body.not-authenticated #main-content {
+            display: none;
+        }
+
+        /* Loading Container */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+        }
+
+        .spinner-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .spinner-ring {
+            position: absolute;
+            inset: 0;
+            border: 4px solid transparent;
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+
+        .spinner-ring:nth-child(1) { animation-delay: -0.45s; }
+        .spinner-ring:nth-child(2) { animation-delay: -0.3s; }
+        .spinner-ring:nth-child(3) { animation-delay: -0.15s; }
+    </style>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PRELOAD CRITICAL RESOURCES
+         ═══════════════════════════════════════════════════════════ -->
+    <!-- Preconnect to Firebase -->
+    <link rel="preconnect" href="https://www.gstatic.com">
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+
+    <!-- Preload critical scripts -->
+    <link rel="preload" href="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" as="script">
+    <link rel="preload" href="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js" as="script">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         DEFERRED CSS - Load after critical render
+         ═══════════════════════════════════════════════════════════ -->
+    <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="themes/theme-base.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="themes/theme-base.css">
+    </noscript>
+
+    <!-- Fallback for browsers that don't support onload -->
+    <script>
+        !function(e){"use strict";var t=function(t,n,o,i){var r,a=e.document,d=a.createElement("link");if(n)r=n;else{var l=(a.body||a.getElementsByTagName("head")[0]).childNodes;r=l[l.length-1]}var s=a.styleSheets;if(i)for(var f in i)i.hasOwnProperty(f)&&d.setAttribute(f,i[f]);d.rel="stylesheet",d.href=t,d.media="only x",function e(t){if(a.body)return t();setTimeout(function(){e(t)})}(function(){r.parentNode.insertBefore(d,n?r:r.nextSibling)});var u=function(e){for(var t=d.href,n=s.length;n--;)if(s[n].href===t)return e();setTimeout(function(){u(e)})};return d.addEventListener&&d.addEventListener("load",o),d.onloadcssdefined=u,u(o),d};"undefined"!=typeof exports?exports.loadCSS=t:e.loadCSS=t}("undefined"!=typeof global?global:this);
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         CRITICAL SCRIPTS ONLY - Block render for auth
+         ═══════════════════════════════════════════════════════════ -->
+    <!-- Firebase SDK - Minimal (Auth + Firestore only) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body class="auth-loading">
+    <!-- Skip to main content (Accessibility) -->
+    <a href="#main-content" class="skip-to-main">Skip to main content</a>
+
+    <!-- Auth Loading Screen (visible until auth resolves) -->
+    <div id="auth-loading-screen" class="auth-loading-screen">
+        <div class="auth-spinner"></div>
+        <p class="loading-text">Loading Eyes of Azrael...</p>
+    </div>
+
+    <!-- Auth Overlay (shown if not authenticated) -->
+    <div id="auth-overlay" class="auth-overlay">
+        <div class="auth-card">
+            <div class="auth-logo">👁️</div>
+            <h1 class="auth-title">Eyes of Azrael</h1>
+            <p class="auth-subtitle">Explore World Mythologies</p>
+            <p class="auth-description">
+                Discover deities, heroes, creatures, and sacred texts from cultures across the globe
+            </p>
+            <button id="google-login-btn-overlay" class="google-login-btn">
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" style="width: 20px; height: 20px; margin-right: 12px;">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                </svg>
+                Sign in with Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Site Header -->
+    <header class="site-header">
+        <div class="header-container">
+            <a href="#/" class="site-logo">👁️ Eyes of Azrael</a>
+            <nav class="main-nav">
+                <a href="#/" class="nav-link">Home</a>
+                <a href="#/search" class="nav-link">Search</a>
+                <a href="#/compare" class="nav-link">Compare</a>
+                <a href="#/dashboard" class="nav-link">Dashboard</a>
+            </nav>
+            <div class="header-actions">
+                <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">🌙</button>
+                <div id="userInfo" class="user-info" style="display: none;">
+                    <img id="userAvatar" class="user-avatar" src="" alt="User">
+                    <span id="userName"></span>
+                    <button id="signOutBtn" class="btn-secondary btn-sm">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main id="main-content" class="view-container" role="main">
+        <div class="loading-container">
+            <div class="spinner-container">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+            </div>
+            <p class="loading-message">Initializing...</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <p>&copy; 2024 Eyes of Azrael. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         CRITICAL INLINE SCRIPT - Auth Guard
+         Inline to avoid network request blocking
+         ═══════════════════════════════════════════════════════════ -->
+    <script type="module">
+        (function() {
+            'use strict';
+
+            console.log('[Auth Guard] Initializing (inline optimized)...');
+
+            // Initialize Firebase
+            if (firebase.apps.length === 0 && typeof firebaseConfig !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+            }
+
+            const auth = firebase.auth();
+
+            // Set persistence
+            auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                .catch(err => console.error('[Auth] Persistence error:', err));
+
+            // Single auth state listener
+            auth.onAuthStateChanged((user) => {
+                document.body.classList.remove('auth-loading');
+
+                if (user) {
+                    // Authenticated
+                    document.body.classList.remove('not-authenticated');
+                    document.body.classList.add('authenticated');
+
+                    const overlay = document.getElementById('auth-overlay');
+                    if (overlay) overlay.style.display = 'none';
+
+                    const loadingScreen = document.getElementById('auth-loading-screen');
+                    if (loadingScreen) loadingScreen.style.display = 'none';
+
+                    const mainContent = document.getElementById('main-content');
+                    if (mainContent) {
+                        mainContent.style.display = 'block';
+                        // Hide initial spinner
+                        const loadingContainer = mainContent.querySelector('.loading-container');
+                        if (loadingContainer) {
+                            loadingContainer.style.display = 'none';
+                        }
+                    }
+
+                    // Update UI
+                    const userInfo = document.getElementById('userInfo');
+                    const userName = document.getElementById('userName');
+                    const userAvatar = document.getElementById('userAvatar');
+
+                    if (userInfo) {
+                        userInfo.style.display = 'flex';
+                        if (userName) userName.textContent = user.displayName || user.email;
+                        if (userAvatar && user.photoURL) {
+                            userAvatar.src = user.photoURL;
+                        }
+                    }
+
+                    // Emit event for app initialization
+                    document.dispatchEvent(new CustomEvent('auth-ready', {
+                        detail: { user, authenticated: true }
+                    }));
+
+                    // Load rest of app asynchronously
+                    loadAppComponents(user);
+
+                } else {
+                    // Not authenticated
+                    document.body.classList.add('not-authenticated');
+                    document.body.classList.remove('authenticated');
+
+                    const overlay = document.getElementById('auth-overlay');
+                    if (overlay) overlay.style.display = 'flex';
+
+                    const loadingScreen = document.getElementById('auth-loading-screen');
+                    if (loadingScreen) loadingScreen.style.display = 'none';
+
+                    document.dispatchEvent(new CustomEvent('auth-ready', {
+                        detail: { user: null, authenticated: false }
+                    }));
+                }
+            });
+
+            // Login handler
+            const loginBtn = document.getElementById('google-login-btn-overlay');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', async () => {
+                    loginBtn.disabled = true;
+                    loginBtn.textContent = 'Signing in...';
+
+                    try {
+                        const provider = new firebase.auth.GoogleAuthProvider();
+                        provider.addScope('profile');
+                        provider.addScope('email');
+                        await auth.signInWithPopup(provider);
+                    } catch (error) {
+                        console.error('[Auth] Login failed:', error);
+                        alert('Login failed: ' + error.message);
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = 'Sign in with Google';
+                    }
+                });
+            }
+
+            // Logout handler
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', async () => {
+                    try {
+                        await auth.signOut();
+                    } catch (error) {
+                        console.error('[Auth] Logout failed:', error);
+                    }
+                });
+            }
+
+            console.log('[Auth Guard] Initialized, waiting for auth state...');
+        })();
+
+        /**
+         * Load app components asynchronously AFTER authentication
+         * This prevents blocking the initial auth check
+         */
+        async function loadAppComponents(user) {
+            console.log('[App] Loading components for authenticated user...');
+
+            // Load Firestore only after auth succeeds
+            const firestoreScript = document.createElement('script');
+            firestoreScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js';
+            firestoreScript.onload = async () => {
+                console.log('[App] Firestore loaded');
+
+                const db = firebase.firestore();
+                window.EyesOfAzrael = window.EyesOfAzrael || {};
+                window.EyesOfAzrael.db = db;
+                window.EyesOfAzrael.auth = firebase.auth();
+
+                // Load remaining app scripts in parallel (non-blocking)
+                const scripts = [
+                    'js/views/home-view.js',
+                    'js/components/universal-display-renderer.js',
+                    'js/spa-navigation.js'
+                ];
+
+                await Promise.all(scripts.map(src => {
+                    return new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = src;
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.body.appendChild(script);
+                    });
+                }));
+
+                console.log('[App] Core scripts loaded');
+
+                // Initialize navigation
+                if (typeof SPANavigation !== 'undefined' && typeof UniversalDisplayRenderer !== 'undefined') {
+                    window.EyesOfAzrael.renderer = new UniversalDisplayRenderer({
+                        enableHover: true,
+                        enableExpand: true,
+                        enableCorpusLinks: true
+                    });
+
+                    window.EyesOfAzrael.navigation = new SPANavigation(
+                        db,
+                        firebase.auth(),
+                        window.EyesOfAzrael.renderer
+                    );
+
+                    console.log('[App] Navigation initialized');
+                    document.dispatchEvent(new CustomEvent('app-initialized'));
+                }
+
+                // Load non-critical features in background
+                setTimeout(() => {
+                    loadNonCriticalFeatures();
+                }, 2000);
+            };
+
+            document.head.appendChild(firestoreScript);
+        }
+
+        /**
+         * Load non-critical features after page is interactive
+         */
+        function loadNonCriticalFeatures() {
+            console.log('[App] Loading non-critical features...');
+
+            const nonCriticalScripts = [
+                'js/search-firebase.js',
+                'js/firebase-crud-manager.js',
+                'js/components/entity-form.js',
+                'js/shaders/shader-themes.js',
+                'js/theme-manager.js'
+            ];
+
+            // Load in parallel, non-blocking
+            nonCriticalScripts.forEach(src => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = true;
+                document.body.appendChild(script);
+            });
+
+            // Load non-critical CSS
+            const nonCriticalCSS = [
+                'css/accessibility.css',
+                'css/ui-components.css',
+                'css/search-components.css',
+                'css/entity-forms.css',
+                'css/shader-backgrounds.css'
+            ];
+
+            nonCriticalCSS.forEach(href => {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = href;
+                document.head.appendChild(link);
+            });
+        }
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PERFORMANCE MONITORING
+         Track actual load times
+         ═══════════════════════════════════════════════════════════ -->
+    <script>
+        // Performance monitoring
+        window.addEventListener('load', () => {
+            if (window.performance && window.performance.timing) {
+                const perfData = window.performance.timing;
+                const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+                const connectTime = perfData.responseEnd - perfData.requestStart;
+                const renderTime = perfData.domComplete - perfData.domLoading;
+
+                console.log('⚡ Performance Metrics:');
+                console.log(`  Page Load Time: ${pageLoadTime}ms`);
+                console.log(`  Connect Time: ${connectTime}ms`);
+                console.log(`  Render Time: ${renderTime}ms`);
+
+                // Send to analytics if configured
+                if (window.gtag) {
+                    gtag('event', 'timing_complete', {
+                        name: 'page_load',
+                        value: pageLoadTime,
+                        event_category: 'Performance'
+                    });
+                }
+            }
+        });
+
+        // Track auth timing
+        document.addEventListener('auth-ready', (e) => {
+            const authTime = performance.now();
+            console.log(`🔐 Auth Ready: ${Math.round(authTime)}ms`);
+        });
+
+        document.addEventListener('app-initialized', (e) => {
+            const appTime = performance.now();
+            console.log(`🚀 App Initialized: ${Math.round(appTime)}ms`);
+        });
+    </script>
+</body>
+</html>
