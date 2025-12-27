@@ -1,0 +1,523 @@
+{
+  "testPlan": {
+    "name": "Eyes of Azrael - Critical Pages Test Plan",
+    "version": "1.0.0",
+    "date": "2025-12-27",
+    "purpose": "Verify site functionality after deletion of 412 HTML files (Batches 5-8)",
+    "status": "Ready for Execution"
+  },
+  "deletionSummary": {
+    "totalDeleted": 412,
+    "batches": [
+      {
+        "batch": 5,
+        "files": "~100",
+        "description": "Deity index pages and category indexes"
+      },
+      {
+        "batch": 6,
+        "files": "~100",
+        "description": "Cosmology and ritual pages"
+      },
+      {
+        "batch": 7,
+        "files": "~100",
+        "description": "Hero, creature, and text pages"
+      },
+      {
+        "batch": 8,
+        "files": "~112",
+        "description": "Remaining mythology content pages"
+      }
+    ],
+    "remainingFiles": {
+      "mythos": 573,
+      "archetypes": 61,
+      "total": 634
+    }
+  },
+  "criticalPaths": {
+    "authentication": {
+      "priority": "CRITICAL",
+      "tests": [
+        {
+          "id": "auth-001",
+          "name": "Auth Guard Loads",
+          "route": "/",
+          "expected": "Login overlay appears for unauthenticated users",
+          "verification": "Check for auth-guard-overlay element"
+        },
+        {
+          "id": "auth-002",
+          "name": "Firebase Auth Initialized",
+          "route": "/",
+          "expected": "firebase.auth() is available",
+          "verification": "Check window.firebase.auth exists"
+        }
+      ]
+    },
+    "navigation": {
+      "priority": "CRITICAL",
+      "tests": [
+        {
+          "id": "nav-001",
+          "name": "SPA Navigation Initialized",
+          "route": "/",
+          "expected": "SPANavigation class instantiated",
+          "verification": "Check window.EyesOfAzrael.navigation exists"
+        },
+        {
+          "id": "nav-002",
+          "name": "Home Route",
+          "route": "#/",
+          "expected": "Home page loads with mythology cards",
+          "verification": "Check for .mythologies-grid element"
+        },
+        {
+          "id": "nav-003",
+          "name": "Mythology Overview",
+          "route": "#/mythology/greek",
+          "expected": "Greek mythology overview loads",
+          "verification": "Check for mythology-specific content"
+        },
+        {
+          "id": "nav-004",
+          "name": "Search Page",
+          "route": "#/search",
+          "expected": "Search interface loads",
+          "verification": "Check for search container"
+        },
+        {
+          "id": "nav-005",
+          "name": "Compare Page",
+          "route": "#/compare",
+          "expected": "Compare interface loads",
+          "verification": "Check for compare container"
+        },
+        {
+          "id": "nav-006",
+          "name": "Dashboard Page",
+          "route": "#/dashboard",
+          "expected": "User dashboard loads",
+          "verification": "Check for dashboard container"
+        }
+      ]
+    },
+    "firebaseContent": {
+      "priority": "CRITICAL",
+      "tests": [
+        {
+          "id": "fb-001",
+          "name": "Deities Collection",
+          "collection": "deities",
+          "expected": "194 deity documents accessible",
+          "verification": "Query collection and check count"
+        },
+        {
+          "id": "fb-002",
+          "name": "Heroes Collection",
+          "collection": "heroes",
+          "expected": "32 hero documents accessible",
+          "verification": "Query collection and check count"
+        },
+        {
+          "id": "fb-003",
+          "name": "Creatures Collection",
+          "collection": "creatures",
+          "expected": "35 creature documents accessible",
+          "verification": "Query collection and check count"
+        },
+        {
+          "id": "fb-004",
+          "name": "Cosmology Collection",
+          "collection": "cosmology",
+          "expected": "65 cosmology documents accessible",
+          "verification": "Query collection and check count"
+        },
+        {
+          "id": "fb-005",
+          "name": "Rituals Collection",
+          "collection": "rituals",
+          "expected": "20 ritual documents accessible",
+          "verification": "Query collection and check count"
+        },
+        {
+          "id": "fb-006",
+          "name": "Mythologies Collection",
+          "collection": "mythologies",
+          "expected": "18 mythology documents accessible",
+          "verification": "Query collection and check count"
+        }
+      ]
+    },
+    "rendering": {
+      "priority": "HIGH",
+      "tests": [
+        {
+          "id": "render-001",
+          "name": "Universal Display Renderer",
+          "expected": "UniversalDisplayRenderer class available",
+          "verification": "Check typeof UniversalDisplayRenderer !== 'undefined'"
+        },
+        {
+          "id": "render-002",
+          "name": "Entity Renderer",
+          "expected": "Entity cards render with proper styling",
+          "verification": "Check for .entity-card elements with content"
+        },
+        {
+          "id": "render-003",
+          "name": "Home View Renderer",
+          "expected": "HomeView class available and renders",
+          "verification": "Check typeof HomeView !== 'undefined'"
+        },
+        {
+          "id": "render-004",
+          "name": "Page Asset Renderer",
+          "expected": "PageAssetRenderer can load Firebase pages",
+          "verification": "Check typeof PageAssetRenderer !== 'undefined'"
+        }
+      ]
+    },
+    "shaders": {
+      "priority": "MEDIUM",
+      "tests": [
+        {
+          "id": "shader-001",
+          "name": "Shader Script Loads",
+          "expected": "js/shaders/shader-themes.js loads successfully",
+          "verification": "Check script tag exists and loads"
+        },
+        {
+          "id": "shader-002",
+          "name": "Shader CSS Loads",
+          "expected": "css/shader-backgrounds.css loads successfully",
+          "verification": "Check link tag exists and loads"
+        },
+        {
+          "id": "shader-003",
+          "name": "WebGL Support",
+          "expected": "Browser supports WebGL for shaders",
+          "verification": "Create canvas and test for webgl context"
+        },
+        {
+          "id": "shader-004",
+          "name": "Shader Manager Initialized",
+          "expected": "ShaderThemeManager or similar class available",
+          "verification": "Check for shader manager in global scope"
+        }
+      ]
+    },
+    "staticLinks": {
+      "priority": "CRITICAL",
+      "tests": [
+        {
+          "id": "link-001",
+          "name": "No Static HTML Links in Navigation",
+          "expected": "All nav links use hash routes (#/)",
+          "verification": "Query for a[href$='.html'] should return 0"
+        },
+        {
+          "id": "link-002",
+          "name": "No 404 Errors",
+          "expected": "No broken links to deleted files",
+          "verification": "Check browser console for 404 errors"
+        },
+        {
+          "id": "link-003",
+          "name": "Mythology Cards Use Hash Routes",
+          "expected": "Home page mythology cards link to #/mythology/{id}",
+          "verification": "Check .mythology-card href attributes"
+        }
+      ]
+    },
+    "scripts": {
+      "priority": "CRITICAL",
+      "tests": [
+        {
+          "id": "script-001",
+          "name": "Firebase SDK Loaded",
+          "expected": "Firebase scripts load from CDN",
+          "verification": "Check typeof firebase !== 'undefined'"
+        },
+        {
+          "id": "script-002",
+          "name": "Firebase Config Loaded",
+          "expected": "firebase-config.js executes successfully",
+          "verification": "Check firebase.apps.length > 0"
+        },
+        {
+          "id": "script-003",
+          "name": "App Coordinator Loaded",
+          "expected": "app-coordinator.js manages initialization",
+          "verification": "Check for coordinator diagnostic functions"
+        },
+        {
+          "id": "script-004",
+          "name": "No Script 404 Errors",
+          "expected": "All script tags point to existing files",
+          "verification": "Check network tab for 404s on .js files"
+        }
+      ]
+    }
+  },
+  "mythology Sampling": {
+    "description": "Test a sample from each mythology to verify Firebase integration",
+    "samples": [
+      {
+        "mythology": "greek",
+        "routes": [
+          "#/mythology/greek",
+          "#/mythology/greek/deities",
+          "#/mythology/greek/deity/zeus"
+        ],
+        "expectedFirebase": {
+          "deities": ["zeus", "hera", "athena", "apollo"],
+          "cosmology": ["mount-olympus", "underworld"],
+          "heroes": ["heracles", "perseus", "odysseus"]
+        }
+      },
+      {
+        "mythology": "norse",
+        "routes": [
+          "#/mythology/norse",
+          "#/mythology/norse/deities",
+          "#/mythology/norse/deity/odin"
+        ],
+        "expectedFirebase": {
+          "deities": ["odin", "thor", "loki", "freya"],
+          "cosmology": ["yggdrasil", "asgard"],
+          "heroes": ["sigurd"]
+        }
+      },
+      {
+        "mythology": "egyptian",
+        "routes": [
+          "#/mythology/egyptian",
+          "#/mythology/egyptian/deities",
+          "#/mythology/egyptian/deity/ra"
+        ],
+        "expectedFirebase": {
+          "deities": ["ra", "osiris", "isis", "anubis"],
+          "cosmology": ["duat", "nun"],
+          "creatures": ["sphinx"]
+        }
+      },
+      {
+        "mythology": "hindu",
+        "routes": [
+          "#/mythology/hindu",
+          "#/mythology/hindu/deities",
+          "#/mythology/hindu/deity/shiva"
+        ],
+        "expectedFirebase": {
+          "deities": ["shiva", "vishnu", "brahma", "kali"],
+          "cosmology": ["karma", "samsara"],
+          "heroes": ["rama", "krishna"]
+        }
+      },
+      {
+        "mythology": "christian",
+        "routes": [
+          "#/mythology/christian",
+          "#/mythology/christian/deities",
+          "#/mythology/christian/deity/jesus-christ"
+        ],
+        "expectedFirebase": {
+          "deities": ["jesus-christ", "god-father", "holy-spirit"],
+          "cosmology": ["heaven", "trinity"],
+          "heroes": ["moses", "peter", "john"]
+        }
+      }
+    ]
+  },
+  "performanceMetrics": {
+    "description": "Performance benchmarks to verify site speed",
+    "metrics": [
+      {
+        "metric": "Initial Page Load",
+        "target": "< 3 seconds",
+        "measurement": "Time to first paint"
+      },
+      {
+        "metric": "Route Navigation",
+        "target": "< 500ms",
+        "measurement": "Hash change to content render"
+      },
+      {
+        "metric": "Firebase Query",
+        "target": "< 1 second",
+        "measurement": "Collection query to data display"
+      },
+      {
+        "metric": "Shader Initialization",
+        "target": "< 2 seconds",
+        "measurement": "WebGL context creation to first render"
+      }
+    ]
+  },
+  "browserCompatibility": {
+    "description": "Browsers to test for compatibility",
+    "browsers": [
+      {
+        "name": "Chrome",
+        "version": "Latest",
+        "priority": "CRITICAL"
+      },
+      {
+        "name": "Firefox",
+        "version": "Latest",
+        "priority": "HIGH"
+      },
+      {
+        "name": "Safari",
+        "version": "Latest",
+        "priority": "HIGH"
+      },
+      {
+        "name": "Edge",
+        "version": "Latest",
+        "priority": "MEDIUM"
+      }
+    ]
+  },
+  "regressionTests": {
+    "description": "Verify features still work after migration",
+    "tests": [
+      {
+        "feature": "User Authentication",
+        "test": "Login with Google OAuth",
+        "expected": "User can sign in and session persists"
+      },
+      {
+        "feature": "Search Functionality",
+        "test": "Search for 'Zeus' across all mythologies",
+        "expected": "Returns Zeus and related entities"
+      },
+      {
+        "feature": "Entity Comparison",
+        "test": "Compare Zeus and Odin",
+        "expected": "Side-by-side comparison displays"
+      },
+      {
+        "feature": "User Contributions",
+        "test": "Submit new entity via CRUD form",
+        "expected": "Entity saves to Firebase and appears in list"
+      },
+      {
+        "feature": "Theme Switching",
+        "test": "Toggle between light/dark themes",
+        "expected": "Theme changes and persists"
+      },
+      {
+        "feature": "Breadcrumb Navigation",
+        "test": "Navigate deep, check breadcrumbs",
+        "expected": "Breadcrumb trail accurately reflects path"
+      }
+    ]
+  },
+  "knownIssues": {
+    "description": "Issues identified that need monitoring",
+    "issues": [
+      {
+        "id": "ISSUE-001",
+        "severity": "MEDIUM",
+        "description": "Shader script path changed to js/shaders/shader-themes.js",
+        "status": "FIXED",
+        "fix": "Updated index.html to reference correct path"
+      },
+      {
+        "id": "ISSUE-002",
+        "severity": "LOW",
+        "description": "Some mythology indexes may still have static links in HTML",
+        "status": "MONITORING",
+        "mitigation": "SPA router handles redirects from static to hash routes"
+      }
+    ]
+  },
+  "successCriteria": {
+    "description": "Criteria for declaring migration successful",
+    "criteria": [
+      {
+        "criterion": "All critical routes load without errors",
+        "measurement": "0 console errors on route navigation",
+        "required": true
+      },
+      {
+        "criterion": "All Firebase collections accessible",
+        "measurement": "All 6 collections return data",
+        "required": true
+      },
+      {
+        "criterion": "No 404 errors on page load",
+        "measurement": "Network tab shows 0 failed requests",
+        "required": true
+      },
+      {
+        "criterion": "Authentication flow works",
+        "measurement": "Users can sign in and access content",
+        "required": true
+      },
+      {
+        "criterion": "Shaders render properly",
+        "measurement": "Visual verification of shader backgrounds",
+        "required": false
+      },
+      {
+        "criterion": "Performance within targets",
+        "measurement": "All metrics meet or exceed targets",
+        "required": false
+      }
+    ]
+  },
+  "testExecution": {
+    "description": "How to execute the test plan",
+    "steps": [
+      {
+        "step": 1,
+        "action": "Open site-link-checker.html in browser",
+        "expected": "Test interface loads"
+      },
+      {
+        "step": 2,
+        "action": "Click 'Run All Tests' button",
+        "expected": "All automated tests execute"
+      },
+      {
+        "step": 3,
+        "action": "Review test results",
+        "expected": "Green checkmarks for passed tests, red X for failures"
+      },
+      {
+        "step": 4,
+        "action": "Open main index.html",
+        "expected": "Site loads with auth guard"
+      },
+      {
+        "step": 5,
+        "action": "Sign in with test account",
+        "expected": "Auth successful, home page displays"
+      },
+      {
+        "step": 6,
+        "action": "Navigate through each critical route",
+        "expected": "All routes load content from Firebase"
+      },
+      {
+        "step": 7,
+        "action": "Check browser console for errors",
+        "expected": "No critical errors or 404s"
+      },
+      {
+        "step": 8,
+        "action": "Test sampling routes from each mythology",
+        "expected": "Content loads from Firebase for all tested mythologies"
+      },
+      {
+        "step": 9,
+        "action": "Export test results from link checker",
+        "expected": "JSON file with all test results downloads"
+      }
+    ]
+  }
+}
