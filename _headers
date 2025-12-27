@@ -1,0 +1,52 @@
+# Firebase Hosting Security Headers
+# https://firebase.google.com/docs/hosting/full-config#headers
+
+/*
+  # Content Security Policy (CSP)
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://apis.google.com https://*.firebaseio.com https://*.firebaseapp.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.google.com https://*.firebaseapp.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self';
+
+  # Prevent clickjacking attacks
+  X-Frame-Options: DENY
+
+  # Prevent MIME type sniffing
+  X-Content-Type-Options: nosniff
+
+  # Enable XSS protection in older browsers
+  X-XSS-Protection: 1; mode=block
+
+  # Referrer policy (privacy-focused)
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # Permissions policy (restrict features)
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()
+
+  # Strict-Transport-Security (HSTS)
+  # Only enable after confirming HTTPS works correctly
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+  # Cache-Control for HTML (don't cache, always fresh)
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/css/*
+  # Cache CSS for 1 year
+  Cache-Control: public, max-age=31536000, immutable
+
+/js/*
+  # Cache JavaScript for 1 year
+  Cache-Control: public, max-age=31536000, immutable
+
+/icons/*
+  # Cache icons for 1 year
+  Cache-Control: public, max-age=31536000, immutable
+
+/images/*
+  # Cache images for 1 month
+  Cache-Control: public, max-age=2592000
+
+/manifest.json
+  # Cache manifest for 1 week
+  Cache-Control: public, max-age=604800
+
+/firebase-config.js
+  # Don't cache Firebase config (may change)
+  Cache-Control: no-cache, must-revalidate
