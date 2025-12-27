@@ -287,7 +287,7 @@ def generate_report(total: int, success: int, errors: int, deleted: int):
         if len(error_log) > 10:
             report += f"\n*See batch4_upload_errors.json for complete error list*\n"
     else:
-        report += "No errors encountered! ✓\n"
+        report += "No errors encountered!\n"
 
     report += "\n## Rollback Information\n\n"
     report += f"Rollback data saved to: batch4_rollback_data.json\n"
