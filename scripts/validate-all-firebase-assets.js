@@ -23,11 +23,36 @@ const REPORTS_DIR = path.join(__dirname, '..');
 // ============================================================================
 
 console.log('Initializing Firebase Admin SDK...');
-const serviceAccount = require('../firebase-service-account.json');
+
+// Try multiple possible locations for service account
+let serviceAccount;
+const possiblePaths = [
+  path.join(__dirname, '..', 'firebase-service-account.json'),
+  path.join(__dirname, '..', 'FIREBASE', 'firebase-service-account.json'),
+  path.join(__dirname, '..', 'serviceAccountKey.json')
+];
+
+for (const accountPath of possiblePaths) {
+  try {
+    if (fs.existsSync(accountPath)) {
+      serviceAccount = require(accountPath);
+      console.log(`Found service account at: ${accountPath}`);
+      break;
+    }
+  } catch (err) {
+    // Continue to next path
+  }
+}
+
+if (!serviceAccount) {
+  console.error('ERROR: Could not find Firebase service account key!');
+  console.error('Tried locations:', possiblePaths);
+  process.exit(1);
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  projectId: 'eyesofazrael'
+  projectId: serviceAccount.project_id || 'eyesofazrael'
 });
 
 const db = admin.firestore();
