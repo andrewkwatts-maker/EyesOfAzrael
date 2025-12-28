@@ -12,13 +12,14 @@ class LandingPageView {
 
     /**
  * Define all asset type categories for the landing page
+ * Now using SVG icons instead of emoji for better visual quality
      */
     getAssetTypes() {
         return [
             {
                 id: 'mythologies',
                 name: 'World Mythologies',
-                icon: '🏛️',
+                icon: 'icons/categories/mythologies.svg',
                 description: 'Explore gods, heroes, and legends from cultures around the world',
                 route: '#/mythologies',
                 color: '#8b7fff',
@@ -27,7 +28,7 @@ class LandingPageView {
             {
                 id: 'deities',
                 name: 'Deities & Gods',
-                icon: '⚡',
+                icon: 'icons/categories/deities.svg',
                 description: 'Divine beings and pantheons across traditions',
                 route: '#/browse/deities',
                 color: '#ffd93d',
@@ -36,7 +37,7 @@ class LandingPageView {
             {
                 id: 'heroes',
                 name: 'Heroes & Legends',
-                icon: '🗡️',
+                icon: 'icons/categories/heroes.svg',
                 description: 'Epic heroes and legendary figures',
                 route: '#/browse/heroes',
                 color: '#4a9eff',
@@ -45,7 +46,7 @@ class LandingPageView {
             {
                 id: 'creatures',
                 name: 'Mythical Creatures',
-                icon: '🐉',
+                icon: 'icons/categories/creatures.svg',
                 description: 'Dragons, monsters, and fantastic beasts',
                 route: '#/browse/creatures',
                 color: '#ff7eb6',
@@ -54,7 +55,7 @@ class LandingPageView {
             {
                 id: 'items',
                 name: 'Sacred Items',
-                icon: '💎',
+                icon: 'icons/categories/items.svg',
                 description: 'Legendary artifacts and magical objects',
                 route: '#/browse/items',
                 color: '#51cf66',
@@ -63,7 +64,7 @@ class LandingPageView {
             {
                 id: 'places',
                 name: 'Sacred Places',
-                icon: '🏔️',
+                icon: 'icons/categories/places.svg',
                 description: 'Holy sites, temples, and mystical locations',
                 route: '#/browse/places',
                 color: '#7fd9d3',
@@ -72,7 +73,7 @@ class LandingPageView {
             {
                 id: 'archetypes',
                 name: 'Archetypes',
-                icon: '🎭',
+                icon: 'icons/categories/archetypes.svg',
                 description: 'Universal patterns in mythology and storytelling',
                 route: '#/archetypes',
                 color: '#b965e6',
@@ -81,7 +82,7 @@ class LandingPageView {
             {
                 id: 'magic',
                 name: 'Magic Systems',
-                icon: '✨',
+                icon: 'icons/categories/magic.svg',
                 description: 'Mystical practices and esoteric traditions',
                 route: '#/magic',
                 color: '#f85a8f',
@@ -90,7 +91,7 @@ class LandingPageView {
             {
                 id: 'herbs',
                 name: 'Sacred Herbalism',
-                icon: '🌿',
+                icon: 'icons/categories/herbs.svg',
                 description: 'Plants, preparations, and traditional medicine',
                 route: '#/browse/herbs',
                 color: '#7fb0f9',
@@ -99,7 +100,7 @@ class LandingPageView {
             {
                 id: 'rituals',
                 name: 'Rituals & Practices',
-                icon: '🕯️',
+                icon: 'icons/categories/rituals.svg',
                 description: 'Ceremonies, festivals, and sacred rites',
                 route: '#/browse/rituals',
                 color: '#fb9f7f',
@@ -108,7 +109,7 @@ class LandingPageView {
             {
                 id: 'texts',
                 name: 'Sacred Texts',
-                icon: '📜',
+                icon: 'icons/categories/texts.svg',
                 description: 'Holy scriptures and ancient writings',
                 route: '#/browse/texts',
                 color: '#a8edea',
@@ -117,7 +118,7 @@ class LandingPageView {
             {
                 id: 'symbols',
                 name: 'Sacred Symbols',
-                icon: '☯️',
+                icon: 'icons/categories/symbols.svg',
                 description: 'Religious icons and mystical symbols',
                 route: '#/browse/symbols',
                 color: '#fed6e3',
@@ -411,15 +412,21 @@ class LandingPageView {
                 }
 
                 .landing-category-icon {
-                    font-size: clamp(1.5rem, 2.5vw, 2rem);
+                    width: clamp(2rem, 3vw, 2.5rem);
+                    height: clamp(2rem, 3vw, 2.5rem);
                     margin-bottom: var(--spacing-md, 1rem);
                     display: block;
                     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
                     transition: transform var(--transition-base, 0.3s ease);
+                    color: var(--card-color);
+                    opacity: 0.9;
                 }
 
                 .landing-category-card:hover .landing-category-icon {
-                    transform: scale(1.1);
+                    transform: scale(1.15);
+                    opacity: 1;
+                    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4))
+                            drop-shadow(0 0 12px var(--card-color));
                 }
 
                 .landing-category-name {
@@ -575,6 +582,7 @@ class LandingPageView {
 
     /**
      * Get asset type card HTML
+     * Now renders SVG icons with proper styling
      */
     getAssetTypeCardHTML(type) {
         return `
@@ -582,7 +590,10 @@ class LandingPageView {
                class="landing-category-card"
                data-type="${type.id}"
                style="--card-color: ${type.color}">
-                <span class="landing-category-icon">${type.icon}</span>
+                <img src="${type.icon}"
+                     alt="${type.name} icon"
+                     class="landing-category-icon"
+                     loading="lazy" />
                 <h3 class="landing-category-name">${type.name}</h3>
                 <p class="landing-category-description">${type.description}</p>
             </a>

@@ -603,6 +603,14 @@ class BrowseCategoryView {
                     flex-shrink: 0;
                 }
 
+                /* Support SVG icons */
+                .entity-icon img,
+                img.entity-icon {
+                    width: 2.5rem;
+                    height: 2.5rem;
+                    object-fit: contain;
+                }
+
                 .entity-card-info {
                     flex: 1;
                     min-width: 0;
@@ -798,6 +806,12 @@ class BrowseCategoryView {
                         font-size: 2rem;
                     }
 
+                    .entity-icon img,
+                    img.entity-icon {
+                        width: 2rem;
+                        height: 2rem;
+                    }
+
                     .stat-badge {
                         font-size: 0.85rem;
                     }
@@ -847,6 +861,12 @@ class BrowseCategoryView {
         const tags = entity.domains || entity.attributes || entity.roles || [];
         const displayTags = Array.isArray(tags) ? tags.slice(0, 4) : [];
 
+        // Check if icon is SVG path or emoji
+        const isSvgIcon = icon && icon.includes('/');
+        const iconHTML = isSvgIcon
+            ? `<img src="${icon}" alt="${entity.name} icon" class="entity-icon" loading="lazy" />`
+            : `<span class="entity-icon">${icon}</span>`;
+
         return `
             <a href="#/entity/${this.category}/${entity.mythology}/${entity.id}"
                class="entity-card"
@@ -854,7 +874,7 @@ class BrowseCategoryView {
                data-mythology="${entity.mythology}"
                data-name="${entity.name.toLowerCase()}">
                 <div class="entity-card-header">
-                    <span class="entity-icon">${icon}</span>
+                    ${iconHTML}
                     <div class="entity-card-info">
                         <h3 class="entity-card-title">${this.escapeHtml(entity.name)}</h3>
                         <span class="entity-mythology">${this.capitalize(entity.mythology)}</span>
