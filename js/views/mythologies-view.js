@@ -240,16 +240,29 @@ class MythologiesView {
                 }
 
                 .mythology-icon {
-                    font-size: 2rem;
+                    width: 2rem;
+                    height: 2rem;
                     margin-bottom: var(--spacing-md, 1rem);
                     display: block;
                     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
                     transition: transform var(--transition-base, 0.3s ease);
                     line-height: 1;
+                    color: var(--card-color, var(--color-primary));
+                    opacity: 0.9;
+                }
+
+                /* Support both emoji and SVG icons */
+                .mythology-icon:not(img) {
+                    font-size: 2rem;
+                    width: auto;
+                    height: auto;
                 }
 
                 .mythology-card:hover .mythology-icon {
-                    transform: scale(1.1);
+                    transform: scale(1.15);
+                    opacity: 1;
+                    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4))
+                            drop-shadow(0 0 12px var(--card-color));
                 }
 
                 .mythology-name {
@@ -386,12 +399,18 @@ class MythologiesView {
         const color = mythology.color || '#8b7fff';
         const counts = mythology.counts || { deities: 0, heroes: 0, creatures: 0 };
 
+        // Check if icon is SVG path or emoji
+        const isSvgIcon = mythology.icon && mythology.icon.includes('/');
+        const iconHTML = isSvgIcon
+            ? `<img src="${mythology.icon}" alt="${mythology.name} icon" class="mythology-icon" loading="lazy" />`
+            : `<span class="mythology-icon">${mythology.icon || '📖'}</span>`;
+
         return `
             <a href="#/mythology/${mythology.id}"
                class="mythology-card"
                data-mythology="${mythology.id}"
                style="--card-color: ${color}">
-                <span class="mythology-icon">${mythology.icon || '📖'}</span>
+                ${iconHTML}
                 <h3 class="mythology-name">${mythology.name}</h3>
                 <p class="mythology-description">${mythology.description}</p>
                 ${counts.deities || counts.heroes || counts.creatures ? `
