@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Scrolling Demo - Eyes of Azrael</title>
+
+    <link rel="stylesheet" href="../css/virtual-scroller.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls h2 {
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .control-group input,
+        .control-group select,
+        .control-group button {
+            padding: 10px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .control-group button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .control-group button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        #virtual-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .demo-item {
+            padding: 16px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: background 0.2s;
+        }
+
+        .demo-item:hover {
+            background: #f5f5f5;
+        }
+
+        .demo-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .item-description {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .item-meta {
+            font-size: 12px;
+            color: #999;
+            display: flex;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .item-index {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            margin-top: 40px;
+            opacity: 0.9;
+        }
+
+        .performance-overlay {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #0f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .control-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <header>
+            <h1>⚡ Virtual Scrolling Demo</h1>
+            <p>Smooth 60fps scrolling with 10,000+ items</p>
+        </header>
+
+        <div class="controls">
+            <h2>Controls</h2>
+
+            <div class="control-group">
+                <label for="item-count">Item Count:</label>
+                <select id="item-count">
+                    <option value="100">100 items</option>
+                    <option value="500">500 items</option>
+                    <option value="1000" selected>1,000 items</option>
+                    <option value="5000">5,000 items</option>
+                    <option value="10000">10,000 items</option>
+                    <option value="50000">50,000 items (extreme!)</option>
+                </select>
+
+                <label for="item-height">Item Height:</label>
+                <input type="number" id="item-height" value="80" min="50" max="200" step="10">
+
+                <label for="buffer-size">Buffer Size:</label>
+                <input type="number" id="buffer-size" value="10" min="0" max="50">
+
+                <button id="regenerate-btn">Regenerate Items</button>
+                <button id="toggle-performance">Show Performance</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-items">0</div>
+                    <div class="stat-label">Total Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="visible-items">0</div>
+                    <div class="stat-label">Visible Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avg-render-time">0ms</div>
+                    <div class="stat-label">Avg Render Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avg-fps">60</div>
+                    <div class="stat-label">Average FPS</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="virtual-container"></div>
+
+        <footer>
+            <p>Virtual scrolling maintains constant performance regardless of list size</p>
+            <p style="margin-top: 8px; opacity: 0.8;">Try scrolling through 50,000 items - still smooth!</p>
+        </footer>
+    </div>
+
+    <script type="module">
+        import { VirtualScroller } from '../js/components/virtual-scroller.js';
+        import { VirtualScrollerPerformance } from '../js/components/virtual-scroller-performance.js';
+
+        let scroller = null;
+        let performance = null;
+        let updateInterval = null;
+
+        // Demo data generators
+        const icons = ['⚡', '🔮', '🗡️', '🏛️', '📜', '🐉', '👑', '✨', '🌟', '💎', '🦅', '🌙', '☀️', '🔥', '💧'];
+        const types = ['Deity', 'Hero', 'Creature', 'Place', 'Artifact', 'Concept', 'Myth', 'Ritual'];
+        const mythologies = ['Greek', 'Norse', 'Egyptian', 'Hindu', 'Chinese', 'Babylonian', 'Celtic', 'Japanese'];
+
+        function generateItem(index) {
+            const icon = icons[index % icons.length];
+            const type = types[index % types.length];
+            const mythology = mythologies[index % mythologies.length];
+
+            return {
+                id: index,
+                icon: icon,
+                name: `Entity ${index + 1}`,
+                type: type,
+                mythology: mythology,
+                description: `A fascinating ${type.toLowerCase()} from ${mythology} mythology with rich history and cultural significance.`
+            };
+        }
+
+        function renderItem(item, index) {
+            return `
+                <div class="demo-item">
+                    <div class="item-icon">${item.icon}</div>
+                    <div class="item-content">
+                        <div class="item-title">${item.name}</div>
+                        <div class="item-description">${item.description}</div>
+                        <div class="item-meta">
+                            <span>${item.mythology}</span>
+                            <span>•</span>
+                            <span>${item.type}</span>
+                            <span>•</span>
+                            <span>Index: ${index}</span>
+                        </div>
+                    </div>
+                    <div class="item-index">#${index + 1}</div>
+                </div>
+            `;
+        }
+
+        function initializeScroller() {
+            const container = document.getElementById('virtual-container');
+            const itemCount = parseInt(document.getElementById('item-count').value);
+            const itemHeight = parseInt(document.getElementById('item-height').value);
+            const bufferSize = parseInt(document.getElementById('buffer-size').value);
+
+            // Destroy existing scroller
+            if (scroller) {
+                scroller.destroy();
+            }
+
+            // Create new scroller
+            scroller = new VirtualScroller(container, {
+                itemHeight: itemHeight,
+                bufferSize: bufferSize,
+                renderItem: renderItem
+            });
+
+            // Create performance monitor
+            performance = new VirtualScrollerPerformance(scroller);
+
+            // Generate items
+            const items = Array(itemCount).fill(0).map((_, i) => generateItem(i));
+            scroller.setItems(items);
+
+            // Update stats
+            updateStats();
+
+            // Start real-time stats update
+            if (updateInterval) clearInterval(updateInterval);
+            updateInterval = setInterval(updateStats, 1000);
+
+            console.log(`Initialized virtual scroller with ${itemCount} items`);
+        }
+
+        function updateStats() {
+            if (!scroller || !performance) return;
+
+            const stats = scroller.getStats();
+            const perfSummary = performance.getSummary();
+
+            document.getElementById('total-items').textContent = stats.itemCount.toLocaleString();
+            document.getElementById('visible-items').textContent = stats.visibleRange.count;
+            document.getElementById('avg-render-time').textContent = perfSummary.averageRenderTime + 'ms';
+            document.getElementById('avg-fps').textContent = perfSummary.averageFPS;
+        }
+
+        // Event listeners
+        document.getElementById('regenerate-btn').addEventListener('click', initializeScroller);
+
+        document.getElementById('toggle-performance').addEventListener('click', () => {
+            const existingOverlay = document.querySelector('.virtual-scroller-performance-overlay');
+            if (existingOverlay) {
+                existingOverlay.remove();
+            } else {
+                performance.showOverlay();
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', initializeScroller);
+
+        // Cleanup on unload
+        window.addEventListener('beforeunload', () => {
+            if (updateInterval) clearInterval(updateInterval);
+            if (scroller) scroller.destroy();
+        });
+    </script>
+</body>
+</html>

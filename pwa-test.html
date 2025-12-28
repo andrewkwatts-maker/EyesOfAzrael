@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Testing Dashboard - Eyes of Azrael</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#8b7fff">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a1a2e 0%, #1a2a3e 100%);
+            color: #e0e0e0;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #8b7fff;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        .subtitle {
+            color: #c0c0c0;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(26, 31, 58, 0.8);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(139, 127, 255, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .card h2 {
+            color: #ffffff;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-active {
+            background: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+
+        .status-inactive {
+            background: #ff4500;
+            box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+        }
+
+        .status-pending {
+            background: #fbbf24;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .info-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            color: #ffffff;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8b7fff, #6a5acd);
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 127, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(139, 127, 255, 0.5);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4500, #dc143c);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 69, 0, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255, 69, 0, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .log-container {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(139, 127, 255, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .log-entry {
+            padding: 0.25rem 0;
+            color: #c0c0c0;
+        }
+
+        .log-success { color: #4ade80; }
+        .log-error { color: #ff4500; }
+        .log-warning { color: #fbbf24; }
+        .log-info { color: #60a5fa; }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .metric {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #8b7fff;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+
+        .cache-list {
+            list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .cache-item {
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            word-break: break-all;
+        }
+
+        .progress-bar {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #8b7fff, #6a5acd);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PWA Testing Dashboard</h1>
+        <p class="subtitle">Monitor and test Progressive Web App features for Eyes of Azrael</p>
+
+        <div class="dashboard-grid">
+            <!-- Service Worker Status -->
+            <div class="card">
+                <h2>
+                    <span class="status-indicator" id="swStatus"></span>
+                    Service Worker
+                </h2>
+                <div class="info-item">
+                    <div class="info-label">Status</div>
+                    <div class="info-value" id="swState">Checking...</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Scope</div>
+                    <div class="info-value" id="swScope">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Version</div>
+                    <div class="info-value" id="swVersion">-</div>
+                </div>
+                <button class="btn btn-primary" onclick="checkServiceWorker()">Refresh Status</button>
+                <button class="btn btn-danger" onclick="unregisterServiceWorker()">Unregister</button>
+            </div>
+
+            <!-- Cache Information -->
+            <div class="card">
+                <h2>
+                    <span class="status-indicator status-active"></span>
+                    Cache Storage
+                </h2>
+                <div class="info-item">
+                    <div class="info-label">Cache Names</div>
+                    <div class="info-value" id="cacheCount">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Total Items</div>
+                    <div class="info-value" id="cacheItems">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Estimated Size</div>
+                    <div class="info-value" id="cacheSize">Calculating...</div>
+                </div>
+                <button class="btn btn-primary" onclick="viewCaches()">View Caches</button>
+                <button class="btn btn-danger" onclick="clearAllCaches()">Clear All</button>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="card">
+                <h2>
+                    <span class="status-indicator status-active"></span>
+                    Performance
+                </h2>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value" id="loadTime">-</div>
+                        <div class="metric-label">Load Time (ms)</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="cacheHits">-</div>
+                        <div class="metric-label">Cache Hits</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="measurePerformance()">Measure</button>
+            </div>
+
+            <!-- Offline Support -->
+            <div class="card">
+                <h2>
+                    <span class="status-indicator" id="onlineStatus"></span>
+                    Network Status
+                </h2>
+                <div class="info-item">
+                    <div class="info-label">Connection</div>
+                    <div class="info-value" id="connectionType">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Online Status</div>
+                    <div class="info-value" id="onlineState">-</div>
+                </div>
+                <button class="btn btn-secondary" onclick="testOffline()">Test Offline Mode</button>
+            </div>
+        </div>
+
+        <!-- Cache Details -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h2>Cached Resources</h2>
+            <div id="cacheDetails">
+                <p style="color: #9ca3af;">Click "View Caches" to see cached resources</p>
+            </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="card">
+            <h2>Activity Log</h2>
+            <div class="log-container" id="activityLog">
+                <div class="log-entry log-info">PWA Testing Dashboard initialized</div>
+            </div>
+            <button class="btn btn-secondary" onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <script>
+        // Logging
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('activityLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('activityLog').innerHTML = '';
+            log('Log cleared', 'info');
+        }
+
+        // Service Worker Check
+        async function checkServiceWorker() {
+            log('Checking Service Worker status...', 'info');
+
+            if (!('serviceWorker' in navigator)) {
+                log('Service Workers not supported', 'error');
+                document.getElementById('swStatus').className = 'status-indicator status-inactive';
+                document.getElementById('swState').textContent = 'Not Supported';
+                return;
+            }
+
+            try {
+                const registration = await navigator.serviceWorker.getRegistration();
+
+                if (registration) {
+                    document.getElementById('swStatus').className = 'status-indicator status-active';
+                    document.getElementById('swState').textContent = registration.active ? 'Active' : 'Installing';
+                    document.getElementById('swScope').textContent = registration.scope;
+                    document.getElementById('swVersion').textContent = 'v1.0.0';
+
+                    log('Service Worker is active', 'success');
+                } else {
+                    document.getElementById('swStatus').className = 'status-indicator status-inactive';
+                    document.getElementById('swState').textContent = 'Not Registered';
+                    log('Service Worker not registered', 'warning');
+                }
+            } catch (error) {
+                log(`Error checking Service Worker: ${error.message}`, 'error');
+            }
+        }
+
+        async function unregisterServiceWorker() {
+            if (confirm('Are you sure you want to unregister the Service Worker?')) {
+                try {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration) {
+                        await registration.unregister();
+                        log('Service Worker unregistered', 'success');
+                        checkServiceWorker();
+                    }
+                } catch (error) {
+                    log(`Error unregistering: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Cache Management
+        async function viewCaches() {
+            log('Loading cache information...', 'info');
+
+            try {
+                const cacheNames = await caches.keys();
+                document.getElementById('cacheCount').textContent = cacheNames.length;
+
+                let totalItems = 0;
+                let cacheHTML = '';
+
+                for (const name of cacheNames) {
+                    const cache = await caches.open(name);
+                    const requests = await cache.keys();
+                    totalItems += requests.length;
+
+                    cacheHTML += `
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: #8b7fff; margin-bottom: 0.5rem;">${name} (${requests.length} items)</h3>
+                            <ul class="cache-list">
+                                ${requests.slice(0, 10).map(req => `
+                                    <li class="cache-item">${new URL(req.url).pathname}</li>
+                                `).join('')}
+                                ${requests.length > 10 ? `<li class="cache-item">... and ${requests.length - 10} more</li>` : ''}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('cacheItems').textContent = totalItems;
+                document.getElementById('cacheDetails').innerHTML = cacheHTML || '<p>No caches found</p>';
+
+                log(`Found ${cacheNames.length} caches with ${totalItems} total items`, 'success');
+
+                // Estimate size
+                if ('storage' in navigator && 'estimate' in navigator.storage) {
+                    const estimate = await navigator.storage.estimate();
+                    const size = (estimate.usage / 1024 / 1024).toFixed(2);
+                    document.getElementById('cacheSize').textContent = `${size} MB`;
+                }
+            } catch (error) {
+                log(`Error viewing caches: ${error.message}`, 'error');
+            }
+        }
+
+        async function clearAllCaches() {
+            if (confirm('Are you sure you want to clear all caches?')) {
+                try {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+
+                    log(`Cleared ${cacheNames.length} caches`, 'success');
+                    viewCaches();
+                } catch (error) {
+                    log(`Error clearing caches: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Performance
+        function measurePerformance() {
+            log('Measuring performance...', 'info');
+
+            const perfData = performance.getEntriesByType('navigation')[0];
+            if (perfData) {
+                const loadTime = Math.round(perfData.loadEventEnd - perfData.fetchStart);
+                document.getElementById('loadTime').textContent = loadTime;
+                log(`Page load time: ${loadTime}ms`, 'success');
+            }
+
+            // Count cache hits from performance entries
+            const resourceEntries = performance.getEntriesByType('resource');
+            const cacheHits = resourceEntries.filter(entry =>
+                entry.transferSize === 0 && entry.decodedBodySize > 0
+            ).length;
+
+            document.getElementById('cacheHits').textContent = cacheHits;
+            log(`Cache hits: ${cacheHits}`, 'info');
+        }
+
+        // Network Status
+        function updateNetworkStatus() {
+            const online = navigator.onLine;
+            const statusEl = document.getElementById('onlineStatus');
+            const stateEl = document.getElementById('onlineState');
+
+            if (online) {
+                statusEl.className = 'status-indicator status-active';
+                stateEl.textContent = 'Online';
+            } else {
+                statusEl.className = 'status-indicator status-inactive';
+                stateEl.textContent = 'Offline';
+            }
+
+            // Connection info
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (connection) {
+                document.getElementById('connectionType').textContent =
+                    `${connection.effectiveType || 'unknown'} (${connection.downlink || 'N/A'} Mbps)`;
+            }
+        }
+
+        function testOffline() {
+            log('To test offline mode:', 'info');
+            log('1. Open DevTools (F12)', 'info');
+            log('2. Go to Network tab', 'info');
+            log('3. Set throttling to "Offline"', 'info');
+            log('4. Refresh the page', 'info');
+        }
+
+        // Event Listeners
+        window.addEventListener('online', () => {
+            log('Connection restored', 'success');
+            updateNetworkStatus();
+        });
+
+        window.addEventListener('offline', () => {
+            log('Connection lost', 'warning');
+            updateNetworkStatus();
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkServiceWorker();
+            viewCaches();
+            updateNetworkStatus();
+            measurePerformance();
+            log('Dashboard ready', 'success');
+        });
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            checkServiceWorker();
+            updateNetworkStatus();
+        }, 30000);
+    </script>
+</body>
+</html>
