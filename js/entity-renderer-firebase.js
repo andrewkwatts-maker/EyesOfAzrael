@@ -147,7 +147,12 @@ class FirebaseEntityRenderer {
      * Render deity entity
      */
     renderDeity(entity, container) {
+        // Make container position relative for edit icon
+        container.style.position = 'relative';
+
         const html = `
+            ${this.renderEditIcon(entity)}
+
             <!-- Deity Header -->
             <section class="deity-header">
                 <div class="deity-icon">${entity.visual?.icon || entity.icon || this.getDefaultIcon('deity')}</div>
@@ -684,7 +689,12 @@ class FirebaseEntityRenderer {
      * Render generic entity (fallback)
      */
     renderGenericEntity(entity, container) {
+        // Make container position relative for edit icon
+        container.style.position = 'relative';
+
         const html = `
+            ${this.renderEditIcon(entity)}
+
             <section class="entity-header">
                 <div class="entity-icon">${entity.visual?.icon || entity.icon || this.getDefaultIcon(entity.type)}</div>
                 <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
@@ -700,6 +710,44 @@ class FirebaseEntityRenderer {
         `;
 
         container.innerHTML = html;
+    }
+
+    /**
+     * Render edit icon if user owns entity
+     * @param {Object} entity - Entity data
+     * @returns {string} Edit icon HTML or empty string
+     */
+    renderEditIcon(entity) {
+        if (!this.canUserEdit(entity)) {
+            return '';
+        }
+
+        const collection = this.getCollectionName(entity.type);
+
+        return `
+            <button class="edit-icon-btn"
+                    data-entity-id="${entity.id}"
+                    data-collection="${collection}"
+                    aria-label="Edit ${entity.name}"
+                    title="Edit this ${entity.type}">
+                ✏️
+            </button>
+        `;
+    }
+
+    /**
+     * Check if current user can edit this entity
+     * @param {Object} entity - Entity data
+     * @returns {boolean}
+     */
+    canUserEdit(entity) {
+        if (!firebase || !firebase.auth) return false;
+
+        const user = firebase.auth().currentUser;
+        if (!user) return false;
+
+        // Check if user created this entity
+        return entity.createdBy === user.uid;
     }
 
     /**

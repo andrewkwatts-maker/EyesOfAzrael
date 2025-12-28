@@ -32,7 +32,10 @@ class SPANavigation {
             category: /^#?\/mythology\/([^\/]+)\/([^\/]+)\/?$/,
             search: /^#?\/search\/?$/,
             compare: /^#?\/compare\/?$/,
-            dashboard: /^#?\/dashboard\/?$/
+            dashboard: /^#?\/dashboard\/?$/,
+            about: /^#?\/about\/?$/,
+            privacy: /^#?\/privacy\/?$/,
+            terms: /^#?\/terms\/?$/
         };
 
         // ⚡ OPTIMIZATION: Check currentUser synchronously first
@@ -194,6 +197,16 @@ class SPANavigation {
             currentRoute: this.currentRoute
         });
 
+        // Track page view
+        if (window.AnalyticsManager) {
+            window.AnalyticsManager.trackPageView(path);
+        }
+
+        // Track navigation
+        if (this.currentRoute && window.AnalyticsManager) {
+            window.AnalyticsManager.trackNavigation(this.currentRoute, path);
+        }
+
         const mainContent = document.getElementById('main-content');
 
         // Double-check authentication (auth guard already handles this)
@@ -259,6 +272,15 @@ class SPANavigation {
             } else if (this.routes.dashboard.test(path)) {
                 console.log('[SPA] ✅ Matched DASHBOARD route');
                 await this.renderDashboard();
+            } else if (this.routes.about.test(path)) {
+                console.log('[SPA] ✅ Matched ABOUT route');
+                await this.renderAbout();
+            } else if (this.routes.privacy.test(path)) {
+                console.log('[SPA] ✅ Matched PRIVACY route');
+                await this.renderPrivacy();
+            } else if (this.routes.terms.test(path)) {
+                console.log('[SPA] ✅ Matched TERMS route');
+                await this.renderTerms();
             } else {
                 console.log('[SPA] ⚠️  No route matched, rendering 404');
                 await this.render404();
@@ -615,16 +637,67 @@ class SPANavigation {
 
         try {
             const mainContent = document.getElementById('main-content');
-            mainContent.innerHTML = '<div id="search-container"></div>';
 
-            console.log('[SPA] ✅ Search page rendered');
-            console.log('[SPA] 📡 Emitting first-render-complete event');
-            document.dispatchEvent(new CustomEvent('first-render-complete', {
-                detail: {
-                    route: 'search',
-                    timestamp: Date.now()
-                }
-            }));
+            // Check if SearchViewComplete class is available (preferred)
+            if (typeof SearchViewComplete !== 'undefined') {
+                console.log('[SPA] ✓ SearchViewComplete class available, using it...');
+
+                // Create and render complete search view
+                const searchView = new SearchViewComplete(this.db);
+
+                // Store globally for pagination callbacks
+                window.searchViewInstance = searchView;
+
+                console.log('[SPA] 📡 Rendering SearchViewComplete...');
+                await searchView.render(mainContent);
+
+                console.log('[SPA] ✅ Search page rendered via SearchViewComplete');
+                console.log('[SPA] 📡 Emitting first-render-complete event');
+                document.dispatchEvent(new CustomEvent('first-render-complete', {
+                    detail: {
+                        route: 'search',
+                        renderer: 'SearchViewComplete',
+                        timestamp: Date.now()
+                    }
+                }));
+                return;
+            }
+
+            // Fallback to EnhancedCorpusSearch if available
+            if (typeof EnhancedCorpusSearch !== 'undefined') {
+                console.log('[SPA] ⚠️  Falling back to EnhancedCorpusSearch...');
+
+                const container = document.createElement('div');
+                container.id = 'search-container';
+                mainContent.innerHTML = '';
+                mainContent.appendChild(container);
+
+                const searchEngine = new EnhancedCorpusSearch(this.db);
+                // Note: EnhancedCorpusSearch may not have a render method
+                // This is a placeholder - you may need to implement a UI wrapper
+
+                console.log('[SPA] ✅ Search container created (EnhancedCorpusSearch)');
+                console.log('[SPA] 📡 Emitting first-render-complete event');
+                document.dispatchEvent(new CustomEvent('first-render-complete', {
+                    detail: {
+                        route: 'search',
+                        renderer: 'EnhancedCorpusSearch',
+                        timestamp: Date.now()
+                    }
+                }));
+                return;
+            }
+
+            // Final fallback - show error
+            console.error('[SPA] ❌ No search component available');
+            mainContent.innerHTML = `
+                <div class="error-page">
+                    <h1>Search Not Available</h1>
+                    <p>The search component failed to load. Please refresh the page.</p>
+                    <a href="#/" class="btn-primary">Return Home</a>
+                </div>
+            `;
+
         } catch (error) {
             console.error('[SPA] ❌ Search page render failed:', error);
             console.log('[SPA] 📡 Emitting render-error event');
@@ -644,9 +717,28 @@ class SPANavigation {
 
         try {
             const mainContent = document.getElementById('main-content');
-            mainContent.innerHTML = `<div class="compare-page"><h1>Compare Entities</h1><p>Coming soon...</p></div>`;
 
-            console.log('[SPA] ✅ Compare page rendered');
+            // Check if CompareView class is available
+            if (typeof CompareView === 'undefined') {
+                console.error('[SPA] ❌ CompareView class not loaded');
+                mainContent.innerHTML = `
+                    <div class="error-page">
+                        <h1>Error</h1>
+                        <p>Compare component not loaded. Please refresh the page.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            console.log('[SPA] ✓ CompareView class available');
+
+            // Create and render CompareView
+            const compareView = new CompareView(this.db);
+
+            console.log('[SPA] 📡 Rendering CompareView...');
+            await compareView.render(mainContent);
+
+            console.log('[SPA] ✅ Compare page rendered successfully');
             console.log('[SPA] 📡 Emitting first-render-complete event');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
@@ -673,9 +765,51 @@ class SPANavigation {
 
         try {
             const mainContent = document.getElementById('main-content');
-            mainContent.innerHTML = `<div class="dashboard-page"><h1>My Contributions</h1><p>Coming soon...</p></div>`;
 
-            console.log('[SPA] ✅ Dashboard page rendered');
+            // Check if UserDashboard class is available
+            if (typeof UserDashboard === 'undefined') {
+                console.error('[SPA] ❌ UserDashboard class not loaded');
+                mainContent.innerHTML = `
+                    <div class="error-page">
+                        <h1>Error</h1>
+                        <p>Dashboard component not loaded. Please refresh the page.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Check if FirebaseCRUDManager is available
+            if (typeof FirebaseCRUDManager === 'undefined') {
+                console.error('[SPA] ❌ FirebaseCRUDManager class not loaded');
+                mainContent.innerHTML = `
+                    <div class="error-page">
+                        <h1>Error</h1>
+                        <p>CRUD manager not loaded. Please refresh the page.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            console.log('[SPA] ✓ UserDashboard and dependencies available');
+
+            // Create CRUD manager instance
+            const crudManager = new FirebaseCRUDManager(this.db, firebase.auth());
+
+            // Create and render dashboard
+            const dashboard = new UserDashboard({
+                crudManager: crudManager,
+                auth: firebase.auth()
+            });
+
+            console.log('[SPA] 📡 Rendering UserDashboard...');
+            const dashboardHTML = await dashboard.render();
+            mainContent.innerHTML = dashboardHTML;
+
+            // Initialize dashboard event listeners
+            console.log('[SPA] 🔧 Initializing dashboard event listeners...');
+            dashboard.initialize(mainContent);
+
+            console.log('[SPA] ✅ Dashboard page rendered successfully');
             console.log('[SPA] 📡 Emitting first-render-complete event');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
@@ -689,6 +823,108 @@ class SPANavigation {
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: {
                     route: 'dashboard',
+                    error: error.message,
+                    timestamp: Date.now()
+                }
+            }));
+            throw error;
+        }
+    }
+
+    async renderAbout() {
+        console.log('[SPA] ▶️  renderAbout() called');
+
+        try {
+            const mainContent = document.getElementById('main-content');
+            if (typeof AboutPage !== 'undefined') {
+                const aboutPage = new AboutPage();
+                aboutPage.render(mainContent);
+            } else {
+                mainContent.innerHTML = '<div class="error">AboutPage component not loaded</div>';
+            }
+
+            console.log('[SPA] ✅ About page rendered');
+            console.log('[SPA] 📡 Emitting first-render-complete event');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: 'about',
+                    timestamp: Date.now()
+                }
+            }));
+        } catch (error) {
+            console.error('[SPA] ❌ About page render failed:', error);
+            console.log('[SPA] 📡 Emitting render-error event');
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: {
+                    route: 'about',
+                    error: error.message,
+                    timestamp: Date.now()
+                }
+            }));
+            throw error;
+        }
+    }
+
+    async renderPrivacy() {
+        console.log('[SPA] ▶️  renderPrivacy() called');
+
+        try {
+            const mainContent = document.getElementById('main-content');
+            if (typeof PrivacyPage !== 'undefined') {
+                const privacyPage = new PrivacyPage();
+                privacyPage.render(mainContent);
+            } else {
+                mainContent.innerHTML = '<div class="error">PrivacyPage component not loaded</div>';
+            }
+
+            console.log('[SPA] ✅ Privacy page rendered');
+            console.log('[SPA] 📡 Emitting first-render-complete event');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: 'privacy',
+                    timestamp: Date.now()
+                }
+            }));
+        } catch (error) {
+            console.error('[SPA] ❌ Privacy page render failed:', error);
+            console.log('[SPA] 📡 Emitting render-error event');
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: {
+                    route: 'privacy',
+                    error: error.message,
+                    timestamp: Date.now()
+                }
+            }));
+            throw error;
+        }
+    }
+
+    async renderTerms() {
+        console.log('[SPA] ▶️  renderTerms() called');
+
+        try {
+            const mainContent = document.getElementById('main-content');
+            if (typeof TermsPage !== 'undefined') {
+                const termsPage = new TermsPage();
+                termsPage.render(mainContent);
+            } else {
+                mainContent.innerHTML = '<div class="error">TermsPage component not loaded</div>';
+            }
+
+            console.log('[SPA] ✅ Terms page rendered');
+            console.log('[SPA] 📡 Emitting first-render-complete event');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: 'terms',
+                    timestamp: Date.now()
+                }
+            }));
+        } catch (error) {
+            console.error('[SPA] ❌ Terms page render failed:', error);
+            console.log('[SPA] 📡 Emitting render-error event');
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: {
+                    route: 'terms',
                     error: error.message,
                     timestamp: Date.now()
                 }

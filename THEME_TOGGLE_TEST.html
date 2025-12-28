@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Toggle Test - Eyes of Azrael</title>
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="css/header-theme-picker.css">
+    <style>
+        body {
+            padding: 2rem;
+            background: var(--color-bg-primary, #0a0e27);
+            color: var(--color-text-primary, #f8f9fa);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .test-card {
+            background: var(--color-bg-card, #1a1f3a);
+            border: 2px solid var(--color-border-primary, #2a2f4a);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+
+        .color-swatch {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid var(--color-border-primary);
+            margin: 0.25rem;
+        }
+
+        .status {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+
+        .status.success { background: #10b981; color: white; }
+        .status.error { background: #ef4444; color: white; }
+        .status.info { background: var(--color-primary, #8b7fff); color: white; }
+
+        .header-actions {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .icon-btn {
+            background: var(--color-bg-card);
+            border: 2px solid var(--color-border-primary);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="header-actions">
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">🌙</button>
+    </div>
+
+    <div class="test-container">
+        <h1>🎨 Theme System Test</h1>
+
+        <div class="test-card">
+            <h2>Current Theme Status</h2>
+            <div id="themeStatus"></div>
+            <div id="localStorageStatus"></div>
+            <div id="pickerStatus"></div>
+        </div>
+
+        <div class="test-card">
+            <h2>Color Variables Test</h2>
+            <p>These swatches should change with the theme:</p>
+            <div>
+                <span class="color-swatch" style="background: var(--color-primary);" title="Primary"></span>
+                <span class="color-swatch" style="background: var(--color-secondary);" title="Secondary"></span>
+                <span class="color-swatch" style="background: var(--color-accent);" title="Accent"></span>
+                <span class="color-swatch" style="background: var(--color-bg-primary);" title="BG Primary"></span>
+                <span class="color-swatch" style="background: var(--color-bg-secondary);" title="BG Secondary"></span>
+                <span class="color-swatch" style="background: var(--color-bg-card);" title="BG Card"></span>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h2>Persistence Test</h2>
+            <p>Reload this page - your theme should persist</p>
+            <button onclick="location.reload()" style="padding: 0.5rem 1rem; cursor: pointer;">🔄 Reload Page</button>
+        </div>
+
+        <div class="test-card">
+            <h2>Manual Theme Switcher</h2>
+            <p>Test API calls:</p>
+            <button onclick="testTheme('day')" style="padding: 0.5rem 1rem; cursor: pointer;">☀️ Day</button>
+            <button onclick="testTheme('night')" style="padding: 0.5rem 1rem; cursor: pointer;">🌙 Night</button>
+            <button onclick="testTheme('fire')" style="padding: 0.5rem 1rem; cursor: pointer;">🔥 Fire</button>
+            <button onclick="testTheme('water')" style="padding: 0.5rem 1rem; cursor: pointer;">💧 Water</button>
+            <button onclick="testTheme('celestial')" style="padding: 0.5rem 1rem; cursor: pointer;">✨ Celestial</button>
+        </div>
+
+        <div class="test-card">
+            <h2>Debug Info</h2>
+            <pre id="debugInfo" style="background: #000; padding: 1rem; border-radius: 8px; overflow-x: auto;"></pre>
+        </div>
+    </div>
+
+    <script src="js/header-theme-picker.js"></script>
+
+    <script>
+        // Test functions
+        function testTheme(themeName) {
+            if (window.HeaderThemePicker) {
+                window.HeaderThemePicker.setTheme(themeName);
+                updateStatus();
+            } else {
+                alert('HeaderThemePicker not available');
+            }
+        }
+
+        function updateStatus() {
+            // Theme status
+            const theme = document.body.getAttribute('data-theme') || 'unknown';
+            document.getElementById('themeStatus').innerHTML = `
+                <div class="status info">Current Theme: <strong>${theme}</strong></div>
+            `;
+
+            // localStorage status
+            const savedTheme = localStorage.getItem('eoaplot-selected-theme');
+            document.getElementById('localStorageStatus').innerHTML = `
+                <div class="status ${savedTheme ? 'success' : 'error'}">
+                    LocalStorage: ${savedTheme || 'Not set'}
+                </div>
+            `;
+
+            // Picker status
+            const pickerExists = !!document.querySelector('.theme-picker-dropdown');
+            document.getElementById('pickerStatus').innerHTML = `
+                <div class="status ${pickerExists ? 'success' : 'error'}">
+                    Theme Picker: ${pickerExists ? 'Active' : 'Not found'}
+                </div>
+            `;
+
+            // Debug info
+            const debugData = {
+                currentTheme: theme,
+                savedTheme: savedTheme,
+                pickerAPI: window.HeaderThemePicker ? 'Available' : 'Not available',
+                availableThemes: window.HeaderThemePicker?.getAvailableThemes() || [],
+                cssVariables: {
+                    primary: getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim(),
+                    bgPrimary: getComputedStyle(document.documentElement).getPropertyValue('--color-bg-primary').trim(),
+                    textPrimary: getComputedStyle(document.documentElement).getPropertyValue('--color-text-primary').trim()
+                }
+            };
+
+            document.getElementById('debugInfo').textContent = JSON.stringify(debugData, null, 2);
+        }
+
+        // Update on load and theme change
+        window.addEventListener('load', () => {
+            setTimeout(updateStatus, 500); // Wait for HeaderThemePicker to init
+        });
+
+        // Listen for theme changes
+        const observer = new MutationObserver(updateStatus);
+        observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+    </script>
+</body>
+</html>

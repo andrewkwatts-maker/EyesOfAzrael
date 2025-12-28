@@ -221,8 +221,8 @@ class EntityLoader {
             // Update page title
             document.title = `${entity.name || entity.title} - Eyes of Azrael`;
 
-            // Track view (analytics)
-            this.trackView(id, type);
+            // Track view (analytics) - pass full entity object
+            this.trackView(entity);
 
         } catch (error) {
             console.error('Error loading entity:', error);
@@ -449,12 +449,17 @@ class EntityLoader {
     /**
      * Track entity view (for analytics)
      */
-    static trackView(id, type) {
-        // TODO: Implement analytics tracking
-        if (window.gtag) {
+    static trackView(entity) {
+        // Use AnalyticsManager if available
+        if (window.AnalyticsManager) {
+            window.AnalyticsManager.trackEntityView(entity);
+        } else if (window.gtag) {
+            // Fallback to direct gtag
             gtag('event', 'view_entity', {
-                entity_type: type,
-                entity_id: id
+                entity_type: entity.type,
+                entity_id: entity.id,
+                entity_name: entity.name || entity.title,
+                mythology: entity.mythology
             });
         }
     }

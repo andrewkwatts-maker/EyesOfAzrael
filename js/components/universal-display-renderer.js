@@ -65,13 +65,17 @@ class UniversalDisplayRenderer {
     renderGridCard(entity) {
         const display = entity.gridDisplay || this.generateGridDisplay(entity);
         const hoverInfo = this.options.enableHover ? this.renderHoverInfo(entity) : '';
+        const editIcon = this.renderEditIcon(entity);
 
         return `
             <div class="entity-card grid-card"
                  data-entity-id="${entity.id}"
                  data-mythology="${entity.mythology}"
                  data-entity-type="${entity.entityType}"
-                 data-importance="${entity.importance || 50}">
+                 data-importance="${entity.importance || 50}"
+                 data-created-by="${entity.createdBy || ''}">
+
+                ${editIcon}
 
                 ${display.badge ? `<div class="card-badge">${display.badge}</div>` : ''}
 
@@ -450,6 +454,66 @@ class UniversalDisplayRenderer {
                 } : null
             ].filter(Boolean)
         };
+    }
+
+    /**
+     * Render edit icon if user owns entity
+     * @param {Object} entity - Entity data
+     * @returns {string} Edit icon HTML or empty string
+     */
+    renderEditIcon(entity) {
+        if (!this.canUserEdit(entity)) {
+            return '';
+        }
+
+        const collection = entity.collection || this.inferCollection(entity.entityType);
+
+        return `
+            <button class="edit-icon-btn"
+                    data-entity-id="${entity.id}"
+                    data-collection="${collection}"
+                    aria-label="Edit ${entity.name}"
+                    title="Edit this entity">
+                ✏️
+            </button>
+        `;
+    }
+
+    /**
+     * Check if current user can edit this entity
+     * @param {Object} entity - Entity data
+     * @returns {boolean}
+     */
+    canUserEdit(entity) {
+        if (typeof firebase === 'undefined' || !firebase.auth) return false;
+
+        const user = firebase.auth().currentUser;
+        if (!user) return false;
+
+        // Check if user created this entity
+        return entity.createdBy === user.uid;
+    }
+
+    /**
+     * Infer Firestore collection from entity type
+     * @param {string} entityType - Entity type
+     * @returns {string} Collection name
+     */
+    inferCollection(entityType) {
+        const map = {
+            'deity': 'deities',
+            'hero': 'heroes',
+            'creature': 'creatures',
+            'item': 'items',
+            'place': 'places',
+            'concept': 'concepts',
+            'magic': 'magic',
+            'ritual': 'rituals',
+            'herb': 'herbs',
+            'symbol': 'symbols',
+            'text': 'texts'
+        };
+        return map[entityType] || entityType + 's';
     }
 
     /**

@@ -1,0 +1,691 @@
+/**
+ * Compare View Styles
+ * Responsive entity comparison interface with side-by-side attribute display
+ */
+
+/* ========================================
+   Compare View Container
+   ======================================== */
+
+.compare-view {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 2rem;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   Header Section
+   ======================================== */
+
+.compare-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--color-border-primary, #2a2f4a);
+}
+
+.compare-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--color-primary, #8b7fff), var(--color-secondary, #ff7eb6));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.compare-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.compare-actions button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    background: var(--color-bg-card, #1a1f3a);
+    color: var(--color-text-primary, #f8f9fa);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.compare-actions button:hover:not(:disabled) {
+    background: var(--color-primary, #8b7fff);
+    border-color: var(--color-primary, #8b7fff);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 127, 255, 0.3);
+}
+
+.compare-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ========================================
+   Entity Selector Panel
+   ======================================== */
+
+.entity-selector-panel {
+    background: var(--color-bg-card, #1a1f3a);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.entity-selector-panel h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--color-text-primary, #f8f9fa);
+}
+
+.selector-controls {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-input-wrapper input {
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    background: var(--color-bg-secondary, #151a35);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 8px;
+    color: var(--color-text-primary, #f8f9fa);
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.search-input-wrapper input:focus {
+    outline: none;
+    border-color: var(--color-primary, #8b7fff);
+    box-shadow: 0 0 0 3px rgba(139, 127, 255, 0.1);
+}
+
+.search-input-wrapper input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.search-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.selector-controls select {
+    padding: 0.75rem 1rem;
+    background: var(--color-bg-secondary, #151a35);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 8px;
+    color: var(--color-text-primary, #f8f9fa);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.selector-controls select:focus {
+    outline: none;
+    border-color: var(--color-primary, #8b7fff);
+    box-shadow: 0 0 0 3px rgba(139, 127, 255, 0.1);
+}
+
+/* ========================================
+   Search Results
+   ======================================== */
+
+.search-results {
+    min-height: 100px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.search-results::-webkit-scrollbar {
+    width: 8px;
+}
+
+.search-results::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary, #151a35);
+    border-radius: 4px;
+}
+
+.search-results::-webkit-scrollbar-thumb {
+    background: var(--color-border-primary, #2a2f4a);
+    border-radius: 4px;
+}
+
+.search-results::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary, #8b7fff);
+}
+
+.search-hint,
+.no-results,
+.search-error,
+.max-entities-msg {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-secondary, #adb5bd);
+    font-size: 0.95rem;
+}
+
+.search-loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-secondary, #adb5bd);
+}
+
+.search-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+/* ========================================
+   Search Result Cards
+   ======================================== */
+
+.search-result-card {
+    background: var(--color-bg-secondary, #151a35);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.search-result-card:hover {
+    border-color: var(--color-primary, #8b7fff);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 127, 255, 0.2);
+}
+
+.result-header {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.result-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.result-info {
+    flex: 1;
+}
+
+.result-name {
+    font-weight: 600;
+    color: var(--color-text-primary, #f8f9fa);
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.result-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.mythology-badge,
+.type-badge {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.mythology-badge {
+    background: rgba(139, 127, 255, 0.2);
+    color: var(--color-primary, #8b7fff);
+}
+
+.type-badge {
+    background: rgba(255, 126, 182, 0.2);
+    color: var(--color-secondary, #ff7eb6);
+}
+
+.result-title {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary, #adb5bd);
+    margin-bottom: 0.5rem;
+    font-style: italic;
+}
+
+.result-description {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary, #adb5bd);
+    line-height: 1.5;
+}
+
+/* ========================================
+   Comparison Section
+   ======================================== */
+
+.comparison-section {
+    margin-top: 2rem;
+}
+
+/* ========================================
+   Empty States
+   ======================================== */
+
+.empty-state,
+.single-entity-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--color-bg-card, #1a1f3a);
+    border: 2px dashed var(--color-border-primary, #2a2f4a);
+    border-radius: 12px;
+}
+
+.empty-state-icon,
+.single-entity-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.empty-state h2,
+.single-entity-state h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary, #f8f9fa);
+}
+
+.empty-state p,
+.single-entity-state p {
+    color: var(--color-text-secondary, #adb5bd);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.hint {
+    font-size: 0.9rem;
+    color: var(--color-primary, #8b7fff);
+    font-style: italic;
+}
+
+/* ========================================
+   Comparison Table
+   ======================================== */
+
+.comparison-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 12px;
+    background: var(--color-bg-card, #1a1f3a);
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.comparison-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--color-bg-secondary, #151a35);
+}
+
+.comparison-table th {
+    padding: 1rem;
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    font-weight: 600;
+    text-align: left;
+}
+
+.comparison-table th.attribute-column {
+    min-width: 200px;
+    background: var(--color-bg-secondary, #151a35);
+    position: sticky;
+    left: 0;
+    z-index: 11;
+}
+
+.comparison-table th.entity-column {
+    min-width: 250px;
+    vertical-align: top;
+}
+
+/* Entity header styling */
+.entity-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    position: relative;
+}
+
+.entity-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.entity-info {
+    flex: 1;
+}
+
+.entity-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #f8f9fa);
+    margin-bottom: 0.25rem;
+}
+
+.entity-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.remove-entity-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: rgba(255, 77, 77, 0.2);
+    color: #ff4d4d;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.remove-entity-btn:hover {
+    background: #ff4d4d;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Table body */
+.comparison-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.comparison-table tbody tr:hover {
+    background: rgba(139, 127, 255, 0.05);
+}
+
+.comparison-table td {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    vertical-align: top;
+}
+
+.attribute-name {
+    font-weight: 600;
+    color: var(--color-text-primary, #f8f9fa);
+    background: var(--color-bg-secondary, #151a35);
+    position: sticky;
+    left: 0;
+    z-index: 5;
+}
+
+.entity-value {
+    color: var(--color-text-secondary, #adb5bd);
+    line-height: 1.6;
+}
+
+.empty-value {
+    opacity: 0.3;
+    font-style: italic;
+}
+
+/* ========================================
+   Attribute Highlighting
+   ======================================== */
+
+/* All values match */
+.attribute-row.all-match {
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.attribute-row.all-match .entity-value {
+    color: #4caf50;
+    font-weight: 500;
+}
+
+/* Some values match (partial) */
+.attribute-row.some-match {
+    background: rgba(255, 193, 7, 0.05);
+}
+
+/* All values different */
+.attribute-row.all-differ {
+    background: rgba(33, 150, 243, 0.05);
+}
+
+.attribute-row.all-differ .entity-value {
+    color: var(--color-text-primary, #f8f9fa);
+}
+
+/* All values empty */
+.attribute-row.all-empty {
+    opacity: 0.5;
+}
+
+/* ========================================
+   Mythology-specific styling
+   ======================================== */
+
+.entity-column[data-mythology="greek"],
+.entity-value[data-mythology="greek"] {
+    --myth-color: #4A90E2;
+}
+
+.entity-column[data-mythology="norse"],
+.entity-value[data-mythology="norse"] {
+    --myth-color: #7C4DFF;
+}
+
+.entity-column[data-mythology="egyptian"],
+.entity-value[data-mythology="egyptian"] {
+    --myth-color: #FFB300;
+}
+
+.entity-column[data-mythology="hindu"],
+.entity-value[data-mythology="hindu"] {
+    --myth-color: #E91E63;
+}
+
+.entity-column[data-mythology="chinese"],
+.entity-value[data-mythology="chinese"] {
+    --myth-color: #F44336;
+}
+
+.entity-column[data-mythology="japanese"],
+.entity-value[data-mythology="japanese"] {
+    --myth-color: #FF5722;
+}
+
+.entity-column[data-mythology="celtic"],
+.entity-value[data-mythology="celtic"] {
+    --myth-color: #4CAF50;
+}
+
+.entity-column[data-mythology="babylonian"],
+.entity-value[data-mythology="babylonian"] {
+    --myth-color: #795548;
+}
+
+.entity-column {
+    border-top: 3px solid var(--myth-color, var(--color-primary, #8b7fff));
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+
+@media (max-width: 1024px) {
+    .compare-view {
+        padding: 1rem;
+    }
+
+    .compare-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .compare-actions {
+        justify-content: stretch;
+    }
+
+    .compare-actions button {
+        flex: 1;
+    }
+
+    .selector-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .search-results-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .compare-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .comparison-table-wrapper {
+        border-radius: 8px;
+    }
+
+    .comparison-table {
+        font-size: 0.9rem;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 0.5rem;
+    }
+
+    .entity-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .entity-icon {
+        font-size: 1.5rem;
+    }
+
+    .entity-name {
+        font-size: 1rem;
+    }
+
+    .remove-entity-btn {
+        position: static;
+        margin-top: 0.5rem;
+        width: 100%;
+    }
+}
+
+/* ========================================
+   Print Styles
+   ======================================== */
+
+@media print {
+    .compare-header,
+    .entity-selector-panel,
+    .remove-entity-btn {
+        display: none !important;
+    }
+
+    .comparison-table-wrapper {
+        border: 1px solid #000;
+    }
+
+    .comparison-table {
+        color: #000;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        border: 1px solid #000;
+        background: white !important;
+    }
+
+    .attribute-row.all-match {
+        background: #e8f5e9 !important;
+    }
+
+    .attribute-row.all-differ {
+        background: #e3f2fd !important;
+    }
+}
+
+/* ========================================
+   Accessibility
+   ======================================== */
+
+/* Focus styles */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+.search-result-card:focus-visible {
+    outline: 2px solid var(--color-primary, #8b7fff);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .compare-view {
+        border: 2px solid currentColor;
+    }
+
+    .mythology-badge,
+    .type-badge {
+        border: 1px solid currentColor;
+    }
+
+    .attribute-row.all-match,
+    .attribute-row.all-differ {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

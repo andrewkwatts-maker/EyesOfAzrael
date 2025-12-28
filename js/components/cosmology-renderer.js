@@ -267,8 +267,23 @@ class CosmologyRenderer {
      * Show edit modal
      */
     async showEditModal(mythology, entityId) {
-        // TODO: Implement edit modal
-        alert('Edit functionality coming soon! This will allow users to suggest edits to cosmology content.');
+        // Check if EditEntityModal is available
+        if (typeof EditEntityModal === 'undefined') {
+            console.error('EditEntityModal not loaded');
+            alert('Edit functionality not available. Please ensure all scripts are loaded.');
+            return;
+        }
+
+        // Check if CRUD manager is available
+        if (!window.EyesOfAzrael || !window.EyesOfAzrael.crudManager) {
+            console.error('CRUD Manager not initialized');
+            alert('Edit functionality not available. Please ensure the app is properly initialized.');
+            return;
+        }
+
+        // Open edit modal
+        const modal = new EditEntityModal(window.EyesOfAzrael.crudManager);
+        await modal.open(entityId, 'cosmology');
     }
 
     /**
