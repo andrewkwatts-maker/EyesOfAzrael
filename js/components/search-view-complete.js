@@ -11,7 +11,6 @@
  * - Performance optimized
  */
 
-import { VirtualScroller } from './virtual-scroller.js';
 
 class SearchViewComplete {
     constructor(firestoreInstance) {

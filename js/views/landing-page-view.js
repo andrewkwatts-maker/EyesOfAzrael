@@ -411,7 +411,7 @@ class LandingPageView {
                 }
 
                 .landing-category-icon {
-                    font-size: clamp(3rem, 5vw, 3.5rem);
+                    font-size: clamp(1.5rem, 2.5vw, 2rem);
                     margin-bottom: var(--spacing-md, 1rem);
                     display: block;
                     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
@@ -466,7 +466,7 @@ class LandingPageView {
                 }
 
                 .landing-feature-icon {
-                    font-size: clamp(2.5rem, 4vw, 3rem);
+                    font-size: clamp(1.75rem, 3vw, 2.25rem);
                     margin-bottom: var(--spacing-md, 1rem);
                     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
                 }

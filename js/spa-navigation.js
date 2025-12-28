@@ -357,7 +357,27 @@ class SPANavigation {
             innerHTML: mainContent.innerHTML.substring(0, 100) + '...'
         });
 
-        // Try PageAssetRenderer first (dynamic Firebase page loading)
+        // PRIORITY: Use LandingPageView for home page (shows ONLY 12 asset type categories)
+        if (typeof LandingPageView !== 'undefined') {
+            console.log('[SPA] 🔧 LandingPageView class available, using it...');
+            const landingView = new LandingPageView(this.db);
+            console.log('[SPA] 📡 Calling landingView.render(mainContent)...');
+            await landingView.render(mainContent);
+            console.log('[SPA] ✅ Landing page rendered via LandingPageView');
+
+            // Emit success event
+            console.log('[SPA] 📡 Emitting first-render-complete event (LandingPageView)');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: 'home',
+                    renderer: 'LandingPageView',
+                    timestamp: Date.now()
+                }
+            }));
+            return;
+        }
+
+        // Fallback: Try PageAssetRenderer (dynamic Firebase page loading)
         if (typeof PageAssetRenderer !== 'undefined') {
             console.log('[SPA] 🔧 PageAssetRenderer class available, trying...');
             try {
@@ -388,26 +408,6 @@ class SPANavigation {
             }
         } else {
             console.log('[SPA] ℹ️  PageAssetRenderer class not defined, skipping');
-        }
-
-        // Try LandingPageView first (new landing page with asset types)
-        if (typeof LandingPageView !== 'undefined') {
-            console.log('[SPA] 🔧 LandingPageView class available, using it...');
-            const landingView = new LandingPageView(this.db);
-            console.log('[SPA] 📡 Calling landingView.render(mainContent)...');
-            await landingView.render(mainContent);
-            console.log('[SPA] ✅ Landing page rendered via LandingPageView');
-
-            // Emit success event
-            console.log('[SPA] 📡 Emitting first-render-complete event (LandingPageView)');
-            document.dispatchEvent(new CustomEvent('first-render-complete', {
-                detail: {
-                    route: 'home',
-                    renderer: 'LandingPageView',
-                    timestamp: Date.now()
-                }
-            }));
-            return;
         }
 
         // Fallback to HomeView class (old mythologies grid)
@@ -611,9 +611,34 @@ class SPANavigation {
 
         try {
             const mainContent = document.getElementById('main-content');
-            mainContent.innerHTML = `<div class="mythology-page"><h1>${mythologyId} Mythology</h1><p>Coming soon...</p></div>`;
 
-            console.log('[SPA] ✅ Mythology page rendered');
+            // Check if MythologyOverview component is available
+            if (typeof MythologyOverview !== 'undefined') {
+                console.log('[SPA] ✓ MythologyOverview class available, using it...');
+                const mythologyView = new MythologyOverview({ db: this.db, router: this });
+                const html = await mythologyView.render({ mythology: mythologyId });
+                mainContent.innerHTML = html;
+                console.log('[SPA] ✅ Mythology page rendered via MythologyOverview');
+            } else {
+                // Fallback to PageAssetRenderer for special mythology pages
+                console.log('[SPA] ⚠️  MythologyOverview not available, trying PageAssetRenderer...');
+                if (typeof PageAssetRenderer !== 'undefined') {
+                    const renderer = new PageAssetRenderer(this.db);
+                    const pageData = await renderer.loadPage(`mythology-${mythologyId}`);
+                    if (pageData) {
+                        await renderer.renderPage(`mythology-${mythologyId}`, mainContent);
+                        console.log('[SPA] ✅ Mythology page rendered via PageAssetRenderer');
+                    } else {
+                        // Final fallback: basic mythology info
+                        mainContent.innerHTML = await this.renderBasicMythologyPage(mythologyId);
+                        console.log('[SPA] ✅ Mythology page rendered (basic fallback)');
+                    }
+                } else {
+                    mainContent.innerHTML = await this.renderBasicMythologyPage(mythologyId);
+                    console.log('[SPA] ✅ Mythology page rendered (basic fallback)');
+                }
+            }
+
             console.log('[SPA] 📡 Emitting first-render-complete event');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
@@ -637,14 +662,95 @@ class SPANavigation {
         }
     }
 
+    /**
+     * Render basic mythology page (fallback)
+     */
+    async renderBasicMythologyPage(mythologyId) {
+        const mythologies = {
+            'greek': { name: 'Greek', icon: '🏛️', color: '#4A90E2' },
+            'norse': { name: 'Norse', icon: '⚔️', color: '#7C4DFF' },
+            'egyptian': { name: 'Egyptian', icon: '🔺', color: '#FFB300' },
+            'hindu': { name: 'Hindu', icon: '🕉️', color: '#E91E63' },
+            'chinese': { name: 'Chinese', icon: '🐉', color: '#F44336' },
+            'japanese': { name: 'Japanese', icon: '⛩️', color: '#FF5722' },
+            'celtic': { name: 'Celtic', icon: '🍀', color: '#4CAF50' },
+            'babylonian': { name: 'Babylonian', icon: '🏺', color: '#795548' },
+            'sumerian': { name: 'Sumerian', icon: '📜', color: '#9E9E9E' },
+            'persian': { name: 'Persian', icon: '🦁', color: '#00BCD4' },
+            'roman': { name: 'Roman', icon: '🏛️', color: '#673AB7' },
+            'aztec': { name: 'Aztec', icon: '☀️', color: '#FF9800' },
+            'mayan': { name: 'Mayan', icon: '🗿', color: '#8BC34A' },
+            'buddhist': { name: 'Buddhist', icon: '☸️', color: '#FFEB3B' },
+            'christian': { name: 'Christian', icon: '✝️', color: '#2196F3' },
+            'yoruba': { name: 'Yoruba', icon: '👑', color: '#9C27B0' }
+        };
+
+        const myth = mythologies[mythologyId] || { name: mythologyId, icon: '📚', color: '#666' };
+
+        // Count entities
+        const entityTypes = ['deities', 'heroes', 'creatures', 'texts', 'rituals', 'herbs', 'cosmology', 'magic'];
+        const counts = {};
+        let totalCount = 0;
+
+        for (const type of entityTypes) {
+            try {
+                const snapshot = await this.db.collection(type)
+                    .where('mythology', '==', mythologyId)
+                    .get();
+                counts[type] = snapshot.size;
+                totalCount += snapshot.size;
+            } catch (error) {
+                console.error(`Error loading count for ${type}:`, error);
+                counts[type] = 0;
+            }
+        }
+
+        return `
+            <div class="mythology-page" style="--myth-color: ${myth.color};">
+                <div class="mythology-hero" style="text-align: center; padding: 3rem 1rem; background: linear-gradient(135deg, ${myth.color}22 0%, transparent 100%);">
+                    <div class="mythology-icon" style="font-size: 5rem; margin-bottom: 1rem;">${myth.icon}</div>
+                    <h1 style="font-size: 3rem; margin-bottom: 0.5rem; color: ${myth.color};">${myth.name} Mythology</h1>
+                    <p style="font-size: 1.2rem; opacity: 0.8;">Explore ${totalCount} entities from the ${myth.name} tradition</p>
+                </div>
+
+                <div class="mythology-categories" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                    ${entityTypes.filter(type => counts[type] > 0).map(type => `
+                        <a href="#/browse/${type}/${mythologyId}" class="category-card" style="text-decoration: none; padding: 1.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; transition: all 0.3s;">
+                            <h3 style="color: ${myth.color}; margin-bottom: 0.5rem; text-transform: capitalize;">${type}</h3>
+                            <p style="opacity: 0.7; margin: 0;">${counts[type]} ${type}</p>
+                        </a>
+                    `).join('')}
+                </div>
+
+                ${totalCount === 0 ? `
+                    <div style="text-align: center; padding: 3rem; opacity: 0.6;">
+                        <p>No entities available for this mythology yet. Check back soon!</p>
+                        <a href="#/" class="btn-primary" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: ${myth.color}; color: white; text-decoration: none; border-radius: 4px;">Browse All Mythologies</a>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
     async renderCategory(mythology, category) {
         console.log('[SPA] ▶️  renderCategory() called');
 
         try {
             const mainContent = document.getElementById('main-content');
-            mainContent.innerHTML = `<div class="category-page"><h1>${category} - ${mythology}</h1><p>Coming soon...</p></div>`;
 
-            console.log('[SPA] ✅ Category page rendered');
+            // Use BrowseCategoryView to render the category page
+            if (typeof BrowseCategoryView !== 'undefined') {
+                console.log('[SPA] ✓ BrowseCategoryView class available, using it...');
+                const browseView = new BrowseCategoryView(this.db);
+                await browseView.render(mainContent, { category, mythology });
+                console.log('[SPA] ✅ Category page rendered via BrowseCategoryView');
+            } else {
+                // Fallback to basic category rendering
+                console.log('[SPA] ⚠️  BrowseCategoryView not available, using basic fallback...');
+                mainContent.innerHTML = await this.renderBasicCategoryPage(mythology, category);
+                console.log('[SPA] ✅ Category page rendered (basic fallback)');
+            }
+
             console.log('[SPA] 📡 Emitting first-render-complete event');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
@@ -670,14 +776,86 @@ class SPANavigation {
         }
     }
 
+    /**
+     * Render basic category page (fallback)
+     */
+    async renderBasicCategoryPage(mythology, category) {
+        const categoryIcons = {
+            'deities': '👑',
+            'heroes': '🦸',
+            'creatures': '🐉',
+            'texts': '📜',
+            'rituals': '🕯️',
+            'herbs': '🌿',
+            'cosmology': '🌌',
+            'magic': '✨',
+            'items': '⚔️',
+            'places': '🏛️',
+            'symbols': '⚡'
+        };
+
+        const icon = categoryIcons[category] || '📄';
+        const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
+
+        // Load entities from Firebase
+        let entities = [];
+        try {
+            const snapshot = await this.db.collection(category)
+                .where('mythology', '==', mythology)
+                .get();
+            entities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error(`Error loading ${category} for ${mythology}:`, error);
+        }
+
+        return `
+            <div class="category-page">
+                <div class="category-hero" style="text-align: center; padding: 2rem 1rem;">
+                    <div class="category-icon" style="font-size: 4rem; margin-bottom: 1rem;">${icon}</div>
+                    <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">${categoryName}</h1>
+                    <p style="font-size: 1.2rem; opacity: 0.8;">${mythology.charAt(0).toUpperCase() + mythology.slice(1)} Mythology</p>
+                    <p style="opacity: 0.7;">${entities.length} ${entities.length === 1 ? category.slice(0, -1) : category}</p>
+                </div>
+
+                ${entities.length > 0 ? `
+                    <div class="entity-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                        ${entities.map(entity => `
+                            <a href="#/mythology/${mythology}/${category}/${entity.id}" class="entity-card" style="text-decoration: none; padding: 1.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; transition: all 0.3s;">
+                                <div class="entity-icon" style="font-size: 2rem; text-align: center; margin-bottom: 0.5rem;">${entity.icon || icon}</div>
+                                <h3 style="color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.25rem;">${this.escapeHtml(entity.name || entity.title || 'Unnamed')}</h3>
+                                ${entity.description ? `<p style="opacity: 0.7; font-size: 0.9rem; margin: 0;">${this.escapeHtml(entity.description.substring(0, 100))}${entity.description.length > 100 ? '...' : ''}</p>` : ''}
+                            </a>
+                        `).join('')}
+                    </div>
+                ` : `
+                    <div style="text-align: center; padding: 3rem; opacity: 0.6;">
+                        <p>No ${category} found for ${mythology} mythology yet.</p>
+                        <a href="#/mythology/${mythology}" class="btn-secondary" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px;">Back to ${mythology.charAt(0).toUpperCase() + mythology.slice(1)} Mythology</a>
+                    </div>
+                `}
+            </div>
+        `;
+    }
+
     async renderEntity(mythology, categoryType, entityId) {
         console.log('[SPA] ▶️  renderEntity() called');
 
         try {
             const mainContent = document.getElementById('main-content');
-            mainContent.innerHTML = `<div class="entity-page"><h1>${entityId}</h1><p>Coming soon...</p></div>`;
 
-            console.log('[SPA] ✅ Entity page rendered');
+            // Use FirebaseEntityRenderer to render the entity
+            if (typeof FirebaseEntityRenderer !== 'undefined') {
+                console.log('[SPA] ✓ FirebaseEntityRenderer class available, using it...');
+                const entityRenderer = new FirebaseEntityRenderer();
+                await entityRenderer.loadAndRender(categoryType, entityId, mythology, mainContent);
+                console.log('[SPA] ✅ Entity page rendered via FirebaseEntityRenderer');
+            } else {
+                // Fallback to basic entity rendering
+                console.log('[SPA] ⚠️  FirebaseEntityRenderer not available, using basic fallback...');
+                mainContent.innerHTML = await this.renderBasicEntityPage(mythology, categoryType, entityId);
+                console.log('[SPA] ✅ Entity page rendered (basic fallback)');
+            }
+
             console.log('[SPA] 📡 Emitting first-render-complete event');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
@@ -703,6 +881,81 @@ class SPANavigation {
             }));
             throw error;
         }
+    }
+
+    /**
+     * Render basic entity page (fallback)
+     */
+    async renderBasicEntityPage(mythology, categoryType, entityId) {
+        // Load entity from Firebase
+        let entity = null;
+        try {
+            const doc = await this.db.collection(categoryType).doc(entityId).get();
+            if (doc.exists) {
+                entity = { id: doc.id, ...doc.data() };
+            }
+        } catch (error) {
+            console.error(`Error loading entity ${entityId}:`, error);
+        }
+
+        if (!entity) {
+            return `
+                <div class="error-page" style="text-align: center; padding: 3rem;">
+                    <h1 style="font-size: 3rem; margin-bottom: 1rem;">🔍</h1>
+                    <h2>Entity Not Found</h2>
+                    <p>The entity "${entityId}" could not be found in ${categoryType}.</p>
+                    <a href="#/mythology/${mythology}/${categoryType}" class="btn-primary" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px;">Back to ${categoryType}</a>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="entity-page">
+                <div class="entity-hero" style="text-align: center; padding: 2rem 1rem;">
+                    <div class="entity-icon" style="font-size: 5rem; margin-bottom: 1rem;">${entity.icon || '✨'}</div>
+                    <h1 style="font-size: 3rem; margin-bottom: 0.5rem;">${this.escapeHtml(entity.name || entity.title || 'Unnamed')}</h1>
+                    ${entity.subtitle ? `<p style="font-size: 1.5rem; opacity: 0.8; margin-bottom: 1rem;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
+                    ${entity.description ? `<p style="font-size: 1.1rem; opacity: 0.9; max-width: 800px; margin: 0 auto;">${this.escapeHtml(entity.description)}</p>` : ''}
+                </div>
+
+                ${entity.content ? `
+                    <div style="max-width: 900px; margin: 2rem auto; padding: 0 1rem;">
+                        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 2rem;">
+                            ${this.renderMarkdown(entity.content)}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div style="text-align: center; margin-top: 3rem; padding: 2rem; opacity: 0.7;">
+                    <a href="#/mythology/${mythology}/${categoryType}" class="btn-secondary" style="display: inline-block; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px;">← Back to ${categoryType}</a>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Render markdown content (basic implementation)
+     */
+    renderMarkdown(markdown) {
+        if (!markdown) return '';
+        return markdown
+            .replace(/^### (.*$)/gim, '<h3 style="color: var(--color-secondary); margin: 1.5rem 0 1rem;">$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2 style="color: var(--color-primary); margin: 2rem 0 1rem;">$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1 style="margin: 2rem 0 1rem;">$1</h1>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n\n/g, '</p><p style="margin: 1rem 0;">')
+            .replace(/\n/g, '<br>');
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     async renderSearch() {

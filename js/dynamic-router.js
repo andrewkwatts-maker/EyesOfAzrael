@@ -10,6 +10,7 @@
  *
  * Routes:
  * /#/                                      → Home (mythology browser)
+ * /#/browse/{type}                         → Category landing page
  * /#/mythology/{id}                        → Mythology overview
  * /#/mythology/{id}/{type}                 → Entity type list
  * /#/mythology/{id}/{type}/{entity}        → Entity detail
@@ -30,6 +31,7 @@ class DynamicRouter {
         // Component registry
         this.components = {
             'home': null,  // Will be set by MythologyBrowser
+            'category-landing': null,  // Will be set by CategoryLandingView
             'mythology-overview': null,  // Will be set by MythologyOverview
             'entity-type-browser': null,  // Will be set by EntityTypeBrowser
             'entity-detail-viewer': null,  // Will be set by EntityDetailViewer
@@ -255,6 +257,19 @@ class DynamicRouter {
             };
         }
 
+        if (segments[0] === 'browse') {
+            if (segments.length === 2) {
+                // Category landing: #/browse/deities
+                return {
+                    hash,
+                    type: 'category-landing',
+                    entityType: this.pluralToSingular(segments[1]),
+                    entityTypePlural: segments[1],
+                    queryParams
+                };
+            }
+        }
+
         if (segments[0] === 'mythology') {
             if (segments.length === 2) {
                 // Mythology overview: #/mythology/greek
@@ -459,6 +474,14 @@ class DynamicRouter {
         }];
 
         if (route.type === 'home') {
+            return crumbs;
+        }
+
+        if (route.type === 'category-landing') {
+            crumbs.push({
+                label: this.capitalize(route.entityTypePlural),
+                hash: route.hash
+            });
             return crumbs;
         }
 
