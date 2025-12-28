@@ -5,7 +5,7 @@
 
 const firebaseConfig = {
   apiKey: "AIzaSyB7bFdte6f81-bNMsdITgnnnWq7aBNMXRw",
-  authDomain: "eyesofazrael.firebaseapp.com",
+  authDomain: "www.eyesofazrael.com", // Changed from eyesofazrael.firebaseapp.com to custom domain
   projectId: "eyesofazrael",
   storageBucket: "eyesofazrael.firebasestorage.app",
   messagingSenderId: "533894778090",
