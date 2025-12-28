@@ -36,9 +36,13 @@ const mockSearchEngine = {
 // Mock global objects
 global.EnhancedCorpusSearch = jest.fn(() => mockSearchEngine);
 global.CorpusSearch = jest.fn(() => mockSearchEngine);
-global.AnalyticsManager = {
+
+// Create window.AnalyticsManager as well since the component checks window
+global.window = global.window || {};
+global.window.AnalyticsManager = {
     trackSearch: jest.fn()
 };
+global.AnalyticsManager = global.window.AnalyticsManager;
 
 // Import the component - we need to mock the module since it's not CommonJS
 // Create a mock implementation based on the actual source
@@ -391,7 +395,7 @@ class SearchViewComplete {
 
     hideAutocomplete() {
         const container = document.getElementById('autocomplete-results');
-        container.style.display = 'none';
+        if (container) container.style.display = 'none';
     }
 
     async performSearch(query) {
@@ -407,8 +411,10 @@ class SearchViewComplete {
         this.state.isLoading = true;
         this.state.error = null;
 
-        document.getElementById('results-container').innerHTML = this.getLoadingHTML();
-        document.querySelector('.results-controls').style.display = 'none';
+        const resultsContainer = document.getElementById('results-container');
+        const resultsControls = document.querySelector('.results-controls');
+        if (resultsContainer) resultsContainer.innerHTML = this.getLoadingHTML();
+        if (resultsControls) resultsControls.style.display = 'none';
 
         try {
             const searchOptions = {
@@ -717,21 +723,31 @@ class SearchViewComplete {
     }
 
     showEmptyState() {
-        document.getElementById('results-container').innerHTML = this.getEmptyStateHTML();
-        document.querySelector('.results-controls').style.display = 'none';
-        document.getElementById('pagination').style.display = 'none';
+        const resultsContainer = document.getElementById('results-container');
+        const resultsControls = document.querySelector('.results-controls');
+        const pagination = document.getElementById('pagination');
+
+        if (!resultsContainer) return; // Guard for tests without DOM
+
+        resultsContainer.innerHTML = this.getEmptyStateHTML();
+        if (resultsControls) resultsControls.style.display = 'none';
+        if (pagination) pagination.style.display = 'none';
 
         document.querySelectorAll('.example-query').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const query = e.target.dataset.query;
-                document.getElementById('search-input').value = query;
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) searchInput.value = query;
                 this.performSearch(query);
             });
         });
     }
 
     renderError() {
-        document.getElementById('results-container').innerHTML = `
+        const resultsContainer = document.getElementById('results-container');
+        if (!resultsContainer) return;
+
+        resultsContainer.innerHTML = `
             <div class="search-error">
                 <div class="error-icon">⚠️</div>
                 <h3>Search Error</h3>
@@ -811,14 +827,28 @@ describe('SearchViewComplete', () => {
     beforeEach(() => {
         // Reset mocks
         jest.clearAllMocks();
+        mockSearchEngine.search.mockClear();
+        mockSearchEngine.getSuggestions.mockClear();
         global.localStorage.clear();
+
+        // Re-create AnalyticsManager after clearAllMocks
+        global.window = global.window || {};
+        global.window.AnalyticsManager = {
+            trackSearch: jest.fn()
+        };
+
+        // Reset the mock constructor to return the same mockSearchEngine
+        global.EnhancedCorpusSearch = jest.fn(() => mockSearchEngine);
+        global.CorpusSearch = jest.fn(() => mockSearchEngine);
 
         // Create fresh instance
         searchView = new SearchViewComplete(mockFirestore);
 
-        // Create container
+        // Create container and add to document body for querySelector to work
         container = document.createElement('div');
+        container.id = 'test-container';
         container.innerHTML = '';
+        document.body.appendChild(container);
 
         // Mock mythology data
         mockFirestore.get.mockResolvedValue({
@@ -834,7 +864,9 @@ describe('SearchViewComplete', () => {
     });
 
     afterEach(() => {
-        container.innerHTML = '';
+        if (container && container.parentNode) {
+            container.parentNode.removeChild(container);
+        }
         jest.clearAllTimers();
     });
 
@@ -927,7 +959,8 @@ describe('SearchViewComplete', () => {
 
             // Assert
             expect(searchView.searchHistory).toEqual([]);
-            expect(global.localStorage.setItem).toHaveBeenCalledWith('searchHistory', '[]');
+            const stored = global.localStorage.getItem('searchHistory');
+            expect(stored).toBe('[]');
         });
 
         test('should render responsive layout', async () => {
@@ -946,8 +979,9 @@ describe('SearchViewComplete', () => {
     // 2. Real-time Search (12 tests)
     // ==========================================
     describe('Real-time Search', () => {
-        beforeEach(() => {
+        beforeEach(async () => {
             jest.useFakeTimers();
+            await searchView.render(container);
         });
 
         afterEach(() => {
@@ -956,7 +990,6 @@ describe('SearchViewComplete', () => {
 
         test('should debounce search input (300ms)', async () => {
             // Arrange
-            await searchView.render(container);
             const searchInput = container.querySelector('#search-input');
             mockSearchEngine.getSuggestions.mockResolvedValue(['zeus', 'zephyr']);
 
@@ -977,7 +1010,6 @@ describe('SearchViewComplete', () => {
 
         test('should search by entity name', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.search.mockResolvedValue({
                 items: [{ name: 'Zeus', type: 'deities', mythology: 'greek' }]
             });
@@ -992,7 +1024,6 @@ describe('SearchViewComplete', () => {
 
         test('should search by entity description', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.search.mockResolvedValue({
                 items: [{ name: 'Thor', description: 'God of thunder', mythology: 'norse' }]
             });
@@ -1006,7 +1037,6 @@ describe('SearchViewComplete', () => {
 
         test('should search by tags/keywords', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.search.mockResolvedValue({
                 items: [{ name: 'Poseidon', tags: ['ocean', 'trident'], mythology: 'greek' }]
             });
@@ -1020,7 +1050,6 @@ describe('SearchViewComplete', () => {
 
         test('should perform case-insensitive search', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.search.mockResolvedValue({
                 items: [{ name: 'Zeus', mythology: 'greek' }]
             });
@@ -1035,7 +1064,6 @@ describe('SearchViewComplete', () => {
 
         test('should perform partial match search', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.search.mockResolvedValue({
                 items: [{ name: 'Zeus' }, { name: 'Zephyr' }]
             });
@@ -1062,7 +1090,6 @@ describe('SearchViewComplete', () => {
 
         test('should show search result count', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.search.mockResolvedValue({
                 items: [{ name: 'Zeus' }, { name: 'Hera' }]
             });
@@ -1077,10 +1104,7 @@ describe('SearchViewComplete', () => {
         });
 
         test('should handle empty search query', async () => {
-            // Arrange
-            await searchView.render(container);
-
-            // Act
+            // Arrange & Act
             await searchView.performSearch('');
 
             // Assert
@@ -1091,7 +1115,6 @@ describe('SearchViewComplete', () => {
 
         test('should show "no results" message', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.search.mockResolvedValue({ items: [] });
 
             // Act
@@ -1106,7 +1129,6 @@ describe('SearchViewComplete', () => {
 
         test('should clear search results', async () => {
             // Arrange
-            await searchView.render(container);
             const clearBtn = container.querySelector('#clear-search');
 
             // Act
@@ -1119,7 +1141,6 @@ describe('SearchViewComplete', () => {
 
         test('should track search query in analytics', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.search.mockResolvedValue({
                 items: [{ name: 'Zeus' }]
             });
@@ -1128,7 +1149,7 @@ describe('SearchViewComplete', () => {
             await searchView.performSearch('zeus');
 
             // Assert
-            expect(global.AnalyticsManager.trackSearch).toHaveBeenCalledWith(
+            expect(global.window.AnalyticsManager.trackSearch).toHaveBeenCalledWith(
                 'zeus',
                 expect.any(Object),
                 1
@@ -1140,8 +1161,9 @@ describe('SearchViewComplete', () => {
     // 3. Autocomplete (6 tests)
     // ==========================================
     describe('Autocomplete', () => {
-        beforeEach(() => {
+        beforeEach(async () => {
             jest.useFakeTimers();
+            await searchView.render(container);
         });
 
         afterEach(() => {
@@ -1150,7 +1172,6 @@ describe('SearchViewComplete', () => {
 
         test('should show autocomplete suggestions', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.getSuggestions.mockResolvedValue(['zeus', 'zephyr']);
 
             // Act
@@ -1164,7 +1185,6 @@ describe('SearchViewComplete', () => {
 
         test('should limit suggestions to 10', async () => {
             // Arrange
-            await searchView.render(container);
             const suggestions = Array.from({ length: 15 }, (_, i) => `term${i}`);
             mockSearchEngine.getSuggestions.mockResolvedValue(suggestions);
 
@@ -1177,7 +1197,6 @@ describe('SearchViewComplete', () => {
 
         test('should navigate suggestions with keyboard', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.getSuggestions.mockResolvedValue(['zeus', 'zephyr']);
             await searchView.showAutocomplete('ze');
 
@@ -1190,7 +1209,6 @@ describe('SearchViewComplete', () => {
 
         test('should select suggestion with Enter', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.getSuggestions.mockResolvedValue(['zeus']);
             mockSearchEngine.search.mockResolvedValue({ items: [] });
             const searchInput = container.querySelector('#search-input');
@@ -1211,7 +1229,6 @@ describe('SearchViewComplete', () => {
 
         test('should dismiss suggestions with Esc', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.getSuggestions.mockResolvedValue(['zeus']);
             await searchView.showAutocomplete('ze');
 
@@ -1225,7 +1242,6 @@ describe('SearchViewComplete', () => {
 
         test('should close suggestions on outside click', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.getSuggestions.mockResolvedValue(['zeus']);
             await searchView.showAutocomplete('ze');
 
@@ -1242,9 +1258,12 @@ describe('SearchViewComplete', () => {
     // 4. Filtering (10 tests)
     // ==========================================
     describe('Filtering', () => {
+        beforeEach(async () => {
+            await searchView.render(container);
+        });
+
         test('should filter by mythology (single)', async () => {
             // Arrange
-            await searchView.render(container);
             const mythologyFilter = container.querySelector('#mythology-filter');
 
             // Act
@@ -1257,7 +1276,6 @@ describe('SearchViewComplete', () => {
 
         test('should filter by mythology (multiple via search)', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.search.mockResolvedValue({
                 items: [
                     { name: 'Zeus', mythology: 'greek' },
@@ -1274,7 +1292,6 @@ describe('SearchViewComplete', () => {
 
         test('should filter by entity type (single)', async () => {
             // Arrange
-            await searchView.render(container);
             const checkboxes = container.querySelectorAll('.checkbox-group input[type="checkbox"]');
 
             // Act - uncheck all except deities
@@ -1289,7 +1306,6 @@ describe('SearchViewComplete', () => {
 
         test('should filter by entity type (multiple)', async () => {
             // Arrange
-            await searchView.render(container);
             const checkboxes = container.querySelectorAll('.checkbox-group input[type="checkbox"]');
 
             // Act - check first two
@@ -1304,7 +1320,6 @@ describe('SearchViewComplete', () => {
 
         test('should filter by importance range (1-5)', async () => {
             // Arrange
-            await searchView.render(container);
             const importanceFilter = container.querySelector('#importance-filter');
 
             // Act
@@ -1317,7 +1332,6 @@ describe('SearchViewComplete', () => {
 
         test('should combine multiple filters (AND logic)', async () => {
             // Arrange
-            await searchView.render(container);
             mockSearchEngine.search.mockResolvedValue({
                 items: [
                     { name: 'Zeus', mythology: 'greek', type: 'deities', importance: 100 },
@@ -1341,7 +1355,6 @@ describe('SearchViewComplete', () => {
 
         test('should show active filter count', async () => {
             // Arrange
-            await searchView.render(container);
             const mythologyFilter = container.querySelector('#mythology-filter');
 
             // Act
@@ -1356,7 +1369,6 @@ describe('SearchViewComplete', () => {
 
         test('should clear individual filters', async () => {
             // Arrange
-            await searchView.render(container);
             searchView.state.filters.mythology = 'greek';
             const mythologyFilter = container.querySelector('#mythology-filter');
 
@@ -1370,7 +1382,6 @@ describe('SearchViewComplete', () => {
 
         test('should clear all filters', async () => {
             // Arrange
-            await searchView.render(container);
             searchView.state.filters = {
                 mythology: 'greek',
                 entityTypes: ['deities'],
@@ -1389,10 +1400,7 @@ describe('SearchViewComplete', () => {
         });
 
         test('should persist filters in URL params', async () => {
-            // Arrange
-            await searchView.render(container);
-
-            // Act
+            // Arrange & Act
             searchView.state.filters.mythology = 'greek';
 
             // Assert - URL persistence would be handled by router
@@ -1645,10 +1653,8 @@ describe('SearchViewComplete', () => {
 
             // Assert
             expect(searchView.searchHistory[0].query).toBe('zeus');
-            expect(global.localStorage.setItem).toHaveBeenCalledWith(
-                'searchHistory',
-                expect.stringContaining('zeus')
-            );
+            const stored = global.localStorage.getItem('searchHistory');
+            expect(stored).toContain('zeus');
         });
 
         test('should display recent searches (last 10)', () => {
@@ -1696,7 +1702,8 @@ describe('SearchViewComplete', () => {
 
             // Assert
             expect(searchView.searchHistory).toEqual([]);
-            expect(global.localStorage.setItem).toHaveBeenCalledWith('searchHistory', '[]');
+            const stored = global.localStorage.getItem('searchHistory');
+            expect(stored).toBe('[]');
         });
 
         test('should limit history to 10 items', () => {
@@ -1859,6 +1866,7 @@ describe('SearchViewComplete', () => {
         test('should not perform search for queries less than 2 characters', async () => {
             // Arrange
             await searchView.render(container);
+            mockSearchEngine.search.mockResolvedValue({ items: [] });
 
             // Act
             await searchView.performSearch('a');

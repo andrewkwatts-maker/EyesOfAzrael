@@ -15,7 +15,7 @@ describe('Image Lazy Loading', () => {
         // Arrange
         const img = document.createElement('img');
         img.src = 'test.jpg';
-        img.loading = 'lazy';
+        img.setAttribute('loading', 'lazy');
 
         // Assert
         expect(img.getAttribute('loading')).toBe('lazy');
@@ -109,12 +109,13 @@ describe('Image Lazy Loading', () => {
             setTimeout(() => loadBatch(batch), i * 10);
         }
 
-        // Check after all batches
+        // Check after all batches - need enough time for all timeouts to fire
+        // Max timeout is at i=96, which is 960ms, so we wait 1100ms
         setTimeout(() => {
             expect(loadCount).toBe(100);
             done();
-        }, 200);
-    });
+        }, 1100);
+    }, 15000); // Increase test timeout to 15 seconds
 });
 
 describe('Component Lazy Loading', () => {
