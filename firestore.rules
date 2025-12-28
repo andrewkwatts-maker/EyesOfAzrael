@@ -162,8 +162,8 @@ service cloud.firestore {
                     && (!('isOfficial' in request.resource.data) || request.resource.data.isOfficial == false);
 
       // Owner or moderator can update
-      allow update: if (isAuthenticated() && resource.data.contributedBy == request.auth.uid)
-                    || isModerator()
+      allow update: if ((isAuthenticated() && resource.data.contributedBy == request.auth.uid)
+                    || isModerator())
                     && isValidAsset();
 
       // Only moderators can delete assets

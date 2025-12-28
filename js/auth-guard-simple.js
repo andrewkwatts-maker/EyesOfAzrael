@@ -248,9 +248,9 @@ function handleAuthenticated(user) {
     document.body.classList.remove('not-authenticated', 'auth-loading');
     document.body.classList.add('authenticated');
 
+    // Hide auth overlay if visible
     const overlay = document.getElementById('auth-overlay');
     if (overlay) {
-        // Fade out animation
         overlay.style.opacity = '0';
         overlay.style.transition = 'opacity 0.3s ease';
         setTimeout(() => {
@@ -258,42 +258,23 @@ function handleAuthenticated(user) {
         }, 300);
     }
 
-    const loadingScreen = document.getElementById('auth-loading-screen');
-    if (loadingScreen) {
-        loadingScreen.style.opacity = '0';
-        loadingScreen.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => {
-            loadingScreen.style.display = 'none';
-        }, 300);
-    }
+    // DON'T hide loading screen yet - wait for content to render
+    console.log('[EOA Auth Guard] Waiting for content to render before hiding loading screen...');
 
+    // Show main content container (but it will have loading spinner until SPA renders)
     const mainContent = document.getElementById('main-content');
     if (mainContent) {
         mainContent.style.display = 'block';
-        mainContent.style.opacity = '0';
-        mainContent.style.transition = 'opacity 0.3s ease';
-
-        // Fade in
-        setTimeout(() => {
-            mainContent.style.opacity = '1';
-        }, 50);
-
-        // Hide the initial loading container
-        const loadingContainer = mainContent.querySelector('.loading-container');
-        if (loadingContainer) {
-            loadingContainer.style.display = 'none';
-        }
+        mainContent.style.opacity = '1';
     }
 
-    // Update user info display in header
+    // Update user display
     updateUserDisplay(user);
 
-    // Emit auth-ready event for app coordinator
+    // Emit auth-ready event
     document.dispatchEvent(new CustomEvent('auth-ready', {
         detail: { user, authenticated: true }
     }));
-
-    console.log('[EOA Auth Guard] User authenticated, SPANavigation will handle routing');
 }
 
 /**
@@ -496,6 +477,21 @@ export function getPerformanceMetrics() {
         marks: perfMarks
     };
 }
+
+// Listen for first render complete to hide loading screen
+document.addEventListener('first-render-complete', (event) => {
+    console.log('[EOA Auth Guard] Content rendered, hiding loading screen');
+
+    const loadingScreen = document.getElementById('auth-loading-screen');
+    if (loadingScreen) {
+        loadingScreen.style.opacity = '0';
+        loadingScreen.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            console.log('[EOA Auth Guard] Loading screen hidden');
+        }, 300);
+    }
+});
 
 // PHASE 1 & 2: Execute when DOM body is ready
 if (document.readyState === 'loading') {

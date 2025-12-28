@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Home Page Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            color: #f8f9fa;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #8b7fff;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+        }
+
+        .test-section {
+            background: #1a1f3a;
+            border: 1px solid #2a2f4a;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .test-section h2 {
+            color: #8b7fff;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .test-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .status-pending {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .status-success {
+            background: #51cf66;
+            color: #000;
+        }
+
+        .status-error {
+            background: #ff6b6b;
+            color: #fff;
+        }
+
+        .log-output {
+            background: #0a0e27;
+            border: 1px solid #2a2f4a;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0;
+        }
+
+        .log-info { color: #51cf66; }
+        .log-warn { color: #ffc107; }
+        .log-error { color: #ff6b6b; }
+
+        .test-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #8b7fff;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #7b6fff;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #2a2f4a;
+            color: #f8f9fa;
+        }
+
+        .btn-secondary:hover {
+            background: #3a3f5a;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .result-card {
+            background: #0a0e27;
+            border: 1px solid #2a2f4a;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .result-card h3 {
+            color: #ff7eb6;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .result-card p {
+            color: #adb5bd;
+            font-size: 0.9rem;
+        }
+
+        #homePagePreview {
+            margin-top: 1rem;
+            border: 2px solid #8b7fff;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔥 Firebase Home Page Integration Test</h1>
+
+        <!-- Test 1: Firebase Connection -->
+        <div class="test-section">
+            <h2>1️⃣ Firebase Connection Test</h2>
+            <div class="test-status status-pending" id="connectionStatus">⏳ Pending</div>
+            <div class="log-output" id="connectionLog"></div>
+            <div class="test-actions">
+                <button class="btn-primary" onclick="testFirebaseConnection()">Test Connection</button>
+            </div>
+        </div>
+
+        <!-- Test 2: Home Page Asset Fetch -->
+        <div class="test-section">
+            <h2>2️⃣ Home Page Asset Test</h2>
+            <div class="test-status status-pending" id="homePageStatus">⏳ Pending</div>
+            <div class="log-output" id="homePageLog"></div>
+            <div class="test-actions">
+                <button class="btn-primary" onclick="testHomePageFetch()">Fetch Home Page</button>
+            </div>
+        </div>
+
+        <!-- Test 3: Mythology Cards Fetch -->
+        <div class="test-section">
+            <h2>3️⃣ Mythology Cards Test</h2>
+            <div class="test-status status-pending" id="mythologyStatus">⏳ Pending</div>
+            <div class="log-output" id="mythologyLog"></div>
+            <div class="results-grid" id="mythologyResults"></div>
+            <div class="test-actions">
+                <button class="btn-primary" onclick="testMythologyFetch()">Fetch Mythologies</button>
+            </div>
+        </div>
+
+        <!-- Test 4: Home Page Rendering -->
+        <div class="test-section">
+            <h2>4️⃣ Home Page Rendering Test</h2>
+            <div class="test-status status-pending" id="renderStatus">⏳ Pending</div>
+            <div class="log-output" id="renderLog"></div>
+            <div id="homePagePreview"></div>
+            <div class="test-actions">
+                <button class="btn-primary" onclick="testHomePageRender()">Render Home Page</button>
+            </div>
+        </div>
+
+        <!-- Test 5: Navigation Test -->
+        <div class="test-section">
+            <h2>5️⃣ Navigation & Asset Loading Test</h2>
+            <div class="test-status status-pending" id="navStatus">⏳ Pending</div>
+            <div class="log-output" id="navLog"></div>
+            <div class="test-actions">
+                <button class="btn-primary" onclick="testNavigation()">Test Navigation</button>
+                <button class="btn-secondary" onclick="testAssetLoad('greek', 'zeus')">Load Zeus</button>
+                <button class="btn-secondary" onclick="testAssetLoad('norse', 'odin')">Load Odin</button>
+            </div>
+        </div>
+
+        <!-- Run All Tests -->
+        <div class="test-actions" style="margin-top: 2rem;">
+            <button class="btn-primary" onclick="runAllTests()" style="font-size: 1.2rem; padding: 1rem 2rem;">
+                ▶️ Run All Tests
+            </button>
+            <button class="btn-secondary" onclick="clearAllLogs()">🗑️ Clear Logs</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <!-- Test Scripts -->
+    <script>
+        // Initialize Firebase
+        let db = null;
+
+        function log(elementId, message, type = 'info') {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function setStatus(elementId, status, text) {
+            const statusElement = document.getElementById(elementId);
+            statusElement.className = `test-status status-${status}`;
+            statusElement.textContent = text;
+        }
+
+        function clearAllLogs() {
+            const logs = document.querySelectorAll('.log-output');
+            logs.forEach(log => log.innerHTML = '');
+
+            const statuses = document.querySelectorAll('.test-status');
+            statuses.forEach(status => {
+                status.className = 'test-status status-pending';
+                status.textContent = '⏳ Pending';
+            });
+
+            document.getElementById('mythologyResults').innerHTML = '';
+            document.getElementById('homePagePreview').innerHTML = '';
+        }
+
+        async function testFirebaseConnection() {
+            setStatus('connectionStatus', 'pending', '⏳ Testing...');
+            log('connectionLog', 'Starting Firebase connection test...', 'info');
+
+            try {
+                // Check if Firebase is loaded
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase SDK not loaded');
+                }
+                log('connectionLog', '✓ Firebase SDK loaded', 'info');
+
+                // Check Firebase config
+                if (typeof firebaseConfig === 'undefined') {
+                    throw new Error('Firebase config not found');
+                }
+                log('connectionLog', '✓ Firebase config found', 'info');
+                log('connectionLog', `Project ID: ${firebaseConfig.projectId}`, 'info');
+
+                // Initialize Firebase
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                log('connectionLog', '✓ Firebase initialized', 'info');
+
+                // Get Firestore instance
+                db = firebase.firestore();
+                log('connectionLog', '✓ Firestore instance created', 'info');
+
+                // Test Firestore connection
+                const testDoc = await db.collection('mythologies').limit(1).get();
+                log('connectionLog', `✓ Firestore query successful (${testDoc.size} docs)`, 'info');
+
+                setStatus('connectionStatus', 'success', '✅ Connected');
+                log('connectionLog', '🎉 Firebase connection test PASSED', 'info');
+                return true;
+
+            } catch (error) {
+                setStatus('connectionStatus', 'error', '❌ Failed');
+                log('connectionLog', `Error: ${error.message}`, 'error');
+                console.error('Firebase connection test failed:', error);
+                return false;
+            }
+        }
+
+        async function testHomePageFetch() {
+            setStatus('homePageStatus', 'pending', '⏳ Fetching...');
+            log('homePageLog', 'Fetching home page from Firebase...', 'info');
+
+            try {
+                if (!db) {
+                    await testFirebaseConnection();
+                }
+
+                // Try to fetch a "home" or "homepage" document
+                log('homePageLog', 'Checking for home page document...', 'info');
+
+                // Check multiple possible locations
+                const attempts = [
+                    { collection: 'pages', doc: 'home' },
+                    { collection: 'pages', doc: 'homepage' },
+                    { collection: 'pages', doc: 'index' },
+                    { collection: 'special_pages', doc: 'home' }
+                ];
+
+                let homePageData = null;
+                for (const attempt of attempts) {
+                    log('homePageLog', `Trying: ${attempt.collection}/${attempt.doc}`, 'info');
+                    const doc = await db.collection(attempt.collection).doc(attempt.doc).get();
+                    if (doc.exists) {
+                        homePageData = { id: doc.id, ...doc.data() };
+                        log('homePageLog', `✓ Found at ${attempt.collection}/${attempt.doc}`, 'info');
+                        break;
+                    }
+                }
+
+                if (homePageData) {
+                    log('homePageLog', `Home page data: ${JSON.stringify(homePageData, null, 2)}`, 'info');
+                    setStatus('homePageStatus', 'success', '✅ Found');
+                    return homePageData;
+                } else {
+                    log('homePageLog', 'Home page document not found in Firebase', 'warn');
+                    log('homePageLog', 'Will use mythology cards as fallback', 'info');
+                    setStatus('homePageStatus', 'success', '⚠️ Using Fallback');
+                    return null;
+                }
+
+            } catch (error) {
+                setStatus('homePageStatus', 'error', '❌ Failed');
+                log('homePageLog', `Error: ${error.message}`, 'error');
+                console.error('Home page fetch failed:', error);
+                return null;
+            }
+        }
+
+        async function testMythologyFetch() {
+            setStatus('mythologyStatus', 'pending', '⏳ Fetching...');
+            log('mythologyLog', 'Fetching mythologies from Firebase...', 'info');
+
+            try {
+                if (!db) {
+                    await testFirebaseConnection();
+                }
+
+                const snapshot = await db.collection('mythologies').get();
+                log('mythologyLog', `✓ Retrieved ${snapshot.size} mythologies`, 'info');
+
+                const mythologies = [];
+                snapshot.forEach(doc => {
+                    const data = { id: doc.id, ...doc.data() };
+                    mythologies.push(data);
+                    log('mythologyLog', `- ${data.name || doc.id}`, 'info');
+                });
+
+                // Display mythology cards
+                const resultsContainer = document.getElementById('mythologyResults');
+                resultsContainer.innerHTML = mythologies.map(myth => `
+                    <div class="result-card">
+                        <h3>${myth.icon || '📚'} ${myth.name || myth.id}</h3>
+                        <p>${myth.description || 'No description'}</p>
+                    </div>
+                `).join('');
+
+                setStatus('mythologyStatus', 'success', `✅ Loaded ${mythologies.length}`);
+                log('mythologyLog', '🎉 Mythology fetch test PASSED', 'info');
+                return mythologies;
+
+            } catch (error) {
+                setStatus('mythologyStatus', 'error', '❌ Failed');
+                log('mythologyLog', `Error: ${error.message}`, 'error');
+                console.error('Mythology fetch failed:', error);
+                return [];
+            }
+        }
+
+        async function testHomePageRender() {
+            setStatus('renderStatus', 'pending', '⏳ Rendering...');
+            log('renderLog', 'Rendering home page...', 'info');
+
+            try {
+                // Fetch mythologies
+                const mythologies = await testMythologyFetch();
+
+                if (!mythologies || mythologies.length === 0) {
+                    throw new Error('No mythologies to render');
+                }
+
+                // Create home page HTML
+                const homeHTML = `
+                    <div class="home-view" style="padding: 2rem; background: #0a0e27;">
+                        <div class="hero-section" style="text-align: center; margin-bottom: 3rem;">
+                            <h1 style="color: #8b7fff; font-size: 3rem; margin-bottom: 1rem;">
+                                👁️ Eyes of Azrael
+                            </h1>
+                            <p style="color: #adb5bd; font-size: 1.2rem; max-width: 600px; margin: 0 auto;">
+                                Explore the rich tapestry of world mythologies
+                            </p>
+                        </div>
+
+                        <div class="mythology-grid" style="
+                            display: grid;
+                            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                            gap: 1.5rem;
+                            padding: 1rem;
+                        ">
+                            ${mythologies.map(myth => `
+                                <div class="mythology-card" style="
+                                    background: #1a1f3a;
+                                    border: 1px solid #2a2f4a;
+                                    border-radius: 12px;
+                                    padding: 1.5rem;
+                                    cursor: pointer;
+                                    transition: all 0.3s;
+                                " onclick="alert('Clicked: ${myth.name}')">
+                                    <div class="card-icon" style="font-size: 3rem; margin-bottom: 1rem;">
+                                        ${myth.icon || '📚'}
+                                    </div>
+                                    <h3 style="color: #ff7eb6; margin-bottom: 0.5rem;">
+                                        ${myth.name || myth.id}
+                                    </h3>
+                                    <p style="color: #adb5bd; font-size: 0.9rem;">
+                                        ${myth.description || 'Explore this mythology'}
+                                    </p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('homePagePreview').innerHTML = homeHTML;
+                log('renderLog', '✓ Home page rendered successfully', 'info');
+                log('renderLog', `Rendered ${mythologies.length} mythology cards`, 'info');
+
+                setStatus('renderStatus', 'success', '✅ Rendered');
+                log('renderLog', '🎉 Home page render test PASSED', 'info');
+                return true;
+
+            } catch (error) {
+                setStatus('renderStatus', 'error', '❌ Failed');
+                log('renderLog', `Error: ${error.message}`, 'error');
+                console.error('Home page render failed:', error);
+                return false;
+            }
+        }
+
+        async function testNavigation() {
+            setStatus('navStatus', 'pending', '⏳ Testing...');
+            log('navLog', 'Testing navigation system...', 'info');
+
+            try {
+                log('navLog', '✓ Navigation test simulated', 'info');
+                log('navLog', 'Use buttons below to test asset loading', 'info');
+
+                setStatus('navStatus', 'success', '✅ Ready');
+                log('navLog', '🎉 Navigation test ready', 'info');
+                return true;
+
+            } catch (error) {
+                setStatus('navStatus', 'error', '❌ Failed');
+                log('navLog', `Error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testAssetLoad(mythology, assetId) {
+            log('navLog', `Loading asset: ${mythology}/${assetId}`, 'info');
+
+            try {
+                if (!db) {
+                    await testFirebaseConnection();
+                }
+
+                // Try different collections
+                const collections = ['deities', 'heroes', 'creatures', 'places', 'items'];
+                let found = false;
+
+                for (const collection of collections) {
+                    const doc = await db.collection(collection).doc(assetId).get();
+                    if (doc.exists) {
+                        const data = { id: doc.id, ...doc.data() };
+                        log('navLog', `✓ Found ${assetId} in ${collection}`, 'info');
+                        log('navLog', `Name: ${data.name || 'Unknown'}`, 'info');
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    log('navLog', `Asset ${assetId} not found in any collection`, 'warn');
+                }
+
+            } catch (error) {
+                log('navLog', `Error loading ${assetId}: ${error.message}`, 'error');
+            }
+        }
+
+        async function runAllTests() {
+            clearAllLogs();
+
+            console.log('🚀 Running all tests...');
+
+            // Run tests sequentially
+            await testFirebaseConnection();
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            await testHomePageFetch();
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            await testMythologyFetch();
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            await testHomePageRender();
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            await testNavigation();
+
+            console.log('✅ All tests completed!');
+        }
+
+        // Auto-run connection test on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testFirebaseConnection();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

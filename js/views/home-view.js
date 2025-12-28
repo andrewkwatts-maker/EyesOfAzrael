@@ -21,7 +21,7 @@ class HomeView {
         console.log('[Home View] Rendering home page...');
         this.loadingStartTime = Date.now();
 
-        // Show loading state with ARIA attributes
+        // Enhanced loading state with skeleton screens
         container.innerHTML = `
             <div class="loading-container" role="status" aria-live="polite" aria-label="Loading mythologies">
                 <div class="spinner-container" aria-hidden="true">
@@ -30,7 +30,61 @@ class HomeView {
                     <div class="spinner-ring"></div>
                 </div>
                 <p class="loading-message">Loading mythologies...</p>
-                <p class="loading-submessage">Connecting to Firebase...</p>
+                <p class="loading-submessage">Fetching from Firebase...</p>
+
+                <!-- Skeleton cards for better perceived performance -->
+                <div class="skeleton-grid" style="
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                    gap: 1.5rem;
+                    margin-top: 2rem;
+                    max-width: 1200px;
+                    width: 100%;
+                    padding: 0 1rem;
+                ">
+                    ${Array(6).fill(0).map(() => `
+                        <div class="skeleton-card" style="
+                            height: 200px;
+                            background: linear-gradient(90deg,
+                                rgba(var(--color-bg-card-rgb, 30, 30, 40), 0.5) 0%,
+                                rgba(var(--color-bg-card-rgb, 30, 30, 40), 0.8) 50%,
+                                rgba(var(--color-bg-card-rgb, 30, 30, 40), 0.5) 100%);
+                            background-size: 200% 100%;
+                            animation: skeleton-loading 1.5s ease-in-out infinite;
+                            border-radius: 16px;
+                            border: 1px solid rgba(var(--color-border-primary-rgb, 139, 127, 255), 0.3);
+                        "></div>
+                    `).join('')}
+                </div>
+
+                <style>
+                    @keyframes skeleton-loading {
+                        0% { background-position: 200% 0; }
+                        100% { background-position: -200% 0; }
+                    }
+
+                    .loading-container {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 400px;
+                        padding: 2rem;
+                    }
+
+                    .loading-message {
+                        font-size: 1.2rem;
+                        margin-top: 1rem;
+                        color: var(--color-text-primary);
+                    }
+
+                    .loading-submessage {
+                        font-size: 0.9rem;
+                        color: var(--color-text-secondary);
+                        margin-top: 0.5rem;
+                        opacity: 0.7;
+                    }
+                </style>
             </div>
         `;
 
@@ -46,7 +100,11 @@ class HomeView {
             // Clear timeout
             clearTimeout(this.loadingTimeout);
 
-            // Ensure minimum loading time for smooth UX
+            // Calculate load time for performance metrics
+            const loadTime = Date.now() - this.loadingStartTime;
+            console.log(`[Home View] ⚡ Mythologies loaded in ${loadTime}ms`);
+
+            // Ensure minimum loading time for smooth UX (prevents jarring flash)
             const elapsedTime = Date.now() - this.loadingStartTime;
             if (elapsedTime < this.minLoadingTime) {
                 await this.delay(this.minLoadingTime - elapsedTime);
@@ -63,10 +121,13 @@ class HomeView {
     }
 
     /**
-     * Smooth transition from loading to content
+     * Smooth transition from loading to content with performance tracking
      */
     async transitionToContent(container) {
-        // Add fade-out to loading spinner
+        const transitionStart = performance.now();
+        console.log('[Home View] 🎬 Starting transition to content...');
+
+        // Add fade-out to loading spinner and skeleton
         const loadingContainer = container.querySelector('.loading-container');
         if (loadingContainer) {
             loadingContainer.classList.add('loading-fade-out');
@@ -74,20 +135,38 @@ class HomeView {
         }
 
         // Render content with fade-in
+        const renderStart = performance.now();
         container.innerHTML = this.getHomeHTML();
+        const renderTime = performance.now() - renderStart;
+        console.log(`[Home View] 🎨 Content rendered in ${renderTime.toFixed(2)}ms`);
+
         const homeView = container.querySelector('.home-view');
         if (homeView) {
             homeView.classList.add('loading-fade-in');
         }
 
         // ENHANCEMENT: Activate shader background
+        const shaderStart = performance.now();
         this.activateShaderBackground();
+        const shaderTime = performance.now() - shaderStart;
+        console.log(`[Home View] ✨ Shader activated in ${shaderTime.toFixed(2)}ms`);
 
         // Add event listeners
+        const listenerStart = performance.now();
         this.attachEventListeners();
+        const listenerTime = performance.now() - listenerStart;
+        console.log(`[Home View] 🎯 Event listeners attached in ${listenerTime.toFixed(2)}ms`);
 
         // Save to cache
         this.saveMythologiesCache(this.mythologies);
+
+        // Log total transition time
+        const totalTransitionTime = performance.now() - transitionStart;
+        const totalLoadTime = performance.now() - this.loadingStartTime;
+        console.log(`[Home View] 🏁 Transition complete!
+            - Transition time: ${totalTransitionTime.toFixed(2)}ms
+            - Total load time: ${totalLoadTime.toFixed(2)}ms
+            - Mythologies displayed: ${this.mythologies.length}`);
     }
 
     /**
@@ -197,40 +276,56 @@ class HomeView {
     }
 
     /**
-     * Load mythologies from Firebase with intelligent caching
+     * Load mythologies from Firebase with intelligent caching and performance tracking
      */
     async loadMythologies() {
+        const perfStart = performance.now();
         console.log('[Home View] Loading mythologies with cache manager...');
 
         try {
             // Try cache first for instant display
+            const cacheStart = performance.now();
             const cached = this.loadFromCache();
+            const cacheTime = performance.now() - cacheStart;
+
             if (cached) {
-                console.log('[Home View] Using cached mythologies while fetching fresh data');
+                console.log(`[Home View] ⚡ Cache hit in ${cacheTime.toFixed(2)}ms - Using cached mythologies while fetching fresh data`);
                 this.mythologies = cached;
+            } else {
+                console.log(`[Home View] 📭 Cache miss (checked in ${cacheTime.toFixed(2)}ms)`);
             }
 
             // Try to load from cache manager (multi-layer cache)
+            const fetchStart = performance.now();
             const mythologies = await this.cache.getList('mythologies', {}, {
                 ttl: this.cache.defaultTTL.mythologies,
                 orderBy: 'order asc',
                 limit: 50
             });
+            const fetchTime = performance.now() - fetchStart;
 
             if (mythologies && mythologies.length > 0) {
                 this.mythologies = mythologies;
-                console.log(`[Home View] Loaded ${mythologies.length} mythologies from cache manager`);
+                console.log(`[Home View] ✅ Loaded ${mythologies.length} mythologies in ${fetchTime.toFixed(2)}ms`);
+
+                // Log performance breakdown
+                const totalTime = performance.now() - perfStart;
+                console.log(`[Home View] 📊 Performance breakdown:
+                    - Cache check: ${cacheTime.toFixed(2)}ms
+                    - Firebase fetch: ${fetchTime.toFixed(2)}ms
+                    - Total: ${totalTime.toFixed(2)}ms`);
 
                 // Load counts from metadata collection in background
                 this.loadCountsInBackground();
             } else {
                 // Use fallback hardcoded list
-                console.warn('[Home View] No mythologies found, using fallback');
+                console.warn('[Home View] ⚠️ No mythologies found, using fallback');
                 this.useFallbackData();
             }
 
         } catch (error) {
-            console.error('[Home View] Error loading from Firebase:', error);
+            const totalTime = performance.now() - perfStart;
+            console.error(`[Home View] ❌ Error loading from Firebase after ${totalTime.toFixed(2)}ms:`, error);
             console.log('[Home View] Using fallback mythologies');
             this.useFallbackData();
         }
@@ -520,24 +615,105 @@ class HomeView {
     }
 
     /**
-     * Show error HTML with retry options
+     * Show enhanced error HTML with retry options and helpful information
      */
     showError(container, error) {
+        console.error('[Home View] Showing error state:', error);
+
+        // Determine error type for better messaging
+        const isNetworkError = error.message?.includes('network') || error.message?.includes('fetch');
+        const isFirebaseError = error.message?.includes('Firebase') || error.message?.includes('firestore');
+
         container.innerHTML = `
-            <div class="error-container">
-                <div class="error-state">
-                    <div class="error-icon">⚠️</div>
-                    <h2 class="error-title">Error Loading Home Page</h2>
-                    <p class="error-message">${error.message || 'Unknown error occurred'}</p>
-                    <div class="error-actions" style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap;">
-                        <button class="error-retry-btn" onclick="location.reload()">
-                            🔄 Reload Page
-                        </button>
-                        <button class="btn-secondary" id="useFallbackBtn">
-                            💾 Use Fallback Data
-                        </button>
-                    </div>
+            <div class="error-container" style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 400px;
+                padding: 3rem;
+                text-align: center;
+            ">
+                <div class="error-icon" style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
+
+                <h2 style="color: var(--color-text-primary); margin-bottom: 1rem; font-size: 2rem;">
+                    Failed to Load Mythologies
+                </h2>
+
+                <p style="color: var(--color-text-secondary); margin-bottom: 0.5rem; font-size: 1.1rem;">
+                    ${error.message || 'Unknown error occurred'}
+                </p>
+
+                <p style="color: var(--color-text-secondary); margin-bottom: 2rem; font-size: 0.9rem; max-width: 500px;">
+                    ${isNetworkError ? 'Please check your internet connection and try again.' :
+                      isFirebaseError ? 'There may be an issue connecting to Firebase. Try reloading.' :
+                      'This could be due to network issues or Firebase connectivity problems.'}
+                </p>
+
+                <!-- Error details for debugging -->
+                <details style="margin-bottom: 2rem; max-width: 600px; width: 100%;">
+                    <summary style="
+                        cursor: pointer;
+                        color: var(--color-text-secondary);
+                        font-size: 0.9rem;
+                        padding: 0.5rem;
+                        border-radius: 8px;
+                        background: rgba(255, 193, 7, 0.1);
+                    ">
+                        🔍 View Error Details
+                    </summary>
+                    <pre style="
+                        text-align: left;
+                        background: rgba(0, 0, 0, 0.3);
+                        padding: 1rem;
+                        border-radius: 8px;
+                        margin-top: 1rem;
+                        overflow-x: auto;
+                        font-size: 0.85rem;
+                        color: var(--color-text-secondary);
+                    ">${error.stack || error.message || 'No additional details available'}</pre>
+                </details>
+
+                <!-- Action buttons -->
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="location.reload()" style="
+                        padding: 0.75rem 1.5rem;
+                        background: var(--color-primary, #8b7fff);
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 1rem;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(139, 127, 255, 0.4)'"
+                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        🔄 Retry Loading
+                    </button>
+
+                    <button id="useFallbackBtn" style="
+                        padding: 0.75rem 1.5rem;
+                        background: rgba(var(--color-bg-card-rgb, 30, 30, 40), 1);
+                        color: var(--color-text-primary);
+                        border: 1px solid var(--color-border-primary, #8b7fff);
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 1rem;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.borderColor='var(--color-accent, #00d4ff)'"
+                       onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--color-border-primary, #8b7fff)'">
+                        💾 Use Cached Data
+                    </button>
                 </div>
+
+                <!-- Help text -->
+                <p style="
+                    margin-top: 2rem;
+                    color: var(--color-text-secondary);
+                    font-size: 0.85rem;
+                    opacity: 0.7;
+                ">
+                    Need help? Check the browser console for more details (F12).
+                </p>
             </div>
         `;
 
@@ -545,6 +721,7 @@ class HomeView {
         const fallbackBtn = container.querySelector('#useFallbackBtn');
         if (fallbackBtn) {
             fallbackBtn.addEventListener('click', () => {
+                console.log('[Home View] Using fallback data after error');
                 this.useFallbackData();
                 this.transitionToContent(container);
             });
