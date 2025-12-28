@@ -145,7 +145,10 @@ class PrivacyPage {
     }
 }
 
-// Export
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = PrivacyPage;
+// ES Module Export
+export { PrivacyPage };
+
+// Legacy global export for backwards compatibility
+if (typeof window !== 'undefined') {
+    window.PrivacyPage = PrivacyPage;
 }

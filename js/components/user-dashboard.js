@@ -575,7 +575,12 @@ class UserDashboard {
     }
 }
 
-// Export for use in other modules
+// CommonJS export for Node.js (Jest tests)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = UserDashboard;
+}
+
+// Browser global export
+if (typeof window !== 'undefined') {
+    window.UserDashboard = UserDashboard;
 }

@@ -131,7 +131,10 @@ class TermsPage {
     }
 }
 
-// Export
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = TermsPage;
+// ES Module Export
+export { TermsPage };
+
+// Legacy global export for backwards compatibility
+if (typeof window !== 'undefined') {
+    window.TermsPage = TermsPage;
 }

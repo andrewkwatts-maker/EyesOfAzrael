@@ -14,7 +14,7 @@
  * @param {Object} overrides - Properties to override
  * @returns {Object} Mock entity object
  */
-export function createMockEntity(overrides = {}) {
+function createMockEntity(overrides = {}) {
     return {
         id: 'entity-123',
         name: 'Zeus',
@@ -42,7 +42,7 @@ export function createMockEntity(overrides = {}) {
  * @param {Object} overrides - Properties to override
  * @returns {Object} Mock user object
  */
-export function createMockUser(overrides = {}) {
+function createMockUser(overrides = {}) {
     return {
         uid: 'user-123',
         email: 'test@example.com',
@@ -54,58 +54,122 @@ export function createMockUser(overrides = {}) {
 }
 
 /**
- * Creates a mock Firestore instance
+ * Creates a mock Firestore instance with full query chaining support
  * @param {Object} options - Configuration options
- * @returns {Object} Mock Firestore instance
+ * @param {Array} options.docs - Array of mock documents to return
+ * @param {Object} options.data - Default data for single document
+ * @param {boolean} options.exists - Whether document exists (default: true)
+ * @param {string} options.id - Document ID (default: 'doc-123')
+ * @returns {Object} Mock Firestore instance with full chaining
  */
-export function createMockFirestore(options = {}) {
+function createMockFirestore(options = {}) {
+    // Create mock document
     const mockDoc = {
         exists: options.exists !== undefined ? options.exists : true,
         id: options.id || 'doc-123',
         data: jest.fn(() => options.data || createMockEntity())
     };
 
+    // Create mock snapshot
+    const mockSnapshot = {
+        docs: options.docs || [mockDoc],
+        empty: (options.docs && options.docs.length === 0) || false,
+        size: (options.docs && options.docs.length) || 1,
+        forEach: function(callback) {
+            this.docs.forEach(callback);
+        }
+    };
+
+    // Create chainable query mock
+    const createQueryMock = () => {
+        const queryMock = {
+            where: jest.fn(function() { return this; }),
+            orderBy: jest.fn(function() { return this; }),
+            limit: jest.fn(function() { return this; }),
+            startAfter: jest.fn(function() { return this; }),
+            endBefore: jest.fn(function() { return this; }),
+            startAt: jest.fn(function() { return this; }),
+            endAt: jest.fn(function() { return this; }),
+            get: jest.fn(() => Promise.resolve(mockSnapshot))
+        };
+        return queryMock;
+    };
+
+    // Create mock document reference
     const mockDocRef = {
         get: jest.fn(() => Promise.resolve(mockDoc)),
         set: jest.fn(() => Promise.resolve()),
         update: jest.fn(() => Promise.resolve()),
-        delete: jest.fn(() => Promise.resolve())
+        delete: jest.fn(() => Promise.resolve()),
+        onSnapshot: jest.fn((callback) => {
+            callback(mockDoc);
+            return () => {}; // unsubscribe function
+        })
     };
 
-    const mockQuery = {
-        where: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
-        get: jest.fn(() => Promise.resolve({
-            docs: options.docs || [mockDoc],
-            forEach: function(callback) {
-                (options.docs || [mockDoc]).forEach(callback);
+    // Create mock collection reference with full chaining
+    const mockCollection = {
+        doc: jest.fn((id) => {
+            if (id) {
+                // Return a specific document reference that respects current mockDoc state
+                return {
+                    get: jest.fn(() => Promise.resolve(mockDoc)),
+                    set: jest.fn(() => Promise.resolve()),
+                    update: jest.fn(() => Promise.resolve()),
+                    delete: jest.fn(() => Promise.resolve()),
+                    onSnapshot: jest.fn((callback) => {
+                        callback(mockDoc);
+                        return () => {};
+                    })
+                };
             }
+            return mockDocRef;
+        }),
+        where: jest.fn(() => createQueryMock()),
+        orderBy: jest.fn(() => createQueryMock()),
+        limit: jest.fn(() => createQueryMock()),
+        startAfter: jest.fn(() => createQueryMock()),
+        endBefore: jest.fn(() => createQueryMock()),
+        get: jest.fn(() => Promise.resolve(mockSnapshot)),
+        add: jest.fn((data) => Promise.resolve({ id: 'new-doc-id', ...mockDocRef })),
+        onSnapshot: jest.fn((callback) => {
+            callback(mockSnapshot);
+            return () => {}; // unsubscribe function
+        })
+    };
+
+    // Create mock Firestore database instance
+    const mockDb = {
+        collection: jest.fn(() => mockCollection),
+        doc: jest.fn(() => mockDocRef),
+        runTransaction: jest.fn((callback) => callback({
+            get: jest.fn(() => Promise.resolve(mockDoc)),
+            set: jest.fn(() => Promise.resolve()),
+            update: jest.fn(() => Promise.resolve()),
+            delete: jest.fn(() => Promise.resolve())
+        })),
+        batch: jest.fn(() => ({
+            set: jest.fn(),
+            update: jest.fn(),
+            delete: jest.fn(),
+            commit: jest.fn(() => Promise.resolve())
         }))
     };
 
-    const mockCollection = {
-        doc: jest.fn(() => mockDocRef),
-        where: jest.fn(() => mockQuery),
-        orderBy: jest.fn(() => mockQuery),
-        limit: jest.fn(() => mockQuery),
-        get: jest.fn(() => mockQuery.get())
-    };
+    // Expose internal mocks for testing purposes
+    mockDb._mockCollection = mockCollection;
+    mockDb._mockDocRef = mockDocRef;
+    mockDb._mockDoc = mockDoc;
+    mockDb._mockSnapshot = mockSnapshot;
 
-    return {
-        collection: jest.fn(() => mockCollection),
-        _mockCollection: mockCollection,
-        _mockDocRef: mockDocRef,
-        _mockDoc: mockDoc,
-        _mockQuery: mockQuery
-    };
+    return mockDb;
 }
 
 /**
  * Creates a mock CRUD manager
  * @returns {Object} Mock CRUD manager instance
  */
-export function createMockCRUDManager() {
+function createMockCRUDManager() {
     return {
         create: jest.fn(() => Promise.resolve({ success: true, id: 'new-123' })),
         read: jest.fn(() => Promise.resolve({ success: true, data: createMockEntity() })),
@@ -120,7 +184,7 @@ export function createMockCRUDManager() {
  * Creates a mock analytics instance
  * @returns {Object} Mock analytics instance
  */
-export function createMockAnalytics() {
+function createMockAnalytics() {
     return {
         trackPageView: jest.fn(),
         trackEvent: jest.fn(),
@@ -141,7 +205,7 @@ export function createMockAnalytics() {
  * @param {string} id - Container ID (default: 'test-container')
  * @returns {HTMLElement} Container element
  */
-export function createContainer(id = 'test-container') {
+function createContainer(id = 'test-container') {
     const container = document.createElement('div');
     container.id = id;
     document.body.appendChild(container);
@@ -152,7 +216,7 @@ export function createContainer(id = 'test-container') {
  * Removes a container from the DOM
  * @param {HTMLElement} container - Container to remove
  */
-export function cleanupContainer(container) {
+function cleanupContainer(container) {
     if (container && container.parentElement) {
         container.parentElement.removeChild(container);
     }
@@ -163,7 +227,7 @@ export function cleanupContainer(container) {
  * @param {Object} options - Button options
  * @returns {HTMLButtonElement} Button element
  */
-export function createMockButton(options = {}) {
+function createMockButton(options = {}) {
     const button = document.createElement('button');
     button.id = options.id || 'test-button';
     button.className = options.className || '';
@@ -183,7 +247,7 @@ export function createMockButton(options = {}) {
  * @param {number} ms - Milliseconds to wait
  * @returns {Promise<void>}
  */
-export function waitFor(ms = 0) {
+function waitFor(ms = 0) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -193,7 +257,7 @@ export function waitFor(ms = 0) {
  * @param {Object} options - Options (timeout, interval)
  * @returns {Promise<void>}
  */
-export async function waitForCondition(condition, options = {}) {
+async function waitForCondition(condition, options = {}) {
     const timeout = options.timeout || 5000;
     const interval = options.interval || 50;
     const startTime = Date.now();
@@ -210,7 +274,7 @@ export async function waitForCondition(condition, options = {}) {
  * Flushes all pending promises
  * @returns {Promise<void>}
  */
-export async function flushPromises() {
+async function flushPromises() {
     return new Promise(resolve => setImmediate(resolve));
 }
 
@@ -221,7 +285,7 @@ export async function flushPromises() {
 /**
  * Sets up common global mocks
  */
-export function setupGlobalMocks() {
+function setupGlobalMocks() {
     // Mock window methods
     global.window = global.window || {};
     global.window.alert = jest.fn();
@@ -269,7 +333,7 @@ export function setupGlobalMocks() {
 /**
  * Resets all global mocks
  */
-export function resetGlobalMocks() {
+function resetGlobalMocks() {
     jest.clearAllMocks();
     if (global.localStorage) {
         global.localStorage.clear();
@@ -285,7 +349,7 @@ export function resetGlobalMocks() {
  * @param {HTMLElement} element - Element to check
  * @param {Object} attributes - Expected attributes
  */
-export function expectElementAttributes(element, attributes) {
+function expectElementAttributes(element, attributes) {
     expect(element).toBeTruthy();
     Object.entries(attributes).forEach(([key, value]) => {
         expect(element.getAttribute(key)).toBe(value);
@@ -297,7 +361,7 @@ export function expectElementAttributes(element, attributes) {
  * @param {HTMLElement} element - Element to check
  * @param {string[]} classes - Expected classes
  */
-export function expectElementClasses(element, classes) {
+function expectElementClasses(element, classes) {
     expect(element).toBeTruthy();
     classes.forEach(className => {
         expect(element.classList.contains(className)).toBe(true);
@@ -309,7 +373,7 @@ export function expectElementClasses(element, classes) {
  * @param {jest.Mock} mockFn - Mock function
  * @param {Array} expectedArgs - Expected arguments
  */
-export function expectCalledWith(mockFn, expectedArgs) {
+function expectCalledWith(mockFn, expectedArgs) {
     expect(mockFn).toHaveBeenCalled();
     expect(mockFn).toHaveBeenCalledWith(...expectedArgs);
 }
@@ -319,7 +383,7 @@ export function expectCalledWith(mockFn, expectedArgs) {
  * @param {Function} asyncFn - Async function to test
  * @returns {Promise<any>} Result of the function
  */
-export async function expectAsyncSuccess(asyncFn) {
+async function expectAsyncSuccess(asyncFn) {
     const result = await asyncFn();
     expect(result).toBeDefined();
     return result;
@@ -330,7 +394,7 @@ export async function expectAsyncSuccess(asyncFn) {
  * @param {Function} asyncFn - Async function to test
  * @param {string} errorMessage - Expected error message (optional)
  */
-export async function expectAsyncError(asyncFn, errorMessage) {
+async function expectAsyncError(asyncFn, errorMessage) {
     await expect(asyncFn()).rejects.toThrow(errorMessage);
 }
 
@@ -344,7 +408,7 @@ export async function expectAsyncError(asyncFn, errorMessage) {
  * @param {Object} baseOverrides - Base overrides for all entities
  * @returns {Array<Object>} Array of mock entities
  */
-export function generateMockEntities(count, baseOverrides = {}) {
+function generateMockEntities(count, baseOverrides = {}) {
     return Array.from({ length: count }, (_, i) => createMockEntity({
         id: `entity-${i}`,
         name: `Entity ${i}`,
@@ -357,7 +421,7 @@ export function generateMockEntities(count, baseOverrides = {}) {
  * @param {string} mythology - Mythology name
  * @returns {Object} Mock entity for that mythology
  */
-export function generateMythologyEntity(mythology) {
+function generateMythologyEntity(mythology) {
     const mythologyData = {
         greek: {
             name: 'Zeus',
@@ -394,7 +458,7 @@ export function generateMythologyEntity(mythology) {
  * @param {string} url - URL to validate
  * @returns {boolean} True if valid URL
  */
-export function isValidUrl(url) {
+function isValidUrl(url) {
     try {
         new URL(url);
         return true;
@@ -408,7 +472,7 @@ export function isValidUrl(url) {
  * @param {string} html - HTML string to check
  * @returns {boolean} True if safe
  */
-export function isSafeHTML(html) {
+function isSafeHTML(html) {
     const dangerousPatterns = [
         /<script/i,
         /javascript:/i,
@@ -426,7 +490,7 @@ export function isSafeHTML(html) {
 /**
  * Extends Jest with custom matchers
  */
-export function extendJestMatchers() {
+function extendJestMatchers() {
     expect.extend({
         toBeValidEntity(received) {
             const pass = received &&
@@ -467,7 +531,7 @@ export function extendJestMatchers() {
  * @param {Object} options - Setup options
  * @returns {Object} Setup objects
  */
-export function setupComponentTest(options = {}) {
+function setupComponentTest(options = {}) {
     const container = createContainer();
     const mockFirestore = createMockFirestore();
     const mockCRUD = createMockCRUDManager();
@@ -491,8 +555,43 @@ export function setupComponentTest(options = {}) {
  * Common afterEach cleanup
  * @param {Object} setupObjects - Objects returned from setupComponentTest
  */
-export function cleanupComponentTest(setupObjects) {
+function cleanupComponentTest(setupObjects) {
     if (setupObjects && setupObjects.cleanup) {
         setupObjects.cleanup();
     }
+}
+
+// ============================================================================
+// COMMONJS EXPORTS (for Jest compatibility)
+// ============================================================================
+
+// Export all functions for CommonJS require()
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        createMockEntity,
+        createMockUser,
+        createMockFirestore,
+        createMockCRUDManager,
+        createMockAnalytics,
+        createContainer,
+        cleanupContainer,
+        createMockButton,
+        waitFor,
+        waitForCondition,
+        flushPromises,
+        setupGlobalMocks,
+        resetGlobalMocks,
+        expectElementAttributes,
+        expectElementClasses,
+        expectCalledWith,
+        expectAsyncSuccess,
+        expectAsyncError,
+        generateMockEntities,
+        generateMythologyEntity,
+        isValidUrl,
+        isSafeHTML,
+        extendJestMatchers,
+        setupComponentTest,
+        cleanupComponentTest
+    };
 }

@@ -659,7 +659,12 @@ class CompareView {
     }
 }
 
-// Export for use in other modules
+// CommonJS export for Node.js (Jest tests)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = CompareView;
+}
+
+// Browser global export
+if (typeof window !== 'undefined') {
+    window.CompareView = CompareView;
 }

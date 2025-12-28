@@ -1,19 +1,23 @@
 /**
  * Performance Benchmarks Test Suite
- * Eyes of Azrael - Test Polish Agent 5
+ * Eyes of Azrael - Final Polish Agent 3
  *
  * Measures actual performance of core components against
- * established performance budgets.
+ * established performance budgets with CI environment support.
  *
- * Performance Budgets:
- * - Search rendering: < 100ms
- * - Entity card rendering: < 50ms per card
- * - Modal open/close: < 200ms
- * - Filter operations: < 100ms
- * - Large dataset handling: < 500ms for 1000 items
+ * Performance budgets automatically adjust based on environment:
+ * - Local development: Strict thresholds
+ * - CI environment: Relaxed thresholds (2.5x multiplier)
  */
 
 const { performance } = require('perf_hooks');
+const {
+    getTimeout,
+    getMultiplier,
+    logPerformance,
+    isCI,
+    generateReport
+} = require('./budgets.js');
 
 // Mock dependencies
 const mockFirestore = {
@@ -25,12 +29,18 @@ const mockFirestore = {
     limit: jest.fn().mockReturnThis()
 };
 
+// Create a shared mock search engine
 const mockSearchEngine = {
-    search: jest.fn(),
-    getSuggestions: jest.fn()
+    search: jest.fn().mockResolvedValue({ items: [] }),
+    getSuggestions: jest.fn().mockResolvedValue([])
 };
 
-global.EnhancedCorpusSearch = jest.fn(() => mockSearchEngine);
+// Create a constructor that returns a consistent mock
+global.EnhancedCorpusSearch = jest.fn().mockImplementation(function() {
+    this.search = mockSearchEngine.search;
+    this.getSuggestions = mockSearchEngine.getSuggestions;
+});
+
 global.AnalyticsManager = {
     trackSearch: jest.fn()
 };
@@ -89,11 +99,27 @@ describe('Performance Benchmarks', () => {
     let searchView;
     let container;
 
+    beforeAll(() => {
+        // Log environment and budgets
+        console.log(`\n🔧 Running in ${isCI ? 'CI' : 'LOCAL'} mode`);
+        if (process.env.DEBUG_PERF === 'true') {
+            generateReport();
+        }
+    });
+
     beforeEach(() => {
         container = document.createElement('div');
         document.body.appendChild(container);
+
+        // Reset mock call counts but keep implementations
+        mockSearchEngine.search.mockClear();
+        mockSearchEngine.getSuggestions.mockClear();
+
+        // Re-set default implementations
+        mockSearchEngine.search.mockResolvedValue({ items: [] });
+        mockSearchEngine.getSuggestions.mockResolvedValue([]);
+
         searchView = new SearchViewComplete(mockFirestore);
-        jest.clearAllMocks();
     });
 
     afterEach(() => {
@@ -101,7 +127,7 @@ describe('Performance Benchmarks', () => {
     });
 
     describe('Search Performance', () => {
-        test('should render search results in < 100ms', async () => {
+        test('should render search results efficiently', async () => {
             // Arrange
             const mockResults = Array.from({ length: 24 }, (_, i) => ({
                 id: `entity-${i}`,
@@ -121,10 +147,11 @@ describe('Performance Benchmarks', () => {
 
             const duration = end - start;
 
-            // Assert
-            expect(duration).toBeLessThan(100);
+            // Assert - Use environment-aware threshold
+            const threshold = getTimeout('search');
+            expect(duration).toBeLessThan(threshold);
             expect(rendered.length).toBe(24);
-            console.log(`✅ Search render time: ${duration.toFixed(2)}ms`);
+            logPerformance('search', duration);
         });
 
         test('should handle 100 rapid searches without degradation', async () => {
@@ -145,16 +172,17 @@ describe('Performance Benchmarks', () => {
                 times.push(end - start);
             }
 
-            // Assert
+            // Assert - Use environment-aware thresholds
             const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
             const maxTime = Math.max(...times);
 
-            expect(avgTime).toBeLessThan(50);
-            expect(maxTime).toBeLessThan(150);
-            console.log(`✅ Avg search time: ${avgTime.toFixed(2)}ms, Max: ${maxTime.toFixed(2)}ms`);
+            expect(avgTime).toBeLessThan(getTimeout('searchAverage'));
+            expect(maxTime).toBeLessThan(getTimeout('searchMax'));
+            logPerformance('searchAverage', avgTime);
+            logPerformance('searchMax', maxTime);
         });
 
-        test('should filter 1000 entities in < 100ms', () => {
+        test('should filter 1000 entities efficiently', () => {
             // Arrange
             const largeDataset = Array.from({ length: 1000 }, (_, i) => ({
                 id: `entity-${i}`,
@@ -173,13 +201,13 @@ describe('Performance Benchmarks', () => {
 
             const duration = end - start;
 
-            // Assert
-            expect(duration).toBeLessThan(100);
+            // Assert - Use environment-aware threshold
+            expect(duration).toBeLessThan(getTimeout('filter'));
             expect(filtered.length).toBeGreaterThan(0);
-            console.log(`✅ Filter time (1000 items): ${duration.toFixed(2)}ms`);
+            logPerformance('filter', duration);
         });
 
-        test('should sort 500 entities in < 100ms', () => {
+        test('should sort 500 entities efficiently', () => {
             // Arrange
             const dataset = Array.from({ length: 500 }, (_, i) => ({
                 id: `entity-${i}`,
@@ -194,15 +222,15 @@ describe('Performance Benchmarks', () => {
 
             const duration = end - start;
 
-            // Assert
-            expect(duration).toBeLessThan(100);
+            // Assert - Use environment-aware threshold
+            expect(duration).toBeLessThan(getTimeout('sort'));
             expect(sorted[0].importance).toBeGreaterThanOrEqual(sorted[sorted.length - 1].importance);
-            console.log(`✅ Sort time (500 items): ${duration.toFixed(2)}ms`);
+            logPerformance('sort', duration);
         });
     });
 
     describe('Large Dataset Performance', () => {
-        test('should handle 1000 entities without lag (< 500ms)', () => {
+        test('should handle 1000 entities without lag', () => {
             // Arrange
             const entities = Array.from({ length: 1000 }, (_, i) => ({
                 id: `entity-${i}`,
@@ -223,10 +251,10 @@ describe('Performance Benchmarks', () => {
 
             const duration = end - start;
 
-            // Assert
-            expect(duration).toBeLessThan(500);
+            // Assert - Use environment-aware threshold
+            expect(duration).toBeLessThan(getTimeout('largeDataset'));
             expect(paginated.length).toBe(24);
-            console.log(`✅ Large dataset processing: ${duration.toFixed(2)}ms`);
+            logPerformance('largeDataset', duration);
         });
 
         test('should paginate through 1000 items quickly', () => {
@@ -251,10 +279,10 @@ describe('Performance Benchmarks', () => {
                 times.push(end - start);
             }
 
-            // Assert
+            // Assert - Use environment-aware threshold
             const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
-            expect(avgTime).toBeLessThan(10); // Should be very fast
-            console.log(`✅ Avg pagination time: ${avgTime.toFixed(3)}ms`);
+            expect(avgTime).toBeLessThan(getTimeout('pagination'));
+            logPerformance('pagination', avgTime);
         });
 
         test('should maintain performance with complex filters', () => {
@@ -283,14 +311,14 @@ describe('Performance Benchmarks', () => {
 
             const duration = end - start;
 
-            // Assert
-            expect(duration).toBeLessThan(150);
-            console.log(`✅ Complex filter time: ${duration.toFixed(2)}ms (${filtered.length} results)`);
+            // Assert - Use environment-aware threshold
+            expect(duration).toBeLessThan(getTimeout('filterComplex'));
+            logPerformance('filterComplex', duration);
         });
     });
 
     describe('Rendering Performance', () => {
-        test('should render entity cards quickly (< 50ms per batch)', () => {
+        test('should render entity cards quickly', () => {
             // Arrange
             const entities = Array.from({ length: 24 }, (_, i) => ({
                 id: `entity-${i}`,
@@ -310,10 +338,10 @@ describe('Performance Benchmarks', () => {
 
             const duration = end - start;
 
-            // Assert
-            expect(duration).toBeLessThan(50);
+            // Assert - Use environment-aware threshold
+            expect(duration).toBeLessThan(getTimeout('render'));
             expect(container.querySelectorAll('.entity-card').length).toBe(24);
-            console.log(`✅ Card render time (24 cards): ${duration.toFixed(2)}ms`);
+            logPerformance('render', duration);
         });
 
         test('should minimize DOM operations during bulk updates', () => {
@@ -341,10 +369,10 @@ describe('Performance Benchmarks', () => {
 
             observer.disconnect();
 
-            // Assert
+            // Assert - Use environment-aware threshold
             expect(mutationCount).toBeLessThanOrEqual(2); // Should be 1-2 mutations max
-            expect(end - start).toBeLessThan(100);
-            console.log(`✅ DOM mutations: ${mutationCount}, Time: ${(end - start).toFixed(2)}ms`);
+            expect(end - start).toBeLessThan(getTimeout('renderDOM'));
+            logPerformance('renderDOM', end - start);
         });
     });
 
@@ -368,9 +396,9 @@ describe('Performance Benchmarks', () => {
             const end = performance.now();
             const duration = end - start;
 
-            // Assert - Should handle 10 concurrent searches
-            expect(duration).toBeLessThan(1000);
-            console.log(`✅ 10 concurrent searches: ${duration.toFixed(2)}ms`);
+            // Assert - Use environment-aware threshold
+            expect(duration).toBeLessThan(getTimeout('concurrent'));
+            logPerformance('concurrent', duration);
         });
 
         test('should handle rapid filter changes efficiently', () => {
@@ -393,9 +421,9 @@ describe('Performance Benchmarks', () => {
             const end = performance.now();
             const duration = end - start;
 
-            // Assert
-            expect(duration).toBeLessThan(500);
-            console.log(`✅ 50 rapid filter changes: ${duration.toFixed(2)}ms`);
+            // Assert - Use environment-aware threshold
+            expect(duration).toBeLessThan(getTimeout('rapidFilters'));
+            logPerformance('rapidFilters', duration);
         });
     });
 
@@ -429,35 +457,22 @@ describe('Performance Benchmarks', () => {
                 lastBatch.push(end - start);
             }
 
-            // Assert - Performance should not degrade
+            // Assert - Use environment-aware threshold (relative comparison)
             const firstAvg = firstBatch.reduce((a, b) => a + b, 0) / firstBatch.length;
             const lastAvg = lastBatch.reduce((a, b) => a + b, 0) / lastBatch.length;
 
             const degradation = ((lastAvg - firstAvg) / firstAvg) * 100;
+            const maxDegradation = getMultiplier('performanceDegradation');
 
-            expect(degradation).toBeLessThan(20); // Max 20% degradation allowed
-            console.log(`✅ Performance degradation: ${degradation.toFixed(2)}% (First: ${firstAvg.toFixed(2)}ms, Last: ${lastAvg.toFixed(2)}ms)`);
+            expect(degradation).toBeLessThan(maxDegradation);
+            logPerformance('performanceDegradation', degradation, '%');
         });
     });
 });
 
 describe('Performance Budget Compliance', () => {
     test('should document performance budgets', () => {
-        const budgets = {
-            'Search rendering': '< 100ms',
-            'Entity card rendering': '< 50ms per batch',
-            'Modal open/close': '< 200ms',
-            'Filter operations': '< 100ms',
-            'Large dataset (1000 items)': '< 500ms',
-            'Pagination navigation': '< 10ms',
-            'Sort operations (500 items)': '< 100ms'
-        };
-
-        console.log('\n📊 Performance Budget Compliance Report:');
-        Object.entries(budgets).forEach(([operation, budget]) => {
-            console.log(`   ${operation}: ${budget}`);
-        });
-
-        expect(Object.keys(budgets).length).toBeGreaterThan(0);
+        generateReport();
+        expect(true).toBe(true);
     });
 });

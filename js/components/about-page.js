@@ -88,7 +88,10 @@ class AboutPage {
     }
 }
 
-// Export
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = AboutPage;
+// ES Module Export
+export { AboutPage };
+
+// Legacy global export for backwards compatibility
+if (typeof window !== 'undefined') {
+    window.AboutPage = AboutPage;
 }

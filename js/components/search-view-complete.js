@@ -7,8 +7,11 @@
  * - Multiple display modes (grid/list/table)
  * - Search history
  * - Pagination
+ * - Virtual scrolling for large result sets (>100 items)
  * - Performance optimized
  */
+
+import { VirtualScroller } from './virtual-scroller.js';
 
 class SearchViewComplete {
     constructor(firestoreInstance) {
@@ -17,6 +20,7 @@ class SearchViewComplete {
         }
 
         this.db = firestoreInstance;
+        this.virtualScroller = null;
 
         // Initialize search engine (prefer enhanced version)
         if (typeof EnhancedCorpusSearch !== 'undefined') {
@@ -727,7 +731,7 @@ class SearchViewComplete {
     }
 
     /**
-     * Render search results
+     * Render search results with virtual scrolling for large lists
      */
     renderResults() {
         const resultsContainer = document.getElementById('results-container');
@@ -752,6 +756,7 @@ class SearchViewComplete {
             resultsContainer.innerHTML = this.getNoResultsHTML();
             resultsControls.style.display = 'none';
             paginationContainer.style.display = 'none';
+            this.destroyVirtualScroller();
             return;
         }
 
@@ -768,26 +773,112 @@ class SearchViewComplete {
         // Sort results
         const sortedResults = this.sortResults([...this.state.results]);
 
-        // Paginate
-        const startIdx = (this.state.currentPage - 1) * this.state.resultsPerPage;
-        const endIdx = startIdx + this.state.resultsPerPage;
-        const pageResults = sortedResults.slice(startIdx, endIdx);
+        // Use virtual scrolling for large result sets (>100 items)
+        const useVirtualScrolling = sortedResults.length > 100;
 
-        // Render based on display mode
-        switch (this.state.displayMode) {
-            case 'grid':
-                resultsContainer.innerHTML = this.renderGridView(pageResults);
-                break;
-            case 'list':
-                resultsContainer.innerHTML = this.renderListView(pageResults);
-                break;
-            case 'table':
-                resultsContainer.innerHTML = this.renderTableView(pageResults);
-                break;
+        if (useVirtualScrolling) {
+            console.log(`[SearchView] Using virtual scrolling for ${sortedResults.length} items`);
+
+            // Hide pagination for virtual scrolling
+            paginationContainer.style.display = 'none';
+
+            // Destroy existing virtual scroller if present
+            this.destroyVirtualScroller();
+
+            // Prepare container for virtual scrolling
+            resultsContainer.innerHTML = '';
+            resultsContainer.style.height = '600px'; // Fixed height for scrolling
+
+            // Determine item height based on display mode
+            const itemHeight = this.getItemHeight(this.state.displayMode);
+
+            // Create virtual scroller
+            this.virtualScroller = new VirtualScroller(resultsContainer, {
+                itemHeight: itemHeight,
+                bufferSize: 10,
+                renderItem: (entity, index) => {
+                    return this.renderVirtualItem(entity, index, this.state.displayMode);
+                }
+            });
+
+            this.virtualScroller.setItems(sortedResults);
+
+            // Track analytics
+            if (window.AnalyticsManager) {
+                window.AnalyticsManager.trackEvent('virtual_scroll_enabled', {
+                    itemCount: sortedResults.length,
+                    displayMode: this.state.displayMode
+                });
+            }
+
+        } else {
+            // Regular rendering with pagination for small lists (<= 100 items)
+            this.destroyVirtualScroller();
+            resultsContainer.style.height = ''; // Reset height
+
+            // Paginate
+            const startIdx = (this.state.currentPage - 1) * this.state.resultsPerPage;
+            const endIdx = startIdx + this.state.resultsPerPage;
+            const pageResults = sortedResults.slice(startIdx, endIdx);
+
+            // Render based on display mode
+            switch (this.state.displayMode) {
+                case 'grid':
+                    resultsContainer.innerHTML = this.renderGridView(pageResults);
+                    break;
+                case 'list':
+                    resultsContainer.innerHTML = this.renderListView(pageResults);
+                    break;
+                case 'table':
+                    resultsContainer.innerHTML = this.renderTableView(pageResults);
+                    break;
+            }
+
+            // Render pagination
+            this.renderPagination();
         }
+    }
 
-        // Render pagination
-        this.renderPagination();
+    /**
+     * Get item height for virtual scrolling based on display mode
+     */
+    getItemHeight(displayMode) {
+        switch (displayMode) {
+            case 'grid':
+                return 320; // Grid cards are taller
+            case 'list':
+                return 120; // List items are medium height
+            case 'table':
+                return 60;  // Table rows are compact
+            default:
+                return 120;
+        }
+    }
+
+    /**
+     * Render a single item for virtual scrolling
+     */
+    renderVirtualItem(entity, index, displayMode) {
+        switch (displayMode) {
+            case 'grid':
+                return this.renderEntityCard(entity);
+            case 'list':
+                return this.renderListItem(entity);
+            case 'table':
+                return this.renderTableRow(entity);
+            default:
+                return this.renderEntityCard(entity);
+        }
+    }
+
+    /**
+     * Destroy virtual scroller instance
+     */
+    destroyVirtualScroller() {
+        if (this.virtualScroller) {
+            this.virtualScroller.destroy();
+            this.virtualScroller = null;
+        }
     }
 
     /**
@@ -1159,6 +1250,9 @@ class SearchViewComplete {
     destroy() {
         console.log('[SearchView] Destroying instance');
 
+        // Destroy virtual scroller
+        this.destroyVirtualScroller();
+
         // Clear global instance reference if it's this instance
         if (window.searchViewInstance === this) {
             window.searchViewInstance = null;
@@ -1176,9 +1270,12 @@ class SearchViewComplete {
     }
 }
 
-// Export for use
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = SearchViewComplete;
+// ES Module Export
+export { SearchViewComplete };
+
+// Legacy global export for backwards compatibility
+if (typeof window !== 'undefined') {
+    window.SearchViewComplete = SearchViewComplete;
 }
 
 // Global instance for pagination callbacks

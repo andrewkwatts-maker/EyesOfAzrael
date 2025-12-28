@@ -14,30 +14,11 @@
  * Total Tests: 15
  */
 
-// Mock Firebase - create chainable mock
-const createMockFirestore = () => {
-    const mock = {
-        collection: jest.fn(),
-        doc: jest.fn(),
-        get: jest.fn(),
-        set: jest.fn(),
-        update: jest.fn(),
-        where: jest.fn(),
-        orderBy: jest.fn(),
-        limit: jest.fn()
-    };
+// Import test utilities
+const { createMockFirestore } = require('../test-utils.js');
 
-    // Make all methods return the mock for chaining
-    mock.collection.mockReturnValue(mock);
-    mock.doc.mockReturnValue(mock);
-    mock.where.mockReturnValue(mock);
-    mock.orderBy.mockReturnValue(mock);
-    mock.limit.mockReturnValue(mock);
-
-    return mock;
-};
-
-const mockFirestore = createMockFirestore();
+// Mock Firestore instance (will be initialized in beforeEach)
+let mockFirestore;
 
 // Mock components
 class MockSearchView {
@@ -96,6 +77,15 @@ class MockQuickViewModal {
         if (!favorites.includes(this.currentEntity.id)) {
             favorites.push(this.currentEntity.id);
             localStorage.setItem('favorites', JSON.stringify(favorites));
+
+            // Track analytics
+            if (window.gtag) {
+                window.gtag('event', 'add_to_favorites', {
+                    item_id: this.currentEntity.id,
+                    item_name: this.currentEntity.name
+                });
+            }
+
             return true;
         }
         return false;
@@ -167,21 +157,24 @@ class MockEditModal {
 }
 
 // Mock window objects
-global.window = {
-    location: { origin: 'http://localhost', hash: '' },
-    localStorage: {
-        data: {},
-        getItem(key) { return this.data[key] || null; },
-        setItem(key, value) { this.data[key] = value; },
-        clear() { this.data = {}; }
-    },
-    print: jest.fn(),
-    gtag: jest.fn(),
-    dispatchEvent: jest.fn(),
-    addEventListener: jest.fn()
-};
+if (!global.window) {
+    global.window = {};
+}
 
-global.localStorage = window.localStorage;
+// Ensure window has all necessary mocks
+global.window.location = global.window.location || { origin: 'http://localhost', hash: '' };
+global.window.localStorage = global.window.localStorage || {
+    data: {},
+    getItem(key) { return this.data[key] || null; },
+    setItem(key, value) { this.data[key] = value; },
+    clear() { this.data = {}; }
+};
+global.window.print = jest.fn();
+global.window.gtag = jest.fn();
+global.window.dispatchEvent = jest.fn();
+global.window.addEventListener = jest.fn();
+
+global.localStorage = global.window.localStorage;
 
 // Wait utility
 const waitFor = async (callback, timeout = 1000) => {
@@ -206,6 +199,32 @@ describe('Search to Entity View Integration', () => {
         jest.clearAllMocks();
         localStorage.clear();
 
+        // Create fresh mock Firestore instance with Zeus data
+        const zeusDoc = {
+            id: 'zeus',
+            exists: true,
+            data: () => ({
+                name: 'Zeus',
+                mythology: 'greek',
+                type: 'deity',
+                description: 'King of the Gods',
+                importance: 100
+            })
+        };
+
+        mockFirestore = createMockFirestore({
+            id: 'zeus',
+            exists: true,
+            data: {
+                name: 'Zeus',
+                mythology: 'greek',
+                type: 'deity',
+                description: 'King of the Gods',
+                importance: 100
+            },
+            docs: [zeusDoc]
+        });
+
         // Create instances
         searchView = new MockSearchView(mockFirestore);
         quickViewModal = new MockQuickViewModal(mockFirestore);
@@ -220,32 +239,6 @@ describe('Search to Entity View Integration', () => {
         // Create container
         container = document.createElement('div');
         document.body.appendChild(container);
-
-        // Mock Firestore responses
-        mockFirestore.get.mockResolvedValue({
-            exists: true,
-            id: 'zeus',
-            data: () => ({
-                name: 'Zeus',
-                mythology: 'greek',
-                type: 'deity',
-                description: 'King of the Gods',
-                importance: 100
-            }),
-            docs: [{
-                id: 'zeus',
-                data: () => ({
-                    name: 'Zeus',
-                    mythology: 'greek',
-                    type: 'deity',
-                    description: 'King of the Gods',
-                    importance: 100
-                })
-            }]
-        });
-
-        mockFirestore.set.mockResolvedValue({});
-        mockFirestore.update.mockResolvedValue({});
     });
 
     afterEach(() => {
@@ -285,16 +278,13 @@ describe('Search to Entity View Integration', () => {
         await searchView.search('Zeus');
         const zeus = searchView.state.results[0];
 
-        // Mock second entity
-        mockFirestore.get.mockResolvedValueOnce({
-            exists: true,
+        // Mock second entity - update the snapshot for Hera search
+        const heraDoc = {
             id: 'hera',
-            data: () => ({ name: 'Hera', mythology: 'greek', type: 'deity' }),
-            docs: [{
-                id: 'hera',
-                data: () => ({ name: 'Hera', mythology: 'greek', type: 'deity' })
-            }]
-        });
+            exists: true,
+            data: () => ({ name: 'Hera', mythology: 'greek', type: 'deity' })
+        };
+        mockFirestore._mockSnapshot.docs = [heraDoc];
 
         await searchView.search('Hera');
         const hera = searchView.state.results[0];
@@ -395,15 +385,17 @@ describe('Search to Entity View Integration', () => {
     });
 
     test('7. Error propagation across components', async () => {
-        // Mock Firestore error
-        const error = new Error('Permission denied');
-        mockFirestore.get.mockRejectedValueOnce(error);
+        // Mock Firestore error - document not found
+        mockFirestore._mockDoc.exists = false;
 
         // Try to open quick view
         await expect(quickViewModal.open('zeus', 'deities')).rejects.toThrow('Entity not found');
 
         // Error should be logged
         expect(quickViewModal.isOpen).toBe(false);
+
+        // Reset for other tests
+        mockFirestore._mockDoc.exists = true;
     });
 
     test('8. Multiple components updating simultaneously', async () => {
@@ -445,7 +437,8 @@ describe('Search to Entity View Integration', () => {
     });
 
     test('10. Search with empty query returns empty results', async () => {
-        mockFirestore.get.mockResolvedValueOnce({ docs: [] });
+        // Update snapshot to return empty results
+        mockFirestore._mockSnapshot.docs = [];
 
         const results = await searchView.search('');
 
@@ -477,6 +470,16 @@ describe('Search to Entity View Integration', () => {
 
         // Try to open another entity while first is open
         const firstEntity = editModal.currentEntity;
+
+        // Update mock to return Hera
+        mockFirestore._mockDoc.id = 'hera';
+        mockFirestore._mockDoc.data = () => ({
+            name: 'Hera',
+            mythology: 'greek',
+            type: 'deity',
+            description: 'Queen of the Gods',
+            importance: 95
+        });
 
         await editModal.open('hera', 'deities');
 
@@ -510,8 +513,9 @@ describe('Search to Entity View Integration', () => {
         searchView.state.query = 'Zeus';
         searchView.state.results = [{ id: 'zeus', name: 'Zeus' }];
 
-        // Trigger error
-        mockFirestore.get.mockRejectedValueOnce(new Error('Network error'));
+        // Trigger error - document doesn't exist
+        const originalExists = mockFirestore._mockDoc.exists;
+        mockFirestore._mockDoc.exists = false;
 
         try {
             await quickViewModal.open('zeus', 'deities');
@@ -525,6 +529,9 @@ describe('Search to Entity View Integration', () => {
 
         // Modal should be closed
         expect(quickViewModal.isOpen).toBe(false);
+
+        // Reset
+        mockFirestore._mockDoc.exists = originalExists;
     });
 
     test('15. Cross-component event communication', async () => {

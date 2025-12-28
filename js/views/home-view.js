@@ -754,7 +754,10 @@ class HomeView {
     }
 }
 
-// Export for use in SPA navigation
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = HomeView;
+// ES Module Export
+export { HomeView };
+
+// Legacy global export for backwards compatibility
+if (typeof window !== 'undefined') {
+    window.HomeView = HomeView;
 }

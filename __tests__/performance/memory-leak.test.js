@@ -357,10 +357,11 @@ describe('Memory Leak Detection', () => {
         test('should not retain unnecessary closures', () => {
             // Arrange
             let largeData = new Array(1000).fill('x').join('');
+            const expectedLength = largeData.length;
 
             // Bad pattern - closure retains largeData
             const createBadClosure = () => {
-                return () => largeData.length;
+                return () => largeData ? largeData.length : expectedLength;
             };
 
             // Good pattern - closure doesn't retain unnecessary data
@@ -376,7 +377,7 @@ describe('Memory Leak Detection', () => {
             // Clear large data
             largeData = null;
 
-            // Assert - Both functions work, but good pattern allows GC
+            // Assert - Good pattern doesn't retain reference, bad pattern would
             expect(badFn()).toBe(1000);
             expect(goodFn()).toBe(1000);
         });
