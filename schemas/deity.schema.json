@@ -1,0 +1,215 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eyesofazrael.com/schemas/deity.json",
+  "title": "Deity Schema",
+  "description": "Schema for deity entities",
+  "allOf": [
+    {
+      "$ref": "entity-base.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "const": "deity"
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["male", "female", "non-binary", "fluid", "multiple", "unknown"],
+          "description": "Gender presentation of the deity"
+        },
+        "pantheon": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Specific pantheon within mythology (e.g., Olympian, Aesir, Ennead)"
+        },
+        "rank": {
+          "type": "string",
+          "enum": ["primordial", "supreme", "major", "minor", "demi-god", "hero-god", "spirit"],
+          "description": "Hierarchical rank within pantheon"
+        },
+        "family": {
+          "type": "object",
+          "properties": {
+            "parents": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "name"],
+                "properties": {
+                  "id": {"type": "string"},
+                  "name": {"type": "string"},
+                  "type": {"type": "string"}
+                }
+              }
+            },
+            "siblings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "name"],
+                "properties": {
+                  "id": {"type": "string"},
+                  "name": {"type": "string"},
+                  "type": {"type": "string"}
+                }
+              }
+            },
+            "consorts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "name"],
+                "properties": {
+                  "id": {"type": "string"},
+                  "name": {"type": "string"},
+                  "type": {"type": "string"}
+                }
+              }
+            },
+            "children": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "name"],
+                "properties": {
+                  "id": {"type": "string"},
+                  "name": {"type": "string"},
+                  "type": {"type": "string"}
+                }
+              }
+            }
+          },
+          "description": "Family relationships"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "weapons": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "animals": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "plants": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "colors": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "numbers": {
+              "type": "array",
+              "items": {"type": "number"}
+            },
+            "elements": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["fire", "water", "earth", "air", "aether", "void"]
+              }
+            }
+          },
+          "description": "Sacred attributes and associations"
+        },
+        "worship": {
+          "type": "object",
+          "properties": {
+            "temples": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {"type": "string"},
+                  "location": {"type": "string"},
+                  "period": {"type": "string"},
+                  "description": {"type": "string"}
+                }
+              }
+            },
+            "festivals": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {"type": "string"},
+                  "date": {"type": "string"},
+                  "description": {"type": "string"}
+                }
+              }
+            },
+            "offerings": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "prayers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                  "title": {"type": "string"},
+                  "text": {"type": "string"},
+                  "language": {"type": "string"},
+                  "translation": {"type": "string"},
+                  "purpose": {"type": "string"}
+                }
+              }
+            }
+          },
+          "description": "Worship practices and rituals"
+        },
+        "mythology_references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title", "summary"],
+            "properties": {
+              "title": {"type": "string"},
+              "summary": {"type": "string"},
+              "source": {"type": "string"},
+              "url": {"type": "string", "format": "uri"}
+            }
+          },
+          "description": "Mythological stories and references"
+        },
+        "mantras": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["text"],
+            "properties": {
+              "text": {"type": "string"},
+              "transliteration": {"type": "string"},
+              "translation": {"type": "string"},
+              "language": {"type": "string"},
+              "purpose": {"type": "string"}
+            }
+          },
+          "description": "Sacred mantras (primarily for Hindu/Buddhist deities)"
+        },
+        "sutra_references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title"],
+            "properties": {
+              "title": {"type": "string"},
+              "text": {"type": "string"},
+              "chapter": {"type": "string"},
+              "verse": {"type": "string"}
+            }
+          },
+          "description": "Sutra references (primarily for Buddhist deities)"
+        }
+      }
+    }
+  ]
+}

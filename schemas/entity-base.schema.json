@@ -1,0 +1,216 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eyesofazrael.com/schemas/entity-base.json",
+  "title": "Entity Base Schema",
+  "description": "Base schema for all entities in Eyes of Azrael",
+  "type": "object",
+  "required": ["id", "name", "type", "mythology"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Unique identifier (lowercase, alphanumeric, hyphens/underscores only)"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Display name of the entity"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["deity", "hero", "creature", "text", "ritual", "symbol", "herb", "place", "concept", "event", "cosmology"],
+      "description": "Type of entity"
+    },
+    "mythology": {
+      "type": "string",
+      "enum": ["greek", "norse", "egyptian", "hindu", "buddhist", "christian", "islamic", "babylonian", "sumerian", "persian", "roman", "celtic", "chinese", "japanese", "aztec", "mayan", "yoruba", "native_american", "jewish", "tarot", "apocryphal", "comparative"],
+      "description": "Mythology tradition this entity belongs to"
+    },
+    "alternateNames": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "uniqueItems": true,
+      "description": "Alternative names, epithets, or titles"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 10000,
+      "description": "Detailed description of the entity"
+    },
+    "shortDescription": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 500,
+      "description": "Brief description for cards and previews"
+    },
+    "symbolism": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "description": "Symbolic meanings and associations"
+    },
+    "domains": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "description": "Domains of influence or expertise"
+    },
+    "archetypes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_-]+$"
+      },
+      "description": "Associated archetype IDs"
+    },
+    "relatedEntities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "relationship"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_-]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "type": {
+            "type": "string"
+          },
+          "relationship": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      },
+      "description": "Related entities with relationship descriptions"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "author": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "date": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2000
+          },
+          "pages": {
+            "type": "string",
+            "maxLength": 50
+          }
+        }
+      },
+      "description": "Source texts and references"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["url", "alt"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2000
+          },
+          "alt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "caption": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "credit": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "license": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      },
+      "description": "Images associated with this entity"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_-]+$",
+        "maxLength": 50
+      },
+      "uniqueItems": true,
+      "description": "Searchable tags"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "author": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "contributors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "Whether this entity has been verified by moderators"
+        },
+        "featured": {
+          "type": "boolean",
+          "description": "Whether to feature this entity"
+        }
+      },
+      "description": "Metadata about the entity record"
+    }
+  },
+  "additionalProperties": false
+}

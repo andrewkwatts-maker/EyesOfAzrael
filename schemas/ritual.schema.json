@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eyesofazrael.com/schemas/ritual.json",
+  "title": "Ritual Schema",
+  "description": "Schema for ritual entities",
+  "allOf": [
+    {
+      "$ref": "entity-base.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "const": "ritual"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["offering", "prayer", "ceremony", "festival", "initiation", "divination", "purification", "invocation", "meditation", "sacrament"],
+          "description": "Type of ritual"
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 1000,
+          "description": "Purpose and intent of the ritual"
+        },
+        "participants": {
+          "type": "object",
+          "properties": {
+            "minimum": {"type": "number", "minimum": 1},
+            "maximum": {"type": "number", "minimum": 1},
+            "roles": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["title"],
+                "properties": {
+                  "title": {"type": "string"},
+                  "description": {"type": "string"},
+                  "required": {"type": "boolean"}
+                }
+              }
+            }
+          }
+        },
+        "timing": {
+          "type": "object",
+          "properties": {
+            "season": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["spring", "summer", "autumn", "winter", "any"]
+              }
+            },
+            "moon_phase": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["new", "waxing_crescent", "first_quarter", "waxing_gibbous", "full", "waning_gibbous", "last_quarter", "waning_crescent", "any"]
+              }
+            },
+            "time_of_day": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["dawn", "morning", "noon", "afternoon", "dusk", "evening", "midnight", "night", "any"]
+              }
+            },
+            "specific_dates": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "duration": {"type": "string"}
+          }
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["temple", "home", "outdoors", "sacred_grove", "mountain", "river", "cave", "altar", "any"]
+              }
+            },
+            "requirements": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "materials": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {"type": "string"},
+              "quantity": {"type": "string"},
+              "purpose": {"type": "string"},
+              "optional": {"type": "boolean"}
+            }
+          }
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["order", "description"],
+            "properties": {
+              "order": {"type": "number", "minimum": 1},
+              "title": {"type": "string"},
+              "description": {"type": "string"},
+              "duration": {"type": "string"},
+              "warnings": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          }
+        },
+        "prayers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["text"],
+            "properties": {
+              "title": {"type": "string"},
+              "text": {"type": "string"},
+              "language": {"type": "string"},
+              "translation": {"type": "string"},
+              "when": {"type": "string"}
+            }
+          }
+        },
+        "offerings": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "expected_outcomes": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "warnings": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "historical_context": {
+          "type": "string",
+          "maxLength": 3000
+        }
+      }
+    }
+  ]
+}

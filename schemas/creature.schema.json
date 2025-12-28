@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eyesofazrael.com/schemas/creature.json",
+  "title": "Creature Schema",
+  "description": "Schema for mythological creature entities",
+  "allOf": [
+    {
+      "$ref": "entity-base.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "const": "creature"
+        },
+        "classification": {
+          "type": "string",
+          "enum": ["beast", "monster", "dragon", "spirit", "elemental", "demon", "angel", "hybrid", "undead", "divine-animal"],
+          "description": "Creature classification"
+        },
+        "appearance": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 3000,
+          "description": "Physical description"
+        },
+        "size": {
+          "type": "string",
+          "enum": ["tiny", "small", "medium", "large", "huge", "gargantuan", "colossal"],
+          "description": "Approximate size category"
+        },
+        "habitat": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Natural habitats"
+        },
+        "abilities": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Special abilities or powers"
+        },
+        "weaknesses": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Known weaknesses or vulnerabilities"
+        },
+        "encounters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["hero", "description"],
+            "properties": {
+              "hero": {"type": "string"},
+              "heroId": {"type": "string"},
+              "description": {"type": "string"},
+              "outcome": {"type": "string"}
+            }
+          },
+          "description": "Famous encounters with heroes or deities"
+        },
+        "offspring": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {"type": "string"},
+              "name": {"type": "string"},
+              "type": {"type": "string"}
+            }
+          }
+        },
+        "diet": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Dietary habits"
+        },
+        "behavior": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Behavioral patterns and temperament"
+        }
+      }
+    }
+  ]
+}
