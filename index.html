@@ -21,6 +21,18 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
 
+    <!-- Code Splitting Performance Hints -->
+    <!-- Preload critical route for instant home page -->
+    <link rel="modulepreload" href="js/views/home-view.js" as="script" crossorigin>
+
+    <!-- Prefetch likely next routes (loaded in background after initial render) -->
+    <link rel="prefetch" href="js/components/search-view-complete.js" as="script" crossorigin>
+    <link rel="prefetch" href="js/components/compare-view.js" as="script" crossorigin>
+
+    <!-- Preconnect to external resources -->
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+
     <!-- CRITICAL CSS - Inlined for instant rendering -->
     <style>
         /* Critical CSS for above-the-fold content */
@@ -218,7 +230,12 @@
     <!-- PERFORMANCE: Progressive Lazy Loader (skeleton screens & deferred loading) -->
     <script src="js/lazy-loader.js"></script>
 
+    <!-- PWA: Service Worker Registration -->
+    <script src="js/sw-register.js"></script>
+    <script src="js/sw-update-notifier.js"></script>
+
     <!-- Core Scripts -->
+    <script src="js/debug-loading.js"></script>
     <script src="js/diagnostic-collector.js"></script>
     <script src="js/seo.js"></script>
     <script src="js/toast.js"></script>
