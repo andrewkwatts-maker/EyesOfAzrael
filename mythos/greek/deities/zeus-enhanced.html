@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeus - Greek Mythology - Enhanced Entity View</title>
+
+    <!-- SEO Meta Tags (will be enhanced by JavaScript) -->
+    <meta name="description" content="Zeus, King of the Gods, God of Sky and Thunder. Supreme ruler of Mount Olympus and the Greek pantheon.">
+    <meta name="keywords" content="Zeus, Greek mythology, Sky Father, Olympian gods, thunderbolt, Mount Olympus">
+
+    <!-- Entity Metadata -->
+    <meta name="mythology" content="greek">
+    <meta name="entity-type" content="deity">
+    <meta name="entity-id" content="zeus">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../../themes/mythology-colors.css">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="../../../css/entity-detail-enhanced.css">
+    <link rel="stylesheet" href="../../../css/spinner.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../../../firebase-config.js"></script>
+
+    <!-- Entity Renderers -->
+    <script src="../../../js/entity-renderer-firebase.js"></script>
+    <script src="../../../js/entity-renderer-enhanced.js"></script>
+
+    <style>
+        /* Page-specific enhancements */
+        body {
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 2rem 0;
+            background: rgba(138, 43, 226, 0.1);
+            border-bottom: 2px solid rgba(138, 43, 226, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--mythos-primary);
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>⚡ Enhanced Entity View - Zeus</h1>
+        <p style="color: var(--color-text-secondary); margin-top: 0.5rem;">
+            Demonstrating modern UX enhancements with tabbed interface, metadata, and interactive features
+        </p>
+    </header>
+
+    <main data-mythology="greek">
+        <!-- Content will be dynamically rendered here -->
+        <div id="entity-content">
+            <div class="loading-container" style="text-align: center; padding: 4rem;">
+                <div class="spinner-container" style="margin: 0 auto;">
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                </div>
+                <p class="loading-message" style="margin-top: 2rem; color: var(--color-text-secondary);">
+                    Loading enhanced Zeus entity...
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; margin-top: 4rem; border-top: 1px solid rgba(255,255,255,0.1);">
+        <p style="color: var(--color-text-secondary);">
+            <strong>Enhanced Entity View</strong> - Showcasing modern UX features
+            <br>
+            <a href="zeus.html" style="color: var(--mythos-primary);">View Standard Version</a> |
+            <a href="../index.html" style="color: var(--mythos-primary);">All Greek Deities</a>
+        </p>
+    </footer>
+
+    <script>
+        // Sample Zeus data for demonstration
+        const zeusData = {
+            id: 'zeus',
+            name: 'Zeus',
+            type: 'deity',
+            mythology: 'greek',
+            subtitle: 'King of the Gods, God of Sky and Thunder',
+            description: 'Supreme ruler of Mount Olympus and the Greek pantheon, Zeus commands the sky, hurls thunderbolts, and upholds cosmic justice. As father of gods and men, he embodies sovereignty, law, and divine authority.',
+
+            // Visual
+            visual: {
+                icon: '⚡'
+            },
+
+            // Metadata
+            epithets: [
+                'Sky Father',
+                'Cloud Gatherer',
+                'Thunderer',
+                'Father of Gods and Men'
+            ],
+            alternativeNames: [
+                'Jupiter (Roman)',
+                'Dyaus Pita (Indo-European)',
+                'Iuppiter'
+            ],
+            period: 'Archaic to Hellenistic Period (c. 8th century BCE - 4th century CE)',
+            region: 'Ancient Greece, Mediterranean',
+            significance: 'Supreme deity of Greek pantheon, ruler of sky and cosmos',
+
+            // Domains and attributes
+            domains: [
+                'Sky',
+                'Thunder',
+                'Lightning',
+                'Justice',
+                'Law',
+                'Kingship',
+                'Hospitality'
+            ],
+            symbols: [
+                'Thunderbolt',
+                'Eagle',
+                'Oak tree',
+                'Bull',
+                'Scepter'
+            ],
+            sacredAnimals: [
+                'Eagle',
+                'Bull',
+                'Swan'
+            ],
+            sacredPlants: [
+                'Oak',
+                'Olive'
+            ],
+            sacredPlaces: [
+                'Mount Olympus',
+                'Dodona',
+                'Olympia',
+                'Nemea'
+            ],
+
+            // Content
+            content: `## The Supreme Olympian
+
+Zeus stands as the mightiest of the Olympian gods, wielding absolute power over sky, weather, and cosmic order. Born to the Titans Kronos and Rhea, he escaped his father's cannibalistic paranoia and led the younger gods in the great war against the Titans—the Titanomachy—establishing a new divine order.
+
+### Divine Authority
+
+As king of the gods, Zeus governs from Mount Olympus, dispensing justice and maintaining cosmic balance. His thunderbolt, forged by the Cyclopes, serves as both weapon and symbol of his supreme authority. No deity challenges his rule, though many seek to influence his decisions.
+
+### Complex Character
+
+Zeus embodies the paradoxes of divine power. Though upholder of justice and protector of guests (xenia), he himself frequently violates these principles. His numerous affairs with goddesses and mortal women demonstrate both his virility and his disregard for marriage vows, creating ongoing conflict with his wife Hera.`,
+
+            // Family relationships
+            family: {
+                parents: [
+                    'Kronos (Titan of Time)',
+                    'Rhea (Titaness, Mother of Gods)'
+                ],
+                siblings: [
+                    'Hestia',
+                    'Demeter',
+                    'Hera',
+                    'Hades',
+                    'Poseidon'
+                ],
+                consorts: [
+                    'Hera (Queen of Olympus)',
+                    'Metis',
+                    'Themis',
+                    'Leto',
+                    'Maia',
+                    'Semele',
+                    'Danaë',
+                    'Leda',
+                    'Europa',
+                    'Alcmene'
+                ],
+                children: [
+                    'Athena',
+                    'Apollo',
+                    'Artemis',
+                    'Hermes',
+                    'Dionysus',
+                    'Ares',
+                    'Hephaestus',
+                    'Persephone',
+                    'Perseus',
+                    'Heracles',
+                    'Helen',
+                    'The Muses',
+                    'The Horae',
+                    'The Moirai (Fates)'
+                ]
+            },
+
+            // Allies and enemies
+            allies: [
+                'Athena (favorite daughter)',
+                'Hermes (messenger)',
+                'The Cyclopes',
+                'Themis (Justice)',
+                'Nike (Victory)'
+            ],
+            enemies: [
+                'Kronos and the Titans',
+                'The Giants',
+                'Typhon',
+                'Prometheus (complex relationship)',
+                'Those displaying hubris'
+            ],
+
+            // Myths and legends with timeline
+            mythsAndLegends: [
+                {
+                    title: 'Birth and Survival',
+                    description: 'Hidden by Rhea in a cave on Crete, baby Zeus escaped being swallowed by his father Kronos. Raised by nymphs and protected by the Kouretes, who clashed their shields to mask his cries.',
+                    source: 'Hesiod, Theogony',
+                    period: 'Primordial Age'
+                },
+                {
+                    title: 'The Titanomachy',
+                    description: 'Zeus led his siblings and allies in a ten-year war against Kronos and the Titans. With the help of the Cyclopes (who forged his thunderbolt) and the Hundred-Handed Ones, he achieved victory and imprisoned the Titans in Tartarus.',
+                    source: 'Hesiod, Theogony',
+                    period: 'Titanomachy War'
+                },
+                {
+                    title: 'Division of the Cosmos',
+                    description: 'After defeating the Titans, Zeus and his brothers drew lots to divide the cosmos. Zeus won the sky, Poseidon the sea, and Hades the underworld, while the earth remained common to all.',
+                    source: 'Homer, Iliad',
+                    period: 'Establishment of Olympian Order'
+                },
+                {
+                    title: 'The Gigantomachy',
+                    description: 'Zeus and the Olympians fought the Giants, born from Gaia to avenge the imprisoned Titans. Only with mortal help (Heracles) could the gods achieve victory, as prophecy declared the Giants could not be killed by gods alone.',
+                    source: 'Apollodorus, Bibliotheca',
+                    period: 'Second Divine War'
+                },
+                {
+                    title: 'Battle with Typhon',
+                    description: 'Gaia sent the monstrous Typhon to challenge Zeus. After an initial defeat, Zeus recovered and trapped Typhon under Mount Etna, where his fiery breath still escapes as volcanic eruptions.',
+                    source: 'Hesiod, Theogony; Apollodorus',
+                    period: 'Late Mythological Age'
+                },
+                {
+                    title: 'Punishment of Prometheus',
+                    description: 'When Prometheus stole fire for humanity, Zeus chained him to a rock where an eagle ate his regenerating liver daily. This demonstrated Zeus\'s harsh justice toward those who defied divine order.',
+                    source: 'Hesiod, Theogony; Aeschylus, Prometheus Bound',
+                    period: 'Age of Heroes'
+                },
+                {
+                    title: 'The Great Flood',
+                    description: 'Disgusted by human wickedness, Zeus sent a catastrophic flood to destroy humanity, sparing only Deucalion and Pyrrha. They repopulated the earth by throwing stones that became people.',
+                    source: 'Apollodorus, Bibliotheca',
+                    period: 'Bronze Age'
+                },
+                {
+                    title: 'Transformation and Seduction',
+                    description: 'Zeus transformed into various forms to seduce mortals: a swan (Leda), a bull (Europa), golden rain (Danaë), a mortal (Alcmene). These unions produced many heroes including Perseus, Helen, and Heracles.',
+                    source: 'Various sources',
+                    period: 'Heroic Age'
+                }
+            ],
+
+            // Worship practices
+            worship: 'Zeus received worship throughout the Greek world as supreme deity. His most famous oracle at Dodona interpreted messages through the rustling of sacred oak leaves. The massive gold and ivory statue at Olympia, one of the Seven Wonders of the Ancient World, drew pilgrims from across the Mediterranean.',
+            cultCenters: [
+                'Dodona (Oracle)',
+                'Olympia (Temple and Games)',
+                'Mount Olympus (Divine Residence)',
+                'Nemea (Games)',
+                'Athens (Various Temples)'
+            ],
+            festivals: [
+                {
+                    name: 'Olympic Games',
+                    description: 'Held every four years at Olympia, these pan-Hellenic athletic contests honored Zeus. Athletes competed for olive wreaths and eternal glory, and a sacred truce halted all wars during the games.',
+                    date: 'Every four years, beginning 776 BCE'
+                },
+                {
+                    name: 'Diasia',
+                    description: 'Athenian festival in early spring featuring sacrifices of sheep and pigs. Celebrated Zeus Meilichios (Zeus the Gentle), seeking his benevolence for the coming agricultural season.',
+                    date: 'Early spring (month of Anthesterion)'
+                }
+            ],
+
+            // Primary sources
+            texts: [
+                {
+                    source: 'Homer, Iliad',
+                    section: 'Book 1',
+                    lines: '528-530',
+                    text: 'The son of Kronos spoke, and nodded his dark brow, and the ambrosial locks fell forward from the lord\'s immortal head, and he made great Olympus tremble.',
+                    reference: 'Richmond Lattimore translation'
+                },
+                {
+                    source: 'Hesiod, Theogony',
+                    lines: '886-900',
+                    text: 'Zeus himself gave birth from his own head to bright-eyed Tritogeneia [Athena], the awful, the strife-stirring, the host-leader, the unwearying, the queen, who delights in tumults and wars and battles.',
+                    reference: 'Hugh G. Evelyn-White translation'
+                },
+                {
+                    source: 'Homeric Hymn to Zeus',
+                    lines: '1-5',
+                    text: 'I will sing of Zeus, chiefest among the gods and greatest, all-seeing, the lord of all, the fulfiller who whispers words of wisdom to Themis as she sits leaning towards him.',
+                    reference: 'H.G. Evelyn-White translation'
+                },
+                {
+                    source: 'Pindar, Olympian Ode 1',
+                    lines: '1-7',
+                    text: 'Water is best, and gold, like a blazing fire in the night, stands out supreme of all lordly wealth. But if, my heart, you wish to sing of contests, look no further for any star warmer than the sun, shining by day through the lonely sky, and let us not proclaim any contest greater than Olympia.',
+                    reference: 'Diane Arnson Svarlien translation'
+                }
+            ],
+
+            // Modern interpretations
+            modernInterpretations: [
+                'Carl Jung identified Zeus as an archetype of the patriarchal ruler, representing consciousness, order, and rational authority.',
+                'Feminist scholars analyze Zeus\'s numerous affairs as mythological justification for patriarchal power structures in ancient Greek society.',
+                'Comparative mythologists connect Zeus to the Indo-European sky father archetype, linking him to Jupiter, Dyaus Pita, and Odin.',
+                'Psychological interpretations view Zeus\'s conflicts with Hera as representing the eternal tension between masculine freedom and committed relationship.'
+            ],
+
+            // Related entities
+            relatedEntities: [
+                {
+                    icon: '👑',
+                    name: 'Hera',
+                    relationship: 'Wife and Queen of Olympus',
+                    description: 'Goddess of marriage and family, often in conflict with Zeus over his affairs'
+                },
+                {
+                    icon: '🔱',
+                    name: 'Poseidon',
+                    relationship: 'Brother',
+                    description: 'God of the sea, earthquakes, and horses, ruler of the oceanic realm'
+                },
+                {
+                    icon: '💀',
+                    name: 'Hades',
+                    relationship: 'Brother',
+                    description: 'God of the underworld and the dead, ruler of the chthonic realm'
+                },
+                {
+                    icon: '🦉',
+                    name: 'Athena',
+                    relationship: 'Daughter (born from head)',
+                    description: 'Goddess of wisdom and war, Zeus\'s favorite child'
+                },
+                {
+                    icon: '☀️',
+                    name: 'Apollo',
+                    relationship: 'Son',
+                    description: 'God of light, prophecy, music, and healing'
+                },
+                {
+                    icon: '🏹',
+                    name: 'Artemis',
+                    relationship: 'Daughter',
+                    description: 'Goddess of the hunt, wilderness, and the moon'
+                },
+                {
+                    icon: '🗡️',
+                    name: 'Heracles',
+                    relationship: 'Son (demigod)',
+                    description: 'Greatest of Greek heroes, achieved apotheosis'
+                },
+                {
+                    icon: '⚡',
+                    name: 'The Cyclopes',
+                    relationship: 'Allies',
+                    description: 'Forged Zeus\'s thunderbolt during the Titanomachy'
+                }
+            ]
+        };
+
+        // Initialize enhanced renderer when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('entity-content');
+            const renderer = new EnhancedEntityRenderer();
+
+            // Set mythology and entity data
+            renderer.mythology = 'greek';
+            renderer.currentEntity = zeusData;
+
+            // Render the enhanced entity view
+            renderer.renderDeity(zeusData, container);
+
+            console.log('Enhanced Zeus entity rendered successfully');
+        });
+    </script>
+</body>
+</html>
