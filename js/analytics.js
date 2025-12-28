@@ -589,10 +589,106 @@
       };
 
       if (duration !== null) {
-        params.engagement_time: duration;
+        params.engagement_time = duration;
       }
 
       this.trackEvent('user_engagement', params);
+    }
+
+    /**
+     * Track entity view (detailed entity page)
+     */
+    trackEntityView(entity) {
+      if (!this.analyticsEnabled) return;
+
+      this.trackEvent('view_item', {
+        item_id: entity.id,
+        item_name: entity.name || entity.title,
+        item_category: entity.collection || entity.type,
+        item_category2: entity.mythology,
+        content_type: 'entity',
+        entity_type: entity.type,
+        mythology: entity.mythology
+      });
+
+      this.log('Entity View', entity.name || entity.title);
+    }
+
+    /**
+     * Track navigation between routes
+     */
+    trackNavigation(fromRoute, toRoute) {
+      if (!this.analyticsEnabled) return;
+
+      this.trackEvent('navigation', {
+        from_route: fromRoute || 'initial',
+        to_route: toRoute,
+        navigation_type: fromRoute ? 'route_change' : 'initial_load'
+      });
+
+      this.log('Navigation', fromRoute, '→', toRoute);
+    }
+
+    /**
+     * Track entity comparison
+     */
+    trackEntityComparison(entityIds, entityTypes = []) {
+      if (!this.analyticsEnabled) return;
+
+      this.trackEvent('compare_entities', {
+        entity_count: entityIds.length,
+        entity_ids: entityIds.join(','),
+        entity_types: entityTypes.join(',')
+      });
+
+      this.log('Comparison', entityIds.length, 'entities');
+    }
+
+    /**
+     * Track user contribution action (create, edit, delete)
+     */
+    trackContributionAction(action, collection, entityId = null) {
+      if (!this.analyticsEnabled) return;
+
+      this.trackEvent('contribution_action', {
+        action: action, // 'create', 'edit', 'delete'
+        collection: collection,
+        entity_id: entityId
+      });
+
+      this.log('Contribution Action', action, collection, entityId);
+    }
+
+    /**
+     * Track timing/performance metrics
+     */
+    trackTiming(category, variable, value, label = '') {
+      if (!this.analyticsEnabled) return;
+
+      gtag('event', 'timing_complete', {
+        name: variable,
+        value: Math.round(value),
+        event_category: category,
+        event_label: label
+      });
+
+      this.log('Timing', category, variable, Math.round(value) + 'ms');
+    }
+
+    /**
+     * Track custom error
+     */
+    trackCustomError(error, context = {}) {
+      if (!this.analyticsEnabled) return;
+
+      this.trackEvent('exception', {
+        description: error.message || error,
+        fatal: context.fatal || false,
+        context: JSON.stringify(context),
+        stack: error.stack
+      });
+
+      this.log('Error Tracked', error.message || error);
     }
 
     /**

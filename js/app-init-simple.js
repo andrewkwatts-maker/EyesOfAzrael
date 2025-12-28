@@ -112,8 +112,14 @@
             setupAuthUI(auth);
         }
 
-        // Setup theme toggle
-        setupThemeToggle();
+        // Setup simple theme toggle (removed - now handled by simple-theme-toggle.js)
+        // Note: SimpleThemeToggle will auto-initialize when loaded
+
+        // Setup global error tracking
+        setupErrorTracking();
+
+        // Setup global edit icon handler
+        setupEditIconHandler();
 
         console.log('[App] Initialization complete');
 
@@ -182,31 +188,94 @@
     }
 
     /**
-     * Setup theme toggle
+     * REMOVED: setupThemeToggle() function
+     * Now handled by js/simple-theme-toggle.js
+     * See SimpleThemeToggle class for new implementation
      */
-    function setupThemeToggle() {
-        const themeToggle = document.getElementById('themeToggle');
-        if (!themeToggle) return;
 
-        let isDark = localStorage.getItem('darkMode') !== 'false';
-
-        const updateTheme = () => {
-            if (isDark) {
-                document.body.classList.add('dark-mode');
-                themeToggle.textContent = '☀️';
-            } else {
-                document.body.classList.remove('dark-mode');
-                themeToggle.textContent = '🌙';
+    /**
+     * Setup global error tracking
+     */
+    function setupErrorTracking() {
+        // Track uncaught JavaScript errors
+        window.addEventListener('error', (event) => {
+            if (window.AnalyticsManager) {
+                window.AnalyticsManager.trackCustomError(event.error || new Error(event.message), {
+                    fatal: true,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    type: 'javascript_error'
+                });
             }
-            localStorage.setItem('darkMode', isDark);
-        };
-
-        themeToggle.addEventListener('click', () => {
-            isDark = !isDark;
-            updateTheme();
         });
 
-        updateTheme();
+        // Track unhandled promise rejections
+        window.addEventListener('unhandledrejection', (event) => {
+            if (window.AnalyticsManager) {
+                window.AnalyticsManager.trackCustomError(
+                    event.reason instanceof Error ? event.reason : new Error(String(event.reason)),
+                    {
+                        fatal: false,
+                        type: 'unhandled_promise_rejection'
+                    }
+                );
+            }
+        });
+
+        console.log('[App] Global error tracking enabled');
+    }
+
+    /**
+     * Setup global edit icon click handler
+     */
+    function setupEditIconHandler() {
+        // Wire up edit icons globally using event delegation
+        document.addEventListener('click', async (e) => {
+            // Check if click was on edit icon button or inside it
+            const editBtn = e.target.matches('.edit-icon-btn')
+                ? e.target
+                : e.target.closest('.edit-icon-btn');
+
+            if (!editBtn) return;
+
+            // Stop propagation to prevent card navigation
+            e.preventDefault();
+            e.stopPropagation();
+
+            const entityId = editBtn.dataset.entityId;
+            const collection = editBtn.dataset.collection;
+
+            if (!entityId || !collection) {
+                console.error('[EditIcon] Missing entity ID or collection');
+                return;
+            }
+
+            // Check if EditEntityModal is available
+            if (typeof EditEntityModal === 'undefined') {
+                console.error('[EditIcon] EditEntityModal not loaded');
+                alert('Edit functionality not available. Please ensure all scripts are loaded.');
+                return;
+            }
+
+            // Check if CRUD manager is available
+            if (!window.EyesOfAzrael || !window.EyesOfAzrael.crudManager) {
+                console.error('[EditIcon] CRUD Manager not initialized');
+                alert('Edit functionality not available. Please ensure the app is properly initialized.');
+                return;
+            }
+
+            // Open edit modal
+            try {
+                const modal = new EditEntityModal(window.EyesOfAzrael.crudManager);
+                await modal.open(entityId, collection);
+            } catch (error) {
+                console.error('[EditIcon] Error opening edit modal:', error);
+                alert('Failed to open edit modal: ' + error.message);
+            }
+        });
+
+        console.log('[App] Global edit icon handler initialized');
     }
 
     /**

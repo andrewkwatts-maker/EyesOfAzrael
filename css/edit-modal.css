@@ -1,0 +1,416 @@
+/**
+ * Edit Modal & Edit Icon Styles
+ * Provides styling for entity edit modals and edit buttons
+ */
+
+/* ===================================
+   Edit Icon Button
+   =================================== */
+
+.edit-icon-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(var(--color-bg-card-rgb), 0.95);
+    border: 1px solid var(--color-border-primary);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+    opacity: 0.7;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.edit-icon-btn:hover {
+    opacity: 1;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+}
+
+.edit-icon-btn:active {
+    transform: scale(0.95) rotate(15deg);
+}
+
+.edit-icon-btn:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Edit Icon in different positions */
+.edit-icon--top-left {
+    top: 0.5rem;
+    left: 0.5rem;
+    right: auto;
+}
+
+.edit-icon--top-right {
+    top: 0.5rem;
+    right: 0.5rem;
+}
+
+.edit-icon--bottom-left {
+    bottom: 0.5rem;
+    left: 0.5rem;
+    top: auto;
+    right: auto;
+}
+
+.edit-icon--bottom-right {
+    bottom: 0.5rem;
+    right: 0.5rem;
+    top: auto;
+}
+
+/* Edit Icon sizes */
+.edit-icon--small {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+}
+
+.edit-icon--medium {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+}
+
+.edit-icon--large {
+    width: 44px;
+    height: 44px;
+    font-size: 1.3rem;
+}
+
+/* Edit Icon visible state */
+.edit-icon--visible {
+    opacity: 0.7;
+}
+
+/* Ensure parent cards have position relative */
+.entity-card,
+.glass-card,
+.deity-card,
+.creature-card,
+.cosmology-card {
+    position: relative;
+}
+
+/* ===================================
+   Modal Overlay
+   =================================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 1rem;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+}
+
+/* ===================================
+   Modal Content
+   =================================== */
+
+.modal-content {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-primary);
+    border-radius: 16px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(-30px) scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.modal-overlay.show .modal-content {
+    transform: translateY(0) scale(1);
+}
+
+.modal-large {
+    max-width: 900px;
+}
+
+.modal-small {
+    max-width: 400px;
+}
+
+/* ===================================
+   Modal Header
+   =================================== */
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--color-border-primary);
+    background: rgba(var(--color-bg-secondary), 0.5);
+    border-radius: 16px 16px 0 0;
+}
+
+.modal-header h2 {
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-close {
+    font-size: 2rem;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-primary);
+    transform: rotate(90deg);
+}
+
+.modal-close:active {
+    transform: rotate(90deg) scale(0.9);
+}
+
+/* ===================================
+   Modal Body
+   =================================== */
+
+.modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+    max-height: calc(90vh - 100px);
+}
+
+/* Custom scrollbar for modal */
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: rgba(var(--color-bg-secondary), 0.5);
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: var(--color-border-primary);
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+}
+
+/* ===================================
+   Loading State
+   =================================== */
+
+.loading-spinner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    min-height: 200px;
+}
+
+.loading-spinner {
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+}
+
+.loading-spinner::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 1rem;
+    border: 3px solid transparent;
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===================================
+   Toast Notifications
+   =================================== */
+
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    z-index: 99999;
+    max-width: 400px;
+    font-weight: 500;
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast-success {
+    background: #10b981;
+    color: white;
+}
+
+.toast-error {
+    background: #ef4444;
+    color: white;
+}
+
+.toast-info {
+    background: #3b82f6;
+    color: white;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* ===================================
+   Error Container
+   =================================== */
+
+.error-container {
+    text-align: center;
+    padding: 3rem;
+}
+
+.error-container h3 {
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.error-container p {
+    color: #ef4444;
+    margin: 1rem 0;
+}
+
+/* ===================================
+   Responsive Adjustments
+   =================================== */
+
+@media (max-width: 768px) {
+    .modal-overlay {
+        padding: 0.5rem;
+    }
+
+    .modal-content {
+        width: 95%;
+        max-height: 95vh;
+        border-radius: 12px;
+    }
+
+    .modal-header {
+        padding: 1rem 1.5rem;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .modal-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+        max-height: calc(95vh - 80px);
+    }
+
+    .modal-close {
+        width: 36px;
+        height: 36px;
+        font-size: 1.75rem;
+    }
+
+    .toast {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        max-width: none;
+    }
+
+    .edit-icon-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+}
+
+/* ===================================
+   Accessibility
+   =================================== */
+
+.modal-overlay:focus-visible {
+    outline: none;
+}
+
+.modal-close:focus-visible,
+.edit-icon-btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    .modal-overlay,
+    .modal-content,
+    .edit-icon-btn,
+    .modal-close,
+    .toast {
+        transition: none;
+        animation: none;
+    }
+}

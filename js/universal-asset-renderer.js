@@ -638,18 +638,30 @@ class UniversalAssetRenderer {
 
     // Quick view modal
     showQuickView(asset) {
-        // TODO: Implement modal quick view
-        console.log('[Asset Renderer] Quick view:', asset.id);
+        if (typeof EntityQuickViewModal !== 'undefined' && this.db) {
+            const modal = new EntityQuickViewModal(this.db);
+            modal.open(asset.id, asset.type || 'assets', asset.relationships?.mythology || 'unknown');
+        } else {
+            console.warn('[Asset Renderer] EntityQuickViewModal not available');
+            // Fallback to navigation
+            window.location.hash = this.getAssetRoute(asset);
+        }
     }
 
     showReferences(asset) {
-        // TODO: Implement references view
-        console.log('[Asset Renderer] References for:', asset.id);
+        // Show references in modal or navigate to references section
+        if (asset.relationships?.references && asset.relationships.references.length > 0) {
+            // Navigate to full page with references anchor
+            window.location.hash = this.getAssetRoute(asset) + '#references';
+        } else {
+            console.log('[Asset Renderer] No references available for:', asset.id);
+        }
     }
 
     openCorpusSearch(asset) {
-        // TODO: Implement corpus search
-        window.location.hash = `#/search?q=${encodeURIComponent(asset.name)}`;
+        // Navigate to search page with entity name pre-filled
+        const searchQuery = asset.name || asset.title || '';
+        window.location.hash = `#/search?q=${encodeURIComponent(searchQuery)}`;
     }
 
     clearCache() {

@@ -76,7 +76,15 @@ class CreatureRenderer {
             return;
         }
 
+        // Make container position relative for edit icon
+        container.style.position = 'relative';
+
         let html = '';
+
+        // Add edit icon if allowed and user owns entity
+        if (allowEdit && this.canUserEdit(creature)) {
+            html += this.renderEditIcon(entityId, 'creatures');
+        }
 
         // Header section
         html += this.renderHeader(creature);
@@ -329,7 +337,38 @@ class CreatureRenderer {
     }
 
     /**
-     * Render edit button
+     * Render edit icon
+     * @param {string} entityId - Entity ID
+     * @param {string} collection - Collection name
+     * @returns {string} Edit icon HTML
+     */
+    renderEditIcon(entityId, collection) {
+        return `
+            <button class="edit-icon-btn"
+                    data-entity-id="${entityId}"
+                    data-collection="${collection}"
+                    aria-label="Edit creature"
+                    title="Edit this creature">
+                ✏️
+            </button>
+        `;
+    }
+
+    /**
+     * Check if current user can edit this entity
+     * @param {Object} entity - Entity data
+     * @returns {boolean}
+     */
+    canUserEdit(entity) {
+        const user = this.auth.currentUser;
+        if (!user) return false;
+
+        // Check if user created this entity
+        return entity.createdBy === user.uid;
+    }
+
+    /**
+     * Render edit button (legacy - kept for compatibility)
      */
     renderEditButton(mythology, entityId) {
         return `

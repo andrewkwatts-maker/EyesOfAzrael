@@ -104,6 +104,11 @@ class HomeView {
             const loadTime = Date.now() - this.loadingStartTime;
             console.log(`[Home View] ⚡ Mythologies loaded in ${loadTime}ms`);
 
+            // Track performance
+            if (window.AnalyticsManager) {
+                window.AnalyticsManager.trackTiming('render', 'home_view', loadTime);
+            }
+
             // Ensure minimum loading time for smooth UX (prevents jarring flash)
             const elapsedTime = Date.now() - this.loadingStartTime;
             if (elapsedTime < this.minLoadingTime) {
