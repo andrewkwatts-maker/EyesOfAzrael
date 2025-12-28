@@ -60,6 +60,11 @@ class FirebaseCRUDManager {
 
             console.log(`[CRUD] Created ${collection} entity:`, docRef.id);
 
+            // Track contribution
+            if (window.AnalyticsManager) {
+                window.AnalyticsManager.trackContributionAction('create', collection, docRef.id);
+            }
+
             return {
                 success: true,
                 id: docRef.id,
@@ -207,6 +212,11 @@ class FirebaseCRUDManager {
 
             console.log(`[CRUD] Updated ${collection} entity:`, id);
 
+            // Track contribution
+            if (window.AnalyticsManager) {
+                window.AnalyticsManager.trackContributionAction('edit', collection, id);
+            }
+
             return {
                 success: true
             };
@@ -256,6 +266,11 @@ class FirebaseCRUDManager {
                     deletedByEmail: user.email
                 });
                 console.log(`[CRUD] Soft deleted ${collection} entity:`, id);
+            }
+
+            // Track contribution
+            if (window.AnalyticsManager) {
+                window.AnalyticsManager.trackContributionAction('delete', collection, id);
             }
 
             return {
