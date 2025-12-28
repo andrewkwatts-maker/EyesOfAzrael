@@ -27,16 +27,19 @@ class EntityQuickViewModal {
     async open(entityId, collection, mythology) {
         console.log('[QuickView] Opening modal for:', { entityId, collection, mythology });
 
+        // Create modal structure first to ensure error handling works
+        this.createModal();
+
         try {
             // Load entity data
             this.currentEntity = await this.loadEntity(entityId, collection, mythology);
 
-            // Create and show modal
-            this.createModal();
+            // Render content
             this.renderContent();
 
         } catch (error) {
             console.error('[QuickView] Error loading entity:', error);
+            // showError() is now safe to call since modal exists
             this.showError(error.message);
         }
     }
@@ -429,19 +432,31 @@ class EntityQuickViewModal {
      */
     showError(message) {
         const modal = document.getElementById('quick-view-modal');
-        if (modal) {
-            const body = modal.querySelector('.quick-view-body');
-            body.innerHTML = `
-                <div class="error-state">
-                    <div class="error-icon">⚠️</div>
-                    <h2>Error</h2>
-                    <p class="error-message">${this.escapeHtml(message)}</p>
-                    <button class="btn-primary" onclick="this.closest('.quick-view-overlay').remove()">
-                        Close
-                    </button>
-                </div>
-            `;
+        if (!modal) {
+            console.error('[QuickView] Cannot show error - modal not found:', message);
+            // Create modal if it doesn't exist (defensive programming)
+            this.createModal();
+            // Try again after creating modal
+            setTimeout(() => this.showError(message), 50);
+            return;
         }
+
+        const body = modal.querySelector('.quick-view-body');
+        if (!body) {
+            console.error('[QuickView] Cannot show error - modal body not found:', message);
+            return;
+        }
+
+        body.innerHTML = `
+            <div class="error-state">
+                <div class="error-icon">⚠️</div>
+                <h2>Error</h2>
+                <p class="error-message">${this.escapeHtml(message)}</p>
+                <button class="btn-primary" onclick="this.closest('.quick-view-overlay').remove()">
+                    Close
+                </button>
+            </div>
+        `;
     }
 
     // ============================================

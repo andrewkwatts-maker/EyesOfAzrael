@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick View Modal Error Handling Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+
+        h1 {
+            color: #4a90e2;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            background: #252540;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+
+        .test-button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .test-button:hover {
+            background: #357abd;
+        }
+
+        .test-button.success {
+            background: #27ae60;
+        }
+
+        .test-button.error {
+            background: #e74c3c;
+        }
+
+        .test-description {
+            color: #aaa;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            background: #1a1a2e;
+            border-left: 4px solid #4a90e2;
+        }
+
+        .result.pass {
+            border-left-color: #27ae60;
+            color: #27ae60;
+        }
+
+        .result.fail {
+            border-left-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        /* Quick View Modal Styles */
+        .quick-view-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .quick-view-overlay.show {
+            opacity: 1;
+        }
+
+        .quick-view-content {
+            background: #252540;
+            border-radius: 12px;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid #444;
+        }
+
+        .quick-view-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 30px;
+            color: #aaa;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .quick-view-close:hover {
+            color: #fff;
+        }
+
+        .quick-view-body {
+            padding: 40px;
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .error-state h2 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+
+        .error-message {
+            color: #aaa;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-primary:hover {
+            background: #357abd;
+        }
+
+        .loading-content {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner-ring {
+            display: inline-block;
+            width: 64px;
+            height: 64px;
+            border: 8px solid #333;
+            border-top-color: #4a90e2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Quick View Modal Error Handling Test</h1>
+
+    <div class="test-section">
+        <h2>Test 1: Error Before Modal Creation (Original Bug)</h2>
+        <div class="test-description">
+            This test simulates the original bug where an error occurs during entity loading,
+            before the modal structure is created. The fix ensures the modal is created first,
+            so error handling works correctly.
+        </div>
+        <button class="test-button error" onclick="testErrorBeforeModal()">
+            Test Error Handling
+        </button>
+        <div id="test1-result" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Normal Operation (No Error)</h2>
+        <div class="test-description">
+            This test verifies that the fix doesn't break normal operation when entity loading
+            succeeds. The modal should show loading state then content.
+        </div>
+        <button class="test-button success" onclick="testNormalOperation()">
+            Test Normal Operation
+        </button>
+        <div id="test2-result" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Multiple Error Conditions</h2>
+        <div class="test-description">
+            Tests various error conditions: Firestore not initialized, entity not found,
+            network errors, etc.
+        </div>
+        <button class="test-button error" onclick="testMultipleErrors('firestore')">
+            Test: Firestore Not Initialized
+        </button>
+        <button class="test-button error" onclick="testMultipleErrors('notfound')">
+            Test: Entity Not Found
+        </button>
+        <button class="test-button error" onclick="testMultipleErrors('network')">
+            Test: Network Error
+        </button>
+        <div id="test3-result" class="result" style="display: none;"></div>
+    </div>
+
+    <script src="../js/components/entity-quick-view-modal.js"></script>
+    <script>
+        // Mock Firestore for testing
+        class MockFirestore {
+            constructor(shouldFail, errorType) {
+                this.shouldFail = shouldFail;
+                this.errorType = errorType;
+            }
+
+            collection(name) {
+                return this;
+            }
+
+            doc(id) {
+                return this;
+            }
+
+            async get() {
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                if (this.shouldFail) {
+                    if (this.errorType === 'notfound') {
+                        return { exists: false };
+                    } else if (this.errorType === 'network') {
+                        throw new Error('Network error: Failed to fetch document');
+                    }
+                    throw new Error('Test error: Entity loading failed');
+                }
+
+                return {
+                    exists: true,
+                    id: 'test-entity',
+                    data() {
+                        return {
+                            name: 'Test Entity',
+                            icon: '🧪',
+                            mythology: 'test',
+                            description: 'This is a test entity',
+                            domains: ['Testing', 'Quality Assurance'],
+                            symbols: ['🔬', '✅']
+                        };
+                    }
+                };
+            }
+        }
+
+        // Test 1: Error before modal creation (original bug)
+        async function testErrorBeforeModal() {
+            const resultDiv = document.getElementById('test1-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Running test...';
+
+            try {
+                const mockDb = new MockFirestore(true, 'error');
+                const modal = new EntityQuickViewModal(mockDb);
+
+                // This should trigger an error
+                await modal.open('nonexistent-entity', 'deities', 'test');
+
+                // Check if modal exists and shows error
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const modalElement = document.getElementById('quick-view-modal');
+                if (modalElement) {
+                    const errorState = modalElement.querySelector('.error-state');
+                    if (errorState) {
+                        resultDiv.className = 'result pass';
+                        resultDiv.textContent = '✓ PASS: Modal created successfully and error displayed correctly';
+                    } else {
+                        resultDiv.className = 'result fail';
+                        resultDiv.textContent = '✗ FAIL: Modal exists but error not displayed';
+                    }
+                } else {
+                    resultDiv.className = 'result fail';
+                    resultDiv.textContent = '✗ FAIL: Modal not created';
+                }
+            } catch (error) {
+                resultDiv.className = 'result fail';
+                resultDiv.textContent = '✗ FAIL: Unexpected error - ' + error.message;
+            }
+        }
+
+        // Test 2: Normal operation
+        async function testNormalOperation() {
+            const resultDiv = document.getElementById('test2-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Running test...';
+
+            try {
+                const mockDb = new MockFirestore(false, null);
+                const modal = new EntityQuickViewModal(mockDb);
+
+                await modal.open('test-entity', 'deities', 'test');
+
+                // Check if modal exists and shows content
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const modalElement = document.getElementById('quick-view-modal');
+                if (modalElement) {
+                    const errorState = modalElement.querySelector('.error-state');
+                    const entityTitle = modalElement.querySelector('.entity-title');
+
+                    if (!errorState && entityTitle) {
+                        resultDiv.className = 'result pass';
+                        resultDiv.textContent = '✓ PASS: Modal created and content displayed correctly';
+                    } else if (errorState) {
+                        resultDiv.className = 'result fail';
+                        resultDiv.textContent = '✗ FAIL: Error shown when it should succeed';
+                    } else {
+                        resultDiv.className = 'result fail';
+                        resultDiv.textContent = '✗ FAIL: Content not rendered';
+                    }
+                } else {
+                    resultDiv.className = 'result fail';
+                    resultDiv.textContent = '✗ FAIL: Modal not created';
+                }
+            } catch (error) {
+                resultDiv.className = 'result fail';
+                resultDiv.textContent = '✗ FAIL: Unexpected error - ' + error.message;
+            }
+        }
+
+        // Test 3: Multiple error conditions
+        async function testMultipleErrors(errorType) {
+            const resultDiv = document.getElementById('test3-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Running test for ' + errorType + '...';
+
+            try {
+                let mockDb;
+                let expectedError;
+
+                if (errorType === 'firestore') {
+                    mockDb = null;
+                    expectedError = 'Firestore not initialized';
+                } else {
+                    mockDb = new MockFirestore(true, errorType);
+                    if (errorType === 'notfound') {
+                        expectedError = 'Entity not found';
+                    } else if (errorType === 'network') {
+                        expectedError = 'Network error';
+                    }
+                }
+
+                const modal = new EntityQuickViewModal(mockDb);
+                await modal.open('test-entity', 'deities', 'test');
+
+                // Check if modal shows error
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const modalElement = document.getElementById('quick-view-modal');
+                if (modalElement) {
+                    const errorState = modalElement.querySelector('.error-state');
+                    const errorMessage = modalElement.querySelector('.error-message');
+
+                    if (errorState && errorMessage) {
+                        resultDiv.className = 'result pass';
+                        resultDiv.textContent = `✓ PASS: Error handled correctly for ${errorType} - "${errorMessage.textContent}"`;
+                    } else {
+                        resultDiv.className = 'result fail';
+                        resultDiv.textContent = '✗ FAIL: Error state not displayed';
+                    }
+                } else {
+                    resultDiv.className = 'result fail';
+                    resultDiv.textContent = '✗ FAIL: Modal not created';
+                }
+            } catch (error) {
+                resultDiv.className = 'result fail';
+                resultDiv.textContent = '✗ FAIL: Unexpected error - ' + error.message;
+            }
+        }
+
+        console.log('Quick View Modal Error Handling Test Suite Loaded');
+        console.log('Click the test buttons to run individual tests');
+    </script>
+</body>
+</html>

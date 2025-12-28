@@ -1375,5 +1375,128 @@ describe('EditEntityModal', () => {
             const modals = document.querySelectorAll('#edit-entity-modal');
             expect(modals.length).toBe(1);
         });
+
+        test('should call onSuccess callback when EntityForm triggers it', async () => {
+            // Arrange
+            mockCRUDManager.read.mockResolvedValue({
+                success: true,
+                data: { id: 'entity123', name: 'Zeus' }
+            });
+            await modal.open('entity123', 'deities');
+
+            // Get the onSuccess callback that was passed to EntityForm
+            const onSuccessCallback = modal.entityForm.options.onSuccess;
+
+            // Act
+            onSuccessCallback({ success: true, id: 'entity123' });
+
+            // Assert
+            expect(window.showToast).toHaveBeenCalledWith(
+                'Entity updated successfully!',
+                'success'
+            );
+        });
+
+        test('should call onCancel callback when EntityForm triggers it', async () => {
+            // Arrange
+            mockCRUDManager.read.mockResolvedValue({
+                success: true,
+                data: { id: 'entity123', name: 'Zeus' }
+            });
+            await modal.open('entity123', 'deities');
+
+            // Get the onCancel callback that was passed to EntityForm
+            const onCancelCallback = modal.entityForm.options.onCancel;
+
+            // Act
+            onCancelCallback();
+            jest.advanceTimersByTime(500);
+
+            // Assert
+            expect(modal.modalElement).toBeNull();
+        });
+
+        test('should handle capitalizeFirst with empty string', () => {
+            // Act
+            const result = modal.capitalizeFirst('');
+
+            // Assert
+            expect(result).toBe('');
+        });
+
+        test('should handle capitalizeFirst with null', () => {
+            // Act
+            const result = modal.capitalizeFirst(null);
+
+            // Assert
+            expect(result).toBe('');
+        });
+
+        test('should handle capitalizeFirst with undefined', () => {
+            // Act
+            const result = modal.capitalizeFirst(undefined);
+
+            // Assert
+            expect(result).toBe('');
+        });
+
+        test('should handle loadEntity with error but no error message', async () => {
+            // Arrange
+            mockCRUDManager.read.mockResolvedValue({
+                success: false
+                // No error property provided
+            });
+
+            // Act & Assert
+            await expect(modal.loadEntity('entity123', 'deities')).rejects.toThrow('Failed to load entity');
+        });
+
+        test('should use default type "info" when showToast called without type', () => {
+            // Arrange
+            window.showToast = null; // Force fallback toast
+
+            // Act
+            modal.showToast('Test message');
+            const toast = document.querySelector('.toast-info');
+
+            // Assert
+            expect(toast).toBeTruthy();
+            expect(toast.textContent).toBe('Test message');
+
+            // Cleanup
+            toast.remove();
+        });
+
+        test('should create success toast with correct color when showToast uses fallback', () => {
+            // Arrange
+            window.showToast = null; // Force fallback toast
+
+            // Act
+            modal.showToast('Success message', 'success');
+            const toast = document.querySelector('.toast-success');
+
+            // Assert
+            expect(toast).toBeTruthy();
+            expect(toast.style.background).toContain('rgb(16, 185, 129)'); // #10b981
+
+            // Cleanup
+            toast.remove();
+        });
+
+        test('should create error toast with correct color when showToast uses fallback', () => {
+            // Arrange
+            window.showToast = null; // Force fallback toast
+
+            // Act
+            modal.showToast('Error message', 'error');
+            const toast = document.querySelector('.toast-error');
+
+            // Assert
+            expect(toast).toBeTruthy();
+            expect(toast.style.background).toContain('rgb(239, 68, 68)'); // #ef4444
+
+            // Cleanup
+            toast.remove();
+        });
     });
 });

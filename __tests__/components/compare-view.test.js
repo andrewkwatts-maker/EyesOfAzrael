@@ -1118,4 +1118,180 @@ describe('CompareView - Utility Functions', () => {
         // Event handler should be attached
         expect(mythologyFilter).toBeTruthy();
     });
+
+    test('Search input triggers performSearch after debounce', async () => {
+        jest.useFakeTimers();
+        await compareView.render(container);
+
+        const searchInput = container.querySelector('#entity-search');
+        const performSearchSpy = jest.spyOn(compareView, 'performSearch');
+
+        if (searchInput) {
+            const event = new Event('input', { bubbles: true });
+            searchInput.value = 'zeus';
+            searchInput.dispatchEvent(event);
+
+            // Advance timer past debounce (500ms)
+            jest.advanceTimersByTime(600);
+        }
+
+        // performSearch should be called after debounce
+        expect(performSearchSpy).toHaveBeenCalledWith('zeus');
+        jest.useRealTimers();
+    });
+
+    test('Type filter change triggers search', async () => {
+        await compareView.render(container);
+
+        const typeFilter = container.querySelector('#type-filter');
+        const performSearchSpy = jest.spyOn(compareView, 'performSearch');
+
+        if (typeFilter) {
+            const event = new Event('change', { bubbles: true });
+            typeFilter.value = 'deities';
+            typeFilter.dispatchEvent(event);
+        }
+
+        // performSearch should be called
+        expect(performSearchSpy).toHaveBeenCalled();
+    });
+
+    test('Clear button triggers clearAll', async () => {
+        compareView.selectedEntities = [mockDeityZeus];
+        await compareView.render(container);
+
+        const clearBtn = container.querySelector('#clear-compare');
+        const clearAllSpy = jest.spyOn(compareView, 'clearAll');
+
+        if (clearBtn) {
+            clearBtn.click();
+        }
+
+        // clearAll should be called
+        expect(clearAllSpy).toHaveBeenCalled();
+    });
+
+    test('Share button triggers shareComparison', async () => {
+        compareView.selectedEntities = [mockDeityZeus, mockDeityOdin];
+        await compareView.render(container);
+
+        const shareBtn = container.querySelector('#share-compare');
+        const shareComparisonSpy = jest.spyOn(compareView, 'shareComparison');
+
+        if (shareBtn) {
+            shareBtn.click();
+        }
+
+        // shareComparison should be called
+        expect(shareComparisonSpy).toHaveBeenCalled();
+    });
+
+    test('Export button triggers exportComparison', async () => {
+        compareView.selectedEntities = [mockDeityZeus, mockDeityOdin];
+        await compareView.render(container);
+
+        const exportBtn = container.querySelector('#export-compare');
+        const exportComparisonSpy = jest.spyOn(compareView, 'exportComparison');
+
+        if (exportBtn) {
+            exportBtn.click();
+        }
+
+        // exportComparison should be called
+        expect(exportComparisonSpy).toHaveBeenCalled();
+    });
+
+    test('Remove entity button triggers removeEntity', async () => {
+        compareView.selectedEntities = [mockDeityZeus, mockDeityOdin];
+        await compareView.render(container);
+
+        const removeEntitySpy = jest.spyOn(compareView, 'removeEntity');
+
+        // Simulate click on remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.classList.add('remove-entity-btn');
+        removeBtn.dataset.index = '0';
+        document.body.appendChild(removeBtn);
+
+        const event = new MouseEvent('click', { bubbles: true });
+        Object.defineProperty(event, 'target', { value: removeBtn, writable: false });
+        document.dispatchEvent(event);
+
+        // removeEntity should be called with index 0
+        expect(removeEntitySpy).toHaveBeenCalledWith(0);
+
+        // Cleanup
+        removeBtn.remove();
+    });
+
+    test('performSearch handles missing results container gracefully', async () => {
+        // Don't render the view, so there's no results container
+        const searchResults = await compareView.performSearch('zeus');
+
+        // Should not crash, just return early
+        expect(searchResults).toBeUndefined();
+    });
+
+    test('performSearch shows search results and adds click handlers', async () => {
+        await compareView.render(container);
+
+        const mockResults = [mockDeityZeus, mockDeityOdin];
+        jest.spyOn(compareView, 'searchEntities').mockResolvedValue(mockResults);
+
+        await compareView.performSearch('test');
+
+        const resultsContainer = container.querySelector('#search-results');
+        const resultCards = resultsContainer.querySelectorAll('.search-result-card');
+
+        // Should render result cards
+        expect(resultCards.length).toBeGreaterThan(0);
+
+        // Click on first result card
+        if (resultCards[0]) {
+            resultCards[0].click();
+            // Should add entity to selected entities
+            expect(compareView.selectedEntities.length).toBeGreaterThan(0);
+        }
+    });
+
+    test('performSearch handles search errors gracefully', async () => {
+        await compareView.render(container);
+
+        const mockError = new Error('Search failed');
+        jest.spyOn(compareView, 'searchEntities').mockRejectedValue(mockError);
+
+        await compareView.performSearch('test');
+
+        const resultsContainer = container.querySelector('#search-results');
+
+        // Should show error message
+        expect(resultsContainer.innerHTML).toContain('Error performing search');
+    });
+
+    test('Search result card click adds entity with correct data', async () => {
+        await compareView.render(container);
+
+        const mockResults = [{
+            id: 'zeus',
+            collection: 'deities',
+            name: 'Zeus',
+            mythology: 'greek',
+            icon: '⚡'
+        }];
+
+        jest.spyOn(compareView, 'searchEntities').mockResolvedValue(mockResults);
+        const addEntitySpy = jest.spyOn(compareView, 'addEntity');
+
+        await compareView.performSearch('zeus');
+
+        const resultsContainer = container.querySelector('#search-results');
+        const resultCard = resultsContainer.querySelector('.search-result-card');
+
+        if (resultCard) {
+            resultCard.click();
+
+            // Should call addEntity with parsed entity data
+            expect(addEntitySpy).toHaveBeenCalled();
+        }
+    });
 });

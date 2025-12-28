@@ -17,8 +17,19 @@ class EntityForm {
         this.crudManager = options.crudManager;
         this.collection = options.collection;
         this.entityId = options.entityId;
-        this.onSuccess = options.onSuccess || (() => {});
-        this.onCancel = options.onCancel || (() => {});
+
+        // Validate and sanitize callbacks with proper type checking
+        this.onSuccess = typeof options.onSuccess === 'function'
+            ? options.onSuccess
+            : (() => {
+                console.warn('[EntityForm] No onSuccess callback provided');
+            });
+
+        this.onCancel = typeof options.onCancel === 'function'
+            ? options.onCancel
+            : (() => {
+                console.warn('[EntityForm] No onCancel callback provided');
+            });
 
         this.formData = {};
         this.errors = {};
@@ -474,7 +485,16 @@ class EntityForm {
         if (result.success) {
             this.showStatus('Success!', 'success');
             setTimeout(() => {
-                this.onSuccess(result);
+                // Safely invoke success callback with error handling
+                if (typeof this.onSuccess === 'function') {
+                    try {
+                        this.onSuccess(result);
+                    } catch (error) {
+                        console.error('[EntityForm] Error in onSuccess callback:', error);
+                        // Don't show error to user since save was successful
+                        // Just log it for debugging
+                    }
+                }
             }, 1000);
         } else {
             this.showStatus(`Error: ${result.error}`, 'error');
@@ -486,7 +506,17 @@ class EntityForm {
      */
     handleCancel() {
         if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
-            this.onCancel();
+            // Safely invoke cancel callback with error handling
+            if (typeof this.onCancel === 'function') {
+                try {
+                    this.onCancel();
+                } catch (error) {
+                    console.error('[EntityForm] Error in onCancel callback:', error);
+                    // Fallback: try to close any open modals
+                    const modals = document.querySelectorAll('.modal-overlay');
+                    modals.forEach(modal => modal.remove());
+                }
+            }
         }
     }
 

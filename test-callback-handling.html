@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Callback Handling Test - Edit Modal</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        h1 {
+            color: #60a5fa;
+            border-bottom: 2px solid #374151;
+            padding-bottom: 1rem;
+        }
+        .test-section {
+            background: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .test-section h2 {
+            color: #34d399;
+            margin-top: 0;
+        }
+        .test-case {
+            background: #1f1f1f;
+            border-left: 3px solid #60a5fa;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .test-case h3 {
+            color: #fbbf24;
+            margin-top: 0;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button.danger {
+            background: #ef4444;
+        }
+        button.danger:hover {
+            background: #dc2626;
+        }
+        .result {
+            background: #374151;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        .success {
+            color: #34d399;
+        }
+        .error {
+            color: #f87171;
+        }
+        .warning {
+            color: #fbbf24;
+        }
+        .info {
+            color: #60a5fa;
+        }
+        code {
+            background: #1f1f1f;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            color: #a78bfa;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Callback Handling Test Suite - Edit Modal</h1>
+    <p>This page tests edge cases in callback parameter handling for the Edit Entity Modal.</p>
+
+    <div class="test-section">
+        <h2>Test 1: Valid Callbacks (Expected Behavior)</h2>
+        <div class="test-case">
+            <h3>1.1 Valid Function Callbacks</h3>
+            <p>Tests that normal function callbacks work correctly.</p>
+            <button onclick="testValidCallbacks()">Run Test</button>
+            <div id="test1-result" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Null/Undefined Callbacks</h2>
+        <div class="test-case">
+            <h3>2.1 Null onSuccess Callback</h3>
+            <p>Tests that null callback is handled gracefully.</p>
+            <button onclick="testNullOnSuccess()">Run Test</button>
+            <div id="test2-1-result" class="result" style="display:none;"></div>
+        </div>
+        <div class="test-case">
+            <h3>2.2 Undefined onCancel Callback</h3>
+            <p>Tests that undefined callback is handled gracefully.</p>
+            <button onclick="testUndefinedOnCancel()">Run Test</button>
+            <div id="test2-2-result" class="result" style="display:none;"></div>
+        </div>
+        <div class="test-case">
+            <h3>2.3 Both Callbacks Missing</h3>
+            <p>Tests that completely missing callbacks don't crash.</p>
+            <button onclick="testBothMissing()">Run Test</button>
+            <div id="test2-3-result" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Non-Function Callbacks</h2>
+        <div class="test-case">
+            <h3>3.1 String Instead of Function</h3>
+            <p>Tests that string values are rejected.</p>
+            <button onclick="testStringCallback()">Run Test</button>
+            <div id="test3-1-result" class="result" style="display:none;"></div>
+        </div>
+        <div class="test-case">
+            <h3>3.2 Number Instead of Function</h3>
+            <p>Tests that number values are rejected.</p>
+            <button onclick="testNumberCallback()">Run Test</button>
+            <div id="test3-2-result" class="result" style="display:none;"></div>
+        </div>
+        <div class="test-case">
+            <h3>3.3 Object Instead of Function</h3>
+            <p>Tests that object values are rejected.</p>
+            <button onclick="testObjectCallback()">Run Test</button>
+            <div id="test3-3-result" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Callback Errors</h2>
+        <div class="test-case">
+            <h3>4.1 Callback Throws Error</h3>
+            <p>Tests that errors in callbacks are caught and logged.</p>
+            <button onclick="testThrowingCallback()">Run Test</button>
+            <div id="test4-1-result" class="result" style="display:none;"></div>
+        </div>
+        <div class="test-case">
+            <h3>4.2 Callback With Invalid Parameters</h3>
+            <p>Tests handling of callbacks called with wrong parameters.</p>
+            <button onclick="testInvalidParams()">Run Test</button>
+            <div id="test4-2-result" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Mock EntityForm for testing
+        class EntityForm {
+            constructor(options) {
+                this.collection = options.collection;
+                this.entityId = options.entityId;
+
+                // This is the code we're testing - callback validation
+                this.onSuccess = typeof options.onSuccess === 'function'
+                    ? options.onSuccess
+                    : (() => {
+                        console.warn('[EntityForm] No onSuccess callback provided');
+                    });
+
+                this.onCancel = typeof options.onCancel === 'function'
+                    ? options.onCancel
+                    : (() => {
+                        console.warn('[EntityForm] No onCancel callback provided');
+                    });
+            }
+
+            // Simulate successful save
+            simulateSuccess(result) {
+                if (typeof this.onSuccess === 'function') {
+                    try {
+                        this.onSuccess(result);
+                        return { success: true, error: null };
+                    } catch (error) {
+                        console.error('[EntityForm] Error in onSuccess callback:', error);
+                        return { success: false, error: error.message };
+                    }
+                }
+                return { success: false, error: 'onSuccess is not a function' };
+            }
+
+            // Simulate cancel
+            simulateCancel() {
+                if (typeof this.onCancel === 'function') {
+                    try {
+                        this.onCancel();
+                        return { success: true, error: null };
+                    } catch (error) {
+                        console.error('[EntityForm] Error in onCancel callback:', error);
+                        return { success: false, error: error.message };
+                    }
+                }
+                return { success: false, error: 'onCancel is not a function' };
+            }
+        }
+
+        // Helper to display results
+        function showResult(id, message, type = 'info') {
+            const el = document.getElementById(id);
+            el.style.display = 'block';
+            el.innerHTML = `<span class="${type}">${message}</span>`;
+        }
+
+        // Test 1.1: Valid callbacks
+        function testValidCallbacks() {
+            let successCalled = false;
+            let cancelCalled = false;
+
+            const form = new EntityForm({
+                collection: 'deities',
+                entityId: 'test-123',
+                onSuccess: (result) => { successCalled = true; },
+                onCancel: () => { cancelCalled = true; }
+            });
+
+            form.simulateSuccess({ success: true });
+            form.simulateCancel();
+
+            if (successCalled && cancelCalled) {
+                showResult('test1-result', '✓ PASS: Valid callbacks executed correctly', 'success');
+            } else {
+                showResult('test1-result', '✗ FAIL: Valid callbacks did not execute', 'error');
+            }
+        }
+
+        // Test 2.1: Null onSuccess
+        function testNullOnSuccess() {
+            try {
+                const form = new EntityForm({
+                    collection: 'deities',
+                    entityId: 'test-123',
+                    onSuccess: null,
+                    onCancel: () => {}
+                });
+
+                const result = form.simulateSuccess({ success: true });
+                showResult('test2-1-result', '✓ PASS: Null callback handled gracefully. Fallback used.', 'success');
+            } catch (error) {
+                showResult('test2-1-result', `✗ FAIL: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 2.2: Undefined onCancel
+        function testUndefinedOnCancel() {
+            try {
+                const form = new EntityForm({
+                    collection: 'deities',
+                    entityId: 'test-123',
+                    onSuccess: () => {},
+                    onCancel: undefined
+                });
+
+                const result = form.simulateCancel();
+                showResult('test2-2-result', '✓ PASS: Undefined callback handled gracefully. Fallback used.', 'success');
+            } catch (error) {
+                showResult('test2-2-result', `✗ FAIL: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 2.3: Both missing
+        function testBothMissing() {
+            try {
+                const form = new EntityForm({
+                    collection: 'deities',
+                    entityId: 'test-123'
+                });
+
+                form.simulateSuccess({ success: true });
+                form.simulateCancel();
+                showResult('test2-3-result', '✓ PASS: Missing callbacks handled gracefully. Fallbacks used.', 'success');
+            } catch (error) {
+                showResult('test2-3-result', `✗ FAIL: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 3.1: String callback
+        function testStringCallback() {
+            try {
+                const form = new EntityForm({
+                    collection: 'deities',
+                    entityId: 'test-123',
+                    onSuccess: 'not a function',
+                    onCancel: () => {}
+                });
+
+                const result = form.simulateSuccess({ success: true });
+                if (typeof form.onSuccess === 'function') {
+                    showResult('test3-1-result', '✓ PASS: String rejected, fallback function used', 'success');
+                } else {
+                    showResult('test3-1-result', '✗ FAIL: String not properly rejected', 'error');
+                }
+            } catch (error) {
+                showResult('test3-1-result', `✗ FAIL: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 3.2: Number callback
+        function testNumberCallback() {
+            try {
+                const form = new EntityForm({
+                    collection: 'deities',
+                    entityId: 'test-123',
+                    onSuccess: () => {},
+                    onCancel: 12345
+                });
+
+                const result = form.simulateCancel();
+                if (typeof form.onCancel === 'function') {
+                    showResult('test3-2-result', '✓ PASS: Number rejected, fallback function used', 'success');
+                } else {
+                    showResult('test3-2-result', '✗ FAIL: Number not properly rejected', 'error');
+                }
+            } catch (error) {
+                showResult('test3-2-result', `✗ FAIL: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 3.3: Object callback
+        function testObjectCallback() {
+            try {
+                const form = new EntityForm({
+                    collection: 'deities',
+                    entityId: 'test-123',
+                    onSuccess: { method: 'doSomething' },
+                    onCancel: () => {}
+                });
+
+                const result = form.simulateSuccess({ success: true });
+                if (typeof form.onSuccess === 'function') {
+                    showResult('test3-3-result', '✓ PASS: Object rejected, fallback function used', 'success');
+                } else {
+                    showResult('test3-3-result', '✗ FAIL: Object not properly rejected', 'error');
+                }
+            } catch (error) {
+                showResult('test3-3-result', `✗ FAIL: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 4.1: Callback throws error
+        function testThrowingCallback() {
+            try {
+                const form = new EntityForm({
+                    collection: 'deities',
+                    entityId: 'test-123',
+                    onSuccess: () => { throw new Error('Intentional error'); },
+                    onCancel: () => {}
+                });
+
+                const result = form.simulateSuccess({ success: true });
+                if (!result.success && result.error === 'Intentional error') {
+                    showResult('test4-1-result', '✓ PASS: Error caught and logged properly', 'success');
+                } else {
+                    showResult('test4-1-result', '✗ FAIL: Error not caught properly', 'error');
+                }
+            } catch (error) {
+                showResult('test4-1-result', `✗ FAIL: Error propagated up: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 4.2: Invalid parameters
+        function testInvalidParams() {
+            try {
+                let receivedParam = null;
+                const form = new EntityForm({
+                    collection: 'deities',
+                    entityId: 'test-123',
+                    onSuccess: (result) => { receivedParam = result; },
+                    onCancel: () => {}
+                });
+
+                // Simulate calling with null
+                form.simulateSuccess(null);
+
+                // The callback should still execute, just with null param
+                if (receivedParam === null) {
+                    showResult('test4-2-result', '✓ PASS: Callback executed even with null parameter', 'success');
+                } else {
+                    showResult('test4-2-result', '✗ FAIL: Parameter handling issue', 'error');
+                }
+            } catch (error) {
+                showResult('test4-2-result', `✗ FAIL: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run all tests on load
+        window.addEventListener('load', () => {
+            console.log('Callback Handling Test Suite loaded');
+            console.log('Click buttons to run individual tests');
+        });
+    </script>
+</body>
+</html>

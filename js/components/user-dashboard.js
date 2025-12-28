@@ -21,6 +21,21 @@ class UserDashboard {
     }
 
     /**
+     * Get default avatar SVG
+     * @returns {string} Data URI for default avatar
+     */
+    getDefaultAvatar() {
+        const svg = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="50" fill="#4a5568"/>
+                <circle cx="50" cy="38" r="18" fill="#e2e8f0"/>
+                <ellipse cx="50" cy="78" rx="24" ry="16" fill="#e2e8f0"/>
+            </svg>
+        `;
+        return `data:image/svg+xml,${encodeURIComponent(svg.trim())}`;
+    }
+
+    /**
      * Render the dashboard
      * @returns {Promise<string>} HTML string
      */
@@ -33,11 +48,13 @@ class UserDashboard {
         // Load user's entities from all collections
         await this.loadUserEntities();
 
+        const avatarUrl = user.photoURL || this.getDefaultAvatar();
+
         return `
             <div class="user-dashboard">
                 <div class="dashboard-header">
                     <div class="dashboard-user-info">
-                        <img src="${user.photoURL || 'https://via.placeholder.com/80'}" alt="${user.displayName}" class="dashboard-avatar">
+                        <img src="${avatarUrl}" alt="${user.displayName}" class="dashboard-avatar">
                         <div>
                             <h1>My Contributions</h1>
                             <p class="dashboard-user-name">${user.displayName || user.email}</p>
