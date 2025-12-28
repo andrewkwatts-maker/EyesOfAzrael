@@ -78,7 +78,7 @@ A comprehensive digital encyclopedia connecting ancient wisdom across 12+ world 
 3. Submit theories via the web interface
 4. Help build cross-mythology connections
 
-📝 **[Read the Contributor Guide](./CONTRIBUTOR_GUIDE.md)** for content standards and workflows.
+📝 **[Read the Contributor Guide](./docs/systems/CONTRIBUTOR_GUIDE.md)** for content standards and workflows.
 
 ### For Developers
 
@@ -103,11 +103,14 @@ python -m http.server 8000
 # http://localhost:8000
 ```
 
-💻 **[Read the Developer Onboarding Guide](./DEVELOPER_ONBOARDING.md)** for architecture and technical details.
+💻 **[Read the Developer Onboarding Guide](./docs/systems/DEVELOPER_ONBOARDING.md)** for architecture and technical details.
 
 ---
 
 ## 📚 Documentation
+
+### Complete Documentation Index
+- **[docs/INDEX.md](./docs/INDEX.md)** - Complete documentation index with links to all guides, systems, and references
 
 ### User Documentation
 - **[USER_GUIDE.md](./USER_GUIDE.md)** - Complete guide for site visitors
@@ -123,41 +126,41 @@ python -m http.server 8000
   - Offline capabilities
 
 ### Contributor Documentation
-- **[CONTRIBUTOR_GUIDE.md](./CONTRIBUTOR_GUIDE.md)** - Content contribution guide
+- **[CONTRIBUTOR_GUIDE.md](./docs/systems/CONTRIBUTOR_GUIDE.md)** - Content contribution guide
   - Adding new mythologies
   - Adding deities/items/places
   - Firebase content structure
   - Quality standards
 
 ### Developer Documentation
-- **[DEVELOPER_ONBOARDING.md](./DEVELOPER_ONBOARDING.md)** - Developer quick start
+- **[DEVELOPER_ONBOARDING.md](./docs/systems/DEVELOPER_ONBOARDING.md)** - Developer quick start
   - Architecture overview
   - Key files and their purposes
   - Running locally
   - Building features
 
-- **[API_REFERENCE.md](./API_REFERENCE.md)** - Firebase API documentation
+- **[API_REFERENCE.md](./docs/systems/API_REFERENCE.md)** - Firebase API documentation
   - Authentication API
   - Database operations
   - Storage API
   - Code examples
 
 ### Setup & Deployment
-- **[FIREBASE_SETUP_GUIDE.md](./FIREBASE_SETUP_GUIDE.md)** - Complete Firebase setup
+- **[FIREBASE_SETUP_GUIDE.md](./docs/systems/FIREBASE_SETUP_GUIDE.md)** - Complete Firebase setup
   - Creating a Firebase project
   - Enabling services
   - Deploying security rules
   - Configuration
 
-- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Deployment options
+- **[DEPLOYMENT_GUIDE.md](./docs/systems/DEPLOYMENT_GUIDE.md)** - Deployment options
   - Firebase Hosting
   - GitHub Pages
   - Netlify
   - Custom servers
 
 ### Reference
-- **[METADATA_SEARCH_GUIDE.md](./METADATA_SEARCH_GUIDE.md)** - Advanced search features
-- **[MONITORING_GUIDE.md](./MONITORING_GUIDE.md)** - Usage monitoring and optimization
+- **[METADATA_SEARCH_GUIDE.md](./docs/systems/METADATA_SEARCH_GUIDE.md)** - Advanced search features
+- **[MONITORING_GUIDE.md](./docs/systems/MONITORING_GUIDE.md)** - Usage monitoring and optimization
 - **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migrating from localStorage to Firebase
 
 ---
@@ -397,7 +400,7 @@ npm run add-submission-cards
 - Provide source citations
 - Maintain quality standards
 
-📝 See [CONTRIBUTOR_GUIDE.md](./CONTRIBUTOR_GUIDE.md) for details.
+📝 See [CONTRIBUTOR_GUIDE.md](./docs/systems/CONTRIBUTOR_GUIDE.md) for details.
 
 ### Code Contributions
 
@@ -410,7 +413,7 @@ This is a personal project by Andrew Keith Watts. While the code is visible for 
 - Provide steps to reproduce (bugs)
 - Explain use case (features)
 
-💻 See [DEVELOPER_ONBOARDING.md](./DEVELOPER_ONBOARDING.md) for technical details.
+💻 See [DEVELOPER_ONBOARDING.md](./docs/systems/DEVELOPER_ONBOARDING.md) for technical details.
 
 ---
 
@@ -523,7 +526,7 @@ For licensing inquiries: **AndrewKWatts@Gmail.com**
 
 ### Support
 - **User Questions**: See [USER_GUIDE.md](./USER_GUIDE.md)
-- **Technical Issues**: See [DEVELOPER_ONBOARDING.md](./DEVELOPER_ONBOARDING.md)
+- **Technical Issues**: See [DEVELOPER_ONBOARDING.md](./docs/systems/DEVELOPER_ONBOARDING.md)
 - **Performance**: See [PERFORMANCE_GUIDE.md](./PERFORMANCE_GUIDE.md)
 - **Bug Reports**: Email with details and screenshots
 

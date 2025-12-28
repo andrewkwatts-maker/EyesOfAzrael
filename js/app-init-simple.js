@@ -116,15 +116,31 @@
         setupThemeToggle();
 
         console.log('[App] Initialization complete');
-        
+
         // Emit app-initialized event
         document.dispatchEvent(new CustomEvent('app-initialized'));
 
-        // Hide loading spinner
-        const loadingContainer = document.querySelector('.loading-container');
-        if (loadingContainer) {
-            loadingContainer.style.display = 'none';
-        }
+        // Don't hide loading immediately - wait for content to render
+        // This prevents blank white screen before SPANavigation renders content
+        // const loadingContainer = document.querySelector('.loading-container');
+        // if (loadingContainer) {
+        //     loadingContainer.style.display = 'none';
+        // }
+
+        // Listen for first render complete from SPANavigation
+        document.addEventListener('first-render-complete', () => {
+            console.log('[App Init] First render complete, hiding loading container');
+            const loadingContainer = document.querySelector('.loading-container');
+            if (loadingContainer) {
+                // Smooth fade-out transition
+                loadingContainer.style.opacity = '0';
+                loadingContainer.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => {
+                    loadingContainer.style.display = 'none';
+                    console.log('[App Init] Loading container hidden');
+                }, 300);
+            }
+        }, { once: true }); // Use once to ensure it only fires once
 
     } catch (error) {
         console.error('[App] ❌ Initialization error:', error);
