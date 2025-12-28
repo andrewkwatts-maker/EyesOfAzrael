@@ -153,9 +153,9 @@ class FirebaseEntityRenderer {
         const html = `
             ${this.renderEditIcon(entity)}
 
-            <!-- Deity Header -->
-            <section class="deity-header">
-                <div class="deity-icon">${entity.visual?.icon || entity.icon || this.getDefaultIcon('deity')}</div>
+            <!-- Hero Section with Large Icon -->
+            <section class="hero-section">
+                <div class="hero-icon-display">${entity.visual?.icon || entity.icon || this.getDefaultIcon('deity')}</div>
                 <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
                 ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem;">${this.escapeHtml(entity.description)}</p>` : ''}
@@ -163,50 +163,59 @@ class FirebaseEntityRenderer {
 
             <!-- Attributes & Domains -->
             <section>
-                <h2 style="color: var(--mythos-primary);">Attributes & Domains</h2>
-                <div class="attribute-grid">
+                <h2 style="color: var(--color-primary);">
+                    <a data-mythos="${this.mythology}" data-smart href="#attributes">Attributes</a> &amp; Domains
+                </h2>
+                <div class="attribute-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
                     ${this.renderDeityAttributes(entity)}
                 </div>
             </section>
 
             <!-- Mythology & Stories -->
             ${entity.mythsAndLegends?.length ? `
-            <section>
-                <h2 style="color: var(--mythos-primary);">Mythology & Stories</h2>
-                <div class="glass-card">
+            <section style="margin-top: 2rem;">
+                <h2 style="color: var(--color-primary);">
+                    <a data-mythos="${this.mythology}" data-smart href="#mythology">Mythology</a> &amp; Stories
+                </h2>
+                <p>${this.escapeHtml(entity.name || 'This entity')}'s mythology spans numerous tales and legends. These stories reveal the nature of divine power, wisdom, and the relationship between the divine and humanity.</p>
+                <h3 style="color: var(--color-text-primary); margin-top: 1.5rem;">Key Myths:</h3>
+                <ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
                     ${entity.mythsAndLegends.map(myth => `
-                        <div class="subsection-card accent-border-left" style="margin-bottom: 1rem;">
-                            <h4 style="color: var(--mythos-secondary);">${this.escapeHtml(myth.title || myth.name)}</h4>
-                            <p>${this.escapeHtml(myth.description || myth.summary)}</p>
-                        </div>
+                        <li>
+                            <strong>${this.escapeHtml(myth.title || myth.name)}:</strong> ${this.escapeHtml(myth.description || myth.summary)}
+                            ${myth.source ? `<div class="citation" style="margin-top: 0.5rem;"><em>Source: ${this.escapeHtml(myth.source)}</em></div>` : ''}
+                        </li>
                     `).join('')}
-                </div>
+                </ul>
             </section>
             ` : ''}
 
             <!-- Family Relationships -->
             ${entity.family ? `
-            <section>
-                <h2 style="color: var(--mythos-primary);">Family & Relationships</h2>
-                <div class="glass-card">
+            <section style="margin-top: 2rem;">
+                <h2 style="color: var(--color-primary);">
+                    <a data-mythos="${this.mythology}" data-smart href="#relationships">Relationships</a>
+                </h2>
+                <h3 style="color: var(--color-text-primary);">Family</h3>
+                <ul style="margin: 0.5rem 0 0 2rem;">
                     ${this.renderFamilyRelationships(entity.family)}
-                </div>
+                </ul>
             </section>
             ` : ''}
 
             <!-- Worship & Sacred Sites -->
             ${entity.worship || entity.cultCenters ? `
-            <section>
-                <h2 style="color: var(--mythos-primary);">Worship & Sacred Sites</h2>
-                <div class="glass-card">
-                    ${entity.worship ? `<p>${this.escapeHtml(entity.worship)}</p>` : ''}
-                    ${entity.cultCenters?.length ? `
-                        <h4 style="color: var(--mythos-secondary); margin-top: 1rem;">Sacred Sites</h4>
-                        <ul>
-                            ${entity.cultCenters.map(site => `<li>${this.escapeHtml(site)}</li>`).join('')}
-                        </ul>
-                    ` : ''}
-                </div>
+            <section style="margin-top: 2rem;">
+                <h2 style="color: var(--color-primary);">
+                    <a data-mythos="${this.mythology}" data-smart href="#worship">Worship</a> &amp; Rituals
+                </h2>
+                <h3 style="color: var(--color-text-primary);">Sacred Sites</h3>
+                ${entity.worship ? `<p>${this.escapeHtml(entity.worship)}</p>` : ''}
+                ${entity.cultCenters?.length ? `
+                    <ul style="margin: 0.5rem 0 0 2rem;">
+                        ${entity.cultCenters.map(site => `<li>${this.escapeHtml(site)}</li>`).join('')}
+                    </ul>
+                ` : ''}
             </section>
             ` : ''}
 
@@ -227,14 +236,14 @@ class FirebaseEntityRenderer {
             </section>
             ` : ''}
 
+            <!-- Sacred Texts / Primary Sources -->
+            ${entity.texts?.length || entity.sources?.length ? this.renderSacredTexts(entity) : ''}
+
             <!-- Sources -->
-            ${entity.sources?.length ? `
+            ${entity.sources?.length && !entity.texts?.length ? `
             <section>
-                <h3 style="color: var(--mythos-secondary);">Sources & References</h3>
-                <div class="glass-card">
-                    <ul>
-                        ${entity.sources.map(source => `<li>${this.escapeHtml(source)}</li>`).join('')}
-                    </ul>
+                <div class="citation" style="margin-top: 1rem;">
+                    <strong>Sources:</strong> ${entity.sources.map(source => this.escapeHtml(source)).join(', ')}
                 </div>
             </section>
             ` : ''}
@@ -252,7 +261,7 @@ class FirebaseEntityRenderer {
         // Titles
         if (entity.titles?.length || entity.epithets?.length) {
             attributes.push(`
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Titles</div>
                     <div class="attribute-value">${(entity.titles || entity.epithets || []).join(', ')}</div>
                 </div>
@@ -262,7 +271,7 @@ class FirebaseEntityRenderer {
         // Domains
         if (entity.domains?.length) {
             attributes.push(`
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Domains</div>
                     <div class="attribute-value">${entity.domains.join(', ')}</div>
                 </div>
@@ -272,7 +281,7 @@ class FirebaseEntityRenderer {
         // Symbols
         if (entity.symbols?.length) {
             attributes.push(`
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Symbols</div>
                     <div class="attribute-value">${entity.symbols.join(', ')}</div>
                 </div>
@@ -282,7 +291,7 @@ class FirebaseEntityRenderer {
         // Sacred Animals
         if (entity.sacredAnimals?.length) {
             attributes.push(`
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Sacred Animals</div>
                     <div class="attribute-value">${entity.sacredAnimals.join(', ')}</div>
                 </div>
@@ -292,7 +301,7 @@ class FirebaseEntityRenderer {
         // Sacred Plants
         if (entity.sacredPlants?.length) {
             attributes.push(`
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Sacred Plants</div>
                     <div class="attribute-value">${entity.sacredPlants.join(', ')}</div>
                 </div>
@@ -302,14 +311,14 @@ class FirebaseEntityRenderer {
         // Sacred Places
         if (entity.sacredPlaces?.length) {
             attributes.push(`
-                <div class="attribute-card">
+                <div class="subsection-card">
                     <div class="attribute-label">Sacred Places</div>
                     <div class="attribute-value">${entity.sacredPlaces.join(', ')}</div>
                 </div>
             `);
         }
 
-        return attributes.join('');
+        return attributes.length > 0 ? attributes.join('') : '<p style="color: var(--color-text-secondary);">No attributes recorded yet.</p>';
     }
 
     /**
@@ -320,43 +329,81 @@ class FirebaseEntityRenderer {
 
         if (family.parents?.length) {
             sections.push(`
-                <div class="subsection-card">
-                    <div class="subsection-title">Parents</div>
-                    <p>${family.parents.join(', ')}</p>
-                </div>
+                <li><strong>Parents:</strong> ${family.parents.join(', ')}</li>
             `);
         }
 
         if (family.consorts?.length || family.spouses?.length) {
             const consorts = family.consorts || family.spouses || [];
             sections.push(`
-                <div class="subsection-card">
-                    <div class="subsection-title">Consorts</div>
-                    <p>${consorts.join(', ')}</p>
-                </div>
+                <li><strong>Consort(s):</strong> ${consorts.join(', ')}</li>
             `);
         }
 
         if (family.children?.length || family.offspring?.length) {
             const children = family.children || family.offspring || [];
             sections.push(`
-                <div class="subsection-card">
-                    <div class="subsection-title">Children</div>
-                    <p>${children.join(', ')}</p>
-                </div>
+                <li><strong>Children:</strong> ${children.join(', ')}</li>
             `);
         }
 
         if (family.siblings?.length) {
             sections.push(`
-                <div class="subsection-card">
-                    <div class="subsection-title">Siblings</div>
-                    <p>${family.siblings.join(', ')}</p>
-                </div>
+                <li><strong>Siblings:</strong> ${family.siblings.join(', ')}</li>
             `);
         }
 
         return sections.join('');
+    }
+
+    /**
+     * Render sacred texts section with collapsible verses (like mushussu.html)
+     */
+    renderSacredTexts(entity) {
+        const texts = entity.texts || [];
+
+        if (!texts.length && !entity.sources?.length) {
+            return '';
+        }
+
+        return `
+            <div class="codex-search-section">
+                <div class="codex-search-header" onclick="toggleCodexSearch(this)">
+                    <h3>📚 Primary Sources: ${this.escapeHtml(entity.name)}</h3>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="codex-search-content">
+                    ${texts.map(text => `
+                        <div class="search-result-item">
+                            <div class="citation" onclick="toggleVerse(this)">
+                                ${this.escapeHtml(text.source)}${text.section ? `:${this.escapeHtml(text.section)}` : ''}${text.lines ? `:Lines ${this.escapeHtml(text.lines)}` : ''}
+                            </div>
+                            <div class="verse-text">
+                                ${this.escapeHtml(text.text || text.content || text.verse)}
+                            </div>
+                            ${text.reference ? `
+                                <div class="book-reference">
+                                    Source: ${this.escapeHtml(text.reference)}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            <script>
+                function toggleCodexSearch(header) {
+                    const section = header.parentElement;
+                    const content = section.querySelector('.codex-search-content');
+                    section.classList.toggle('expanded');
+                    content.classList.toggle('show');
+                }
+
+                function toggleVerse(citation) {
+                    const verseText = citation.nextElementSibling;
+                    verseText.classList.toggle('show');
+                }
+            </script>
+        `;
     }
 
     /**
@@ -682,7 +729,87 @@ class FirebaseEntityRenderer {
      * Render creature entity
      */
     renderCreature(entity, container) {
-        this.renderGenericEntity(entity, container);
+        // Make container position relative for edit icon
+        container.style.position = 'relative';
+
+        const html = `
+            ${this.renderEditIcon(entity)}
+
+            <!-- Hero Section with Large Icon -->
+            <section class="hero-section">
+                <div class="hero-icon-display">${entity.visual?.icon || entity.icon || this.getDefaultIcon('creature')}</div>
+                <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
+                ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
+                ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem;">${this.escapeHtml(entity.description)}</p>` : ''}
+            </section>
+
+            <!-- Attributes -->
+            ${entity.attributes || entity.characteristics ? `
+            <section>
+                <h2 style="color: var(--color-primary);">
+                    <a data-mythos="${this.mythology}" data-smart href="#attributes">Attributes</a>
+                </h2>
+                <div class="attribute-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    ${this.renderCreatureAttributes(entity)}
+                </div>
+            </section>
+            ` : ''}
+
+            <!-- Content (Markdown) -->
+            ${entity.content ? `
+            <section style="margin-top: 2rem;">
+                <div class="glass-card">
+                    ${this.renderMarkdown(entity.content)}
+                </div>
+            </section>
+            ` : ''}
+
+            <!-- Sacred Texts / Primary Sources -->
+            ${entity.texts?.length ? this.renderSacredTexts(entity) : ''}
+
+            <!-- Related Entities -->
+            ${entity.relatedEntities?.length ? `
+            <section style="margin-top: 2rem;">
+                <h2 style="color: var(--color-primary);">Related Entities</h2>
+                ${this.renderRelatedEntities(entity.relatedEntities, 'relatedEntities', entity.displayOptions)}
+            </section>
+            ` : ''}
+        `;
+
+        container.innerHTML = html;
+    }
+
+    /**
+     * Render creature-specific attributes
+     */
+    renderCreatureAttributes(entity) {
+        const attributes = [];
+        const data = entity.attributes || entity.characteristics || {};
+
+        // Handle both object and array formats
+        if (Array.isArray(data)) {
+            data.forEach(attr => {
+                attributes.push(`
+                    <div class="subsection-card">
+                        <div class="attribute-label">${this.escapeHtml(attr.label || attr.name)}</div>
+                        <div class="attribute-value">${this.escapeHtml(attr.value || attr.description)}</div>
+                    </div>
+                `);
+            });
+        } else {
+            // Object format
+            Object.entries(data).forEach(([key, value]) => {
+                const displayValue = Array.isArray(value) ? value.join(', ') : value;
+                attributes.push(`
+                    <div class="subsection-card">
+                        <div class="attribute-label">${this.capitalize(key.replace(/_/g, ' '))}</div>
+                        <div class="attribute-value">${this.escapeHtml(displayValue)}</div>
+                    </div>
+                `);
+            });
+        }
+
+        return attributes.length > 0 ? attributes.join('') : '<p style="color: var(--color-text-secondary);">No attributes recorded yet.</p>';
     }
 
     /**
@@ -695,15 +822,16 @@ class FirebaseEntityRenderer {
         const html = `
             ${this.renderEditIcon(entity)}
 
-            <section class="entity-header">
-                <div class="entity-icon">${entity.visual?.icon || entity.icon || this.getDefaultIcon(entity.type)}</div>
+            <!-- Hero Section with Large Icon -->
+            <section class="hero-section">
+                <div class="hero-icon-display">${entity.visual?.icon || entity.icon || this.getDefaultIcon(entity.type)}</div>
                 <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
-                ${entity.subtitle ? `<p class="subtitle">${this.escapeHtml(entity.subtitle)}</p>` : ''}
-                ${entity.description ? `<p>${this.escapeHtml(entity.description)}</p>` : ''}
+                ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
+                ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem;">${this.escapeHtml(entity.description)}</p>` : ''}
             </section>
 
             ${entity.content ? `
-            <section class="glass-card">
+            <section class="glass-card" style="margin-top: 2rem;">
                 ${this.renderMarkdown(entity.content)}
             </section>
             ` : ''}

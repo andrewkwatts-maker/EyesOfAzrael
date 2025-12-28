@@ -1,0 +1,526 @@
+/**
+ * Cosmology Diagrams Styling
+ * Modern, responsive styling for mythological cosmology visualizations
+ */
+
+/* Container Styling */
+.cosmology-diagram-container {
+    width: 100%;
+    min-height: 600px;
+    background: linear-gradient(135deg,
+        rgba(var(--color-bg-rgb), 0.95) 0%,
+        rgba(var(--color-bg-secondary-rgb), 0.98) 100%);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--color-primary);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    position: relative;
+    margin: 2rem 0;
+}
+
+/* Header */
+.diagram-header {
+    padding: 1.5rem 2rem;
+    background: rgba(var(--color-primary-rgb), 0.1);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.diagram-header h2 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    color: var(--color-primary);
+    margin: 0 0 0.5rem 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.diagram-header p {
+    color: var(--color-text-secondary);
+    margin: 0;
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+/* Content Area */
+.diagram-content {
+    padding: 2rem;
+    position: relative;
+    min-height: 500px;
+}
+
+/* SVG Styling */
+.cosmology-svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.cosmology-svg .diagram-group {
+    transition: transform 0.3s ease;
+}
+
+/* Node Styling */
+.cosmology-svg .node circle {
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.cosmology-svg .node:hover circle {
+    filter: drop-shadow(0 8px 16px rgba(var(--color-accent-rgb), 0.5));
+}
+
+.cosmology-svg .node text {
+    pointer-events: none;
+    user-select: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3),
+                 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* Link Styling */
+.cosmology-svg .links path {
+    transition: stroke-opacity 0.3s ease, stroke-width 0.3s ease;
+}
+
+.cosmology-svg .links path:hover {
+    stroke-opacity: 1 !important;
+    stroke-width: 3px !important;
+}
+
+/* Realm Styling */
+.cosmology-svg .realm circle {
+    transition: all 0.3s ease;
+}
+
+.cosmology-svg .realm:hover circle {
+    opacity: 0.9 !important;
+    filter: drop-shadow(0 0 20px currentColor);
+}
+
+.cosmology-svg .realm text {
+    pointer-events: none;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Hour Markers (for journey maps) */
+.cosmology-svg .hour {
+    transition: all 0.3s ease;
+}
+
+.cosmology-svg .hour:hover circle {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 15px rgba(243, 156, 18, 0.8));
+}
+
+/* Layer Styling */
+.cosmology-svg .layer-interactive rect {
+    transition: opacity 0.3s ease;
+}
+
+.cosmology-svg .layer-interactive:hover rect {
+    opacity: 0.5 !important;
+}
+
+/* Legend */
+.diagram-legend {
+    padding: 1rem 2rem;
+    background: rgba(var(--color-bg-secondary-rgb), 0.6);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.legend-entry {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--color-border);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.legend-label {
+    color: var(--color-text-primary);
+    font-weight: 500;
+}
+
+/* Controls */
+.diagram-controls {
+    padding: 1rem 2rem;
+    background: rgba(var(--color-bg-secondary-rgb), 0.4);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-control {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg,
+        var(--color-primary) 0%,
+        var(--color-secondary) 100%);
+    color: var(--color-text-on-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-control:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+}
+
+.btn-control:active {
+    transform: translateY(0);
+}
+
+/* Modal */
+.cosmology-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: modalFadeIn 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.cosmology-modal-content {
+    background: linear-gradient(135deg,
+        rgba(var(--color-bg-rgb), 0.98) 0%,
+        rgba(var(--color-bg-secondary-rgb), 0.98) 100%);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.cosmology-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(var(--color-bg-secondary-rgb), 0.6);
+}
+
+.cosmology-modal-close:hover {
+    color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.2);
+    transform: rotate(90deg);
+}
+
+.cosmology-modal-content h2 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--color-primary);
+    margin: 0 0 1rem 0;
+    padding-right: 3rem;
+}
+
+.cosmology-modal-content .meaning {
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+
+.cosmology-modal-content p {
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.cosmology-modal-content p strong {
+    color: var(--color-primary);
+}
+
+/* Loading State */
+.loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    font-size: 1.2rem;
+    color: var(--color-text-secondary);
+}
+
+.loading-spinner::before {
+    content: '';
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Error Message */
+.error-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    font-size: 1.1rem;
+    color: var(--color-error, #e74c3c);
+    text-align: center;
+    padding: 2rem;
+}
+
+/* Fullscreen Mode */
+.cosmology-diagram-container:fullscreen {
+    display: flex;
+    flex-direction: column;
+}
+
+.cosmology-diagram-container:fullscreen .diagram-content {
+    flex: 1;
+    padding: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .cosmology-diagram-container {
+        margin: 1rem 0;
+    }
+
+    .diagram-header {
+        padding: 1rem;
+    }
+
+    .diagram-header h2 {
+        font-size: 1.4rem;
+    }
+
+    .diagram-content {
+        padding: 1rem;
+    }
+
+    .diagram-legend {
+        padding: 0.75rem 1rem;
+    }
+
+    .diagram-controls {
+        padding: 0.75rem 1rem;
+        justify-content: center;
+    }
+
+    .btn-control {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .cosmology-modal-content {
+        padding: 1.5rem;
+        width: 95%;
+    }
+
+    .cosmology-modal-content h2 {
+        font-size: 1.5rem;
+    }
+
+    /* Adjust node sizes for mobile */
+    .cosmology-svg .node circle {
+        r: 25px !important;
+    }
+
+    .cosmology-svg .node text {
+        font-size: 10px !important;
+    }
+}
+
+/* Touch Device Enhancements */
+@media (hover: none) and (pointer: coarse) {
+    .cosmology-svg .node circle,
+    .cosmology-svg .realm circle,
+    .cosmology-svg .hour circle {
+        filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+    }
+
+    /* Larger hit areas for touch */
+    .cosmology-svg .node,
+    .cosmology-svg .realm,
+    .cosmology-svg .hour {
+        cursor: pointer;
+    }
+
+    .btn-control {
+        min-height: 44px; /* iOS recommended touch target size */
+        min-width: 44px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .cosmology-diagram-container {
+        border: 1px solid #000;
+        box-shadow: none;
+        page-break-inside: avoid;
+    }
+
+    .diagram-controls,
+    .btn-control {
+        display: none;
+    }
+
+    .cosmology-svg {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+/* Dark Mode Specific Adjustments */
+@media (prefers-color-scheme: dark) {
+    .cosmology-svg .node text,
+    .cosmology-svg .realm text {
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8),
+                     0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .legend-color {
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+}
+
+/* Accessibility */
+.cosmology-svg .node:focus,
+.cosmology-svg .realm:focus,
+.cosmology-svg .hour:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+}
+
+/* Animations for Interactive Elements */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.cosmology-svg .node.highlighted circle,
+.cosmology-svg .realm.highlighted circle {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Connection Animation */
+.cosmology-svg .connection-animated {
+    stroke-dasharray: 10;
+    animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: -20;
+    }
+}
+
+/* Tooltip Enhancement */
+.cosmology-svg title {
+    pointer-events: none;
+}
+
+/* Custom Scrollbar for Modal */
+.cosmology-modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.cosmology-modal-content::-webkit-scrollbar-track {
+    background: rgba(var(--color-bg-secondary-rgb), 0.5);
+    border-radius: 4px;
+}
+
+.cosmology-modal-content::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 4px;
+}
+
+.cosmology-modal-content::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent);
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .cosmology-diagram-container {
+        border-width: 3px;
+    }
+
+    .cosmology-svg .node circle,
+    .cosmology-svg .realm circle {
+        stroke-width: 4px;
+    }
+
+    .btn-control {
+        border: 2px solid var(--color-text-on-primary);
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .cosmology-svg .diagram-group,
+    .cosmology-svg .node circle,
+    .cosmology-svg .links path,
+    .btn-control,
+    .cosmology-modal,
+    .cosmology-modal-content,
+    .cosmology-modal-close {
+        transition: none;
+        animation: none;
+    }
+}

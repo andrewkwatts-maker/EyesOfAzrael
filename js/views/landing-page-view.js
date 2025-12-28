@@ -148,64 +148,64 @@ class LandingPageView {
         return `
             <div class="landing-page-view">
                 <!-- Hero Section -->
-                <section class="hero-section">
-                    <div class="hero-content">
-                        <h1 class="hero-title">
-                            <span class="hero-icon">👁️</span>
-                            Eyes of Azrael
-                        </h1>
-                        <p class="hero-subtitle">
-                            Explore the myths, legends, and sacred traditions of humanity
-                        </p>
-                        <p class="hero-description">
-                            Journey through 6000+ years of mythology, from ancient Sumer to modern traditions.
-                            Discover deities, heroes, creatures, sacred texts, and mystical practices from cultures across the globe.
-                        </p>
-                        <div class="hero-actions">
-                            <a href="#/mythologies" class="btn-primary">
-                                🏛️ Explore Mythologies
-                            </a>
-                            <a href="#/search" class="btn-secondary">
-                                🔍 Browse All Content
-                            </a>
-                        </div>
+                <section class="landing-hero-section">
+                    <div class="hero-icon-display">👁️</div>
+                    <h1 class="landing-hero-title">Eyes of Azrael</h1>
+                    <p class="landing-hero-subtitle">
+                        Explore the myths, legends, and sacred traditions of humanity
+                    </p>
+                    <p class="landing-hero-description">
+                        Journey through 6000+ years of mythology, from ancient Sumer to modern traditions.
+                        Discover deities, heroes, creatures, sacred texts, and mystical practices from cultures across the globe.
+                    </p>
+                    <div class="landing-hero-actions">
+                        <a href="#/mythologies" class="landing-btn landing-btn-primary">
+                            🏛️ Explore Mythologies
+                        </a>
+                        <a href="#/search" class="landing-btn landing-btn-secondary">
+                            🔍 Browse All Content
+                        </a>
                     </div>
                 </section>
 
                 <!-- Asset Type Grid -->
-                <section class="asset-types-section">
-                    <h2 class="section-title">
-                        🗂️ World Mythologies
+                <section class="landing-categories-section">
+                    <h2 class="landing-section-header">
+                        <span class="landing-section-icon">🗂️</span>
+                        Explore by Category
                     </h2>
-                    <p class="section-subtitle">
-                        Explore gods, heroes, and legends from cultures around the world
+                    <p class="landing-section-subtitle">
+                        Browse our comprehensive collection of mythological content
                     </p>
-                    <div class="asset-type-grid">
+                    <div class="landing-category-grid">
                         ${this.assetTypes.map(type => this.getAssetTypeCardHTML(type)).join('')}
                     </div>
                 </section>
 
                 <!-- Features Section -->
-                <section class="features-section">
-                    <h2 class="section-title">Database Features</h2>
-                    <div class="features-grid">
-                        <div class="feature-card">
-                            <div class="feature-icon">📚</div>
+                <section class="landing-features-section">
+                    <h2 class="landing-section-header">
+                        <span class="landing-section-icon">✨</span>
+                        Database Features
+                    </h2>
+                    <div class="landing-features-grid">
+                        <div class="landing-feature-card">
+                            <div class="landing-feature-icon">📚</div>
                             <h3>Comprehensive Database</h3>
                             <p>Thousands of entities across 22+ mythological traditions</p>
                         </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">🔗</div>
+                        <div class="landing-feature-card">
+                            <div class="landing-feature-icon">🔗</div>
                             <h3>Cross-Cultural Links</h3>
                             <p>Discover connections between different traditions</p>
                         </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">🔍</div>
+                        <div class="landing-feature-card">
+                            <div class="landing-feature-icon">🔍</div>
                             <h3>Advanced Search</h3>
                             <p>Find entities by name, type, mythology, or attributes</p>
                         </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">⚖️</div>
+                        <div class="landing-feature-card">
+                            <div class="landing-feature-icon">⚖️</div>
                             <h3>Compare Traditions</h3>
                             <p>Side-by-side comparison of entities and concepts</p>
                         </div>
@@ -214,94 +214,180 @@ class LandingPageView {
             </div>
 
             <style>
+                /* ===== LANDING PAGE STYLES ===== */
+                /* Using modern design matching historic HTML files (zeus.html) */
+
                 .landing-page-view {
                     max-width: 1400px;
                     margin: 0 auto;
-                    padding: 0 2rem 4rem;
+                    padding: 0 var(--spacing-md, 1rem) var(--spacing-4xl, 4rem);
                 }
 
-                .hero-section {
+                /* === Hero Section === */
+                .landing-hero-section {
+                    background: linear-gradient(135deg,
+                        rgba(var(--color-primary-rgb, 139, 127, 255), 0.2),
+                        rgba(var(--color-secondary-rgb, 255, 126, 182), 0.2));
+                    border: 2px solid var(--color-primary, #8b7fff);
+                    border-radius: var(--radius-2xl, 1.5rem);
+                    padding: var(--spacing-4xl, 4rem) var(--spacing-xl, 2rem);
                     text-align: center;
-                    padding: 4rem 2rem;
-                    margin-bottom: 3rem;
+                    margin-bottom: var(--spacing-4xl, 4rem);
+                    position: relative;
+                    overflow: hidden;
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
                 }
 
-                .hero-title {
-                    font-size: 3.5rem;
+                .hero-icon-display {
+                    font-size: 4.5rem;
+                    margin-bottom: var(--spacing-md, 1rem);
+                    filter: drop-shadow(0 4px 8px rgba(var(--color-primary-rgb, 139, 127, 255), 0.5));
+                    animation: float 3s ease-in-out infinite;
+                }
+
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px); }
+                    50% { transform: translateY(-10px); }
+                }
+
+                .landing-hero-title {
+                    font-family: var(--font-heading, Georgia, serif);
+                    font-size: clamp(2.5rem, 5vw, 3.5rem);
                     font-weight: 700;
-                    margin-bottom: 1rem;
-                    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+                    margin-bottom: var(--spacing-md, 1rem);
+                    background: linear-gradient(135deg, var(--color-primary, #8b7fff) 0%, var(--color-secondary, #fbbf24) 100%);
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                     background-clip: text;
+                    text-shadow: 0 0 10px rgba(var(--color-primary-rgb, 139, 127, 255), 0.5),
+                                 0 0 20px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3),
+                                 0 2px 4px rgba(0, 0, 0, 0.5);
+                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
                 }
 
-                .hero-icon {
-                    font-size: 4rem;
-                    display: block;
-                    margin-bottom: 0.5rem;
+                .landing-hero-subtitle {
+                    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+                    color: var(--color-text-primary, #e5e7eb);
+                    margin-bottom: var(--spacing-lg, 1.5rem);
+                    font-weight: 500;
+                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
                 }
 
-                .hero-subtitle {
-                    font-size: 1.5rem;
-                    color: var(--color-text-primary);
-                    margin-bottom: 1rem;
-                }
-
-                .hero-description {
-                    font-size: 1.1rem;
-                    color: var(--color-text-secondary);
+                .landing-hero-description {
+                    font-size: clamp(1rem, 1.5vw, 1.125rem);
+                    color: var(--color-text-secondary, #9ca3af);
                     max-width: 800px;
-                    margin: 0 auto 2rem;
-                    line-height: 1.8;
+                    margin: 0 auto var(--spacing-xl, 2rem);
+                    line-height: var(--leading-relaxed, 1.75);
                 }
 
-                .hero-actions {
+                .landing-hero-actions {
                     display: flex;
-                    gap: 1rem;
+                    gap: var(--spacing-md, 1rem);
                     justify-content: center;
+                    flex-wrap: wrap;
+                    margin-top: var(--spacing-xl, 2rem);
+                }
+
+                .landing-btn {
+                    font-family: var(--font-primary, sans-serif);
+                    font-weight: var(--font-semibold, 600);
+                    padding: var(--spacing-md, 1rem) var(--spacing-xl, 2rem);
+                    border-radius: var(--radius-lg, 0.75rem);
+                    border: none;
+                    cursor: pointer;
+                    transition: all var(--transition-base, 0.3s ease);
+                    font-size: var(--font-size-base, 1rem);
+                    text-decoration: none;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: var(--spacing-sm, 0.5rem);
+                    min-height: 44px;
+                    min-width: 44px;
+                }
+
+                .landing-btn-primary {
+                    background: linear-gradient(135deg, var(--color-primary, #8b7fff), var(--color-secondary, #fbbf24));
+                    color: white;
+                    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+                }
+
+                .landing-btn-primary:hover {
+                    box-shadow: 0 8px 24px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4),
+                                0 0 20px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+                    transform: translateY(-2px);
+                }
+
+                .landing-btn-secondary {
+                    background: transparent;
+                    border: 2px solid var(--color-primary, #8b7fff);
+                    color: var(--color-primary, #8b7fff);
+                }
+
+                .landing-btn-secondary:hover {
+                    background: var(--color-primary, #8b7fff);
+                    color: white;
+                    box-shadow: 0 8px 24px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+                    transform: translateY(-2px);
+                }
+
+                /* === Categories Section === */
+                .landing-categories-section {
+                    margin-bottom: var(--spacing-5xl, 5rem);
+                }
+
+                .landing-section-header {
+                    font-size: clamp(1.75rem, 3vw, 2.25rem);
+                    text-align: center;
+                    margin-bottom: var(--spacing-md, 1rem);
+                    color: var(--color-primary, #8b7fff);
+                    font-weight: var(--font-semibold, 600);
+                    text-shadow: 0 0 8px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: var(--spacing-md, 1rem);
                     flex-wrap: wrap;
                 }
 
-                .asset-types-section {
-                    margin-bottom: 4rem;
+                .landing-section-icon {
+                    font-size: 1.5em;
+                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
                 }
 
-                .section-title {
-                    font-size: 2rem;
+                .landing-section-subtitle {
                     text-align: center;
-                    margin-bottom: 0.5rem;
-                    color: var(--color-text-primary);
+                    color: var(--color-text-secondary, #9ca3af);
+                    margin-bottom: var(--spacing-xl, 2rem);
+                    font-size: clamp(1rem, 1.5vw, 1.125rem);
                 }
 
-                .section-subtitle {
-                    text-align: center;
-                    color: var(--color-text-secondary);
-                    margin-bottom: 2rem;
-                    font-size: 1.1rem;
-                }
-
-                .asset-type-grid {
+                .landing-category-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                    gap: 1.5rem;
-                    margin-bottom: 3rem;
+                    gap: var(--spacing-lg, 1.5rem);
                 }
 
-                .asset-type-card {
-                    background: rgba(var(--color-bg-card-rgb), 0.6);
-                    border: 1px solid rgba(var(--color-border-primary-rgb), 0.3);
-                    border-radius: 16px;
-                    padding: 2rem;
+                .landing-category-card {
+                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+                    backdrop-filter: blur(10px);
+                    border: 2px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.5);
+                    border-radius: var(--radius-xl, 1rem);
+                    padding: var(--spacing-xl, 2rem);
                     text-decoration: none;
                     color: inherit;
-                    transition: all 0.3s ease;
+                    transition: all var(--transition-base, 0.3s ease);
                     cursor: pointer;
                     position: relative;
                     overflow: hidden;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    min-height: 180px;
+                    display: flex;
+                    flex-direction: column;
                 }
 
-                .asset-type-card::before {
+                .landing-category-card::before {
                     content: '';
                     position: absolute;
                     top: 0;
@@ -310,78 +396,177 @@ class LandingPageView {
                     height: 4px;
                     background: var(--card-color);
                     transform: scaleX(0);
-                    transition: transform 0.3s ease;
+                    transition: transform var(--transition-base, 0.3s ease);
                 }
 
-                .asset-type-card:hover {
-                    transform: translateY(-4px);
+                .landing-category-card:hover {
+                    transform: translateY(-8px);
                     border-color: var(--card-color);
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+                    box-shadow: 0 12px 40px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
                 }
 
-                .asset-type-card:hover::before {
+                .landing-category-card:hover::before {
                     transform: scaleX(1);
                 }
 
-                .asset-type-icon {
-                    font-size: 3rem;
-                    margin-bottom: 1rem;
+                .landing-category-icon {
+                    font-size: clamp(3rem, 5vw, 3.5rem);
+                    margin-bottom: var(--spacing-md, 1rem);
                     display: block;
+                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+                    transition: transform var(--transition-base, 0.3s ease);
                 }
 
-                .asset-type-name {
-                    font-size: 1.3rem;
-                    font-weight: 600;
-                    margin-bottom: 0.5rem;
-                    color: var(--color-text-primary);
+                .landing-category-card:hover .landing-category-icon {
+                    transform: scale(1.1);
                 }
 
-                .asset-type-description {
-                    font-size: 0.95rem;
-                    color: var(--color-text-secondary);
-                    line-height: 1.6;
+                .landing-category-name {
+                    font-size: clamp(1.25rem, 2vw, 1.4rem);
+                    font-weight: var(--font-semibold, 600);
+                    margin-bottom: var(--spacing-sm, 0.5rem);
+                    color: var(--color-text-primary, #e5e7eb);
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
                 }
 
-                .features-section {
-                    margin-top: 4rem;
+                .landing-category-description {
+                    font-size: clamp(0.875rem, 1.25vw, 0.95rem);
+                    color: var(--color-text-secondary, #9ca3af);
+                    line-height: var(--leading-normal, 1.6);
+                    flex-grow: 1;
                 }
 
-                .features-grid {
+                /* === Features Section === */
+                .landing-features-section {
+                    margin-top: var(--spacing-5xl, 5rem);
+                    padding: var(--spacing-3xl, 3rem) 0;
+                }
+
+                .landing-features-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                    gap: 2rem;
-                    margin-top: 2rem;
+                    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                    gap: var(--spacing-xl, 2rem);
+                    margin-top: var(--spacing-xl, 2rem);
                 }
 
-                .feature-card {
+                .landing-feature-card {
                     text-align: center;
-                    padding: 2rem;
+                    padding: var(--spacing-xl, 2rem);
+                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.4);
+                    border-radius: var(--radius-xl, 1rem);
+                    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.3);
+                    transition: all var(--transition-base, 0.3s ease);
                 }
 
-                .feature-icon {
-                    font-size: 3rem;
-                    margin-bottom: 1rem;
+                .landing-feature-card:hover {
+                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+                    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.5);
+                    transform: translateY(-4px);
                 }
 
-                .feature-card h3 {
-                    font-size: 1.2rem;
-                    margin-bottom: 0.5rem;
-                    color: var(--color-text-primary);
+                .landing-feature-icon {
+                    font-size: clamp(2.5rem, 4vw, 3rem);
+                    margin-bottom: var(--spacing-md, 1rem);
+                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
                 }
 
-                .feature-card p {
-                    color: var(--color-text-secondary);
-                    font-size: 0.95rem;
+                .landing-feature-card h3 {
+                    font-size: clamp(1.125rem, 1.75vw, 1.25rem);
+                    margin-bottom: var(--spacing-sm, 0.5rem);
+                    color: var(--color-text-primary, #e5e7eb);
+                    font-weight: var(--font-semibold, 600);
                 }
 
-                @media (max-width: 768px) {
-                    .hero-title {
-                        font-size: 2.5rem;
+                .landing-feature-card p {
+                    color: var(--color-text-secondary, #9ca3af);
+                    font-size: clamp(0.875rem, 1.25vw, 0.95rem);
+                    line-height: var(--leading-normal, 1.6);
+                }
+
+                /* === Responsive Design === */
+
+                /* Mobile (320px - 767px) */
+                @media (max-width: 767px) {
+                    .landing-page-view {
+                        padding: 0 var(--spacing-sm, 0.5rem) var(--spacing-xl, 2rem);
                     }
 
-                    .asset-type-grid {
-                        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-                        gap: 1rem;
+                    .landing-hero-section {
+                        padding: var(--spacing-2xl, 2.5rem) var(--spacing-md, 1rem);
+                        margin-bottom: var(--spacing-xl, 2rem);
+                    }
+
+                    .landing-category-grid {
+                        grid-template-columns: 1fr;
+                        gap: var(--spacing-md, 1rem);
+                    }
+
+                    .landing-features-grid {
+                        grid-template-columns: 1fr;
+                        gap: var(--spacing-md, 1rem);
+                    }
+
+                    .landing-hero-actions {
+                        flex-direction: column;
+                        align-items: stretch;
+                    }
+
+                    .landing-btn {
+                        width: 100%;
+                        justify-content: center;
+                    }
+                }
+
+                /* Tablet (768px - 1023px) */
+                @media (min-width: 768px) and (max-width: 1023px) {
+                    .landing-category-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
+
+                    .landing-features-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
+                }
+
+                /* Desktop (1024px+) */
+                @media (min-width: 1024px) {
+                    .landing-category-grid {
+                        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                    }
+
+                    .landing-features-grid {
+                        grid-template-columns: repeat(4, 1fr);
+                    }
+                }
+
+                /* Large Desktop (1400px+) */
+                @media (min-width: 1400px) {
+                    .landing-category-grid {
+                        grid-template-columns: repeat(4, 1fr);
+                    }
+                }
+
+                /* Touch-friendly adjustments */
+                @media (hover: none) and (pointer: coarse) {
+                    .landing-btn {
+                        min-height: 48px;
+                        padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
+                    }
+
+                    .landing-category-card {
+                        min-height: 200px;
+                    }
+                }
+
+                /* Reduce motion for accessibility */
+                @media (prefers-reduced-motion: reduce) {
+                    .landing-category-card,
+                    .landing-feature-card,
+                    .landing-btn,
+                    .hero-icon-display {
+                        transition: none;
+                        animation: none;
                     }
                 }
             </style>
@@ -394,12 +579,12 @@ class LandingPageView {
     getAssetTypeCardHTML(type) {
         return `
             <a href="${type.route}"
-               class="asset-type-card"
+               class="landing-category-card"
                data-type="${type.id}"
                style="--card-color: ${type.color}">
-                <span class="asset-type-icon">${type.icon}</span>
-                <h3 class="asset-type-name">${type.name}</h3>
-                <p class="asset-type-description">${type.description}</p>
+                <span class="landing-category-icon">${type.icon}</span>
+                <h3 class="landing-category-name">${type.name}</h3>
+                <p class="landing-category-description">${type.description}</p>
             </a>
         `;
     }
@@ -408,7 +593,7 @@ class LandingPageView {
      * Attach event listeners
      */
     attachEventListeners() {
-        const cards = document.querySelectorAll('.asset-type-card');
+        const cards = document.querySelectorAll('.landing-category-card');
         cards.forEach(card => {
             card.addEventListener('click', (e) => {
                 const type = card.dataset.type;

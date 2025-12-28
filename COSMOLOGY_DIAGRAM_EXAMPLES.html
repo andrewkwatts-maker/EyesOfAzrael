@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmology Diagram Examples - Eyes of Azrael</title>
+
+    <!-- Theme System -->
+    <script defer src="themes/theme-picker.js"></script>
+    <script defer src="themes/theme-animations.js"></script>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/cosmology-diagrams.css">
+
+    <!-- D3.js for visualizations -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <!-- Cosmology Diagram Renderer -->
+    <script defer src="js/components/cosmology-diagram-renderer.js"></script>
+
+    <style>
+        body {
+            font-family: var(--font-primary);
+            background: radial-gradient(ellipse at center,
+                rgba(var(--color-bg-rgb), 0.9) 0%,
+                rgba(var(--color-bg-rgb), 1) 100%);
+            color: var(--color-text-primary);
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: rgba(var(--color-bg-secondary-rgb), 0.6);
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--color-primary);
+        }
+
+        .page-header h1 {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            color: var(--color-primary);
+            margin: 0 0 1rem 0;
+            text-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .example-section {
+            margin-bottom: 4rem;
+        }
+
+        .example-section h2 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: var(--color-accent);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        .example-description {
+            background: rgba(var(--color-bg-secondary-rgb), 0.4);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .code-example {
+            background: rgba(var(--color-bg-secondary-rgb), 0.8);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-example code {
+            font-family: 'Courier New', monospace;
+            color: var(--color-accent);
+            font-size: 0.9rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: rgba(var(--color-bg-secondary-rgb), 0.6);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+        }
+
+        .feature-card h3 {
+            color: var(--color-primary);
+            margin: 0 0 0.5rem 0;
+            font-size: 1.2rem;
+        }
+
+        .feature-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+
+        .toc {
+            background: rgba(var(--color-bg-secondary-rgb), 0.6);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .toc h3 {
+            color: var(--color-primary);
+            margin: 0 0 1rem 0;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .toc li {
+            margin: 0.5rem 0;
+        }
+
+        .toc a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <div class="page-header">
+        <h1>Cosmology Diagram Examples</h1>
+        <p>Interactive visualizations of mythological cosmological structures using the Cosmology Diagram Renderer</p>
+    </div>
+
+    <div class="toc">
+        <h3>Table of Contents</h3>
+        <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#yggdrasil">Example 1: Yggdrasil - Norse World Tree</a></li>
+            <li><a href="#tree-of-life">Example 2: Kabbalistic Tree of Life</a></li>
+            <li><a href="#nine-realms">Example 3: Norse Nine Realms Map</a></li>
+            <li><a href="#greek-underworld">Example 4: Greek Underworld</a></li>
+            <li><a href="#olympian-genealogy">Example 5: Olympian Genealogy Tree</a></li>
+            <li><a href="#egyptian-duat">Example 6: Egyptian Duat Journey</a></li>
+            <li><a href="#usage">Usage Instructions</a></li>
+        </ul>
+    </div>
+
+    <section id="features" class="example-section">
+        <h2>Features</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>🌳 Tree Diagrams</h3>
+                <p>Hierarchical tree layouts for cosmic trees like Yggdrasil and the Tree of Life</p>
+            </div>
+            <div class="feature-card">
+                <h3>🗺️ Realm Maps</h3>
+                <p>Spatial layouts showing interconnected realms and cosmic geography</p>
+            </div>
+            <div class="feature-card">
+                <h3>👨‍👩‍👧‍👦 Genealogy Trees</h3>
+                <p>Family tree visualizations for divine lineages and relationships</p>
+            </div>
+            <div class="feature-card">
+                <h3>📱 Responsive Design</h3>
+                <p>Automatically scales to fit any screen size with touch support</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔍 Zoom & Pan</h3>
+                <p>Interactive controls for exploring complex diagrams</p>
+            </div>
+            <div class="feature-card">
+                <h3>💾 Export</h3>
+                <p>Download diagrams as PNG images for use elsewhere</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔥 Firebase Integration</h3>
+                <p>Load cosmology data dynamically from Firestore</p>
+            </div>
+            <div class="feature-card">
+                <h3>🎨 Customizable</h3>
+                <p>Configurable colors, sizes, and layouts per mythology</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="yggdrasil" class="example-section">
+        <h2>Example 1: Yggdrasil - Norse World Tree</h2>
+        <div class="example-description">
+            <p><strong>Type:</strong> Tree Diagram</p>
+            <p>The cosmic ash tree Yggdrasil connects the Nine Realms of Norse cosmology. This visualization shows the vertical structure with realms positioned in the crown, branches, trunk, and roots.</p>
+        </div>
+
+        <div class="code-example">
+            <code>&lt;div data-cosmology-diagram<br>
+     data-type="tree"<br>
+     data-mythology="norse"<br>
+     data-structure="yggdrasil"&gt;&lt;/div&gt;</code>
+        </div>
+
+        <!-- Actual Yggdrasil Diagram -->
+        <div data-cosmology-diagram
+             data-type="tree"
+             data-mythology="norse"
+             data-structure="yggdrasil"></div>
+    </section>
+
+    <section id="tree-of-life" class="example-section">
+        <h2>Example 2: Kabbalistic Tree of Life</h2>
+        <div class="example-description">
+            <p><strong>Type:</strong> Tree Diagram</p>
+            <p>The ten Sefirot representing divine emanations in Jewish Kabbalah. Shows the flow of divine energy from Keter (Crown) to Malkhut (Kingdom).</p>
+        </div>
+
+        <div class="code-example">
+            <code>&lt;div data-cosmology-diagram<br>
+     data-type="tree"<br>
+     data-mythology="jewish"<br>
+     data-structure="tree_of_life"&gt;&lt;/div&gt;</code>
+        </div>
+
+        <!-- Tree of Life Diagram -->
+        <div data-cosmology-diagram
+             data-type="tree"
+             data-mythology="jewish"
+             data-structure="tree_of_life"></div>
+    </section>
+
+    <section id="nine-realms" class="example-section">
+        <h2>Example 3: Norse Nine Realms Map</h2>
+        <div class="example-description">
+            <p><strong>Type:</strong> Realm Map (Vertical)</p>
+            <p>A spatial representation of the Nine Realms arranged by level, showing the hierarchical structure of Norse cosmology.</p>
+        </div>
+
+        <div class="code-example">
+            <code>&lt;div data-cosmology-diagram<br>
+     data-type="realm_map"<br>
+     data-mythology="norse"<br>
+     data-structure="nine_realms"&gt;&lt;/div&gt;</code>
+        </div>
+
+        <!-- Nine Realms Map -->
+        <div data-cosmology-diagram
+             data-type="realm_map"
+             data-mythology="norse"
+             data-structure="nine_realms"></div>
+    </section>
+
+    <section id="greek-underworld" class="example-section">
+        <h2>Example 4: Greek Underworld</h2>
+        <div class="example-description">
+            <p><strong>Type:</strong> Realm Map (Vertical)</p>
+            <p>The structure of Hades showing the descent from Earth through the River Styx to the various regions of the afterlife.</p>
+        </div>
+
+        <div class="code-example">
+            <code>&lt;div data-cosmology-diagram<br>
+     data-type="realm_map"<br>
+     data-mythology="greek"<br>
+     data-structure="underworld"&gt;&lt;/div&gt;</code>
+        </div>
+
+        <!-- Greek Underworld Diagram -->
+        <div data-cosmology-diagram
+             data-type="realm_map"
+             data-mythology="greek"
+             data-structure="underworld"></div>
+    </section>
+
+    <section id="olympian-genealogy" class="example-section">
+        <h2>Example 5: Olympian Genealogy Tree</h2>
+        <div class="example-description">
+            <p><strong>Type:</strong> Genealogy</p>
+            <p>The divine family tree from Chaos through the Titans to the Olympian gods, showing generational relationships.</p>
+        </div>
+
+        <div class="code-example">
+            <code>&lt;div data-cosmology-diagram<br>
+     data-type="genealogy"<br>
+     data-mythology="greek"<br>
+     data-structure="olympian_genealogy"&gt;&lt;/div&gt;</code>
+        </div>
+
+        <!-- Olympian Genealogy -->
+        <div data-cosmology-diagram
+             data-type="genealogy"
+             data-mythology="greek"
+             data-structure="olympian_genealogy"></div>
+    </section>
+
+    <section id="egyptian-duat" class="example-section">
+        <h2>Example 6: Egyptian Duat Journey</h2>
+        <div class="example-description">
+            <p><strong>Type:</strong> Realm Map (Horizontal)</p>
+            <p>The twelve hours of Ra's nightly journey through the Duat (Egyptian underworld), representing the soul's passage.</p>
+        </div>
+
+        <div class="code-example">
+            <code>&lt;div data-cosmology-diagram<br>
+     data-type="realm_map"<br>
+     data-mythology="egyptian"<br>
+     data-structure="duat"&gt;&lt;/div&gt;</code>
+        </div>
+
+        <!-- Egyptian Duat -->
+        <div data-cosmology-diagram
+             data-type="realm_map"
+             data-mythology="egyptian"
+             data-structure="duat"></div>
+    </section>
+
+    <section id="usage" class="example-section">
+        <h2>Usage Instructions</h2>
+        <div class="example-description">
+            <h3>Basic Setup</h3>
+            <p>Include the required dependencies in your HTML:</p>
+            <div class="code-example">
+                <code>
+                    &lt;!-- D3.js --&gt;<br>
+                    &lt;script src="https://d3js.org/d3.v7.min.js"&gt;&lt;/script&gt;<br><br>
+
+                    &lt;!-- Cosmology Diagram CSS --&gt;<br>
+                    &lt;link rel="stylesheet" href="css/cosmology-diagrams.css"&gt;<br><br>
+
+                    &lt;!-- Cosmology Diagram Renderer --&gt;<br>
+                    &lt;script defer src="js/components/cosmology-diagram-renderer.js"&gt;&lt;/script&gt;
+                </code>
+            </div>
+
+            <h3>HTML Attributes</h3>
+            <ul>
+                <li><code>data-cosmology-diagram</code> - Marks element as a diagram container (required)</li>
+                <li><code>data-type</code> - Diagram type: "tree", "realm_map", "genealogy", or "cosmic_layers" (required)</li>
+                <li><code>data-mythology</code> - Mythology name: "norse", "greek", "jewish", "egyptian", etc. (required)</li>
+                <li><code>data-structure</code> - Structure name within the mythology (required)</li>
+                <li><code>data-entity-id</code> - Firebase entity ID for dynamic loading (optional)</li>
+            </ul>
+
+            <h3>Available Structures</h3>
+            <ul>
+                <li><strong>Norse:</strong> yggdrasil, nine_realms</li>
+                <li><strong>Jewish:</strong> tree_of_life</li>
+                <li><strong>Greek:</strong> underworld, olympian_genealogy</li>
+                <li><strong>Egyptian:</strong> duat</li>
+            </ul>
+
+            <h3>Interaction Controls</h3>
+            <ul>
+                <li><strong>Zoom:</strong> Mouse wheel or pinch gesture</li>
+                <li><strong>Pan:</strong> Click and drag the diagram</li>
+                <li><strong>Node Click:</strong> View detailed information</li>
+                <li><strong>Reset View:</strong> Use the "Reset View" button</li>
+                <li><strong>Export:</strong> Use the "Export PNG" button</li>
+                <li><strong>Fullscreen:</strong> Use the "Fullscreen" button</li>
+            </ul>
+
+            <h3>Firebase Integration</h3>
+            <p>To load cosmology data from Firebase, structure your Firestore data as:</p>
+            <div class="code-example">
+                <code>
+                    entities/{mythology}/cosmology/{entityId}<br><br>
+
+                    Example:<br>
+                    entities/norse/cosmology/yggdrasil
+                </code>
+            </div>
+        </div>
+    </section>
+
+    <footer style="text-align: center; margin-top: 4rem; padding: 2rem; border-top: 2px solid var(--color-border);">
+        <p>
+            <strong>Cosmology Diagram Renderer</strong> - Part of Eyes of Azrael<br>
+            <a href="index.html" style="color: var(--color-primary);">Return to Home</a>
+        </p>
+    </footer>
+</body>
+</html>

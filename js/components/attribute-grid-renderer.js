@@ -92,7 +92,7 @@ class AttributeGridRenderer {
         ).join('');
 
         return `
-            <div class="attribute-grid" data-mythology="${mythology}" data-entity="${entityId}">
+            <div class="attribute-grid" data-mythology="${mythology}" data-entity="${entityId}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
                 ${cards}
                 ${allowEdit ? this.getAddButtonHTML() : ''}
             </div>

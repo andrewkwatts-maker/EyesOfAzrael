@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script defer src="../../../themes/theme-picker.js"></script>
+    <script defer src="../../../themes/theme-animations.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yggdrasil - The World Tree | Norse Mythology</title>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="../../../themes/theme-base.css">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="../../../css/spinner.css">
+    <link rel="stylesheet" href="../../../css/cosmology-diagrams.css">
+    <link rel="stylesheet" href="../../../themes/smart-links.css">
+
+    <!-- D3.js for visualization -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="../../../firebase-config.js"></script>
+
+    <!-- Components -->
+    <script defer src="../../../themes/smart-links.js"></script>
+    <script defer src="../../../js/components/cosmology-diagram-renderer.js"></script>
+
+    <style>
+        body {
+            font-family: var(--font-primary);
+            background: radial-gradient(ellipse at center,
+                rgba(var(--color-bg-rgb), 0.9) 0%,
+                rgba(var(--color-bg-rgb), 1) 100%);
+            color: var(--color-text-primary);
+            line-height: 1.8;
+        }
+
+        .page-header {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.1),
+                rgba(var(--color-secondary-rgb), 0.1));
+            border-bottom: 2px solid var(--color-primary);
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            color: var(--color-primary);
+            margin: 0 0 1rem 0;
+            text-shadow: 0 2px 10px rgba(var(--color-primary-rgb), 0.5);
+        }
+
+        .page-header .subtitle {
+            font-size: 1.3rem;
+            color: var(--color-accent);
+            font-style: italic;
+        }
+
+        .breadcrumb {
+            padding: 1rem 2rem;
+            background: rgba(var(--color-bg-secondary-rgb), 0.6);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--color-accent);
+        }
+
+        .content-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .intro-section {
+            background: rgba(var(--color-bg-secondary-rgb), 0.6);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--color-accent);
+            margin-bottom: 3rem;
+        }
+
+        .intro-section p {
+            font-size: 1.1rem;
+            margin: 1rem 0;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section h2 {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            color: var(--color-accent);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        .section h3 {
+            font-size: 1.6rem;
+            color: var(--color-primary);
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .realm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .realm-card {
+            background: rgba(var(--color-bg-secondary-rgb), 0.6);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--color-border);
+            transition: all 0.3s ease;
+        }
+
+        .realm-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-accent);
+            box-shadow: 0 8px 24px rgba(var(--color-accent-rgb), 0.3);
+        }
+
+        .realm-card h4 {
+            color: var(--color-accent);
+            font-size: 1.3rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .realm-card .realm-level {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+
+        .realm-card p {
+            margin: 0.5rem 0;
+        }
+
+        .inhabitants {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .inhabitants strong {
+            color: var(--color-primary);
+        }
+
+        .symbol-section {
+            background: linear-gradient(135deg,
+                rgba(var(--color-primary-rgb), 0.05),
+                rgba(var(--color-secondary-rgb), 0.05));
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            margin: 2rem 0;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature-item {
+            background: rgba(var(--color-bg-secondary-rgb), 0.4);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .related-links {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(var(--color-bg-secondary-rgb), 0.6);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+        }
+
+        .related-links h3 {
+            color: var(--color-primary);
+            margin-bottom: 1rem;
+        }
+
+        .related-links ul {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .related-links li a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .related-links li a:hover {
+            color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="theme-picker-container"></div>
+
+    <nav class="breadcrumb">
+        <a href="../../../index.html">Home</a> →
+        <a href="../../index.html">Mythologies</a> →
+        <a href="../index.html">Norse Mythology</a> →
+        <a href="index.html">Cosmology</a> →
+        <span>Yggdrasil</span>
+    </nav>
+
+    <header class="page-header">
+        <h1>Yggdrasil</h1>
+        <p class="subtitle">The Cosmic Ash Tree Connecting the Nine Realms</p>
+    </header>
+
+    <main class="content-container">
+        <section class="intro-section">
+            <p>
+                <strong>Yggdrasil</strong> (Old Norse: "Ygg's horse") is the immense cosmic ash tree that stands at the center of Norse cosmology.
+                Its branches stretch out over all the Nine Realms, while its three great roots reach into three different wells,
+                anchoring the structure of the universe itself.
+            </p>
+            <p>
+                The World Tree is not merely a passive structure but a living entity that sustains and connects all existence.
+                Gods, humans, giants, elves, dwarves, and the dead all dwell within its vast expanse. Yggdrasil's fate is intertwined
+                with that of the cosmos—it will tremble during Ragnarök but is destined to survive the world's destruction and renewal.
+            </p>
+        </section>
+
+        <!-- Interactive Yggdrasil Diagram -->
+        <section class="section">
+            <h2>Interactive Cosmic Tree</h2>
+            <p>Explore the structure of Yggdrasil and the Nine Realms it connects. Click on any realm to learn more about its inhabitants and significance.</p>
+
+            <div data-cosmology-diagram
+                 data-type="tree"
+                 data-mythology="norse"
+                 data-structure="yggdrasil"></div>
+        </section>
+
+        <!-- The Nine Realms -->
+        <section class="section">
+            <h2>The Nine Realms</h2>
+            <p>
+                Yggdrasil connects nine distinct worlds, each home to different beings and governed by unique cosmic laws.
+                These realms are arranged vertically along the tree's structure, from the highest branches to the deepest roots.
+            </p>
+
+            <div class="realm-grid">
+                <div class="realm-card">
+                    <h4>Asgard</h4>
+                    <p class="realm-level">Upper Realm - Crown of the Tree</p>
+                    <p>
+                        The fortress home of the Aesir gods, connected to Midgard by the rainbow bridge Bifrost.
+                        Here stand the golden halls of Valhalla and Gladsheim.
+                    </p>
+                    <div class="inhabitants">
+                        <strong>Inhabitants:</strong> Odin, Thor, Frigg, Baldur, Tyr, and the Aesir
+                    </div>
+                </div>
+
+                <div class="realm-card">
+                    <h4>Vanaheim</h4>
+                    <p class="realm-level">Upper Realm - Branches</p>
+                    <p>
+                        Home of the Vanir, gods of fertility, wisdom, and the ability to see the future.
+                        A realm of magic and nature.
+                    </p>
+                    <div class="inhabitants">
+                        <strong>Inhabitants:</strong> Njörðr, Freyr, Freyja, and the Vanir
+                    </div>
+                </div>
+
+                <div class="realm-card">
+                    <h4>Alfheim</h4>
+                    <p class="realm-level">Upper Realm - Branches</p>
+                    <p>
+                        The realm of the Light Elves (Ljósálfar), beings of incredible beauty who are brighter than the sun.
+                        Given to Freyr as a tooth-gift.
+                    </p>
+                    <div class="inhabitants">
+                        <strong>Inhabitants:</strong> Light Elves (Ljósálfar)
+                    </div>
+                </div>
+
+                <div class="realm-card">
+                    <h4>Midgard</h4>
+                    <p class="realm-level">Middle Realm - Trunk</p>
+                    <p>
+                        The world of humans, created from the body of Ymir and encircled by the great ocean where
+                        Jörmungandr, the World Serpent, dwells.
+                    </p>
+                    <div class="inhabitants">
+                        <strong>Inhabitants:</strong> Humans, created from Ask and Embla
+                    </div>
+                </div>
+
+                <div class="realm-card">
+                    <h4>Jotunheim</h4>
+                    <p class="realm-level">Middle Realm - Outer Branches</p>
+                    <p>
+                        The mountainous realm of the Giants (Jötnar), ancient enemies of the gods yet sometimes
+                        allied with them. A land of chaos and primordial power.
+                    </p>
+                    <div class="inhabitants">
+                        <strong>Inhabitants:</strong> Giants (Jötnar), including frost and mountain giants
+                    </div>
+                </div>
+
+                <div class="realm-card">
+                    <h4>Svartalfheim</h4>
+                    <p class="realm-level">Lower Realm - Below Ground</p>
+                    <p>
+                        Home of the Dark Elves (Dökkálfar) or Dwarves, master craftsmen who forged the gods'
+                        greatest treasures including Mjölnir and Gungnir.
+                    </p>
+                    <div class="inhabitants">
+                        <strong>Inhabitants:</strong> Dark Elves/Dwarves (Dökkálfar)
+                    </div>
+                </div>
+
+                <div class="realm-card">
+                    <h4>Niflheim</h4>
+                    <p class="realm-level">Lower Realm - Roots</p>
+                    <p>
+                        The primordial realm of ice, mist, and cold darkness. One of the first worlds to exist,
+                        its freezing waters from the well Hvergelmir feed into other realms.
+                    </p>
+                    <div class="inhabitants">
+                        <strong>Features:</strong> Hvergelmir (the roaring cauldron), rivers of ice
+                    </div>
+                </div>
+
+                <div class="realm-card">
+                    <h4>Muspelheim</h4>
+                    <p class="realm-level">Lower Realm - Roots</p>
+                    <p>
+                        The primordial realm of fire, home to fire giants and the demon Surtr who will set the
+                        world ablaze during Ragnarök.
+                    </p>
+                    <div class="inhabitants">
+                        <strong>Inhabitants:</strong> Surtr and the fire giants
+                    </div>
+                </div>
+
+                <div class="realm-card">
+                    <h4>Helheim</h4>
+                    <p class="realm-level">Lower Realm - Deepest Roots</p>
+                    <p>
+                        The realm of the dishonorable dead, ruled by Hel, daughter of Loki. Those who die of
+                        sickness or old age come here.
+                    </p>
+                    <div class="inhabitants">
+                        <strong>Ruler:</strong> Hel (daughter of Loki)
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Three Roots -->
+        <section class="section">
+            <h2>The Three Great Roots</h2>
+            <p>Yggdrasil's structure is sustained by three mighty roots, each reaching to a different well:</p>
+
+            <div class="feature-list">
+                <div class="feature-item">
+                    <h4>First Root - Well of Urd</h4>
+                    <p>
+                        Extends to Asgard, watered by the Norns (Urd, Verdandi, and Skuld) from the Well of Urd (Urðarbrunnr).
+                        Here the gods hold their daily council.
+                    </p>
+                </div>
+
+                <div class="feature-item">
+                    <h4>Second Root - Well of Mimir</h4>
+                    <p>
+                        Reaches to Jotunheim, watered from Mímisbrunnr, the well of wisdom. Odin sacrificed his eye
+                        to drink from this well and gain cosmic knowledge.
+                    </p>
+                </div>
+
+                <div class="feature-item">
+                    <h4>Third Root - Well of Hvergelmir</h4>
+                    <p>
+                        Extends to Niflheim, where the dragon Níðhöggr gnaws at the root. From Hvergelmir spring
+                        the rivers that flow through all the worlds.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inhabitants and Guardians -->
+        <section class="section">
+            <h2>Creatures of Yggdrasil</h2>
+            <p>The World Tree hosts numerous beings who dwell upon, within, and around its vast structure:</p>
+
+            <div class="symbol-section">
+                <h3>Níðhöggr</h3>
+                <p>
+                    The dragon that gnaws eternally at the root in Niflheim, seeking to destroy the tree.
+                    It also chews on the corpses of oathbreakers and murderers in Hel.
+                </p>
+
+                <h3>Ratatoskr</h3>
+                <p>
+                    The squirrel that runs up and down Yggdrasil, carrying messages (often insults) between
+                    the eagle at the top and Níðhöggr at the bottom.
+                </p>
+
+                <h3>Veðrfölnir and the Eagle</h3>
+                <p>
+                    An eagle sits at the highest branches, with the hawk Veðrfölnir perched between its eyes.
+                    The eagle surveys all the realms from its lofty position.
+                </p>
+
+                <h3>Four Stags</h3>
+                <p>
+                    Dáinn, Dvalinn, Duneyrr, and Duraþrór—four stags that feed on the buds and branches of Yggdrasil,
+                    representing the cyclical nature of time and seasons.
+                </p>
+
+                <h3>The Norns</h3>
+                <p>
+                    Urd (Past), Verdandi (Present), and Skuld (Future)—the three fate-weavers who water the tree
+                    daily and carve the destinies of gods and men into its trunk.
+                </p>
+            </div>
+        </section>
+
+        <!-- Symbolism and Significance -->
+        <section class="section">
+            <h2>Symbolism and Cosmic Significance</h2>
+
+            <h3>Axis Mundi</h3>
+            <p>
+                Yggdrasil serves as the axis mundi (world axis), the cosmic pillar connecting the heavens,
+                earth, and underworld. It represents order imposed upon chaos, the structured cosmos emerging
+                from primordial void.
+            </p>
+
+            <h3>Sacred Sacrifice</h3>
+            <p>
+                Odin's self-sacrifice upon Yggdrasil—hanging for nine nights, pierced by his own spear—mirrors
+                shamanic initiation rites. The tree becomes a gateway to wisdom, where death leads to rebirth
+                and enlightenment.
+            </p>
+
+            <h3>Eternal Cycle</h3>
+            <p>
+                The constant gnawing of Níðhöggr, the feeding of the stags, and the watering by the Norns
+                represent the cycle of destruction and renewal. Yggdrasil is both eternal and ever-changing.
+            </p>
+
+            <h3>Interconnection</h3>
+            <p>
+                The tree demonstrates that all realms are interconnected—actions in one world ripple through
+                all others. The fate of gods, giants, and humans are inextricably linked through Yggdrasil's network.
+            </p>
+        </section>
+
+        <!-- Realm Map Alternative View -->
+        <section class="section">
+            <h2>Nine Realms Spatial Map</h2>
+            <p>An alternative visualization showing the relative positions of the Nine Realms:</p>
+
+            <div data-cosmology-diagram
+                 data-type="realm_map"
+                 data-mythology="norse"
+                 data-structure="nine_realms"></div>
+        </section>
+
+        <!-- Related Content -->
+        <div class="related-links">
+            <h3>Related Content</h3>
+            <ul>
+                <li><a href="../deities/odin.html">Odin - The All-Father</a></li>
+                <li><a href="../deities/thor.html">Thor - God of Thunder</a></li>
+                <li><a href="../realms/asgard.html">Asgard - Realm of the Gods</a></li>
+                <li><a href="../realms/midgard.html">Midgard - World of Humans</a></li>
+                <li><a href="../realms/helheim.html">Helheim - Realm of the Dead</a></li>
+                <li><a href="../creatures/nidhoggr.html">Níðhöggr - The Dragon</a></li>
+                <li><a href="../cosmology/ragnarok.html">Ragnarök - The Twilight of the Gods</a></li>
+                <li><a href="../../jewish/kabbalah/sefirot/index.html">Compare: Kabbalistic Tree of Life</a></li>
+            </ul>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; margin-top: 3rem; border-top: 2px solid var(--color-border);">
+        <p>
+            <a href="../index.html" style="color: var(--color-primary);">Norse Mythology Home</a> |
+            <a href="../../index.html" style="color: var(--color-primary);">All Mythologies</a>
+        </p>
+    </footer>
+</body>
+</html>

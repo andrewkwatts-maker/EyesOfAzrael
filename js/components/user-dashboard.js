@@ -1,6 +1,7 @@
 /**
  * User Dashboard Component
  * Displays user's created entities with CRUD operations
+ * Modern, polished UI with accessibility features
  */
 
 class UserDashboard {
@@ -27,7 +28,7 @@ class UserDashboard {
     getDefaultAvatar() {
         const svg = `
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="50" fill="#4a5568"/>
+                <circle cx="50" cy="50" r="50" fill="#667eea"/>
                 <circle cx="50" cy="38" r="18" fill="#e2e8f0"/>
                 <ellipse cx="50" cy="78" rx="24" ry="16" fill="#e2e8f0"/>
             </svg>
@@ -51,61 +52,106 @@ class UserDashboard {
         const avatarUrl = user.photoURL || this.getDefaultAvatar();
 
         return `
-            <div class="user-dashboard">
-                <div class="dashboard-header">
+            <div class="user-dashboard" role="main">
+                <!-- Header Section -->
+                <div class="dashboard-header glass-card">
                     <div class="dashboard-user-info">
-                        <img src="${avatarUrl}" alt="${user.displayName}" class="dashboard-avatar">
-                        <div>
-                            <h1>My Contributions</h1>
+                        <img
+                            src="${avatarUrl}"
+                            alt="${user.displayName || user.email} avatar"
+                            class="dashboard-avatar"
+                            role="img"
+                        />
+                        <div class="user-details">
+                            <h1 class="dashboard-title">My Contributions</h1>
                             <p class="dashboard-user-name">${user.displayName || user.email}</p>
+                            <p class="dashboard-user-email">${user.email}</p>
                         </div>
                     </div>
 
-                    <div class="dashboard-stats">
-                        ${this.renderStats()}
+                    <div class="dashboard-quick-actions">
+                        <button
+                            id="createNewBtn"
+                            class="btn btn-primary"
+                            aria-label="Create new entity"
+                        >
+                            <span class="btn-icon">✨</span>
+                            <span>Create New</span>
+                        </button>
                     </div>
                 </div>
 
-                <div class="dashboard-controls">
-                    <div class="dashboard-filters">
-                        <select id="collectionFilter" class="filter-select">
-                            <option value="all">All Types</option>
-                            <option value="deities">Deities</option>
-                            <option value="creatures">Creatures</option>
-                            <option value="heroes">Heroes</option>
-                            <option value="items">Items</option>
-                            <option value="places">Places</option>
-                            <option value="herbs">Herbs</option>
-                            <option value="rituals">Rituals</option>
-                            <option value="symbols">Symbols</option>
-                            <option value="concepts">Concepts</option>
-                            <option value="texts">Texts</option>
-                        </select>
+                <!-- Statistics Cards -->
+                <div class="dashboard-stats" role="region" aria-label="Statistics">
+                    ${this.renderStats()}
+                </div>
 
-                        <select id="statusFilter" class="filter-select">
-                            <option value="active">Active</option>
-                            <option value="deleted">Deleted</option>
-                            <option value="all">All Status</option>
-                        </select>
+                <!-- Recent Activity Timeline -->
+                <div class="dashboard-section glass-card">
+                    <h2 class="section-title">
+                        <span class="section-icon">📊</span>
+                        Recent Activity
+                    </h2>
+                    <div id="activityTimeline" class="activity-timeline">
+                        ${this.renderRecentActivity()}
+                    </div>
+                </div>
 
-                        <input
-                            type="search"
-                            id="searchInput"
-                            placeholder="Search your entities..."
-                            class="search-input"
-                        />
+                <!-- Filters and Controls -->
+                <div class="dashboard-section glass-card">
+                    <div class="dashboard-controls">
+                        <div class="dashboard-filters" role="search">
+                            <label for="collectionFilter" class="filter-label sr-only">Filter by type</label>
+                            <select
+                                id="collectionFilter"
+                                class="filter-select"
+                                aria-label="Filter by entity type"
+                            >
+                                <option value="all">All Types</option>
+                                <option value="deities">🏛️ Deities</option>
+                                <option value="creatures">🐉 Creatures</option>
+                                <option value="heroes">⚔️ Heroes</option>
+                                <option value="items">⚡ Items</option>
+                                <option value="places">🗺️ Places</option>
+                                <option value="herbs">🌿 Herbs</option>
+                                <option value="rituals">🕯️ Rituals</option>
+                                <option value="symbols">✨ Symbols</option>
+                                <option value="concepts">💭 Concepts</option>
+                                <option value="texts">📜 Texts</option>
+                            </select>
+
+                            <label for="statusFilter" class="filter-label sr-only">Filter by status</label>
+                            <select
+                                id="statusFilter"
+                                class="filter-select"
+                                aria-label="Filter by status"
+                            >
+                                <option value="active">✅ Active</option>
+                                <option value="deleted">🗑️ Deleted</option>
+                                <option value="all">All Status</option>
+                            </select>
+
+                            <label for="searchInput" class="filter-label sr-only">Search entities</label>
+                            <div class="search-input-wrapper">
+                                <input
+                                    type="search"
+                                    id="searchInput"
+                                    placeholder="🔍 Search your entities..."
+                                    class="search-input"
+                                    aria-label="Search entities"
+                                />
+                            </div>
+                        </div>
                     </div>
 
-                    <button id="createNewBtn" class="btn-primary">
-                        <span>+ Create New Entity</span>
-                    </button>
+                    <!-- Entities Grid -->
+                    <div id="entitiesList" class="entities-list" role="region" aria-live="polite">
+                        ${this.renderEntitiesList()}
+                    </div>
                 </div>
 
-                <div id="entitiesList" class="entities-list">
-                    ${this.renderEntitiesList()}
-                </div>
-
-                <div id="formContainer"></div>
+                <!-- Form Container (Modal) -->
+                <div id="formContainer" role="dialog" aria-modal="true" aria-hidden="true"></div>
             </div>
         `;
     }
@@ -116,11 +162,18 @@ class UserDashboard {
      */
     renderNotAuthenticated() {
         return `
-            <div class="empty-container">
-                <div class="empty-icon">🔒</div>
+            <div class="empty-container glass-card" role="alert">
+                <div class="empty-icon" aria-hidden="true">🔒</div>
                 <h2>Authentication Required</h2>
                 <p class="empty-message">Please sign in to manage your entities</p>
-                <button id="signInBtn" class="btn-primary">Sign In with Google</button>
+                <button
+                    id="signInBtn"
+                    class="btn btn-primary"
+                    aria-label="Sign in with Google"
+                >
+                    <span class="btn-icon">🔑</span>
+                    <span>Sign In with Google</span>
+                </button>
             </div>
         `;
     }
@@ -133,17 +186,25 @@ class UserDashboard {
         const stats = this.calculateStats();
 
         return `
-            <div class="stat-card">
-                <div class="stat-value">${stats.total}</div>
+            <div class="stat-card glass-card" role="article">
+                <div class="stat-icon" aria-hidden="true">📚</div>
+                <div class="stat-value" aria-label="Total entities">${stats.total}</div>
                 <div class="stat-label">Total Entities</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value">${stats.active}</div>
+            <div class="stat-card glass-card" role="article">
+                <div class="stat-icon" aria-hidden="true">✅</div>
+                <div class="stat-value" aria-label="Active entities">${stats.active}</div>
                 <div class="stat-label">Active</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value">${stats.mythologies}</div>
+            <div class="stat-card glass-card" role="article">
+                <div class="stat-icon" aria-hidden="true">🌍</div>
+                <div class="stat-value" aria-label="Mythologies covered">${stats.mythologies}</div>
                 <div class="stat-label">Mythologies</div>
+            </div>
+            <div class="stat-card glass-card" role="article">
+                <div class="stat-icon" aria-hidden="true">📅</div>
+                <div class="stat-value" aria-label="Days active">${stats.daysActive}</div>
+                <div class="stat-label">Days Active</div>
             </div>
         `;
     }
@@ -156,11 +217,62 @@ class UserDashboard {
         const active = this.entities.filter(e => e.status === 'active').length;
         const mythologies = new Set(this.entities.map(e => e.mythology)).size;
 
+        // Calculate days active
+        const oldestEntity = this.entities.reduce((oldest, entity) => {
+            const date = entity.createdAt?.toDate?.() || new Date();
+            return !oldest || date < oldest ? date : oldest;
+        }, null);
+
+        const daysActive = oldestEntity
+            ? Math.floor((new Date() - oldestEntity) / (1000 * 60 * 60 * 24))
+            : 0;
+
         return {
             total: this.entities.length,
             active,
-            mythologies
+            mythologies,
+            daysActive
         };
+    }
+
+    /**
+     * Render recent activity timeline
+     * @returns {string} HTML string
+     */
+    renderRecentActivity() {
+        const recentEntities = this.entities
+            .sort((a, b) => {
+                const dateA = a.updatedAt?.toDate?.() || a.createdAt?.toDate?.() || new Date(0);
+                const dateB = b.updatedAt?.toDate?.() || b.createdAt?.toDate?.() || new Date(0);
+                return dateB - dateA;
+            })
+            .slice(0, 5);
+
+        if (recentEntities.length === 0) {
+            return `
+                <div class="empty-state">
+                    <p>No recent activity</p>
+                </div>
+            `;
+        }
+
+        return recentEntities.map(entity => {
+            const date = entity.updatedAt?.toDate?.() || entity.createdAt?.toDate?.() || new Date();
+            const action = entity.updatedAt ? 'Updated' : 'Created';
+
+            return `
+                <div class="activity-item">
+                    <div class="activity-icon">${entity.icon || '📄'}</div>
+                    <div class="activity-content">
+                        <div class="activity-title">${action}: ${entity.name || 'Untitled'}</div>
+                        <div class="activity-meta">
+                            <span class="activity-type">${entity.collection || 'Unknown'}</span>
+                            <span class="activity-time">${this.formatDate(date)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     /**
@@ -172,9 +284,14 @@ class UserDashboard {
 
         if (filteredEntities.length === 0) {
             return `
-                <div class="empty-state">
+                <div class="empty-state" role="status">
+                    <div class="empty-icon" aria-hidden="true">📭</div>
                     <p>No entities found matching your filters.</p>
-                    <button class="btn-secondary" onclick="this.closest('.user-dashboard').querySelector('#createNewBtn').click()">
+                    <button
+                        class="btn btn-primary"
+                        onclick="this.closest('.user-dashboard').querySelector('#createNewBtn').click()"
+                        aria-label="Create your first entity"
+                    >
                         Create Your First Entity
                     </button>
                 </div>
@@ -182,7 +299,7 @@ class UserDashboard {
         }
 
         return `
-            <div class="entity-grid">
+            <div class="entity-grid" role="list">
                 ${filteredEntities.map(entity => this.renderEntityCard(entity)).join('')}
             </div>
         `;
@@ -197,16 +314,21 @@ class UserDashboard {
         const isDeleted = entity.status === 'deleted';
 
         return `
-            <div class="entity-panel ${isDeleted ? 'deleted' : ''}" data-mythology="${entity.mythology || 'unknown'}">
-                ${isDeleted ? '<div class="deleted-badge">Deleted</div>' : ''}
+            <article
+                class="entity-panel glass-card ${isDeleted ? 'deleted' : ''}"
+                data-mythology="${entity.mythology || 'unknown'}"
+                role="listitem"
+                tabindex="0"
+            >
+                ${isDeleted ? '<div class="deleted-badge" role="status">Deleted</div>' : ''}
 
-                <div class="entity-icon">${entity.icon || '📄'}</div>
+                <div class="entity-icon" aria-hidden="true">${entity.icon || '📄'}</div>
 
                 <h3 class="entity-name">${entity.name || 'Untitled'}</h3>
 
-                <div class="entity-meta">
-                    <span class="entity-tag">${entity.mythology || 'Unknown'}</span>
-                    <span class="entity-tag">${entity.type || 'Unknown'}</span>
+                <div class="entity-meta" role="group">
+                    <span class="entity-tag" aria-label="Mythology">${entity.mythology || 'Unknown'}</span>
+                    <span class="entity-tag" aria-label="Type">${entity.type || 'Unknown'}</span>
                 </div>
 
                 ${entity.description ? `
@@ -214,28 +336,52 @@ class UserDashboard {
                 ` : ''}
 
                 <div class="entity-dates">
-                    <small>Created: ${this.formatDate(entity.createdAt)}</small>
-                    ${entity.updatedAt ? `<small>Updated: ${this.formatDate(entity.updatedAt)}</small>` : ''}
+                    <small>Created: <time datetime="${entity.createdAt?.toDate?.()?.toISOString?.()}">${this.formatDate(entity.createdAt)}</time></small>
+                    ${entity.updatedAt ? `<small>Updated: <time datetime="${entity.updatedAt?.toDate?.()?.toISOString?.()}">${this.formatDate(entity.updatedAt)}</time></small>` : ''}
                 </div>
 
-                <div class="panel-actions">
-                    <button class="panel-action-btn" data-action="view" data-collection="${entity.collection}" data-id="${entity.id}">
-                        👁️ View
+                <div class="panel-actions" role="group" aria-label="Entity actions">
+                    <button
+                        class="panel-action-btn"
+                        data-action="view"
+                        data-collection="${entity.collection}"
+                        data-id="${entity.id}"
+                        aria-label="View ${entity.name}"
+                    >
+                        <span aria-hidden="true">👁️</span> View
                     </button>
-                    <button class="panel-action-btn" data-action="edit" data-collection="${entity.collection}" data-id="${entity.id}">
-                        ✏️ Edit
+                    <button
+                        class="panel-action-btn"
+                        data-action="edit"
+                        data-collection="${entity.collection}"
+                        data-id="${entity.id}"
+                        aria-label="Edit ${entity.name}"
+                    >
+                        <span aria-hidden="true">✏️</span> Edit
                     </button>
                     ${isDeleted ? `
-                        <button class="panel-action-btn" data-action="restore" data-collection="${entity.collection}" data-id="${entity.id}">
-                            ♻️ Restore
+                        <button
+                            class="panel-action-btn"
+                            data-action="restore"
+                            data-collection="${entity.collection}"
+                            data-id="${entity.id}"
+                            aria-label="Restore ${entity.name}"
+                        >
+                            <span aria-hidden="true">♻️</span> Restore
                         </button>
                     ` : `
-                        <button class="panel-action-btn danger" data-action="delete" data-collection="${entity.collection}" data-id="${entity.id}">
-                            🗑️ Delete
+                        <button
+                            class="panel-action-btn danger"
+                            data-action="delete"
+                            data-collection="${entity.collection}"
+                            data-id="${entity.id}"
+                            aria-label="Delete ${entity.name}"
+                        >
+                            <span aria-hidden="true">🗑️</span> Delete
                         </button>
                     `}
                 </div>
-            </div>
+            </article>
         `;
     }
 
@@ -328,13 +474,17 @@ class UserDashboard {
             });
         }
 
-        // Search input
+        // Search input with debounce
         const searchInput = container.querySelector('#searchInput');
         if (searchInput) {
             searchInput.value = this.filter.search;
+            let searchTimeout;
             searchInput.addEventListener('input', (e) => {
-                this.filter.search = e.target.value;
-                this.refresh();
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    this.filter.search = e.target.value;
+                    this.refresh();
+                }, 300);
             });
         }
 
@@ -374,6 +524,40 @@ class UserDashboard {
                     break;
             }
         });
+
+        // Keyboard navigation for entity cards
+        this.initializeKeyboardNavigation();
+    }
+
+    /**
+     * Initialize keyboard navigation
+     */
+    initializeKeyboardNavigation() {
+        const entityCards = this.container.querySelectorAll('.entity-panel');
+
+        entityCards.forEach((card, index) => {
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    // Activate first action button
+                    const firstBtn = card.querySelector('.panel-action-btn');
+                    if (firstBtn) firstBtn.click();
+                }
+
+                // Arrow key navigation
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const next = entityCards[index + 1];
+                    if (next) next.focus();
+                }
+
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const prev = entityCards[index - 1];
+                    if (prev) prev.focus();
+                }
+            });
+        });
     }
 
     /**
@@ -383,42 +567,82 @@ class UserDashboard {
         const listContainer = this.container.querySelector('#entitiesList');
         if (!listContainer) return;
 
-        listContainer.innerHTML = '<div class="loading">Loading...</div>';
+        listContainer.innerHTML = '<div class="loading" role="status"><div class="loading-spinner" aria-hidden="true">⏳</div><p>Loading...</p></div>';
 
         await this.loadUserEntities();
 
         listContainer.innerHTML = this.renderEntitiesList();
+
+        // Re-initialize keyboard navigation
+        this.initializeKeyboardNavigation();
+
+        // Announce to screen readers
+        const count = this.filterEntities().length;
+        this.announceToScreenReader(`${count} entities found`);
     }
 
     /**
      * Handle create new entity
      */
     async handleCreateNew() {
-        // Show collection selector first
-        const collection = prompt(
-            'Select entity type:\n\n' +
-            '1. Deity\n2. Creature\n3. Hero\n4. Item\n5. Place\n' +
-            '6. Herb\n7. Ritual\n8. Symbol\n9. Concept\n10. Text\n\n' +
-            'Enter number (1-10):'
-        );
+        // Show collection selector modal with better UI
+        const collections = [
+            { value: 'deities', label: '🏛️ Deity', description: 'Gods and divine beings' },
+            { value: 'creatures', label: '🐉 Creature', description: 'Mythical beasts and monsters' },
+            { value: 'heroes', label: '⚔️ Hero', description: 'Legendary figures and champions' },
+            { value: 'items', label: '⚡ Item', description: 'Magical artifacts and objects' },
+            { value: 'places', label: '🗺️ Place', description: 'Sacred sites and realms' },
+            { value: 'herbs', label: '🌿 Herb', description: 'Sacred plants and medicines' },
+            { value: 'rituals', label: '🕯️ Ritual', description: 'Ceremonies and practices' },
+            { value: 'symbols', label: '✨ Symbol', description: 'Sacred symbols and signs' },
+            { value: 'concepts', label: '💭 Concept', description: 'Philosophical ideas' },
+            { value: 'texts', label: '📜 Text', description: 'Sacred writings' }
+        ];
 
-        const collectionMap = {
-            '1': 'deities',
-            '2': 'creatures',
-            '3': 'heroes',
-            '4': 'items',
-            '5': 'places',
-            '6': 'herbs',
-            '7': 'rituals',
-            '8': 'symbols',
-            '9': 'concepts',
-            '10': 'texts'
-        };
+        const modalHTML = `
+            <div class="collection-selector-modal" role="dialog" aria-labelledby="modal-title">
+                <div class="modal-content glass-card">
+                    <h2 id="modal-title">Select Entity Type</h2>
+                    <div class="collection-grid">
+                        ${collections.map(col => `
+                            <button
+                                class="collection-option glass-card"
+                                data-collection="${col.value}"
+                                aria-label="${col.label} - ${col.description}"
+                            >
+                                <div class="collection-label">${col.label}</div>
+                                <div class="collection-description">${col.description}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <button class="btn btn-secondary modal-cancel" aria-label="Cancel">Cancel</button>
+                </div>
+            </div>
+        `;
 
-        const selectedCollection = collectionMap[collection];
-        if (!selectedCollection) return;
+        const formContainer = this.container.querySelector('#formContainer');
+        formContainer.innerHTML = modalHTML;
+        formContainer.setAttribute('aria-hidden', 'false');
 
-        this.showForm(selectedCollection);
+        // Focus first option
+        setTimeout(() => {
+            formContainer.querySelector('.collection-option')?.focus();
+        }, 100);
+
+        // Handle selection
+        formContainer.querySelectorAll('.collection-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const collection = btn.dataset.collection;
+                formContainer.innerHTML = '';
+                formContainer.setAttribute('aria-hidden', 'true');
+                this.showForm(collection);
+            });
+        });
+
+        formContainer.querySelector('.modal-cancel')?.addEventListener('click', () => {
+            formContainer.innerHTML = '';
+            formContainer.setAttribute('aria-hidden', 'true');
+        });
     }
 
     /**
@@ -431,7 +655,7 @@ class UserDashboard {
             window.location.reload();
         } catch (error) {
             console.error('[Dashboard] Sign in error:', error);
-            alert('Failed to sign in: ' + error.message);
+            this.showToast('Failed to sign in: ' + error.message, 'error');
         }
     }
 
@@ -507,18 +731,26 @@ class UserDashboard {
             entityId,
             onSuccess: async () => {
                 formContainer.innerHTML = '';
+                formContainer.setAttribute('aria-hidden', 'true');
                 this.showToast(entityId ? 'Entity updated!' : 'Entity created!', 'success');
                 await this.refresh();
             },
             onCancel: () => {
                 formContainer.innerHTML = '';
+                formContainer.setAttribute('aria-hidden', 'true');
             }
         });
 
         form.render().then(html => {
             formContainer.innerHTML = `<div class="form-overlay">${html}</div>`;
+            formContainer.setAttribute('aria-hidden', 'false');
             const formElement = formContainer.querySelector('.entity-form-container');
             form.initialize(formElement);
+
+            // Focus first input
+            setTimeout(() => {
+                formElement.querySelector('input, textarea, select')?.focus();
+            }, 100);
         });
     }
 
@@ -533,6 +765,25 @@ class UserDashboard {
         } else {
             alert(message);
         }
+    }
+
+    /**
+     * Announce to screen readers
+     * @param {string} message - Message to announce
+     */
+    announceToScreenReader(message) {
+        const announcement = document.createElement('div');
+        announcement.setAttribute('role', 'status');
+        announcement.setAttribute('aria-live', 'polite');
+        announcement.setAttribute('aria-atomic', 'true');
+        announcement.className = 'sr-only';
+        announcement.textContent = message;
+
+        document.body.appendChild(announcement);
+
+        setTimeout(() => {
+            document.body.removeChild(announcement);
+        }, 1000);
     }
 
     /**

@@ -1,0 +1,641 @@
+/**
+ * Compare View - Enhanced Features CSS
+ * Supplemental styles for similarity visualization, Venn diagrams, and mobile features
+ *
+ * Import this file after compare-view.css:
+ * <link rel="stylesheet" href="css/compare-view.css">
+ * <link rel="stylesheet" href="css/compare-view-enhanced.css">
+ *
+ * @version 2.0
+ * @author Eyes of Azrael Development Team
+ */
+
+/* ========================================
+   Similarity Section & Metrics
+   ======================================== */
+
+.similarity-section {
+    background: var(--color-bg-card, #1a1f3a);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.similarity-section h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-text-primary, #f8f9fa);
+    text-align: center;
+}
+
+.similarity-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: var(--color-bg-secondary, #151a35);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.metric-card:hover {
+    border-color: var(--color-primary, #8b7fff);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 127, 255, 0.2);
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary, #adb5bd);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--color-primary, #8b7fff), var(--color-secondary, #ff7eb6));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.metric-description {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary, #adb5bd);
+}
+
+.metric-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--color-bg-primary, #0a0e27);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 0.75rem;
+}
+
+.metric-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary, #8b7fff), var(--color-secondary, #ff7eb6));
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
+
+/* ========================================
+   Venn Diagram Visualization
+   ======================================== */
+
+.venn-diagram-container {
+    margin: 2rem 0;
+    padding: 2rem;
+    background: var(--color-bg-secondary, #151a35);
+    border-radius: 8px;
+}
+
+.venn-diagram-container h4 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--color-text-primary, #f8f9fa);
+    font-size: 1.2rem;
+}
+
+.venn-diagram {
+    position: relative;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Two-circle Venn diagram */
+.venn-diagram.venn-2 {
+    height: 250px;
+    max-width: 500px;
+}
+
+.venn-diagram.venn-2 .venn-circle {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 3px solid;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.venn-diagram.venn-2 .venn-circle:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.venn-diagram.venn-2 .venn-circle-1 {
+    left: 20%;
+    background: rgba(139, 127, 255, 0.2);
+    border-color: var(--color-primary, #8b7fff);
+}
+
+.venn-diagram.venn-2 .venn-circle-2 {
+    right: 20%;
+    background: rgba(255, 126, 182, 0.2);
+    border-color: var(--color-secondary, #ff7eb6);
+}
+
+.venn-diagram.venn-2 .venn-overlap {
+    position: absolute;
+    z-index: 10;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-accent, #ffd93d);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Three-circle Venn diagram */
+.venn-diagram.venn-3 {
+    height: 300px;
+    max-width: 600px;
+}
+
+.venn-diagram.venn-3 .venn-circle {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 3px solid;
+    opacity: 0.6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.venn-diagram.venn-3 .venn-circle:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.venn-diagram.venn-3 .venn-circle-1 {
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(139, 127, 255, 0.2);
+    border-color: var(--color-primary, #8b7fff);
+}
+
+.venn-diagram.venn-3 .venn-circle-2 {
+    bottom: 20px;
+    left: 20%;
+    background: rgba(255, 126, 182, 0.2);
+    border-color: var(--color-secondary, #ff7eb6);
+}
+
+.venn-diagram.venn-3 .venn-circle-3 {
+    bottom: 20px;
+    right: 20%;
+    background: rgba(255, 217, 61, 0.2);
+    border-color: var(--color-accent, #ffd93d);
+}
+
+.venn-diagram.venn-3 .venn-center {
+    position: absolute;
+    z-index: 10;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.venn-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #f8f9fa);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    padding: 0.25rem 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+/* ========================================
+   Insights Grid
+   ======================================== */
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.insight-box {
+    background: var(--color-bg-secondary, #151a35);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.insight-box.similarities {
+    border-left: 4px solid #4caf50;
+}
+
+.insight-box.differences {
+    border-left: 4px solid #2196f3;
+}
+
+.insight-box h4 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--color-text-primary, #f8f9fa);
+}
+
+.insight-box.similarities h4 {
+    color: #4caf50;
+}
+
+.insight-box.differences h4 {
+    color: #2196f3;
+}
+
+.insight-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.insight-box li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border-primary, #2a2f4a);
+    color: var(--color-text-secondary, #adb5bd);
+}
+
+.insight-box li:last-child {
+    border-bottom: none;
+}
+
+.suggestion-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0 0;
+    text-align: left;
+}
+
+.suggestion-list li {
+    padding: 0.5rem 0 0.5rem 1.5rem;
+    position: relative;
+    color: var(--color-text-secondary, #adb5bd);
+}
+
+.suggestion-list li:before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--color-primary, #8b7fff);
+}
+
+/* ========================================
+   Mobile Entity Tabs
+   ======================================== */
+
+.mobile-entity-tabs {
+    display: none; /* Hidden on desktop */
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.mobile-tab {
+    padding: 0.75rem 1rem;
+    background: var(--color-bg-card, #1a1f3a);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 8px;
+    color: var(--color-text-primary, #f8f9fa);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.mobile-tab.active {
+    background: var(--color-primary, #8b7fff);
+    border-color: var(--color-primary, #8b7fff);
+    font-weight: 600;
+}
+
+.mobile-tab:hover:not(.active) {
+    border-color: var(--color-primary, #8b7fff);
+}
+
+/* ========================================
+   Desktop vs Mobile Comparison
+   ======================================== */
+
+.desktop-comparison {
+    display: block;
+}
+
+.mobile-comparison {
+    display: none;
+}
+
+/* ========================================
+   Mobile Comparison Cards
+   ======================================== */
+
+.swipe-hint {
+    text-align: center;
+    color: var(--color-text-secondary, #adb5bd);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: var(--color-bg-secondary, #151a35);
+    border-radius: 8px;
+}
+
+.mobile-cards-container {
+    position: relative;
+    min-height: 400px;
+}
+
+.mobile-entity-card {
+    display: none;
+    animation: slideIn 0.3s ease;
+}
+
+.mobile-entity-card.active {
+    display: block;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.mobile-card-header {
+    background: var(--color-bg-secondary, #151a35);
+    border: 2px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 12px 12px 0 0;
+    padding: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+
+.card-info {
+    flex: 1;
+}
+
+.card-name {
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem 0;
+    color: var(--color-text-primary, #f8f9fa);
+}
+
+.card-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.card-remove {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(255, 77, 77, 0.2);
+    color: #ff4d4d;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+    transition: all 0.2s ease;
+}
+
+.card-remove:hover {
+    background: #ff4d4d;
+    color: white;
+}
+
+.mobile-card-body {
+    background: var(--color-bg-card, #1a1f3a);
+    border: 2px solid var(--color-border-primary, #2a2f4a);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    padding: 1rem;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.mobile-attribute-row {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--color-border-primary, #2a2f4a);
+}
+
+.mobile-attribute-row:last-child {
+    border-bottom: none;
+}
+
+.mobile-attr-label {
+    font-weight: 600;
+    color: var(--color-text-primary, #f8f9fa);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.mobile-attr-value {
+    color: var(--color-text-secondary, #adb5bd);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* ========================================
+   Mobile Navigation
+   ======================================== */
+
+.mobile-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.nav-prev,
+.nav-next {
+    padding: 0.75rem 1.5rem;
+    background: var(--color-bg-card, #1a1f3a);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 8px;
+    color: var(--color-text-primary, #f8f9fa);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.nav-prev:hover:not(:disabled),
+.nav-next:hover:not(:disabled) {
+    background: var(--color-primary, #8b7fff);
+    border-color: var(--color-primary, #8b7fff);
+}
+
+.nav-prev:disabled,
+.nav-next:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.nav-indicator {
+    color: var(--color-text-secondary, #adb5bd);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* ========================================
+   Sticky Column Enhancement
+   ======================================== */
+
+.sticky-column {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    background: var(--color-bg-secondary, #151a35);
+}
+
+/* ========================================
+   Long Value Expansion
+   ======================================== */
+
+.long-value {
+    position: relative;
+}
+
+.value-preview {
+    margin-bottom: 0.5rem;
+}
+
+.value-full {
+    margin-bottom: 0.5rem;
+}
+
+.expand-value-btn {
+    padding: 0.25rem 0.75rem;
+    background: var(--color-bg-secondary, #151a35);
+    border: 1px solid var(--color-primary, #8b7fff);
+    border-radius: 4px;
+    color: var(--color-primary, #8b7fff);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.expand-value-btn:hover {
+    background: var(--color-primary, #8b7fff);
+    color: white;
+}
+
+/* ========================================
+   Button Icons and Text
+   ======================================== */
+
+.btn-icon {
+    font-size: 1rem;
+}
+
+.btn-text {
+    display: inline;
+}
+
+/* ========================================
+   Example Suggestions
+   ======================================== */
+
+.example-suggestions {
+    margin-top: 2rem;
+    text-align: left;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ========================================
+   Responsive Mobile Overrides
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Show mobile tabs and hide desktop comparison */
+    .mobile-entity-tabs {
+        display: flex;
+    }
+
+    .desktop-comparison {
+        display: none;
+    }
+
+    .mobile-comparison {
+        display: block;
+    }
+
+    /* Adjust button text visibility */
+    .btn-text {
+        display: none;
+    }
+
+    .btn-icon {
+        font-size: 1.2rem;
+    }
+
+    /* Smaller metrics on mobile */
+    .metric-value {
+        font-size: 2rem;
+    }
+
+    /* Stack insights grid */
+    .insights-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Adjust Venn diagram sizes */
+    .venn-diagram.venn-2 {
+        height: 200px;
+        max-width: 350px;
+    }
+
+    .venn-diagram.venn-2 .venn-circle {
+        width: 150px;
+        height: 150px;
+    }
+
+    .venn-diagram.venn-3 {
+        height: 250px;
+        max-width: 400px;
+    }
+
+    .venn-diagram.venn-3 .venn-circle {
+        width: 140px;
+        height: 140px;
+    }
+
+    .venn-label {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.4rem;
+    }
+}
