@@ -1,0 +1,318 @@
+/**
+ * Virtual Scroller Styles
+ *
+ * Optimized styles for virtual scrolling performance
+ * Maintains smooth 60fps scrolling even with 10,000+ items
+ */
+
+/* Container */
+.virtual-scroller-container {
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    will-change: scroll-position;
+    height: 600px; /* Default height, can be overridden */
+}
+
+/* Scroll content (spacer) */
+.virtual-scroll-content {
+    position: relative;
+    width: 100%;
+    pointer-events: none; /* Don't block clicks */
+}
+
+/* Viewport (visible items container) */
+.virtual-viewport {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    will-change: transform;
+    pointer-events: auto; /* Re-enable clicks for items */
+}
+
+/* Individual items */
+.virtual-item {
+    box-sizing: border-box;
+    overflow: hidden;
+    contain: layout style paint; /* CSS containment for performance */
+}
+
+/* Grid layout for virtual items */
+.virtual-scroller-container .entity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 0 20px;
+}
+
+/* List layout for virtual items */
+.virtual-scroller-container .entity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0 20px;
+}
+
+/* Table layout for virtual items */
+.virtual-scroller-container .entity-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Loading indicator */
+.virtual-loading {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.95);
+    border-top: 2px solid var(--border-color, #e0e0e0);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
+
+.virtual-loading .spinner {
+    width: 32px;
+    height: 32px;
+    margin: 0 auto 12px;
+    border: 3px solid var(--border-color, #e0e0e0);
+    border-top-color: var(--primary-color, #9370DB);
+    border-radius: 50%;
+    animation: virtual-spin 0.6s linear infinite;
+}
+
+.virtual-loading p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary, #666);
+}
+
+@keyframes virtual-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Smooth scrolling */
+.virtual-scroller-container {
+    scroll-behavior: smooth;
+}
+
+/* Performance: Use GPU acceleration */
+.virtual-viewport,
+.virtual-item {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Custom scrollbar styling */
+.virtual-scroller-container::-webkit-scrollbar {
+    width: 12px;
+}
+
+.virtual-scroller-container::-webkit-scrollbar-track {
+    background: var(--secondary-bg, #f5f5f5);
+    border-radius: 6px;
+}
+
+.virtual-scroller-container::-webkit-scrollbar-thumb {
+    background: var(--border-color, #ddd);
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.virtual-scroller-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color, #9370DB);
+}
+
+/* Firefox scrollbar */
+.virtual-scroller-container {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color, #ddd) var(--secondary-bg, #f5f5f5);
+}
+
+/* Scroll to top button */
+.virtual-scroll-to-top {
+    position: sticky;
+    bottom: 20px;
+    left: 100%;
+    transform: translateX(-60px);
+    width: 48px;
+    height: 48px;
+    background: var(--primary-color, #9370DB);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(147, 112, 219, 0.3);
+    transition: all 0.3s ease;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.virtual-scroll-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.virtual-scroll-to-top:hover {
+    transform: translateX(-60px) translateY(-4px);
+    box-shadow: 0 6px 20px rgba(147, 112, 219, 0.4);
+}
+
+/* Performance indicator (for debugging) */
+.virtual-scroller-container.show-performance::before {
+    content: attr(data-performance);
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #0f0;
+    font-family: monospace;
+    font-size: 11px;
+    text-align: center;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .virtual-scroller-container .entity-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+        padding: 0 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .virtual-scroller-container {
+        height: calc(100vh - 200px); /* Full viewport on mobile */
+    }
+
+    .virtual-scroller-container .entity-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 0 12px;
+    }
+
+    .virtual-scroller-container .entity-list {
+        gap: 12px;
+        padding: 0 12px;
+    }
+
+    .virtual-scroll-to-top {
+        transform: translateX(-20px);
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .virtual-scroll-to-top:hover {
+        transform: translateX(-20px) translateY(-4px);
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .virtual-loading {
+        background: rgba(42, 42, 62, 0.95);
+    }
+
+    .virtual-scroller-container::-webkit-scrollbar-track {
+        background: #2a2a3e;
+    }
+
+    .virtual-scroller-container::-webkit-scrollbar-thumb {
+        background: #404050;
+    }
+
+    .virtual-scroller-container::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-color, #9370DB);
+    }
+
+    .virtual-scroller-container {
+        scrollbar-color: #404050 #2a2a3e;
+    }
+}
+
+/* Print styles - disable virtual scrolling */
+@media print {
+    .virtual-scroller-container {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    .virtual-scroll-content {
+        height: auto !important;
+    }
+
+    .virtual-viewport {
+        position: static !important;
+        transform: none !important;
+    }
+
+    .virtual-loading,
+    .virtual-scroll-to-top {
+        display: none !important;
+    }
+}
+
+/* Accessibility: Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .virtual-scroller-container {
+        scroll-behavior: auto;
+    }
+
+    .virtual-viewport,
+    .virtual-item {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* Performance optimization: Force layer creation */
+.virtual-scroller-container {
+    transform: translate3d(0, 0, 0);
+    isolation: isolate;
+}
+
+/* Grid card adjustments for virtual scrolling */
+.virtual-scroller-container .grid-card {
+    margin: 0; /* Remove margins, use gap instead */
+}
+
+.virtual-scroller-container .entity-list-item {
+    margin: 0; /* Remove margins, use gap instead */
+}
+
+/* Ensure consistent sizing */
+.virtual-item > * {
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Loading skeleton for initial render */
+.virtual-item.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--secondary-bg, #f5f5f5) 25%,
+        var(--hover-bg, #e8e8e8) 50%,
+        var(--secondary-bg, #f5f5f5) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
