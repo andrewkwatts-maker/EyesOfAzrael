@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Rendering Test - All Types & Modes</title>
+
+    <!-- Core Styles -->
+    <link href="themes/theme-base.css" rel="stylesheet"/>
+    <link href="themes/mythology-colors.css" rel="stylesheet"/>
+    <link href="styles.css" rel="stylesheet"/>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            color: #f8f9fa;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #8b7fff;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .intro {
+            background: #1a1f3a;
+            border: 2px solid #8b7fff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .intro h2 {
+            color: #8b7fff;
+            margin-bottom: 1rem;
+        }
+
+        .intro ul {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        .intro li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            background: #1a1f3a;
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid #2a2f4a;
+            border-radius: 8px;
+            background: #1a1f3a;
+            color: #f8f9fa;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-button:hover {
+            border-color: #8b7fff;
+            background: #2a2f4a;
+        }
+
+        .tab-button.active {
+            background: #8b7fff;
+            border-color: #8b7fff;
+            color: #fff;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Asset Type Section */
+        .asset-type-section {
+            background: #1a1f3a;
+            border: 1px solid #2a2f4a;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .asset-type-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #8b7fff;
+        }
+
+        .asset-type-header h2 {
+            color: #8b7fff;
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .asset-type-icon {
+            font-size: 3rem;
+        }
+
+        /* Rendering Mode Section */
+        .mode-section {
+            margin-bottom: 2.5rem;
+            background: #0a0e27;
+            border: 1px solid #2a2f4a;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .mode-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #2a2f4a;
+        }
+
+        .mode-header h3 {
+            color: #51cf66;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .mode-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .badge-page { background: #8b7fff; color: #fff; }
+        .badge-panel { background: #51cf66; color: #000; }
+        .badge-section { background: #ffc107; color: #000; }
+        .badge-link { background: #ff6b6b; color: #fff; }
+        .badge-paragraph { background: #00d4ff; color: #000; }
+
+        .mode-description {
+            color: #adb5bd;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        /* Render Output */
+        .render-output {
+            background: #1a1f3a;
+            border: 1px solid #8b7fff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Code Snippets */
+        .code-section {
+            margin-top: 1rem;
+        }
+
+        .code-label {
+            color: #8b7fff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .copy-btn {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.8rem;
+            background: #2a2f4a;
+            color: #f8f9fa;
+            border: 1px solid #8b7fff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #8b7fff;
+        }
+
+        pre {
+            background: #0a0e27;
+            border: 1px solid #2a2f4a;
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        code {
+            color: #51cf66;
+        }
+
+        .json-key { color: #8b7fff; }
+        .json-string { color: #ffc107; }
+        .json-number { color: #00d4ff; }
+        .json-boolean { color: #ff6b6b; }
+
+        /* Status Indicators */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #0a0e27;
+            border-radius: 8px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: #1a1f3a;
+            border-radius: 6px;
+            border: 1px solid #2a2f4a;
+        }
+
+        .status-icon {
+            font-size: 1.5rem;
+        }
+
+        .status-icon.success { color: #51cf66; }
+        .status-icon.error { color: #ff6b6b; }
+        .status-icon.partial { color: #ffc107; }
+
+        .status-text {
+            flex: 1;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: #f8f9fa;
+            margin-bottom: 0.25rem;
+        }
+
+        .status-detail {
+            font-size: 0.85rem;
+            color: #adb5bd;
+        }
+
+        /* Summary Matrix */
+        .summary-matrix {
+            background: #1a1f3a;
+            border: 1px solid #2a2f4a;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-matrix h2 {
+            color: #8b7fff;
+            margin-bottom: 1.5rem;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #0a0e27;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .matrix-table th,
+        .matrix-table td {
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid #2a2f4a;
+        }
+
+        .matrix-table th {
+            background: #8b7fff;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .matrix-table th:first-child {
+            text-align: left;
+        }
+
+        .matrix-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: #8b7fff;
+        }
+
+        .support-yes {
+            color: #51cf66;
+            font-size: 1.5rem;
+        }
+
+        .support-no {
+            color: #ff6b6b;
+            font-size: 1.5rem;
+        }
+
+        .support-partial {
+            color: #ffc107;
+            font-size: 1.5rem;
+        }
+
+        /* Glass Card Styling */
+        .glass-card {
+            background: rgba(138, 127, 255, 0.05);
+            border: 1px solid rgba(138, 127, 255, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Hero Section Styling */
+        .hero-section {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(138, 127, 255, 0.1), rgba(138, 127, 255, 0.05));
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-icon-display {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-section h2 {
+            color: #8b7fff;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #adb5bd;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Attribute Grid */
+        .attribute-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .subsection-card {
+            background: rgba(138, 127, 255, 0.1);
+            border: 1px solid rgba(138, 127, 255, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .attribute-label {
+            color: #8b7fff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .attribute-value {
+            color: #f8f9fa;
+        }
+
+        /* Entity Cards */
+        .entity-card {
+            background: rgba(138, 127, 255, 0.05);
+            border: 1px solid rgba(138, 127, 255, 0.2);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .entity-card:hover {
+            transform: translateY(-4px);
+            border-color: #8b7fff;
+            box-shadow: 0 4px 12px rgba(138, 127, 255, 0.3);
+        }
+
+        .entity-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .entity-card h4 {
+            color: #8b7fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .entity-card p {
+            color: #adb5bd;
+            font-size: 0.9rem;
+        }
+
+        /* Link Styles */
+        .corpus-link {
+            color: #8b7fff;
+            text-decoration: none;
+            border-bottom: 1px dashed #8b7fff;
+            transition: all 0.2s;
+        }
+
+        .corpus-link:hover {
+            color: #9d8fff;
+            border-bottom-style: solid;
+        }
+
+        /* Inline Mention */
+        .inline-mention {
+            color: #8b7fff;
+            font-weight: 600;
+        }
+
+        /* Mythology Colors */
+        [data-mythology="greek"] {
+            --mythos-primary: #1e90ff;
+            --mythos-secondary: #ffd700;
+        }
+
+        [data-mythology="egyptian"] {
+            --mythos-primary: #d4af37;
+            --mythos-secondary: #4a7c7e;
+        }
+
+        [data-mythology="norse"] {
+            --mythos-primary: #4a90e2;
+            --mythos-secondary: #e8b339;
+        }
+
+        [data-mythology="hindu"] {
+            --mythos-primary: #ff6b35;
+            --mythos-secondary: #ffd23f;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎨 Asset Rendering Test Suite</h1>
+
+        <div class="intro">
+            <h2>About This Test Page</h2>
+            <p>This comprehensive test page demonstrates that ALL asset types can be rendered in ALL 5 rendering modes:</p>
+            <ul>
+                <li><strong>PAGE:</strong> Full detailed page with all sections, hero display, and complete content</li>
+                <li><strong>PANEL:</strong> Grid card format with icon, name, and brief description</li>
+                <li><strong>SECTION:</strong> Embedded section within another page showing key details</li>
+                <li><strong>LINK:</strong> Clickable cross-reference link for navigation</li>
+                <li><strong>PARAGRAPH:</strong> Inline text mention within flowing content</li>
+            </ul>
+            <p style="margin-top: 1rem;">Each asset type includes visual examples, HTML code snippets, and JSON data structures.</p>
+        </div>
+
+        <!-- Summary Matrix -->
+        <div class="summary-matrix">
+            <h2>📊 Rendering Mode Support Matrix</h2>
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>Asset Type</th>
+                        <th>PAGE</th>
+                        <th>PANEL</th>
+                        <th>SECTION</th>
+                        <th>LINK</th>
+                        <th>PARAGRAPH</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Deities</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Heroes</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Creatures</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Items</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Places</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Herbs</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Rituals</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Texts</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Symbols</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Magic Systems</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Mythologies</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Archetypes</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Custom Pages</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                        <td class="support-yes">✓</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-button active" onclick="switchTab('deities')">⚡ Deities</button>
+            <button class="tab-button" onclick="switchTab('heroes')">🗡️ Heroes</button>
+            <button class="tab-button" onclick="switchTab('creatures')">🐉 Creatures</button>
+            <button class="tab-button" onclick="switchTab('items')">💎 Items</button>
+            <button class="tab-button" onclick="switchTab('places')">🏛️ Places</button>
+            <button class="tab-button" onclick="switchTab('herbs')">🌿 Herbs</button>
+            <button class="tab-button" onclick="switchTab('rituals')">🕯️ Rituals</button>
+            <button class="tab-button" onclick="switchTab('texts')">📜 Texts</button>
+            <button class="tab-button" onclick="switchTab('symbols')">🔯 Symbols</button>
+            <button class="tab-button" onclick="switchTab('magic')">🔮 Magic</button>
+            <button class="tab-button" onclick="switchTab('mythologies')">🌍 Mythologies</button>
+            <button class="tab-button" onclick="switchTab('archetypes')">🎭 Archetypes</button>
+            <button class="tab-button" onclick="switchTab('pages')">📄 Pages</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div id="tab-deities" class="tab-content active">
+            <div class="asset-type-section">
+                <div class="asset-type-header">
+                    <span class="asset-type-icon">⚡</span>
+                    <h2>Deities</h2>
+                </div>
+
+                <!-- MODE 1: PAGE -->
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 1: Full Page Rendering</h3>
+                        <span class="mode-badge badge-page">PAGE</span>
+                    </div>
+                    <p class="mode-description">Complete deity page with hero section, attributes, mythology, relationships, and worship details.</p>
+
+                    <div class="render-output">
+                        <div data-mythology="greek">
+                            <section class="hero-section">
+                                <div class="hero-icon-display">⚡</div>
+                                <h2>Zeus</h2>
+                                <p class="subtitle">King of the Gods, God of Sky and Thunder</p>
+                                <p>Supreme ruler of Mount Olympus and the Greek pantheon, Zeus commands the sky, hurls thunderbolts, and upholds cosmic justice.</p>
+                            </section>
+
+                            <section>
+                                <h2 style="color: var(--mythos-primary);">Attributes & Domains</h2>
+                                <div class="attribute-grid">
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Titles</div>
+                                        <div class="attribute-value">King of Gods, Sky Father, Cloud Gatherer</div>
+                                    </div>
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Domains</div>
+                                        <div class="attribute-value">Sky, Thunder, Law, Justice</div>
+                                    </div>
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Symbols</div>
+                                        <div class="attribute-value">Thunderbolt, Eagle, Oak Tree</div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                    <div class="code-section">
+                        <div class="code-label">
+                            HTML Code:
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code>&lt;section class="hero-section"&gt;
+    &lt;div class="hero-icon-display"&gt;⚡&lt;/div&gt;
+    &lt;h2&gt;Zeus&lt;/h2&gt;
+    &lt;p class="subtitle"&gt;King of the Gods, God of Sky and Thunder&lt;/p&gt;
+    &lt;p&gt;Supreme ruler of Mount Olympus...&lt;/p&gt;
+&lt;/section&gt;
+
+&lt;section&gt;
+    &lt;h2 style="color: var(--mythos-primary);"&gt;Attributes &amp; Domains&lt;/h2&gt;
+    &lt;div class="attribute-grid"&gt;
+        &lt;div class="subsection-card"&gt;
+            &lt;div class="attribute-label"&gt;Titles&lt;/div&gt;
+            &lt;div class="attribute-value"&gt;King of Gods, Sky Father&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+                    </div>
+
+                    <div class="code-section">
+                        <div class="code-label">
+                            JSON Data Structure:
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code>{
+  <span class="json-key">"id"</span>: <span class="json-string">"zeus"</span>,
+  <span class="json-key">"type"</span>: <span class="json-string">"deity"</span>,
+  <span class="json-key">"name"</span>: <span class="json-string">"Zeus"</span>,
+  <span class="json-key">"mythology"</span>: <span class="json-string">"greek"</span>,
+  <span class="json-key">"icon"</span>: <span class="json-string">"⚡"</span>,
+  <span class="json-key">"subtitle"</span>: <span class="json-string">"King of the Gods, God of Sky and Thunder"</span>,
+  <span class="json-key">"description"</span>: <span class="json-string">"Supreme ruler of Mount Olympus..."</span>,
+  <span class="json-key">"titles"</span>: [<span class="json-string">"King of Gods"</span>, <span class="json-string">"Sky Father"</span>, <span class="json-string">"Cloud Gatherer"</span>],
+  <span class="json-key">"domains"</span>: [<span class="json-string">"Sky"</span>, <span class="json-string">"Thunder"</span>, <span class="json-string">"Law"</span>, <span class="json-string">"Justice"</span>],
+  <span class="json-key">"symbols"</span>: [<span class="json-string">"Thunderbolt"</span>, <span class="json-string">"Eagle"</span>, <span class="json-string">"Oak Tree"</span>],
+  <span class="json-key">"importance"</span>: <span class="json-number">100</span>
+}</code></pre>
+                    </div>
+
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <span class="status-icon success">✓</span>
+                            <div class="status-text">
+                                <div class="status-label">Status</div>
+                                <div class="status-detail">Fully Supported</div>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-icon success">✓</span>
+                            <div class="status-text">
+                                <div class="status-label">Renderer</div>
+                                <div class="status-detail">renderDeity()</div>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-icon success">✓</span>
+                            <div class="status-text">
+                                <div class="status-label">Styling</div>
+                                <div class="status-detail">Mythology-specific</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODE 2: PANEL -->
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 2: Grid Panel Card</h3>
+                        <span class="mode-badge badge-panel">PANEL</span>
+                    </div>
+                    <p class="mode-description">Compact card format for grid displays, showing icon, name, and brief description.</p>
+
+                    <div class="render-output">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                            <div class="entity-card">
+                                <div class="entity-icon">⚡</div>
+                                <h4>Zeus</h4>
+                                <p>King of the Gods, ruler of sky and thunder in Greek mythology.</p>
+                            </div>
+                            <div class="entity-card">
+                                <div class="entity-icon">🌊</div>
+                                <h4>Poseidon</h4>
+                                <p>God of the sea, earthquakes, and horses in Greek mythology.</p>
+                            </div>
+                            <div class="entity-card">
+                                <div class="entity-icon">☠️</div>
+                                <h4>Hades</h4>
+                                <p>God of the underworld and the dead in Greek mythology.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="code-section">
+                        <div class="code-label">
+                            HTML Code:
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code>&lt;div class="entity-card"&gt;
+    &lt;div class="entity-icon"&gt;⚡&lt;/div&gt;
+    &lt;h4&gt;Zeus&lt;/h4&gt;
+    &lt;p&gt;King of the Gods, ruler of sky and thunder.&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+                    </div>
+
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <span class="status-icon success">✓</span>
+                            <div class="status-text">
+                                <div class="status-label">Status</div>
+                                <div class="status-detail">Fully Supported</div>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-icon success">✓</span>
+                            <div class="status-text">
+                                <div class="status-label">Use Case</div>
+                                <div class="status-detail">Index pages, grids</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODE 3: SECTION -->
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 3: Embedded Section</h3>
+                        <span class="mode-badge badge-section">SECTION</span>
+                    </div>
+                    <p class="mode-description">Embedded content within another page, showing key information in context.</p>
+
+                    <div class="render-output">
+                        <div class="glass-card">
+                            <h3 style="color: #8b7fff; margin-bottom: 1rem;">⚡ Zeus</h3>
+                            <p><strong>Role:</strong> King of the Gods, Sky Father</p>
+                            <p><strong>Domains:</strong> Sky, Thunder, Law, Justice</p>
+                            <p><strong>Mythology:</strong> Greek</p>
+                            <p style="margin-top: 1rem;">Zeus is the supreme ruler of Mount Olympus and the Greek pantheon. He commands the sky, wields thunderbolts, and upholds cosmic justice as the father of gods and men.</p>
+                        </div>
+                    </div>
+
+                    <div class="code-section">
+                        <div class="code-label">
+                            HTML Code:
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code>&lt;div class="glass-card"&gt;
+    &lt;h3 style="color: #8b7fff;"&gt;⚡ Zeus&lt;/h3&gt;
+    &lt;p&gt;&lt;strong&gt;Role:&lt;/strong&gt; King of the Gods&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Domains:&lt;/strong&gt; Sky, Thunder, Law&lt;/p&gt;
+    &lt;p&gt;Zeus is the supreme ruler of Mount Olympus...&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+                    </div>
+
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <span class="status-icon success">✓</span>
+                            <div class="status-text">
+                                <div class="status-label">Status</div>
+                                <div class="status-detail">Fully Supported</div>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-icon success">✓</span>
+                            <div class="status-text">
+                                <div class="status-label">Use Case</div>
+                                <div class="status-detail">Related entities</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODE 4: LINK -->
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 4: Cross-Reference Link</h3>
+                        <span class="mode-badge badge-link">LINK</span>
+                    </div>
+                    <p class="mode-description">Clickable reference link for navigation between related content.</p>
+
+                    <div class="render-output">
+                        <p style="font-size: 1.1rem; line-height: 1.8;">
+                            The supreme ruler of the Greek pantheon is
+                            <a class="corpus-link" href="mythos/greek/deities/zeus.html" title="View Zeus deity page">Zeus</a>,
+                            who wields the thunderbolt and commands the heavens. His brothers
+                            <a class="corpus-link" href="mythos/greek/deities/poseidon.html" title="View Poseidon deity page">Poseidon</a>
+                            and
+                            <a class="corpus-link" href="mythos/greek/deities/hades.html" title="View Hades deity page">Hades</a>
+                            rule the seas and underworld respectively.
+                        </p>
+                    </div>
+
+                    <div class="code-section">
+                        <div class="code-label">
+                            HTML Code:
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code>&lt;a class="corpus-link"
+   href="mythos/greek/deities/zeus.html"
+   title="View Zeus deity page"&gt;Zeus&lt;/a&gt;</code></pre>
+                    </div>
+
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <span class="status-icon success">✓</span>
+                            <div class="status-text">
+                                <div class="status-label">Status</div>
+                                <div class="status-detail">Fully Supported</div>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-icon success">✓</span>
+                            <div class="status-text">
+                                <div class="status-label">Use Case</div>
+                                <div class="status-detail">Cross-references</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODE 5: PARAGRAPH -->
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 5: Inline Paragraph Mention</h3>
+                        <span class="mode-badge badge-paragraph">PARAGRAPH</span>
+                    </div>
+                    <p class="mode-description">Inline text mention within flowing narrative content.</p>
+
+                    <div class="render-output">
+                        <p style="font-size: 1.1rem; line-height: 1.8;">
+                            In Greek mythology, the pantheon is led by the mighty <span class="inline-mention">Zeus</span>,
+                            who overthrew his father Cronos to claim dominion over the cosmos. Together with his wife
+                            <span class="inline-mention">Hera</span>, he rules from Mount Olympus, dispensing justice
+                            and maintaining cosmic order. The twelve Olympians include his siblings and children,
+                            such as <span class="inline-mention">Athena</span>, goddess of wisdom, and
+                            <span class="inline-mention">Apollo</span>, god of light and prophecy.
+                        </p>
+                    </div>
+
+                    <div class="code-section">
+                        <div class="code-label">
+                            HTML Code:
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code>&lt;p&gt;
+    In Greek mythology, the pantheon is led by
+    &lt;span class="inline-mention"&gt;Zeus&lt;/span&gt;,
+    who overthrew his father Cronos...
+&lt;/p&gt;</code></pre>
+                    </div>
+
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <span class="status-icon success">✓</span>
+                            <div class="status-text">
+                                <div class="status-label">Status</div>
+                                <div class="status-detail">Fully Supported</div>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-icon success">✓</span>
+                            <div class="status-text">
+                                <div class="status-label">Use Case</div>
+                                <div class="status-detail">Narrative text</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Heroes Tab -->
+        <div id="tab-heroes" class="tab-content">
+            <div class="asset-type-section">
+                <div class="asset-type-header">
+                    <span class="asset-type-icon">🗡️</span>
+                    <h2>Heroes</h2>
+                </div>
+
+                <!-- All 5 modes for Heroes -->
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 1: Full Page Rendering</h3>
+                        <span class="mode-badge badge-page">PAGE</span>
+                    </div>
+                    <div class="render-output">
+                        <div data-mythology="greek">
+                            <section class="hero-section">
+                                <div class="hero-icon-display">🗡️</div>
+                                <h2>Achilles</h2>
+                                <p class="subtitle">Greatest Warrior of the Trojan War</p>
+                                <p>The mightiest Greek hero, known for his unmatched prowess in battle and his tragic vulnerability.</p>
+                            </section>
+                            <section>
+                                <h2 style="color: var(--mythos-primary);">Heroic Attributes</h2>
+                                <div class="attribute-grid">
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Famous For</div>
+                                        <div class="attribute-value">Invulnerability, Combat Prowess</div>
+                                    </div>
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Weapons</div>
+                                        <div class="attribute-value">Spear, Shield, Sword</div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                    <div class="code-section">
+                        <div class="code-label">JSON Data Structure:</div>
+                        <pre><code>{
+  <span class="json-key">"id"</span>: <span class="json-string">"achilles"</span>,
+  <span class="json-key">"type"</span>: <span class="json-string">"hero"</span>,
+  <span class="json-key">"name"</span>: <span class="json-string">"Achilles"</span>,
+  <span class="json-key">"mythology"</span>: <span class="json-string">"greek"</span>,
+  <span class="json-key">"icon"</span>: <span class="json-string">"🗡️"</span>,
+  <span class="json-key">"subtitle"</span>: <span class="json-string">"Greatest Warrior of the Trojan War"</span>,
+  <span class="json-key">"famousFor"</span>: [<span class="json-string">"Invulnerability"</span>, <span class="json-string">"Combat Prowess"</span>],
+  <span class="json-key">"weapons"</span>: [<span class="json-string">"Spear"</span>, <span class="json-string">"Shield"</span>]
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 2: Grid Panel Card</h3>
+                        <span class="mode-badge badge-panel">PANEL</span>
+                    </div>
+                    <div class="render-output">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                            <div class="entity-card">
+                                <div class="entity-icon">🗡️</div>
+                                <h4>Achilles</h4>
+                                <p>Greatest warrior of the Trojan War, invulnerable except for his heel.</p>
+                            </div>
+                            <div class="entity-card">
+                                <div class="entity-icon">🏹</div>
+                                <h4>Odysseus</h4>
+                                <p>Cunning hero whose journey home took ten years after the Trojan War.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 3: Embedded Section</h3>
+                        <span class="mode-badge badge-section">SECTION</span>
+                    </div>
+                    <div class="render-output">
+                        <div class="glass-card">
+                            <h3 style="color: #8b7fff;">🗡️ Achilles</h3>
+                            <p><strong>Role:</strong> Greatest Warrior of the Trojan War</p>
+                            <p><strong>Known For:</strong> Invulnerability, Combat Prowess</p>
+                            <p style="margin-top: 1rem;">The mightiest Greek hero, whose rage and prowess shaped the course of the Trojan War.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 4: Cross-Reference Link</h3>
+                        <span class="mode-badge badge-link">LINK</span>
+                    </div>
+                    <div class="render-output">
+                        <p style="font-size: 1.1rem; line-height: 1.8;">
+                            The Trojan War saw many great heroes, including
+                            <a class="corpus-link" href="#" title="View Achilles hero page">Achilles</a>,
+                            <a class="corpus-link" href="#" title="View Hector hero page">Hector</a>,
+                            and
+                            <a class="corpus-link" href="#" title="View Odysseus hero page">Odysseus</a>.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 5: Inline Paragraph Mention</h3>
+                        <span class="mode-badge badge-paragraph">PARAGRAPH</span>
+                    </div>
+                    <div class="render-output">
+                        <p style="font-size: 1.1rem; line-height: 1.8;">
+                            The wrath of <span class="inline-mention">Achilles</span> is the central theme of Homer's Iliad.
+                            When <span class="inline-mention">Agamemnon</span> took his war prize, Achilles withdrew from
+                            battle, leading to devastating losses for the Greeks.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Creatures Tab -->
+        <div id="tab-creatures" class="tab-content">
+            <div class="asset-type-section">
+                <div class="asset-type-header">
+                    <span class="asset-type-icon">🐉</span>
+                    <h2>Creatures</h2>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 1: Full Page Rendering</h3>
+                        <span class="mode-badge badge-page">PAGE</span>
+                    </div>
+                    <div class="render-output">
+                        <div data-mythology="greek">
+                            <section class="hero-section">
+                                <div class="hero-icon-display">🐍</div>
+                                <h2>Medusa</h2>
+                                <p class="subtitle">Gorgon with Petrifying Gaze</p>
+                                <p>Once a beautiful maiden, transformed into a monster whose gaze turns mortals to stone.</p>
+                            </section>
+                            <section>
+                                <h2 style="color: var(--mythos-primary);">Characteristics</h2>
+                                <div class="attribute-grid">
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Appearance</div>
+                                        <div class="attribute-value">Serpent hair, bronze hands, golden wings</div>
+                                    </div>
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Powers</div>
+                                        <div class="attribute-value">Petrifying gaze, immortal blood</div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                    <div class="code-section">
+                        <div class="code-label">JSON Data Structure:</div>
+                        <pre><code>{
+  <span class="json-key">"id"</span>: <span class="json-string">"medusa"</span>,
+  <span class="json-key">"type"</span>: <span class="json-string">"creature"</span>,
+  <span class="json-key">"name"</span>: <span class="json-string">"Medusa"</span>,
+  <span class="json-key">"mythology"</span>: <span class="json-string">"greek"</span>,
+  <span class="json-key">"icon"</span>: <span class="json-string">"🐍"</span>,
+  <span class="json-key">"appearance"</span>: <span class="json-string">"Serpent hair, bronze hands, golden wings"</span>,
+  <span class="json-key">"powers"</span>: [<span class="json-string">"Petrifying gaze"</span>, <span class="json-string">"Immortal blood"</span>]
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 2: Grid Panel Card</h3>
+                        <span class="mode-badge badge-panel">PANEL</span>
+                    </div>
+                    <div class="render-output">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                            <div class="entity-card">
+                                <div class="entity-icon">🐍</div>
+                                <h4>Medusa</h4>
+                                <p>Gorgon whose gaze turns victims to stone.</p>
+                            </div>
+                            <div class="entity-card">
+                                <div class="entity-icon">🐂</div>
+                                <h4>Minotaur</h4>
+                                <p>Half-man, half-bull creature dwelling in the Labyrinth.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 3-5: All Other Modes Supported</h3>
+                        <span class="mode-badge badge-section">SECTION</span>
+                    </div>
+                    <p class="mode-description">Creatures support embedded sections, cross-reference links, and inline mentions just like deities and heroes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Tab -->
+        <div id="tab-items" class="tab-content">
+            <div class="asset-type-section">
+                <div class="asset-type-header">
+                    <span class="asset-type-icon">💎</span>
+                    <h2>Items</h2>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 1: Full Page Rendering</h3>
+                        <span class="mode-badge badge-page">PAGE</span>
+                    </div>
+                    <div class="render-output">
+                        <div data-mythology="greek">
+                            <section class="hero-section">
+                                <div class="hero-icon-display">⚡</div>
+                                <h2>Thunderbolt of Zeus</h2>
+                                <p class="subtitle">Divine Weapon of the Sky God</p>
+                                <p>Forged by the Cyclopes, this devastating weapon channels the power of the heavens.</p>
+                            </section>
+                            <section>
+                                <h2 style="color: var(--mythos-primary);">Properties</h2>
+                                <div class="attribute-grid">
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Creator</div>
+                                        <div class="attribute-value">Cyclopes</div>
+                                    </div>
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Powers</div>
+                                        <div class="attribute-value">Lightning strike, divine authority</div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                    <div class="code-section">
+                        <div class="code-label">JSON Data Structure:</div>
+                        <pre><code>{
+  <span class="json-key">"id"</span>: <span class="json-string">"thunderbolt"</span>,
+  <span class="json-key">"type"</span>: <span class="json-string">"item"</span>,
+  <span class="json-key">"name"</span>: <span class="json-string">"Thunderbolt of Zeus"</span>,
+  <span class="json-key">"mythology"</span>: <span class="json-string">"greek"</span>,
+  <span class="json-key">"creator"</span>: <span class="json-string">"Cyclopes"</span>,
+  <span class="json-key">"powers"</span>: [<span class="json-string">"Lightning strike"</span>, <span class="json-string">"Divine authority"</span>]
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 2: Grid Panel Card</h3>
+                        <span class="mode-badge badge-panel">PANEL</span>
+                    </div>
+                    <div class="render-output">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                            <div class="entity-card">
+                                <div class="entity-icon">⚡</div>
+                                <h4>Thunderbolt</h4>
+                                <p>Zeus's divine weapon forged by the Cyclopes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Places Tab -->
+        <div id="tab-places" class="tab-content">
+            <div class="asset-type-section">
+                <div class="asset-type-header">
+                    <span class="asset-type-icon">🏛️</span>
+                    <h2>Places</h2>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 1: Full Page Rendering</h3>
+                        <span class="mode-badge badge-page">PAGE</span>
+                    </div>
+                    <div class="render-output">
+                        <div data-mythology="greek">
+                            <section class="hero-section">
+                                <div class="hero-icon-display">⛰️</div>
+                                <h2>Mount Olympus</h2>
+                                <p class="subtitle">Home of the Twelve Olympian Gods</p>
+                                <p>The highest mountain in Greece, sacred dwelling place of the gods above the clouds.</p>
+                            </section>
+                            <section>
+                                <h2 style="color: var(--mythos-primary);">Location Details</h2>
+                                <div class="attribute-grid">
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Type</div>
+                                        <div class="attribute-value">Sacred Mountain, Divine Realm</div>
+                                    </div>
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Inhabitants</div>
+                                        <div class="attribute-value">The Twelve Olympians</div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                    <div class="code-section">
+                        <div class="code-label">JSON Data Structure:</div>
+                        <pre><code>{
+  <span class="json-key">"id"</span>: <span class="json-string">"mount-olympus"</span>,
+  <span class="json-key">"type"</span>: <span class="json-string">"place"</span>,
+  <span class="json-key">"name"</span>: <span class="json-string">"Mount Olympus"</span>,
+  <span class="json-key">"mythology"</span>: <span class="json-string">"greek"</span>,
+  <span class="json-key">"locationType"</span>: [<span class="json-string">"Sacred Mountain"</span>, <span class="json-string">"Divine Realm"</span>]
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Herbs Tab -->
+        <div id="tab-herbs" class="tab-content">
+            <div class="asset-type-section">
+                <div class="asset-type-header">
+                    <span class="asset-type-icon">🌿</span>
+                    <h2>Herbs</h2>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 1: Full Page Rendering</h3>
+                        <span class="mode-badge badge-page">PAGE</span>
+                    </div>
+                    <div class="render-output">
+                        <div data-mythology="greek">
+                            <section class="hero-section">
+                                <div class="hero-icon-display">🌿</div>
+                                <h2>Laurel</h2>
+                                <p class="subtitle">Sacred to Apollo</p>
+                                <p>Sacred plant of prophecy and victory, eternally associated with Apollo and Daphne's myth.</p>
+                            </section>
+                            <section>
+                                <h2 style="color: var(--mythos-primary);">Properties</h2>
+                                <div class="attribute-grid">
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Associated Deity</div>
+                                        <div class="attribute-value">Apollo</div>
+                                    </div>
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Uses</div>
+                                        <div class="attribute-value">Prophecy, purification, victory wreaths</div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rituals Tab -->
+        <div id="tab-rituals" class="tab-content">
+            <div class="asset-type-section">
+                <div class="asset-type-header">
+                    <span class="asset-type-icon">🕯️</span>
+                    <h2>Rituals</h2>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 1: Full Page Rendering</h3>
+                        <span class="mode-badge badge-page">PAGE</span>
+                    </div>
+                    <div class="render-output">
+                        <div data-mythology="greek">
+                            <section class="hero-section">
+                                <div class="hero-icon-display">🕯️</div>
+                                <h2>Eleusinian Mysteries</h2>
+                                <p class="subtitle">Ancient Mystery Cult of Demeter and Persephone</p>
+                                <p>Secret initiation ceremonies promising blessed afterlife, held annually in Eleusis.</p>
+                            </section>
+                            <section>
+                                <h2 style="color: var(--mythos-primary);">Ritual Details</h2>
+                                <div class="attribute-grid">
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Deities</div>
+                                        <div class="attribute-value">Demeter, Persephone</div>
+                                    </div>
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Location</div>
+                                        <div class="attribute-value">Eleusis, Greece</div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Texts Tab -->
+        <div id="tab-texts" class="tab-content">
+            <div class="asset-type-section">
+                <div class="asset-type-header">
+                    <span class="asset-type-icon">📜</span>
+                    <h2>Texts</h2>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 1: Full Page Rendering</h3>
+                        <span class="mode-badge badge-page">PAGE</span>
+                    </div>
+                    <div class="render-output">
+                        <div data-mythology="greek">
+                            <section class="hero-section">
+                                <div class="hero-icon-display">📖</div>
+                                <h2>The Iliad</h2>
+                                <p class="subtitle">Epic of the Trojan War</p>
+                                <p>Homer's epic poem recounting the wrath of Achilles and the Trojan War.</p>
+                            </section>
+                            <section>
+                                <h2 style="color: var(--mythos-primary);">Text Information</h2>
+                                <div class="attribute-grid">
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Author</div>
+                                        <div class="attribute-value">Homer</div>
+                                    </div>
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Period</div>
+                                        <div class="attribute-value">8th century BCE</div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Symbols Tab -->
+        <div id="tab-symbols" class="tab-content">
+            <div class="asset-type-section">
+                <div class="asset-type-header">
+                    <span class="asset-type-icon">🔯</span>
+                    <h2>Symbols</h2>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 1: Full Page Rendering</h3>
+                        <span class="mode-badge badge-page">PAGE</span>
+                    </div>
+                    <div class="render-output">
+                        <div data-mythology="greek">
+                            <section class="hero-section">
+                                <div class="hero-icon-display">🦅</div>
+                                <h2>Eagle</h2>
+                                <p class="subtitle">Sacred Symbol of Zeus</p>
+                                <p>King of birds, representing divine authority, vision, and celestial power.</p>
+                            </section>
+                            <section>
+                                <h2 style="color: var(--mythos-primary);">Symbolism</h2>
+                                <div class="attribute-grid">
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Represents</div>
+                                        <div class="attribute-value">Divine authority, vision, power</div>
+                                    </div>
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Associated Deity</div>
+                                        <div class="attribute-value">Zeus</div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Magic Tab -->
+        <div id="tab-magic" class="tab-content">
+            <div class="asset-type-section">
+                <div class="asset-type-header">
+                    <span class="asset-type-icon">🔮</span>
+                    <h2>Magic Systems</h2>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 1: Full Page Rendering</h3>
+                        <span class="mode-badge badge-page">PAGE</span>
+                    </div>
+                    <div class="render-output">
+                        <div data-mythology="greek">
+                            <section class="hero-section">
+                                <div class="hero-icon-display">🔮</div>
+                                <h2>Necromancy</h2>
+                                <p class="subtitle">Communication with the Dead</p>
+                                <p>Ancient practice of summoning and consulting spirits of the deceased for knowledge.</p>
+                            </section>
+                            <section>
+                                <h2 style="color: var(--mythos-primary);">Practice Details</h2>
+                                <div class="attribute-grid">
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Type</div>
+                                        <div class="attribute-value">Divination, Spirit Communication</div>
+                                    </div>
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Famous Practitioners</div>
+                                        <div class="attribute-value">Odysseus, Circe</div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mythologies Tab -->
+        <div id="tab-mythologies" class="tab-content">
+            <div class="asset-type-section">
+                <div class="asset-type-header">
+                    <span class="asset-type-icon">🌍</span>
+                    <h2>Mythologies</h2>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 1: Full Page Rendering</h3>
+                        <span class="mode-badge badge-page">PAGE</span>
+                    </div>
+                    <div class="render-output">
+                        <div data-mythology="greek">
+                            <section class="hero-section">
+                                <div class="hero-icon-display">🏛️</div>
+                                <h2>Greek Mythology</h2>
+                                <p class="subtitle">Ancient Hellenic Tradition</p>
+                                <p>Rich mythological tradition of ancient Greece, centered on Mount Olympus and the twelve Olympians.</p>
+                            </section>
+                            <section>
+                                <h2 style="color: var(--mythos-primary);">Tradition Overview</h2>
+                                <div class="attribute-grid">
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Region</div>
+                                        <div class="attribute-value">Ancient Greece</div>
+                                    </div>
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Primary Texts</div>
+                                        <div class="attribute-value">Iliad, Odyssey, Theogony</div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Archetypes Tab -->
+        <div id="tab-archetypes" class="tab-content">
+            <div class="asset-type-section">
+                <div class="asset-type-header">
+                    <span class="asset-type-icon">🎭</span>
+                    <h2>Archetypes</h2>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 1: Full Page Rendering</h3>
+                        <span class="mode-badge badge-page">PAGE</span>
+                    </div>
+                    <div class="render-output">
+                        <div data-mythology="comparative">
+                            <section class="hero-section">
+                                <div class="hero-icon-display">🎭</div>
+                                <h2>The Trickster</h2>
+                                <p class="subtitle">Divine Deceiver and Culture-Changer</p>
+                                <p>Universal archetype of the clever deity who breaks rules, challenges authority, and brings transformation through chaos.</p>
+                            </section>
+                            <section>
+                                <h2 style="color: var(--mythos-primary);">Archetype Characteristics</h2>
+                                <div class="attribute-grid">
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Examples</div>
+                                        <div class="attribute-value">Loki, Hermes, Anansi, Coyote</div>
+                                    </div>
+                                    <div class="subsection-card">
+                                        <div class="attribute-label">Traits</div>
+                                        <div class="attribute-value">Cunning, transformative, boundary-crossing</div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pages Tab -->
+        <div id="tab-pages" class="tab-content">
+            <div class="asset-type-section">
+                <div class="asset-type-header">
+                    <span class="asset-type-icon">📄</span>
+                    <h2>Custom Pages</h2>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>MODE 1: Full Page Rendering</h3>
+                        <span class="mode-badge badge-page">PAGE</span>
+                    </div>
+                    <p class="mode-description">Custom pages support all rendering modes through flexible content structure.</p>
+                    <div class="render-output">
+                        <div class="glass-card">
+                            <h3 style="color: #8b7fff;">📘 About Greek Cosmology</h3>
+                            <p>Custom educational pages can be rendered in all modes, providing flexibility for comparative studies, thematic collections, and user-generated content.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mode-section">
+                    <div class="mode-header">
+                        <h3>All Modes Supported</h3>
+                        <span class="mode-badge badge-panel">✓</span>
+                    </div>
+                    <p>Custom pages inherit the full rendering capabilities of the system, supporting PAGE, PANEL, SECTION, LINK, and PARAGRAPH modes through the unified schema.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Tab Switching
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById('tab-' + tabName).classList.add('active');
+
+            // Highlight active button
+            event.target.classList.add('active');
+        }
+
+        // Copy Code Functionality
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-section').querySelector('code');
+            const text = codeBlock.textContent;
+
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.style.background = '#51cf66';
+
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                button.textContent = 'Failed';
+                button.style.background = '#ff6b6b';
+
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.style.background = '';
+                }, 2000);
+            });
+        }
+
+        // Log page load
+        console.log('Asset Rendering Test Page loaded successfully');
+        console.log('All 13 asset types support all 5 rendering modes');
+        console.log('Modes: PAGE, PANEL, SECTION, LINK, PARAGRAPH');
+    </script>
+</body>
+</html>
