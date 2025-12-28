@@ -6,6 +6,7 @@
 
 class SPANavigation {
     constructor(firestore, authManager, renderer) {
+        const constructorStart = performance.now();
         console.log('[SPA] 🔧 Constructor called at:', new Date().toISOString());
 
         this.db = firestore;
@@ -34,19 +35,55 @@ class SPANavigation {
             dashboard: /^#?\/dashboard\/?$/
         };
 
-        console.log('[SPA] 🔒 Starting waitForAuth()...');
+        // ⚡ OPTIMIZATION: Check currentUser synchronously first
+        const syncCheckStart = performance.now();
+        const currentUser = firebase.auth().currentUser;
+        const syncCheckEnd = performance.now();
 
-        // Wait for auth to be ready before initializing router
-        this.waitForAuth().then((user) => {
-            console.log('[SPA] ✅ waitForAuth() resolved with user:', user ? user.email : 'null');
+        console.log(`[SPA] ⚡ Synchronous auth check took: ${(syncCheckEnd - syncCheckStart).toFixed(2)}ms`);
+
+        if (currentUser) {
+            // Fast path: User already authenticated
+            const fastPathEnd = performance.now();
+            console.log('[SPA] ✨ CurrentUser available immediately:', currentUser.email);
+            console.log('[SPA] ⚡ FAST PATH: Skipping async auth wait (performance optimization)');
+            console.log(`[SPA] 📊 Total constructor time (fast path): ${(fastPathEnd - constructorStart).toFixed(2)}ms`);
+
             this.authReady = true;
-            console.log('[SPA] 🔓 Auth ready flag set to true');
-            this.initRouter();
-        }).catch((error) => {
-            console.error('[SPA] ❌ waitForAuth() rejected with error:', error);
-        });
 
-        console.log('[SPA] 🏁 Constructor completed (waitForAuth is async)');
+            // Initialize router immediately (synchronous path)
+            if (document.readyState === 'loading') {
+                console.log('[SPA] 📄 DOM still loading, waiting for DOMContentLoaded...');
+                document.addEventListener('DOMContentLoaded', () => {
+                    console.log('[SPA] 📄 DOMContentLoaded fired, initializing router...');
+                    this.initRouter();
+                });
+            } else {
+                console.log('[SPA] 📄 DOM already loaded, initializing router immediately...');
+                this.initRouter();
+            }
+
+            console.log('[SPA] 🏁 Constructor completed (FAST PATH - synchronous)');
+        } else {
+            // Slow path: Wait for auth state change
+            console.log('[SPA] 🔒 No currentUser, taking SLOW PATH (async wait)...');
+            console.log('[SPA] 🔒 Starting waitForAuth()...');
+
+            // Wait for auth to be ready before initializing router
+            this.waitForAuth().then((user) => {
+                const slowPathEnd = performance.now();
+                console.log('[SPA] ✅ waitForAuth() resolved with user:', user ? user.email : 'null');
+                console.log(`[SPA] 📊 Total auth wait time (slow path): ${(slowPathEnd - constructorStart).toFixed(2)}ms`);
+
+                this.authReady = true;
+                console.log('[SPA] 🔓 Auth ready flag set to true');
+                this.initRouter();
+            }).catch((error) => {
+                console.error('[SPA] ❌ waitForAuth() rejected with error:', error);
+            });
+
+            console.log('[SPA] 🏁 Constructor completed (SLOW PATH - waitForAuth is async)');
+        }
     }
 
     /**
@@ -157,11 +194,14 @@ class SPANavigation {
             currentRoute: this.currentRoute
         });
 
+        const mainContent = document.getElementById('main-content');
+
         // Double-check authentication (auth guard already handles this)
         if (!this.authReady) {
-            console.log('[SPA] ⚠️  EARLY RETURN: Auth not ready yet, waiting...');
+            console.log('[SPA] ⏳ Auth not ready yet, showing loading state...');
             console.log('[SPA] 💡 Tip: waitForAuth() may not have completed yet');
             console.log('[SPA] ═══════════════════════════════════════');
+            this.showAuthWaitingState(mainContent);
             return;
         }
 
@@ -172,9 +212,10 @@ class SPANavigation {
         console.log('[SPA] 👤 Firebase currentUser:', currentUser ? currentUser.email : 'null');
 
         if (!currentUser) {
-            console.log('[SPA] ⚠️  EARLY RETURN: No current user - auth guard will show login overlay');
+            console.log('[SPA] ⏳ No user found, showing loading state...');
             console.log('[SPA] 💡 Tip: Firebase auth.currentUser is null (may be transient)');
             console.log('[SPA] ═══════════════════════════════════════');
+            this.showAuthWaitingState(mainContent);
             return;
         }
 
@@ -255,6 +296,16 @@ class SPANavigation {
         if (!mainContent) {
             console.error('[SPA] ❌ CRITICAL: main-content element not found!');
             console.error('[SPA] 💡 DOM may not be ready or element ID is wrong');
+
+            // Emit error event
+            console.log('[SPA] 📡 Emitting render-error event');
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: {
+                    route: 'home',
+                    error: 'main-content element not found',
+                    timestamp: Date.now()
+                }
+            }));
             return;
         }
 
@@ -277,6 +328,16 @@ class SPANavigation {
                     console.log('[SPA] ✅ Home page data loaded from Firebase');
                     await renderer.renderPage('home', mainContent);
                     console.log('[SPA] ✅ Home page rendered via PageAssetRenderer');
+
+                    // Emit success event
+                    console.log('[SPA] 📡 Emitting first-render-complete event (PageAssetRenderer)');
+                    document.dispatchEvent(new CustomEvent('first-render-complete', {
+                        detail: {
+                            route: 'home',
+                            renderer: 'PageAssetRenderer',
+                            timestamp: Date.now()
+                        }
+                    }));
                     return;
                 } else {
                     console.log('[SPA] ⚠️  Home page not found in Firebase, falling back to HomeView');
@@ -295,6 +356,16 @@ class SPANavigation {
             console.log('[SPA] 📡 Calling homeView.render(mainContent)...');
             await homeView.render(mainContent);
             console.log('[SPA] ✅ Home page rendered via HomeView');
+
+            // Emit success event
+            console.log('[SPA] 📡 Emitting first-render-complete event (HomeView)');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: 'home',
+                    renderer: 'HomeView',
+                    timestamp: Date.now()
+                }
+            }));
             return;
         } else {
             console.log('[SPA] ℹ️  HomeView class not defined, using inline fallback');
@@ -379,7 +450,17 @@ class SPANavigation {
             });
         }
 
-        console.log('[SPA] Home page rendered');
+        console.log('[SPA] ✅ Home page rendered (inline fallback)');
+
+        // Emit success event
+        console.log('[SPA] 📡 Emitting first-render-complete event (inline)');
+        document.dispatchEvent(new CustomEvent('first-render-complete', {
+            detail: {
+                route: 'home',
+                renderer: 'inline-fallback',
+                timestamp: Date.now()
+            }
+        }));
     }
 
     async loadMythologyCounts(mythologies) {
@@ -431,44 +512,224 @@ class SPANavigation {
     }
 
     async renderMythology(mythologyId) {
-        const mainContent = document.getElementById('main-content');
-        mainContent.innerHTML = `<div class="mythology-page"><h1>${mythologyId} Mythology</h1><p>Coming soon...</p></div>`;
+        console.log('[SPA] ▶️  renderMythology() called');
+
+        try {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `<div class="mythology-page"><h1>${mythologyId} Mythology</h1><p>Coming soon...</p></div>`;
+
+            console.log('[SPA] ✅ Mythology page rendered');
+            console.log('[SPA] 📡 Emitting first-render-complete event');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: 'mythology',
+                    mythologyId: mythologyId,
+                    timestamp: Date.now()
+                }
+            }));
+        } catch (error) {
+            console.error('[SPA] ❌ Mythology page render failed:', error);
+            console.log('[SPA] 📡 Emitting render-error event');
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: {
+                    route: 'mythology',
+                    mythologyId: mythologyId,
+                    error: error.message,
+                    timestamp: Date.now()
+                }
+            }));
+            throw error;
+        }
     }
 
     async renderCategory(mythology, category) {
-        const mainContent = document.getElementById('main-content');
-        mainContent.innerHTML = `<div class="category-page"><h1>${category} - ${mythology}</h1><p>Coming soon...</p></div>`;
+        console.log('[SPA] ▶️  renderCategory() called');
+
+        try {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `<div class="category-page"><h1>${category} - ${mythology}</h1><p>Coming soon...</p></div>`;
+
+            console.log('[SPA] ✅ Category page rendered');
+            console.log('[SPA] 📡 Emitting first-render-complete event');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: 'category',
+                    mythology: mythology,
+                    category: category,
+                    timestamp: Date.now()
+                }
+            }));
+        } catch (error) {
+            console.error('[SPA] ❌ Category page render failed:', error);
+            console.log('[SPA] 📡 Emitting render-error event');
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: {
+                    route: 'category',
+                    mythology: mythology,
+                    category: category,
+                    error: error.message,
+                    timestamp: Date.now()
+                }
+            }));
+            throw error;
+        }
     }
 
     async renderEntity(mythology, categoryType, entityId) {
-        const mainContent = document.getElementById('main-content');
-        mainContent.innerHTML = `<div class="entity-page"><h1>${entityId}</h1><p>Coming soon...</p></div>`;
+        console.log('[SPA] ▶️  renderEntity() called');
+
+        try {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `<div class="entity-page"><h1>${entityId}</h1><p>Coming soon...</p></div>`;
+
+            console.log('[SPA] ✅ Entity page rendered');
+            console.log('[SPA] 📡 Emitting first-render-complete event');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: 'entity',
+                    mythology: mythology,
+                    categoryType: categoryType,
+                    entityId: entityId,
+                    timestamp: Date.now()
+                }
+            }));
+        } catch (error) {
+            console.error('[SPA] ❌ Entity page render failed:', error);
+            console.log('[SPA] 📡 Emitting render-error event');
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: {
+                    route: 'entity',
+                    mythology: mythology,
+                    categoryType: categoryType,
+                    entityId: entityId,
+                    error: error.message,
+                    timestamp: Date.now()
+                }
+            }));
+            throw error;
+        }
     }
 
     async renderSearch() {
-        const mainContent = document.getElementById('main-content');
-        mainContent.innerHTML = '<div id="search-container"></div>';
+        console.log('[SPA] ▶️  renderSearch() called');
+
+        try {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = '<div id="search-container"></div>';
+
+            console.log('[SPA] ✅ Search page rendered');
+            console.log('[SPA] 📡 Emitting first-render-complete event');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: 'search',
+                    timestamp: Date.now()
+                }
+            }));
+        } catch (error) {
+            console.error('[SPA] ❌ Search page render failed:', error);
+            console.log('[SPA] 📡 Emitting render-error event');
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: {
+                    route: 'search',
+                    error: error.message,
+                    timestamp: Date.now()
+                }
+            }));
+            throw error;
+        }
     }
 
     async renderCompare() {
-        const mainContent = document.getElementById('main-content');
-        mainContent.innerHTML = `<div class="compare-page"><h1>Compare Entities</h1><p>Coming soon...</p></div>`;
+        console.log('[SPA] ▶️  renderCompare() called');
+
+        try {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `<div class="compare-page"><h1>Compare Entities</h1><p>Coming soon...</p></div>`;
+
+            console.log('[SPA] ✅ Compare page rendered');
+            console.log('[SPA] 📡 Emitting first-render-complete event');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: 'compare',
+                    timestamp: Date.now()
+                }
+            }));
+        } catch (error) {
+            console.error('[SPA] ❌ Compare page render failed:', error);
+            console.log('[SPA] 📡 Emitting render-error event');
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: {
+                    route: 'compare',
+                    error: error.message,
+                    timestamp: Date.now()
+                }
+            }));
+            throw error;
+        }
     }
 
     async renderDashboard() {
-        const mainContent = document.getElementById('main-content');
-        mainContent.innerHTML = `<div class="dashboard-page"><h1>My Contributions</h1><p>Coming soon...</p></div>`;
+        console.log('[SPA] ▶️  renderDashboard() called');
+
+        try {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `<div class="dashboard-page"><h1>My Contributions</h1><p>Coming soon...</p></div>`;
+
+            console.log('[SPA] ✅ Dashboard page rendered');
+            console.log('[SPA] 📡 Emitting first-render-complete event');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: 'dashboard',
+                    timestamp: Date.now()
+                }
+            }));
+        } catch (error) {
+            console.error('[SPA] ❌ Dashboard page render failed:', error);
+            console.log('[SPA] 📡 Emitting render-error event');
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: {
+                    route: 'dashboard',
+                    error: error.message,
+                    timestamp: Date.now()
+                }
+            }));
+            throw error;
+        }
     }
 
     async render404() {
-        const mainContent = document.getElementById('main-content');
-        mainContent.innerHTML = `
-            <div class="error-page">
-                <h1>404</h1>
-                <p>Page not found</p>
-                <a href="#/" class="btn-primary">Return Home</a>
-            </div>
-        `;
+        console.log('[SPA] ▶️  render404() called');
+
+        try {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `
+                <div class="error-page">
+                    <h1>404</h1>
+                    <p>Page not found</p>
+                    <a href="#/" class="btn-primary">Return Home</a>
+                </div>
+            `;
+
+            console.log('[SPA] ✅ 404 page rendered');
+            console.log('[SPA] 📡 Emitting first-render-complete event');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: '404',
+                    timestamp: Date.now()
+                }
+            }));
+        } catch (error) {
+            console.error('[SPA] ❌ 404 page render failed:', error);
+            console.log('[SPA] 📡 Emitting render-error event');
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: {
+                    route: '404',
+                    error: error.message,
+                    timestamp: Date.now()
+                }
+            }));
+            throw error;
+        }
     }
 
     renderError(error) {
@@ -493,6 +754,29 @@ class SPANavigation {
                         <div class="spinner-ring"></div>
                     </div>
                     <p class="loading-message">Loading...</p>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Show loading state while waiting for auth
+     */
+    showAuthWaitingState(container) {
+        if (!container) {
+            container = document.getElementById('main-content');
+        }
+
+        if (container) {
+            container.innerHTML = `
+                <div class="loading-container" role="status">
+                    <div class="spinner-container">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <p class="loading-message">Preparing content...</p>
+                    <p class="loading-submessage">Verifying authentication...</p>
                 </div>
             `;
         }
