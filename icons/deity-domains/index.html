@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deity Domain Icons - Eyes of Azrael</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        .icon-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .icon-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .icon-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--color-primary);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon-display {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            padding: 1rem;
+            background: rgba(var(--color-primary-rgb), 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-display svg {
+            width: 100%;
+            height: 100%;
+            color: var(--color-primary);
+        }
+
+        .icon-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .icon-domains {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .icon-examples {
+            font-size: 0.85rem;
+            color: var(--color-text-tertiary);
+            font-style: italic;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .domain-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            margin: 0.25rem;
+            background: rgba(var(--color-primary-rgb), 0.2);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.4);
+            border-radius: 1rem;
+            font-size: 0.75rem;
+        }
+
+        .color-demo {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+
+        .color-swatch {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .color-swatch svg {
+            width: 40px;
+            height: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="hero-section">
+            <h1>Deity Domain Icons</h1>
+            <p class="subtitle">Universal symbolic icons for deity domains across all mythologies</p>
+        </header>
+
+        <section class="glass-card">
+            <h2>About Domain Icons</h2>
+            <p>
+                This icon set provides 15 symbolic, mythology-agnostic icons representing common deity domains
+                found across world religions and mythologies. Each icon is designed to be instantly recognizable
+                and works seamlessly across different cultural traditions.
+            </p>
+            <p>
+                Icons use <code>currentColor</code> to automatically adapt to mythology-specific color schemes,
+                ensuring visual consistency while respecting each tradition's unique aesthetic.
+            </p>
+        </section>
+
+        <section>
+            <h2>Icon Gallery</h2>
+            <p style="color: var(--color-text-secondary); margin-bottom: 1rem;">
+                Click any icon to view its SVG source
+            </p>
+
+            <div class="icon-gallery" id="iconGallery">
+                <!-- Icons will be loaded here -->
+            </div>
+        </section>
+
+        <section class="glass-card">
+            <h2>Color Adaptability</h2>
+            <p>Icons automatically adapt to different mythology color schemes:</p>
+            <div class="color-demo">
+                <div class="color-swatch" style="background: #1E90FF; color: white;" title="Greek/Roman" onclick="setDemoColor('#1E90FF')">
+                    <svg id="colorDemo1"></svg>
+                </div>
+                <div class="color-swatch" style="background: #DAA520; color: white;" title="Egyptian" onclick="setDemoColor('#DAA520')">
+                    <svg id="colorDemo2"></svg>
+                </div>
+                <div class="color-swatch" style="background: #8B4513; color: white;" title="Norse" onclick="setDemoColor('#8B4513')">
+                    <svg id="colorDemo3"></svg>
+                </div>
+                <div class="color-swatch" style="background: #FF6347; color: white;" title="Hindu" onclick="setDemoColor('#FF6347')">
+                    <svg id="colorDemo4"></svg>
+                </div>
+                <div class="color-swatch" style="background: #4B0082; color: white;" title="Christian" onclick="setDemoColor('#4B0082')">
+                    <svg id="colorDemo5"></svg>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass-card">
+            <h2>Usage</h2>
+            <p>Icons are automatically applied to deity pages based on their domains:</p>
+            <pre><code>{
+  "name": "Zeus",
+  "type": "deity",
+  "domains": ["sky", "thunder", "justice"],
+  // Icon automatically selected from domains
+}</code></pre>
+            <p style="margin-top: 1rem;">
+                See <a href="/DEITY_DOMAIN_ICONS.md">DEITY_DOMAIN_ICONS.md</a> for complete documentation.
+            </p>
+        </section>
+    </div>
+
+    <script>
+        const icons = [
+            {
+                file: 'war.svg',
+                name: 'War/Battle',
+                domains: ['war', 'battle', 'combat', 'warrior'],
+                examples: 'Ares, Mars, Thor, Tyr, Huitzilopochtli'
+            },
+            {
+                file: 'wisdom.svg',
+                name: 'Wisdom/Knowledge',
+                domains: ['wisdom', 'knowledge', 'learning', 'intelligence'],
+                examples: 'Athena, Minerva, Thoth, Saraswati, Nabu'
+            },
+            {
+                file: 'love.svg',
+                name: 'Love/Beauty',
+                domains: ['love', 'beauty', 'desire', 'romance'],
+                examples: 'Aphrodite, Venus, Freya, Hathor, Oshun'
+            },
+            {
+                file: 'death.svg',
+                name: 'Death/Underworld',
+                domains: ['death', 'underworld', 'afterlife'],
+                examples: 'Hades, Pluto, Hel, Anubis, Yama'
+            },
+            {
+                file: 'sky.svg',
+                name: 'Sky/Thunder',
+                domains: ['sky', 'thunder', 'lightning', 'storm'],
+                examples: 'Zeus, Jupiter, Thor, Indra, Raijin'
+            },
+            {
+                file: 'earth.svg',
+                name: 'Earth/Nature',
+                domains: ['earth', 'nature', 'agriculture', 'harvest'],
+                examples: 'Gaia, Demeter, Ceres, Prithvi'
+            },
+            {
+                file: 'sea.svg',
+                name: 'Sea/Water',
+                domains: ['sea', 'water', 'ocean', 'rivers'],
+                examples: 'Poseidon, Neptune, Yemoja, Dragon Kings'
+            },
+            {
+                file: 'sun.svg',
+                name: 'Sun',
+                domains: ['sun', 'solar', 'light', 'day'],
+                examples: 'Ra, Apollo, Amaterasu, Surya, Shamash'
+            },
+            {
+                file: 'moon.svg',
+                name: 'Moon',
+                domains: ['moon', 'lunar', 'night'],
+                examples: 'Selene, Luna, Tsukuyomi, Chandra, Sin'
+            },
+            {
+                file: 'trickster.svg',
+                name: 'Trickster',
+                domains: ['trickster', 'mischief', 'chaos', 'cunning'],
+                examples: 'Loki, Hermes, Anansi, Coyote, Eshu'
+            },
+            {
+                file: 'healing.svg',
+                name: 'Healing',
+                domains: ['healing', 'medicine', 'health'],
+                examples: 'Asclepius, Apollo, Eir, Dhanvantari'
+            },
+            {
+                file: 'fertility.svg',
+                name: 'Fertility',
+                domains: ['fertility', 'abundance', 'growth'],
+                examples: 'Demeter, Freyr, Osiris, Inanna'
+            },
+            {
+                file: 'fire.svg',
+                name: 'Fire',
+                domains: ['fire', 'forge', 'smithing', 'crafts'],
+                examples: 'Hephaestus, Vulcan, Agni, Pele'
+            },
+            {
+                file: 'creator.svg',
+                name: 'Creator',
+                domains: ['creator', 'creation', 'primordial'],
+                examples: 'Brahma, Ptah, Atum, An, Izanagi'
+            },
+            {
+                file: 'justice.svg',
+                name: 'Justice/Law',
+                domains: ['justice', 'law', 'order', 'judgment'],
+                examples: 'Maat, Themis, Forseti, Rashnu'
+            }
+        ];
+
+        async function loadIcons() {
+            const gallery = document.getElementById('iconGallery');
+
+            for (const icon of icons) {
+                try {
+                    const response = await fetch(icon.file);
+                    const svgContent = await response.text();
+
+                    const card = document.createElement('div');
+                    card.className = 'icon-card';
+                    card.innerHTML = `
+                        <div class="icon-display">${svgContent}</div>
+                        <div class="icon-name">${icon.name}</div>
+                        <div class="icon-domains">
+                            ${icon.domains.map(d => `<span class="domain-badge">${d}</span>`).join('')}
+                        </div>
+                        <div class="icon-examples">Examples: ${icon.examples}</div>
+                    `;
+
+                    card.addEventListener('click', () => {
+                        alert(`SVG Source for ${icon.name}:\n\n${svgContent}`);
+                    });
+
+                    gallery.appendChild(card);
+
+                    // Load first icon into color demos
+                    if (icon.file === 'war.svg') {
+                        document.getElementById('colorDemo1').innerHTML = svgContent;
+                        document.getElementById('colorDemo2').innerHTML = svgContent;
+                        document.getElementById('colorDemo3').innerHTML = svgContent;
+                        document.getElementById('colorDemo4').innerHTML = svgContent;
+                        document.getElementById('colorDemo5').innerHTML = svgContent;
+                    }
+                } catch (error) {
+                    console.error(`Failed to load ${icon.file}:`, error);
+                }
+            }
+        }
+
+        function setDemoColor(color) {
+            document.documentElement.style.setProperty('--color-primary', color);
+        }
+
+        // Load icons when page loads
+        loadIcons();
+    </script>
+</body>
+</html>

@@ -3,6 +3,11 @@
  *
  * Loads entity data from Firebase and renders it with mythology-specific styling,
  * preserving the rich visual identity of each tradition while enabling dynamic content.
+ *
+ * NOTE: An enhanced version with modern UX features is available:
+ * - See: entity-renderer-enhanced.js
+ * - Features: Tabbed interface, timeline views, family trees, SEO metadata
+ * - Documentation: ENTITY_DETAIL_ENHANCEMENTS.md
  */
 
 class FirebaseEntityRenderer {
