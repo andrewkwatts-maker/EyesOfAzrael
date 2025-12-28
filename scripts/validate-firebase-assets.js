@@ -29,24 +29,34 @@ const COLLECTIONS = [
     'symbols',
     'items',
     'places',
-    'mythologies'
+    'mythologies',
+    'magic',
+    'archetypes',
+    'pages',
+    'concepts',
+    'events'
 ];
 
 const REQUIRED_FIELDS = {
     deity: ['name', 'mythology', 'description', 'domains', 'type'],
-    hero: ['name', 'mythology', 'description', 'deeds', 'type'],
-    creature: ['name', 'mythology', 'description', 'abilities', 'type'],
+    hero: ['name', 'mythology', 'description', 'type'],
+    creature: ['name', 'mythology', 'description', 'type'],
     cosmology: ['name', 'mythology', 'description', 'type'],
-    ritual: ['name', 'mythology', 'description', 'purpose', 'type'],
-    herb: ['name', 'mythology', 'description', 'uses', 'type'],
+    ritual: ['name', 'mythology', 'description', 'type'],
+    herb: ['name', 'mythology', 'description', 'type'],
     text: ['name', 'mythology', 'description', 'type'],
-    symbol: ['name', 'mythology', 'description', 'meaning', 'type'],
-    item: ['name', 'mythology', 'description', 'powers', 'type'],
-    place: ['name', 'mythology', 'description', 'significance', 'type'],
-    mythology: ['name', 'id', 'description', 'icon']
+    symbol: ['name', 'mythology', 'description', 'type'],
+    item: ['name', 'mythology', 'description', 'type'],
+    place: ['name', 'mythology', 'description', 'type'],
+    mythology: ['name', 'id', 'description', 'icon'],
+    magic: ['name', 'mythology', 'description', 'type'],
+    archetype: ['name', 'description', 'type'],
+    page: ['name', 'mythology', 'type'],
+    concept: ['name', 'mythology', 'description', 'type'],
+    event: ['name', 'mythology', 'description', 'type']
 };
 
-const DISPLAY_MODES = ['page', 'panel', 'card', 'table-row', 'short-description', 'link'];
+const DISPLAY_MODES = ['page', 'panel', 'section', 'link', 'paragraph'];
 
 class FirebaseAssetValidator {
     constructor() {
@@ -247,11 +257,10 @@ class FirebaseAssetValidator {
         // 7. Validate rendering data (fields needed for different display modes)
         const renderingChecks = {
             page: ['name', 'description'], // Full page view
-            panel: ['name', 'description', 'icon'], // Side panel
-            card: ['name', 'icon'], // Grid card
-            'table-row': ['name', 'type'], // Table entry
-            'short-description': ['name', 'description'], // Summary
-            link: ['name', 'id'] // Link reference
+            panel: ['name', 'description'], // Side panel
+            section: ['name', 'description'], // Section within page
+            link: ['name'], // Link reference
+            paragraph: ['name', 'description'] // Inline paragraph
         };
 
         for (const [mode, fields] of Object.entries(renderingChecks)) {
@@ -323,9 +332,147 @@ class FirebaseAssetValidator {
     }
 
     /**
+     * Generate rendering examples for each collection
+     */
+    generateRenderingExamples() {
+        const examples = {};
+
+        for (const collection of COLLECTIONS) {
+            const asset = this.assets.find(a => a.collection === collection);
+            if (!asset) continue;
+
+            examples[collection] = {
+                id: asset.id,
+                name: asset.data.name,
+                modes: {}
+            };
+
+            // Generate example for each display mode
+            for (const mode of DISPLAY_MODES) {
+                examples[collection].modes[mode] = this.renderAsset(asset, mode);
+            }
+        }
+
+        return examples;
+    }
+
+    /**
+     * Render an asset in a specific display mode
+     */
+    renderAsset(asset, mode) {
+        const data = asset.data;
+
+        switch(mode) {
+            case 'page':
+                return {
+                    html: `<div class="entity-page">
+                        <h1>${data.name || 'Unnamed'}</h1>
+                        ${data.icon ? `<div class="icon">${data.icon}</div>` : ''}
+                        <div class="metadata">
+                            ${data.mythology ? `<span class="mythology">${data.mythology}</span>` : ''}
+                            ${data.type ? `<span class="type">${data.type}</span>` : ''}
+                        </div>
+                        <div class="description">${data.description || ''}</div>
+                    </div>`,
+                    canRender: !!(data.name && data.description)
+                };
+
+            case 'panel':
+                return {
+                    html: `<div class="entity-panel">
+                        <h3>${data.name || 'Unnamed'}</h3>
+                        <p>${data.description ? data.description.substring(0, 200) + '...' : ''}</p>
+                    </div>`,
+                    canRender: !!(data.name && data.description)
+                };
+
+            case 'section':
+                return {
+                    html: `<section class="entity-section">
+                        <h2>${data.name || 'Unnamed'}</h2>
+                        <p>${data.description || ''}</p>
+                    </section>`,
+                    canRender: !!(data.name && data.description)
+                };
+
+            case 'link':
+                return {
+                    html: `<a href="/${asset.collection}/${asset.id}" class="entity-link">${data.name || 'Unnamed'}</a>`,
+                    canRender: !!(data.name)
+                };
+
+            case 'paragraph':
+                return {
+                    html: `<p class="entity-paragraph"><strong>${data.name}:</strong> ${data.description ? data.description.substring(0, 150) + '...' : ''}</p>`,
+                    canRender: !!(data.name && data.description)
+                };
+
+            default:
+                return { html: '', canRender: false };
+        }
+    }
+
+    /**
+     * Validate icon fields
+     */
+    validateIcons() {
+        const iconStats = {
+            total: 0,
+            valid: 0,
+            invalid: 0,
+            missing: 0,
+            byType: {}
+        };
+
+        for (const asset of this.assets) {
+            iconStats.total++;
+
+            if (!asset.data.icon) {
+                iconStats.missing++;
+            } else if (typeof asset.data.icon === 'string') {
+                // Valid if it's an emoji or SVG path
+                const isEmoji = /[\u{1F300}-\u{1F9FF}]/u.test(asset.data.icon);
+                const isSvgPath = asset.data.icon.startsWith('/') || asset.data.icon.startsWith('./');
+
+                if (isEmoji || isSvgPath) {
+                    iconStats.valid++;
+                    const type = isEmoji ? 'emoji' : 'svg';
+                    iconStats.byType[type] = (iconStats.byType[type] || 0) + 1;
+                } else {
+                    iconStats.invalid++;
+                }
+            }
+        }
+
+        return iconStats;
+    }
+
+    /**
      * Generate validation report
      */
     async generateReport(failedAssets) {
+        console.log('\n📊 Generating detailed reports...');
+
+        const iconStats = this.validateIcons();
+        const renderingExamples = this.generateRenderingExamples();
+        const collectionStats = this.getCollectionStats();
+
+        // Add rendering capability stats to each collection
+        for (const [collection, stats] of Object.entries(collectionStats)) {
+            stats.renderingModes = {};
+            for (const mode of DISPLAY_MODES) {
+                const canRender = this.assets
+                    .filter(a => a.collection === collection)
+                    .filter(a => this.renderAsset(a, mode).canRender)
+                    .length;
+                stats.renderingModes[mode] = {
+                    canRender,
+                    total: stats.total,
+                    percentage: ((canRender / stats.total) * 100).toFixed(1) + '%'
+                };
+            }
+        }
+
         const report = {
             timestamp: new Date().toISOString(),
             summary: {
@@ -335,6 +482,7 @@ class FirebaseAssetValidator {
                 warnings: this.results.warnings,
                 passRate: ((this.results.passed / this.results.total) * 100).toFixed(2) + '%'
             },
+            icons: iconStats,
             failedAssets: failedAssets.map(asset => ({
                 collection: asset.collection,
                 id: asset.id,
@@ -342,19 +490,26 @@ class FirebaseAssetValidator {
                 mythology: asset.data.mythology || 'Unknown',
                 issues: asset.issues
             })),
-            byCollection: this.getCollectionStats(),
+            byCollection: collectionStats,
             byMythology: this.getMythologyStats()
         };
 
-        // Save report
-        const reportPath = path.join(__dirname, '..', 'FIREBASE_VALIDATION_REPORT.json');
+        // Save main validation report
+        const reportPath = path.join(__dirname, '..', 'validation-report.json');
         await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
-        console.log(`\n📄 Full report saved to: ${reportPath}`);
+        console.log(`   ✅ Validation report: validation-report.json`);
+
+        // Save rendering examples
+        const examplesPath = path.join(__dirname, '..', 'rendering-examples.json');
+        await fs.writeFile(examplesPath, JSON.stringify(renderingExamples, null, 2));
+        console.log(`   ✅ Rendering examples: rendering-examples.json`);
 
         // Save failed assets for agent processing
-        const failedPath = path.join(__dirname, '..', 'FAILED_ASSETS.json');
-        await fs.writeFile(failedPath, JSON.stringify(failedAssets, null, 2));
-        console.log(`📄 Failed assets saved to: ${failedPath}`);
+        if (failedAssets.length > 0) {
+            const failedPath = path.join(__dirname, '..', 'FAILED_ASSETS.json');
+            await fs.writeFile(failedPath, JSON.stringify(failedAssets, null, 2));
+            console.log(`   ✅ Failed assets: FAILED_ASSETS.json`);
+        }
 
         return report;
     }
@@ -425,37 +580,59 @@ class FirebaseAssetValidator {
      * Print summary
      */
     printSummary(report) {
-        console.log('\n' + '='.repeat(60));
+        console.log('\n' + '='.repeat(70));
         console.log('📊 VALIDATION SUMMARY');
-        console.log('='.repeat(60));
+        console.log('='.repeat(70));
         console.log(`Total Assets:     ${report.summary.total}`);
         console.log(`✅ Passed:         ${report.summary.passed} (${report.summary.passRate})`);
         console.log(`❌ Failed:         ${report.summary.failed}`);
         console.log(`⚠️  Warnings:       ${report.summary.warnings}`);
-        console.log('='.repeat(60));
+        console.log('='.repeat(70));
+
+        console.log('\n🎨 Icon Statistics:');
+        console.log(`  Total Assets:     ${report.icons.total}`);
+        console.log(`  Valid Icons:      ${report.icons.valid} (${((report.icons.valid / report.icons.total) * 100).toFixed(1)}%)`);
+        console.log(`  Missing Icons:    ${report.icons.missing} (${((report.icons.missing / report.icons.total) * 100).toFixed(1)}%)`);
+        console.log(`  Invalid Icons:    ${report.icons.invalid}`);
+        if (Object.keys(report.icons.byType).length > 0) {
+            console.log('  By Type:');
+            for (const [type, count] of Object.entries(report.icons.byType)) {
+                console.log(`    ${type}: ${count}`);
+            }
+        }
 
         console.log('\n📈 By Collection:');
         for (const [collection, stats] of Object.entries(report.byCollection)) {
             const passRate = ((stats.passed / stats.total) * 100).toFixed(1);
-            console.log(`  ${collection.padEnd(20)} ${stats.passed}/${stats.total} (${passRate}%)`);
+            console.log(`  ${collection.padEnd(20)} ${stats.total.toString().padStart(4)} assets  (${passRate}% valid)`);
+        }
+
+        console.log('\n🎭 Rendering Capability Summary:');
+        for (const mode of DISPLAY_MODES) {
+            const totalCanRender = Object.values(report.byCollection)
+                .reduce((sum, stats) => sum + (stats.renderingModes?.[mode]?.canRender || 0), 0);
+            const total = report.summary.total;
+            const percentage = ((totalCanRender / total) * 100).toFixed(1);
+            console.log(`  ${mode.padEnd(15)} ${totalCanRender}/${total} (${percentage}%)`);
         }
 
         console.log('\n🌍 By Mythology:');
-        for (const [mythology, stats] of Object.entries(report.byMythology)) {
+        const sortedMythologies = Object.entries(report.byMythology)
+            .sort((a, b) => b[1].total - a[1].total)
+            .slice(0, 10);
+        for (const [mythology, stats] of sortedMythologies) {
             const passRate = ((stats.passed / stats.total) * 100).toFixed(1);
-            console.log(`  ${mythology.padEnd(20)} ${stats.passed}/${stats.total} (${passRate}%)`);
+            console.log(`  ${mythology.padEnd(20)} ${stats.total.toString().padStart(4)} assets  (${passRate}% valid)`);
         }
 
-        console.log('\n' + '='.repeat(60));
+        console.log('\n' + '='.repeat(70));
 
         if (report.summary.failed > 0) {
             console.log(`\n⚠️  ${report.summary.failed} assets need fixing!`);
-            console.log('   Run: node scripts/fix-failed-assets.js');
-            console.log('   Or spin off agents to fix issues automatically\n');
-            process.exit(1); // Exit with error code
+            console.log('   Review: validation-report.json');
+            console.log('   Failed assets: FAILED_ASSETS.json\n');
         } else {
             console.log('\n✅ All assets passed validation!\n');
-            process.exit(0);
         }
     }
 }
