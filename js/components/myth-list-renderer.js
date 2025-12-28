@@ -115,25 +115,36 @@ class MythListRenderer {
      * @returns {string} HTML string
      */
     renderMythHTML(myth) {
+        const isExpandable = myth.content && myth.content.length > 200;
         const source = myth.source ? `
-            <div class="myth-source" style="font-size: 0.9rem; color: var(--color-text-secondary); margin-top: 0.5rem;">
-                <em>Source: ${myth.source}</em>
+            <div class="citation" style="margin-top: 0.5rem;">
+                <em>Source: ${this.escapeHtml(myth.source)}</em>
             </div>
         ` : '';
 
         const submittedBy = myth.submittedBy ? `
             <div class="myth-contributor" style="font-size: 0.85rem; color: var(--color-text-secondary); opacity: 0.7; margin-top: 0.25rem;">
-                Contributed by: ${myth.submittedBy}
+                Contributed by: ${this.escapeHtml(myth.submittedBy)}
             </div>
         ` : '';
 
         return `
-            <li class="myth-item" data-myth-id="${myth.id || ''}">
-                <strong>${myth.title}:</strong> ${myth.content}
+            <li class="myth-item" data-myth-id="${myth.id || ''}" style="margin-bottom: 1rem;">
+                <strong>${this.escapeHtml(myth.title)}:</strong> ${this.escapeHtml(myth.content || myth.description)}
                 ${source}
                 ${submittedBy}
             </li>
         `;
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     /**

@@ -2,6 +2,15 @@
  * Browse Category View
  * Displays a grid of entities for a specific category (deities, creatures, etc.)
  * Fetches from Firebase and renders dynamically
+ *
+ * Features:
+ * - Responsive auto-fill grid (280px min, 1fr max)
+ * - List/Grid view toggle
+ * - Advanced filtering and sorting
+ * - Skeleton loading states
+ * - Entity cards with tag badges
+ * - Description truncation (3 lines)
+ * - Empty states with helpful messaging
  */
 
 class BrowseCategoryView {
@@ -9,8 +18,11 @@ class BrowseCategoryView {
         this.db = firestore;
         this.cache = window.cacheManager || new FirebaseCacheManager({ db: firestore });
         this.entities = [];
+        this.filteredEntities = [];
         this.category = null;
         this.mythology = null; // Optional filter
+        this.viewMode = 'grid'; // 'grid' or 'list'
+        this.sortBy = 'name'; // 'name' or 'mythology'
     }
 
     /**
@@ -93,18 +105,119 @@ class BrowseCategoryView {
     }
 
     /**
-     * Get loading HTML
+     * Get loading HTML with skeleton cards
      */
     getLoadingHTML() {
         return `
-            <div class="loading-container">
-                <div class="spinner-container">
-                    <div class="spinner-ring"></div>
-                    <div class="spinner-ring"></div>
-                    <div class="spinner-ring"></div>
+            <div class="browse-view">
+                <!-- Skeleton Header -->
+                <header class="browse-header skeleton-header">
+                    <div class="browse-header-icon skeleton-pulse">⏳</div>
+                    <div class="browse-header-content">
+                        <div class="skeleton-title skeleton-pulse"></div>
+                        <div class="skeleton-text skeleton-pulse"></div>
+                        <div class="skeleton-stats skeleton-pulse"></div>
+                    </div>
+                </header>
+
+                <!-- Skeleton Grid -->
+                <div class="entity-grid">
+                    ${Array(6).fill(0).map(() => this.getSkeletonCardHTML()).join('')}
                 </div>
-                <p class="loading-message">Loading ${this.category}...</p>
             </div>
+
+            <style>
+                .skeleton-pulse {
+                    animation: skeleton-pulse 1.5s ease-in-out infinite;
+                }
+
+                @keyframes skeleton-pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.5; }
+                }
+
+                .skeleton-title {
+                    height: 2.5rem;
+                    width: 300px;
+                    background: rgba(var(--color-primary-rgb), 0.2);
+                    border-radius: var(--radius-lg);
+                    margin-bottom: 0.5rem;
+                }
+
+                .skeleton-text {
+                    height: 1.5rem;
+                    width: 500px;
+                    max-width: 100%;
+                    background: rgba(var(--color-text-secondary-rgb, 156, 163, 175), 0.2);
+                    border-radius: var(--radius-md);
+                    margin-bottom: 1rem;
+                }
+
+                .skeleton-stats {
+                    height: 1.5rem;
+                    width: 200px;
+                    background: rgba(var(--color-primary-rgb), 0.2);
+                    border-radius: var(--radius-md);
+                }
+            </style>
+        `;
+    }
+
+    /**
+     * Get skeleton card HTML for loading state
+     */
+    getSkeletonCardHTML() {
+        return `
+            <div class="entity-card skeleton-card">
+                <div class="entity-card-header">
+                    <div class="skeleton-icon skeleton-pulse"></div>
+                    <div class="skeleton-card-info">
+                        <div class="skeleton-card-title skeleton-pulse"></div>
+                        <div class="skeleton-card-myth skeleton-pulse"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card-desc skeleton-pulse"></div>
+                <div class="skeleton-card-desc skeleton-pulse" style="width: 80%;"></div>
+            </div>
+
+            <style>
+                .skeleton-card {
+                    pointer-events: none;
+                }
+
+                .skeleton-icon {
+                    width: 2.5rem;
+                    height: 2.5rem;
+                    background: rgba(var(--color-primary-rgb), 0.2);
+                    border-radius: var(--radius-md);
+                }
+
+                .skeleton-card-info {
+                    flex: 1;
+                }
+
+                .skeleton-card-title {
+                    height: 1.2rem;
+                    width: 150px;
+                    background: rgba(var(--color-text-primary-rgb, 229, 231, 235), 0.2);
+                    border-radius: var(--radius-md);
+                    margin-bottom: 0.5rem;
+                }
+
+                .skeleton-card-myth {
+                    height: 0.85rem;
+                    width: 100px;
+                    background: rgba(var(--color-primary-rgb), 0.2);
+                    border-radius: var(--radius-md);
+                }
+
+                .skeleton-card-desc {
+                    height: 0.95rem;
+                    background: rgba(var(--color-text-secondary-rgb, 156, 163, 175), 0.2);
+                    border-radius: var(--radius-md);
+                    margin-top: 1rem;
+                }
+            </style>
         `;
     }
 
@@ -113,6 +226,7 @@ class BrowseCategoryView {
      */
     getBrowseHTML() {
         const categoryInfo = this.getCategoryInfo(this.category);
+        this.filteredEntities = [...this.entities];
 
         return `
             <div class="browse-view">
@@ -123,68 +237,126 @@ class BrowseCategoryView {
                         <h1 class="browse-title">${categoryInfo.name}</h1>
                         <p class="browse-description">${categoryInfo.description}</p>
                         <div class="browse-stats">
-                            <span class="stat">${this.entities.length} ${this.category}</span>
-                            <span class="stat">${Object.keys(this.groupedEntities).length} mythologies</span>
+                            <span class="stat-badge">
+                                <span class="stat-icon">📊</span>
+                                <span class="stat-value">${this.entities.length}</span>
+                                <span class="stat-label">${this.category}</span>
+                            </span>
+                            <span class="stat-badge">
+                                <span class="stat-icon">🌍</span>
+                                <span class="stat-value">${Object.keys(this.groupedEntities).length}</span>
+                                <span class="stat-label">mythologies</span>
+                            </span>
                         </div>
                     </div>
                 </header>
 
-                <!-- Filters -->
-                <div class="browse-filters">
-                    <select id="mythologyFilter" class="filter-select">
-                        <option value="">All Mythologies</option>
-                        ${Object.keys(this.groupedEntities).sort().map(myth => `
-                            <option value="${myth}" ${this.mythology === myth ? 'selected' : ''}>
-                                ${this.capitalize(myth)}
-                            </option>
-                        `).join('')}
-                    </select>
+                <!-- Filters & Controls -->
+                <div class="browse-controls">
+                    <div class="browse-filters">
+                        <div class="filter-group">
+                            <label for="mythologyFilter" class="filter-label">
+                                <span class="filter-icon">🌍</span>
+                                Mythology
+                            </label>
+                            <select id="mythologyFilter" class="filter-select">
+                                <option value="">All Mythologies</option>
+                                ${Object.keys(this.groupedEntities).sort().map(myth => `
+                                    <option value="${myth}" ${this.mythology === myth ? 'selected' : ''}>
+                                        ${this.capitalize(myth)}
+                                    </option>
+                                `).join('')}
+                            </select>
+                        </div>
 
-                    <select id="sortOrder" class="filter-select">
-                        <option value="name">Sort by Name</option>
-                        <option value="mythology">Sort by Mythology</option>
-                    </select>
+                        <div class="filter-group">
+                            <label for="sortOrder" class="filter-label">
+                                <span class="filter-icon">⚡</span>
+                                Sort
+                            </label>
+                            <select id="sortOrder" class="filter-select">
+                                <option value="name">Name (A-Z)</option>
+                                <option value="mythology">Mythology</option>
+                            </select>
+                        </div>
 
-                    <div class="view-toggle">
-                        <button class="view-btn active" data-view="grid">⊞ Grid</button>
-                        <button class="view-btn" data-view="list">☰ List</button>
+                        <div class="filter-group">
+                            <label for="searchFilter" class="filter-label">
+                                <span class="filter-icon">🔍</span>
+                                Search
+                            </label>
+                            <input
+                                type="text"
+                                id="searchFilter"
+                                class="filter-input"
+                                placeholder="Search ${this.category}..."
+                                aria-label="Search entities"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="view-controls">
+                        <div class="view-toggle">
+                            <button
+                                class="view-btn active"
+                                data-view="grid"
+                                aria-label="Grid view"
+                                title="Grid view">
+                                <span class="view-icon">⊞</span>
+                                <span class="view-label">Grid</span>
+                            </button>
+                            <button
+                                class="view-btn"
+                                data-view="list"
+                                aria-label="List view"
+                                title="List view">
+                                <span class="view-icon">☰</span>
+                                <span class="view-label">List</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Entity Grid -->
                 <div class="entity-grid" id="entityGrid">
-                    ${this.entities.map(entity => this.getEntityCardHTML(entity)).join('')}
+                    ${this.entities.length > 0
+                        ? this.entities.map(entity => this.getEntityCardHTML(entity)).join('')
+                        : this.getEmptyStateHTML()
+                    }
                 </div>
-
-                ${this.entities.length === 0 ? `
-                    <div class="empty-state">
-                        <div class="empty-icon">📭</div>
-                        <h3>No ${this.category} found</h3>
-                        <p>Try selecting a different mythology or check back later.</p>
-                    </div>
-                ` : ''}
             </div>
 
             <style>
+                /* ==========================================
+                   Browse View Container
+                   ========================================== */
                 .browse-view {
                     max-width: 1400px;
                     margin: 0 auto;
-                    padding: 2rem;
+                    padding: var(--spacing-xl, 2rem);
                 }
 
+                /* ==========================================
+                   Header Section
+                   ========================================== */
                 .browse-header {
                     display: flex;
-                    gap: 2rem;
+                    gap: var(--spacing-xl, 2rem);
                     align-items: center;
-                    margin-bottom: 3rem;
-                    padding: 2rem;
-                    background: rgba(var(--color-bg-card-rgb), 0.6);
-                    border-radius: 16px;
-                    border: 1px solid rgba(var(--color-border-primary-rgb), 0.3);
+                    margin-bottom: var(--spacing-3xl, 3rem);
+                    padding: var(--spacing-xl, 2rem);
+                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.6);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    border-radius: var(--radius-2xl, 1.5rem);
+                    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+                    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
                 }
 
                 .browse-header-icon {
                     font-size: 4rem;
+                    filter: drop-shadow(0 4px 8px rgba(var(--color-primary-rgb), 0.4));
+                    line-height: 1;
                 }
 
                 .browse-header-content {
@@ -192,162 +364,472 @@ class BrowseCategoryView {
                 }
 
                 .browse-title {
-                    font-size: 2.5rem;
-                    margin-bottom: 0.5rem;
+                    font-size: clamp(1.75rem, 4vw, 2.5rem);
+                    margin: 0 0 var(--spacing-sm, 0.5rem) 0;
                     color: var(--color-text-primary);
+                    font-family: var(--font-heading, Georgia, serif);
                 }
 
                 .browse-description {
                     color: var(--color-text-secondary);
-                    font-size: 1.1rem;
-                    margin-bottom: 1rem;
+                    font-size: clamp(0.95rem, 2vw, 1.1rem);
+                    margin: 0 0 var(--spacing-lg, 1.5rem) 0;
+                    line-height: var(--leading-relaxed, 1.75);
                 }
 
                 .browse-stats {
                     display: flex;
-                    gap: 2rem;
+                    gap: var(--spacing-lg, 1.5rem);
+                    flex-wrap: wrap;
                 }
 
-                .stat {
+                .stat-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: var(--spacing-sm, 0.5rem);
+                    padding: var(--spacing-sm, 0.5rem) var(--spacing-lg, 1.5rem);
+                    background: linear-gradient(135deg,
+                        rgba(var(--color-primary-rgb), 0.2),
+                        rgba(var(--color-secondary-rgb), 0.2));
+                    border: 1px solid rgba(var(--color-primary-rgb), 0.4);
+                    border-radius: var(--radius-full, 9999px);
+                    font-weight: var(--font-semibold, 600);
+                }
+
+                .stat-icon {
+                    font-size: 1.25rem;
+                    line-height: 1;
+                }
+
+                .stat-value {
                     color: var(--color-primary);
-                    font-weight: 600;
+                    font-size: 1.1rem;
+                }
+
+                .stat-label {
+                    color: var(--color-text-secondary);
+                    font-size: 0.9rem;
+                }
+
+                /* ==========================================
+                   Filters & Controls
+                   ========================================== */
+                .browse-controls {
+                    display: flex;
+                    gap: var(--spacing-lg, 1.5rem);
+                    margin-bottom: var(--spacing-xl, 2rem);
+                    flex-wrap: wrap;
+                    align-items: flex-end;
+                    justify-content: space-between;
                 }
 
                 .browse-filters {
                     display: flex;
-                    gap: 1rem;
-                    margin-bottom: 2rem;
+                    gap: var(--spacing-lg, 1.5rem);
                     flex-wrap: wrap;
-                    align-items: center;
+                    flex: 1;
                 }
 
-                .filter-select {
-                    padding: 0.75rem 1rem;
-                    background: rgba(var(--color-bg-card-rgb), 0.8);
-                    border: 1px solid rgba(var(--color-border-primary-rgb), 0.5);
-                    border-radius: 8px;
-                    color: var(--color-text-primary);
+                .filter-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: var(--spacing-xs, 0.25rem);
+                    min-width: 200px;
+                    flex: 1;
+                }
+
+                .filter-label {
+                    display: flex;
+                    align-items: center;
+                    gap: var(--spacing-xs, 0.25rem);
+                    font-size: var(--font-size-sm, 0.875rem);
+                    font-weight: var(--font-medium, 500);
+                    color: var(--color-text-secondary);
+                }
+
+                .filter-icon {
                     font-size: 1rem;
+                }
+
+                .filter-select,
+                .filter-input {
+                    padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.8);
+                    backdrop-filter: blur(10px);
+                    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+                    border-radius: var(--radius-lg, 0.75rem);
+                    color: var(--color-text-primary);
+                    font-size: var(--font-size-base, 1rem);
                     cursor: pointer;
+                    transition: all var(--transition-base, 0.3s ease);
+                    font-family: var(--font-primary);
+                }
+
+                .filter-select:hover,
+                .filter-input:hover {
+                    border-color: rgba(var(--color-primary-rgb), 0.5);
+                }
+
+                .filter-select:focus,
+                .filter-input:focus {
+                    outline: none;
+                    border-color: var(--color-primary);
+                    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+                }
+
+                .filter-input::placeholder {
+                    color: var(--color-text-secondary);
+                    opacity: 0.6;
+                }
+
+                .view-controls {
+                    display: flex;
+                    align-items: flex-end;
                 }
 
                 .view-toggle {
                     display: flex;
-                    gap: 0.5rem;
-                    margin-left: auto;
+                    gap: var(--spacing-xs, 0.25rem);
+                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.6);
+                    padding: var(--spacing-xs, 0.25rem);
+                    border-radius: var(--radius-lg, 0.75rem);
+                    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
                 }
 
                 .view-btn {
-                    padding: 0.75rem 1rem;
-                    background: rgba(var(--color-bg-card-rgb), 0.8);
-                    border: 1px solid rgba(var(--color-border-primary-rgb), 0.5);
-                    border-radius: 8px;
-                    color: var(--color-text-primary);
+                    display: flex;
+                    align-items: center;
+                    gap: var(--spacing-xs, 0.25rem);
+                    padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+                    background: transparent;
+                    border: none;
+                    border-radius: var(--radius-md, 0.5rem);
+                    color: var(--color-text-secondary);
+                    font-size: var(--font-size-sm, 0.875rem);
+                    font-weight: var(--font-medium, 500);
                     cursor: pointer;
-                    transition: all 0.3s ease;
+                    transition: all var(--transition-fast, 0.15s ease);
+                    font-family: var(--font-primary);
+                }
+
+                .view-btn:hover {
+                    background: rgba(var(--color-primary-rgb), 0.1);
+                    color: var(--color-text-primary);
                 }
 
                 .view-btn.active {
-                    background: var(--color-primary);
-                    border-color: var(--color-primary);
+                    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+                    color: white;
+                    box-shadow: var(--shadow-md);
                 }
 
+                .view-icon {
+                    font-size: 1.1rem;
+                    line-height: 1;
+                }
+
+                /* ==========================================
+                   Entity Grid
+                   ========================================== */
                 .entity-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                    gap: 1.5rem;
-                    margin-bottom: 3rem;
+                    gap: var(--spacing-lg, 1.5rem);
+                    margin-bottom: var(--spacing-3xl, 3rem);
                 }
 
                 .entity-grid.list-view {
                     grid-template-columns: 1fr;
                 }
 
+                /* ==========================================
+                   Entity Cards
+                   ========================================== */
                 .entity-card {
-                    background: rgba(var(--color-bg-card-rgb), 0.6);
-                    border: 1px solid rgba(var(--color-border-primary-rgb), 0.3);
-                    border-radius: 12px;
-                    padding: 1.5rem;
+                    display: block;
+                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.6);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+                    border-radius: var(--radius-xl, 1rem);
+                    padding: var(--spacing-lg, 1.5rem);
                     text-decoration: none;
                     color: inherit;
-                    transition: all 0.3s ease;
+                    transition: all var(--transition-base, 0.3s ease);
                     cursor: pointer;
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .entity-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 4px;
+                    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+                    opacity: 0;
+                    transition: opacity var(--transition-fast, 0.15s ease);
                 }
 
                 .entity-card:hover {
                     transform: translateY(-4px);
                     border-color: var(--color-primary);
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+                    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+                                0 0 20px rgba(var(--color-primary-rgb), 0.3);
+                }
+
+                .entity-card:hover::before {
+                    opacity: 1;
+                }
+
+                .entity-card:focus {
+                    outline: 3px solid var(--color-primary);
+                    outline-offset: 2px;
                 }
 
                 .entity-card-header {
                     display: flex;
-                    align-items: center;
-                    gap: 1rem;
-                    margin-bottom: 1rem;
+                    align-items: flex-start;
+                    gap: var(--spacing-md, 1rem);
+                    margin-bottom: var(--spacing-md, 1rem);
                 }
 
                 .entity-icon {
                     font-size: 2.5rem;
+                    line-height: 1;
+                    filter: drop-shadow(0 2px 4px rgba(var(--color-primary-rgb), 0.3));
+                    flex-shrink: 0;
+                }
+
+                .entity-card-info {
+                    flex: 1;
+                    min-width: 0;
                 }
 
                 .entity-card-title {
-                    font-size: 1.2rem;
-                    font-weight: 600;
+                    font-size: var(--font-size-lg, 1.125rem);
+                    font-weight: var(--font-semibold, 600);
                     color: var(--color-text-primary);
-                    margin: 0;
+                    margin: 0 0 var(--spacing-xs, 0.25rem) 0;
+                    line-height: var(--leading-tight, 1.25);
                 }
 
                 .entity-mythology {
-                    font-size: 0.85rem;
+                    display: inline-block;
+                    font-size: var(--font-size-xs, 0.75rem);
+                    padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+                    background: rgba(var(--color-primary-rgb), 0.2);
+                    border: 1px solid rgba(var(--color-primary-rgb), 0.4);
+                    border-radius: var(--radius-full, 9999px);
                     color: var(--color-primary);
-                    text-transform: capitalize;
+                    text-transform: uppercase;
+                    font-weight: var(--font-semibold, 600);
+                    letter-spacing: 0.05em;
                 }
 
                 .entity-description {
                     color: var(--color-text-secondary);
-                    font-size: 0.95rem;
-                    line-height: 1.6;
+                    font-size: var(--font-size-sm, 0.875rem);
+                    line-height: var(--leading-relaxed, 1.75);
+                    margin: var(--spacing-md, 1rem) 0;
                     display: -webkit-box;
                     -webkit-line-clamp: 3;
                     -webkit-box-orient: vertical;
                     overflow: hidden;
+                    text-overflow: ellipsis;
                 }
 
                 .entity-tags {
                     display: flex;
-                    gap: 0.5rem;
-                    margin-top: 1rem;
+                    gap: var(--spacing-xs, 0.25rem);
+                    margin-top: var(--spacing-md, 1rem);
                     flex-wrap: wrap;
                 }
 
                 .tag {
-                    padding: 0.25rem 0.75rem;
-                    background: rgba(var(--color-primary-rgb), 0.2);
-                    border: 1px solid rgba(var(--color-primary-rgb), 0.4);
-                    border-radius: 12px;
-                    font-size: 0.8rem;
-                    color: var(--color-primary);
+                    padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+                    background: rgba(var(--color-secondary-rgb), 0.2);
+                    border: 1px solid rgba(var(--color-secondary-rgb), 0.4);
+                    border-radius: var(--radius-md, 0.5rem);
+                    font-size: var(--font-size-xs, 0.75rem);
+                    color: var(--color-secondary);
+                    font-weight: var(--font-medium, 500);
+                    transition: all var(--transition-fast, 0.15s ease);
                 }
 
+                .tag:hover {
+                    background: rgba(var(--color-secondary-rgb), 0.3);
+                    transform: scale(1.05);
+                }
+
+                /* List View Adjustments */
+                .entity-grid.list-view .entity-card {
+                    display: flex;
+                    align-items: center;
+                    gap: var(--spacing-lg, 1.5rem);
+                }
+
+                .entity-grid.list-view .entity-card-header {
+                    margin-bottom: 0;
+                    min-width: 300px;
+                }
+
+                .entity-grid.list-view .entity-description {
+                    -webkit-line-clamp: 2;
+                    flex: 1;
+                }
+
+                /* ==========================================
+                   Empty State
+                   ========================================== */
                 .empty-state {
+                    grid-column: 1 / -1;
                     text-align: center;
-                    padding: 4rem 2rem;
+                    padding: var(--spacing-5xl, 5rem) var(--spacing-xl, 2rem);
+                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.4);
+                    border: 2px dashed rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+                    border-radius: var(--radius-2xl, 1.5rem);
                 }
 
                 .empty-icon {
                     font-size: 4rem;
-                    margin-bottom: 1rem;
+                    margin-bottom: var(--spacing-lg, 1.5rem);
+                    opacity: 0.5;
+                    filter: grayscale(1);
                 }
 
+                .empty-state h3 {
+                    color: var(--color-text-primary);
+                    font-size: var(--font-size-2xl, 1.5rem);
+                    margin: 0 0 var(--spacing-md, 1rem) 0;
+                }
+
+                .empty-state p {
+                    color: var(--color-text-secondary);
+                    font-size: var(--font-size-base, 1rem);
+                    margin: 0;
+                }
+
+                /* ==========================================
+                   Responsive Design
+                   ========================================== */
+
+                /* Tablet */
+                @media (max-width: 1024px) {
+                    .entity-grid {
+                        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                    }
+                }
+
+                /* Mobile */
                 @media (max-width: 768px) {
+                    .browse-view {
+                        padding: var(--spacing-md, 1rem);
+                    }
+
                     .browse-header {
                         flex-direction: column;
                         text-align: center;
+                        padding: var(--spacing-lg, 1.5rem);
+                        gap: var(--spacing-lg, 1.5rem);
+                    }
+
+                    .browse-header-icon {
+                        font-size: 3rem;
+                    }
+
+                    .browse-stats {
+                        justify-content: center;
+                    }
+
+                    .browse-controls {
+                        flex-direction: column;
+                        align-items: stretch;
+                    }
+
+                    .browse-filters {
+                        flex-direction: column;
+                    }
+
+                    .filter-group {
+                        min-width: 100%;
+                    }
+
+                    .view-controls {
+                        justify-content: center;
                     }
 
                     .entity-grid {
-                        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                        grid-template-columns: 1fr;
+                        gap: var(--spacing-md, 1rem);
+                    }
+
+                    .entity-grid.list-view .entity-card {
+                        flex-direction: column;
+                        align-items: flex-start;
+                    }
+
+                    .entity-grid.list-view .entity-card-header {
+                        min-width: 100%;
+                    }
+
+                    .view-label {
+                        display: none;
+                    }
+                }
+
+                /* Small mobile */
+                @media (max-width: 480px) {
+                    .browse-title {
+                        font-size: 1.5rem;
+                    }
+
+                    .browse-description {
+                        font-size: 0.9rem;
+                    }
+
+                    .entity-card {
+                        padding: var(--spacing-md, 1rem);
+                    }
+
+                    .entity-icon {
+                        font-size: 2rem;
+                    }
+
+                    .stat-badge {
+                        font-size: 0.85rem;
+                    }
+                }
+
+                /* ==========================================
+                   Accessibility
+                   ========================================== */
+                @media (prefers-reduced-motion: reduce) {
+                    .entity-card,
+                    .view-btn,
+                    .tag,
+                    .entity-card::before {
+                        transition: none;
+                    }
+
+                    .entity-card:hover {
+                        transform: none;
+                    }
+
+                    .skeleton-pulse {
+                        animation: none;
+                        opacity: 0.7;
+                    }
+                }
+
+                @media (prefers-contrast: high) {
+                    .entity-card,
+                    .browse-header,
+                    .filter-select,
+                    .filter-input {
+                        border-width: 3px;
                     }
                 }
             </style>
@@ -361,27 +843,62 @@ class BrowseCategoryView {
         const icon = entity.icon || this.getDefaultIcon(this.category);
         const description = entity.description || entity.summary || 'No description available';
 
+        // Get tags from domains or attributes
+        const tags = entity.domains || entity.attributes || entity.roles || [];
+        const displayTags = Array.isArray(tags) ? tags.slice(0, 4) : [];
+
         return `
             <a href="#/entity/${this.category}/${entity.mythology}/${entity.id}"
                class="entity-card"
-               data-entity-id="${entity.id}">
+               data-entity-id="${entity.id}"
+               data-mythology="${entity.mythology}"
+               data-name="${entity.name.toLowerCase()}">
                 <div class="entity-card-header">
                     <span class="entity-icon">${icon}</span>
-                    <div>
-                        <h3 class="entity-card-title">${entity.name}</h3>
-                        <div class="entity-mythology">${this.capitalize(entity.mythology)}</div>
+                    <div class="entity-card-info">
+                        <h3 class="entity-card-title">${this.escapeHtml(entity.name)}</h3>
+                        <span class="entity-mythology">${this.capitalize(entity.mythology)}</span>
                     </div>
                 </div>
-                <p class="entity-description">${description}</p>
-                ${entity.domains ? `
+                <p class="entity-description">${this.escapeHtml(description)}</p>
+                ${displayTags.length > 0 ? `
                     <div class="entity-tags">
-                        ${entity.domains.slice(0, 3).map(domain => `
-                            <span class="tag">${domain}</span>
+                        ${displayTags.map(tag => `
+                            <span class="tag" title="${this.escapeHtml(tag)}">${this.escapeHtml(tag)}</span>
                         `).join('')}
                     </div>
                 ` : ''}
             </a>
         `;
+    }
+
+    /**
+     * Get empty state HTML
+     */
+    getEmptyStateHTML() {
+        const categoryInfo = this.getCategoryInfo(this.category);
+
+        return `
+            <div class="empty-state">
+                <div class="empty-icon">${categoryInfo.icon}</div>
+                <h3>No ${categoryInfo.name} Found</h3>
+                <p>
+                    ${this.mythology
+                        ? `No ${this.category} found in ${this.capitalize(this.mythology)} mythology. Try selecting a different mythology or browse all.`
+                        : `No ${this.category} available at this time. Check back later for updates.`
+                    }
+                </p>
+            </div>
+        `;
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     /**
@@ -437,10 +954,30 @@ class BrowseCategoryView {
         const mythFilter = document.getElementById('mythologyFilter');
         if (mythFilter) {
             mythFilter.addEventListener('change', (e) => {
-                const mythology = e.target.value;
-                window.location.hash = mythology
-                    ? `#/browse/${this.category}/${mythology}`
-                    : `#/browse/${this.category}`;
+                this.mythology = e.target.value || null;
+                this.applyFilters();
+            });
+        }
+
+        // Sort order
+        const sortOrder = document.getElementById('sortOrder');
+        if (sortOrder) {
+            sortOrder.addEventListener('change', (e) => {
+                this.sortBy = e.target.value;
+                this.applyFilters();
+            });
+        }
+
+        // Search filter
+        const searchFilter = document.getElementById('searchFilter');
+        if (searchFilter) {
+            let searchTimeout;
+            searchFilter.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    this.searchTerm = e.target.value.toLowerCase();
+                    this.applyFilters();
+                }, 300); // Debounce search
             });
         }
 
@@ -452,13 +989,72 @@ class BrowseCategoryView {
                 viewBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
 
-                if (btn.dataset.view === 'list') {
+                this.viewMode = btn.dataset.view;
+                if (this.viewMode === 'list') {
                     grid.classList.add('list-view');
                 } else {
                     grid.classList.remove('list-view');
                 }
             });
         });
+    }
+
+    /**
+     * Apply filters and update display
+     */
+    applyFilters() {
+        let filtered = [...this.entities];
+
+        // Apply mythology filter
+        if (this.mythology) {
+            filtered = filtered.filter(entity =>
+                entity.mythology === this.mythology
+            );
+        }
+
+        // Apply search filter
+        if (this.searchTerm) {
+            filtered = filtered.filter(entity => {
+                const searchableText = [
+                    entity.name,
+                    entity.description || '',
+                    entity.summary || '',
+                    ...(entity.domains || []),
+                    ...(entity.attributes || []),
+                    ...(entity.roles || [])
+                ].join(' ').toLowerCase();
+
+                return searchableText.includes(this.searchTerm);
+            });
+        }
+
+        // Apply sorting
+        filtered.sort((a, b) => {
+            if (this.sortBy === 'mythology') {
+                const mythCompare = a.mythology.localeCompare(b.mythology);
+                if (mythCompare !== 0) return mythCompare;
+            }
+            return a.name.localeCompare(b.name);
+        });
+
+        this.filteredEntities = filtered;
+        this.updateGrid();
+    }
+
+    /**
+     * Update grid with filtered entities
+     */
+    updateGrid() {
+        const grid = document.getElementById('entityGrid');
+        if (!grid) return;
+
+        if (this.filteredEntities.length === 0) {
+            grid.innerHTML = this.getEmptyStateHTML();
+        } else {
+            grid.innerHTML = this.filteredEntities
+                .map(entity => this.getEntityCardHTML(entity))
+                .join('');
+        }
     }
 
     /**

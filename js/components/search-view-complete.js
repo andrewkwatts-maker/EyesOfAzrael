@@ -140,33 +140,165 @@ class SearchViewComplete {
      */
     getHTML() {
         return `
-            <div class="search-view">
-                <div class="search-header">
-                    <h1>Search Mythological Entities</h1>
-                    <p class="search-description">Explore deities, heroes, creatures, and more across world mythologies</p>
-
-                    <div class="search-input-wrapper">
-                        <span class="search-icon">🔍</span>
-                        <input
-                            type="text"
-                            id="search-input"
-                            class="search-input"
-                            placeholder="Search deities, heroes, creatures, and more..."
-                            autocomplete="off"
-                            value="${this.state.query}"
-                        >
-                        <button id="clear-search" class="clear-btn" style="display: none;">✕</button>
-                        <button id="search-btn" class="search-submit-btn">Search</button>
+            <div class="search-view" style="max-width: 1600px; margin: 0 auto; padding: 1rem;">
+                <div class="search-header" style="margin-bottom: 2rem;">
+                    <div class="search-hero" style="
+                        text-align: center;
+                        padding: 3rem 2rem;
+                        background: linear-gradient(135deg,
+                            rgba(var(--color-primary-rgb), 0.15),
+                            rgba(var(--color-secondary-rgb), 0.15));
+                        backdrop-filter: blur(10px);
+                        border: 2px solid rgba(var(--color-primary-rgb), 0.3);
+                        border-radius: var(--radius-xl, 24px);
+                        margin-bottom: 2rem;
+                        box-shadow: var(--shadow-xl);
+                    ">
+                        <h1 style="
+                            font-size: clamp(2rem, 5vw, 3rem);
+                            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                            background-clip: text;
+                            margin: 0 0 1rem 0;
+                        ">🔍 Search Mythological Entities</h1>
+                        <p class="search-description" style="
+                            font-size: 1.2rem;
+                            color: var(--color-text-secondary);
+                            margin: 0;
+                        ">Explore deities, heroes, creatures, and more across world mythologies</p>
                     </div>
 
-                    <div id="autocomplete-results" class="search-suggestions" style="display: none;"></div>
+                    <div class="search-input-wrapper" style="
+                        display: flex;
+                        gap: 0.75rem;
+                        position: relative;
+                        margin-bottom: 1rem;
+                    ">
+                        <div style="position: relative; flex: 1;">
+                            <span class="search-icon" style="
+                                position: absolute;
+                                left: 1rem;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                font-size: 1.2rem;
+                                opacity: 0.6;
+                            ">🔍</span>
+                            <input
+                                type="text"
+                                id="search-input"
+                                class="search-input"
+                                placeholder="Search deities, heroes, creatures, and more..."
+                                autocomplete="off"
+                                value="${this.state.query}"
+                                style="
+                                    width: 100%;
+                                    min-height: 48px;
+                                    padding: 0.75rem 3rem 0.75rem 3rem;
+                                    font-size: 1.1rem;
+                                    background: rgba(var(--color-surface-rgb), 0.6);
+                                    backdrop-filter: blur(10px);
+                                    border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+                                    border-radius: var(--radius-md, 12px);
+                                    color: var(--color-text-primary);
+                                    transition: all var(--transition-base);
+                                "
+                            >
+                            <button id="clear-search" class="clear-btn" style="
+                                display: none;
+                                position: absolute;
+                                right: 1rem;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                background: transparent;
+                                border: none;
+                                color: var(--color-text-secondary);
+                                font-size: 1.5rem;
+                                cursor: pointer;
+                                padding: 0.25rem;
+                                opacity: 0.6;
+                                transition: opacity 0.2s;
+                            ">✕</button>
+                        </div>
+                        <button id="search-btn" class="search-submit-btn" style="
+                            min-height: 48px;
+                            padding: 0.75rem 2rem;
+                            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+                            color: white;
+                            border: none;
+                            border-radius: var(--radius-md, 12px);
+                            font-size: 1.1rem;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all var(--transition-base);
+                            white-space: nowrap;
+                        ">Search</button>
+                    </div>
+
+                    <div id="autocomplete-results" class="search-suggestions" style="
+                        display: none;
+                        position: absolute;
+                        top: 100%;
+                        left: 0;
+                        right: 0;
+                        margin-top: 0.5rem;
+                        background: rgba(var(--color-surface-rgb), 0.95);
+                        backdrop-filter: blur(10px);
+                        border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+                        border-radius: var(--radius-md, 12px);
+                        overflow: hidden;
+                        z-index: 1000;
+                        max-height: 300px;
+                        overflow-y: auto;
+                        box-shadow: var(--shadow-lg);
+                    "></div>
                 </div>
 
-                <div class="search-content">
-                    <aside class="search-filters">
-                        <button id="filter-toggle-btn" class="filter-toggle-btn">
+                <div class="search-content" style="
+                    display: grid;
+                    grid-template-columns: 320px 1fr;
+                    gap: 2rem;
+                    align-items: start;
+                ">
+                    <aside class="search-filters" style="
+                        position: sticky;
+                        top: 1rem;
+                        background: rgba(var(--color-surface-rgb), 0.6);
+                        backdrop-filter: blur(10px);
+                        border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+                        border-radius: var(--radius-lg, 16px);
+                        padding: 1.5rem;
+                        max-height: calc(100vh - 2rem);
+                        overflow-y: auto;
+                    ">
+                        <button id="filter-toggle-btn" class="filter-toggle-btn" style="
+                            width: 100%;
+                            min-height: 44px;
+                            padding: 0.75rem 1rem;
+                            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+                            color: white;
+                            border: none;
+                            border-radius: var(--radius-md, 8px);
+                            font-size: 1rem;
+                            font-weight: 600;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            gap: 0.5rem;
+                            margin-bottom: 1rem;
+                            transition: all var(--transition-base);
+                        ">
                             <span>🎛️ Filters</span>
-                            <span id="filter-count" class="filter-count" style="display: none;">0</span>
+                            <span id="filter-count" class="filter-count" style="
+                                display: none;
+                                background: white;
+                                color: var(--color-primary);
+                                border-radius: var(--radius-full, 20px);
+                                padding: 0.25rem 0.75rem;
+                                font-size: 0.85rem;
+                                font-weight: 700;
+                            ">0</span>
                         </button>
 
                         <div id="filter-panel" class="filter-panel" style="display: none;">
@@ -176,27 +308,88 @@ class SearchViewComplete {
                         ${this.getSearchHistoryHTML()}
                     </aside>
 
-                    <main class="search-results-main">
-                        <div class="results-controls" style="display: none;">
+                    <main class="search-results-main" style="min-height: 600px;">
+                        <div class="results-controls" style="
+                            display: none;
+                            flex-wrap: wrap;
+                            gap: 1rem;
+                            align-items: center;
+                            justify-content: space-between;
+                            padding: 1rem;
+                            background: rgba(var(--color-surface-rgb), 0.4);
+                            border-radius: var(--radius-md, 8px);
+                            margin-bottom: 1.5rem;
+                        ">
                             <div class="results-info">
-                                <span id="results-count">0 results</span>
+                                <span id="results-count" style="
+                                    font-size: 1.1rem;
+                                    font-weight: 600;
+                                    color: var(--color-text-primary);
+                                ">0 results</span>
                             </div>
 
-                            <div class="display-mode-switcher">
-                                <button class="display-mode-btn active" data-mode="grid" title="Grid view">
-                                    ▦
-                                </button>
-                                <button class="display-mode-btn" data-mode="list" title="List view">
-                                    ☰
-                                </button>
-                                <button class="display-mode-btn" data-mode="table" title="Table view">
-                                    ▤
-                                </button>
+                            <div class="display-mode-switcher" style="
+                                display: flex;
+                                gap: 0.5rem;
+                                background: rgba(var(--color-surface-rgb), 0.6);
+                                padding: 0.25rem;
+                                border-radius: var(--radius-md, 8px);
+                                border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+                            ">
+                                <button class="display-mode-btn active" data-mode="grid" title="Grid view" style="
+                                    min-height: 40px;
+                                    min-width: 40px;
+                                    padding: 0.5rem;
+                                    background: var(--color-primary);
+                                    border: none;
+                                    border-radius: var(--radius-sm, 6px);
+                                    color: white;
+                                    cursor: pointer;
+                                    font-size: 1.2rem;
+                                    transition: all var(--transition-base);
+                                ">▦</button>
+                                <button class="display-mode-btn" data-mode="list" title="List view" style="
+                                    min-height: 40px;
+                                    min-width: 40px;
+                                    padding: 0.5rem;
+                                    background: transparent;
+                                    border: none;
+                                    border-radius: var(--radius-sm, 6px);
+                                    color: var(--color-text-secondary);
+                                    cursor: pointer;
+                                    font-size: 1.2rem;
+                                    transition: all var(--transition-base);
+                                ">☰</button>
+                                <button class="display-mode-btn" data-mode="table" title="Table view" style="
+                                    min-height: 40px;
+                                    min-width: 40px;
+                                    padding: 0.5rem;
+                                    background: transparent;
+                                    border: none;
+                                    border-radius: var(--radius-sm, 6px);
+                                    color: var(--color-text-secondary);
+                                    cursor: pointer;
+                                    font-size: 1.2rem;
+                                    transition: all var(--transition-base);
+                                ">▤</button>
                             </div>
 
-                            <div class="sort-controls">
-                                <label for="sort-select">Sort:</label>
-                                <select id="sort-select" class="sort-select">
+                            <div class="sort-controls" style="display: flex; align-items: center; gap: 0.5rem;">
+                                <label for="sort-select" style="
+                                    font-size: 0.95rem;
+                                    color: var(--color-text-secondary);
+                                    font-weight: 500;
+                                ">Sort:</label>
+                                <select id="sort-select" class="sort-select" style="
+                                    min-height: 40px;
+                                    padding: 0.5rem 1rem;
+                                    background: rgba(var(--color-surface-rgb), 0.6);
+                                    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+                                    border-radius: var(--radius-sm, 6px);
+                                    color: var(--color-text-primary);
+                                    cursor: pointer;
+                                    font-size: 0.95rem;
+                                ">
                                     <option value="relevance">Relevance</option>
                                     <option value="name">Name (A-Z)</option>
                                     <option value="importance">Importance</option>
@@ -209,7 +402,14 @@ class SearchViewComplete {
                             ${this.getEmptyStateHTML()}
                         </div>
 
-                        <div id="pagination" class="pagination" style="display: none;"></div>
+                        <div id="pagination" class="pagination" style="
+                            display: none;
+                            flex-wrap: wrap;
+                            justify-content: center;
+                            align-items: center;
+                            gap: 0.5rem;
+                            padding: 2rem 0;
+                        "></div>
                     </main>
                 </div>
             </div>
@@ -221,9 +421,25 @@ class SearchViewComplete {
      */
     getFiltersHTML() {
         return `
-            <div class="filter-group">
-                <label for="mythology-filter">Mythology</label>
-                <select id="mythology-filter">
+            <div class="filter-group" style="margin-bottom: 1.5rem;">
+                <label for="mythology-filter" style="
+                    display: block;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    color: var(--color-text-primary);
+                    margin-bottom: 0.5rem;
+                ">🌍 Mythology</label>
+                <select id="mythology-filter" style="
+                    width: 100%;
+                    min-height: 44px;
+                    padding: 0.5rem 1rem;
+                    background: rgba(var(--color-surface-rgb), 0.6);
+                    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+                    border-radius: var(--radius-sm, 6px);
+                    color: var(--color-text-primary);
+                    cursor: pointer;
+                    font-size: 0.95rem;
+                ">
                     <option value="">All Mythologies</option>
                     ${this.mythologies.map(m =>
                         `<option value="${m.id}">${m.name}</option>`
@@ -231,21 +447,124 @@ class SearchViewComplete {
                 </select>
             </div>
 
-            <div class="filter-group">
-                <label>Entity Type</label>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" value="deities" checked> Deities</label>
-                    <label><input type="checkbox" value="heroes" checked> Heroes</label>
-                    <label><input type="checkbox" value="creatures" checked> Creatures</label>
-                    <label><input type="checkbox" value="cosmology" checked> Cosmology</label>
-                    <label><input type="checkbox" value="rituals" checked> Rituals</label>
-                    <label><input type="checkbox" value="texts" checked> Texts</label>
+            <div class="filter-group" style="margin-bottom: 1.5rem;">
+                <label style="
+                    display: block;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    color: var(--color-text-primary);
+                    margin-bottom: 0.5rem;
+                ">📚 Entity Type</label>
+                <div class="checkbox-group" style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                ">
+                    <label style="
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        padding: 0.5rem;
+                        border-radius: var(--radius-sm, 6px);
+                        cursor: pointer;
+                        transition: background 0.2s;
+                        color: var(--color-text-secondary);
+                    "><input type="checkbox" value="deities" checked style="
+                        width: 18px;
+                        height: 18px;
+                        cursor: pointer;
+                        accent-color: var(--color-primary);
+                    "> Deities</label>
+                    <label style="
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        padding: 0.5rem;
+                        border-radius: var(--radius-sm, 6px);
+                        cursor: pointer;
+                        transition: background 0.2s;
+                        color: var(--color-text-secondary);
+                    "><input type="checkbox" value="heroes" checked style="
+                        width: 18px;
+                        height: 18px;
+                        cursor: pointer;
+                        accent-color: var(--color-primary);
+                    "> Heroes</label>
+                    <label style="
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        padding: 0.5rem;
+                        border-radius: var(--radius-sm, 6px);
+                        cursor: pointer;
+                        transition: background 0.2s;
+                        color: var(--color-text-secondary);
+                    "><input type="checkbox" value="creatures" checked style="
+                        width: 18px;
+                        height: 18px;
+                        cursor: pointer;
+                        accent-color: var(--color-primary);
+                    "> Creatures</label>
+                    <label style="
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        padding: 0.5rem;
+                        border-radius: var(--radius-sm, 6px);
+                        cursor: pointer;
+                        transition: background 0.2s;
+                        color: var(--color-text-secondary);
+                    "><input type="checkbox" value="cosmology" checked style="
+                        width: 18px;
+                        height: 18px;
+                        cursor: pointer;
+                        accent-color: var(--color-primary);
+                    "> Cosmology</label>
+                    <label style="
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        padding: 0.5rem;
+                        border-radius: var(--radius-sm, 6px);
+                        cursor: pointer;
+                        transition: background 0.2s;
+                        color: var(--color-text-secondary);
+                    "><input type="checkbox" value="rituals" checked style="
+                        width: 18px;
+                        height: 18px;
+                        cursor: pointer;
+                        accent-color: var(--color-primary);
+                    "> Rituals</label>
+                    <label style="
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        padding: 0.5rem;
+                        border-radius: var(--radius-sm, 6px);
+                        cursor: pointer;
+                        transition: background 0.2s;
+                        color: var(--color-text-secondary);
+                    "><input type="checkbox" value="texts" checked style="
+                        width: 18px;
+                        height: 18px;
+                        cursor: pointer;
+                        accent-color: var(--color-primary);
+                    "> Texts</label>
                 </div>
             </div>
 
-            <div class="filter-group">
-                <label for="importance-filter">
-                    Minimum Importance: <span id="importance-value">1</span>
+            <div class="filter-group" style="margin-bottom: 1.5rem;">
+                <label for="importance-filter" style="
+                    display: block;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    color: var(--color-text-primary);
+                    margin-bottom: 0.5rem;
+                ">
+                    ⭐ Minimum Importance: <span id="importance-value" style="
+                        color: var(--color-secondary);
+                        font-weight: 700;
+                    ">1</span>
                 </label>
                 <input
                     type="range"
@@ -254,21 +573,87 @@ class SearchViewComplete {
                     max="5"
                     value="1"
                     step="1"
+                    style="
+                        width: 100%;
+                        height: 8px;
+                        cursor: pointer;
+                        accent-color: var(--color-primary);
+                    "
                 >
+                <div style="
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 0.25rem;
+                    font-size: 0.75rem;
+                    color: var(--color-text-secondary);
+                ">
+                    <span>1</span>
+                    <span>2</span>
+                    <span>3</span>
+                    <span>4</span>
+                    <span>5</span>
+                </div>
             </div>
 
-            <div class="filter-group">
-                <label>Has Image</label>
-                <select id="image-filter">
+            <div class="filter-group" style="margin-bottom: 1.5rem;">
+                <label for="image-filter" style="
+                    display: block;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    color: var(--color-text-primary);
+                    margin-bottom: 0.5rem;
+                ">🖼️ Has Image</label>
+                <select id="image-filter" style="
+                    width: 100%;
+                    min-height: 44px;
+                    padding: 0.5rem 1rem;
+                    background: rgba(var(--color-surface-rgb), 0.6);
+                    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+                    border-radius: var(--radius-sm, 6px);
+                    color: var(--color-text-primary);
+                    cursor: pointer;
+                    font-size: 0.95rem;
+                ">
                     <option value="">Any</option>
                     <option value="true">Yes</option>
                     <option value="false">No</option>
                 </select>
             </div>
 
-            <div class="filter-actions">
-                <button id="apply-filters" class="btn-primary">Apply Filters</button>
-                <button id="clear-filters" class="btn-secondary">Clear All</button>
+            <div class="filter-actions" style="
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid rgba(var(--color-primary-rgb), 0.2);
+            ">
+                <button id="apply-filters" class="btn-primary" style="
+                    width: 100%;
+                    min-height: 44px;
+                    padding: 0.75rem 1rem;
+                    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+                    color: white;
+                    border: none;
+                    border-radius: var(--radius-md, 8px);
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all var(--transition-base);
+                ">Apply Filters</button>
+                <button id="clear-filters" class="btn-secondary" style="
+                    width: 100%;
+                    min-height: 44px;
+                    padding: 0.75rem 1rem;
+                    background: transparent;
+                    color: var(--color-text-secondary);
+                    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+                    border-radius: var(--radius-md, 8px);
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all var(--transition-base);
+                ">Clear All</button>
             </div>
         `;
     }
@@ -282,16 +667,67 @@ class SearchViewComplete {
         }
 
         return `
-            <div class="search-history">
-                <div class="history-header">
-                    <h4>Recent Searches</h4>
-                    <button id="clear-history" class="btn-text">Clear</button>
+            <div class="search-history" style="margin-top: 1.5rem;">
+                <div class="history-header" style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 0.75rem;
+                ">
+                    <h4 style="
+                        font-size: 0.95rem;
+                        font-weight: 600;
+                        color: var(--color-text-primary);
+                        margin: 0;
+                    ">🕒 Recent Searches</h4>
+                    <button id="clear-history" class="btn-text" style="
+                        background: transparent;
+                        border: none;
+                        color: var(--color-text-secondary);
+                        font-size: 0.85rem;
+                        cursor: pointer;
+                        padding: 0.25rem 0.5rem;
+                        transition: color 0.2s;
+                    ">Clear</button>
                 </div>
-                <ul class="history-list">
+                <ul class="history-list" style="
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                ">
                     ${this.searchHistory.slice(0, 5).map(entry => `
-                        <li class="history-item" data-query="${this.escapeHtml(entry.query)}">
-                            <span class="history-query">${this.escapeHtml(entry.query)}</span>
-                            <span class="history-count">${entry.resultCount || 0}</span>
+                        <li class="history-item" data-query="${this.escapeHtml(entry.query)}" style="
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding: 0.75rem;
+                            background: rgba(var(--color-primary-rgb), 0.1);
+                            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+                            border-radius: var(--radius-sm, 6px);
+                            cursor: pointer;
+                            transition: all 0.2s;
+                        ">
+                            <span class="history-query" style="
+                                color: var(--color-text-primary);
+                                font-size: 0.9rem;
+                                flex: 1;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                white-space: nowrap;
+                            ">${this.escapeHtml(entry.query)}</span>
+                            <span class="history-count" style="
+                                background: rgba(var(--color-primary-rgb), 0.3);
+                                color: var(--color-primary);
+                                padding: 0.25rem 0.5rem;
+                                border-radius: var(--radius-full, 20px);
+                                font-size: 0.75rem;
+                                font-weight: 700;
+                                min-width: 30px;
+                                text-align: center;
+                            ">${entry.resultCount || 0}</span>
                         </li>
                     `).join('')}
                 </ul>
@@ -304,17 +740,111 @@ class SearchViewComplete {
      */
     getEmptyStateHTML() {
         return `
-            <div class="search-placeholder">
-                <div class="placeholder-icon">🔍</div>
-                <p>Enter a search term to find entities across world mythologies</p>
+            <div class="search-placeholder" style="
+                text-align: center;
+                padding: 4rem 2rem;
+                background: rgba(var(--color-surface-rgb), 0.3);
+                border-radius: var(--radius-lg, 16px);
+                border: 2px dashed rgba(var(--color-primary-rgb), 0.3);
+            ">
+                <div class="placeholder-icon" style="
+                    font-size: 4rem;
+                    margin-bottom: 1.5rem;
+                    opacity: 0.6;
+                ">🔍</div>
+                <p style="
+                    font-size: 1.2rem;
+                    color: var(--color-text-secondary);
+                    margin-bottom: 2rem;
+                ">Enter a search term to find entities across world mythologies</p>
                 <div class="search-examples">
-                    <p><strong>Try searching for:</strong></p>
-                    <button class="example-query" data-query="zeus">Zeus</button>
-                    <button class="example-query" data-query="odin">Odin</button>
-                    <button class="example-query" data-query="ra">Ra</button>
-                    <button class="example-query" data-query="shiva">Shiva</button>
-                    <button class="example-query" data-query="thunder">Thunder deities</button>
-                    <button class="example-query" data-query="underworld">Underworld</button>
+                    <p style="
+                        font-size: 1rem;
+                        font-weight: 600;
+                        color: var(--color-text-primary);
+                        margin-bottom: 1rem;
+                    ">Try searching for:</p>
+                    <div style="
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 0.75rem;
+                        justify-content: center;
+                        max-width: 600px;
+                        margin: 0 auto;
+                    ">
+                        <button class="example-query" data-query="zeus" style="
+                            min-height: 44px;
+                            padding: 0.75rem 1.5rem;
+                            background: rgba(var(--color-primary-rgb), 0.2);
+                            border: 2px solid var(--color-primary);
+                            border-radius: var(--radius-full, 20px);
+                            color: var(--color-primary);
+                            cursor: pointer;
+                            font-size: 0.95rem;
+                            font-weight: 600;
+                            transition: all var(--transition-base);
+                        ">Zeus</button>
+                        <button class="example-query" data-query="odin" style="
+                            min-height: 44px;
+                            padding: 0.75rem 1.5rem;
+                            background: rgba(var(--color-primary-rgb), 0.2);
+                            border: 2px solid var(--color-primary);
+                            border-radius: var(--radius-full, 20px);
+                            color: var(--color-primary);
+                            cursor: pointer;
+                            font-size: 0.95rem;
+                            font-weight: 600;
+                            transition: all var(--transition-base);
+                        ">Odin</button>
+                        <button class="example-query" data-query="ra" style="
+                            min-height: 44px;
+                            padding: 0.75rem 1.5rem;
+                            background: rgba(var(--color-primary-rgb), 0.2);
+                            border: 2px solid var(--color-primary);
+                            border-radius: var(--radius-full, 20px);
+                            color: var(--color-primary);
+                            cursor: pointer;
+                            font-size: 0.95rem;
+                            font-weight: 600;
+                            transition: all var(--transition-base);
+                        ">Ra</button>
+                        <button class="example-query" data-query="shiva" style="
+                            min-height: 44px;
+                            padding: 0.75rem 1.5rem;
+                            background: rgba(var(--color-primary-rgb), 0.2);
+                            border: 2px solid var(--color-primary);
+                            border-radius: var(--radius-full, 20px);
+                            color: var(--color-primary);
+                            cursor: pointer;
+                            font-size: 0.95rem;
+                            font-weight: 600;
+                            transition: all var(--transition-base);
+                        ">Shiva</button>
+                        <button class="example-query" data-query="thunder" style="
+                            min-height: 44px;
+                            padding: 0.75rem 1.5rem;
+                            background: rgba(var(--color-primary-rgb), 0.2);
+                            border: 2px solid var(--color-primary);
+                            border-radius: var(--radius-full, 20px);
+                            color: var(--color-primary);
+                            cursor: pointer;
+                            font-size: 0.95rem;
+                            font-weight: 600;
+                            transition: all var(--transition-base);
+                        ">Thunder</button>
+                        <button class="example-query" data-query="underworld" style="
+                            min-height: 44px;
+                            padding: 0.75rem 1.5rem;
+                            background: rgba(var(--color-primary-rgb), 0.2);
+                            border: 2px solid var(--color-primary);
+                            border-radius: var(--radius-full, 20px);
+                            color: var(--color-primary);
+                            cursor: pointer;
+                            font-size: 0.95rem;
+                            font-weight: 600;
+                            transition: all var(--transition-base);
+                        ">Underworld</button>
+                    </div>
                 </div>
             </div>
         `;
@@ -325,10 +855,40 @@ class SearchViewComplete {
      */
     getNoResultsHTML() {
         return `
-            <div class="no-results">
-                <div class="no-results-icon">😕</div>
-                <p>No entities found for "${this.escapeHtml(this.state.query)}"</p>
-                <p class="no-results-hint">Try different keywords or check your filters</p>
+            <div class="no-results" style="
+                text-align: center;
+                padding: 4rem 2rem;
+                background: rgba(255, 69, 0, 0.1);
+                border: 2px solid rgba(255, 69, 0, 0.3);
+                border-radius: var(--radius-lg, 16px);
+            ">
+                <div class="no-results-icon" style="
+                    font-size: 4rem;
+                    margin-bottom: 1.5rem;
+                ">😕</div>
+                <p style="
+                    font-size: 1.3rem;
+                    color: #ff6347;
+                    font-weight: 600;
+                    margin-bottom: 0.5rem;
+                ">No entities found for "${this.escapeHtml(this.state.query)}"</p>
+                <p class="no-results-hint" style="
+                    font-size: 1rem;
+                    color: var(--color-text-secondary);
+                    margin-bottom: 2rem;
+                ">Try different keywords or check your filters</p>
+                <button id="clear-all-filters-btn" class="btn-secondary" style="
+                    min-height: 44px;
+                    padding: 0.75rem 2rem;
+                    background: linear-gradient(135deg, #ff6347, #ff4500);
+                    color: white;
+                    border: none;
+                    border-radius: var(--radius-md, 8px);
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all var(--transition-base);
+                ">Clear All Filters</button>
             </div>
         `;
     }
@@ -498,7 +1058,13 @@ class SearchViewComplete {
             }
 
             container.innerHTML = suggestions.map(term => `
-                <div class="suggestion-item" data-query="${this.escapeHtml(term)}">
+                <div class="suggestion-item" data-query="${this.escapeHtml(term)}" style="
+                    padding: 0.75rem 1rem;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                    border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.1);
+                    color: var(--color-text-primary);
+                ">
                     <strong>${this.highlightMatch(term, query)}</strong>
                 </div>
             `).join('');
@@ -886,7 +1452,11 @@ class SearchViewComplete {
      */
     renderGridView(results) {
         return `
-            <div class="entity-grid universal-grid">
+            <div class="entity-grid universal-grid" style="
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 1.5rem;
+            ">
                 ${results.map(entity => this.renderEntityCard(entity)).join('')}
             </div>
         `;
@@ -905,20 +1475,91 @@ class SearchViewComplete {
         const importance = entity.importance || 50;
         const stars = Math.round(importance / 20); // Convert to 1-5 stars
 
+        // Highlight search term in name
+        const highlightedName = this.highlightMatch(name, this.state.query);
+
         return `
-            <a href="#/mythology/${mythology}/${entityType}/${entityId}" class="entity-card grid-card">
-                <div class="card-badge">${this.formatMythologyName(mythology)}</div>
-                <div class="card-icon">${icon}</div>
-                <div class="card-title">${this.escapeHtml(name)}</div>
-                <div class="card-subtitle">${this.escapeHtml(subtitle)}</div>
-                <div class="card-stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Type:</span>
-                        <span class="stat-value">${this.formatEntityType(entityType)}</span>
+            <a href="#/mythology/${mythology}/${entityType}/${entityId}" style="
+                display: block;
+                background: rgba(var(--color-surface-rgb), 0.6);
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(var(--color-primary-rgb), 0.2);
+                border-radius: var(--radius-lg, 12px);
+                padding: 1.5rem;
+                cursor: pointer;
+                transition: all var(--transition-base);
+                position: relative;
+                overflow: hidden;
+                text-decoration: none;
+                color: inherit;
+            " class="entity-card grid-card">
+                <div style="
+                    position: absolute;
+                    top: 0.75rem;
+                    right: 0.75rem;
+                    background: rgba(var(--color-primary-rgb), 0.2);
+                    padding: 0.25rem 0.75rem;
+                    border-radius: var(--radius-full, 20px);
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+                    color: var(--color-primary);
+                ">${this.formatMythologyName(mythology)}</div>
+                <div style="
+                    font-size: 3rem;
+                    text-align: center;
+                    margin: 1rem 0;
+                ">${icon}</div>
+                <div style="
+                    font-size: 1.2rem;
+                    font-weight: 600;
+                    color: var(--color-primary);
+                    margin-bottom: 0.5rem;
+                    text-align: center;
+                ">${highlightedName}</div>
+                <div style="
+                    font-size: 0.9rem;
+                    color: var(--color-text-secondary);
+                    line-height: 1.5;
+                    margin-bottom: 1rem;
+                    text-align: center;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                ">${this.escapeHtml(subtitle)}</div>
+                <div style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding-top: 1rem;
+                    border-top: 1px solid rgba(var(--color-primary-rgb), 0.2);
+                    gap: 0.5rem;
+                ">
+                    <div style="flex: 1; text-align: center;">
+                        <span style="
+                            display: block;
+                            font-size: 0.75rem;
+                            color: var(--color-text-secondary);
+                            margin-bottom: 0.25rem;
+                        ">Type</span>
+                        <span style="
+                            font-size: 0.85rem;
+                            font-weight: 600;
+                            color: var(--color-text-primary);
+                        ">${this.formatEntityType(entityType)}</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Importance:</span>
-                        <span class="stat-value">${'⭐'.repeat(stars)}</span>
+                    <div style="flex: 1; text-align: center;">
+                        <span style="
+                            display: block;
+                            font-size: 0.75rem;
+                            color: var(--color-text-secondary);
+                            margin-bottom: 0.25rem;
+                        ">Importance</span>
+                        <span style="
+                            font-size: 1rem;
+                        ">${'⭐'.repeat(stars)}</span>
                     </div>
                 </div>
             </a>
@@ -1035,7 +1676,20 @@ class SearchViewComplete {
         // Previous button
         html += `
             <button class="btn-secondary" ${this.state.currentPage === 1 ? 'disabled' : ''}
-                    onclick="searchViewInstance.goToPage(${this.state.currentPage - 1})">
+                    onclick="searchViewInstance.goToPage(${this.state.currentPage - 1})"
+                    style="
+                        min-height: 44px;
+                        padding: 0.75rem 1.5rem;
+                        background: rgba(var(--color-surface-rgb), 0.6);
+                        border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+                        border-radius: var(--radius-md, 8px);
+                        color: var(--color-text-primary);
+                        cursor: pointer;
+                        font-size: 0.95rem;
+                        font-weight: 600;
+                        transition: all var(--transition-base);
+                        ${this.state.currentPage === 1 ? 'opacity: 0.5; cursor: not-allowed;' : ''}
+                    ">
                 ← Previous
             </button>
         `;
@@ -1050,28 +1704,79 @@ class SearchViewComplete {
         }
 
         if (startPage > 1) {
-            html += `<button class="btn-secondary" onclick="searchViewInstance.goToPage(1)">1</button>`;
-            if (startPage > 2) html += '<span>...</span>';
+            html += `<button class="btn-secondary" onclick="searchViewInstance.goToPage(1)" style="
+                min-height: 44px;
+                min-width: 44px;
+                padding: 0.75rem;
+                background: rgba(var(--color-surface-rgb), 0.6);
+                border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+                border-radius: var(--radius-md, 8px);
+                color: var(--color-text-primary);
+                cursor: pointer;
+                font-size: 0.95rem;
+                font-weight: 600;
+                transition: all var(--transition-base);
+            ">1</button>`;
+            if (startPage > 2) html += '<span style="color: var(--color-text-secondary); padding: 0 0.5rem;">...</span>';
         }
 
         for (let i = startPage; i <= endPage; i++) {
+            const isActive = i === this.state.currentPage;
             html += `
-                <button class="btn-${i === this.state.currentPage ? 'primary' : 'secondary'}"
-                        onclick="searchViewInstance.goToPage(${i})">
+                <button class="btn-${isActive ? 'primary' : 'secondary'}"
+                        onclick="searchViewInstance.goToPage(${i})"
+                        style="
+                            min-height: 44px;
+                            min-width: 44px;
+                            padding: 0.75rem;
+                            background: ${isActive ? 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))' : 'rgba(var(--color-surface-rgb), 0.6)'};
+                            border: 1px solid ${isActive ? 'var(--color-primary)' : 'rgba(var(--color-primary-rgb), 0.2)'};
+                            border-radius: var(--radius-md, 8px);
+                            color: ${isActive ? 'white' : 'var(--color-text-primary)'};
+                            cursor: pointer;
+                            font-size: 0.95rem;
+                            font-weight: ${isActive ? '700' : '600'};
+                            transition: all var(--transition-base);
+                        ">
                     ${i}
                 </button>
             `;
         }
 
         if (endPage < totalPages) {
-            if (endPage < totalPages - 1) html += '<span>...</span>';
-            html += `<button class="btn-secondary" onclick="searchViewInstance.goToPage(${totalPages})">${totalPages}</button>`;
+            if (endPage < totalPages - 1) html += '<span style="color: var(--color-text-secondary); padding: 0 0.5rem;">...</span>';
+            html += `<button class="btn-secondary" onclick="searchViewInstance.goToPage(${totalPages})" style="
+                min-height: 44px;
+                min-width: 44px;
+                padding: 0.75rem;
+                background: rgba(var(--color-surface-rgb), 0.6);
+                border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+                border-radius: var(--radius-md, 8px);
+                color: var(--color-text-primary);
+                cursor: pointer;
+                font-size: 0.95rem;
+                font-weight: 600;
+                transition: all var(--transition-base);
+            ">${totalPages}</button>`;
         }
 
         // Next button
         html += `
             <button class="btn-secondary" ${this.state.currentPage === totalPages ? 'disabled' : ''}
-                    onclick="searchViewInstance.goToPage(${this.state.currentPage + 1})">
+                    onclick="searchViewInstance.goToPage(${this.state.currentPage + 1})"
+                    style="
+                        min-height: 44px;
+                        padding: 0.75rem 1.5rem;
+                        background: rgba(var(--color-surface-rgb), 0.6);
+                        border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+                        border-radius: var(--radius-md, 8px);
+                        color: var(--color-text-primary);
+                        cursor: pointer;
+                        font-size: 0.95rem;
+                        font-weight: 600;
+                        transition: all var(--transition-base);
+                        ${this.state.currentPage === totalPages ? 'opacity: 0.5; cursor: not-allowed;' : ''}
+                    ">
                 Next →
             </button>
         `;
