@@ -8,12 +8,36 @@
 
     console.log('[App] Starting initialization...');
 
+    // Initialize error monitoring FIRST (before anything else)
+    if (typeof initErrorMonitoring === 'function') {
+        try {
+            initErrorMonitoring();
+            console.log('[App] Error monitoring initialized');
+        } catch (error) {
+            console.warn('[App] Failed to initialize error monitoring:', error);
+        }
+    }
+
+    // Initialize performance monitoring
+    if (typeof initPerformanceMonitoring === 'function') {
+        try {
+            initPerformanceMonitoring();
+            console.log('[App] Performance monitoring initialized');
+        } catch (error) {
+            console.warn('[App] Failed to initialize performance monitoring:', error);
+        }
+    }
+
     // Wait for DOM to be ready
     if (document.readyState === 'loading') {
         await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
     }
 
     try {
+        // Add breadcrumb for initialization start
+        if (typeof addBreadcrumb === 'function') {
+            addBreadcrumb('app', 'Starting app initialization');
+        }
         // Check if Firebase is loaded
         if (typeof firebase === 'undefined') {
             throw new Error('Firebase SDK not loaded');
@@ -123,15 +147,13 @@
 
         console.log('[App] Initialization complete');
 
+        // Add breadcrumb for successful initialization
+        if (typeof addBreadcrumb === 'function') {
+            addBreadcrumb('app', 'App initialized successfully');
+        }
+
         // Emit app-initialized event
         document.dispatchEvent(new CustomEvent('app-initialized'));
-
-        // Don't hide loading immediately - wait for content to render
-        // This prevents blank white screen before SPANavigation renders content
-        // const loadingContainer = document.querySelector('.loading-container');
-        // if (loadingContainer) {
-        //     loadingContainer.style.display = 'none';
-        // }
 
         // Listen for first render complete from SPANavigation
         document.addEventListener('first-render-complete', () => {
@@ -146,10 +168,33 @@
                     console.log('[App Init] Loading container hidden');
                 }, 300);
             }
-        }, { once: true }); // Use once to ensure it only fires once
+        }, { once: true });
+
+        // Fallback: Hide loading after 10 seconds if first-render-complete never fires
+        setTimeout(() => {
+            const loadingContainer = document.querySelector('.loading-container');
+            if (loadingContainer && loadingContainer.style.display !== 'none') {
+                console.warn('[App Init] ⚠️ Fallback timeout: hiding loading container after 10s');
+                loadingContainer.style.opacity = '0';
+                loadingContainer.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => {
+                    loadingContainer.style.display = 'none';
+                }, 300);
+            }
+        }, 10000);
 
     } catch (error) {
         console.error('[App] ❌ Initialization error:', error);
+
+        // Capture error with Sentry
+        if (typeof captureError === 'function') {
+            captureError(error, {
+                phase: 'initialization',
+                timestamp: Date.now(),
+                url: window.location.href,
+            });
+        }
+
         showError(error);
     }
 
@@ -197,7 +242,10 @@
      * Setup global error tracking
      */
     function setupErrorTracking() {
-        // Track uncaught JavaScript errors
+        // Note: Global error tracking is now handled by error-monitoring.js
+        // This function is kept for backwards compatibility with AnalyticsManager
+
+        // Track uncaught JavaScript errors (legacy support)
         window.addEventListener('error', (event) => {
             if (window.AnalyticsManager) {
                 window.AnalyticsManager.trackCustomError(event.error || new Error(event.message), {
@@ -208,12 +256,34 @@
                     type: 'javascript_error'
                 });
             }
+
+            // Also track with Sentry if available
+            if (typeof captureError === 'function') {
+                captureError(event.error || new Error(event.message), {
+                    fatal: true,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    type: 'javascript_error'
+                });
+            }
         });
 
-        // Track unhandled promise rejections
+        // Track unhandled promise rejections (legacy support)
         window.addEventListener('unhandledrejection', (event) => {
             if (window.AnalyticsManager) {
                 window.AnalyticsManager.trackCustomError(
+                    event.reason instanceof Error ? event.reason : new Error(String(event.reason)),
+                    {
+                        fatal: false,
+                        type: 'unhandled_promise_rejection'
+                    }
+                );
+            }
+
+            // Also track with Sentry if available
+            if (typeof captureError === 'function') {
+                captureError(
                     event.reason instanceof Error ? event.reason : new Error(String(event.reason)),
                     {
                         fatal: false,
