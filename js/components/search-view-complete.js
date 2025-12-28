@@ -58,6 +58,12 @@ class SearchViewComplete {
 
         // Available mythologies (will be loaded from Firebase)
         this.mythologies = [];
+
+        // Event listener cleanup tracking (memory leak prevention)
+        this.boundHandlers = {};
+        this.activeTimers = [];
+        this.elements = {};
+        this.isDestroyed = false;
     }
 
     /**
@@ -463,6 +469,10 @@ class SearchViewComplete {
                 this.hideAutocomplete();
             }
         });
+
+        // Set global instance for pagination callbacks
+        window.searchViewInstance = this;
+        console.log('[SearchView] Global instance set for pagination callbacks');
     }
 
     /**
@@ -472,6 +482,11 @@ class SearchViewComplete {
         try {
             const suggestions = await this.searchEngine.getSuggestions(query, 8);
             const container = document.getElementById('autocomplete-results');
+
+            if (!container) {
+                console.warn('[SearchView] Element not found in showAutocomplete: autocomplete-results');
+                return;
+            }
 
             if (!suggestions || suggestions.length === 0) {
                 this.hideAutocomplete();
@@ -488,9 +503,12 @@ class SearchViewComplete {
             container.querySelectorAll('.suggestion-item').forEach(item => {
                 item.addEventListener('click', (e) => {
                     const query = e.currentTarget.dataset.query;
-                    document.getElementById('search-input').value = query;
-                    this.performSearch(query);
-                    this.hideAutocomplete();
+                    const searchInput = document.getElementById('search-input');
+                    if (searchInput) {
+                        searchInput.value = query;
+                        this.performSearch(query);
+                        this.hideAutocomplete();
+                    }
                 });
             });
 
@@ -505,6 +523,10 @@ class SearchViewComplete {
      */
     hideAutocomplete() {
         const container = document.getElementById('autocomplete-results');
+        if (!container) {
+            console.warn('[SearchView] Element not found in hideAutocomplete');
+            return;
+        }
         container.style.display = 'none';
     }
 
@@ -526,8 +548,15 @@ class SearchViewComplete {
         this.state.error = null;
 
         // Show loading state
-        document.getElementById('results-container').innerHTML = this.getLoadingHTML();
-        document.querySelector('.results-controls').style.display = 'none';
+        const resultsContainer = document.getElementById('results-container');
+        if (resultsContainer) {
+            resultsContainer.innerHTML = this.getLoadingHTML();
+        }
+
+        const resultsControls = document.querySelector('.results-controls');
+        if (resultsControls) {
+            resultsControls.style.display = 'none';
+        }
 
         try {
             console.log('[SearchView] Searching for:', query);
@@ -608,7 +637,10 @@ class SearchViewComplete {
      */
     updateFilters() {
         // Mythology filter
-        this.state.filters.mythology = document.getElementById('mythology-filter').value;
+        const mythologyFilter = document.getElementById('mythology-filter');
+        if (mythologyFilter) {
+            this.state.filters.mythology = mythologyFilter.value;
+        }
 
         // Entity types
         const checkedTypes = Array.from(
@@ -617,12 +649,18 @@ class SearchViewComplete {
         this.state.filters.entityTypes = checkedTypes;
 
         // Importance filter
-        const importanceValue = parseInt(document.getElementById('importance-filter').value);
-        this.state.filters.importance = [importanceValue, 5];
+        const importanceFilterEl = document.getElementById('importance-filter');
+        if (importanceFilterEl) {
+            const importanceValue = parseInt(importanceFilterEl.value);
+            this.state.filters.importance = [importanceValue, 5];
+        }
 
         // Image filter
-        const imageFilter = document.getElementById('image-filter').value;
-        this.state.filters.hasImage = imageFilter === '' ? null : imageFilter === 'true';
+        const imageFilterEl = document.getElementById('image-filter');
+        if (imageFilterEl) {
+            const imageFilter = imageFilterEl.value;
+            this.state.filters.hasImage = imageFilter === '' ? null : imageFilter === 'true';
+        }
 
         // Update filter count badge
         let filterCount = 0;
@@ -632,11 +670,13 @@ class SearchViewComplete {
         if (this.state.filters.hasImage !== null) filterCount++;
 
         const filterCountBadge = document.getElementById('filter-count');
-        if (filterCount > 0) {
-            filterCountBadge.textContent = filterCount;
-            filterCountBadge.style.display = 'inline-block';
-        } else {
-            filterCountBadge.style.display = 'none';
+        if (filterCountBadge) {
+            if (filterCount > 0) {
+                filterCountBadge.textContent = filterCount;
+                filterCountBadge.style.display = 'inline-block';
+            } else {
+                filterCountBadge.style.display = 'none';
+            }
         }
     }
 
@@ -644,13 +684,29 @@ class SearchViewComplete {
      * Clear all filters
      */
     clearFilters() {
-        document.getElementById('mythology-filter').value = '';
+        const mythologyFilter = document.getElementById('mythology-filter');
+        if (mythologyFilter) {
+            mythologyFilter.value = '';
+        }
+
         document.querySelectorAll('.checkbox-group input[type="checkbox"]').forEach(cb => {
             cb.checked = true;
         });
-        document.getElementById('importance-filter').value = 1;
-        document.getElementById('importance-value').textContent = '1';
-        document.getElementById('image-filter').value = '';
+
+        const importanceFilter = document.getElementById('importance-filter');
+        if (importanceFilter) {
+            importanceFilter.value = 1;
+        }
+
+        const importanceValue = document.getElementById('importance-value');
+        if (importanceValue) {
+            importanceValue.textContent = '1';
+        }
+
+        const imageFilter = document.getElementById('image-filter');
+        if (imageFilter) {
+            imageFilter.value = '';
+        }
 
         this.state.filters = {
             mythology: '',
@@ -659,7 +715,10 @@ class SearchViewComplete {
             hasImage: null
         };
 
-        document.getElementById('filter-count').style.display = 'none';
+        const filterCount = document.getElementById('filter-count');
+        if (filterCount) {
+            filterCount.style.display = 'none';
+        }
 
         // Re-run search if there's a query
         if (this.state.query) {
@@ -672,8 +731,22 @@ class SearchViewComplete {
      */
     renderResults() {
         const resultsContainer = document.getElementById('results-container');
+        if (!resultsContainer) {
+            console.warn('[SearchView] Element not found in renderResults: results-container');
+            return;
+        }
+
         const resultsControls = document.querySelector('.results-controls');
+        if (!resultsControls) {
+            console.warn('[SearchView] Element not found in renderResults: results-controls');
+            return;
+        }
+
         const paginationContainer = document.getElementById('pagination');
+        if (!paginationContainer) {
+            console.warn('[SearchView] Element not found in renderResults: pagination');
+            return;
+        }
 
         if (this.state.totalResults === 0) {
             resultsContainer.innerHTML = this.getNoResultsHTML();
@@ -686,8 +759,11 @@ class SearchViewComplete {
         resultsControls.style.display = 'flex';
 
         // Update results count
-        document.getElementById('results-count').textContent =
-            `${this.state.totalResults} result${this.state.totalResults !== 1 ? 's' : ''}`;
+        const resultsCount = document.getElementById('results-count');
+        if (resultsCount) {
+            resultsCount.textContent =
+                `${this.state.totalResults} result${this.state.totalResults !== 1 ? 's' : ''}`;
+        }
 
         // Sort results
         const sortedResults = this.sortResults([...this.state.results]);
@@ -846,6 +922,11 @@ class SearchViewComplete {
      */
     renderPagination() {
         const paginationContainer = document.getElementById('pagination');
+        if (!paginationContainer) {
+            console.warn('[SearchView] Element not found in renderPagination: pagination');
+            return;
+        }
+
         const totalPages = Math.ceil(this.state.totalResults / this.state.resultsPerPage);
 
         if (totalPages <= 1) {
@@ -918,7 +999,10 @@ class SearchViewComplete {
         this.renderResults();
 
         // Scroll to top of results
-        document.querySelector('.search-results-main').scrollIntoView({ behavior: 'smooth' });
+        const resultsMain = document.querySelector('.search-results-main');
+        if (resultsMain) {
+            resultsMain.scrollIntoView({ behavior: 'smooth' });
+        }
     }
 
     /**
@@ -943,16 +1027,32 @@ class SearchViewComplete {
      * Show empty state
      */
     showEmptyState() {
-        document.getElementById('results-container').innerHTML = this.getEmptyStateHTML();
-        document.querySelector('.results-controls').style.display = 'none';
-        document.getElementById('pagination').style.display = 'none';
+        const resultsContainer = document.getElementById('results-container');
+        if (!resultsContainer) {
+            console.warn('[SearchView] Element not found in showEmptyState: results-container');
+            return;
+        }
+        resultsContainer.innerHTML = this.getEmptyStateHTML();
+
+        const resultsControls = document.querySelector('.results-controls');
+        if (resultsControls) {
+            resultsControls.style.display = 'none';
+        }
+
+        const pagination = document.getElementById('pagination');
+        if (pagination) {
+            pagination.style.display = 'none';
+        }
 
         // Re-attach event listeners to example queries
         document.querySelectorAll('.example-query').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const query = e.target.dataset.query;
-                document.getElementById('search-input').value = query;
-                this.performSearch(query);
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.value = query;
+                    this.performSearch(query);
+                }
             });
         });
     }
@@ -961,7 +1061,12 @@ class SearchViewComplete {
      * Render error state
      */
     renderError() {
-        document.getElementById('results-container').innerHTML = `
+        const resultsContainer = document.getElementById('results-container');
+        if (!resultsContainer) {
+            console.warn('[SearchView] Element not found in renderError: results-container');
+            return;
+        }
+        resultsContainer.innerHTML = `
             <div class="search-error">
                 <div class="error-icon">⚠️</div>
                 <h3>Search Error</h3>
@@ -1046,6 +1151,28 @@ class SearchViewComplete {
 
     formatEntityType(type) {
         return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+
+    /**
+     * Cleanup method - removes global instance and clears resources
+     */
+    destroy() {
+        console.log('[SearchView] Destroying instance');
+
+        // Clear global instance reference if it's this instance
+        if (window.searchViewInstance === this) {
+            window.searchViewInstance = null;
+            console.log('[SearchView] Global instance cleared');
+        }
+
+        // Clear timers
+        if (this.autocompleteTimer) {
+            clearTimeout(this.autocompleteTimer);
+            this.autocompleteTimer = null;
+        }
+
+        // Mark as destroyed
+        this.isDestroyed = true;
     }
 }
 

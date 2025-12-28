@@ -160,13 +160,29 @@ class EditEntityModal {
 
         const formContainer = this.modalElement.querySelector('#modal-form-container');
 
-        // Create EntityForm instance
+        // Create EntityForm instance with validated callbacks
         this.entityForm = new EntityForm({
             crudManager: this.crudManager,
             collection: this.currentCollection,
             entityId: this.currentEntityId,
-            onSuccess: (result) => this.handleSuccess(result),
-            onCancel: () => this.close()
+            onSuccess: (result) => {
+                try {
+                    this.handleSuccess(result);
+                } catch (error) {
+                    console.error('[EditModal] onSuccess callback error:', error);
+                    this.showError('An error occurred after saving. Please refresh the page.');
+                }
+            },
+            onCancel: () => {
+                try {
+                    this.close();
+                } catch (error) {
+                    console.error('[EditModal] onCancel callback error:', error);
+                    // Fallback: try to remove modal directly
+                    const modal = document.getElementById('edit-entity-modal');
+                    if (modal) modal.remove();
+                }
+            }
         });
 
         // Render form
@@ -223,6 +239,12 @@ class EditEntityModal {
      * @param {Object} result - Save result from CRUD manager
      */
     handleSuccess(result) {
+        // Validate result parameter
+        if (!result || typeof result !== 'object') {
+            console.warn('[EditModal] handleSuccess called with invalid result:', result);
+            // Still show success since the save operation completed
+        }
+
         this.showToast('Entity updated successfully!', 'success');
 
         // Close modal after brief delay

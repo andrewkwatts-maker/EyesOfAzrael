@@ -247,3 +247,115 @@ When adding new tests:
 **Last Updated**: 2025-12-28
 **Test Coverage**: 98.07% (Theme Toggle), 90%+ (Analytics)
 **Total Tests**: 127 (47 Theme Toggle + 80 Analytics)
+
+---
+
+## Test Utilities (New!)
+
+### Quick Reference
+
+The Eyes of Azrael test suite now includes comprehensive utilities and fixtures to dramatically improve test quality and reduce code duplication.
+
+#### Import Common Utilities
+
+```javascript
+// Import test utilities
+import {
+    createMockEntity,
+    createMockFirestore,
+    setupComponentTest,
+    flushPromises,
+    waitForCondition
+} from './test-utils';
+
+// Import test fixtures
+import {
+    GREEK_DEITIES,
+    NORSE_DEITIES,
+    EDGE_CASES,
+    USERS
+} from './test-fixtures';
+```
+
+#### Common Test Patterns
+
+**Pattern 1: Component Test Setup**
+```javascript
+describe('MyComponent', () => {
+    let testSetup;
+
+    beforeEach(() => {
+        testSetup = setupComponentTest();
+    });
+
+    afterEach(() => {
+        testSetup.cleanup();
+    });
+
+    test('should render', () => {
+        const component = new MyComponent(testSetup.mockFirestore);
+        component.render(testSetup.container);
+        expect(testSetup.container.querySelector('.my-component')).toBeTruthy();
+    });
+});
+```
+
+**Pattern 2: Using Fixtures**
+```javascript
+test('should display Zeus correctly', () => {
+    const zeus = GREEK_DEITIES.zeus;
+    component.render(zeus);
+    expect(component.querySelector('.name').textContent).toBe('Zeus');
+});
+
+test('should handle edge cases', () => {
+    component.render(EDGE_CASES.empty_strings);
+    expect(component).toBeTruthy(); // Doesn't crash
+});
+```
+
+**Pattern 3: Async Testing**
+```javascript
+test('should load data', async () => {
+    component.loadData();
+    await flushPromises();
+    expect(component.data).toBeDefined();
+});
+```
+
+### Available Utilities
+
+See **TEST_POLISH_AGENT_2_REPORT.md** for complete documentation including:
+- Mock Factories (Firestore, CRUD, Analytics, etc.)
+- DOM Utilities (Container management, element creation)
+- Async Utilities (Promises, timers, conditions)
+- Assertion Helpers (Specific assertions, custom matchers)
+- Data Generators (Bulk entities, mythology-specific data)
+
+### Available Fixtures
+
+**Deities:**
+- `GREEK_DEITIES.zeus`, `.hera`, `.athena`
+- `NORSE_DEITIES.odin`, `.thor`
+- `EGYPTIAN_DEITIES.ra`
+
+**Edge Cases:**
+- `EDGE_CASES.minimal` - Bare minimum data
+- `EDGE_CASES.empty_strings` - Empty values
+- `EDGE_CASES.null_values` - Null handling
+- `EDGE_CASES.very_long_strings` - Performance testing
+- `EDGE_CASES.special_characters` - XSS prevention
+
+**Users:**
+- `USERS.standard`, `.admin`, `.unverified`, `.no_photo`
+
+**Responses:**
+- `FIRESTORE_RESPONSES.*`, `CRUD_RESPONSES.*`, `SEARCH_RESULTS.*`
+
+---
+
+**For detailed information, see:**
+- `TEST_POLISH_AGENT_2_REPORT.md` - Comprehensive quality report
+- `test-utils.js` - Utility documentation (JSDoc)
+- `test-fixtures.js` - Fixture documentation (JSDoc)
+
