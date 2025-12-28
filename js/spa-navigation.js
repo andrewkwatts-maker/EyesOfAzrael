@@ -27,8 +27,12 @@ class SPANavigation {
         // Route patterns
         this.routes = {
             home: /^#?\/?$/,
+            mythologies: /^#?\/mythologies\/?$/,
+            browse_category: /^#?\/browse\/([^\/]+)\/?$/,
+            browse_category_mythology: /^#?\/browse\/([^\/]+)\/([^\/]+)\/?$/,
             mythology: /^#?\/mythology\/([^\/]+)\/?$/,
             entity: /^#?\/mythology\/([^\/]+)\/([^\/]+)\/([^\/]+)\/?$/,
+            entity_alt: /^#?\/entity\/([^\/]+)\/([^\/]+)\/([^\/]+)\/?$/,
             category: /^#?\/mythology\/([^\/]+)\/([^\/]+)\/?$/,
             search: /^#?\/search\/?$/,
             compare: /^#?\/compare\/?$/,
@@ -251,6 +255,21 @@ class SPANavigation {
                 console.log('[SPA] 🏠 Calling renderHome()...');
                 await this.renderHome();
                 console.log('[SPA] ✓ renderHome() completed');
+            } else if (this.routes.mythologies.test(path)) {
+                console.log('[SPA] ✅ Matched MYTHOLOGIES route');
+                await this.renderMythologies();
+            } else if (this.routes.browse_category_mythology.test(path)) {
+                const match = path.match(this.routes.browse_category_mythology);
+                console.log('[SPA] ✅ Matched BROWSE CATEGORY+MYTHOLOGY route:', match[1], match[2]);
+                await this.renderBrowseCategory(match[1], match[2]);
+            } else if (this.routes.browse_category.test(path)) {
+                const match = path.match(this.routes.browse_category);
+                console.log('[SPA] ✅ Matched BROWSE CATEGORY route:', match[1]);
+                await this.renderBrowseCategory(match[1]);
+            } else if (this.routes.entity_alt.test(path)) {
+                const match = path.match(this.routes.entity_alt);
+                console.log('[SPA] ✅ Matched ENTITY (alt format) route:', match[3]);
+                await this.renderEntity(match[2], match[1], match[3]);
             } else if (this.routes.entity.test(path)) {
                 const match = path.match(this.routes.entity);
                 console.log('[SPA] ✅ Matched ENTITY route:', match[3]);
@@ -371,7 +390,27 @@ class SPANavigation {
             console.log('[SPA] ℹ️  PageAssetRenderer class not defined, skipping');
         }
 
-        // Fallback to HomeView class
+        // Try LandingPageView first (new landing page with asset types)
+        if (typeof LandingPageView !== 'undefined') {
+            console.log('[SPA] 🔧 LandingPageView class available, using it...');
+            const landingView = new LandingPageView(this.db);
+            console.log('[SPA] 📡 Calling landingView.render(mainContent)...');
+            await landingView.render(mainContent);
+            console.log('[SPA] ✅ Landing page rendered via LandingPageView');
+
+            // Emit success event
+            console.log('[SPA] 📡 Emitting first-render-complete event (LandingPageView)');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: 'home',
+                    renderer: 'LandingPageView',
+                    timestamp: Date.now()
+                }
+            }));
+            return;
+        }
+
+        // Fallback to HomeView class (old mythologies grid)
         if (typeof HomeView !== 'undefined') {
             console.log('[SPA] 🔧 HomeView class available, using it...');
             const homeView = new HomeView(this.db);
@@ -390,7 +429,7 @@ class SPANavigation {
             }));
             return;
         } else {
-            console.log('[SPA] ℹ️  HomeView class not defined, using inline fallback');
+            console.log('[SPA] ℹ️  No view classes defined, using inline fallback');
         }
 
         // Fallback to inline rendering if HomeView not available
@@ -530,6 +569,40 @@ class SPANavigation {
         } catch (error) {
             console.error('Error loading featured entities:', error);
             container.innerHTML = '<p class="error">Error loading featured entities</p>';
+        }
+    }
+
+    /**
+     * Render mythologies grid page
+     */
+    async renderMythologies() {
+        console.log('[SPA] ▶️  renderMythologies() called');
+        const mainContent = document.getElementById('main-content');
+
+        if (typeof MythologiesView !== 'undefined') {
+            const mythologiesView = new MythologiesView(this.db);
+            await mythologiesView.render(mainContent);
+            console.log('[SPA] ✅ Mythologies grid rendered');
+        } else {
+            mainContent.innerHTML = `<div class="error-page"><h1>Mythologies View not available</h1></div>`;
+            console.error('[SPA] MythologiesView class not found');
+        }
+    }
+
+    /**
+     * Render browse category page (deities, creatures, etc.)
+     */
+    async renderBrowseCategory(category, mythology = null) {
+        console.log(`[SPA] ▶️  renderBrowseCategory() called: ${category}${mythology ? ` (${mythology})` : ''}`);
+        const mainContent = document.getElementById('main-content');
+
+        if (typeof BrowseCategoryView !== 'undefined') {
+            const browseView = new BrowseCategoryView(this.db);
+            await browseView.render(mainContent, { category, mythology });
+            console.log('[SPA] ✅ Browse category rendered');
+        } else {
+            mainContent.innerHTML = `<div class="error-page"><h1>Browse View not available</h1></div>`;
+            console.error('[SPA] BrowseCategoryView class not found');
         }
     }
 
