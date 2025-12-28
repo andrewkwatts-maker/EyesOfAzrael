@@ -42,7 +42,7 @@ class ShaderThemeManager {
             // Light themes
             light: 'light-shader.glsl',
 
-            // NEW: Day/Daylight themes
+            // Day/Daylight themes
             day: 'day-shader.glsl',
             daylight: 'day-shader.glsl',
             sunshine: 'day-shader.glsl',
@@ -51,21 +51,36 @@ class ShaderThemeManager {
             dark: 'dark-shader.glsl',
             shadow: 'dark-shader.glsl',
 
-            // NEW: Air/Wind themes
+            // Air/Wind themes
             air: 'air-shader.glsl',
             wind: 'air-shader.glsl',
 
-            // NEW: Chaos/Void themes
+            // Chaos themes
             chaos: 'chaos-shader.glsl',
-            void: 'chaos-shader.glsl',
-            abyss: 'chaos-shader.glsl',
+            void: 'dark-shader.glsl',
+            abyss: 'dark-shader.glsl',
 
-            // NEW: Order/Divine themes
+            // Order/Divine themes
             order: 'order-shader.glsl',
             divine: 'order-shader.glsl',
             sacred: 'order-shader.glsl',
             angelic: 'order-shader.glsl',
-            heaven: 'order-shader.glsl'
+            heaven: 'order-shader.glsl',
+
+            // Aurora themes
+            aurora: 'aurora-shader.glsl',
+            northernlights: 'aurora-shader.glsl',
+
+            // Storm themes
+            storm: 'storm-shader.glsl',
+            thunder: 'storm-shader.glsl',
+            lightning: 'storm-shader.glsl',
+
+            // Cosmic themes
+            cosmic: 'cosmic-shader.glsl',
+            nebula: 'cosmic-shader.glsl',
+            galaxy: 'cosmic-shader.glsl',
+            space: 'cosmic-shader.glsl'
         };
 
         // Performance settings

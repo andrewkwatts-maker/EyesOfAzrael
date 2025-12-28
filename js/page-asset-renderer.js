@@ -162,16 +162,15 @@ class PageAssetRenderer {
         const { title, subtitle, icon, cta = [] } = hero;
 
         return `
-            <section class="hero-section">
-                ${icon ? `<div class="hero-icon-display" style="font-size: 4rem; text-align: center; margin-bottom: 1rem;">${icon}</div>` : ''}
-                <h1 class="hero-title" style="text-align: center; font-size: 2.5rem; margin-bottom: 0.5rem;">${title}</h1>
-                ${subtitle ? `<p class="subtitle" style="font-size: 1.5rem; text-align: center; margin: 0.5rem 0;">${subtitle}</p>` : ''}
+            <section class="page-hero-section">
+                ${icon ? `<div class="hero-icon-display">${icon}</div>` : ''}
+                <h1 class="hero-title">${title}</h1>
+                ${subtitle ? `<p class="hero-subtitle">${subtitle}</p>` : ''}
                 ${cta.length > 0 ? `
-                    <div class="hero-cta" style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                    <div class="hero-actions">
                         ${cta.map(button => `
                             <a href="${button.link}"
-                               class="btn ${button.primary ? 'btn-primary' : 'btn-secondary'}"
-                               style="padding: 0.75rem 1.5rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.3s;">
+                               class="btn ${button.primary ? 'btn-primary' : 'btn-secondary'}">
                                 ${button.icon || ''} ${button.text}
                             </a>
                         `).join('')}
@@ -188,14 +187,15 @@ class PageAssetRenderer {
         const { title, description, cards = [], icon = '📄' } = section;
 
         return `
-            <section class="page-section" data-section="${section.id}" style="margin-top: 2rem;">
+            <section class="page-section" data-section="${section.id}">
                 <div class="section-header">
-                    <h2 class="section-title" style="color: var(--color-primary); margin-bottom: 1rem;">
-                        ${icon} ${title}
+                    <h2 class="section-title">
+                        <span class="section-icon">${icon}</span>
+                        ${title}
                     </h2>
-                    ${description ? `<p class="section-description" style="color: var(--color-text-secondary); margin-bottom: 1.5rem;">${description}</p>` : ''}
+                    ${description ? `<p class="section-description">${description}</p>` : ''}
                     ${section.link ? `
-                        <a href="${section.link}" class="section-link" style="color: var(--color-secondary); text-decoration: none; font-weight: 600;">View All →</a>
+                        <a href="${section.link}" class="section-link">View All →</a>
                     ` : ''}
                 </div>
                 <div class="section-content">
@@ -210,18 +210,18 @@ class PageAssetRenderer {
      */
     getCardsHTML(cards, section) {
         if (!cards || cards.length === 0) {
-            return `<p class="no-content" style="color: var(--color-text-secondary); font-style: italic;">No ${section.collection} available yet.</p>`;
+            return `<p class="no-content">No ${section.collection} available yet.</p>`;
         }
 
         return `
-            <div class="card-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+            <div class="card-grid">
                 ${cards.map(card => this.getCardHTML(card, section)).join('')}
             </div>
         `;
     }
 
     /**
-     * Generate individual card HTML (matching historic card styling)
+     * Generate individual card HTML (matching standardized card styling)
      */
     getCardHTML(card, section) {
         const link = this.getCardLink(card, section);
@@ -230,12 +230,12 @@ class PageAssetRenderer {
         const description = card.description || card.subtitle || '';
 
         return `
-            <a href="${link}" class="card panel-card" data-card-id="${card.id}" style="text-decoration: none; color: inherit; display: block;">
-                <div class="card-icon" style="font-size: 2rem; text-align: center; margin-bottom: 0.5rem;">${icon}</div>
-                <h3 class="card-title" style="color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.25rem; font-weight: 600;">${this.escapeHtml(name)}</h3>
-                ${description ? `<p class="card-description" style="color: var(--color-text-secondary); font-size: 0.9rem; line-height: 1.5;">${this.escapeHtml(description)}</p>` : ''}
+            <a href="${link}" class="panel-card" data-card-id="${card.id}">
+                <span class="card-icon">${icon}</span>
+                <h3 class="card-title">${this.escapeHtml(name)}</h3>
+                ${description ? `<p class="card-description">${this.escapeHtml(description)}</p>` : ''}
                 ${card.metadata?.status ? `
-                    <span class="card-status" style="display: inline-block; margin-top: 0.5rem; padding: 0.25rem 0.75rem; background: rgba(var(--color-primary-rgb), 0.2); border-radius: var(--radius-full); font-size: 0.75rem;">${card.metadata.status}</span>
+                    <span class="card-status">${card.metadata.status}</span>
                 ` : ''}
             </a>
         `;

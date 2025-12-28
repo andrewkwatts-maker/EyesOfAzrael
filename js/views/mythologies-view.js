@@ -124,25 +124,34 @@ class MythologiesView {
             </div>
 
             <style>
+                /* ===== MYTHOLOGIES VIEW STYLES ===== */
+                /* Standardized to match VISUAL_CONSISTENCY_GUIDE.md */
+
                 .mythologies-view {
                     max-width: 1400px;
                     margin: 0 auto;
-                    padding: 2rem;
+                    padding: 0 var(--spacing-xl, 2rem) var(--spacing-4xl, 4rem);
                 }
 
+                /* === Header Section === */
                 .mythologies-header {
                     display: flex;
-                    gap: 2rem;
+                    gap: var(--spacing-xl, 2rem);
                     align-items: center;
-                    margin-bottom: 3rem;
-                    padding: 2rem;
-                    background: rgba(var(--color-bg-card-rgb), 0.6);
-                    border-radius: 16px;
-                    border: 1px solid rgba(var(--color-border-primary-rgb), 0.3);
+                    margin-bottom: var(--spacing-4xl, 4rem);
+                    padding: var(--spacing-xl, 2rem);
+                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    border-radius: var(--radius-2xl, 1.5rem);
+                    border: 2px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.3);
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
                 }
 
                 .header-icon {
                     font-size: 4rem;
+                    filter: drop-shadow(0 4px 8px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4));
+                    line-height: 1;
                 }
 
                 .header-content {
@@ -150,45 +159,61 @@ class MythologiesView {
                 }
 
                 .page-title {
-                    font-size: 2.5rem;
-                    margin-bottom: 0.5rem;
-                    color: var(--color-text-primary);
+                    font-family: var(--font-heading, Georgia, serif);
+                    font-size: clamp(1.75rem, 4vw, 2.5rem);
+                    margin: 0 0 var(--spacing-sm, 0.5rem) 0;
+                    color: var(--color-text-primary, #e5e7eb);
+                    font-weight: var(--font-bold, 700);
                 }
 
                 .page-description {
-                    color: var(--color-text-secondary);
-                    font-size: 1.1rem;
-                    margin-bottom: 1rem;
-                    line-height: 1.6;
+                    color: var(--color-text-secondary, #9ca3af);
+                    font-size: clamp(0.95rem, 2vw, 1.1rem);
+                    margin: 0 0 var(--spacing-lg, 1.5rem) 0;
+                    line-height: var(--leading-relaxed, 1.75);
                 }
 
                 .mythology-stats {
                     display: flex;
-                    gap: 2rem;
+                    gap: var(--spacing-xl, 2rem);
+                    flex-wrap: wrap;
                 }
 
                 .stat {
-                    color: var(--color-primary);
-                    font-weight: 600;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: var(--spacing-xs, 0.25rem);
+                    color: var(--color-primary, #8b7fff);
+                    font-weight: var(--font-semibold, 600);
+                    font-size: 1rem;
                 }
 
+                /* === Mythology Grid === */
                 .mythology-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                    gap: 1.5rem;
+                    gap: var(--spacing-lg, 1.5rem);
+                    margin-bottom: var(--spacing-3xl, 3rem);
                 }
 
+                /* === Mythology Cards === */
                 .mythology-card {
-                    background: rgba(var(--color-bg-card-rgb), 0.6);
-                    border: 1px solid rgba(var(--color-border-primary-rgb), 0.3);
-                    border-radius: 16px;
-                    padding: 2rem;
+                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    border: 2px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.5);
+                    border-radius: var(--radius-xl, 1rem);
+                    padding: var(--spacing-xl, 2rem);
                     text-decoration: none;
                     color: inherit;
-                    transition: all 0.3s ease;
+                    transition: all var(--transition-base, 0.3s ease);
                     cursor: pointer;
                     position: relative;
                     overflow: hidden;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    min-height: 180px;
+                    display: flex;
+                    flex-direction: column;
                 }
 
                 .mythology-card::before {
@@ -198,15 +223,16 @@ class MythologiesView {
                     left: 0;
                     right: 0;
                     height: 4px;
-                    background: var(--card-color);
+                    background: var(--card-color, linear-gradient(90deg, var(--color-primary), var(--color-secondary)));
                     transform: scaleX(0);
-                    transition: transform 0.3s ease;
+                    transition: transform var(--transition-base, 0.3s ease);
                 }
 
                 .mythology-card:hover {
-                    transform: translateY(-4px);
-                    border-color: var(--card-color);
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+                    transform: translateY(-8px);
+                    border-color: var(--card-color, var(--color-primary));
+                    box-shadow: 0 12px 40px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
                 }
 
                 .mythology-card:hover::before {
@@ -214,46 +240,139 @@ class MythologiesView {
                 }
 
                 .mythology-icon {
-                    font-size: 3.5rem;
-                    margin-bottom: 1rem;
+                    font-size: 2rem;
+                    margin-bottom: var(--spacing-md, 1rem);
                     display: block;
+                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+                    transition: transform var(--transition-base, 0.3s ease);
+                    line-height: 1;
+                }
+
+                .mythology-card:hover .mythology-icon {
+                    transform: scale(1.1);
                 }
 
                 .mythology-name {
-                    font-size: 1.4rem;
-                    font-weight: 600;
-                    margin-bottom: 0.5rem;
-                    color: var(--color-text-primary);
+                    font-size: clamp(1.25rem, 2vw, 1.4rem);
+                    font-weight: var(--font-semibold, 600);
+                    margin-bottom: var(--spacing-sm, 0.5rem);
+                    color: var(--color-text-primary, #e5e7eb);
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                    line-height: var(--leading-tight, 1.25);
                 }
 
                 .mythology-description {
-                    font-size: 0.95rem;
-                    color: var(--color-text-secondary);
-                    line-height: 1.6;
-                    margin-bottom: 1rem;
+                    font-size: clamp(0.875rem, 1.25vw, 0.95rem);
+                    color: var(--color-text-secondary, #9ca3af);
+                    line-height: var(--leading-normal, 1.6);
+                    margin-bottom: var(--spacing-md, 1rem);
+                    flex-grow: 1;
                 }
 
                 .mythology-counts {
                     display: flex;
-                    gap: 1rem;
-                    font-size: 0.85rem;
-                    color: var(--color-text-secondary);
+                    gap: var(--spacing-md, 1rem);
+                    font-size: clamp(0.75rem, 1vw, 0.85rem);
+                    color: var(--color-text-secondary, #9ca3af);
+                    flex-wrap: wrap;
                 }
 
                 .count-item {
                     display: flex;
                     align-items: center;
-                    gap: 0.25rem;
+                    gap: var(--spacing-xs, 0.25rem);
                 }
 
-                @media (max-width: 768px) {
+                /* === Responsive Design === */
+
+                /* Mobile (320px - 767px) */
+                @media (max-width: 767px) {
+                    .mythologies-view {
+                        padding: 0 var(--spacing-sm, 0.5rem) var(--spacing-xl, 2rem);
+                    }
+
                     .mythologies-header {
                         flex-direction: column;
                         text-align: center;
+                        padding: var(--spacing-lg, 1.5rem);
+                        gap: var(--spacing-lg, 1.5rem);
+                        margin-bottom: var(--spacing-xl, 2rem);
+                    }
+
+                    .header-icon {
+                        font-size: 3rem;
+                    }
+
+                    .mythology-stats {
+                        justify-content: center;
                     }
 
                     .mythology-grid {
-                        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                        grid-template-columns: 1fr;
+                        gap: var(--spacing-md, 1rem);
+                    }
+
+                    .mythology-card {
+                        padding: var(--spacing-md, 1rem);
+                        min-height: 200px;
+                    }
+
+                    .mythology-icon {
+                        font-size: 2rem;
+                    }
+                }
+
+                /* Tablet (768px - 1023px) */
+                @media (min-width: 768px) and (max-width: 1023px) {
+                    .mythology-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
+                }
+
+                /* Desktop (1024px+) */
+                @media (min-width: 1024px) {
+                    .mythology-grid {
+                        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                    }
+                }
+
+                /* Large Desktop (1400px+) */
+                @media (min-width: 1400px) {
+                    .mythology-grid {
+                        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                    }
+                }
+
+                /* Touch-friendly adjustments */
+                @media (hover: none) and (pointer: coarse) {
+                    .mythology-card {
+                        min-height: 200px;
+                    }
+                }
+
+                /* Reduce motion for accessibility */
+                @media (prefers-reduced-motion: reduce) {
+                    .mythology-card,
+                    .mythology-card::before,
+                    .mythology-icon {
+                        transition: none;
+                        animation: none;
+                    }
+
+                    .mythology-card:hover {
+                        transform: none;
+                    }
+
+                    .mythology-card:hover .mythology-icon {
+                        transform: none;
+                    }
+                }
+
+                /* High contrast mode */
+                @media (prefers-contrast: high) {
+                    .mythology-card,
+                    .mythologies-header {
+                        border-width: 3px;
                     }
                 }
             </style>
