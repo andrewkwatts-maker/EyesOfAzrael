@@ -61,6 +61,18 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* CRITICAL: Ensure main content is visible by default */
+        /* Auth-guard CSS will override when needed for auth flow */
+        #main-content {
+            display: block;
+        }
+
+        /* Safety: Landing page must always be visible once rendered */
+        .landing-page-view {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
         .site-header {
             position: sticky;
             top: 0;
@@ -161,6 +173,8 @@
     <!-- MODAL/OVERLAY CSS - Load async (triggered by user interaction) -->
     <link rel="stylesheet" href="css/quick-view-modal.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/edit-modal.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/admin-moderation.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/hamburger-menu.css" media="print" onload="this.media='all'">
 
     <!-- VISUAL EFFECTS CSS - Load async (progressive enhancement) -->
     <link rel="stylesheet" href="css/shader-backgrounds.css" media="print" onload="this.media='all'">
@@ -188,8 +202,10 @@
         <link rel="stylesheet" href="css/legal-pages.css">
         <link rel="stylesheet" href="css/quick-view-modal.css">
         <link rel="stylesheet" href="css/edit-modal.css">
+        <link rel="stylesheet" href="css/admin-moderation.css">
         <link rel="stylesheet" href="css/shader-backgrounds.css">
         <link rel="stylesheet" href="css/panel-shaders.css">
+        <link rel="stylesheet" href="css/hamburger-menu.css">
     </noscript>
 
     <!-- Google Analytics 4 - Privacy-compliant analytics -->
@@ -226,13 +242,123 @@
 
             <nav class="main-nav" aria-label="Main navigation">
                 <a href="#/" class="nav-link" aria-label="Go to home page">Home</a>
+
+                <!-- Mythologies Dropdown -->
+                <div class="nav-dropdown" data-dropdown="mythologies">
+                    <button class="nav-dropdown-trigger" aria-expanded="false" aria-haspopup="true">
+                        Mythologies
+                    </button>
+                    <div class="nav-dropdown-menu wide" role="menu">
+                        <a href="#/mythology/greek" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">🏛️</span>
+                            <span class="nav-dropdown-item-text">Greek</span>
+                        </a>
+                        <a href="#/mythology/norse" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">⚔️</span>
+                            <span class="nav-dropdown-item-text">Norse</span>
+                        </a>
+                        <a href="#/mythology/egyptian" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">🔺</span>
+                            <span class="nav-dropdown-item-text">Egyptian</span>
+                        </a>
+                        <a href="#/mythology/hindu" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">🕉️</span>
+                            <span class="nav-dropdown-item-text">Hindu</span>
+                        </a>
+                        <a href="#/mythology/chinese" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">🐉</span>
+                            <span class="nav-dropdown-item-text">Chinese</span>
+                        </a>
+                        <a href="#/mythology/japanese" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">⛩️</span>
+                            <span class="nav-dropdown-item-text">Japanese</span>
+                        </a>
+                        <a href="#/mythology/celtic" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">🍀</span>
+                            <span class="nav-dropdown-item-text">Celtic</span>
+                        </a>
+                        <a href="#/mythology/roman" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">🦅</span>
+                            <span class="nav-dropdown-item-text">Roman</span>
+                        </a>
+                        <div class="nav-dropdown-divider"></div>
+                        <a href="#/mythologies" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">🌍</span>
+                            <span class="nav-dropdown-item-text">View All Mythologies</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Browse Dropdown -->
+                <div class="nav-dropdown" data-dropdown="browse">
+                    <button class="nav-dropdown-trigger" aria-expanded="false" aria-haspopup="true">
+                        Browse
+                    </button>
+                    <div class="nav-dropdown-menu wide" role="menu">
+                        <a href="#/browse/deities" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">⚡</span>
+                            <span class="nav-dropdown-item-text">Deities & Gods</span>
+                        </a>
+                        <a href="#/browse/heroes" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">🗡️</span>
+                            <span class="nav-dropdown-item-text">Heroes & Legends</span>
+                        </a>
+                        <a href="#/browse/creatures" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">🐉</span>
+                            <span class="nav-dropdown-item-text">Mythical Creatures</span>
+                        </a>
+                        <a href="#/browse/places" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">🏔️</span>
+                            <span class="nav-dropdown-item-text">Sacred Places</span>
+                        </a>
+                        <a href="#/browse/items" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">💎</span>
+                            <span class="nav-dropdown-item-text">Artifacts & Items</span>
+                        </a>
+                        <a href="#/browse/texts" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">📜</span>
+                            <span class="nav-dropdown-item-text">Sacred Texts</span>
+                        </a>
+                        <a href="#/browse/symbols" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">☯️</span>
+                            <span class="nav-dropdown-item-text">Sacred Symbols</span>
+                        </a>
+                        <a href="#/browse/rituals" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">🕯️</span>
+                            <span class="nav-dropdown-item-text">Rituals & Practices</span>
+                        </a>
+                        <a href="#/browse/concepts" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">💭</span>
+                            <span class="nav-dropdown-item-text">Concepts & Themes</span>
+                        </a>
+                        <a href="#/browse/herbs" class="nav-dropdown-item" role="menuitem">
+                            <span class="nav-dropdown-item-icon">🌿</span>
+                            <span class="nav-dropdown-item-text">Sacred Herbs</span>
+                        </a>
+                    </div>
+                </div>
+
                 <a href="#/search" class="nav-link" aria-label="Search the mythology database">Search</a>
-                <a href="corpus-explorer.html" class="nav-link" aria-label="Explore the full corpus">Corpus Explorer</a>
                 <a href="#/compare" class="nav-link" aria-label="Compare mythological entities">Compare</a>
                 <a href="#/dashboard" class="nav-link" aria-label="View your contributions">My Contributions</a>
             </nav>
 
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobileNavPanel">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <line class="hamburger-line" x1="4" y1="6" x2="20" y2="6"/>
+                    <line class="hamburger-line" x1="4" y1="12" x2="20" y2="12"/>
+                    <line class="hamburger-line" x1="4" y1="18" x2="20" y2="18"/>
+                </svg>
+            </button>
+
             <div class="header-actions">
+                <!-- Extended Menu Button (Desktop) -->
+                <button class="extended-menu-btn" id="extendedMenuBtn" aria-label="Open extended menu with corpus search" aria-expanded="false" aria-controls="extendedMenuPanel">
+                    <span class="menu-icon">📚</span>
+                    <span class="menu-label">More</span>
+                </button>
+
                 <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">🌙</button>
                 <div id="userInfo" class="user-info" style="display: none;" role="region" aria-label="User account">
                     <img id="userAvatar" class="user-avatar" src="" alt="User profile picture">
@@ -242,6 +368,294 @@
             </div>
         </div>
     </header>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay" aria-hidden="true"></div>
+
+    <!-- Mobile Navigation Panel -->
+    <nav class="mobile-nav-panel" id="mobileNavPanel" aria-label="Mobile navigation" aria-hidden="true">
+        <div class="mobile-nav-header">
+            <span class="mobile-nav-title">Navigation</span>
+            <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close navigation menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="mobile-nav-content">
+            <!-- Core Navigation -->
+            <div class="mobile-nav-section">
+                <div class="mobile-nav-section-title">Navigation</div>
+                <div class="mobile-nav-links">
+                    <a href="#/" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">🏠</span>
+                        Home
+                    </a>
+                    <a href="#/search" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">🔍</span>
+                        Search
+                    </a>
+                    <a href="#/compare" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">⚖️</span>
+                        Compare
+                    </a>
+                    <a href="#/dashboard" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">📊</span>
+                        My Contributions
+                    </a>
+                    <a href="corpus-explorer.html" class="mobile-nav-link mobile-nav-corpus-search">
+                        <span class="mobile-nav-link-icon">📚</span>
+                        Corpus Explorer
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mythologies -->
+            <div class="mobile-nav-section">
+                <div class="mobile-nav-section-title">Mythologies</div>
+                <div class="mobile-nav-links">
+                    <a href="#/mythology/greek" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">🏛️</span>
+                        Greek
+                    </a>
+                    <a href="#/mythology/norse" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">⚔️</span>
+                        Norse
+                    </a>
+                    <a href="#/mythology/egyptian" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">🔺</span>
+                        Egyptian
+                    </a>
+                    <a href="#/mythology/hindu" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">🕉️</span>
+                        Hindu
+                    </a>
+                    <a href="#/mythology/chinese" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">🐉</span>
+                        Chinese
+                    </a>
+                    <a href="#/mythology/japanese" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">⛩️</span>
+                        Japanese
+                    </a>
+                    <a href="#/mythologies" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">🌍</span>
+                        View All Mythologies
+                    </a>
+                </div>
+            </div>
+
+            <!-- Browse Categories -->
+            <div class="mobile-nav-section">
+                <div class="mobile-nav-section-title">Browse by Category</div>
+                <div class="mobile-nav-links">
+                    <a href="#/browse/deities" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">⚡</span>
+                        Deities & Gods
+                    </a>
+                    <a href="#/browse/heroes" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">🗡️</span>
+                        Heroes & Legends
+                    </a>
+                    <a href="#/browse/creatures" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">🐉</span>
+                        Mythical Creatures
+                    </a>
+                    <a href="#/browse/places" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">🏔️</span>
+                        Sacred Places
+                    </a>
+                    <a href="#/browse/items" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">💎</span>
+                        Artifacts & Items
+                    </a>
+                    <a href="#/browse/texts" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">📜</span>
+                        Sacred Texts
+                    </a>
+                    <a href="#/browse/symbols" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">☯️</span>
+                        Sacred Symbols
+                    </a>
+                    <a href="#/browse/rituals" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">🕯️</span>
+                        Rituals & Practices
+                    </a>
+                    <a href="#/browse/concepts" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">💭</span>
+                        Concepts & Themes
+                    </a>
+                    <a href="#/browse/herbs" class="mobile-nav-link">
+                        <span class="mobile-nav-link-icon">🌿</span>
+                        Sacred Herbs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Extended Menu Overlay -->
+    <div class="extended-menu-overlay" id="extendedMenuOverlay" aria-hidden="true"></div>
+
+    <!-- Extended Menu Panel (Corpus Search) -->
+    <aside class="extended-menu-panel" id="extendedMenuPanel" aria-label="Extended menu with corpus search" aria-hidden="true">
+        <div class="extended-menu-header">
+            <h2><span class="header-icon">📚</span> Corpus Search</h2>
+            <button class="extended-menu-close" id="extendedMenuClose" aria-label="Close extended menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="extended-menu-content">
+            <!-- Corpus Search Section -->
+            <div class="corpus-search-section">
+                <h3><span class="section-icon">🔍</span> Search the Corpus</h3>
+                <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 1rem;">
+                    Search across all mythological texts, entity data, and corpus queries.
+                </p>
+
+                <!-- Search Input -->
+                <div class="corpus-search-input-wrapper">
+                    <span class="corpus-search-icon">🔍</span>
+                    <input
+                        type="text"
+                        id="corpusSearchInput"
+                        class="corpus-search-input"
+                        placeholder="Search deities, texts, symbols..."
+                        aria-label="Corpus search query"
+                    >
+                </div>
+
+                <!-- Search Filters -->
+                <div class="corpus-search-filters">
+                    <div class="filter-group">
+                        <label for="corpusMythologyFilter">Mythology</label>
+                        <select id="corpusMythologyFilter">
+                            <option value="">All Mythologies</option>
+                            <option value="greek">Greek</option>
+                            <option value="norse">Norse</option>
+                            <option value="egyptian">Egyptian</option>
+                            <option value="hindu">Hindu</option>
+                            <option value="chinese">Chinese</option>
+                            <option value="japanese">Japanese</option>
+                            <option value="celtic">Celtic</option>
+                            <option value="roman">Roman</option>
+                            <option value="babylonian">Babylonian</option>
+                            <option value="sumerian">Sumerian</option>
+                            <option value="buddhist">Buddhist</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="corpusTypeFilter">Entity Type</label>
+                        <select id="corpusTypeFilter">
+                            <option value="">All Types</option>
+                            <option value="deity">Deities</option>
+                            <option value="hero">Heroes</option>
+                            <option value="creature">Creatures</option>
+                            <option value="place">Places</option>
+                            <option value="item">Items</option>
+                            <option value="text">Texts</option>
+                            <option value="symbol">Symbols</option>
+                            <option value="ritual">Rituals</option>
+                            <option value="concept">Concepts</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="corpusPeriodFilter">Time Period</label>
+                        <select id="corpusPeriodFilter">
+                            <option value="">All Periods</option>
+                            <option value="ancient">Ancient (Before 500 BCE)</option>
+                            <option value="classical">Classical (500 BCE - 500 CE)</option>
+                            <option value="medieval">Medieval (500 - 1500 CE)</option>
+                            <option value="modern">Modern (After 1500 CE)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Search Button -->
+                <button class="corpus-search-btn" id="corpusSearchBtn">
+                    <span>🔍</span> Search Corpus
+                </button>
+
+                <!-- Search Results Container -->
+                <div class="corpus-search-results" id="corpusSearchResults" style="display: none;">
+                    <!-- Results will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!-- Quick Links Section -->
+            <div class="panel-nav-section">
+                <h3>Quick Links</h3>
+                <div class="panel-nav-links">
+                    <a href="corpus-explorer.html" class="panel-nav-link">
+                        <span class="link-icon">📖</span>
+                        <span>Full Corpus Explorer</span>
+                    </a>
+                    <a href="#/search" class="panel-nav-link" data-close-menu>
+                        <span class="link-icon">🔍</span>
+                        <span>Advanced Search</span>
+                    </a>
+                    <a href="#/compare" class="panel-nav-link" data-close-menu>
+                        <span class="link-icon">⚖️</span>
+                        <span>Compare Entities</span>
+                    </a>
+                    <a href="#/mythologies" class="panel-nav-link" data-close-menu>
+                        <span class="link-icon">🌍</span>
+                        <span>All Mythologies</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Popular Searches -->
+            <div class="panel-nav-section">
+                <h3>Popular Searches</h3>
+                <div class="panel-nav-links" id="popularSearches">
+                    <button class="panel-nav-link" data-search="zeus thunder">
+                        <span class="link-icon">⚡</span>
+                        <span>Zeus & Thunder</span>
+                    </button>
+                    <button class="panel-nav-link" data-search="underworld death">
+                        <span class="link-icon">💀</span>
+                        <span>Underworld & Death</span>
+                    </button>
+                    <button class="panel-nav-link" data-search="creation myth">
+                        <span class="link-icon">🌅</span>
+                        <span>Creation Myths</span>
+                    </button>
+                    <button class="panel-nav-link" data-search="sacred weapons">
+                        <span class="link-icon">⚔️</span>
+                        <span>Sacred Weapons</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Admin Tools Section (Admin Only) -->
+            <div class="panel-nav-section admin-tools-section" id="adminToolsSection" style="display: none;">
+                <h3><span class="section-icon" style="color: #ffa500;">&#9881;</span> Admin Tools</h3>
+                <div class="panel-nav-links">
+                    <button class="panel-nav-link admin-link" id="openModerationPanel">
+                        <span class="link-icon" style="color: #ff6b6b;">&#128683;</span>
+                        <span>Content Moderation</span>
+                    </button>
+                    <button class="panel-nav-link admin-link" id="viewBannedUsers">
+                        <span class="link-icon" style="color: #ffa500;">&#128100;</span>
+                        <span>Banned Users</span>
+                    </button>
+                    <button class="panel-nav-link admin-link" id="viewFlaggedContent">
+                        <span class="link-icon" style="color: #ffd43b;">&#9873;</span>
+                        <span>Flagged Content</span>
+                    </button>
+                    <button class="panel-nav-link admin-link" id="viewModerationHistory">
+                        <span class="link-icon" style="color: #6c757d;">&#128196;</span>
+                        <span>Moderation History</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </aside>
 
     <!-- Breadcrumb Navigation -->
     <div id="breadcrumb-nav" aria-label="Breadcrumb"></div>
@@ -289,12 +703,15 @@
     <script src="js/utils/loading-spinner.js"></script>
     <script src="js/app-coordinator.js"></script>
 
-    <!-- Authentication Guard (optimized - must load before everything else) -->
-    <script src="js/auth-guard-simple.js" type="module"></script>
+    <!-- Authentication Guard (simplified - content always visible) -->
+    <script src="js/auth-guard-simple.js"></script>
     <!-- Theme System: Comprehensive Shader Theme Picker -->
     <!-- MUST load shader manager BEFORE theme picker -->
     <script src="js/shaders/shader-themes.js"></script>
     <script src="js/shader-theme-picker.js"></script>
+
+    <!-- Header Navigation (dropdowns & mobile menu) -->
+    <script src="js/header-nav.js"></script>
 
     <!-- Authentication -->
     <script src="js/auth-manager.js"></script>
@@ -313,6 +730,7 @@
     <script src="js/entity-renderer-firebase.js"></script>
     <script src="js/components/corpus-search.js"></script>
     <script src="js/components/corpus-search-enhanced.js"></script>
+    <script src="js/components/extended-menu-controller.js"></script>
     <!-- Virtual Scroller (MUST load before search-view-complete.js) -->
     <script src="js/components/virtual-scroller.js"></script>
     <script src="js/components/search-view-complete.js"></script>
@@ -328,6 +746,10 @@
     <script src="js/components/about-page.js"></script>
     <script src="js/components/privacy-page.js"></script>
     <script src="js/components/terms-page.js"></script>
+
+    <!-- Admin Moderation System (Admin Only) -->
+    <script src="js/services/moderation-service.js"></script>
+    <script src="js/components/admin-moderation-panel.js"></script>
 
     <!-- Analytics & Monitoring -->
     <script src="js/analytics.js"></script>
