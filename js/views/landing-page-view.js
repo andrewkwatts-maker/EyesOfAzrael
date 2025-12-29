@@ -143,45 +143,71 @@ class LandingPageView {
     async render(container) {
         console.log('[Landing Page] Rendering...');
 
-        // Show skeleton loading state first
-        if (!this.isLoaded) {
-            container.innerHTML = this.getSkeletonHTML();
-            // Mark container as having skeleton
-            container.classList.add('has-skeleton');
+        try {
+            // Validate container
+            if (!container) {
+                console.error('[Landing Page] ERROR: container is null or undefined');
+                throw new Error('Container element is required');
+            }
+            console.log('[Landing Page] Container valid:', container.tagName);
+
+            // Show skeleton loading state first
+            if (!this.isLoaded) {
+                console.log('[Landing Page] Setting skeleton HTML...');
+                container.innerHTML = this.getSkeletonHTML();
+                container.classList.add('has-skeleton');
+            }
+
+            // Small delay to show skeleton (minimum 100ms for visual feedback)
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Fade out skeleton before replacing
+            const skeleton = container.querySelector('.skeleton-loading');
+            if (skeleton) {
+                skeleton.classList.add('fade-out');
+                await new Promise(resolve => setTimeout(resolve, 150));
+            }
+
+            // Render actual content - immediately visible
+            console.log('[Landing Page] Setting final HTML...');
+            container.innerHTML = this.getLandingHTML();
+            container.classList.remove('has-skeleton');
+
+            // IMMEDIATELY make visible - don't rely on CSS animations
+            const view = container.querySelector('.landing-page-view');
+            if (view) {
+                view.style.opacity = '1';
+                view.style.transform = 'none';
+                view.classList.add('fade-in-ready');
+                console.log('[Landing Page] View made visible');
+            }
+
+            this.attachEventListeners();
+            this.isLoaded = true;
+
+            // Dispatch event to hide loading spinner
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { view: 'landing', timestamp: Date.now() }
+            }));
+
+            console.log('[Landing Page] Render complete');
+
+        } catch (error) {
+            console.error('[Landing Page] RENDER ERROR:', error);
+            // Show error message in container
+            if (container) {
+                container.innerHTML = `
+                    <div class="error-container" style="padding: 2rem; text-align: center; color: #ef4444;">
+                        <h2>Error Loading Landing Page</h2>
+                        <p>${error.message}</p>
+                        <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer;">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+            throw error; // Re-throw so SPA can catch it too
         }
-
-        // Small delay to show skeleton (minimum 100ms for visual feedback)
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Fade out skeleton before replacing
-        const skeleton = container.querySelector('.skeleton-loading');
-        if (skeleton) {
-            skeleton.classList.add('fade-out');
-            await new Promise(resolve => setTimeout(resolve, 150));
-        }
-
-        // Render actual content with fade-in
-        container.innerHTML = this.getLandingHTML();
-        container.classList.remove('has-skeleton');
-        this.attachEventListeners();
-        this.isLoaded = true;
-
-        // Trigger fade-in animation using requestAnimationFrame for smooth timing
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                const view = container.querySelector('.landing-page-view');
-                if (view) {
-                    view.classList.add('fade-in-ready');
-                }
-            });
-        });
-
-        // Dispatch event to hide loading spinner (use document for consistency)
-        document.dispatchEvent(new CustomEvent('first-render-complete', {
-            detail: { view: 'landing', timestamp: Date.now() }
-        }));
-
-        console.log('[Landing Page] Render complete');
     }
 
     /**
