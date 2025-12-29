@@ -66,37 +66,81 @@ class UniversalDisplayRenderer {
         const display = entity.gridDisplay || this.generateGridDisplay(entity);
         const hoverInfo = this.options.enableHover ? this.renderHoverInfo(entity) : '';
         const editIcon = this.renderEditIcon(entity);
+        const mythology = (entity.mythology || 'unknown').toLowerCase();
+        const iconContent = this.renderIconWithFallback(entity.icon);
 
         return `
             <div class="entity-card grid-card"
                  data-entity-id="${entity.id}"
-                 data-mythology="${entity.mythology}"
+                 data-mythology="${mythology}"
                  data-entity-type="${entity.entityType}"
                  data-importance="${entity.importance || 50}"
-                 data-created-by="${entity.createdBy || ''}">
+                 data-created-by="${entity.createdBy || ''}"
+                 tabindex="0"
+                 role="article"
+                 aria-label="${this.escapeHtml(display.title || entity.name)}">
 
                 ${editIcon}
 
                 ${display.badge ? `<div class="card-badge">${display.badge}</div>` : ''}
 
-                <div class="card-icon">
-                    ${entity.icon || '✨'}
+                <div class="card-icon" aria-hidden="true">
+                    ${iconContent}
                 </div>
 
                 <h3 class="card-title">
                     <a href="#/mythology/${entity.mythology}/${entity.entityType}/${entity.id}"
                        class="entity-link">
-                        ${display.title || entity.name}
+                        ${this.escapeHtml(display.title || entity.name)}
                     </a>
                 </h3>
 
-                ${display.subtitle ? `<p class="card-subtitle">${display.subtitle}</p>` : ''}
+                <div class="card-meta">
+                    <span class="entity-type-badge" data-type="${entity.entityType}">${this.getEntityTypeIcon(entity.entityType)} ${this.formatLabel(entity.entityType)}</span>
+                    <span class="mythology-badge" data-mythology="${mythology}">${this.formatLabel(entity.mythology)}</span>
+                </div>
+
+                ${display.subtitle ? `<p class="card-description">${this.escapeHtml(display.subtitle)}</p>` : ''}
 
                 ${display.stats ? this.renderStats(display.stats) : ''}
 
                 ${hoverInfo}
             </div>
         `;
+    }
+
+    /**
+     * Render icon with fallback
+     */
+    renderIconWithFallback(icon) {
+        if (!icon) return '✨';
+
+        // Check if icon is an image URL
+        if (typeof icon === 'string' && (icon.includes('.svg') || icon.includes('.png') || icon.includes('.jpg') || icon.startsWith('http'))) {
+            return `<img src="${icon}" alt="" class="entity-icon-img" loading="lazy" onerror="this.parentElement.textContent='✨'">`;
+        }
+
+        return icon;
+    }
+
+    /**
+     * Get icon for entity type
+     */
+    getEntityTypeIcon(entityType) {
+        const icons = {
+            deity: '👑',
+            hero: '🦸',
+            creature: '🐉',
+            item: '⚔️',
+            place: '🏛️',
+            concept: '💭',
+            magic: '✨',
+            ritual: '🕯️',
+            herb: '🌿',
+            symbol: '⚡',
+            text: '📜'
+        };
+        return icons[entityType] || '📌';
     }
 
     renderStats(stats) {
@@ -524,15 +568,33 @@ class UniversalDisplayRenderer {
     }
 
     formatLabel(str) {
+        if (!str) return '';
         return str.replace(/([A-Z])/g, ' $1')
                   .replace(/_/g, ' ')
                   .split(' ')
                   .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join(' ');
+                  .join(' ')
+                  .trim();
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
     }
 }
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = UniversalDisplayRenderer;
+}
+
+// Global export for non-module script loading (browser context)
+if (typeof window !== 'undefined') {
+    window.UniversalDisplayRenderer = UniversalDisplayRenderer;
+    console.log('[UniversalDisplayRenderer] Class registered globally');
 }
