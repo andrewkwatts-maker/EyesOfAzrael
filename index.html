@@ -127,6 +127,84 @@
             font-size: 1.1rem;
             font-weight: 500;
         }
+
+        /* CRITICAL: Extended menu panel must be hidden by default */
+        .extended-menu-panel {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 450px;
+            max-width: 90vw;
+            height: 100vh;
+            z-index: 9999;
+            background: rgba(var(--color-bg-card-rgb), 0.98);
+            backdrop-filter: blur(30px) saturate(180%);
+        }
+        .extended-menu-panel.active {
+            right: 0;
+        }
+        .extended-menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            visibility: hidden;
+            z-index: 9998;
+        }
+        .extended-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* CRITICAL: Mobile navigation hidden by default */
+        .mobile-nav-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: min(320px, 85vw);
+            transform: translateX(100%);
+            z-index: 9999;
+            background: rgba(var(--color-bg-card-rgb), 0.98);
+            backdrop-filter: blur(20px);
+        }
+        .mobile-nav-panel.visible {
+            transform: translateX(0);
+        }
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            z-index: 9998;
+        }
+        .mobile-nav-overlay.visible {
+            opacity: 1;
+        }
+
+        /* CRITICAL: Navigation dropdowns styling */
+        .nav-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            min-width: 220px;
+            background: rgba(var(--color-bg-card-rgb), 0.98);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(var(--color-border-primary-rgb), 0.8);
+            border-radius: 12px;
+            padding: 0.5rem;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 10000;
+        }
+        .nav-dropdown:hover .nav-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 
     <!-- ============================================
@@ -174,7 +252,8 @@
     <link rel="stylesheet" href="css/quick-view-modal.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/edit-modal.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/admin-moderation.css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/hamburger-menu.css" media="print" onload="this.media='all'">
+    <!-- CRITICAL: hamburger-menu.css must load synchronously for proper UI -->
+    <link rel="stylesheet" href="css/hamburger-menu.css">
 
     <!-- VISUAL EFFECTS CSS - Load async (progressive enhancement) -->
     <link rel="stylesheet" href="css/shader-backgrounds.css" media="print" onload="this.media='all'">
