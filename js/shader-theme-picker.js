@@ -217,7 +217,6 @@
             }
         }
 
-        updateShaderToggleButton();
         console.log('[Shader Theme Picker] Shaders', shadersEnabled ? 'enabled' : 'disabled');
     }
 
@@ -249,14 +248,6 @@
         const currentThemeConfig = themeConfig?.themes?.[currentTheme];
         themeButton.textContent = currentThemeConfig?.icon || '🎨';
 
-        // Create shader toggle button
-        const shaderButton = document.createElement('button');
-        shaderButton.className = 'icon-btn shader-toggle-btn';
-        shaderButton.setAttribute('aria-label', shadersEnabled ? 'Disable shaders' : 'Enable shaders');
-        shaderButton.setAttribute('title', shadersEnabled ? 'Disable animated background' : 'Enable animated background');
-        shaderButton.textContent = shadersEnabled ? '✨' : '💤';
-        shaderButton.style.opacity = shadersEnabled ? '1' : '0.5';
-
         // Create dropdown
         dropdown = document.createElement('div');
         dropdown.className = 'theme-dropdown';
@@ -272,12 +263,6 @@
             const isOpen = dropdown.style.display === 'block';
             dropdown.style.display = isOpen ? 'none' : 'block';
             themeButton.setAttribute('aria-expanded', !isOpen);
-        });
-
-        // Event: Toggle shaders
-        shaderButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleShaders();
         });
 
         // Event: Handle theme selection
@@ -300,7 +285,6 @@
         });
 
         // Add elements to container
-        container.appendChild(shaderButton);
         container.appendChild(themeButton);
         container.appendChild(dropdown);
 
@@ -373,19 +357,6 @@
         const button = document.querySelector('.theme-picker-btn');
         if (button && themeConfig?.themes?.[currentTheme]) {
             button.textContent = themeConfig.themes[currentTheme].icon || '🎨';
-        }
-    }
-
-    /**
-     * Update shader toggle button state
-     */
-    function updateShaderToggleButton() {
-        const button = document.querySelector('.shader-toggle-btn');
-        if (button) {
-            button.textContent = shadersEnabled ? '✨' : '💤';
-            button.style.opacity = shadersEnabled ? '1' : '0.5';
-            button.setAttribute('aria-label', shadersEnabled ? 'Disable shaders' : 'Enable shaders');
-            button.setAttribute('title', shadersEnabled ? 'Disable animated background' : 'Enable animated background');
         }
     }
 
