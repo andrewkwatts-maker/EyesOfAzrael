@@ -358,15 +358,16 @@ class SPANavigation {
             return;
         }
 
-        // Set the hash - this will trigger hashchange event
+        // Set the hash and handle the route
         if (options.replace) {
             window.history.replaceState(null, '', path);
-            // replaceState doesn't trigger hashchange, so handle manually
-            this.handleRoute();
         } else {
             window.location.hash = path;
-            // hashchange event will handle the route
         }
+
+        // ALWAYS call handleRoute() directly - don't rely on hashchange event
+        // because it will be skipped due to deduplication (_lastNavigatedHash check)
+        this.handleRoute();
     }
 
     /**

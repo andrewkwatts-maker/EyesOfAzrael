@@ -226,46 +226,34 @@
 }
 
 /* ==========================================
-   BODY STATES
+   BODY STATES - SIMPLIFIED
+   Content is ALWAYS visible regardless of auth state
    ========================================== */
 
-/* Loading state - show loading screen, hide everything else */
-body.auth-loading #auth-loading-screen {
-    display: flex !important;
+/* Loading screen - only shown when explicitly displayed via JS */
+#auth-loading-screen {
+    display: none;
 }
 
-body.auth-loading #auth-overlay {
-    display: none !important;
+/* Auth overlay - only shown when explicitly displayed via JS */
+#auth-overlay {
+    display: none;
 }
 
-body.auth-loading #main-content {
-    display: none !important;
+/* Main content - ALWAYS visible */
+#main-content {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
-/* Not authenticated - show overlay, hide main content */
-body.not-authenticated #auth-loading-screen {
-    display: none !important;
-}
-
-body.not-authenticated #auth-overlay {
-    display: flex !important;
-}
-
-body.not-authenticated #main-content {
-    display: none !important;
-}
-
-/* Authenticated - hide overlay and loading, show main content */
-body.authenticated #auth-loading-screen {
-    display: none !important;
-}
-
+/* Authenticated state - just hides any overlays that might be open */
 body.authenticated #auth-overlay {
     display: none !important;
 }
 
-body.authenticated #main-content {
-    display: block !important;
+body.authenticated #auth-loading-screen {
+    display: none !important;
 }
 
 /* ==========================================

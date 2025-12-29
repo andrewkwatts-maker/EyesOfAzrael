@@ -151,38 +151,45 @@ class LandingPageView {
             }
             console.log('[Landing Page] Container valid:', container.tagName);
 
-            // Show skeleton loading state first
-            if (!this.isLoaded) {
-                console.log('[Landing Page] Setting skeleton HTML...');
-                container.innerHTML = this.getSkeletonHTML();
-                container.classList.add('has-skeleton');
-            }
-
-            // Small delay to show skeleton (minimum 100ms for visual feedback)
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            // Fade out skeleton before replacing
-            const skeleton = container.querySelector('.skeleton-loading');
-            if (skeleton) {
-                skeleton.classList.add('fade-out');
-                await new Promise(resolve => setTimeout(resolve, 150));
-            }
-
-            // Render actual content - immediately visible
+            // RENDER IMMEDIATELY - no skeleton delay (prevents race condition with lazy loader)
             console.log('[Landing Page] Setting final HTML...');
             container.innerHTML = this.getLandingHTML();
             container.classList.remove('has-skeleton', 'content-loading');
             container.classList.add('content-loaded');
 
-            // IMMEDIATELY make visible - force container and view to be visible
-            container.style.opacity = '1';
+            // FORCE body to authenticated state FIRST (before setting styles)
+            // This is critical - CSS uses !important rules based on body class
+            document.body.classList.add('authenticated');
+            document.body.classList.remove('not-authenticated', 'auth-loading');
+            console.log('[Landing Page] Body classes updated to authenticated');
+
+            // Hide auth overlay if it exists (must come BEFORE showing content)
+            const authOverlay = document.getElementById('auth-overlay');
+            if (authOverlay) {
+                authOverlay.style.setProperty('display', 'none', 'important');
+                console.log('[Landing Page] Auth overlay hidden');
+            }
+
+            // Hide loading screen if it exists
+            const loadingScreen = document.getElementById('auth-loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.setProperty('display', 'none', 'important');
+            }
+
+            // Force container and view to be visible with !important
+            container.style.setProperty('opacity', '1', 'important');
+            container.style.setProperty('display', 'block', 'important');
+            container.style.setProperty('visibility', 'visible', 'important');
+            console.log('[Landing Page] Container made visible');
 
             const view = container.querySelector('.landing-page-view');
             if (view) {
-                view.style.opacity = '1';
-                view.style.transform = 'none';
-                view.classList.add('fade-in-ready');
-                console.log('[Landing Page] View made visible');
+                view.style.setProperty('opacity', '1', 'important');
+                view.style.setProperty('display', 'block', 'important');
+                view.style.setProperty('visibility', 'visible', 'important');
+                console.log('[Landing Page] View element made visible');
+            } else {
+                console.warn('[Landing Page] WARNING: .landing-page-view element not found in container');
             }
 
             this.attachEventListeners();
@@ -298,28 +305,16 @@ class LandingPageView {
                  */
 
                 /* === Root Container === */
+                /* FIXED: Removed opacity:0 animation that was causing content to stay hidden */
+                /* Content is now visible immediately for reliability */
                 .landing-page-view {
                     max-width: 1400px;
                     margin: 0 auto;
                     padding: 0 max(1rem, env(safe-area-inset-left)) 4rem max(1rem, env(safe-area-inset-right));
                     contain: layout style paint;
-                    opacity: 0;
-                    animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-                }
-
-                .landing-page-view.fade-in-ready {
-                    opacity: 1;
-                }
-
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(8px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    display: block !important;
                 }
 
                 /* === Hero Section - Enhanced Glass-morphism === */
