@@ -305,6 +305,10 @@ function handleAuthenticated(user) {
     // Update user display first
     updateUserDisplay(user);
 
+    // ALWAYS ensure authenticated class is on body (required by CSS to show main-content)
+    document.body.classList.remove('not-authenticated', 'auth-loading');
+    document.body.classList.add('authenticated');
+
     // If we were in optimistic mode, content is already visible - just verify
     if (window._eoaOptimisticAuth) {
         console.log('[EOA Auth Guard] Optimistic mode - content already visible, user verified');
@@ -313,10 +317,6 @@ function handleAuthenticated(user) {
 
     console.log('[EOA Auth Guard] User display name:', user.displayName);
     console.log('[EOA Auth Guard] Transitioning to authenticated state...');
-
-    // Smooth transition to authenticated state
-    document.body.classList.remove('not-authenticated', 'auth-loading');
-    document.body.classList.add('authenticated');
 
     // ALWAYS hide auth overlay if visible (this is the key fix)
     const overlay = document.getElementById('auth-overlay');
