@@ -90,7 +90,7 @@ function instantDisplay() {
  * This runs asynchronously in the background after UI is visible
  * OPTIMIZED: Non-blocking, doesn't await persistence
  */
-export function setupAuthGuard() {
+function setupAuthGuard() {
     console.log('[EOA Auth Guard OPTIMIZED] Phase 2: Firebase Verification (background)');
 
     // Wait for Firebase to be ready
@@ -567,21 +567,21 @@ function injectAuthOverlay() {
 /**
  * Check if user is currently authenticated
  */
-export function isUserAuthenticated() {
+function isUserAuthenticated() {
     return isAuthenticated;
 }
 
 /**
  * Get current user
  */
-export function getCurrentUser() {
+function getCurrentUser() {
     return currentUser;
 }
 
 /**
  * Get performance metrics
  */
-export function getPerformanceMetrics() {
+function getPerformanceMetrics() {
     return {
         displayTime: perfMarks.overlayVisible - perfMarks.scriptStart,
         firebaseReadyTime: perfMarks.firebaseReady - perfMarks.scriptStart,

@@ -88,10 +88,7 @@ class AboutPage {
     }
 }
 
-// ES Module Export
-export { AboutPage };
-
-// Legacy global export for backwards compatibility
+// Global export for non-module script loading
 if (typeof window !== 'undefined') {
     window.AboutPage = AboutPage;
 }

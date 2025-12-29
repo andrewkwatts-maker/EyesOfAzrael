@@ -1974,10 +1974,7 @@ class SearchViewComplete {
     }
 }
 
-// ES Module Export
-export { SearchViewComplete };
-
-// Legacy global export for backwards compatibility
+// Global export for non-module script loading
 if (typeof window !== 'undefined') {
     window.SearchViewComplete = SearchViewComplete;
 }

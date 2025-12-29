@@ -21,7 +21,7 @@
  * scroller.setItems(largeArray);
  */
 
-export class VirtualScroller {
+class VirtualScroller {
     constructor(container, options = {}) {
         if (!container) {
             throw new Error('Container element is required');
@@ -402,10 +402,7 @@ export class VirtualScroller {
     }
 }
 
-// ES Module export
-export default VirtualScroller;
-
-// Legacy global export for backwards compatibility
+// Global export for non-module script loading
 if (typeof window !== 'undefined') {
     window.VirtualScroller = VirtualScroller;
 }
