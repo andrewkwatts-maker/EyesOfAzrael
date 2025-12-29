@@ -131,10 +131,7 @@ class TermsPage {
     }
 }
 
-// ES Module Export
-export { TermsPage };
-
-// Legacy global export for backwards compatibility
+// Global export for non-module script loading
 if (typeof window !== 'undefined') {
     window.TermsPage = TermsPage;
 }
