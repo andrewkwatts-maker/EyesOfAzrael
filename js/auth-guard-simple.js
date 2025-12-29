@@ -362,43 +362,89 @@ function handleNotAuthenticated() {
 
 /**
  * Handle login button click
+ * IMPROVED: Check if already logged in, better error handling
  */
 async function handleLogin() {
     const loginBtn = document.getElementById('google-login-btn-overlay');
+    const auth = firebase.auth();
+
+    // Check if user is already logged in
+    if (auth.currentUser) {
+        console.log('[EOA Auth Guard] User already logged in:', auth.currentUser.email);
+        // User is already authenticated - just update UI and hide overlay
+        handleAuthenticated(auth.currentUser);
+        cacheAuthState(true, auth.currentUser);
+        return;
+    }
+
     if (loginBtn) {
         loginBtn.disabled = true;
         loginBtn.textContent = 'Signing in...';
     }
 
     try {
-        const auth = firebase.auth();
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.addScope('profile');
         provider.addScope('email');
 
+        console.log('[EOA Auth Guard] Initiating Google sign-in...');
         const result = await auth.signInWithPopup(provider);
-        console.log('[EOA Auth Guard] Login successful');
+        console.log('[EOA Auth Guard] Login successful:', result.user.email);
 
-        // Cache user info immediately
+        // Cache user info immediately and update UI
         if (result.user) {
             cacheAuthState(true, result.user);
+            handleAuthenticated(result.user);
         }
     } catch (error) {
-        console.error('[EOA Auth Guard] Login failed:', error);
-        alert('Login failed: ' + error.message);
+        console.error('[EOA Auth Guard] Login error:', error.code, error.message);
 
-        if (loginBtn) {
-            loginBtn.disabled = false;
-            loginBtn.innerHTML = `
-                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" style="width: 20px; height: 20px; margin-right: 12px;">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.30-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                </svg>
-                Sign in with Google
-            `;
+        // Handle specific error cases (learned from PrincipiaMetaphysica)
+        switch (error.code) {
+            case 'auth/popup-closed-by-user':
+                console.log('[EOA Auth Guard] Sign-in cancelled by user');
+                // Don't show alert - user intentionally closed popup
+                break;
+            case 'auth/popup-blocked':
+                alert('Pop-up blocked by browser. Please allow pop-ups for this site.');
+                break;
+            case 'auth/cancelled-popup-request':
+                // Multiple popups opened, ignore silently
+                console.log('[EOA Auth Guard] Cancelled duplicate popup request');
+                break;
+            case 'auth/account-exists-with-different-credential':
+                alert('An account already exists with this email using a different sign-in method.');
+                break;
+            case 'auth/network-request-failed':
+                alert('Network error. Please check your connection and try again.');
+                break;
+            default:
+                // Only show alert for unexpected errors
+                if (error.code && !error.code.includes('cancelled') && !error.code.includes('closed')) {
+                    alert('Sign-in failed: ' + error.message);
+                }
         }
+
+        // Reset button state
+        resetLoginButton(loginBtn);
+    }
+}
+
+/**
+ * Reset login button to default state
+ */
+function resetLoginButton(loginBtn) {
+    if (loginBtn) {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = `
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" style="width: 20px; height: 20px; margin-right: 12px;">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.30-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+            </svg>
+            Sign in with Google
+        `;
     }
 }
 

@@ -46,16 +46,32 @@ class AuthManager {
 
     /**
      * Sign in with Google popup
+     * IMPROVED: Check if already logged in before attempting sign-in
      */
     async signInWithGoogle() {
+        // Check if user is already logged in
+        if (this.auth.currentUser) {
+            console.log('[AuthManager] User already logged in:', this.auth.currentUser.email);
+            return this.auth.currentUser;
+        }
+
         try {
+            console.log('[AuthManager] Initiating Google sign-in...');
             const result = await this.auth.signInWithPopup(this.googleProvider);
             const user = result.user;
 
-            console.log('Sign-in successful:', user.displayName);
+            console.log('[AuthManager] Sign-in successful:', user.displayName);
             return user;
         } catch (error) {
-            console.error('Sign-in error:', error);
+            console.error('[AuthManager] Sign-in error:', error.code, error.message);
+
+            // Don't throw for benign errors
+            if (error.code === 'auth/popup-closed-by-user' ||
+                error.code === 'auth/cancelled-popup-request') {
+                console.log('[AuthManager] Sign-in cancelled by user');
+                return null;
+            }
+
             this.handleAuthError(error);
             throw error;
         }
