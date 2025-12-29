@@ -171,9 +171,12 @@ class LandingPageView {
             // Render actual content - immediately visible
             console.log('[Landing Page] Setting final HTML...');
             container.innerHTML = this.getLandingHTML();
-            container.classList.remove('has-skeleton');
+            container.classList.remove('has-skeleton', 'content-loading');
+            container.classList.add('content-loaded');
 
-            // IMMEDIATELY make visible - don't rely on CSS animations
+            // IMMEDIATELY make visible - force container and view to be visible
+            container.style.opacity = '1';
+
             const view = container.querySelector('.landing-page-view');
             if (view) {
                 view.style.opacity = '1';
