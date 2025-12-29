@@ -36,6 +36,7 @@ const AUTH_CACHE_DURATION = 5 * 60 * 1000;
 /**
  * PHASE 1: INSTANT DISPLAY
  * This runs synchronously before any async Firebase operations
+ * OPTIMIZED: Show content immediately when cached auth is valid
  */
 function instantDisplay() {
     console.log('[EOA Auth Guard OPTIMIZED] Phase 1: Instant Display');
@@ -44,10 +45,28 @@ function instantDisplay() {
     const cachedAuth = getCachedAuthState();
 
     if (cachedAuth.isValid && cachedAuth.wasAuthenticated) {
-        // User was recently authenticated - show content immediately, verify in background
-        console.log('[EOA Auth Guard] Using cached auth - showing content optimistically');
-        document.body.classList.add('auth-loading');
-        showLoadingScreen();
+        // User was recently authenticated - show content IMMEDIATELY (optimistic)
+        // Don't show loading screen - go straight to authenticated state
+        console.log('[EOA Auth Guard] Using cached auth - showing content IMMEDIATELY (optimistic)');
+
+        // Set authenticated state instantly - content visible right away
+        isAuthenticated = true;
+        document.body.classList.add('authenticated');
+
+        // Show main content container immediately
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            mainContent.style.display = 'block';
+            mainContent.style.opacity = '1';
+        }
+
+        // Emit optimistic auth-ready event so SPA can start loading content NOW
+        document.dispatchEvent(new CustomEvent('auth-ready', {
+            detail: { user: null, authenticated: true, optimistic: true }
+        }));
+
+        // Mark that we're using optimistic auth (Firebase will verify in background)
+        window._eoaOptimisticAuth = true;
     } else {
         // No valid cache - show login overlay immediately
         console.log('[EOA Auth Guard] No valid cache - showing login immediately');
@@ -63,14 +82,17 @@ function instantDisplay() {
 /**
  * PHASE 2: FIREBASE VERIFICATION
  * This runs asynchronously in the background after UI is visible
+ * OPTIMIZED: Non-blocking, doesn't await persistence
  */
 export function setupAuthGuard() {
-    console.log('[EOA Auth Guard OPTIMIZED] Phase 2: Firebase Verification');
+    console.log('[EOA Auth Guard OPTIMIZED] Phase 2: Firebase Verification (background)');
 
     // Wait for Firebase to be ready
     if (typeof firebase === 'undefined') {
         console.error('[EOA Auth Guard] Firebase not loaded!');
-        handleNotAuthenticated();
+        if (!window._eoaOptimisticAuth) {
+            handleNotAuthenticated();
+        }
         return;
     }
 
@@ -81,28 +103,42 @@ export function setupAuthGuard() {
 
     const auth = firebase.auth();
 
-    // Enable auth persistence (LOCAL = persists across sessions/tabs)
+    // Enable auth persistence in background (DON'T await - non-blocking)
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
         .then(() => {
-            console.log('[EOA Auth Guard] Auth persistence set to LOCAL');
+            console.log('[EOA Auth Guard] Auth persistence set to LOCAL (background)');
             perfMarks.firebaseReady = performance.now();
         })
         .catch((error) => {
             console.error('[EOA Auth Guard] Failed to set persistence:', error);
         });
 
-    // Set up auth state listener
+    // Set up auth state listener for VERIFICATION
     auth.onAuthStateChanged((user) => {
         perfMarks.authResolved = performance.now();
-        console.log(`[EOA Auth Guard] Auth resolved in ${(perfMarks.authResolved - perfMarks.scriptStart).toFixed(2)}ms`);
+        console.log(`[EOA Auth Guard] Auth verified in ${(perfMarks.authResolved - perfMarks.scriptStart).toFixed(2)}ms`);
 
         // Remove loading state
         document.body.classList.remove('auth-loading');
 
         if (user) {
+            // Update user info (content already visible if optimistic)
             handleAuthenticated(user);
             cacheAuthState(true, user);
+
+            // If we were optimistic, emit verification event
+            if (window._eoaOptimisticAuth) {
+                console.log('[EOA Auth Guard] Optimistic auth VERIFIED');
+                document.dispatchEvent(new CustomEvent('auth-verified', {
+                    detail: { user, authenticated: true }
+                }));
+            }
         } else {
+            // Auth failed - if we were optimistic, need to show login
+            if (window._eoaOptimisticAuth) {
+                console.log('[EOA Auth Guard] Optimistic auth FAILED - showing login');
+                window._eoaOptimisticAuth = false;
+            }
             handleNotAuthenticated();
             cacheAuthState(false, null);
         }
@@ -238,30 +274,36 @@ function setupLogoutHandler() {
 
 /**
  * Handle authenticated state
+ * OPTIMIZED: Quick path when already in optimistic mode
  */
 function handleAuthenticated(user) {
-    console.log(`[EOA Auth Guard] User authenticated: ${user.email}`);
+    console.log(`[EOA Auth Guard] ✅ User authenticated: ${user.email}`);
+
     isAuthenticated = true;
     currentUser = user;
+
+    // If we were in optimistic mode, just update user info (content already visible)
+    if (window._eoaOptimisticAuth) {
+        console.log('[EOA Auth Guard] Optimistic mode - just updating user display');
+        updateUserDisplay(user);
+        return;
+    }
+
+    console.log('[EOA Auth Guard] User display name:', user.displayName);
+    console.log('[EOA Auth Guard] Auth persistence active - user will stay logged in');
 
     // Smooth transition to authenticated state
     document.body.classList.remove('not-authenticated', 'auth-loading');
     document.body.classList.add('authenticated');
 
-    // Hide auth overlay if visible
+    // Hide auth overlay if visible (fast, no animation for snappiness)
     const overlay = document.getElementById('auth-overlay');
-    if (overlay) {
-        overlay.style.opacity = '0';
-        overlay.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => {
-            overlay.style.display = 'none';
-        }, 300);
+    if (overlay && overlay.style.display !== 'none') {
+        console.log('[EOA Auth Guard] Hiding auth overlay (login prompt)');
+        overlay.style.display = 'none';
     }
 
-    // DON'T hide loading screen yet - wait for content to render
-    console.log('[EOA Auth Guard] Waiting for content to render before hiding loading screen...');
-
-    // Show main content container (but it will have loading spinner until SPA renders)
+    // Show main content container immediately
     const mainContent = document.getElementById('main-content');
     if (mainContent) {
         mainContent.style.display = 'block';
@@ -281,7 +323,7 @@ function handleAuthenticated(user) {
  * Handle not authenticated state
  */
 function handleNotAuthenticated() {
-    console.log('[EOA Auth Guard] User not authenticated');
+    console.log('[EOA Auth Guard] ❌ User not authenticated - showing login prompt');
     isAuthenticated = false;
     currentUser = null;
 
@@ -291,6 +333,7 @@ function handleNotAuthenticated() {
 
     const overlay = document.getElementById('auth-overlay');
     if (overlay) {
+        console.log('[EOA Auth Guard] Displaying auth overlay (login prompt)');
         overlay.style.display = 'flex';
         overlay.style.opacity = '1';
         prefillLastUserEmail(); // Re-apply in case overlay was just created
@@ -298,11 +341,13 @@ function handleNotAuthenticated() {
 
     const loadingScreen = document.getElementById('auth-loading-screen');
     if (loadingScreen) {
+        console.log('[EOA Auth Guard] Hiding loading screen');
         loadingScreen.style.display = 'none';
     }
 
     const mainContent = document.getElementById('main-content');
     if (mainContent) {
+        console.log('[EOA Auth Guard] Hiding main content');
         mainContent.style.display = 'none';
     }
 

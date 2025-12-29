@@ -3,16 +3,22 @@
  * Comprehensive mobile-first responsive design fixes
  *
  * Focus Areas:
- * - Touch target sizing (minimum 44x44px)
- * - Responsive typography
+ * - Touch target sizing (minimum 48x48px per WCAG 2.1 AA)
+ * - Responsive typography (minimum 16px body text)
  * - Mobile navigation
  * - Gesture support
  * - Performance optimizations
+ *
+ * Breakpoints:
+ * - Extra small: 320px - 479px
+ * - Small/Mobile: 480px - 767px
+ * - Tablet: 768px - 1023px
+ * - Desktop: 1024px+
  */
 
 /* ============================================
    TOUCH TARGET SIZING
-   All interactive elements must be at least 44x44px
+   All interactive elements must be at least 48x48px (WCAG 2.1 AA)
    ============================================ */
 
 @media (pointer: coarse) {
@@ -270,18 +276,6 @@ svg {
         padding: 0.75rem;
     }
 
-    /* Single column for very narrow screens */
-    @media (max-width: 480px) {
-        .grid,
-        .deity-grid,
-        .mythology-grid,
-        .universal-grid {
-            grid-template-columns: 1fr;
-            gap: 0.75rem;
-            padding: 0.5rem;
-        }
-    }
-
     /* Card adjustments */
     .card,
     .deity-card,
@@ -296,11 +290,32 @@ svg {
         grid-template-columns: repeat(2, 1fr);
         gap: 0.75rem;
     }
+}
 
-    @media (max-width: 480px) {
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
+/* Single column for very narrow screens - moved outside to avoid nesting issues */
+@media (max-width: 480px) {
+    .grid,
+    .deity-grid,
+    .mythology-grid,
+    .universal-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Landing page specific - ensure proper column count */
+    .landing-category-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+
+    .landing-features-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
     }
 }
 
@@ -657,6 +672,119 @@ svg {
         bottom: max(1rem, env(safe-area-inset-bottom));
         left: max(1rem, env(safe-area-inset-left));
         right: max(1rem, env(safe-area-inset-right));
+    }
+}
+
+/* ============================================
+   LANDING PAGE COMPACT GRID SIZING
+   Ensures proper 4+ columns on desktop, 2 on tablet, 1 on mobile
+   ============================================ */
+
+/* Desktop compact grid - 4+ columns */
+@media (min-width: 1024px) {
+    .landing-category-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+        gap: 16px !important;
+    }
+
+    .landing-category-card {
+        min-height: 150px !important;
+        padding: 20px !important;
+        border-radius: 12px !important;
+    }
+
+    .landing-category-icon {
+        width: 2.25rem !important;
+        height: 2.25rem !important;
+        margin-bottom: 12px !important;
+    }
+
+    .landing-category-name {
+        font-size: 1.125rem !important;
+        margin-bottom: 6px !important;
+    }
+
+    .landing-category-description {
+        font-size: 0.875rem !important;
+        line-height: 1.5 !important;
+    }
+}
+
+/* Large desktop - ensure 4 columns */
+@media (min-width: 1200px) {
+    .landing-category-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 20px !important;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+}
+
+/* Tablet - 2 columns */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .landing-category-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+    }
+
+    .landing-category-card {
+        min-height: 160px !important;
+        padding: 24px !important;
+    }
+}
+
+/* ============================================
+   LANDING PAGE MOBILE OPTIMIZATIONS
+   ============================================ */
+
+@media (max-width: 767px) {
+    /* Ensure landing page cards have proper touch targets */
+    .landing-category-card {
+        min-height: 48px;
+        touch-action: manipulation;
+    }
+
+    /* Ensure buttons meet WCAG touch target requirements */
+    .landing-btn,
+    .landing-btn-primary,
+    .landing-btn-secondary {
+        min-height: 48px;
+        min-width: 48px;
+        touch-action: manipulation;
+    }
+
+    /* Proper spacing for mobile */
+    .landing-page-view {
+        padding-left: max(12px, env(safe-area-inset-left));
+        padding-right: max(12px, env(safe-area-inset-right));
+    }
+
+    /* Ensure readable text on mobile */
+    .landing-category-description,
+    .landing-feature-card p {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+}
+
+/* Extra small screens - 320px devices */
+@media (max-width: 359px) {
+    .landing-page-view {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .landing-hero-section {
+        padding: 24px 12px;
+    }
+
+    .landing-category-card {
+        padding: 16px;
+    }
+
+    .landing-btn {
+        padding: 12px 20px;
+        font-size: 0.9375rem; /* 15px - slightly smaller but still readable */
     }
 }
 

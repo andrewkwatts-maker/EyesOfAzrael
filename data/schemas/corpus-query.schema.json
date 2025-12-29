@@ -1,0 +1,169 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eyesofazrael.com/schemas/corpus-query.json",
+  "title": "Corpus Query",
+  "description": "Schema for defining corpus search queries that can be embedded in entities or used standalone",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["id", "label", "queryType", "query"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the query (kebab-case)",
+      "pattern": "^[a-z0-9-]+$",
+      "examples": ["zeus-homer-iliad", "odin-poetic-edda", "ra-pyramid-texts"]
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label for the query",
+      "examples": ["Zeus in Homer's Iliad", "Odin in the Poetic Edda", "Ra in the Pyramid Texts"]
+    },
+    "queryType": {
+      "type": "string",
+      "enum": ["github", "firebase", "combined"],
+      "description": "Type of data source to query",
+      "default": "firebase"
+    },
+    "query": {
+      "type": "object",
+      "description": "The query parameters",
+      "properties": {
+        "term": {
+          "type": "string",
+          "description": "Primary search term",
+          "examples": ["Zeus", "Odin", "Ra", "Shiva"]
+        },
+        "alternateTerms": {
+          "type": "array",
+          "description": "Alternate names or spellings to include in search",
+          "items": { "type": "string" },
+          "examples": [["Jupiter", "Dias"], ["Wotan", "Woden"], ["Re", "Amun-Ra"]]
+        },
+        "repositories": {
+          "type": "array",
+          "description": "GitHub repositories to search (for github queryType)",
+          "items": { "type": "string" },
+          "examples": [["sacred-texts/iliad", "sacred-texts/odyssey"]]
+        },
+        "collections": {
+          "type": "array",
+          "description": "Firebase collections to search (for firebase queryType)",
+          "items": { "type": "string" },
+          "examples": [["texts", "concepts", "myths"]]
+        },
+        "textFilters": {
+          "type": "array",
+          "description": "Specific texts or documents to filter by",
+          "items": { "type": "string" },
+          "examples": [["iliad", "odyssey", "theogony"]]
+        },
+        "mythologyFilter": {
+          "type": "string",
+          "description": "Filter results to a specific mythology",
+          "examples": ["greek", "norse", "egyptian", "hindu"]
+        },
+        "dateRange": {
+          "type": "object",
+          "description": "Filter by approximate date range of source texts",
+          "properties": {
+            "start": { "type": "integer", "description": "Start year (negative for BCE)" },
+            "end": { "type": "integer", "description": "End year (negative for BCE)" }
+          }
+        },
+        "options": {
+          "type": "object",
+          "description": "Additional query options",
+          "properties": {
+            "caseSensitive": { "type": "boolean", "default": false },
+            "wholeWord": { "type": "boolean", "default": false },
+            "includeContext": { "type": "boolean", "default": true },
+            "contextLines": { "type": "integer", "default": 3, "minimum": 1, "maximum": 10 },
+            "maxResults": { "type": "integer", "default": 50, "minimum": 1, "maximum": 500 },
+            "sortBy": {
+              "type": "string",
+              "enum": ["relevance", "date", "source", "alphabetical"],
+              "default": "relevance"
+            },
+            "highlightMatches": { "type": "boolean", "default": true }
+          }
+        }
+      },
+      "required": ["term"]
+    },
+    "renderMode": {
+      "type": "string",
+      "enum": ["panel", "inline", "inline-grid", "full-page", "modal", "sidebar", "embedded"],
+      "description": "How to render the query results",
+      "default": "panel"
+    },
+    "entityRef": {
+      "type": "object",
+      "description": "Reference to the entity this query is associated with",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["deity", "hero", "creature", "place", "item", "concept", "text", "myth"],
+          "description": "Entity type"
+        },
+        "id": {
+          "type": "string",
+          "description": "Entity ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the entity"
+        }
+      },
+      "required": ["type", "id"]
+    },
+    "autoLoad": {
+      "type": "boolean",
+      "description": "Whether to automatically execute this query when the entity loads",
+      "default": false
+    },
+    "isStandard": {
+      "type": "boolean",
+      "description": "Whether this is a standard/curated query vs user-created",
+      "default": true
+    },
+    "category": {
+      "type": "string",
+      "description": "Category for organizing queries",
+      "enum": ["primary-sources", "scholarly", "comparative", "iconography", "etymology", "modern-references"],
+      "examples": ["primary-sources"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description of what this query searches for",
+      "examples": ["Search for references to Zeus in Homer's epic poems"]
+    },
+    "icon": {
+      "type": "string",
+      "description": "Optional icon/emoji for the query",
+      "examples": ["📜", "🔍", "📚"]
+    },
+    "priority": {
+      "type": "integer",
+      "description": "Display priority (lower numbers appear first)",
+      "default": 100,
+      "minimum": 0
+    },
+    "tags": {
+      "type": "array",
+      "description": "Tags for categorizing and filtering queries",
+      "items": { "type": "string" },
+      "examples": [["epic", "homer", "primary-source"]]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata for the query",
+      "properties": {
+        "created": { "type": "string", "format": "date-time" },
+        "lastModified": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

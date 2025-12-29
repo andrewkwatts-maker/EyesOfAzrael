@@ -1,7 +1,8 @@
 /**
  * Single Page Application Navigation System
  * Handles dynamic routing and content loading from Firebase
- * REQUIRES AUTHENTICATION FOR ALL PAGES
+ * Public routes (home, mythologies, browse, etc.) are accessible without auth
+ * Protected routes (dashboard, compare) require authentication
  */
 
 class SPANavigation {
@@ -17,7 +18,10 @@ class SPANavigation {
         this.maxHistory = 50;
         this.authReady = false;
 
-        console.log('[SPA] ✓ Properties initialized:', {
+        // Verify required view classes are loaded (initialization order check)
+        this.verifyDependencies();
+
+        console.log('[SPA] Properties initialized:', {
             hasDB: !!this.db,
             hasAuth: !!this.auth,
             hasRenderer: !!this.renderer,
@@ -35,6 +39,7 @@ class SPANavigation {
             entity_alt: /^#?\/entity\/([^\/]+)\/([^\/]+)\/([^\/]+)\/?$/,
             category: /^#?\/mythology\/([^\/]+)\/([^\/]+)\/?$/,
             search: /^#?\/search\/?$/,
+            corpus_explorer: /^#?\/corpus-explorer\/?$/,
             compare: /^#?\/compare\/?$/,
             dashboard: /^#?\/dashboard\/?$/,
             about: /^#?\/about\/?$/,
@@ -42,59 +47,105 @@ class SPANavigation {
             terms: /^#?\/terms\/?$/
         };
 
-        // ⚡ OPTIMIZATION: Check currentUser synchronously first
+        // ⚡ OPTIMIZATION: Check currentUser OR optimistic auth synchronously first
         const syncCheckStart = performance.now();
         const currentUser = firebase.auth().currentUser;
+        const hasOptimisticAuth = window._eoaOptimisticAuth === true;
         const syncCheckEnd = performance.now();
 
         console.log(`[SPA] ⚡ Synchronous auth check took: ${(syncCheckEnd - syncCheckStart).toFixed(2)}ms`);
+        console.log(`[SPA] ⚡ Optimistic auth: ${hasOptimisticAuth}, currentUser: ${!!currentUser}`);
 
-        if (currentUser) {
-            // Fast path: User already authenticated
+        if (currentUser || hasOptimisticAuth) {
+            // Fast path: User already authenticated OR using cached optimistic auth
             const fastPathEnd = performance.now();
-            console.log('[SPA] ✨ CurrentUser available immediately:', currentUser.email);
-            console.log('[SPA] ⚡ FAST PATH: Skipping async auth wait (performance optimization)');
+            if (currentUser) {
+                console.log('[SPA] ✨ CurrentUser available immediately:', currentUser.email);
+            } else {
+                console.log('[SPA] ✨ Using OPTIMISTIC auth from cache (instant start)');
+            }
+            console.log('[SPA] ⚡ FAST PATH: Auth already ready');
             console.log(`[SPA] 📊 Total constructor time (fast path): ${(fastPathEnd - constructorStart).toFixed(2)}ms`);
 
             this.authReady = true;
-
-            // Initialize router immediately (synchronous path)
-            if (document.readyState === 'loading') {
-                console.log('[SPA] 📄 DOM still loading, waiting for DOMContentLoaded...');
-                document.addEventListener('DOMContentLoaded', () => {
-                    console.log('[SPA] 📄 DOMContentLoaded fired, initializing router...');
-                    this.initRouter();
-                });
-            } else {
-                console.log('[SPA] 📄 DOM already loaded, initializing router immediately...');
-                this.initRouter();
-            }
-
-            console.log('[SPA] 🏁 Constructor completed (FAST PATH - synchronous)');
         } else {
-            // Slow path: Wait for auth state change
-            console.log('[SPA] 🔒 No currentUser, taking SLOW PATH (async wait)...');
-            console.log('[SPA] 🔒 Starting waitForAuth()...');
+            // User not authenticated yet - still initialize router for public routes
+            console.log('[SPA] 🔒 No currentUser or optimistic auth, will resolve async...');
+            console.log('[SPA] 📖 Router will initialize immediately for public routes');
 
-            // Wait for auth to be ready before initializing router
+            // Listen for auth state changes to update authReady flag
             this.waitForAuth().then((user) => {
                 const slowPathEnd = performance.now();
                 console.log('[SPA] ✅ waitForAuth() resolved with user:', user ? user.email : 'null');
-                console.log(`[SPA] 📊 Total auth wait time (slow path): ${(slowPathEnd - constructorStart).toFixed(2)}ms`);
+                console.log(`[SPA] 📊 Total auth wait time: ${(slowPathEnd - constructorStart).toFixed(2)}ms`);
 
                 this.authReady = true;
                 console.log('[SPA] 🔓 Auth ready flag set to true');
-                this.initRouter();
+
+                // Re-trigger route if we were on a protected route waiting for auth
+                const currentPath = (window.location.hash || '#/').replace('#', '');
+                const protectedRoutes = ['dashboard', 'compare'];
+                const isProtectedRoute = protectedRoutes.some(route => currentPath.includes(route));
+                if (isProtectedRoute) {
+                    console.log('[SPA] 🔄 Re-handling protected route now that auth is ready');
+                    this.handleRoute();
+                }
             }).catch((error) => {
                 console.error('[SPA] ❌ waitForAuth() rejected with error:', error);
+                // Even on error, mark auth as ready (just not authenticated)
+                // This prevents routes from being blocked indefinitely
+                this.authReady = true;
+                console.log('[SPA] 🔓 Auth ready flag set to true (error fallback)');
             });
 
-            console.log('[SPA] 🏁 Constructor completed (SLOW PATH - waitForAuth is async)');
+            // Also listen for auth-ready event from auth-guard-simple.js (backup mechanism)
+            // This ensures we catch auth state even if our onAuthStateChanged fires late
+            document.addEventListener('auth-ready', (event) => {
+                console.log('[SPA] 🔔 Received auth-ready event from auth guard:', event.detail);
+                if (!this.authReady) {
+                    this.authReady = true;
+                    console.log('[SPA] 🔓 Auth ready flag set via auth-ready event');
+
+                    // Re-trigger protected routes if user is authenticated
+                    const currentPath = (window.location.hash || '#/').replace('#', '');
+                    const protectedRoutes = ['dashboard', 'compare'];
+                    const isProtectedRoute = protectedRoutes.some(route => currentPath.includes(route));
+                    if (isProtectedRoute && event.detail && event.detail.authenticated) {
+                        console.log('[SPA] 🔄 Re-handling protected route after auth-ready event');
+                        this.handleRoute();
+                    }
+                }
+            }, { once: true });
         }
+
+        // Listen for optimistic auth verification (fires when Firebase confirms/denies cached auth)
+        document.addEventListener('auth-verified', (event) => {
+            if (!event.detail?.authenticated) {
+                console.log('[SPA] ⚠️ Optimistic auth verification FAILED');
+                // Auth guard will handle showing the login overlay
+            } else {
+                console.log('[SPA] ✅ Optimistic auth verified successfully');
+            }
+        });
+
+        // ALWAYS initialize router immediately - handleRoute() decides auth requirements per route
+        if (document.readyState === 'loading') {
+            console.log('[SPA] 📄 DOM still loading, waiting for DOMContentLoaded...');
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('[SPA] 📄 DOMContentLoaded fired, initializing router...');
+                this.initRouter();
+            });
+        } else {
+            console.log('[SPA] 📄 DOM already loaded, initializing router immediately...');
+            this.initRouter();
+        }
+
+        console.log('[SPA] 🏁 Constructor completed');
     }
 
     /**
      * Wait for Firebase Auth to be ready
+     * Includes timeout fallback to prevent indefinite blocking
      */
     async waitForAuth() {
         return new Promise((resolve, reject) => {
@@ -108,10 +159,32 @@ class SPANavigation {
                 return;
             }
 
+            let resolved = false;
+
+            // Timeout fallback: resolve with null after 5 seconds if auth never fires
+            // This prevents routes from being blocked indefinitely on network issues
+            const timeoutId = setTimeout(() => {
+                if (!resolved) {
+                    resolved = true;
+                    console.warn('[SPA] ⏰ Auth timeout after 5s - resolving with null (not authenticated)');
+                    console.log('[SPA] 💡 This may indicate slow network or Firebase SDK issues');
+                    resolve(null);
+                }
+            }, 5000);
+
             console.log('[SPA] 📡 Registering onAuthStateChanged listener...');
 
             // Firebase auth ready check - just resolve, auth guard handles UI
             const unsubscribe = auth.onAuthStateChanged((user) => {
+                if (resolved) {
+                    console.log('[SPA] ⚠️ Auth state changed after timeout - ignoring');
+                    unsubscribe();
+                    return;
+                }
+
+                resolved = true;
+                clearTimeout(timeoutId);
+
                 const timestamp = new Date().toISOString();
                 console.log('[SPA] 🔔 onAuthStateChanged fired at:', timestamp);
                 console.log('[SPA] 👤 User state:', user ? `Logged in as ${user.email}` : 'Logged out');
@@ -128,40 +201,127 @@ class SPANavigation {
     }
 
     /**
+     * Verify that required view classes are loaded
+     * This helps catch initialization order issues early
+     */
+    verifyDependencies() {
+        const requiredClasses = [
+            { name: 'LandingPageView', route: 'home', critical: true },
+            { name: 'HomeView', route: 'home', critical: false },
+            { name: 'MythologiesView', route: 'mythologies', critical: false },
+            { name: 'BrowseCategoryView', route: 'browse', critical: false },
+            { name: 'SearchViewComplete', route: 'search', critical: false },
+            { name: 'CompareView', route: 'compare', critical: false },
+            { name: 'UserDashboard', route: 'dashboard', critical: false },
+            { name: 'AboutPage', route: 'about', critical: false },
+            { name: 'PrivacyPage', route: 'privacy', critical: false },
+            { name: 'TermsPage', route: 'terms', critical: false }
+        ];
+
+        const missingClasses = [];
+        const loadedClasses = [];
+
+        requiredClasses.forEach(({ name, route, critical }) => {
+            if (typeof window[name] === 'undefined') {
+                missingClasses.push({ name, route, critical });
+            } else {
+                loadedClasses.push(name);
+            }
+        });
+
+        console.log('[SPA] Dependency check:', {
+            loaded: loadedClasses.length,
+            missing: missingClasses.length,
+            loadedClasses: loadedClasses,
+            missingClasses: missingClasses.map(c => c.name)
+        });
+
+        // Only warn about critical missing classes
+        const criticalMissing = missingClasses.filter(c => c.critical);
+        if (criticalMissing.length > 0) {
+            console.warn('[SPA] CRITICAL: Some view classes are not loaded:', criticalMissing.map(c => c.name));
+            console.warn('[SPA] This may indicate a script loading order issue in index.html');
+        }
+
+        // Store for later reference
+        this._dependencyStatus = {
+            loaded: loadedClasses,
+            missing: missingClasses,
+            verified: true
+        };
+    }
+
+    /**
      * Initialize router and event listeners
      */
     initRouter() {
-        console.log('[SPA] 🚀 initRouter() called at:', new Date().toISOString());
-        console.log('[SPA] 🔍 Current state:', {
+        console.log('[SPA] initRouter() called at:', new Date().toISOString());
+        console.log('[SPA] Current state:', {
             authReady: this.authReady,
             currentRoute: this.currentRoute,
             hash: window.location.hash
         });
 
-        // Handle hash changes
-        window.addEventListener('hashchange', () => {
-            console.log('[SPA] 📍 hashchange event triggered, hash:', window.location.hash);
-            this.handleRoute();
+        // Track if we're currently navigating to prevent double-handling
+        this._isNavigating = false;
+        this._navigationDebounceTimer = null;
+        this._lastNavigatedHash = null;
+
+        // Handle hash changes with debouncing to prevent double-navigation
+        window.addEventListener('hashchange', (e) => {
+            const newHash = window.location.hash;
+            console.log('[SPA] 📍 hashchange event triggered, hash:', newHash);
+            console.log('[SPA] 📍 hashchange oldURL:', e.oldURL, 'newURL:', e.newURL);
+
+            // Skip if we just navigated to this hash (prevents double-handling)
+            if (this._lastNavigatedHash === newHash) {
+                console.log('[SPA] ⏳ Skipping hashchange - same hash already processed');
+                this._lastNavigatedHash = null; // Reset for next navigation
+                return;
+            }
+
+            // Debounce rapid hash changes
+            if (this._navigationDebounceTimer) {
+                clearTimeout(this._navigationDebounceTimer);
+            }
+
+            this._navigationDebounceTimer = setTimeout(() => {
+                if (!this._isNavigating) {
+                    this.handleRoute();
+                } else {
+                    console.log('[SPA] ⏳ Skipping hashchange - navigation already in progress');
+                }
+            }, 10);
         });
 
-        window.addEventListener('popstate', () => {
-            console.log('[SPA] 📍 popstate event triggered');
-            this.handleRoute();
+        window.addEventListener('popstate', (e) => {
+            console.log('[SPA] 📍 popstate event triggered, state:', e.state);
+            if (!this._isNavigating) {
+                this.handleRoute();
+            }
         });
 
         console.log('[SPA] ✓ Event listeners registered (hashchange, popstate)');
 
-        // Intercept link clicks
+        // Intercept link clicks - improved to handle all hash link formats
         document.addEventListener('click', (e) => {
-            if (e.target.matches('a[href^="#"]') || e.target.closest('a[href^="#"]')) {
-                const link = e.target.matches('a') ? e.target : e.target.closest('a');
-                if (link.hash) {
-                    console.log('[SPA] 🔗 Intercepted link click:', link.hash);
-                    e.preventDefault();
-                    this.navigate(link.hash);
-                }
+            // Find the closest anchor element (handles clicks on child elements)
+            const link = e.target.closest('a[href]');
+
+            if (!link) return;
+
+            const href = link.getAttribute('href');
+
+            // Check if this is a hash-based SPA link
+            if (href && href.startsWith('#')) {
+                console.log('[SPA] 🔗 Intercepted link click, href:', href);
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Use the href attribute directly for navigation (more reliable than link.hash)
+                this.navigate(href);
             }
-        });
+        }, true); // Use capture phase to intercept before other handlers
 
         console.log('[SPA] ✓ Link click interceptor registered');
 
@@ -174,20 +334,72 @@ class SPANavigation {
 
     /**
      * Navigate to a route
+     * @param {string} path - Route path (with or without #)
+     * @param {object} options - Navigation options
+     * @param {boolean} options.replace - Use replaceState instead of pushState
      */
-    navigate(path) {
+    navigate(path, options = {}) {
         if (!path.startsWith('#')) {
             path = '#' + path;
         }
 
+        // Normalize path - ensure consistent format
+        path = this.normalizePath(path);
+
         console.log('[SPA] Navigating to:', path);
-        window.location.hash = path;
+
+        // Track that we're about to navigate to this hash (prevents double-handling)
+        this._lastNavigatedHash = path;
+
+        // Check if we're already at this path
+        if (window.location.hash === path) {
+            console.log('[SPA] Already at this path, forcing route refresh');
+            this.handleRoute();
+            return;
+        }
+
+        // Set the hash - this will trigger hashchange event
+        if (options.replace) {
+            window.history.replaceState(null, '', path);
+            // replaceState doesn't trigger hashchange, so handle manually
+            this.handleRoute();
+        } else {
+            window.location.hash = path;
+            // hashchange event will handle the route
+        }
+    }
+
+    /**
+     * Normalize path to consistent format
+     * @param {string} path - Path to normalize
+     * @returns {string} Normalized path
+     */
+    normalizePath(path) {
+        // Remove trailing slashes (except for root)
+        if (path !== '#/' && path.endsWith('/')) {
+            path = path.slice(0, -1);
+        }
+        // Ensure starts with #/
+        if (path === '#') {
+            path = '#/';
+        } else if (path.startsWith('#') && !path.startsWith('#/')) {
+            path = '#/' + path.slice(1);
+        }
+        return path;
     }
 
     /**
      * Handle current route
      */
     async handleRoute() {
+        // Prevent concurrent route handling (race condition guard)
+        if (this._isNavigating) {
+            console.log('[SPA] ⏳ Route handling already in progress, skipping');
+            return;
+        }
+
+        this._isNavigating = true;
+
         const timestamp = new Date().toISOString();
         const hash = window.location.hash || '#/';
         const path = hash.replace('#', '');
@@ -213,30 +425,43 @@ class SPANavigation {
 
         const mainContent = document.getElementById('main-content');
 
-        // Double-check authentication (auth guard already handles this)
-        if (!this.authReady) {
-            console.log('[SPA] ⏳ Auth not ready yet, showing loading state...');
-            console.log('[SPA] 💡 Tip: waitForAuth() may not have completed yet');
-            console.log('[SPA] ═══════════════════════════════════════');
-            this.showAuthWaitingState(mainContent);
-            return;
+        // Define routes that require authentication (protected routes)
+        const protectedRoutes = ['dashboard', 'compare'];
+        const isProtectedRoute = protectedRoutes.some(route => path.includes(route));
+
+        // Only block for protected routes if auth is not ready
+        if (isProtectedRoute) {
+            if (!this.authReady) {
+                console.log('[SPA] ⏳ Auth not ready for protected route, showing loading state...');
+                console.log('[SPA] 💡 Tip: waitForAuth() may not have completed yet');
+                console.log('[SPA] ═══════════════════════════════════════');
+                this.showAuthWaitingState(mainContent);
+                this._isNavigating = false; // Reset flag on early return
+                return;
+            }
+
+            // Verify user is authenticated via Firebase for protected routes
+            const currentUser = firebase.auth().currentUser;
+            console.log('[SPA] 👤 Firebase currentUser:', currentUser ? currentUser.email : 'null');
+
+            if (!currentUser) {
+                console.log('[SPA] ⏳ No user found for protected route, showing loading state...');
+                console.log('[SPA] 💡 Tip: Firebase auth.currentUser is null (may be transient)');
+                console.log('[SPA] ═══════════════════════════════════════');
+                this.showAuthWaitingState(mainContent);
+                this._isNavigating = false; // Reset flag on early return
+                return;
+            }
+
+            console.log('[SPA] ✓ Auth checks passed for protected route');
+        } else {
+            // For public routes, just log the auth state but don't block
+            const currentUser = firebase.auth().currentUser;
+            console.log('[SPA] 📖 Public route - auth state:', {
+                authReady: this.authReady,
+                currentUser: currentUser ? currentUser.email : 'not logged in'
+            });
         }
-
-        console.log('[SPA] ✓ Auth ready check passed');
-
-        // Verify user is authenticated via Firebase
-        const currentUser = firebase.auth().currentUser;
-        console.log('[SPA] 👤 Firebase currentUser:', currentUser ? currentUser.email : 'null');
-
-        if (!currentUser) {
-            console.log('[SPA] ⏳ No user found, showing loading state...');
-            console.log('[SPA] 💡 Tip: Firebase auth.currentUser is null (may be transient)');
-            console.log('[SPA] ═══════════════════════════════════════');
-            this.showAuthWaitingState(mainContent);
-            return;
-        }
-
-        console.log('[SPA] ✓ Current user check passed');
 
         // Add to history
         this.addToHistory(path);
@@ -285,6 +510,10 @@ class SPANavigation {
             } else if (this.routes.search.test(path)) {
                 console.log('[SPA] ✅ Matched SEARCH route');
                 await this.renderSearch();
+            } else if (this.routes.corpus_explorer.test(path)) {
+                console.log('[SPA] ✅ Matched CORPUS EXPLORER route - redirecting to standalone page');
+                window.location.href = 'corpus-explorer.html';
+                return;
             } else if (this.routes.compare.test(path)) {
                 console.log('[SPA] ✅ Matched COMPARE route');
                 await this.renderCompare();
@@ -321,6 +550,9 @@ class SPANavigation {
             console.error('[SPA] Stack trace:', error.stack);
             console.log('[SPA] ═══════════════════════════════════════');
             this.renderError(error);
+        } finally {
+            // Always reset the navigation flag to allow future navigations
+            this._isNavigating = false;
         }
     }
 
@@ -1308,16 +1540,28 @@ class SPANavigation {
     showLoading() {
         const mainContent = document.getElementById('main-content');
         if (mainContent) {
-            mainContent.innerHTML = `
-                <div class="loading-container">
-                    <div class="spinner-container">
-                        <div class="spinner-ring"></div>
-                        <div class="spinner-ring"></div>
-                        <div class="spinner-ring"></div>
+            // Check if there's existing content to fade out
+            const existingContent = mainContent.firstElementChild;
+            if (existingContent && !existingContent.classList.contains('loading-container')) {
+                // Fade out existing content first
+                existingContent.classList.add('fade-out');
+                existingContent.style.opacity = '0';
+                existingContent.style.transition = 'opacity 0.15s ease-out';
+            }
+
+            // Use requestAnimationFrame for smooth transition
+            requestAnimationFrame(() => {
+                mainContent.innerHTML = `
+                    <div class="loading-container" role="status" aria-live="polite">
+                        <div class="spinner-container">
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                        </div>
+                        <p class="loading-message">Loading...</p>
                     </div>
-                    <p class="loading-message">Loading...</p>
-                </div>
-            `;
+                `;
+            });
         }
     }
 

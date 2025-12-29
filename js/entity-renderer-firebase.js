@@ -244,6 +244,9 @@ class FirebaseEntityRenderer {
             <!-- Sacred Texts / Primary Sources -->
             ${entity.texts?.length || entity.sources?.length ? this.renderSacredTexts(entity) : ''}
 
+            <!-- Corpus Search Queries Section -->
+            <div id="corpus-queries-section-${entity.id || 'main'}" class="corpus-queries-wrapper"></div>
+
             <!-- Sources -->
             ${entity.sources?.length && !entity.texts?.length ? `
             <section>
@@ -254,7 +257,9 @@ class FirebaseEntityRenderer {
             ` : ''}
         `;
 
-        container.innerHTML = html;
+        container.innerHTML = html + this.renderUserNotesSection(entity);
+        this.initializeUserNotes(entity);
+        this.initializeCorpusSection(entity);
     }
 
     /**
@@ -781,7 +786,8 @@ class FirebaseEntityRenderer {
             ` : ''}
         `;
 
-        container.innerHTML = html;
+        container.innerHTML = html + this.renderUserNotesSection(entity);
+        this.initializeUserNotes(entity);
     }
 
     /**
@@ -842,7 +848,8 @@ class FirebaseEntityRenderer {
             ` : ''}
         `;
 
-        container.innerHTML = html;
+        container.innerHTML = html + this.renderUserNotesSection(entity);
+        this.initializeUserNotes(entity);
     }
 
     /**
@@ -918,6 +925,215 @@ class FirebaseEntityRenderer {
     /**
      * Update page metadata (title, description)
      */
+    /**
+     * Render user notes section
+     * @param {Object} entity - Entity data
+     * @returns {string} HTML for user notes section
+     */
+    renderUserNotesSection(entity) {
+        return `
+            <!-- User Notes Section -->
+            <section class="user-notes-section" id="userNotesSection" data-asset-type="${entity.type}" data-asset-id="${entity.id}">
+                <div class="notes-header">
+                    <div class="notes-title-wrapper">
+                        <h2 class="notes-title">
+                            Community Notes
+                            <span class="notes-count" id="notesCount">0</span>
+                        </h2>
+                        <p class="notes-subtitle">Share your insights and annotations</p>
+                    </div>
+                    <button class="btn-add-note" id="addNoteBtn" style="display: none;">
+                        <svg class="icon-plus" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"></path>
+                        </svg>
+                        Add Your Note
+                    </button>
+                </div>
+                <div class="notes-controls">
+                    <div class="sort-dropdown">
+                        <label for="notesSortSelect">Sort by:</label>
+                        <select id="notesSortSelect" class="sort-select">
+                            <option value="votes">Most Helpful</option>
+                            <option value="recent">Most Recent</option>
+                            <option value="debated">Most Debated</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="notes-list" id="notesList">
+                    <div class="notes-empty" id="notesEmpty">
+                        <div class="empty-icon">📝</div>
+                        <h3>No notes yet</h3>
+                        <p>Be the first to share your insights on this topic!</p>
+                    </div>
+                    <div class="notes-loading" id="notesLoading" style="display: none;">
+                        <div class="spinner-container">
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                        </div>
+                        <p>Loading notes...</p>
+                    </div>
+                </div>
+            </section>
+            <div class="modal note-editor-modal" id="noteEditorModal">
+                <div class="modal-overlay" onclick="window.userNotesComponentInstance?.closeNoteEditor()"></div>
+                <div class="modal-content modal-large">
+                    <button class="modal-close" onclick="window.userNotesComponentInstance?.closeNoteEditor()" aria-label="Close">×</button>
+                    <h2 id="editorModalTitle">Add Your Note</h2>
+                    <form class="note-editor-form" id="noteEditorForm">
+                        <div class="editor-tabs">
+                            <button type="button" class="editor-tab active" data-tab="write" id="writeTab">Write</button>
+                            <button type="button" class="editor-tab" data-tab="preview" id="previewTab">Preview</button>
+                        </div>
+                        <div class="editor-content active" id="writeContent">
+                            <textarea id="noteContentInput" class="note-textarea" placeholder="Share your insights, interpretations, or additional context... (Markdown supported: **bold**, *italic*, [links](url), - lists)" maxlength="2000" rows="10"></textarea>
+                            <div class="editor-footer">
+                                <div class="character-count">
+                                    <span id="charCount">0</span> / 2000 characters
+                                    <span class="char-minimum">(minimum 20)</span>
+                                </div>
+                                <div class="markdown-help">
+                                    <span class="help-icon" title="Markdown supported">ℹ️</span>
+                                    <span class="help-text">Markdown formatting supported</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="editor-content" id="previewContent">
+                            <div class="note-preview" id="notePreview">
+                                <p class="preview-placeholder">Nothing to preview yet. Start writing!</p>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="submit" class="btn btn-primary" id="saveNoteBtn">Save Note</button>
+                            <button type="button" class="btn btn-secondary" onclick="window.userNotesComponentInstance?.closeNoteEditor()">Cancel</button>
+                        </div>
+                        <div class="error-message" id="noteError" style="display: none;"></div>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Initialize user notes component after rendering
+     * @param {Object} entity - Entity data
+     */
+    initializeUserNotes(entity) {
+        if (!document.querySelector('link[href*="user-notes.css"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = '/css/user-notes.css';
+            document.head.appendChild(link);
+        }
+        if (!document.querySelector('link[href*="spinner.css"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = '/css/spinner.css';
+            document.head.appendChild(link);
+        }
+        setTimeout(() => {
+            if (window.UserNotesComponent) {
+                const notesComponent = new UserNotesComponent('userNotesSection');
+                notesComponent.init(entity.type, entity.id);
+                window.userNotesComponentInstance = notesComponent;
+            } else {
+                console.warn('UserNotesComponent not loaded. Include user-notes.js script.');
+            }
+        }, 100);
+    }
+
+    /**
+     * Initialize corpus search section for entity
+     * @param {Object} entity - Entity data
+     */
+    initializeCorpusSection(entity) {
+        // Only show for entities that might have corpus queries
+        const corpusEnabledTypes = ['deity', 'hero', 'creature', 'text', 'item', 'place', 'concept'];
+        if (!corpusEnabledTypes.includes(entity.type) && !entity.corpusQueries?.length) {
+            return;
+        }
+
+        const containerId = `corpus-queries-section-${entity.id || 'main'}`;
+        const container = document.getElementById(containerId);
+
+        if (!container) {
+            console.warn('Corpus queries container not found:', containerId);
+            return;
+        }
+
+        // Use setTimeout to ensure DOM is ready
+        setTimeout(async () => {
+            if (typeof RelatedTextsSection !== 'undefined') {
+                const textsSection = new RelatedTextsSection(container, entity, {
+                    showUserQueries: true,
+                    maxQueries: 10,
+                    autoLoadFirst: false,
+                    showCorpusExplorerLink: true
+                });
+                await textsSection.init();
+            } else if (entity.corpusQueries?.length > 0) {
+                // Fallback: render simple links to corpus explorer
+                this.renderSimpleCorpusLinks(container, entity);
+            }
+        }, 150);
+    }
+
+    /**
+     * Render simple corpus query links (fallback when RelatedTextsSection not loaded)
+     */
+    renderSimpleCorpusLinks(container, entity) {
+        const queries = entity.corpusQueries || [];
+
+        if (queries.length === 0) {
+            // Just show link to corpus explorer
+            container.innerHTML = `
+                <section class="corpus-search-section glass-card" style="padding: 1.5rem; margin-top: 2rem;">
+                    <h3 style="margin: 0 0 1rem; color: var(--color-primary);">
+                        <span style="margin-right: 0.5rem;">📚</span>
+                        Primary Source References
+                    </h3>
+                    <p style="opacity: 0.8; margin: 0 0 1rem;">
+                        Search ancient texts for references to ${this.escapeHtml(entity.name)}.
+                    </p>
+                    <a href="/corpus-explorer.html?term=${encodeURIComponent(entity.name)}"
+                       style="display: inline-block; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; background: var(--color-primary); color: white;">
+                        🔍 Search Ancient Texts
+                    </a>
+                </section>
+            `;
+            return;
+        }
+
+        container.innerHTML = `
+            <section class="corpus-search-section" style="margin-top: 2rem;">
+                <h3 style="margin: 0 0 1rem; color: var(--color-primary);">
+                    <span style="margin-right: 0.5rem;">📚</span>
+                    Primary Source References
+                </h3>
+                <div class="corpus-queries-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    ${queries.map(query => `
+                        <a href="/corpus-explorer.html?term=${encodeURIComponent(query.query?.term || entity.name)}&type=${query.queryType || 'github'}"
+                           class="glass-card"
+                           style="display: flex; align-items: center; gap: 1rem; padding: 1rem; text-decoration: none; border-radius: 8px;">
+                            <span style="font-size: 1.25rem;">${query.queryType === 'github' ? '📜' : '🔍'}</span>
+                            <div style="flex: 1;">
+                                <strong style="color: var(--color-primary);">${this.escapeHtml(query.label)}</strong>
+                                ${query.description ? `<p style="margin: 0.25rem 0 0; font-size: 0.85rem; opacity: 0.7;">${this.escapeHtml(query.description)}</p>` : ''}
+                            </div>
+                            <span style="opacity: 0.5;">→</span>
+                        </a>
+                    `).join('')}
+                </div>
+                <div style="margin-top: 1rem; text-align: center;">
+                    <a href="/corpus-explorer.html?term=${encodeURIComponent(entity.name)}"
+                       style="color: var(--color-primary); font-size: 0.9rem;">
+                        Search for more references →
+                    </a>
+                </div>
+            </section>
+        `;
+    }
+
     updatePageMetadata(entity) {
         // Update page title
         document.title = `${entity.name} - ${this.capitalize(this.mythology)} Mythology - Eyes of Azrael`;

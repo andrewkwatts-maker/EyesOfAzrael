@@ -1,0 +1,264 @@
+<!--
+  Vote Buttons Component
+  Displays upvote/downvote buttons with vote counts
+
+  Usage:
+  <div class="vote-buttons" data-item-id="asset123" data-item-type="assets"></div>
+
+  Attributes:
+  - data-item-id: ID of the item being voted on
+  - data-item-type: Type of item ('assets' or 'notes')
+  - data-user-vote: Current user's vote (1, -1, or 0) [optional, auto-loaded]
+  - data-total-votes: Total vote count [optional, auto-loaded]
+
+  States:
+  - data-user-vote="1": Upvote active (button green)
+  - data-user-vote="-1": Downvote active (button red)
+  - data-user-vote="0": No vote (buttons gray)
+  - data-disabled="true": Buttons disabled (user not logged in)
+
+  Example:
+  <div class="vote-buttons"
+       data-item-id="asset123"
+       data-item-type="assets"
+       data-user-vote="1"
+       data-total-votes="42">
+  </div>
+-->
+
+<template id="vote-buttons-template">
+  <div class="vote-buttons-container">
+    <!-- Upvote Button -->
+    <button class="vote-btn upvote-btn"
+            data-vote-value="1"
+            data-active="false"
+            aria-label="Upvote"
+            title="Upvote this content">
+      <svg class="vote-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 19V5M5 12l7-7 7 7"/>
+      </svg>
+      <span class="vote-count upvote-count">0</span>
+    </button>
+
+    <!-- Total Votes Display -->
+    <div class="total-votes-display" title="Net votes (upvotes - downvotes)">
+      <span class="total-votes-value">0</span>
+    </div>
+
+    <!-- Downvote Button -->
+    <button class="vote-btn downvote-btn"
+            data-vote-value="-1"
+            data-active="false"
+            aria-label="Downvote"
+            title="Downvote this content">
+      <svg class="vote-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+      </svg>
+      <span class="vote-count downvote-count">0</span>
+    </button>
+
+    <!-- Login Prompt (shown when user not authenticated) -->
+    <div class="vote-login-prompt" style="display: none;">
+      <span class="login-prompt-text">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 16v-4M12 8h.01"/>
+        </svg>
+        Login to vote
+      </span>
+    </div>
+
+    <!-- Rate Limit Warning (shown when rate limited) -->
+    <div class="vote-rate-limit-warning" style="display: none;">
+      <span class="rate-limit-text">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 6v6l4 2"/>
+        </svg>
+        Too many votes. Please wait.
+      </span>
+    </div>
+
+    <!-- Loading State -->
+    <div class="vote-loading" style="display: none;">
+      <div class="vote-spinner"></div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="vote-error-message" style="display: none;">
+      <span class="error-text"></span>
+    </div>
+  </div>
+</template>
+
+<!-- Compact Vote Buttons (for smaller cards) -->
+<template id="vote-buttons-compact-template">
+  <div class="vote-buttons-container vote-buttons-compact">
+    <!-- Combined Upvote/Downvote with Total -->
+    <button class="vote-btn upvote-btn"
+            data-vote-value="1"
+            data-active="false"
+            aria-label="Upvote"
+            title="Upvote">
+      <svg class="vote-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 19V5M5 12l7-7 7 7"/>
+      </svg>
+    </button>
+
+    <span class="total-votes-value">0</span>
+
+    <button class="vote-btn downvote-btn"
+            data-vote-value="-1"
+            data-active="false"
+            aria-label="Downvote"
+            title="Downvote">
+      <svg class="vote-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+      </svg>
+    </button>
+  </div>
+</template>
+
+<!-- Inline Vote Buttons (for lists) -->
+<template id="vote-buttons-inline-template">
+  <div class="vote-buttons-container vote-buttons-inline">
+    <button class="vote-btn upvote-btn" data-vote-value="1" aria-label="Upvote">
+      <svg class="vote-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 19V5M5 12l7-7 7 7"/>
+      </svg>
+    </button>
+    <span class="total-votes-value">0</span>
+    <button class="vote-btn downvote-btn" data-vote-value="-1" aria-label="Downvote">
+      <svg class="vote-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+      </svg>
+    </button>
+  </div>
+</template>
+
+<script>
+/**
+ * Vote Buttons Component
+ * Auto-initializes when included in a page
+ *
+ * Dependencies:
+ * - vote-service.js
+ * - vote-buttons.js
+ * - vote-buttons.css
+ */
+(function() {
+  'use strict';
+
+  // Wait for DOM to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initVoteButtons);
+  } else {
+    initVoteButtons();
+  }
+
+  function initVoteButtons() {
+    // Find all vote button containers
+    const voteContainers = document.querySelectorAll('.vote-buttons[data-item-id]');
+
+    if (voteContainers.length === 0) {
+      console.log('[VoteButtons] No vote button containers found');
+      return;
+    }
+
+    // Wait for VoteButtonsComponent to be available
+    if (typeof window.VoteButtonsComponent === 'undefined') {
+      console.warn('[VoteButtons] VoteButtonsComponent not loaded yet. Waiting...');
+      setTimeout(initVoteButtons, 100);
+      return;
+    }
+
+    // Initialize each container
+    voteContainers.forEach(container => {
+      if (!container.dataset.initialized) {
+        try {
+          new window.VoteButtonsComponent(container);
+          container.dataset.initialized = 'true';
+        } catch (error) {
+          console.error('[VoteButtons] Initialization error:', error);
+        }
+      }
+    });
+  }
+})();
+</script>
+
+<style>
+/* Basic inline styles for immediate rendering */
+/* Full styles are in vote-buttons.css */
+.vote-buttons-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.vote-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vote-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.vote-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.total-votes-display {
+  font-weight: 600;
+  min-width: 40px;
+  text-align: center;
+}
+
+.vote-loading,
+.vote-error-message,
+.vote-login-prompt,
+.vote-rate-limit-warning {
+  font-size: 0.875rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.vote-error-message {
+  background: #fee;
+  color: #c00;
+}
+
+.vote-login-prompt {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.vote-rate-limit-warning {
+  background: #fee;
+  color: #991b1b;
+}
+
+.vote-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ddd;
+  border-top-color: #333;
+  border-radius: 50%;
+  animation: vote-spin 0.6s linear infinite;
+}
+
+@keyframes vote-spin {
+  to { transform: rotate(360deg); }
+}
+</style>

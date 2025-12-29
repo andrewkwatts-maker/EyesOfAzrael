@@ -146,28 +146,42 @@ class LandingPageView {
         // Show skeleton loading state first
         if (!this.isLoaded) {
             container.innerHTML = this.getSkeletonHTML();
+            // Mark container as having skeleton
+            container.classList.add('has-skeleton');
         }
 
-        // Small delay to show skeleton (can be removed if content loads instantly)
+        // Small delay to show skeleton (minimum 100ms for visual feedback)
         await new Promise(resolve => setTimeout(resolve, 100));
 
-        // Render actual content
+        // Fade out skeleton before replacing
+        const skeleton = container.querySelector('.skeleton-loading');
+        if (skeleton) {
+            skeleton.classList.add('fade-out');
+            await new Promise(resolve => setTimeout(resolve, 150));
+        }
+
+        // Render actual content with fade-in
         container.innerHTML = this.getLandingHTML();
+        container.classList.remove('has-skeleton');
         this.attachEventListeners();
         this.isLoaded = true;
 
-        // Trigger fade-in animation
+        // Trigger fade-in animation using requestAnimationFrame for smooth timing
         requestAnimationFrame(() => {
-            const view = container.querySelector('.landing-page-view');
-            if (view) {
-                view.classList.add('fade-in-ready');
-            }
+            requestAnimationFrame(() => {
+                const view = container.querySelector('.landing-page-view');
+                if (view) {
+                    view.classList.add('fade-in-ready');
+                }
+            });
         });
 
-        // Dispatch event to hide loading spinner
-        window.dispatchEvent(new CustomEvent('first-render-complete', {
+        // Dispatch event to hide loading spinner (use document for consistency)
+        document.dispatchEvent(new CustomEvent('first-render-complete', {
             detail: { view: 'landing', timestamp: Date.now() }
         }));
+
+        console.log('[Landing Page] Render complete');
     }
 
     /**
@@ -555,15 +569,16 @@ class LandingPageView {
                     line-height: 1.618;
                 }
 
-                /* Category Grid - Perfect 8px spacing */
+                /* Category Grid - Compact Panel Grid for 4+ columns on desktop */
                 .landing-category-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                    gap: 24px; /* 3x8px grid */
+                    /* Compact cards: 200px min for proper panel sizing - ensures 4+ columns on 900px+ screens */
+                    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                    gap: 16px; /* 2x8px grid - tighter for compact look */
                     contain: layout style;
                 }
 
-                /* Category Cards - Enhanced Glass-morphism */
+                /* Category Cards - Compact Glass-morphism Panels */
                 .landing-category-card {
                     /* Multi-layer glass effect */
                     background:
@@ -574,15 +589,15 @@ class LandingPageView {
                     backdrop-filter: blur(16px) saturate(150%);
                     -webkit-backdrop-filter: blur(16px) saturate(150%);
 
-                    border: 2px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.5);
-                    border-radius: 16px; /* 2x8px grid */
-                    padding: 32px; /* 4x8px grid */
+                    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.5);
+                    border-radius: 12px; /* Slightly smaller radius for compact look */
+                    padding: 20px; /* Reduced padding for compact cards */
                     text-decoration: none;
                     color: inherit;
                     cursor: pointer;
                     position: relative;
                     overflow: hidden;
-                    min-height: 200px;
+                    min-height: 150px; /* Reduced from 200px for compact sizing */
                     display: flex;
                     flex-direction: column;
                     contain: layout style paint;
@@ -663,11 +678,11 @@ class LandingPageView {
                     z-index: 1;
                 }
 
-                /* SVG Icon - Smooth theming with color */
+                /* SVG Icon - Compact sizing for panel layout */
                 .landing-category-icon {
-                    width: clamp(2.5rem, 4vw, 3rem);
-                    height: clamp(2.5rem, 4vw, 3rem);
-                    margin-bottom: 16px; /* 2x8px grid */
+                    width: clamp(2rem, 3vw, 2.5rem); /* Smaller icon for compact cards */
+                    height: clamp(2rem, 3vw, 2.5rem);
+                    margin-bottom: 12px; /* Reduced margin */
                     display: block;
                     object-fit: contain;
                     opacity: 0.9;
@@ -694,14 +709,14 @@ class LandingPageView {
                         brightness(1.1);
                 }
 
-                /* Category Name - Golden Ratio */
+                /* Category Name - Compact sizing */
                 .landing-category-name {
-                    font-size: clamp(1.25rem, 2.5vw, 1.618rem); /* Golden ratio */
+                    font-size: clamp(1rem, 2vw, 1.125rem); /* Compact for panel layout */
                     font-weight: 600;
-                    margin-bottom: 8px; /* 1x8px grid */
+                    margin-bottom: 6px; /* Tighter spacing */
                     color: var(--color-text-primary, #e5e7eb);
                     letter-spacing: -0.01em;
-                    line-height: 1.3;
+                    line-height: 1.25;
                     text-shadow:
                         0 1px 4px rgba(0, 0, 0, 0.4),
                         0 0 8px rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
@@ -713,13 +728,19 @@ class LandingPageView {
                     color: var(--card-color, var(--color-text-primary));
                 }
 
-                /* Category Description */
+                /* Category Description - Compact */
                 .landing-category-description {
-                    font-size: clamp(0.875rem, 1.5vw, 1rem);
+                    /* Smaller for compact cards, maintaining readability */
+                    font-size: clamp(0.8125rem, 1.25vw, 0.9375rem); /* 13-15px range */
                     color: var(--color-text-secondary, #9ca3af);
-                    line-height: 1.618; /* Golden ratio */
+                    line-height: 1.5; /* Tighter line height */
                     flex-grow: 1;
                     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+                    /* Limit to 2-3 lines for compact appearance */
+                    display: -webkit-box;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
                 }
 
                 /* === Features Section === */
@@ -781,7 +802,8 @@ class LandingPageView {
 
                 .landing-feature-card p {
                     color: var(--color-text-secondary, #9ca3af);
-                    font-size: clamp(0.875rem, 1.5vw, 1rem);
+                    /* Minimum 16px (1rem) for WCAG mobile readability */
+                    font-size: clamp(1rem, 1.5vw, 1.125rem);
                     line-height: 1.618; /* Golden ratio */
                     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
                 }
@@ -791,24 +813,36 @@ class LandingPageView {
                 /* Extra Small Mobile (320px - 479px) */
                 @media (max-width: 479px) {
                     .landing-page-view {
-                        padding: 0 8px 32px; /* 1x8px, 4x8px grid */
+                        padding: 0 12px 32px; /* Increased from 8px for better edge spacing */
                     }
 
                     .landing-hero-section {
-                        padding: 40px 16px; /* 5x8px, 2x8px grid */
-                        margin-bottom: 40px; /* 5x8px grid */
+                        padding: 32px 16px; /* Reduced top padding for small screens */
+                        margin-bottom: 32px; /* 4x8px grid */
                         border-radius: 16px; /* 2x8px grid */
                     }
 
                     .landing-category-grid,
                     .landing-features-grid {
                         grid-template-columns: 1fr;
-                        gap: 16px; /* 2x8px grid */
+                        gap: 12px; /* Tighter gap on very small screens */
                     }
 
-                    .landing-category-card,
+                    .landing-category-card {
+                        padding: 20px; /* Slightly reduced padding */
+                        min-height: 160px; /* Reduced height for mobile */
+                    }
+
                     .landing-feature-card {
-                        padding: 24px; /* 3x8px grid */
+                        padding: 20px;
+                    }
+
+                    /* Ensure touch targets are WCAG 2.1 AA compliant (48px minimum) */
+                    .landing-category-card,
+                    .landing-btn {
+                        min-height: 48px;
+                        /* Ensure adequate touch target with padding */
+                        touch-action: manipulation;
                     }
 
                     .landing-hero-actions {
@@ -820,6 +854,32 @@ class LandingPageView {
                     .landing-btn {
                         width: 100%;
                         justify-content: center;
+                        padding: 14px 24px; /* Ensure comfortable tap target */
+                        font-size: 1rem; /* Maintain readability */
+                    }
+
+                    /* Ensure text remains readable on small screens */
+                    .landing-hero-title {
+                        font-size: 1.75rem; /* Explicit small screen size */
+                    }
+
+                    .landing-hero-subtitle {
+                        font-size: 1.125rem;
+                    }
+
+                    .landing-section-header {
+                        font-size: 1.5rem;
+                        gap: 8px;
+                    }
+
+                    .landing-category-name {
+                        font-size: 1.125rem; /* Ensure readable on small screens */
+                    }
+
+                    .landing-category-icon {
+                        width: 2.5rem;
+                        height: 2.5rem;
+                        margin-bottom: 12px;
                     }
                 }
 
@@ -834,14 +894,38 @@ class LandingPageView {
                         margin-bottom: 48px; /* 6x8px grid */
                     }
 
+                    /* Single column for category cards on mobile for readability */
                     .landing-category-grid {
                         grid-template-columns: 1fr;
                         gap: 16px; /* 2x8px grid */
                     }
 
+                    .landing-category-card {
+                        min-height: 140px; /* Compact but still touchable */
+                        padding: 24px;
+                    }
+
                     .landing-features-grid {
                         grid-template-columns: repeat(2, 1fr);
                         gap: 16px; /* 2x8px grid */
+                    }
+
+                    .landing-feature-card {
+                        padding: 20px;
+                        min-height: 180px;
+                    }
+
+                    /* Ensure buttons are easily tappable */
+                    .landing-btn {
+                        min-height: 48px;
+                        padding: 14px 28px;
+                        touch-action: manipulation;
+                    }
+
+                    /* Readable typography */
+                    .landing-category-description {
+                        font-size: 1rem;
+                        line-height: 1.6;
                     }
                 }
 
@@ -852,9 +936,20 @@ class LandingPageView {
                         gap: 20px; /* 2.5x8px grid */
                     }
 
+                    .landing-category-card {
+                        min-height: 180px;
+                        padding: 28px;
+                    }
+
                     .landing-features-grid {
                         grid-template-columns: repeat(2, 1fr);
                         gap: 20px;
+                    }
+
+                    /* Touch targets for tablet */
+                    .landing-btn {
+                        min-height: 48px;
+                        touch-action: manipulation;
                     }
                 }
 
@@ -894,18 +989,41 @@ class LandingPageView {
                 @media (hover: none) and (pointer: coarse) {
                     .landing-btn {
                         min-height: 48px; /* WCAG 2.1 touch target minimum */
+                        min-width: 48px;
                         padding: 16px 32px; /* 2x8px, 4x8px grid */
+                        touch-action: manipulation; /* Disable double-tap zoom for faster response */
                     }
 
                     .landing-category-card {
-                        min-height: 220px;
+                        min-height: 160px; /* Compact for mobile while maintaining touch area */
                         padding: 24px; /* 3x8px grid */
+                        touch-action: manipulation;
+                        /* Ensure entire card is clickable with adequate padding */
+                        -webkit-tap-highlight-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+                    }
+
+                    /* Active state feedback for touch */
+                    .landing-category-card:active {
+                        transform: scale(0.98);
+                        transition: transform 0.1s ease;
                     }
 
                     /* Increase tap targets */
                     .landing-category-icon {
                         width: 3rem;
                         height: 3rem;
+                    }
+
+                    /* Ensure links have adequate touch targets */
+                    .landing-hero-actions a {
+                        min-height: 48px;
+                        min-width: 48px;
+                    }
+
+                    /* Feature cards also need touch optimization */
+                    .landing-feature-card {
+                        touch-action: manipulation;
+                        -webkit-tap-highlight-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
                     }
                 }
 
@@ -1038,6 +1156,13 @@ class LandingPageView {
             <style>
                 .skeleton-loading {
                     pointer-events: none;
+                    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+                }
+
+                .skeleton-loading.fade-out {
+                    opacity: 0;
+                    transform: scale(0.98);
+                    pointer-events: none;
                 }
 
                 .skeleton-icon,
@@ -1155,10 +1280,9 @@ class LandingPageView {
     }
 }
 
-// ES Module Export
-export { LandingPageView };
-
-// Legacy global export
+// Global export for non-module script loading
+// Note: ES module export removed to prevent SyntaxError in non-module context
 if (typeof window !== 'undefined') {
     window.LandingPageView = LandingPageView;
+    console.log('[LandingPageView] Class registered globally');
 }

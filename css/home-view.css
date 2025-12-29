@@ -1,6 +1,9 @@
 /**
  * Home View Styles
  * Homepage layout with hero section and mythology cards
+ *
+ * NOTE: This file complements home-page.css. Use .home-view prefix
+ * for specificity where needed to avoid conflicts.
  */
 
 .home-view {
@@ -10,12 +13,13 @@
 }
 
 /* ============================================
-   HERO SECTION
+   HERO SECTION - Scoped to .home-view
+   Inherits base styles from home-page.css
    ============================================ */
 
-.hero-section {
-    text-align: center;
-    padding: 4rem 2rem 6rem;
+/* Only apply these hero overrides when inside .home-view context */
+.home-view .hero-section {
+    /* Inherits from home-page.css, only add specific overrides here */
     position: relative;
 }
 
@@ -24,28 +28,22 @@
     margin: 0 auto;
 }
 
-.hero-title {
-    font-size: 4rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, var(--color-primary, #8b7fff) 0%, var(--color-secondary, #ff7eb6) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: fadeInUp 0.6s ease-out;
+/* Hero title animation - scoped to avoid conflict with home-page.css */
+.home-view .hero-title {
+    animation: homeViewFadeInUp 0.6s ease-out;
 }
 
 .hero-icon {
     display: inline-block;
-    animation: float 3s ease-in-out infinite;
+    animation: homeViewFloat 3s ease-in-out infinite;
 }
 
-@keyframes float {
+@keyframes homeViewFloat {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
 }
 
-@keyframes fadeInUp {
+@keyframes homeViewFadeInUp {
     from {
         opacity: 0;
         transform: translateY(30px);
@@ -56,12 +54,9 @@
     }
 }
 
-.hero-subtitle {
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--color-text-primary, #f8f9fa);
-    margin-bottom: 1.5rem;
-    animation: fadeInUp 0.6s ease-out 0.1s both;
+/* Hero subtitle - only add animation, inherit other styles from home-page.css */
+.home-view .hero-subtitle {
+    animation: homeViewFadeInUp 0.6s ease-out 0.1s both;
 }
 
 .hero-description {
@@ -72,7 +67,7 @@
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
-    animation: fadeInUp 0.6s ease-out 0.2s both;
+    animation: homeViewFadeInUp 0.6s ease-out 0.2s both;
 }
 
 .hero-actions {
@@ -80,7 +75,7 @@
     gap: 1rem;
     justify-content: center;
     flex-wrap: wrap;
-    animation: fadeInUp 0.6s ease-out 0.3s both;
+    animation: homeViewFadeInUp 0.6s ease-out 0.3s both;
 }
 
 .btn-primary,
@@ -123,14 +118,16 @@
 }
 
 /* ============================================
-   MYTHOLOGY GRID SECTION
+   MYTHOLOGY GRID SECTION - Scoped to .home-view
+   Base mythology-card styles are in home-page.css
    ============================================ */
 
 .mythology-grid-section {
     margin-bottom: 4rem;
 }
 
-.section-title {
+/* Section title specific to home-view (distinct from dynamic-views.css .section-title) */
+.home-view .section-title {
     font-size: 2.5rem;
     font-weight: 700;
     text-align: center;
@@ -141,65 +138,35 @@
     background-clip: text;
 }
 
-.mythology-grid {
+/* Use .mythology-grid within .home-view to avoid conflicts */
+.home-view .mythology-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
+    /* Compact grid: 200px min for 4+ columns on desktop */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
     margin-bottom: 2rem;
 }
 
-.mythology-card {
+/*
+ * NOTE: .mythology-card base styles are defined in home-page.css
+ * Only add home-view specific overrides here with higher specificity
+ */
+.home-view .mythology-card {
+    /* Inherits from home-page.css, minimal overrides */
     position: relative;
-    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.8);
-    border-radius: 16px;
-    padding: 2rem;
-    text-decoration: none;
-    color: var(--color-text-primary, #f8f9fa);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-    cursor: pointer;
-}
-
-.mythology-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg,
-        rgba(var(--color-primary-rgb, 139, 127, 255), 0.05) 0%,
-        rgba(var(--color-secondary-rgb, 255, 126, 182), 0.05) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: 0;
-}
-
-.mythology-card:hover::before {
-    opacity: 1;
-}
-
-.mythology-card:hover {
-    transform: translateY(-8px);
-    border-color: var(--color-primary, #8b7fff);
-    box-shadow:
-        0 12px 40px rgba(0, 0, 0, 0.4),
-        0 0 0 1px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
 }
 
 .mythology-card-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+    font-size: 2.25rem; /* Compact icon size */
+    margin-bottom: 0.75rem;
     position: relative;
     z-index: 1;
 }
 
 .mythology-card-title {
-    font-size: 1.5rem;
+    font-size: 1.125rem; /* Compact title size */
     font-weight: 700;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     position: relative;
     z-index: 1;
 }
@@ -276,7 +243,8 @@
 }
 
 /* ============================================
-   LOADING STATES
+   LOADING STATES - Home view specific
+   Base .loading-container is in dynamic-views.css
    ============================================ */
 
 .loading-submessage {
@@ -285,8 +253,8 @@
     font-size: 0.9rem;
 }
 
-/* Fade animations */
-@keyframes fadeIn {
+/* Fade animations - namespaced to avoid conflicts */
+@keyframes homeViewFadeIn {
     from {
         opacity: 0;
         transform: translateY(20px);
@@ -297,7 +265,7 @@
     }
 }
 
-@keyframes fadeOut {
+@keyframes homeViewFadeOut {
     from {
         opacity: 1;
     }
@@ -306,15 +274,15 @@
     }
 }
 
-.loading-fade-in {
-    animation: fadeIn 0.4s ease-out;
+.home-view .loading-fade-in {
+    animation: homeViewFadeIn 0.4s ease-out;
 }
 
-.loading-fade-out {
-    animation: fadeOut 0.3s ease-out;
+.home-view .loading-fade-out {
+    animation: homeViewFadeOut 0.3s ease-out;
 }
 
-/* Skeleton Cards */
+/* Skeleton Cards - Home view specific loading placeholders */
 .mythology-card-skeleton {
     position: relative;
     background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.4);
@@ -360,10 +328,10 @@
         rgba(147, 112, 219, 0.05) 100%
     );
     background-size: 200% 100%;
-    animation: skeleton-shimmer 2s infinite linear;
+    animation: homeViewSkeletonShimmer 2s infinite linear;
 }
 
-@keyframes skeleton-shimmer {
+@keyframes homeViewSkeletonShimmer {
     0% {
         background-position: -200% 0;
     }
@@ -373,7 +341,7 @@
 }
 
 /* ============================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN - Scoped to .home-view
    ============================================ */
 
 /* Tablet */
@@ -382,19 +350,8 @@
         padding: 1.5rem;
     }
 
-    .hero-section {
-        padding: 3rem 1.5rem 4rem;
-    }
-
-    .hero-title {
-        font-size: 3rem;
-    }
-
-    .hero-subtitle {
-        font-size: 1.75rem;
-    }
-
-    .mythology-grid {
+    /* Scoped to avoid conflict with home-page.css responsive */
+    .home-view .mythology-grid {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 1.25rem;
     }
@@ -406,28 +363,12 @@
         padding: 1rem;
     }
 
-    .hero-section {
-        padding: 2rem 1rem 3rem;
-    }
-
-    .hero-title {
-        font-size: 2.5rem;
-    }
-
-    .hero-subtitle {
-        font-size: 1.5rem;
-    }
-
-    .hero-description {
-        font-size: 1rem;
-    }
-
-    .section-title {
+    .home-view .section-title {
         font-size: 2rem;
         margin-bottom: 2rem;
     }
 
-    .mythology-grid {
+    .home-view .mythology-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
@@ -436,30 +377,12 @@
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
-
-    .btn-primary,
-    .btn-secondary {
-        padding: 0.875rem 1.75rem;
-        font-size: 1rem;
-    }
 }
 
 /* Small Mobile */
 @media (max-width: 480px) {
-    .hero-title {
-        font-size: 2rem;
-    }
-
-    .hero-subtitle {
-        font-size: 1.25rem;
-    }
-
-    .section-title {
+    .home-view .section-title {
         font-size: 1.75rem;
-    }
-
-    .mythology-card {
-        padding: 1.5rem;
     }
 
     .mythology-card-title {
@@ -469,22 +392,16 @@
     .hero-actions {
         flex-direction: column;
     }
-
-    .btn-primary,
-    .btn-secondary {
-        width: 100%;
-        justify-content: center;
-    }
 }
 
 /* ============================================
-   ACCESSIBILITY
+   ACCESSIBILITY - Scoped to .home-view
    ============================================ */
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-    .hero-title,
-    .hero-subtitle,
+    .home-view .hero-title,
+    .home-view .hero-subtitle,
     .hero-description,
     .hero-actions {
         animation: none;
@@ -494,16 +411,10 @@
         animation: none;
     }
 
-    .mythology-card,
-    .btn-primary,
-    .btn-secondary,
     .feature-card {
         transition: none;
     }
 
-    .mythology-card:hover,
-    .btn-primary:hover,
-    .btn-secondary:hover,
     .feature-card:hover {
         transform: none;
     }
@@ -511,13 +422,7 @@
 
 /* High contrast mode */
 @media (prefers-contrast: high) {
-    .mythology-card,
     .feature-card {
-        border-width: 2px;
-    }
-
-    .btn-primary,
-    .btn-secondary {
         border-width: 2px;
     }
 }

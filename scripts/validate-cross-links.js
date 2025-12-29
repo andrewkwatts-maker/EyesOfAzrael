@@ -70,25 +70,26 @@ class CrossLinkValidator {
     const stats = await fs.stat(categoryPath).catch(() => null);
     if (!stats || !stats.isDirectory()) return;
 
-    const mythologies = await fs.readdir(categoryPath);
+    const files = await fs.readdir(categoryPath);
 
-    for (const mythology of mythologies) {
-      if (mythology.startsWith('_') || mythology.startsWith('.')) continue;
+    for (const file of files) {
+      if (file.startsWith('_') || file.startsWith('.')) continue;
 
-      const mythologyPath = path.join(categoryPath, mythology);
-      const mythStats = await fs.stat(mythologyPath).catch(() => null);
+      const filePath = path.join(categoryPath, file);
+      const fileStats = await fs.stat(filePath).catch(() => null);
 
-      if (mythStats && mythStats.isDirectory()) {
-        // Load individual files in mythology directory
-        const files = await fs.readdir(mythologyPath);
-        for (const file of files) {
-          if (file.endsWith('.json') && !file.startsWith('_')) {
-            await this.loadAssetFile(path.join(mythologyPath, file), category);
+      if (fileStats && fileStats.isDirectory()) {
+        // It's a mythology subdirectory, load files from it
+        const mythologyFiles = await fs.readdir(filePath);
+        for (const mythFile of mythologyFiles) {
+          if (mythFile.endsWith('.json') && !mythFile.startsWith('_')) {
+            const mythFilePath = path.join(filePath, mythFile);
+            await this.loadAssetFile(mythFilePath, category);
           }
         }
-      } else if (mythology.endsWith('.json') && !mythology.startsWith('_')) {
-        // Load aggregated file
-        await this.loadAggregatedFile(path.join(categoryPath, mythology), category);
+      } else if (file.endsWith('.json')) {
+        // It's a direct JSON file or aggregated file
+        await this.loadAssetFile(filePath, category);
       }
     }
   }

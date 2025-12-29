@@ -1,0 +1,1086 @@
+/**
+ * Corpus Inline Styles
+ *
+ * Styles for inline corpus search elements, grid layouts, and interactive features.
+ * Supports multiple themes and responsive breakpoints.
+ *
+ * Components:
+ * - Inline links with hover previews
+ * - Blockquote citations
+ * - Grid card layouts
+ * - Animations and transitions
+ */
+
+/* ==========================================================================
+   CSS Custom Properties
+   ========================================================================== */
+
+:root {
+    /* Inline link colors */
+    --corpus-inline-bg: rgba(147, 112, 219, 0.1);
+    --corpus-inline-bg-hover: rgba(147, 112, 219, 0.2);
+    --corpus-inline-border: rgba(147, 112, 219, 0.3);
+    --corpus-inline-text: var(--color-text-primary, #333);
+    --corpus-inline-link: var(--color-primary, #9370DB);
+
+    /* Preview tooltip */
+    --corpus-preview-bg: var(--color-surface, #ffffff);
+    --corpus-preview-border: var(--border-color, #e0e0e0);
+    --corpus-preview-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    --corpus-preview-radius: 12px;
+    --corpus-preview-max-width: 320px;
+
+    /* Quote styles */
+    --corpus-quote-bg: rgba(147, 112, 219, 0.05);
+    --corpus-quote-border: var(--color-primary, #9370DB);
+    --corpus-quote-text: var(--color-text-primary, #333);
+    --corpus-quote-cite: var(--color-text-secondary, #666);
+
+    /* Grid styles */
+    --corpus-grid-gap: 20px;
+    --corpus-grid-columns: 3;
+    --corpus-card-bg: var(--color-surface, #ffffff);
+    --corpus-card-border: var(--border-color, #e0e0e0);
+    --corpus-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --corpus-card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --corpus-card-radius: 12px;
+
+    /* Highlight */
+    --corpus-highlight-bg: rgba(255, 215, 0, 0.3);
+    --corpus-highlight-text: var(--color-text-primary, #333);
+
+    /* Animation */
+    --corpus-transition-fast: 0.15s ease;
+    --corpus-transition-base: 0.2s ease;
+    --corpus-transition-slow: 0.3s ease;
+}
+
+/* Dark theme support */
+[data-theme="dark"],
+.dark-theme {
+    --corpus-inline-bg: rgba(147, 112, 219, 0.15);
+    --corpus-inline-bg-hover: rgba(147, 112, 219, 0.25);
+    --corpus-inline-border: rgba(147, 112, 219, 0.4);
+    --corpus-preview-bg: #1a1a2e;
+    --corpus-preview-border: #333;
+    --corpus-preview-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --corpus-quote-bg: rgba(147, 112, 219, 0.1);
+    --corpus-card-bg: #1a1a2e;
+    --corpus-card-border: #333;
+    --corpus-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --corpus-card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --corpus-highlight-bg: rgba(255, 215, 0, 0.2);
+}
+
+/* ==========================================================================
+   Inline Link Styles
+   ========================================================================== */
+
+.corpus-inline-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    background: var(--corpus-inline-bg);
+    border: 1px solid var(--corpus-inline-border);
+    border-radius: 16px;
+    font-size: 0.9em;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: all var(--corpus-transition-base);
+    vertical-align: baseline;
+}
+
+.corpus-inline-link:hover,
+.corpus-inline-link:focus {
+    background: var(--corpus-inline-bg-hover);
+    border-color: var(--corpus-inline-link);
+    outline: none;
+}
+
+.corpus-inline-link:focus {
+    box-shadow: 0 0 0 3px rgba(147, 112, 219, 0.2);
+}
+
+.corpus-inline-link.corpus-inline-active {
+    background: var(--corpus-inline-bg-hover);
+    border-color: var(--corpus-inline-link);
+}
+
+/* Inline link name (the clickable part) */
+.corpus-inline-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--corpus-inline-link);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--corpus-transition-fast);
+}
+
+.corpus-inline-name:hover {
+    color: var(--color-primary-hover, #7d5ba6);
+    text-decoration: underline;
+}
+
+.corpus-inline-text {
+    white-space: nowrap;
+}
+
+/* Entity icons in inline links */
+.corpus-icon {
+    font-size: 1em;
+    line-height: 1;
+}
+
+.corpus-inline-source {
+    font-size: 0.75em;
+    font-weight: 600;
+    color: var(--color-text-secondary, #666);
+    background: rgba(0, 0, 0, 0.05);
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-left: 4px;
+}
+
+.corpus-inline-match-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    font-size: 0.65em;
+    font-weight: 700;
+    color: white;
+    background: var(--corpus-inline-link);
+    border-radius: 50%;
+    margin-left: 2px;
+}
+
+/* ==========================================================================
+   Preview Tooltip Styles
+   ========================================================================== */
+
+.corpus-inline-preview {
+    position: absolute;
+    left: 50%;
+    z-index: 1000;
+    width: max-content;
+    max-width: var(--corpus-preview-max-width);
+    padding: 16px;
+    background: var(--corpus-preview-bg);
+    border: 1px solid var(--corpus-preview-border);
+    border-radius: var(--corpus-preview-radius);
+    box-shadow: var(--corpus-preview-shadow);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(8px);
+    transition: opacity var(--corpus-transition-base),
+                visibility var(--corpus-transition-base),
+                transform var(--corpus-transition-base);
+    pointer-events: none;
+}
+
+.corpus-inline-preview[aria-hidden="false"] {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+/* Preview positioning */
+.corpus-inline-preview.preview-bottom {
+    top: calc(100% + 8px);
+    bottom: auto;
+}
+
+.corpus-inline-preview.preview-top {
+    bottom: calc(100% + 8px);
+    top: auto;
+}
+
+/* Preview arrow */
+.corpus-inline-preview::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    background: var(--corpus-preview-bg);
+    border: 1px solid var(--corpus-preview-border);
+    transform: translateX(-50%) rotate(45deg);
+}
+
+.corpus-inline-preview.preview-bottom::before {
+    top: -7px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.corpus-inline-preview.preview-top::before {
+    bottom: -7px;
+    border-left: none;
+    border-top: none;
+}
+
+/* Preview content */
+.preview-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--corpus-preview-border);
+}
+
+.preview-header .corpus-icon {
+    font-size: 1.2em;
+}
+
+.preview-name {
+    font-weight: 600;
+    color: var(--color-text-primary, #333);
+}
+
+.preview-metadata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.preview-metadata span {
+    font-size: 0.75em;
+    font-weight: 600;
+    padding: 2px 8px;
+    background: rgba(147, 112, 219, 0.1);
+    border-radius: 10px;
+    color: var(--corpus-inline-link);
+}
+
+.preview-text {
+    font-size: 0.9em;
+    line-height: 1.6;
+    color: var(--color-text-secondary, #666);
+    margin-bottom: 8px;
+}
+
+.preview-matched {
+    font-size: 0.75em;
+    color: var(--color-text-tertiary, #999);
+    margin-top: 8px;
+}
+
+.preview-action-hint {
+    font-size: 0.7em;
+    color: var(--color-text-tertiary, #999);
+    text-align: center;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--corpus-preview-border);
+}
+
+/* ==========================================================================
+   Quote Styles
+   ========================================================================== */
+
+.corpus-quote {
+    position: relative;
+    margin: 1.5em 0;
+    padding: 1.5em 2em;
+    background: var(--corpus-quote-bg);
+    border-left: 4px solid var(--corpus-quote-border);
+    border-radius: 0 var(--corpus-card-radius) var(--corpus-card-radius) 0;
+}
+
+.corpus-quote-content {
+    position: relative;
+    font-size: 1.05em;
+    line-height: 1.8;
+    color: var(--corpus-quote-text);
+}
+
+.corpus-quote-mark {
+    font-family: Georgia, serif;
+    font-size: 2em;
+    line-height: 1;
+    color: var(--corpus-quote-border);
+    opacity: 0.5;
+}
+
+.corpus-quote-mark-open {
+    position: absolute;
+    top: -0.3em;
+    left: -0.5em;
+}
+
+.corpus-quote-mark-close {
+    vertical-align: bottom;
+}
+
+.corpus-quote-text {
+    font-style: italic;
+}
+
+.corpus-quote-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1em;
+    padding-top: 1em;
+    border-top: 1px solid var(--corpus-preview-border);
+}
+
+.corpus-quote-cite {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+    font-style: normal;
+    color: var(--corpus-quote-cite);
+}
+
+.corpus-quote-cite .corpus-icon {
+    opacity: 0.7;
+}
+
+.corpus-quote-link {
+    font-size: 0.85em;
+    color: var(--corpus-inline-link);
+    text-decoration: none;
+    transition: color var(--corpus-transition-fast);
+}
+
+.corpus-quote-link:hover {
+    text-decoration: underline;
+}
+
+/* Quote style variations */
+.corpus-quote-minimal {
+    padding: 1em 1.5em;
+    background: transparent;
+    border-left-width: 3px;
+}
+
+.corpus-quote-minimal .corpus-quote-mark {
+    display: none;
+}
+
+.corpus-quote-decorated {
+    padding: 2em 2.5em;
+    background: linear-gradient(
+        135deg,
+        var(--corpus-quote-bg) 0%,
+        rgba(147, 112, 219, 0.08) 100%
+    );
+    border-left-width: 5px;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================================================
+   Compact Reference Styles
+   ========================================================================== */
+
+.corpus-compact-ref {
+    display: inline;
+}
+
+.corpus-compact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    color: var(--corpus-inline-link);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--corpus-transition-fast);
+}
+
+.corpus-compact-link:hover {
+    text-decoration: underline;
+}
+
+.corpus-compact-link .corpus-icon {
+    font-size: 0.9em;
+}
+
+/* Inline list */
+.corpus-inline-list {
+    display: inline;
+}
+
+.corpus-inline-more {
+    font-size: 0.9em;
+    color: var(--color-text-secondary, #666);
+    font-style: italic;
+}
+
+.corpus-inline-empty {
+    color: var(--color-text-tertiary, #999);
+    font-style: italic;
+}
+
+/* ==========================================================================
+   Highlight Styles
+   ========================================================================== */
+
+.corpus-highlight {
+    background: var(--corpus-highlight-bg);
+    color: var(--corpus-highlight-text);
+    padding: 0.1em 0.2em;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   Grid Container Styles
+   ========================================================================== */
+
+.corpus-grid-container {
+    width: 100%;
+}
+
+.corpus-grid-header {
+    margin-bottom: 20px;
+}
+
+.corpus-grid-summary {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 0.95em;
+}
+
+.summary-count {
+    font-weight: 700;
+    color: var(--color-text-primary, #333);
+}
+
+.summary-query {
+    color: var(--color-text-secondary, #666);
+}
+
+/* ==========================================================================
+   Grid Layout
+   ========================================================================== */
+
+.corpus-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--corpus-grid-columns), 1fr);
+    gap: var(--corpus-grid-gap);
+}
+
+/* ==========================================================================
+   Card Base Styles
+   ========================================================================== */
+
+.corpus-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--corpus-card-bg);
+    border: 1px solid var(--corpus-card-border);
+    border-radius: var(--corpus-card-radius);
+    box-shadow: var(--corpus-card-shadow);
+    transition: transform var(--corpus-transition-base),
+                box-shadow var(--corpus-transition-base),
+                border-color var(--corpus-transition-base);
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.corpus-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--corpus-card-shadow-hover);
+    border-color: var(--corpus-inline-link);
+}
+
+.corpus-card:focus {
+    outline: none;
+    box-shadow: var(--corpus-card-shadow-hover),
+                0 0 0 3px rgba(147, 112, 219, 0.2);
+}
+
+/* Card header */
+.corpus-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 16px 16px 0;
+}
+
+.corpus-card-header-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.corpus-card-header-text {
+    flex: 1;
+}
+
+.corpus-card-icon {
+    font-size: 2em;
+    line-height: 1;
+}
+
+.corpus-card-icon-large {
+    font-size: 2.5em;
+}
+
+.corpus-card-title {
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.corpus-card-title a {
+    color: var(--color-text-primary, #333);
+    text-decoration: none;
+    transition: color var(--corpus-transition-fast);
+}
+
+.corpus-card-title a:hover {
+    color: var(--corpus-inline-link);
+}
+
+.corpus-card-subtitle {
+    margin: 4px 0 0;
+    font-size: 0.85em;
+    color: var(--color-text-secondary, #666);
+    line-height: 1.4;
+}
+
+/* Card badges */
+.corpus-card-badges,
+.corpus-card-header-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.corpus-card-badge {
+    font-size: 0.7em;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.corpus-card-badge-mythology {
+    background: rgba(147, 112, 219, 0.15);
+    color: var(--corpus-inline-link);
+}
+
+.corpus-card-badge-type {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-secondary, #666);
+}
+
+.corpus-card-score {
+    font-size: 0.7em;
+    font-weight: 700;
+    padding: 3px 8px;
+    background: var(--corpus-inline-link);
+    color: white;
+    border-radius: 10px;
+}
+
+/* Card body */
+.corpus-card-body {
+    flex: 1;
+    padding: 12px 16px;
+}
+
+.corpus-card-description {
+    margin: 0;
+    font-size: 0.9em;
+    line-height: 1.6;
+    color: var(--color-text-secondary, #666);
+}
+
+/* Card metadata */
+.corpus-card-metadata {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--corpus-card-border);
+}
+
+.corpus-card-meta-item {
+    font-size: 0.8em;
+}
+
+.meta-label {
+    color: var(--color-text-tertiary, #999);
+}
+
+.meta-value {
+    color: var(--color-text-primary, #333);
+    font-weight: 500;
+}
+
+/* Card matched info */
+.corpus-card-matched {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 0.75em;
+}
+
+.matched-label {
+    color: var(--color-text-tertiary, #999);
+}
+
+.matched-field {
+    padding: 2px 8px;
+    background: rgba(147, 112, 219, 0.1);
+    border-radius: 8px;
+    color: var(--corpus-inline-link);
+    font-weight: 500;
+}
+
+/* Card tags */
+.corpus-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.corpus-card-tag {
+    font-size: 0.75em;
+    padding: 3px 10px;
+    background: var(--secondary-bg, #f5f5f5);
+    border-radius: 12px;
+    color: var(--color-text-secondary, #666);
+    transition: background var(--corpus-transition-fast),
+                color var(--corpus-transition-fast);
+}
+
+.corpus-card-tag:hover {
+    background: var(--corpus-inline-link);
+    color: white;
+}
+
+/* Card footer */
+.corpus-card-footer {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--corpus-card-border);
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.corpus-card-action {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 0.85em;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--corpus-transition-fast);
+}
+
+.corpus-card-action-primary {
+    background: var(--corpus-inline-link);
+    color: white;
+}
+
+.corpus-card-action-primary:hover {
+    background: var(--color-primary-hover, #7d5ba6);
+}
+
+.corpus-card-action-secondary {
+    background: var(--secondary-bg, #f5f5f5);
+    color: var(--color-text-primary, #333);
+}
+
+.corpus-card-action-secondary:hover {
+    background: var(--corpus-inline-bg-hover);
+}
+
+/* ==========================================================================
+   Card Style Variations
+   ========================================================================== */
+
+/* Minimal card */
+.corpus-card-minimal {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 8px;
+}
+
+.corpus-card-minimal .corpus-card-icon {
+    font-size: 1.2em;
+}
+
+.corpus-card-minimal .corpus-card-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-primary, #333);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--corpus-transition-fast);
+}
+
+.corpus-card-minimal .corpus-card-link:hover {
+    color: var(--corpus-inline-link);
+}
+
+.corpus-card-minimal .corpus-card-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Compact card */
+.corpus-card-compact .corpus-card-header {
+    padding-bottom: 8px;
+}
+
+.corpus-card-compact .corpus-card-icon {
+    font-size: 2.5em;
+}
+
+/* Detailed card */
+.corpus-card-detailed {
+    min-height: 280px;
+}
+
+.corpus-card-detailed .corpus-card-header {
+    padding: 20px 20px 12px;
+}
+
+.corpus-card-detailed .corpus-card-body {
+    padding: 12px 20px;
+}
+
+.corpus-card-detailed .corpus-card-footer {
+    padding: 16px 20px;
+}
+
+/* ==========================================================================
+   Load More & Empty States
+   ========================================================================== */
+
+.corpus-grid-load-more {
+    text-align: center;
+    margin-top: 24px;
+}
+
+.corpus-load-more-btn {
+    padding: 12px 32px;
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--corpus-inline-link);
+    background: transparent;
+    border: 2px solid var(--corpus-inline-link);
+    border-radius: 24px;
+    cursor: pointer;
+    transition: all var(--corpus-transition-base);
+}
+
+.corpus-load-more-btn:hover {
+    background: var(--corpus-inline-link);
+    color: white;
+}
+
+.load-more-count {
+    font-size: 0.85em;
+    font-weight: 400;
+    opacity: 0.8;
+    margin-left: 4px;
+}
+
+/* Empty state */
+.corpus-grid-empty {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-icon {
+    font-size: 4em;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-title {
+    font-size: 1.5em;
+    font-weight: 600;
+    color: var(--color-text-primary, #333);
+    margin: 0 0 8px;
+}
+
+.empty-query {
+    color: var(--color-text-secondary, #666);
+    margin: 0 0 24px;
+}
+
+.empty-suggestions {
+    font-size: 0.9em;
+    color: var(--color-text-tertiary, #999);
+}
+
+.empty-suggestions ul {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+}
+
+.empty-suggestions li {
+    padding: 4px 0;
+}
+
+/* Loading state */
+.corpus-grid-loading {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.corpus-grid-loading .loading-spinner {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    border: 4px solid var(--corpus-card-border);
+    border-top-color: var(--corpus-inline-link);
+    border-radius: 50%;
+    animation: corpus-spin 1s linear infinite;
+}
+
+.loading-message {
+    color: var(--color-text-secondary, #666);
+}
+
+@keyframes corpus-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+
+/* Tablet landscape */
+@media (max-width: 1024px) {
+    .corpus-grid {
+        --corpus-grid-columns: 2;
+    }
+
+    .corpus-card-detailed {
+        min-height: 260px;
+    }
+}
+
+/* Tablet portrait */
+@media (max-width: 768px) {
+    :root {
+        --corpus-preview-max-width: calc(100vw - 40px);
+    }
+
+    .corpus-grid {
+        --corpus-grid-columns: 2;
+        --corpus-grid-gap: 16px;
+    }
+
+    .corpus-inline-preview {
+        left: 0;
+        right: 0;
+        transform: translateY(8px);
+    }
+
+    .corpus-inline-preview[aria-hidden="false"] {
+        transform: translateY(0);
+    }
+
+    .corpus-inline-preview::before {
+        display: none;
+    }
+
+    .corpus-quote {
+        padding: 1.25em 1.5em;
+    }
+
+    .corpus-quote-mark-open {
+        left: -0.3em;
+    }
+
+    .corpus-card-header {
+        padding: 14px 14px 0;
+    }
+
+    .corpus-card-body {
+        padding: 10px 14px;
+    }
+
+    .corpus-card-footer {
+        padding: 10px 14px;
+    }
+
+    .corpus-card-metadata {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .corpus-grid {
+        --corpus-grid-columns: 1;
+        --corpus-grid-gap: 12px;
+    }
+
+    .corpus-inline-link {
+        padding: 4px 8px;
+        font-size: 0.85em;
+    }
+
+    .corpus-card-detailed {
+        min-height: auto;
+    }
+
+    .corpus-card-action {
+        padding: 10px 12px;
+        min-height: 44px; /* Touch-friendly size */
+    }
+
+    .corpus-load-more-btn {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    .corpus-quote-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+
+@media print {
+    .corpus-inline-link {
+        background: none;
+        border: none;
+        padding: 0;
+    }
+
+    .corpus-inline-preview {
+        display: none !important;
+    }
+
+    .corpus-inline-source {
+        display: none;
+    }
+
+    .corpus-card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
+    }
+
+    .corpus-card-footer {
+        display: none;
+    }
+
+    .corpus-grid-load-more {
+        display: none;
+    }
+}
+
+/* ==========================================================================
+   Animation Classes
+   ========================================================================== */
+
+.corpus-fade-in {
+    animation: corpusFadeIn 0.3s ease forwards;
+}
+
+@keyframes corpusFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.corpus-slide-up {
+    animation: corpusSlideUp 0.3s ease forwards;
+}
+
+@keyframes corpusSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
+
+/* Focus indicators */
+.corpus-inline-link:focus-visible,
+.corpus-card:focus-visible,
+.corpus-load-more-btn:focus-visible {
+    outline: 2px solid var(--corpus-inline-link);
+    outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .corpus-inline-link,
+    .corpus-inline-preview,
+    .corpus-card,
+    .corpus-card-tag,
+    .corpus-load-more-btn,
+    .corpus-card-action {
+        transition: none;
+    }
+
+    .corpus-fade-in,
+    .corpus-slide-up {
+        animation: none;
+    }
+
+    .corpus-grid-loading .loading-spinner {
+        animation: none;
+        border-top-color: transparent;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .corpus-inline-link {
+        border-width: 2px;
+    }
+
+    .corpus-card {
+        border-width: 2px;
+    }
+
+    .corpus-highlight {
+        background: yellow;
+        color: black;
+    }
+}

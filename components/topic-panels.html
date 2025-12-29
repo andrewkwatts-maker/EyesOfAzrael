@@ -1,0 +1,139 @@
+<!--
+    TOPIC PANELS COMPONENT
+    Rich, expandable content panels for entity pages
+    Provides deep background, cultural significance, and related content
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic Panels Component</title>
+    <link rel="stylesheet" href="../css/topic-panels.css">
+</head>
+<body>
+    <div class="topic-panels-container">
+        <h2 class="topic-panels-title">Deep Dive</h2>
+
+        <!-- Background Panel -->
+        <div class="topic-panel" data-panel="background">
+            <div class="topic-panel-header" onclick="toggleTopicPanel(this)">
+                <div class="panel-icon-title">
+                    <span class="panel-icon">📖</span>
+                    <h3 class="panel-title">Background & Origins</h3>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="topic-panel-content">
+                <div class="panel-content-body">
+                    <!-- Content will be dynamically inserted -->
+                    <p>Historical and cultural context goes here...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cultural Significance Panel -->
+        <div class="topic-panel" data-panel="significance">
+            <div class="topic-panel-header" onclick="toggleTopicPanel(this)">
+                <div class="panel-icon-title">
+                    <span class="panel-icon">⭐</span>
+                    <h3 class="panel-title">Cultural Significance</h3>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="topic-panel-content">
+                <div class="panel-content-body">
+                    <p>Why this entity matters culturally and historically...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Content Panel -->
+        <div class="topic-panel" data-panel="related">
+            <div class="topic-panel-header" onclick="toggleTopicPanel(this)">
+                <div class="panel-icon-title">
+                    <span class="panel-icon">🔗</span>
+                    <h3 class="panel-title">Related Entities</h3>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="topic-panel-content">
+                <div class="panel-content-body">
+                    <div class="related-entities-grid">
+                        <!-- Related entities will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Did You Know Panel -->
+        <div class="topic-panel" data-panel="did-you-know">
+            <div class="topic-panel-header" onclick="toggleTopicPanel(this)">
+                <div class="panel-icon-title">
+                    <span class="panel-icon">💡</span>
+                    <h3 class="panel-title">Did You Know?</h3>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="topic-panel-content">
+                <div class="panel-content-body">
+                    <ul class="did-you-know-list">
+                        <!-- Facts will be inserted here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sources & Further Reading Panel -->
+        <div class="topic-panel" data-panel="sources">
+            <div class="topic-panel-header" onclick="toggleTopicPanel(this)">
+                <div class="panel-icon-title">
+                    <span class="panel-icon">📚</span>
+                    <h3 class="panel-title">Sources & Further Reading</h3>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="topic-panel-content">
+                <div class="panel-content-body">
+                    <div class="sources-list">
+                        <!-- Sources will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Toggle topic panel expansion
+         */
+        function toggleTopicPanel(header) {
+            const panel = header.parentElement;
+            const content = panel.querySelector('.topic-panel-content');
+            const icon = header.querySelector('.expand-icon');
+
+            panel.classList.toggle('expanded');
+
+            if (panel.classList.contains('expanded')) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.style.maxHeight = '0';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        /**
+         * Auto-expand first panel on load
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstPanel = document.querySelector('.topic-panel');
+            if (firstPanel) {
+                const header = firstPanel.querySelector('.topic-panel-header');
+                toggleTopicPanel(header);
+            }
+        });
+    </script>
+</body>
+</html>

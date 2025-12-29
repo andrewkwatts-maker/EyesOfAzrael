@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eyesofazrael.com/schemas/place.schema.json",
+  "title": "Place Schema",
+  "description": "Schema for mythological place entities",
+  "allOf": [
+    {
+      "$ref": "entity-base.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "const": "place"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["realm", "mountain", "temple", "city", "island", "underworld", "paradise", "sacred-site", "natural-feature"],
+          "description": "Place category"
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "cosmological": {"type": "string"},
+            "geographical": {"type": "string"},
+            "realm": {"type": "string"}
+          },
+          "description": "Location within mythology/geography"
+        },
+        "inhabitants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {"type": "string"},
+              "name": {"type": "string"},
+              "type": {"type": "string"},
+              "role": {"type": "string"}
+            }
+          },
+          "description": "Beings who dwell in this place"
+        },
+        "characteristics": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Notable features and characteristics"
+        },
+        "access": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "How the place can be accessed or entered"
+        },
+        "significance": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Religious or mythological significance"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eyesofazrael.com/schemas/event.schema.json",
+  "title": "Event Schema",
+  "description": "Schema for mythological events and occurrences",
+  "allOf": [
+    {
+      "$ref": "entity-base.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "const": "event"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["cosmic", "divine-conflict", "creation", "apocalyptic", "heroic", "festival", "miracle", "transformation"],
+          "description": "Event category"
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "id": {"type": "string"},
+              "name": {"type": "string"},
+              "type": {"type": "string"},
+              "role": {"type": "string"}
+            }
+          },
+          "description": "Entities involved in the event"
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "string"},
+            "name": {"type": "string"},
+            "type": {"type": "string"}
+          },
+          "description": "Where the event occurred"
+        },
+        "timing": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "When the event occurred in mythological time"
+        },
+        "narrative": {
+          "type": "string",
+          "maxLength": 5000,
+          "description": "Detailed narrative of the event"
+        },
+        "causes": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "What led to this event"
+        },
+        "consequences": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Results and outcomes of the event"
+        },
+        "prophecies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {"type": "string"},
+              "source": {"type": "string"}
+            }
+          },
+          "description": "Prophecies related to this event"
+        }
+      }
+    }
+  ]
+}

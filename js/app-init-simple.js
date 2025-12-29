@@ -60,6 +60,8 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
+        // Auth persistence is set by auth-guard-simple.js (non-blocking)
+        // No need to await here - improves startup time
         console.log('[App] Firebase services ready');
 
         // Make services available globally
@@ -155,31 +157,69 @@
         // Emit app-initialized event
         document.dispatchEvent(new CustomEvent('app-initialized'));
 
-        // Listen for first render complete from SPANavigation
-        document.addEventListener('first-render-complete', () => {
-            console.log('[App Init] First render complete, hiding loading container');
-            const loadingContainer = document.querySelector('.loading-container');
-            if (loadingContainer) {
-                // Smooth fade-out transition
-                loadingContainer.style.opacity = '0';
-                loadingContainer.style.transition = 'opacity 0.3s ease';
+        // Track if loading has been hidden to prevent duplicate operations
+        let loadingHidden = false;
+
+        /**
+         * Hide all loading indicators smoothly
+         * Handles both initial loader in #main-content and any other loading containers
+         */
+        function hideAllLoadingIndicators(source = 'unknown') {
+            if (loadingHidden) {
+                console.log(`[App Init] Loading already hidden, skipping (source: ${source})`);
+                return;
+            }
+            loadingHidden = true;
+
+            console.log(`[App Init] Hiding loading indicators (source: ${source})`);
+
+            // Hide all loading containers with smooth transition
+            const loadingContainers = document.querySelectorAll('.loading-container');
+            loadingContainers.forEach((container, index) => {
+                // Add fade-out class for CSS transition
+                container.classList.add('fade-out');
+                container.style.opacity = '0';
+                container.style.transition = 'opacity 0.3s ease-out';
+                container.style.pointerEvents = 'none';
+
                 setTimeout(() => {
-                    loadingContainer.style.display = 'none';
-                    console.log('[App Init] Loading container hidden');
+                    container.style.display = 'none';
+                    console.log(`[App Init] Loading container ${index + 1} hidden`);
+                }, 300);
+            });
+
+            // Also hide auth loading screen if present
+            const authLoadingScreen = document.getElementById('auth-loading-screen');
+            if (authLoadingScreen && authLoadingScreen.style.display !== 'none') {
+                authLoadingScreen.style.opacity = '0';
+                authLoadingScreen.style.transition = 'opacity 0.3s ease-out';
+                setTimeout(() => {
+                    authLoadingScreen.style.display = 'none';
+                    console.log('[App Init] Auth loading screen hidden');
                 }, 300);
             }
-        }, { once: true });
+        }
+
+        // Listen for first render complete from SPANavigation
+        // Note: removed { once: true } to handle multiple navigation events
+        document.addEventListener('first-render-complete', (event) => {
+            const route = event.detail?.route || 'unknown';
+            console.log(`[App Init] First render complete for route: ${route}`);
+            hideAllLoadingIndicators(`first-render-complete:${route}`);
+        });
+
+        // Also listen for render errors to hide loading on failure
+        document.addEventListener('render-error', (event) => {
+            const route = event.detail?.route || 'unknown';
+            console.warn(`[App Init] Render error for route: ${route}, hiding loading`);
+            hideAllLoadingIndicators(`render-error:${route}`);
+        });
 
         // Fallback: Hide loading after 10 seconds if first-render-complete never fires
         setTimeout(() => {
-            const loadingContainer = document.querySelector('.loading-container');
-            if (loadingContainer && loadingContainer.style.display !== 'none') {
-                console.warn('[App Init] ⚠️ Fallback timeout: hiding loading container after 10s');
-                loadingContainer.style.opacity = '0';
-                loadingContainer.style.transition = 'opacity 0.3s ease';
-                setTimeout(() => {
-                    loadingContainer.style.display = 'none';
-                }, 300);
+            if (!loadingHidden) {
+                console.warn('[App Init] Fallback timeout: hiding loading container after 10s');
+                hideAllLoadingIndicators('timeout-fallback');
             }
         }, 10000);
 

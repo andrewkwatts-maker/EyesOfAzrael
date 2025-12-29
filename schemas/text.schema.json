@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eyesofazrael.com/schemas/text.schema.json",
+  "title": "Text Schema",
+  "description": "Schema for sacred texts and mythological literature",
+  "allOf": [
+    {
+      "$ref": "entity-base.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "const": "text"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["scripture", "epic", "hymn", "prayer", "liturgy", "wisdom-text", "creation-myth", "prophecy"],
+          "description": "Text category"
+        },
+        "author": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Author (if known)"
+        },
+        "date": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Date of composition or compilation"
+        },
+        "language": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Original language"
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "original": {"type": "string"},
+            "transliteration": {"type": "string"},
+            "translation": {"type": "string"},
+            "interpretation": {"type": "string"}
+          },
+          "description": "Text content in various forms"
+        },
+        "structure": {
+          "type": "object",
+          "properties": {
+            "chapters": {"type": "number"},
+            "verses": {"type": "number"},
+            "sections": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {"type": "string"},
+                  "summary": {"type": "string"}
+                }
+              }
+            }
+          },
+          "description": "Structural information"
+        },
+        "themes": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Major themes and topics"
+        },
+        "historical_context": {
+          "type": "string",
+          "maxLength": 3000,
+          "description": "Historical and cultural context"
+        }
+      }
+    }
+  ]
+}

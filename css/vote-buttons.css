@@ -1,0 +1,589 @@
+/**
+ * Vote Buttons Component Styles
+ * Upvote/downvote buttons with states and animations
+ *
+ * States:
+ * - Default: Gray buttons
+ * - Upvoted: Green upvote button active
+ * - Downvoted: Red downvote button active
+ * - Hover: Scale and shadow effects
+ * - Disabled: Reduced opacity, no interaction
+ * - Loading: Spinner animation
+ *
+ * Variants:
+ * - Default: Full size with vote counts
+ * - Compact: Smaller size for cards
+ * - Inline: Horizontal layout for lists
+ */
+
+/* ==================== CONTAINER ==================== */
+
+.vote-buttons-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  user-select: none;
+  font-family: var(--font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  position: relative;
+}
+
+.vote-buttons-container.loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* ==================== VOTE BUTTONS ==================== */
+
+.vote-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 2px solid var(--border-color, #e0e0e0);
+  background: var(--button-bg, #ffffff);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color, #333);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.vote-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.vote-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  transition: all 0.1s ease;
+}
+
+.vote-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.vote-btn:focus-visible {
+  outline: 2px solid var(--focus-color, #4A90E2);
+  outline-offset: 2px;
+}
+
+/* Button Icons */
+.vote-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.vote-btn:hover:not(:disabled) .vote-icon {
+  transform: scale(1.1);
+}
+
+/* Vote Counts on Buttons */
+.vote-count {
+  min-width: 24px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==================== UPVOTE BUTTON ==================== */
+
+.upvote-btn {
+  --button-color: #10b981;
+  --button-hover: #059669;
+}
+
+.upvote-btn[data-active="true"] {
+  background: linear-gradient(135deg, var(--button-color), var(--button-hover));
+  border-color: var(--button-color);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.upvote-btn[data-active="true"] .vote-icon {
+  animation: vote-bounce 0.5s ease;
+}
+
+.upvote-btn:hover:not(:disabled):not([data-active="true"]) {
+  border-color: var(--button-color);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+/* ==================== DOWNVOTE BUTTON ==================== */
+
+.downvote-btn {
+  --button-color: #ef4444;
+  --button-hover: #dc2626;
+}
+
+.downvote-btn[data-active="true"] {
+  background: linear-gradient(135deg, var(--button-color), var(--button-hover));
+  border-color: var(--button-color);
+  color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.downvote-btn[data-active="true"] .vote-icon {
+  animation: vote-bounce 0.5s ease;
+}
+
+.downvote-btn:hover:not(:disabled):not([data-active="true"]) {
+  border-color: var(--button-color);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+/* ==================== TOTAL VOTES DISPLAY ==================== */
+
+.total-votes-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  padding: 8px 16px;
+  background: var(--total-bg, #f5f5f5);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+  transition: all 0.3s ease;
+}
+
+.total-votes-value {
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+/* Vote Count Colors */
+.total-votes-value.positive {
+  color: #10b981;
+}
+
+.total-votes-value.negative {
+  color: #ef4444;
+}
+
+.total-votes-value.neutral {
+  color: #6b7280;
+}
+
+/* Pulse animation when vote changes */
+@keyframes vote-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.total-votes-value.changed {
+  animation: vote-pulse 0.4s ease;
+}
+
+/* ==================== ANIMATIONS ==================== */
+
+@keyframes vote-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-4px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  75% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes vote-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes vote-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== LOADING STATE ==================== */
+
+.vote-loading {
+  display: none;
+  padding: 8px;
+}
+
+.vote-loading.active {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vote-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--primary-color, #4A90E2);
+  border-radius: 50%;
+  animation: vote-spin 0.6s linear infinite;
+}
+
+/* ==================== MESSAGES ==================== */
+
+.vote-error-message,
+.vote-login-prompt,
+.vote-rate-limit-warning {
+  display: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  animation: vote-fade-in 0.3s ease;
+  margin-top: 4px;
+}
+
+.vote-error-message {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.vote-login-prompt {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vote-login-prompt:hover {
+  background: #fde68a;
+  transform: translateY(-1px);
+}
+
+.vote-rate-limit-warning {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.login-prompt-text,
+.rate-limit-text,
+.error-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.login-prompt-text svg,
+.rate-limit-text svg {
+  flex-shrink: 0;
+}
+
+/* ==================== COMPACT VARIANT ==================== */
+
+.vote-buttons-compact .vote-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  gap: 4px;
+}
+
+.vote-buttons-compact .vote-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.vote-buttons-compact .total-votes-display {
+  min-width: 40px;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.vote-buttons-compact .vote-count {
+  min-width: 20px;
+  font-size: 11px;
+}
+
+/* ==================== INLINE VARIANT ==================== */
+
+.vote-buttons-inline {
+  gap: 6px;
+}
+
+.vote-buttons-inline .vote-btn {
+  padding: 4px 8px;
+  font-size: 11px;
+  border-radius: 4px;
+}
+
+.vote-buttons-inline .vote-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.vote-buttons-inline .total-votes-display {
+  min-width: 32px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.vote-buttons-inline .vote-count {
+  display: none; /* Hide individual counts in inline variant */
+}
+
+/* ==================== DARK MODE ==================== */
+
+@media (prefers-color-scheme: dark) {
+  .vote-buttons-container {
+    --button-bg: #1f2937;
+    --border-color: #374151;
+    --text-color: #e5e7eb;
+    --total-bg: #374151;
+  }
+
+  .vote-btn:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .vote-error-message {
+    background: #7f1d1d;
+    color: #fca5a5;
+    border-color: #991b1b;
+  }
+
+  .vote-login-prompt {
+    background: #78350f;
+    color: #fde68a;
+    border-color: #92400e;
+  }
+
+  .vote-login-prompt:hover {
+    background: #92400e;
+  }
+
+  .vote-rate-limit-warning {
+    background: #7f1d1d;
+    color: #fca5a5;
+    border-color: #991b1b;
+  }
+}
+
+/* ==================== ACCESSIBILITY ==================== */
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .vote-btn {
+    border-width: 3px;
+  }
+
+  .upvote-btn[data-active="true"],
+  .downvote-btn[data-active="true"] {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .vote-btn,
+  .vote-icon,
+  .total-votes-value {
+    transition: none;
+    animation: none;
+  }
+
+  .vote-btn:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  .vote-buttons-container {
+    gap: 8px;
+  }
+
+  .vote-btn {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .vote-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .total-votes-display {
+    min-width: 50px;
+    padding: 6px 12px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Auto-switch to compact mode on small screens */
+  .vote-buttons-container:not(.inline) {
+    gap: 6px;
+  }
+
+  .vote-buttons-container:not(.inline) .vote-btn {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
+  .vote-buttons-container:not(.inline) .vote-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .vote-buttons-container:not(.inline) .total-votes-display {
+    min-width: 40px;
+    padding: 5px 10px;
+    font-size: 14px;
+  }
+
+  .vote-buttons-container:not(.inline) .vote-count {
+    font-size: 11px;
+  }
+}
+
+/* ==================== PRINT STYLES ==================== */
+
+@media print {
+  .vote-btn {
+    border: 1px solid #000;
+    box-shadow: none;
+  }
+
+  .vote-error-message,
+  .vote-login-prompt,
+  .vote-rate-limit-warning,
+  .vote-loading {
+    display: none !important;
+  }
+}
+
+/* ==================== TOOLTIPS ==================== */
+
+.vote-btn[title]::after {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+}
+
+.vote-btn:hover[title]::after {
+  opacity: 1;
+}
+
+/* Tooltip arrow */
+.vote-btn[title]::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+}
+
+.vote-btn:hover[title]::before {
+  opacity: 1;
+}
+
+/* ==================== INTEGRATION WITH CARDS ==================== */
+
+/* When vote buttons are inside entity cards */
+.entity-card .vote-buttons-container {
+  margin-top: 12px;
+}
+
+.entity-card-header .vote-buttons-container {
+  margin-left: auto;
+}
+
+/* When vote buttons are inside grid items */
+.grid-item .vote-buttons-container {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+}
+
+/* When vote buttons are inside list items */
+.list-item .vote-buttons-container {
+  margin-left: auto;
+}
+
+/* ==================== CUSTOM PROPERTIES ==================== */
+
+:root {
+  --vote-upvote-color: #10b981;
+  --vote-upvote-hover: #059669;
+  --vote-downvote-color: #ef4444;
+  --vote-downvote-hover: #dc2626;
+  --vote-neutral-color: #6b7280;
+  --vote-border-color: #e0e0e0;
+  --vote-bg-color: #ffffff;
+  --vote-total-bg: #f5f5f5;
+}
+
+/* Allow customization via data attributes */
+.vote-buttons-container[data-theme="success"] {
+  --vote-upvote-color: #22c55e;
+  --vote-downvote-color: #f59e0b;
+}
+
+.vote-buttons-container[data-theme="danger"] {
+  --vote-upvote-color: #3b82f6;
+  --vote-downvote-color: #dc2626;
+}
+
+/* ==================== UTILITY CLASSES ==================== */
+
+.vote-buttons-hidden {
+  display: none !important;
+}
+
+.vote-buttons-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.vote-buttons-readonly .vote-btn {
+  cursor: default;
+  pointer-events: none;
+}
+
+.vote-buttons-readonly .vote-btn:hover {
+  transform: none;
+  box-shadow: none;
+}

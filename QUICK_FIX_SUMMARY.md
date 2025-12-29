@@ -1,12 +1,12 @@
 # Quick Fix Summary
 
-**Generated:** 2025-12-28T11:17:50.884Z
+**Generated:** 2025-12-29T01:49:15.215Z
 
 
 ## Immediate Actions Required
 
 
-### 🔴 CRITICAL (728 issues)
+### 🔴 CRITICAL (729 issues)
 
 **Fix immediately - site is broken**
 
@@ -72,6 +72,11 @@
   - Found in: 1 file(s)
 
 - [ ] **#hierogamy**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#/guidelines**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
   - Found in: 1 file(s)

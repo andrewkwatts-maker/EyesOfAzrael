@@ -7,35 +7,73 @@
 class MythologiesView {
     constructor(firestore) {
         this.db = firestore;
-        this.cache = window.cacheManager || new FirebaseCacheManager({ db: firestore });
+        // Use global cache manager if available, otherwise create one (with fallback)
+        if (window.cacheManager) {
+            this.cache = window.cacheManager;
+        } else if (typeof FirebaseCacheManager !== 'undefined') {
+            this.cache = new FirebaseCacheManager({ db: firestore });
+        } else {
+            // Fallback: create a minimal cache interface
+            console.warn('[MythologiesView] FirebaseCacheManager not available, using fallback');
+            this.cache = {
+                getList: async () => null,
+                defaultTTL: { mythologies: 3600000 }
+            };
+        }
         this.mythologies = [];
     }
 
     /**
-     * Render mythologies grid
+     * Render mythologies grid with smooth loading transitions
      */
     async render(container) {
         console.log('[Mythologies View] Rendering...');
 
-        // Show loading
+        // Show loading with skeleton state
         container.innerHTML = this.getLoadingHTML();
+        container.classList.add('has-skeleton');
 
         try {
             // Load mythologies
             await this.loadMythologies();
 
-            // Render content
+            // Fade out loading before replacing content
+            const loadingEl = container.querySelector('.loading-container');
+            if (loadingEl) {
+                loadingEl.classList.add('fade-out');
+                loadingEl.style.opacity = '0';
+                loadingEl.style.transition = 'opacity 0.2s ease-out';
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            // Render content with fade-in
             container.innerHTML = this.getMythologiesHTML();
+            container.classList.remove('has-skeleton');
             this.attachEventListeners();
 
-            // Hide loading spinner
-            window.dispatchEvent(new CustomEvent('first-render-complete', {
-                detail: { view: 'mythologies' }
+            // Trigger fade-in animation
+            requestAnimationFrame(() => {
+                const content = container.firstElementChild;
+                if (content) {
+                    content.classList.add('content-loaded');
+                }
+            });
+
+            // Hide loading spinner (use document for consistency)
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { view: 'mythologies', timestamp: Date.now() }
             }));
+
+            console.log('[Mythologies View] Render complete');
 
         } catch (error) {
             console.error('[Mythologies View] Error:', error);
             this.showError(container, error);
+
+            // Emit error event
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: { view: 'mythologies', error: error.message }
+            }));
         }
     }
 
@@ -482,10 +520,9 @@ class MythologiesView {
     }
 }
 
-// ES Module Export
-export { MythologiesView };
-
-// Legacy global export
+// Global export for non-module script loading
+// Note: ES module export removed to prevent SyntaxError in non-module context
 if (typeof window !== 'undefined') {
     window.MythologiesView = MythologiesView;
+    console.log('[MythologiesView] Class registered globally');
 }

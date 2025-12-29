@@ -24,6 +24,14 @@ A comprehensive digital encyclopedia connecting ancient wisdom across 12+ world 
 - **Real-Time Autocomplete** with keyboard navigation
 - **Multiple Display Modes** (Grid, Table, List, Panel, Inline)
 
+### 📜 Corpus Search System
+- **Sacred Text Search** across GitHub-hosted religious texts
+- **Multi-Source Queries** combining GitHub texts and Firebase entities
+- **7 Render Modes** (Panel, Inline, Grid, Full-page, Modal, Sidebar, Embedded)
+- **User Custom Queries** with community voting system
+- **Metadata Integration** with alternate names and cross-cultural equivalents
+- **Smart Caching** for optimal performance with localStorage/sessionStorage
+
 ### 🎨 Immersive Experience
 - **WebGL Shader Backgrounds** that change based on mythology
 - **10 Custom Shaders** (Water, Fire, Stars, Earth, etc.)
@@ -160,6 +168,7 @@ python -m http.server 8000
 
 ### Reference
 - **[METADATA_SEARCH_GUIDE.md](./docs/systems/METADATA_SEARCH_GUIDE.md)** - Advanced search features
+- **[CORPUS_SEARCH_SYSTEM.md](./docs/CORPUS_SEARCH_SYSTEM.md)** - Sacred text corpus search system
 - **[MONITORING_GUIDE.md](./docs/systems/MONITORING_GUIDE.md)** - Usage monitoring and optimization
 - **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migrating from localStorage to Firebase
 
@@ -225,6 +234,12 @@ python -m http.server 8000
 - Multi-mode search
 - Metadata enhancement
 - Real-time autocomplete
+
+**Corpus Search** (`corpus-search-core.js`, `corpus-search-ui.js`):
+- Sacred text search across GitHub repositories
+- Multi-source queries (GitHub + Firebase)
+- 7 render modes with flexible integration
+- Smart caching with localStorage/sessionStorage
 
 **Cache Manager** (`js/firebase-cache-manager.js`):
 - IndexedDB caching

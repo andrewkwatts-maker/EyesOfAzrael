@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eyesofazrael.com/schemas/herb.schema.json",
+  "title": "Herb Schema",
+  "description": "Schema for sacred herbs and plants",
+  "allOf": [
+    {
+      "$ref": "entity-base.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "const": "herb"
+        },
+        "scientific_name": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Botanical/scientific name"
+        },
+        "associated_deities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {"type": "string"},
+              "name": {"type": "string"},
+              "relationship": {"type": "string"}
+            }
+          },
+          "description": "Deities associated with this herb"
+        },
+        "properties": {
+          "type": "object",
+          "properties": {
+            "magical": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "medicinal": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "spiritual": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "description": "Properties and uses"
+        },
+        "preparation": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["method"],
+            "properties": {
+              "method": {"type": "string"},
+              "purpose": {"type": "string"},
+              "instructions": {"type": "string"}
+            }
+          },
+          "description": "Preparation methods"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Warnings or precautions"
+        },
+        "harvest": {
+          "type": "object",
+          "properties": {
+            "season": {"type": "string"},
+            "moon_phase": {"type": "string"},
+            "ritual": {"type": "string"}
+          },
+          "description": "Traditional harvest practices"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+// Firestore Security Rules for User Corpus Queries
+// Add these rules to your existing firestore.rules file
+
+// =============================================================================
+// USER CORPUS QUERIES COLLECTION
+// =============================================================================
+
+// User's private query subcollection
+match /user_corpus_queries/{userId}/queries/{queryId} {
+  // Allow read if:
+  // - User owns the queries
+  // - Query is marked as public (anyone can read)
+  allow read: if request.auth != null && request.auth.uid == userId;
+
+  // Allow create if user is authenticated and creating their own query
+  allow create: if request.auth != null
+    && request.auth.uid == userId
+    && request.resource.data.userId == userId
+    && request.resource.data.label is string
+    && request.resource.data.label.size() >= 3
+    && request.resource.data.label.size() <= 100
+    && request.resource.data.queryType in ['firebase', 'github', 'combined']
+    && request.resource.data.renderMode in ['panel', 'inline', 'modal', 'collapsed'];
+
+  // Allow update if user owns the query
+  allow update: if request.auth != null
+    && request.auth.uid == userId
+    && resource.data.userId == userId
+    // Prevent changing ownership
+    && request.resource.data.userId == resource.data.userId
+    // Prevent directly modifying vote counts
+    && request.resource.data.votes == resource.data.votes
+    && request.resource.data.upvoteCount == resource.data.upvoteCount
+    && request.resource.data.downvoteCount == resource.data.downvoteCount;
+
+  // Allow delete if user owns the query
+  allow delete: if request.auth != null
+    && request.auth.uid == userId;
+}
+
+// =============================================================================
+// PUBLIC CORPUS QUERIES INDEX
+// =============================================================================
+
+match /public_corpus_queries/{queryId} {
+  // Anyone can read public queries
+  allow read: if true;
+
+  // Only the query owner can create/update their public query
+  allow create: if request.auth != null
+    && request.resource.data.userId == request.auth.uid
+    && request.resource.data.isPublic == true
+    && request.resource.data.label is string
+    && request.resource.data.label.size() >= 3;
+
+  allow update: if request.auth != null
+    && resource.data.userId == request.auth.uid
+    // Allow vote updates via server function or with proper validation
+    && (
+      // Owner updating their query
+      request.resource.data.userId == resource.data.userId
+      // Or vote count update (handled by transaction in service)
+    );
+
+  // Only owner can delete
+  allow delete: if request.auth != null
+    && resource.data.userId == request.auth.uid;
+}
+
+// =============================================================================
+// CORPUS QUERY VOTES
+// =============================================================================
+
+match /votes/corpus_queries/{queryId}/{voterId} {
+  // Anyone authenticated can read votes
+  allow read: if request.auth != null;
+
+  // Users can only create/modify their own vote
+  allow create, update: if request.auth != null
+    && request.auth.uid == voterId
+    && request.resource.data.userId == request.auth.uid
+    && request.resource.data.value in [1, -1]
+    && request.resource.data.timestamp is number;
+
+  // Users can delete their own vote
+  allow delete: if request.auth != null
+    && request.auth.uid == voterId;
+}
+
+// =============================================================================
+// INDEX REQUIREMENTS
+// =============================================================================
+
+/*
+Required Firestore indexes for optimal query performance:
+
+1. public_corpus_queries
+   - Collection: public_corpus_queries
+   - Fields: votes (Descending), createdAt (Descending)
+
+2. public_corpus_queries by engagement
+   - Collection: public_corpus_queries
+   - Fields: totalEngagement (Descending), contestedScore (Descending)
+
+3. user_corpus_queries by entity
+   - Collection group: queries
+   - Fields: entityRef.type (Ascending), entityRef.id (Ascending), createdAt (Descending)
+
+4. Votes by user (collection group)
+   - Collection group: any subcollection named 'votes' under votes/corpus_queries
+   - Fields: userId (Ascending), timestamp (Descending)
+*/
+
+// =============================================================================
+// EXAMPLE DOCUMENT STRUCTURES
+// =============================================================================
+
+/*
+user_corpus_queries/{userId}/queries/{queryId}:
+{
+  "id": "auto-generated",
+  "userId": "user-123",
+  "label": "Zeus Lightning References",
+  "queryType": "firebase",
+  "query": {
+    "searchTerm": "thunderbolt",
+    "searchMode": "generic",
+    "collection": "deities",
+    "mythology": "greek",
+    "repository": "",
+    "branch": "main",
+    "filters": {
+      "extensions": ["json"],
+      "path": "",
+      "minRelevance": 0
+    }
+  },
+  "renderMode": "panel",
+  "autoLoad": false,
+  "entityRef": {
+    "type": "deity",
+    "id": "zeus"
+  },
+  "isPublic": true,
+  "votes": 5,
+  "upvoteCount": 7,
+  "downvoteCount": 2,
+  "executionCount": 42,
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp
+}
+
+public_corpus_queries/{queryId}:
+{
+  // Same as above, plus:
+  "authorDisplayName": "User Name",
+  "authorPhotoURL": "https://..."
+}
+
+votes/corpus_queries/{queryId}/{userId}:
+{
+  "value": 1,  // or -1
+  "userId": "user-456",
+  "timestamp": 1703875200000
+}
+*/

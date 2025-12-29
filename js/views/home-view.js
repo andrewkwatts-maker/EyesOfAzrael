@@ -754,10 +754,9 @@ class HomeView {
     }
 }
 
-// ES Module Export
-export { HomeView };
-
-// Legacy global export for backwards compatibility
+// Global export for non-module script loading
+// Note: ES module export removed to prevent SyntaxError in non-module context
 if (typeof window !== 'undefined') {
     window.HomeView = HomeView;
+    console.log('[HomeView] Class registered globally');
 }

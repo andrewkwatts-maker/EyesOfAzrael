@@ -1,0 +1,646 @@
+<!-- Content Filter Toggle Component -->
+<!-- Shows/hides community-contributed content -->
+
+<template id="content-filter-toggle-template">
+    <div class="content-filter-bar" id="contentFilterBar">
+        <div class="content-filter-main">
+            <label class="toggle-switch" for="show-community-content">
+                <input
+                    type="checkbox"
+                    id="show-community-content"
+                    class="toggle-input"
+                    aria-label="Toggle community content visibility"
+                />
+                <span class="slider round"></span>
+            </label>
+
+            <div class="toggle-info">
+                <span class="toggle-label">Show Community Content</span>
+                <span class="toggle-description">View user-submitted entities alongside official content</span>
+            </div>
+
+            <span class="content-count-badge" id="communityContentCount" style="display: none;">
+                <span class="badge-icon">+</span>
+                <span class="badge-count">0</span>
+                <span class="badge-label">items</span>
+            </span>
+
+            <button
+                class="info-btn"
+                id="contentFilterInfoBtn"
+                title="What is community content?"
+                aria-label="Learn about community content">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+                    <path d="M10 14V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="10" cy="7" r="0.5" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Loading indicator (shown during re-query) -->
+        <div class="filter-loading" id="filterLoading" style="display: none;">
+            <div class="loading-spinner"></div>
+            <span class="loading-text">Updating content...</span>
+        </div>
+    </div>
+</template>
+
+<!-- Info Modal Template -->
+<template id="community-content-info-modal-template">
+    <div class="modal-overlay" id="communityContentModal">
+        <div class="modal-container modal-content-info">
+            <button class="modal-close" id="closeModalBtn" aria-label="Close modal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+
+            <div class="modal-header">
+                <div class="modal-icon">👥</div>
+                <h2 class="modal-title">About Community Content</h2>
+            </div>
+
+            <div class="modal-body">
+                <section class="info-section">
+                    <h3>🌟 What is Community Content?</h3>
+                    <p>
+                        Community content consists of entities created by users like you.
+                        These contributions expand our database with diverse perspectives,
+                        lesser-known deities, regional variations, and modern interpretations
+                        of mythological traditions.
+                    </p>
+                </section>
+
+                <section class="info-section">
+                    <h3>⚠️ Important Notes</h3>
+                    <ul>
+                        <li><strong>Quality Varies:</strong> Content may be incomplete, unverified, or based on personal research.</li>
+                        <li><strong>User-Sourced:</strong> Unlike official content, community entries haven't undergone editorial review.</li>
+                        <li><strong>Evolving:</strong> Entries may be updated, refined, or corrected over time.</li>
+                        <li><strong>Diverse Perspectives:</strong> May include interpretations from various traditions and schools of thought.</li>
+                    </ul>
+                </section>
+
+                <section class="info-section">
+                    <h3>🗳️ Help Curate Quality</h3>
+                    <p>
+                        You can help improve community content quality by:
+                    </p>
+                    <ul>
+                        <li><strong>Voting:</strong> Upvote accurate, well-researched entries</li>
+                        <li><strong>Commenting:</strong> Provide constructive feedback and sources</li>
+                        <li><strong>Reporting:</strong> Flag inappropriate or misleading content</li>
+                        <li><strong>Contributing:</strong> Submit your own well-researched entries</li>
+                    </ul>
+                </section>
+
+                <section class="info-section">
+                    <h3>📜 Contribution Guidelines</h3>
+                    <p>
+                        When submitting community content, please:
+                    </p>
+                    <ul>
+                        <li>✓ Provide credible sources and citations</li>
+                        <li>✓ Write clear, informative descriptions</li>
+                        <li>✓ Respect cultural and religious traditions</li>
+                        <li>✓ Distinguish between historical facts and interpretations</li>
+                        <li>✗ Avoid plagiarism or copyright violations</li>
+                        <li>✗ Don't submit offensive or discriminatory content</li>
+                    </ul>
+                </section>
+
+                <section class="info-section info-section-highlight">
+                    <h3>🛡️ Trust & Safety</h3>
+                    <p>
+                        Official content is marked with a <span class="badge-standard">Official</span> badge.
+                        Community content shows a <span class="badge-community">Community</span> badge and
+                        displays the username of the contributor. Click on any entry to see its full details,
+                        sources, and voting history.
+                    </p>
+                </section>
+            </div>
+
+            <div class="modal-footer">
+                <a href="#/guidelines" class="btn-link">Read Full Guidelines</a>
+                <button class="btn-primary" id="closeModalFooterBtn">Got It</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style>
+    /* ==========================================
+       Content Filter Bar
+       ========================================== */
+    .content-filter-bar {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md, 1rem);
+        margin-bottom: var(--spacing-xl, 2rem);
+        padding: var(--spacing-lg, 1.5rem);
+        background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: var(--radius-xl, 1rem);
+        border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+        transition: all var(--transition-base, 0.3s ease);
+    }
+
+    .content-filter-main {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-lg, 1.5rem);
+        flex-wrap: wrap;
+    }
+
+    /* ==========================================
+       Toggle Switch
+       ========================================== */
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 56px;
+        height: 32px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .toggle-input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(var(--color-text-secondary-rgb, 156, 163, 175), 0.3);
+        transition: all var(--transition-base, 0.3s ease);
+        border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 3px;
+        bottom: 3px;
+        background: white;
+        transition: all var(--transition-base, 0.3s ease);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-input:checked + .slider {
+        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+        border-color: var(--color-primary);
+        box-shadow: 0 0 12px rgba(var(--color-primary-rgb), 0.4);
+    }
+
+    .toggle-input:checked + .slider:before {
+        transform: translateX(24px);
+    }
+
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+    .toggle-input:focus + .slider {
+        outline: 3px solid rgba(var(--color-primary-rgb), 0.3);
+        outline-offset: 2px;
+    }
+
+    /* ==========================================
+       Toggle Info
+       ========================================== */
+    .toggle-info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs, 0.25rem);
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .toggle-label {
+        font-size: var(--font-size-base, 1rem);
+        font-weight: var(--font-semibold, 600);
+        color: var(--color-text-primary);
+        line-height: 1.2;
+    }
+
+    .toggle-description {
+        font-size: var(--font-size-sm, 0.875rem);
+        color: var(--color-text-secondary);
+        line-height: 1.4;
+    }
+
+    /* ==========================================
+       Content Count Badge
+       ========================================== */
+    .content-count-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs, 0.25rem);
+        padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+        background: linear-gradient(135deg,
+            rgba(var(--color-secondary-rgb), 0.2),
+            rgba(var(--color-primary-rgb), 0.2));
+        border: 2px solid rgba(var(--color-secondary-rgb), 0.4);
+        border-radius: var(--radius-full, 9999px);
+        font-weight: var(--font-semibold, 600);
+        color: var(--color-secondary);
+        animation: badge-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badge-pulse {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(var(--color-secondary-rgb), 0.4);
+        }
+        50% {
+            box-shadow: 0 0 0 8px rgba(var(--color-secondary-rgb), 0);
+        }
+    }
+
+    .badge-icon {
+        font-size: 1.1rem;
+        line-height: 1;
+    }
+
+    .badge-count {
+        font-size: var(--font-size-lg, 1.125rem);
+        line-height: 1;
+    }
+
+    .badge-label {
+        font-size: var(--font-size-sm, 0.875rem);
+        opacity: 0.9;
+    }
+
+    /* ==========================================
+       Info Button
+       ========================================== */
+    .info-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        background: rgba(var(--color-primary-rgb), 0.1);
+        border: 2px solid rgba(var(--color-primary-rgb), 0.3);
+        border-radius: var(--radius-full, 9999px);
+        color: var(--color-primary);
+        cursor: pointer;
+        transition: all var(--transition-fast, 0.15s ease);
+        flex-shrink: 0;
+    }
+
+    .info-btn:hover {
+        background: rgba(var(--color-primary-rgb), 0.2);
+        border-color: var(--color-primary);
+        transform: scale(1.1);
+    }
+
+    .info-btn:focus {
+        outline: 3px solid rgba(var(--color-primary-rgb), 0.3);
+        outline-offset: 2px;
+    }
+
+    .info-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* ==========================================
+       Loading State
+       ========================================== */
+    .filter-loading {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md, 1rem);
+        padding: var(--spacing-sm, 0.5rem) 0;
+        color: var(--color-text-secondary);
+        font-size: var(--font-size-sm, 0.875rem);
+    }
+
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(var(--color-primary-rgb), 0.2);
+        border-top-color: var(--color-primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* ==========================================
+       Badges (for info modal examples)
+       ========================================== */
+    .badge-standard,
+    .badge-community {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: var(--radius-md, 0.5rem);
+        font-size: var(--font-size-xs, 0.75rem);
+        font-weight: var(--font-semibold, 600);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .badge-standard {
+        background: linear-gradient(135deg, var(--color-success, #10b981), var(--color-success-dark, #059669));
+        color: white;
+        border: 1px solid var(--color-success-dark, #059669);
+    }
+
+    .badge-community {
+        background: linear-gradient(135deg, var(--color-secondary), var(--color-primary));
+        color: white;
+        border: 1px solid var(--color-primary);
+    }
+
+    /* ==========================================
+       Info Modal
+       ========================================== */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--spacing-lg, 1.5rem);
+        z-index: 9999;
+        opacity: 0;
+        animation: fadeIn var(--transition-base, 0.3s ease) forwards;
+    }
+
+    @keyframes fadeIn {
+        to { opacity: 1; }
+    }
+
+    .modal-container {
+        background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.4);
+        border-radius: var(--radius-2xl, 1.5rem);
+        max-width: 700px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        position: relative;
+        transform: translateY(20px);
+        animation: slideUp var(--transition-base, 0.3s ease) forwards;
+    }
+
+    @keyframes slideUp {
+        to { transform: translateY(0); }
+    }
+
+    .modal-close {
+        position: absolute;
+        top: var(--spacing-lg, 1.5rem);
+        right: var(--spacing-lg, 1.5rem);
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        background: rgba(var(--color-danger-rgb, 239, 68, 68), 0.1);
+        border: 2px solid rgba(var(--color-danger-rgb, 239, 68, 68), 0.3);
+        border-radius: var(--radius-full, 9999px);
+        color: var(--color-danger, #ef4444);
+        cursor: pointer;
+        transition: all var(--transition-fast, 0.15s ease);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-close:hover {
+        background: rgba(var(--color-danger-rgb, 239, 68, 68), 0.2);
+        border-color: var(--color-danger, #ef4444);
+        transform: rotate(90deg);
+    }
+
+    .modal-header {
+        padding: var(--spacing-xl, 2rem);
+        padding-right: var(--spacing-5xl, 5rem); /* Space for close button */
+        border-bottom: 1px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.2);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-lg, 1.5rem);
+    }
+
+    .modal-icon {
+        font-size: 3rem;
+        line-height: 1;
+        filter: drop-shadow(0 4px 8px rgba(var(--color-primary-rgb), 0.4));
+    }
+
+    .modal-title {
+        font-size: var(--font-size-2xl, 1.5rem);
+        font-weight: var(--font-bold, 700);
+        color: var(--color-text-primary);
+        margin: 0;
+        font-family: var(--font-heading, Georgia, serif);
+    }
+
+    .modal-body {
+        padding: var(--spacing-xl, 2rem);
+    }
+
+    .info-section {
+        margin-bottom: var(--spacing-xl, 2rem);
+    }
+
+    .info-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-section h3 {
+        font-size: var(--font-size-lg, 1.125rem);
+        font-weight: var(--font-semibold, 600);
+        color: var(--color-text-primary);
+        margin: 0 0 var(--spacing-md, 1rem) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm, 0.5rem);
+    }
+
+    .info-section p {
+        color: var(--color-text-secondary);
+        line-height: var(--leading-relaxed, 1.75);
+        margin: 0 0 var(--spacing-md, 1rem) 0;
+    }
+
+    .info-section p:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-section ul {
+        margin: 0;
+        padding-left: var(--spacing-xl, 2rem);
+        color: var(--color-text-secondary);
+        line-height: var(--leading-relaxed, 1.75);
+    }
+
+    .info-section li {
+        margin-bottom: var(--spacing-sm, 0.5rem);
+    }
+
+    .info-section li:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-section-highlight {
+        padding: var(--spacing-lg, 1.5rem);
+        background: rgba(var(--color-primary-rgb), 0.1);
+        border: 2px solid rgba(var(--color-primary-rgb), 0.3);
+        border-radius: var(--radius-lg, 0.75rem);
+    }
+
+    .modal-footer {
+        padding: var(--spacing-lg, 1.5rem) var(--spacing-xl, 2rem);
+        border-top: 1px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--spacing-md, 1rem);
+    }
+
+    .btn-link {
+        color: var(--color-primary);
+        text-decoration: none;
+        font-size: var(--font-size-sm, 0.875rem);
+        font-weight: var(--font-medium, 500);
+        transition: all var(--transition-fast, 0.15s ease);
+    }
+
+    .btn-link:hover {
+        color: var(--color-secondary);
+        text-decoration: underline;
+    }
+
+    .btn-primary {
+        padding: var(--spacing-sm, 0.5rem) var(--spacing-xl, 2rem);
+        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+        border: none;
+        border-radius: var(--radius-lg, 0.75rem);
+        color: white;
+        font-size: var(--font-size-base, 1rem);
+        font-weight: var(--font-semibold, 600);
+        cursor: pointer;
+        transition: all var(--transition-base, 0.3s ease);
+        font-family: var(--font-primary);
+        box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.4);
+    }
+
+    /* ==========================================
+       Responsive Design
+       ========================================== */
+    @media (max-width: 768px) {
+        .content-filter-bar {
+            padding: var(--spacing-md, 1rem);
+        }
+
+        .content-filter-main {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--spacing-md, 1rem);
+        }
+
+        .toggle-switch {
+            order: -1;
+        }
+
+        .toggle-info {
+            min-width: 100%;
+        }
+
+        .content-count-badge {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .modal-container {
+            max-width: 100%;
+            max-height: 95vh;
+            border-radius: var(--radius-xl, 1rem);
+        }
+
+        .modal-header {
+            flex-direction: column;
+            text-align: center;
+            padding: var(--spacing-lg, 1.5rem);
+            padding-top: var(--spacing-4xl, 4rem);
+        }
+
+        .modal-close {
+            top: var(--spacing-md, 1rem);
+            right: var(--spacing-md, 1rem);
+        }
+
+        .modal-body {
+            padding: var(--spacing-lg, 1.5rem);
+        }
+
+        .modal-footer {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
+
+        .btn-primary {
+            width: 100%;
+        }
+
+        .btn-link {
+            text-align: center;
+        }
+    }
+
+    /* ==========================================
+       Accessibility
+       ========================================== */
+    @media (prefers-reduced-motion: reduce) {
+        .modal-overlay,
+        .modal-container,
+        .loading-spinner,
+        .badge-pulse {
+            animation: none;
+        }
+
+        .modal-close:hover {
+            transform: none;
+        }
+    }
+
+    @media (prefers-contrast: high) {
+        .toggle-switch,
+        .info-btn,
+        .content-filter-bar {
+            border-width: 3px;
+        }
+    }
+</style>
