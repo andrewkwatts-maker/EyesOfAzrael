@@ -558,6 +558,7 @@ class SPANavigation {
 
     /**
      * Render home page
+     * Shows loading spinner while fetching, error message if fails
      */
     async renderHome() {
         console.log('[SPA] ▶️  renderHome() called at:', new Date().toISOString());
@@ -589,24 +590,32 @@ class SPANavigation {
             innerHTML: mainContent.innerHTML.substring(0, 100) + '...'
         });
 
+        // Show loading spinner while preparing content
+        mainContent.innerHTML = this.getLoadingHTML('Loading home page...');
+
         // PRIORITY: Use LandingPageView for home page (shows ONLY 12 asset type categories)
         if (typeof LandingPageView !== 'undefined') {
             console.log('[SPA] 🔧 LandingPageView class available, using it...');
-            const landingView = new LandingPageView(this.db);
-            console.log('[SPA] 📡 Calling landingView.render(mainContent)...');
-            await landingView.render(mainContent);
-            console.log('[SPA] ✅ Landing page rendered via LandingPageView');
+            try {
+                const landingView = new LandingPageView(this.db);
+                console.log('[SPA] 📡 Calling landingView.render(mainContent)...');
+                await landingView.render(mainContent);
+                console.log('[SPA] ✅ Landing page rendered via LandingPageView');
 
-            // Emit success event
-            console.log('[SPA] 📡 Emitting first-render-complete event (LandingPageView)');
-            document.dispatchEvent(new CustomEvent('first-render-complete', {
-                detail: {
-                    route: 'home',
-                    renderer: 'LandingPageView',
-                    timestamp: Date.now()
-                }
-            }));
-            return;
+                // Emit success event
+                console.log('[SPA] 📡 Emitting first-render-complete event (LandingPageView)');
+                document.dispatchEvent(new CustomEvent('first-render-complete', {
+                    detail: {
+                        route: 'home',
+                        renderer: 'LandingPageView',
+                        timestamp: Date.now()
+                    }
+                }));
+                return;
+            } catch (error) {
+                console.error('[SPA] ❌ LandingPageView.render() failed:', error);
+                // Continue to fallbacks
+            }
         }
 
         // Fallback: Try PageAssetRenderer (dynamic Firebase page loading)
@@ -1586,6 +1595,46 @@ class SPANavigation {
                 </div>
             `;
         }
+    }
+
+    /**
+     * Get loading HTML (returns string for use with innerHTML)
+     * @param {string} message - Optional custom loading message
+     */
+    getLoadingHTML(message = 'Loading...') {
+        return `
+            <div class="loading-container" role="status" aria-live="polite">
+                <div class="spinner-container">
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                </div>
+                <p class="loading-message">${this.escapeHtml(message)}</p>
+            </div>
+        `;
+    }
+
+    /**
+     * Get error HTML (returns string for use with innerHTML)
+     * @param {string} title - Error title
+     * @param {string} message - Error message
+     */
+    getErrorHTML(title = 'Error', message = 'Something went wrong') {
+        return `
+            <div class="error-container" role="alert" style="text-align: center; padding: 4rem 2rem;">
+                <div class="error-icon" style="font-size: 4rem; margin-bottom: 1.5rem;">⚠️</div>
+                <h1 style="color: var(--color-error, #ef4444); margin-bottom: 1rem;">${this.escapeHtml(title)}</h1>
+                <p style="color: var(--color-text-secondary, #9ca3af); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">${this.escapeHtml(message)}</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="location.reload()" class="btn btn-primary" style="padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer;">
+                        Retry
+                    </button>
+                    <a href="#/" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none;">
+                        Return Home
+                    </a>
+                </div>
+            </div>
+        `;
     }
 
     updateBreadcrumb(path) {
