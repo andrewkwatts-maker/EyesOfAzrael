@@ -117,35 +117,80 @@
         }
     </style>
 
-    <!-- Stylesheets - Lazy loaded after critical content -->
+    <!-- ============================================
+         CSS LOADING OPTIMIZATION (Polish Agent 10)
+
+         Strategy:
+         - CRITICAL: Load synchronously (above-fold, header, loading states)
+         - HIGH PRIORITY: Preload for fast availability
+         - DEFERRED: Load async via media="print" onload pattern
+         ============================================ -->
+
+    <!-- CRITICAL CSS - Render blocking (required for initial paint) -->
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="themes/theme-base.css">
-    <link rel="stylesheet" href="css/accessibility.css">
-    <link rel="stylesheet" href="css/ui-components.css">
-    <link rel="stylesheet" href="css/spinner.css">
-    <link rel="stylesheet" href="css/universal-grid.css">
-    <link rel="stylesheet" href="css/dynamic-views.css">
-    <link rel="stylesheet" href="css/search-components.css">
-    <link rel="stylesheet" href="css/search-view.css">
-    <link rel="stylesheet" href="css/shader-backgrounds.css">
-    <link rel="stylesheet" href="css/panel-shaders.css">
-    <link rel="stylesheet" href="css/entity-forms.css">
-    <link rel="stylesheet" href="css/user-dashboard.css">
-    <link rel="stylesheet" href="css/home-page.css">
-    <link rel="stylesheet" href="css/header-user.css">
     <link rel="stylesheet" href="css/site-header.css">
-    <link rel="stylesheet" href="css/home-view.css">
-    <link rel="stylesheet" href="css/auth-guard.css">
-    <link rel="stylesheet" href="css/header-theme-picker.css">
-    <link rel="stylesheet" href="css/header-fix.css">
+    <link rel="stylesheet" href="css/spinner.css">
     <link rel="stylesheet" href="css/loading-spinner.css">
     <link rel="stylesheet" href="css/skeleton-screens.css">
-    <link rel="stylesheet" href="css/visual-polish.css">
-    <link rel="stylesheet" href="css/mobile-optimization.css">
-    <link rel="stylesheet" href="css/legal-pages.css">
-    <link rel="stylesheet" href="css/compare-view.css">
-    <link rel="stylesheet" href="css/quick-view-modal.css">
-    <link rel="stylesheet" href="css/edit-modal.css">
+
+    <!-- HIGH PRIORITY CSS - Preload for fast subsequent use -->
+    <link rel="preload" href="css/home-page.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="css/ui-components.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="css/universal-grid.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="css/accessibility.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+    <!-- DEFERRED CSS - Non-blocking async load -->
+    <link rel="stylesheet" href="css/home-view.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/dynamic-views.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/header-user.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/header-theme-picker.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/header-fix.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/auth-guard.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/visual-polish.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/mobile-optimization.css" media="print" onload="this.media='all'">
+
+    <!-- VIEW-SPECIFIC CSS - Load async (only needed when views are accessed) -->
+    <link rel="stylesheet" href="css/search-components.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/search-view.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/entity-forms.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/user-dashboard.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/compare-view.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/legal-pages.css" media="print" onload="this.media='all'">
+
+    <!-- MODAL/OVERLAY CSS - Load async (triggered by user interaction) -->
+    <link rel="stylesheet" href="css/quick-view-modal.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/edit-modal.css" media="print" onload="this.media='all'">
+
+    <!-- VISUAL EFFECTS CSS - Load async (progressive enhancement) -->
+    <link rel="stylesheet" href="css/shader-backgrounds.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/panel-shaders.css" media="print" onload="this.media='all'">
+
+    <!-- Fallback for browsers with JS disabled -->
+    <noscript>
+        <link rel="stylesheet" href="css/home-page.css">
+        <link rel="stylesheet" href="css/ui-components.css">
+        <link rel="stylesheet" href="css/universal-grid.css">
+        <link rel="stylesheet" href="css/accessibility.css">
+        <link rel="stylesheet" href="css/home-view.css">
+        <link rel="stylesheet" href="css/dynamic-views.css">
+        <link rel="stylesheet" href="css/header-user.css">
+        <link rel="stylesheet" href="css/header-theme-picker.css">
+        <link rel="stylesheet" href="css/header-fix.css">
+        <link rel="stylesheet" href="css/auth-guard.css">
+        <link rel="stylesheet" href="css/visual-polish.css">
+        <link rel="stylesheet" href="css/mobile-optimization.css">
+        <link rel="stylesheet" href="css/search-components.css">
+        <link rel="stylesheet" href="css/search-view.css">
+        <link rel="stylesheet" href="css/entity-forms.css">
+        <link rel="stylesheet" href="css/user-dashboard.css">
+        <link rel="stylesheet" href="css/compare-view.css">
+        <link rel="stylesheet" href="css/legal-pages.css">
+        <link rel="stylesheet" href="css/quick-view-modal.css">
+        <link rel="stylesheet" href="css/edit-modal.css">
+        <link rel="stylesheet" href="css/shader-backgrounds.css">
+        <link rel="stylesheet" href="css/panel-shaders.css">
+    </noscript>
 
     <!-- Google Analytics 4 - Privacy-compliant analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ECC98XJ9W9"></script>
@@ -179,19 +224,20 @@
         <div class="header-container">
             <a href="#/" class="site-logo">👁️ Eyes of Azrael</a>
 
-            <nav class="main-nav">
-                <a href="#/" class="nav-link">Home</a>
-                <a href="#/search" class="nav-link">Search</a>
-                <a href="#/compare" class="nav-link">Compare</a>
-                <a href="#/dashboard" class="nav-link">My Contributions</a>
+            <nav class="main-nav" aria-label="Main navigation">
+                <a href="#/" class="nav-link" aria-label="Go to home page">Home</a>
+                <a href="#/search" class="nav-link" aria-label="Search the mythology database">Search</a>
+                <a href="corpus-explorer.html" class="nav-link" aria-label="Explore the full corpus">Corpus Explorer</a>
+                <a href="#/compare" class="nav-link" aria-label="Compare mythological entities">Compare</a>
+                <a href="#/dashboard" class="nav-link" aria-label="View your contributions">My Contributions</a>
             </nav>
 
             <div class="header-actions">
                 <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">🌙</button>
-                <div id="userInfo" class="user-info" style="display: none;">
-                    <img id="userAvatar" class="user-avatar" src="" alt="User">
-                    <span id="userName"></span>
-                    <button id="signOutBtn" class="btn-secondary btn-sm">Sign Out</button>
+                <div id="userInfo" class="user-info" style="display: none;" role="region" aria-label="User account">
+                    <img id="userAvatar" class="user-avatar" src="" alt="User profile picture">
+                    <span id="userName" aria-live="polite"></span>
+                    <button id="signOutBtn" class="btn-secondary btn-sm" aria-label="Sign out of your account">Sign Out</button>
                 </div>
             </div>
         </div>
@@ -201,9 +247,9 @@
     <div id="breadcrumb-nav" aria-label="Breadcrumb"></div>
 
     <!-- Main Content Container -->
-    <main id="main-content" class="view-container" role="main">
-        <div class="loading-container">
-            <div class="spinner-container">
+    <main id="main-content" class="view-container" role="main" aria-live="polite">
+        <div class="loading-container" role="status" aria-label="Loading content">
+            <div class="spinner-container" aria-hidden="true">
                 <div class="spinner-ring"></div>
                 <div class="spinner-ring"></div>
                 <div class="spinner-ring"></div>
@@ -213,14 +259,14 @@
     </main>
 
     <!-- Footer -->
-    <footer class="site-footer">
+    <footer class="site-footer" role="contentinfo">
         <div class="footer-container">
             <p>&copy; 2024 Eyes of Azrael. All rights reserved.</p>
-            <div class="footer-links">
-                <a href="#/about">About</a>
-                <a href="#/privacy">Privacy</a>
-                <a href="#/terms">Terms</a>
-            </div>
+            <nav class="footer-links" aria-label="Footer navigation">
+                <a href="#/about" aria-label="About Eyes of Azrael">About</a>
+                <a href="#/privacy" aria-label="Privacy Policy">Privacy</a>
+                <a href="#/terms" aria-label="Terms of Service">Terms</a>
+            </nav>
         </div>
     </footer>
 
@@ -270,25 +316,27 @@
     <!-- Virtual Scroller (MUST load before search-view-complete.js) -->
     <script src="js/components/virtual-scroller.js"></script>
     <script src="js/components/search-view-complete.js"></script>
-    <script src="js/spa-navigation.js"></script>
     <!-- Note: shader-themes.js and shader-theme-picker.js loaded earlier in the file -->
 
-    <!-- CRUD System -->
+    <!-- CRUD System - MUST load before SPA Navigation (dashboard route needs these) -->
     <script src="js/firebase-crud-manager.js"></script>
     <script src="js/components/entity-form.js"></script>
     <script src="js/components/edit-entity-modal.js"></script>
     <script src="js/components/user-dashboard.js"></script>
 
-    <!-- Analytics & Monitoring -->
-    <script src="js/analytics.js"></script>
-    <script src="js/privacy-controls.js"></script>
-
-    <!-- Footer Pages -->
+    <!-- Footer Pages - MUST load before SPA Navigation (routes need these) -->
     <script src="js/components/about-page.js"></script>
     <script src="js/components/privacy-page.js"></script>
     <script src="js/components/terms-page.js"></script>
 
-    <!-- App Initialization -->
+    <!-- Analytics & Monitoring -->
+    <script src="js/analytics.js"></script>
+    <script src="js/privacy-controls.js"></script>
+
+    <!-- SPA Navigation - MUST load AFTER all view classes are defined -->
+    <script src="js/spa-navigation.js"></script>
+
+    <!-- App Initialization - MUST be last -->
     <script src="js/app-init-simple.js"></script>
 </body>
 </html>

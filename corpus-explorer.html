@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corpus Explorer - Eyes of Azrael</title>
+    <meta name="description" content="Explore the complete corpus of world mythologies with advanced search, filtering, and cross-cultural discovery">
+    <meta name="keywords" content="mythology search, corpus explorer, deities, heroes, creatures, mythological database">
+    <meta name="author" content="Eyes of Azrael">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#9370DB">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Eyes of Azrael">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+
+    <!-- CRITICAL CSS - Inlined for instant rendering -->
+    <style>
+        /* Critical CSS for above-the-fold content */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --color-bg-primary: #0a0e27;
+            --color-bg-secondary: #151a35;
+            --color-bg-card: #1a1f3a;
+            --color-bg-card-rgb: 26, 31, 58;
+            --color-text-primary: #f8f9fa;
+            --color-text-secondary: #adb5bd;
+            --color-primary: #8b7fff;
+            --color-primary-rgb: 139, 127, 255;
+            --color-secondary: #ff7eb6;
+            --color-border-primary: #2a2f4a;
+            --color-border-primary-rgb: 42, 47, 74;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 9999;
+            background: rgba(var(--color-bg-card-rgb), 0.95);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(var(--color-border-primary-rgb), 0.8);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            padding: 3rem;
+        }
+
+        .spinner-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+        }
+
+        .spinner-ring {
+            position: absolute;
+            border: 4px solid transparent;
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+
+        .spinner-ring:nth-child(1) { width: 80px; height: 80px; }
+        .spinner-ring:nth-child(2) { width: 60px; height: 60px; top: 10px; left: 10px; border-top-color: var(--color-secondary); animation-delay: -0.4s; }
+        .spinner-ring:nth-child(3) { width: 40px; height: 40px; top: 20px; left: 20px; border-top-color: #51cf66; animation-delay: -0.8s; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-message {
+            color: var(--color-text-secondary);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+    </style>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="themes/theme-base.css">
+    <link rel="stylesheet" href="css/accessibility.css">
+    <link rel="stylesheet" href="css/ui-components.css">
+    <link rel="stylesheet" href="css/spinner.css">
+    <link rel="stylesheet" href="css/search-components.css">
+    <link rel="stylesheet" href="css/search-view.css">
+    <link rel="stylesheet" href="css/corpus-explorer.css">
+    <link rel="stylesheet" href="css/site-header.css">
+    <link rel="stylesheet" href="css/header-user.css">
+    <link rel="stylesheet" href="css/header-fix.css">
+
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ECC98XJ9W9"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-ECC98XJ9W9', {
+            send_page_view: false,
+            anonymize_ip: true,
+            cookie_flags: 'SameSite=None;Secure'
+        });
+    </script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <!-- Skip to main content (Accessibility) -->
+    <a href="#main-content" class="skip-to-main">Skip to main content</a>
+
+    <!-- Site Header -->
+    <header class="site-header">
+        <div class="header-container">
+            <a href="index.html" class="site-logo">Eyes of Azrael</a>
+
+            <nav class="main-nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="index.html#/search" class="nav-link">Search</a>
+                <a href="corpus-explorer.html" class="nav-link active">Corpus Explorer</a>
+                <a href="index.html#/compare" class="nav-link">Compare</a>
+                <a href="index.html#/dashboard" class="nav-link">My Contributions</a>
+            </nav>
+
+            <div class="header-actions">
+                <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">Toggle Theme</button>
+                <div id="userInfo" class="user-info" style="display: none;">
+                    <img id="userAvatar" class="user-avatar" src="" alt="User">
+                    <span id="userName"></span>
+                    <button id="signOutBtn" class="btn-secondary btn-sm">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main id="main-content" class="corpus-explorer" role="main">
+        <!-- Filters Sidebar -->
+        <aside class="search-filters" id="filters-sidebar">
+            <div class="filters-header">
+                <h2>Filters</h2>
+                <button id="clear-all-filters" class="btn-text">Clear All</button>
+            </div>
+
+            <!-- Repository/Collection Filter -->
+            <div class="filter-group">
+                <label for="collection-filter">
+                    <span class="filter-icon">Collection</span>
+                </label>
+                <select id="collection-filter" class="filter-select">
+                    <option value="">All Collections</option>
+                    <option value="deities">Deities</option>
+                    <option value="heroes">Heroes</option>
+                    <option value="creatures">Creatures</option>
+                    <option value="texts">Sacred Texts</option>
+                    <option value="rituals">Rituals</option>
+                    <option value="herbs">Herbs</option>
+                    <option value="cosmology">Cosmology</option>
+                    <option value="magic">Magic</option>
+                    <option value="items">Items</option>
+                    <option value="places">Places</option>
+                    <option value="symbols">Symbols</option>
+                    <option value="concepts">Concepts</option>
+                </select>
+            </div>
+
+            <!-- Mythology Filter -->
+            <div class="filter-group">
+                <label for="mythology-filter">
+                    <span class="filter-icon">Mythology</span>
+                </label>
+                <select id="mythology-filter" class="filter-select">
+                    <option value="">All Mythologies</option>
+                    <option value="greek">Greek</option>
+                    <option value="norse">Norse</option>
+                    <option value="egyptian">Egyptian</option>
+                    <option value="hindu">Hindu</option>
+                    <option value="buddhist">Buddhist</option>
+                    <option value="chinese">Chinese</option>
+                    <option value="japanese">Japanese</option>
+                    <option value="celtic">Celtic</option>
+                    <option value="roman">Roman</option>
+                    <option value="babylonian">Babylonian</option>
+                    <option value="sumerian">Sumerian</option>
+                    <option value="persian">Persian</option>
+                    <option value="aztec">Aztec</option>
+                    <option value="mayan">Mayan</option>
+                    <option value="christian">Christian</option>
+                    <option value="islamic">Islamic</option>
+                    <option value="jewish">Jewish</option>
+                    <option value="yoruba">Yoruba</option>
+                </select>
+            </div>
+
+            <!-- Search Mode Filter -->
+            <div class="filter-group">
+                <label for="search-mode">
+                    <span class="filter-icon">Search Mode</span>
+                </label>
+                <select id="search-mode" class="filter-select">
+                    <option value="generic">Full Text Search</option>
+                    <option value="language">Language/Script Search</option>
+                    <option value="source">Source/Citation Search</option>
+                    <option value="term">Corpus Term Search</option>
+                    <option value="advanced">Advanced Search</option>
+                </select>
+            </div>
+
+            <!-- Importance Filter -->
+            <div class="filter-group">
+                <label for="importance-filter">
+                    <span class="filter-icon">Minimum Importance</span>
+                    <span id="importance-value" class="filter-value">1</span>
+                </label>
+                <input type="range" id="importance-filter" min="1" max="5" value="1" step="1" class="range-input">
+                <div class="range-labels">
+                    <span>1</span>
+                    <span>2</span>
+                    <span>3</span>
+                    <span>4</span>
+                    <span>5</span>
+                </div>
+            </div>
+
+            <!-- Has Image Filter -->
+            <div class="filter-group">
+                <label for="image-filter">
+                    <span class="filter-icon">Has Image</span>
+                </label>
+                <select id="image-filter" class="filter-select">
+                    <option value="">Any</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+
+            <!-- Sort Options -->
+            <div class="filter-group">
+                <label for="sort-by">
+                    <span class="filter-icon">Sort By</span>
+                </label>
+                <select id="sort-by" class="filter-select">
+                    <option value="relevance">Relevance</option>
+                    <option value="name">Name (A-Z)</option>
+                    <option value="importance">Importance</option>
+                    <option value="popularity">Popularity</option>
+                </select>
+            </div>
+
+            <!-- Saved Queries Section -->
+            <div class="filter-group saved-queries-section">
+                <div class="saved-queries-header">
+                    <span class="filter-icon">Saved Queries</span>
+                    <button id="manage-queries-btn" class="btn-text btn-sm">Manage</button>
+                </div>
+                <div id="saved-queries-list" class="saved-queries-list">
+                    <!-- Saved queries will be rendered here -->
+                    <p class="no-queries-message">No saved queries yet</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Search Section -->
+        <section class="search-main">
+            <!-- Search Bar -->
+            <div class="search-bar-container">
+                <div class="search-bar">
+                    <span class="search-icon-left">Search</span>
+                    <input
+                        type="text"
+                        id="corpus-search-input"
+                        class="search-input"
+                        placeholder="Search across all mythological entities..."
+                        autocomplete="off"
+                        aria-label="Search corpus"
+                    >
+                    <button id="clear-search-btn" class="clear-search-btn" style="display: none;" aria-label="Clear search">
+                        Clear
+                    </button>
+                    <button id="search-btn" class="search-submit-btn">
+                        Search
+                    </button>
+                </div>
+
+                <!-- Search Suggestions -->
+                <div id="search-suggestions" class="search-suggestions" style="display: none;">
+                    <!-- Autocomplete suggestions will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Search Options -->
+            <div class="search-options" id="search-options">
+                <div class="options-row">
+                    <div class="option-group">
+                        <label>
+                            <input type="checkbox" id="case-sensitive" class="option-checkbox">
+                            Case Sensitive
+                        </label>
+                    </div>
+                    <div class="option-group">
+                        <label>
+                            <input type="checkbox" id="exact-match" class="option-checkbox">
+                            Exact Match
+                        </label>
+                    </div>
+                    <div class="option-group">
+                        <label>
+                            <input type="checkbox" id="include-descriptions" class="option-checkbox" checked>
+                            Include Descriptions
+                        </label>
+                    </div>
+                    <button id="save-query-btn" class="btn-secondary btn-sm">
+                        Save Query
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Controls -->
+            <div class="results-controls" id="results-controls" style="display: none;">
+                <div class="results-info">
+                    <span id="results-count">0 results</span>
+                    <span id="search-time" class="search-time"></span>
+                </div>
+
+                <div class="display-mode-switcher">
+                    <button class="display-mode-btn active" data-mode="grid" title="Grid view" aria-label="Grid view">
+                        Grid
+                    </button>
+                    <button class="display-mode-btn" data-mode="list" title="List view" aria-label="List view">
+                        List
+                    </button>
+                    <button class="display-mode-btn" data-mode="table" title="Table view" aria-label="Table view">
+                        Table
+                    </button>
+                </div>
+
+                <div class="results-per-page">
+                    <label for="results-per-page">Show:</label>
+                    <select id="results-per-page" class="results-per-page-select">
+                        <option value="12">12</option>
+                        <option value="24" selected>24</option>
+                        <option value="48">48</option>
+                        <option value="96">96</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div class="search-results" id="search-results">
+                <!-- Initial empty state -->
+                <div class="search-placeholder" id="search-placeholder">
+                    <div class="placeholder-icon">Search</div>
+                    <h2>Explore the Mythological Corpus</h2>
+                    <p>Search across deities, heroes, creatures, and more from world mythologies</p>
+                    <div class="search-examples">
+                        <p>Try searching for:</p>
+                        <div class="example-queries">
+                            <button class="example-query" data-query="zeus">Zeus</button>
+                            <button class="example-query" data-query="odin">Odin</button>
+                            <button class="example-query" data-query="ra">Ra</button>
+                            <button class="example-query" data-query="shiva">Shiva</button>
+                            <button class="example-query" data-query="thunder god">Thunder God</button>
+                            <button class="example-query" data-query="underworld">Underworld</button>
+                            <button class="example-query" data-query="dragon">Dragon</button>
+                            <button class="example-query" data-query="creation myth">Creation Myth</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination" style="display: none;">
+                <!-- Pagination controls will be rendered here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <p>Eyes of Azrael. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="index.html#/about">About</a>
+                <a href="index.html#/privacy">Privacy</a>
+                <a href="index.html#/terms">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Save Query Modal -->
+    <div id="save-query-modal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Save Search Query</h3>
+                <button class="modal-close" aria-label="Close modal">Close</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="query-name">Query Name</label>
+                    <input type="text" id="query-name" class="form-input" placeholder="Enter a name for this query">
+                </div>
+                <div class="form-group">
+                    <label for="query-description">Description (optional)</label>
+                    <textarea id="query-description" class="form-textarea" placeholder="Add a description..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancel-save-query">Cancel</button>
+                <button class="btn-primary" id="confirm-save-query">Save Query</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="js/toast-notifications.js"></script>
+    <script src="js/utils/loading-spinner.js"></script>
+
+    <!-- Search Components -->
+    <script src="js/components/corpus-search.js"></script>
+    <script src="js/components/corpus-search-enhanced.js"></script>
+    <script src="js/components/virtual-scroller.js"></script>
+
+    <!-- Page Controller -->
+    <script src="js/pages/corpus-explorer.js"></script>
+
+    <!-- Initialize Page -->
+    <script>
+        // Wait for Firebase to be ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('[CorpusExplorer] Page loaded, initializing...');
+
+            // Wait for Firebase Auth
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (user) {
+                    console.log('[CorpusExplorer] User authenticated:', user.email);
+
+                    // Initialize the page controller
+                    const explorer = new CorpusExplorerPage();
+
+                    // Set global reference for onclick handlers in rendered HTML
+                    window.corpusExplorerInstance = explorer;
+
+                    await explorer.init();
+
+                    console.log('[CorpusExplorer] Page initialized successfully');
+                } else {
+                    console.log('[CorpusExplorer] No user, redirecting to login...');
+                    // Redirect to main page for authentication
+                    window.location.href = 'index.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,731 @@
+<!--
+    ASSET CREATOR MODAL
+    Modal for creating new user-submitted entities
+    Supports all entity types: deities, creatures, heroes, items, places, herbs, rituals, texts, symbols
+-->
+
+<div class="modal asset-creator-modal" id="assetCreatorModal">
+    <div class="modal-overlay" data-action="close-modal"></div>
+    <div class="modal-content asset-creator-content">
+        <!-- Close Button -->
+        <button class="modal-close" data-action="close-modal" aria-label="Close modal">×</button>
+
+        <!-- Header -->
+        <div class="asset-creator-header">
+            <div class="creator-icon" id="creatorIcon">✨</div>
+            <div class="creator-header-text">
+                <h2 id="creatorTitle">Create New Asset</h2>
+                <p id="creatorSubtitle">Share your knowledge with the community</p>
+            </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="creation-progress">
+            <div class="progress-step active" data-step="1">
+                <span class="step-number">1</span>
+                <span class="step-label">Basic Info</span>
+            </div>
+            <div class="progress-step" data-step="2">
+                <span class="step-number">2</span>
+                <span class="step-label">Details</span>
+            </div>
+            <div class="progress-step" data-step="3">
+                <span class="step-number">3</span>
+                <span class="step-label">Review</span>
+            </div>
+        </div>
+
+        <!-- Form Container -->
+        <form class="asset-creator-form" id="assetCreatorForm">
+            <!-- Step 1: Basic Information -->
+            <div class="form-step active" data-step="1">
+                <h3 class="step-heading">Basic Information</h3>
+
+                <!-- Entity Type (Hidden - set by caller) -->
+                <input type="hidden" id="entityType" name="type" required>
+
+                <!-- Name -->
+                <div class="form-group">
+                    <label for="entityName" class="form-label">
+                        <span class="label-text">Name</span>
+                        <span class="label-required">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="entityName"
+                        name="name"
+                        class="form-input"
+                        placeholder="Enter name..."
+                        required
+                        maxlength="100">
+                    <span class="form-hint">Maximum 100 characters</span>
+                    <span class="form-error" id="nameError"></span>
+                </div>
+
+                <!-- Mythology -->
+                <div class="form-group">
+                    <label for="entityMythology" class="form-label">
+                        <span class="label-text">Mythology</span>
+                        <span class="label-required">*</span>
+                    </label>
+                    <select id="entityMythology" name="mythology" class="form-input" required>
+                        <option value="">Select mythology...</option>
+                        <option value="greek">Greek</option>
+                        <option value="roman">Roman</option>
+                        <option value="norse">Norse</option>
+                        <option value="egyptian">Egyptian</option>
+                        <option value="celtic">Celtic</option>
+                        <option value="hindu">Hindu</option>
+                        <option value="buddhist">Buddhist</option>
+                        <option value="chinese">Chinese</option>
+                        <option value="japanese">Japanese</option>
+                        <option value="aztec">Aztec</option>
+                        <option value="mayan">Mayan</option>
+                        <option value="babylonian">Babylonian</option>
+                        <option value="sumerian">Sumerian</option>
+                        <option value="persian">Persian</option>
+                        <option value="christian">Christian</option>
+                        <option value="islamic">Islamic</option>
+                        <option value="jewish">Jewish</option>
+                        <option value="yoruba">Yoruba</option>
+                        <option value="native_american">Native American</option>
+                        <option value="apocryphal">Apocryphal</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <span class="form-error" id="mythologyError"></span>
+                </div>
+
+                <!-- Icon/Emoji (Optional) -->
+                <div class="form-group">
+                    <label for="entityIcon" class="form-label">
+                        <span class="label-text">Icon/Emoji</span>
+                        <span class="label-optional">(Optional)</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="entityIcon"
+                        name="icon"
+                        class="form-input"
+                        placeholder="⚡ or paste emoji"
+                        maxlength="10">
+                    <span class="form-hint">Single emoji or symbol to represent this entity</span>
+                </div>
+
+                <!-- Image URL (Optional) -->
+                <div class="form-group">
+                    <label for="entityImage" class="form-label">
+                        <span class="label-text">Image URL</span>
+                        <span class="label-optional">(Optional)</span>
+                    </label>
+                    <input
+                        type="url"
+                        id="entityImage"
+                        name="imageUrl"
+                        class="form-input"
+                        placeholder="https://example.com/image.jpg">
+                    <span class="form-hint">Direct link to an image (JPG, PNG, SVG)</span>
+                    <span class="form-error" id="imageError"></span>
+                </div>
+            </div>
+
+            <!-- Step 2: Detailed Information -->
+            <div class="form-step" data-step="2">
+                <h3 class="step-heading">Detailed Information</h3>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="entityDescription" class="form-label">
+                        <span class="label-text">Description</span>
+                        <span class="label-required">*</span>
+                    </label>
+                    <textarea
+                        id="entityDescription"
+                        name="description"
+                        class="form-input form-textarea"
+                        rows="6"
+                        placeholder="Provide a detailed description..."
+                        required
+                        maxlength="5000"></textarea>
+                    <div class="textarea-footer">
+                        <span class="form-hint">Minimum 50 characters, maximum 5000</span>
+                        <span class="char-count" id="descCharCount">0 / 5000</span>
+                    </div>
+                    <span class="form-error" id="descriptionError"></span>
+                </div>
+
+                <!-- Dynamic Fields Container (varies by entity type) -->
+                <div id="dynamicFields"></div>
+
+                <!-- Alternative Names -->
+                <div class="form-group">
+                    <label for="entityAltNames" class="form-label">
+                        <span class="label-text">Alternative Names</span>
+                        <span class="label-optional">(Optional)</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="entityAltNames"
+                        name="altNames"
+                        class="form-input"
+                        placeholder="Separate with commas">
+                    <span class="form-hint">e.g., Jupiter, Jove (for Zeus)</span>
+                </div>
+
+                <!-- Tags/Keywords -->
+                <div class="form-group">
+                    <label for="entityTags" class="form-label">
+                        <span class="label-text">Tags/Keywords</span>
+                        <span class="label-optional">(Optional)</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="entityTags"
+                        name="tags"
+                        class="form-input"
+                        placeholder="Separate with commas">
+                    <span class="form-hint">Help others find this asset</span>
+                </div>
+
+                <!-- Sources/References -->
+                <div class="form-group">
+                    <label for="entitySources" class="form-label">
+                        <span class="label-text">Sources/References</span>
+                        <span class="label-optional">(Optional)</span>
+                    </label>
+                    <textarea
+                        id="entitySources"
+                        name="sources"
+                        class="form-input form-textarea"
+                        rows="3"
+                        placeholder="List your sources..."></textarea>
+                    <span class="form-hint">Academic credibility helps the community</span>
+                </div>
+            </div>
+
+            <!-- Step 3: Review & Submit -->
+            <div class="form-step" data-step="3">
+                <h3 class="step-heading">Review & Submit</h3>
+
+                <!-- Preview Card -->
+                <div class="preview-card" id="previewCard">
+                    <!-- Dynamically populated -->
+                </div>
+
+                <!-- Visibility Settings -->
+                <div class="form-group visibility-group">
+                    <label class="form-label">
+                        <span class="label-text">Visibility</span>
+                    </label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="visibility" value="public" checked>
+                            <span class="radio-text">
+                                <strong>Public</strong> - Visible to all users
+                            </span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="visibility" value="private">
+                            <span class="radio-text">
+                                <strong>Private</strong> - Only you can see it
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Attribution -->
+                <div class="attribution-notice">
+                    <div class="notice-icon">ℹ️</div>
+                    <div class="notice-text">
+                        <strong>Attribution:</strong> Your submission will be attributed to your account.
+                        By submitting, you confirm that you have the right to share this information.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <!-- Navigation Buttons -->
+                <div class="nav-buttons">
+                    <button type="button" class="btn btn-secondary" id="prevStepBtn" style="display: none;">
+                        ← Previous
+                    </button>
+                    <button type="button" class="btn btn-primary" id="nextStepBtn">
+                        Next →
+                    </button>
+                </div>
+
+                <!-- Submit/Cancel Buttons (only visible on final step) -->
+                <div class="submit-buttons" id="submitButtons" style="display: none;">
+                    <button type="button" class="btn btn-secondary" data-action="close-modal">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="saveDraftBtn">
+                        💾 Save Draft
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        ✨ Submit
+                    </button>
+                </div>
+            </div>
+
+            <!-- Draft Recovery Notice -->
+            <div class="draft-notice" id="draftNotice" style="display: none;">
+                <div class="notice-icon">💾</div>
+                <div class="notice-text">
+                    <strong>Draft Found!</strong> You have an unsaved draft from
+                    <span id="draftTimestamp"></span>
+                </div>
+                <button type="button" class="btn btn-sm btn-primary" id="resumeDraftBtn">
+                    Resume Draft
+                </button>
+                <button type="button" class="btn btn-sm btn-secondary" id="discardDraftBtn">
+                    Discard
+                </button>
+            </div>
+        </form>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+            <div class="spinner-container">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+            </div>
+            <p class="loading-text">Creating your asset...</p>
+        </div>
+
+        <!-- Success Message -->
+        <div class="success-message" id="successMessage" style="display: none;">
+            <div class="success-icon">✅</div>
+            <h3>Asset Created Successfully!</h3>
+            <p id="successText"></p>
+            <div class="success-actions">
+                <button type="button" class="btn btn-primary" id="viewAssetBtn">
+                    View Asset
+                </button>
+                <button type="button" class="btn btn-secondary" id="createAnotherBtn">
+                    Create Another
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Asset Creator Modal Styles */
+.asset-creator-modal .modal-content {
+    max-width: 700px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.asset-creator-content {
+    position: relative;
+}
+
+/* Header */
+.asset-creator-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg, 1.5rem);
+    margin-bottom: var(--spacing-xl, 2rem);
+    padding-bottom: var(--spacing-lg, 1.5rem);
+    border-bottom: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+}
+
+.creator-icon {
+    font-size: 3rem;
+    filter: drop-shadow(0 4px 8px rgba(var(--color-primary-rgb), 0.4));
+}
+
+.creator-header-text h2 {
+    margin: 0 0 var(--spacing-xs, 0.25rem) 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-2xl, 1.5rem);
+}
+
+.creator-header-text p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm, 0.875rem);
+}
+
+/* Progress Indicator */
+.creation-progress {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xl, 2rem);
+    position: relative;
+}
+
+.creation-progress::before {
+    content: '';
+    position: absolute;
+    top: 1.25rem;
+    left: 2rem;
+    right: 2rem;
+    height: 2px;
+    background: rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+    z-index: 0;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs, 0.25rem);
+    position: relative;
+    z-index: 1;
+}
+
+.step-number {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.8);
+    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    font-weight: var(--font-semibold, 600);
+    transition: all var(--transition-base, 0.3s ease);
+}
+
+.step-label {
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-text-secondary);
+    font-weight: var(--font-medium, 500);
+    transition: all var(--transition-base, 0.3s ease);
+}
+
+.progress-step.active .step-number {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border-color: var(--color-primary);
+    color: white;
+    box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.5);
+}
+
+.progress-step.active .step-label {
+    color: var(--color-primary);
+    font-weight: var(--font-semibold, 600);
+}
+
+.progress-step.completed .step-number {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.progress-step.completed .step-number::after {
+    content: '✓';
+}
+
+/* Form Steps */
+.asset-creator-form {
+    overflow-y: auto;
+    max-height: calc(90vh - 300px);
+    padding-right: var(--spacing-sm, 0.5rem);
+}
+
+.form-step {
+    display: none;
+}
+
+.form-step.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.step-heading {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xl, 1.25rem);
+    margin: 0 0 var(--spacing-lg, 1.5rem) 0;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: var(--spacing-lg, 1.5rem);
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs, 0.25rem);
+    margin-bottom: var(--spacing-sm, 0.5rem);
+    color: var(--color-text-primary);
+    font-weight: var(--font-semibold, 600);
+    font-size: var(--font-size-sm, 0.875rem);
+}
+
+.label-required {
+    color: var(--color-danger, #ef4444);
+}
+
+.label-optional {
+    color: var(--color-text-secondary);
+    font-weight: var(--font-normal, 400);
+    font-size: var(--font-size-xs, 0.75rem);
+}
+
+.form-input {
+    width: 100%;
+    padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+    border-radius: var(--radius-lg, 0.75rem);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base, 1rem);
+    font-family: var(--font-primary);
+    transition: all var(--transition-fast, 0.15s ease);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.form-input::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.6;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.textarea-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-xs, 0.25rem);
+}
+
+.char-count {
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-text-secondary);
+}
+
+.form-hint {
+    display: block;
+    margin-top: var(--spacing-xs, 0.25rem);
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-text-secondary);
+    font-style: italic;
+}
+
+.form-error {
+    display: none;
+    margin-top: var(--spacing-xs, 0.25rem);
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-danger, #ef4444);
+}
+
+.form-error.visible {
+    display: block;
+}
+
+.form-input.error {
+    border-color: var(--color-danger, #ef4444);
+}
+
+/* Radio Groups */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm, 0.5rem);
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm, 0.5rem);
+    padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+    border-radius: var(--radius-md, 0.5rem);
+    cursor: pointer;
+    transition: all var(--transition-fast, 0.15s ease);
+}
+
+.radio-label:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.5);
+    background: rgba(var(--color-primary-rgb), 0.1);
+}
+
+.radio-label input[type="radio"] {
+    margin: 0;
+}
+
+.radio-text {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm, 0.875rem);
+}
+
+.radio-label input[type="radio"]:checked + .radio-text {
+    color: var(--color-text-primary);
+}
+
+/* Preview Card */
+.preview-card {
+    padding: var(--spacing-lg, 1.5rem);
+    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.6);
+    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+    border-radius: var(--radius-xl, 1rem);
+    margin-bottom: var(--spacing-lg, 1.5rem);
+}
+
+/* Attribution Notice */
+.attribution-notice,
+.draft-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md, 1rem);
+    padding: var(--spacing-md, 1rem);
+    background: rgba(var(--color-primary-rgb), 0.1);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border-radius: var(--radius-md, 0.5rem);
+    margin-bottom: var(--spacing-lg, 1.5rem);
+}
+
+.notice-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.notice-text {
+    flex: 1;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm, 0.875rem);
+    line-height: var(--leading-relaxed, 1.75);
+}
+
+.notice-text strong {
+    color: var(--color-text-primary);
+}
+
+/* Form Actions */
+.form-actions {
+    position: sticky;
+    bottom: 0;
+    padding-top: var(--spacing-lg, 1.5rem);
+    margin-top: var(--spacing-xl, 2rem);
+    border-top: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+    background: var(--color-surface);
+}
+
+.nav-buttons,
+.submit-buttons {
+    display: flex;
+    gap: var(--spacing-md, 1rem);
+    justify-content: space-between;
+}
+
+.submit-buttons {
+    justify-content: flex-end;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    border-radius: var(--radius-2xl, 1.5rem);
+}
+
+.loading-text {
+    margin-top: var(--spacing-lg, 1.5rem);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-lg, 1.125rem);
+}
+
+/* Success Message */
+.success-message {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.98);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    text-align: center;
+    padding: var(--spacing-xl, 2rem);
+    border-radius: var(--radius-2xl, 1.5rem);
+}
+
+.success-icon {
+    font-size: 5rem;
+    margin-bottom: var(--spacing-lg, 1.5rem);
+    animation: successBounce 0.6s ease;
+}
+
+@keyframes successBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.success-message h3 {
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-md, 1rem) 0;
+}
+
+.success-message p {
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--spacing-xl, 2rem) 0;
+}
+
+.success-actions {
+    display: flex;
+    gap: var(--spacing-md, 1rem);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .asset-creator-modal .modal-content {
+        max-width: 95%;
+        max-height: 95vh;
+        padding: var(--spacing-lg, 1.5rem);
+    }
+
+    .creation-progress {
+        gap: var(--spacing-xs, 0.25rem);
+    }
+
+    .step-label {
+        font-size: 0.65rem;
+    }
+
+    .nav-buttons,
+    .submit-buttons {
+        flex-direction: column;
+    }
+
+    .success-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+}
+</style>

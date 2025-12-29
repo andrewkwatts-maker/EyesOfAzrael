@@ -73,11 +73,14 @@ class LoadingSpinnerManager {
     }
 
     /**
-     * Hide a loading spinner
+     * Hide a loading spinner with smooth fade-out transition
      * @param {string} spinnerId - Spinner ID returned from show()
      * @param {string|null} replacementHTML - Optional HTML to replace spinner with
+     * @param {Object} options - Transition options
      */
-    hide(spinnerId, replacementHTML = null) {
+    hide(spinnerId, replacementHTML = null, options = {}) {
+        const { fadeOut = true, fadeOutDuration = 300 } = options;
+
         if (!this.activeSpinners.has(spinnerId)) {
             console.warn(`[LoadingSpinner] Spinner not found: ${spinnerId}`);
             return;
@@ -102,25 +105,39 @@ class LoadingSpinnerManager {
         const loadTime = Date.now() - spinner.startTime;
         console.log(`[LoadingSpinner] Loaded ${spinner.containerId} in ${loadTime}ms`);
 
-        // Remove spinner
-        if (spinner.inline) {
-            // Remove inline spinner element
-            const spinnerElement = container.querySelector(`[data-spinner-id="${spinnerId}"]`);
-            if (spinnerElement) {
-                spinnerElement.remove();
-            }
-        } else {
-            // Replace entire content
-            if (replacementHTML) {
-                container.innerHTML = replacementHTML;
-            } else if (spinner.originalContent) {
-                container.innerHTML = spinner.originalContent;
-            } else {
-                container.innerHTML = '';
-            }
-        }
+        // Get the spinner element
+        const spinnerElement = container.querySelector(`[data-spinner-id="${spinnerId}"]`);
 
-        this.activeSpinners.delete(spinnerId);
+        // Helper function to replace content
+        const replaceContent = () => {
+            if (spinner.inline) {
+                // Remove inline spinner element
+                if (spinnerElement) {
+                    spinnerElement.remove();
+                }
+            } else {
+                // Replace entire content
+                if (replacementHTML) {
+                    container.innerHTML = replacementHTML;
+                } else if (spinner.originalContent) {
+                    container.innerHTML = spinner.originalContent;
+                } else {
+                    container.innerHTML = '';
+                }
+                // Add fade-in class to new content
+                container.classList.add('content-loaded');
+            }
+            this.activeSpinners.delete(spinnerId);
+        };
+
+        // Apply fade-out transition if enabled
+        if (fadeOut && spinnerElement) {
+            spinnerElement.style.transition = `opacity ${fadeOutDuration}ms ease-out`;
+            spinnerElement.style.opacity = '0';
+            setTimeout(replaceContent, fadeOutDuration);
+        } else {
+            replaceContent();
+        }
     }
 
     /**

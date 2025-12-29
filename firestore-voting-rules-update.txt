@@ -1,0 +1,95 @@
+/**
+ * FIRESTORE SECURITY RULES UPDATE FOR VOTING SYSTEM
+ * Add these rules to firestore.rules after the existing VOTES COLLECTION section
+ */
+
+// ===== HIERARCHICAL VOTES COLLECTION =====
+// Path: /votes/{itemType}/{itemId}/{userId}
+// New schema for upvote/downvote system
+// Schema: votes/assets/{assetId}/{userId} or votes/notes/{noteId}/{userId}
+
+match /votes/{itemType}/{itemId}/{userId} {
+  function isValidVote() {
+    return request.resource.data.keys().hasAll(['value', 'userId', 'timestamp'])
+           && request.resource.data.value in [1, -1]
+           && request.resource.data.userId == request.auth.uid
+           && request.resource.data.timestamp is number;
+  }
+
+  function isValidItemType() {
+    return itemType in ['assets', 'notes'];
+  }
+
+  // Anyone can read votes (for displaying vote counts)
+  allow read: if true;
+
+  // Users can only create their own votes
+  allow create: if isAuthenticated()
+                && request.auth.uid == userId
+                && isValidItemType()
+                && isValidVote();
+
+  // Users can only update their own votes (change vote or timestamp)
+  allow update: if isAuthenticated()
+                && request.auth.uid == userId
+                && resource.data.userId == request.auth.uid
+                && request.resource.data.userId == request.auth.uid
+                && isValidVote();
+
+  // Users can only delete their own votes (remove vote)
+  allow delete: if isAuthenticated()
+                && request.auth.uid == userId
+                && resource.data.userId == request.auth.uid;
+}
+
+/**
+ * NOTES COLLECTION UPDATE
+ * Add vote tracking fields to notes
+ */
+
+// Update notes collection to include vote metadata
+match /notes/{noteId} {
+  allow read: if true;
+
+  // Allow authenticated users to create notes with vote fields
+  allow create: if isAuthenticated()
+                && request.resource.data.authorId == request.auth.uid
+                && (!request.resource.data.keys().hasAny(['votes', 'upvoteCount', 'downvoteCount', 'contestedScore', 'totalEngagement'])
+                    || (request.resource.data.votes == 0
+                        && request.resource.data.upvoteCount == 0
+                        && request.resource.data.downvoteCount == 0
+                        && request.resource.data.contestedScore == 0
+                        && request.resource.data.totalEngagement == 0));
+
+  // Allow updates to vote fields via transactions
+  allow update: if isAuthenticated()
+                && (resource.data.authorId == request.auth.uid
+                    || request.resource.data.keys().hasOnly(['votes', 'upvoteCount', 'downvoteCount', 'contestedScore', 'totalEngagement', 'updatedAt']));
+
+  allow delete: if isAuthenticated()
+                && resource.data.authorId == request.auth.uid;
+}
+
+/**
+ * ASSETS COLLECTION UPDATE
+ * Ensure assets can be updated with vote counts
+ */
+
+// The assets collection already allows updates, just ensure vote fields are permitted
+// Vote fields: votes, upvoteCount, downvoteCount, contestedScore, totalEngagement
+// These are updated automatically by the VoteService via transactions
+
+/**
+ * DEPLOYMENT:
+ *
+ * 1. Add the hierarchical votes rules above to the firestore.rules file
+ * 2. Add the notes collection rules (or update existing notes rules)
+ * 3. Deploy the rules:
+ *    firebase deploy --only firestore:rules
+ *
+ * 4. Test the rules in the Firebase Console Rules Playground:
+ *    - Test creating a vote as authenticated user
+ *    - Test reading votes as unauthenticated user
+ *    - Test updating another user's vote (should fail)
+ *    - Test deleting own vote
+ */

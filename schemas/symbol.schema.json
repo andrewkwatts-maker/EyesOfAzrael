@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eyesofazrael.com/schemas/symbol.schema.json",
+  "title": "Symbol Schema",
+  "description": "Schema for sacred symbols and iconography",
+  "allOf": [
+    {
+      "$ref": "entity-base.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "const": "symbol"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["geometric", "natural", "celestial", "anthropomorphic", "abstract", "composite", "sacred-text"],
+          "description": "Symbol category"
+        },
+        "visual_description": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Detailed visual description"
+        },
+        "meanings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["interpretation"],
+            "properties": {
+              "interpretation": {"type": "string"},
+              "context": {"type": "string"},
+              "tradition": {"type": "string"}
+            }
+          },
+          "description": "Various interpretations and meanings"
+        },
+        "usage": {
+          "type": "object",
+          "properties": {
+            "ritual": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "artistic": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "protective": {"type": "boolean"},
+            "invocative": {"type": "boolean"}
+          },
+          "description": "How the symbol is used"
+        },
+        "associated_deities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {"type": "string"},
+              "name": {"type": "string"}
+            }
+          },
+          "description": "Deities associated with this symbol"
+        },
+        "variations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "description": {"type": "string"},
+              "tradition": {"type": "string"}
+            }
+          },
+          "description": "Cultural or traditional variations"
+        }
+      }
+    }
+  ]
+}

@@ -2,123 +2,88 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Analyzes broken links report and categorizes them
+ * Analyze broken links to categorize error patterns
  */
+function analyzeBrokenLinks() {
+  const brokenLinksPath = path.join(__dirname, '../reports/broken-links.json');
+  const data = JSON.parse(fs.readFileSync(brokenLinksPath, 'utf8'));
 
-class BrokenLinkAnalyzer {
-  constructor() {
-    this.categories = {
-      templates: [],
-      missingPages: [],
-      fixableAbsolute: [],
-      incorrectPaths: []
-    };
-  }
+  const patterns = {
+    prefix_underscore: [],
+    contains_newline: [],
+    contains_colon: [],
+    contains_parentheses: [],
+    contains_spaces: [],
+    other: []
+  };
 
-  analyze() {
-    const report = JSON.parse(fs.readFileSync('scripts/reports/broken-links.json', 'utf8'));
+  const assetCounts = {};
 
-    console.log('🔍 Analyzing broken links...\n');
-    console.log(`Total broken links: ${report.brokenLinks.length}\n`);
+  data.links.forEach(link => {
+    const id = link.targetId;
+    const assetId = link.assetId;
 
-    report.brokenLinks.forEach(link => {
-      this.categorizeLink(link);
+    // Count broken links per asset
+    assetCounts[assetId] = (assetCounts[assetId] || 0) + 1;
+
+    // Categorize the error
+    let category;
+    if (id.startsWith('_')) {
+      category = 'prefix_underscore';
+    } else if (id.includes('\n')) {
+      category = 'contains_newline';
+    } else if (id.includes(':')) {
+      category = 'contains_colon';
+    } else if (id.includes('(') && id.includes(')')) {
+      category = 'contains_parentheses';
+    } else if (id.includes(' ')) {
+      category = 'contains_spaces';
+    } else {
+      category = 'other';
+    }
+
+    patterns[category].push({
+      assetId: link.assetId,
+      targetId: id,
+      field: link.field,
+      mythology: link.assetMythology
     });
+  });
 
-    this.generateReport();
-  }
+  console.log('\n=== BROKEN LINK ANALYSIS ===\n');
+  console.log(`Total broken links: ${data.count}\n`);
 
-  categorizeLink(link) {
-    const { file, link: href, resolvedPath } = link;
+  console.log('Error Pattern Distribution:');
+  Object.keys(patterns).forEach(pattern => {
+    console.log(`  ${pattern}: ${patterns[pattern].length}`);
+  });
 
-    // Template placeholders
-    if (href.includes('[') || href.includes('path/to/')) {
-      this.categories.templates.push(link);
-      return;
-    }
+  console.log('\nTop 10 Assets with Most Broken Links:');
+  const sortedAssets = Object.entries(assetCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
+  sortedAssets.forEach(([assetId, count]) => {
+    console.log(`  ${assetId}: ${count} broken links`);
+  });
 
-    // Absolute paths that can be fixed
-    if (href.startsWith('/')) {
-      this.categories.fixableAbsolute.push(link);
-      return;
-    }
-
-    // Check if it's just a missing page
-    if (!fs.existsSync(resolvedPath)) {
-      this.categories.missingPages.push(link);
-      return;
-    }
-
-    // Incorrect relative path
-    this.categories.incorrectPaths.push(link);
-  }
-
-  generateReport() {
-    console.log('═══════════════════════════════════════════════════════════');
-    console.log('         BROKEN LINK ANALYSIS');
-    console.log('═══════════════════════════════════════════════════════════\n');
-
-    console.log(`📋 Template Placeholders: ${this.categories.templates.length}`);
-    console.log('   (These are intentional - documentation examples)\n');
-
-    console.log(`🔧 Fixable Absolute Paths: ${this.categories.fixableAbsolute.length}`);
-    if (this.categories.fixableAbsolute.length > 0) {
-      console.log('   Files with absolute paths:');
-      const fileSet = new Set(this.categories.fixableAbsolute.map(l => l.file));
-      fileSet.forEach(f => console.log(`   - ${f}`));
-      console.log('');
-    }
-
-    console.log(`📄 Missing Pages: ${this.categories.missingPages.length}`);
-    if (this.categories.missingPages.length > 0) {
-      console.log('   Pages that need to be created:');
-      const pageSet = new Set(this.categories.missingPages.map(l => l.resolvedPath));
-      const pageCounts = {};
-      this.categories.missingPages.forEach(l => {
-        pageCounts[l.resolvedPath] = (pageCounts[l.resolvedPath] || 0) + 1;
+  console.log('\nSample Broken IDs by Category:');
+  Object.keys(patterns).forEach(category => {
+    if (patterns[category].length > 0) {
+      console.log(`\n${category} (${patterns[category].length} total):`);
+      patterns[category].slice(0, 5).forEach(item => {
+        console.log(`  "${item.targetId}" (from ${item.assetId})`);
       });
-
-      Object.entries(pageCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 20)
-        .forEach(([page, count]) => {
-          console.log(`   - ${page} (${count} references)`);
-        });
-
-      if (Object.keys(pageCounts).length > 20) {
-        console.log(`   ... and ${Object.keys(pageCounts).length - 20} more`);
-      }
-      console.log('');
     }
+  });
 
-    console.log(`❓ Incorrect Paths: ${this.categories.incorrectPaths.length}\n`);
-
-    // Save detailed report
-    fs.writeFileSync(
-      'scripts/reports/broken-links-analysis.json',
-      JSON.stringify(this.categories, null, 2)
-    );
-
-    console.log('📝 Detailed report saved to scripts/reports/broken-links-analysis.json\n');
-
-    // Generate action plan
-    console.log('═══════════════════════════════════════════════════════════');
-    console.log('         ACTION PLAN');
-    console.log('═══════════════════════════════════════════════════════════\n');
-
-    if (this.categories.fixableAbsolute.length > 0) {
-      console.log(`✅ Fix ${this.categories.fixableAbsolute.length} absolute paths (high priority)`);
-    }
-
-    if (this.categories.missingPages.length > 0) {
-      const uniquePages = new Set(this.categories.missingPages.map(l => l.resolvedPath));
-      console.log(`📄 Create ${uniquePages.size} missing pages OR remove broken links (medium priority)`);
-    }
-
-    console.log(`✓  Ignore ${this.categories.templates.length} template placeholders (expected)\n`);
-  }
+  // Save detailed analysis
+  const analysisPath = path.join(__dirname, '../reports/broken-links-analysis.json');
+  fs.writeFileSync(analysisPath, JSON.stringify({
+    totalBroken: data.count,
+    patterns,
+    assetCounts
+  }, null, 2));
+  console.log(`\nDetailed analysis saved to ${analysisPath}`);
 }
 
-// Run analyzer
-const analyzer = new BrokenLinkAnalyzer();
-analyzer.analyze();
+analyzeBrokenLinks();

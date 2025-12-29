@@ -1,0 +1,380 @@
+/**
+ * Corpus Search Section Styles
+ *
+ * Styles for the corpus queries section on entity pages.
+ * Part of the Corpus Search System (Agent 6 - Entity Integration)
+ */
+
+/* Main Section Container */
+.corpus-search-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--color-surface, rgba(255, 255, 255, 0.05));
+    border-radius: 12px;
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+}
+
+.related-texts-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.related-texts-section .section-header h3 {
+    margin: 0;
+    color: var(--color-primary, #DAA520);
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.related-texts-section .section-header p {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+/* Loading Spinner */
+.corpus-search-section .loading-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--color-border, rgba(255, 255, 255, 0.2));
+    border-top-color: var(--color-primary, #DAA520);
+    border-radius: 50%;
+    animation: corpus-spin 1s linear infinite;
+}
+
+@keyframes corpus-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Query Panel */
+.corpus-query-panel {
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    background: var(--color-surface, rgba(255, 255, 255, 0.03));
+}
+
+.corpus-query-panel:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: var(--color-primary, #DAA520);
+}
+
+.corpus-query-panel .query-header {
+    cursor: pointer;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: background 0.2s ease;
+}
+
+.corpus-query-panel .query-header:hover {
+    background: rgba(var(--color-primary-rgb, 218, 165, 32), 0.08);
+}
+
+.corpus-query-panel .query-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.corpus-query-panel .query-header h4 {
+    margin: 0;
+    color: var(--color-primary, #DAA520);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.corpus-query-panel .query-header p {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+.corpus-query-panel .query-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto;
+}
+
+.corpus-query-panel .result-count {
+    font-size: 0.85rem;
+    opacity: 0.6;
+}
+
+.corpus-query-panel .expand-icon {
+    font-size: 0.75rem;
+    opacity: 0.5;
+    transition: transform 0.2s ease;
+}
+
+.corpus-query-panel.expanded .expand-icon {
+    transform: rotate(180deg);
+}
+
+/* Query Content (Results) */
+.corpus-query-panel .query-content {
+    border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+}
+
+.corpus-query-panel .query-content.collapsed {
+    display: none;
+}
+
+.corpus-query-panel .query-content.expanded {
+    display: block;
+}
+
+.corpus-query-panel .query-results-container {
+    padding: 1rem;
+}
+
+/* Result Items */
+.corpus-query-panel .result-item {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.05));
+}
+
+.corpus-query-panel .result-item:last-child {
+    border-bottom: none;
+}
+
+.corpus-query-panel .result-source {
+    font-size: 0.85rem;
+    color: var(--color-primary, #DAA520);
+    margin-bottom: 0.5rem;
+}
+
+.corpus-query-panel .context-text {
+    font-style: italic;
+    padding: 0.75rem;
+    background: var(--color-surface, rgba(255, 255, 255, 0.02));
+    border-radius: 4px;
+    border-left: 3px solid var(--color-primary, #DAA520);
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* Entity Grid Results */
+.entity-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.entity-mini-card {
+    padding: 1rem;
+    background: var(--color-surface, rgba(255, 255, 255, 0.05));
+    border-radius: 8px;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.entity-mini-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.entity-mini-card h5 {
+    margin: 0;
+    color: var(--color-primary, #DAA520);
+    font-size: 0.95rem;
+}
+
+/* User Query Badge */
+.user-query-badge {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    background: var(--color-secondary, #4A90E2);
+    color: white;
+    border-radius: 1rem;
+    margin-left: 0.5rem;
+    font-weight: normal;
+}
+
+/* Vote Count */
+.vote-count {
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+/* User Queries Section */
+.user-queries-section {
+    margin-top: 1.5rem;
+}
+
+.user-queries-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+}
+
+.user-queries-header span:first-child {
+    font-size: 0.85rem;
+    color: var(--color-secondary, #4A90E2);
+    font-weight: 600;
+}
+
+.user-query-count {
+    font-size: 0.75rem;
+    opacity: 0.6;
+}
+
+/* Query Link Button */
+.query-link-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 1rem;
+    background: var(--color-surface, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    margin-bottom: 0.5rem;
+    color: inherit;
+}
+
+.query-link-btn:hover {
+    background: var(--color-surface-hover, rgba(255, 255, 255, 0.08));
+    border-color: var(--color-primary, #DAA520);
+}
+
+/* Empty State */
+.queries-empty {
+    text-align: center;
+    padding: 2rem;
+    opacity: 0.7;
+}
+
+.queries-empty p {
+    margin: 0 0 1rem;
+}
+
+/* Section Actions */
+.section-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.section-actions .btn-secondary {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 4px;
+    background: var(--color-surface, rgba(255, 255, 255, 0.05));
+    color: var(--color-text-primary, inherit);
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    transition: all 0.2s ease;
+}
+
+.section-actions .btn-secondary:hover {
+    background: var(--color-surface-hover, rgba(255, 255, 255, 0.1));
+    border-color: var(--color-primary, #DAA520);
+}
+
+/* Loading Placeholder */
+.loading-placeholder {
+    text-align: center;
+    padding: 1rem;
+    opacity: 0.6;
+}
+
+/* Error State */
+.query-error {
+    padding: 1rem;
+    color: var(--color-error, #DC143C);
+    background: rgba(220, 20, 60, 0.1);
+    border-radius: 4px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .related-texts-section .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .section-actions {
+        width: 100%;
+    }
+
+    .section-actions .btn-secondary {
+        flex: 1;
+        text-align: center;
+    }
+
+    .entity-results-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .corpus-query-panel .query-header {
+        flex-wrap: wrap;
+    }
+
+    .corpus-query-panel .query-meta {
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .entity-results-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark Mode Adjustments (usually inherited from theme) */
+@media (prefers-color-scheme: dark) {
+    .corpus-query-panel .context-text {
+        background: rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Mythology-specific theming hooks */
+[data-mythology="greek"] .corpus-search-section {
+    --color-primary: var(--greek-primary, #DAA520);
+}
+
+[data-mythology="norse"] .corpus-search-section {
+    --color-primary: var(--norse-primary, #4A90E2);
+}
+
+[data-mythology="egyptian"] .corpus-search-section {
+    --color-primary: var(--egyptian-primary, #FFD700);
+}
+
+[data-mythology="hindu"] .corpus-search-section {
+    --color-primary: var(--hindu-primary, #FF6B00);
+}
+
+[data-mythology="celtic"] .corpus-search-section {
+    --color-primary: var(--celtic-primary, #228B22);
+}
+
+[data-mythology="japanese"] .corpus-search-section {
+    --color-primary: var(--japanese-primary, #DC143C);
+}
+
+[data-mythology="chinese"] .corpus-search-section {
+    --color-primary: var(--chinese-primary, #C41E3A);
+}

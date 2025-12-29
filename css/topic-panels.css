@@ -1,0 +1,388 @@
+/**
+ * TOPIC PANELS STYLING
+ * Rich, expandable content panels for entity detail pages
+ * Eyes of Azrael - Mythology Knowledge Base
+ */
+
+:root {
+    --panel-bg: rgba(255, 255, 255, 0.05);
+    --panel-bg-hover: rgba(255, 255, 255, 0.08);
+    --panel-border: rgba(255, 255, 255, 0.1);
+    --panel-border-hover: rgba(var(--color-primary-rgb, 245, 158, 11), 0.3);
+    --panel-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --panel-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.25);
+    --panel-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Container */
+.topic-panels-container {
+    margin: 3rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid var(--panel-border);
+}
+
+.topic-panels-title {
+    color: var(--color-primary, #F59E0B);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: center;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--color-primary, #F59E0B), var(--color-secondary, #EC4899));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Topic Panel */
+.topic-panel {
+    background: var(--panel-bg);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--panel-border);
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: var(--panel-transition);
+    box-shadow: var(--panel-shadow);
+}
+
+.topic-panel:hover {
+    background: var(--panel-bg-hover);
+    border-color: var(--panel-border-hover);
+    box-shadow: var(--panel-shadow-hover);
+    transform: translateY(-2px);
+}
+
+.topic-panel.expanded {
+    border-color: var(--color-primary, #F59E0B);
+}
+
+/* Panel Header */
+.topic-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.topic-panel-header:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.panel-icon-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.panel-icon {
+    font-size: 1.75rem;
+    transition: transform 0.3s ease;
+}
+
+.topic-panel:hover .panel-icon {
+    transform: scale(1.1);
+}
+
+.panel-title {
+    color: var(--color-text-primary, #E5E7EB);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.02em;
+}
+
+.expand-icon {
+    color: var(--color-primary, #F59E0B);
+    font-size: 1.25rem;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-block;
+}
+
+/* Panel Content */
+.topic-panel-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.topic-panel.expanded .topic-panel-content {
+    border-top: 1px solid var(--panel-border);
+}
+
+.panel-content-body {
+    padding: 2rem;
+    color: var(--color-text-secondary, #D1D5DB);
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+.panel-content-body p {
+    margin-bottom: 1.25rem;
+    color: var(--color-text-secondary, #D1D5DB);
+}
+
+.panel-content-body p:last-child {
+    margin-bottom: 0;
+}
+
+.panel-content-body h4 {
+    color: var(--color-primary, #F59E0B);
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 1.5rem 0 1rem 0;
+    letter-spacing: 0.02em;
+}
+
+.panel-content-body strong {
+    color: var(--color-text-primary, #E5E7EB);
+    font-weight: 600;
+}
+
+/* Related Entities Grid */
+.related-entities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.related-entity-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    transition: var(--panel-transition);
+    cursor: pointer;
+}
+
+.related-entity-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--color-primary, #F59E0B);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.related-entity-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.related-entity-name {
+    color: var(--color-text-primary, #E5E7EB);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.related-entity-type {
+    color: var(--color-text-secondary, #D1D5DB);
+    font-size: 0.85rem;
+    opacity: 0.8;
+    text-transform: capitalize;
+}
+
+.related-entity-relationship {
+    color: var(--color-primary, #F59E0B);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+/* Did You Know List */
+.did-you-know-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.did-you-know-list li {
+    position: relative;
+    padding-left: 2rem;
+    margin-bottom: 1.25rem;
+    color: var(--color-text-secondary, #D1D5DB);
+    line-height: 1.7;
+}
+
+.did-you-know-list li:last-child {
+    margin-bottom: 0;
+}
+
+.did-you-know-list li::before {
+    content: "✨";
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 1.25rem;
+    opacity: 0.8;
+}
+
+.did-you-know-list li strong {
+    color: var(--color-primary, #F59E0B);
+    font-weight: 600;
+}
+
+/* Sources List */
+.sources-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.source-item {
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 3px solid var(--color-primary, #F59E0B);
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    transition: var(--panel-transition);
+}
+
+.source-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(4px);
+}
+
+.source-title {
+    color: var(--color-text-primary, #E5E7EB);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.source-author {
+    color: var(--color-primary, #F59E0B);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.source-citation {
+    color: var(--color-text-secondary, #D1D5DB);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.source-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: var(--color-secondary, #EC4899);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s ease;
+}
+
+.source-link:hover {
+    color: var(--color-primary, #F59E0B);
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .topic-panels-container {
+        padding: 1.5rem 0;
+    }
+
+    .topic-panels-title {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .topic-panel-header {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .panel-icon {
+        font-size: 1.5rem;
+    }
+
+    .panel-title {
+        font-size: 1.1rem;
+    }
+
+    .panel-content-body {
+        padding: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .related-entities-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .related-entity-icon {
+        font-size: 1.5rem;
+    }
+
+    .related-entity-name {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .topic-panel-header {
+        padding: 1rem;
+    }
+
+    .panel-icon-title {
+        gap: 0.75rem;
+    }
+
+    .panel-title {
+        font-size: 1rem;
+    }
+
+    .related-entities-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark Mode Optimization */
+@media (prefers-color-scheme: dark) {
+    .topic-panel {
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .topic-panel:hover {
+        background: rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* Animation for panel expansion */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.topic-panel.expanded .panel-content-body {
+    animation: slideDown 0.3s ease-out;
+}
+
+/* Accessibility */
+.topic-panel-header:focus {
+    outline: 2px solid var(--color-primary, #F59E0B);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .topic-panel,
+    .topic-panel-content,
+    .expand-icon,
+    .panel-icon,
+    .related-entity-card,
+    .source-item {
+        transition: none;
+    }
+
+    .topic-panel.expanded .panel-content-body {
+        animation: none;
+    }
+}

@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eyesofazrael.com/schemas/item.schema.json",
+  "title": "Item Schema",
+  "description": "Schema for mythological item/artifact entities",
+  "allOf": [
+    {
+      "$ref": "entity-base.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "const": "item"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["weapon", "armor", "artifact", "treasure", "tool", "magical-object", "sacred-object", "relic"],
+          "description": "Item category"
+        },
+        "creator": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "string"},
+            "name": {"type": "string"},
+            "type": {"type": "string"}
+          },
+          "description": "Deity or hero who created the item"
+        },
+        "owner": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "string"},
+            "name": {"type": "string"},
+            "type": {"type": "string"}
+          },
+          "description": "Current or primary owner"
+        },
+        "powers": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Magical powers or special abilities"
+        },
+        "curses": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Curses or negative effects"
+        },
+        "origin_story": {
+          "type": "string",
+          "maxLength": 3000,
+          "description": "How the item was created"
+        },
+        "material": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Materials the item is made from"
+        },
+        "appearance": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Physical description"
+        }
+      }
+    }
+  ]
+}

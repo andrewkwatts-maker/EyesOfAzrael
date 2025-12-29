@@ -157,6 +157,138 @@
         if (data.tags) {
             addDynamicTags(data.tags);
         }
+
+        // Load corpus queries section if entity has corpusQueries or if enabled
+        if (data.corpusQueries || shouldShowCorpusSection(metadata)) {
+            loadCorpusQueries(data, metadata);
+        }
+    }
+
+    /**
+     * Determine if corpus section should be shown
+     */
+    function shouldShowCorpusSection(metadata) {
+        // Show for deities, heroes, creatures, and texts by default
+        const corpusEnabledTypes = ['deity', 'hero', 'creature', 'text', 'item', 'place', 'concept'];
+        return corpusEnabledTypes.includes(metadata.type);
+    }
+
+    /**
+     * Load and render corpus queries section
+     */
+    async function loadCorpusQueries(entityData, metadata) {
+        // Find or create container for corpus section
+        let corpusContainer = document.getElementById('corpus-queries-section');
+
+        if (!corpusContainer) {
+            // Create container and insert before footer or at end of main
+            corpusContainer = document.createElement('div');
+            corpusContainer.id = 'corpus-queries-section';
+            corpusContainer.className = 'corpus-queries-wrapper';
+            corpusContainer.style.marginTop = '2rem';
+
+            const footer = document.querySelector('footer');
+            const main = document.querySelector('main');
+
+            if (footer && footer.parentNode) {
+                footer.parentNode.insertBefore(corpusContainer, footer);
+            } else if (main) {
+                main.appendChild(corpusContainer);
+            } else {
+                document.body.appendChild(corpusContainer);
+            }
+        }
+
+        // Check if RelatedTextsSection component is available
+        if (typeof RelatedTextsSection !== 'undefined') {
+            const entity = {
+                id: metadata.id,
+                type: metadata.type,
+                name: entityData.name || metadata.id,
+                mythology: metadata.mythology,
+                corpusQueries: entityData.corpusQueries || []
+            };
+
+            const textsSection = new RelatedTextsSection(corpusContainer, entity, {
+                showUserQueries: true,
+                maxQueries: 10,
+                autoLoadFirst: false,
+                showCorpusExplorerLink: true
+            });
+
+            await textsSection.init();
+        } else {
+            // Fallback: render simple corpus queries
+            renderSimpleCorpusSection(corpusContainer, entityData, metadata);
+        }
+    }
+
+    /**
+     * Simple fallback corpus section renderer
+     */
+    function renderSimpleCorpusSection(container, entityData, metadata) {
+        const queries = entityData.corpusQueries || [];
+
+        if (queries.length === 0) {
+            // Show link to corpus explorer
+            container.innerHTML = `
+                <section class="corpus-search-section glass-card" style="padding: 1.5rem; margin-top: 2rem;">
+                    <h3 style="margin: 0 0 1rem; color: var(--color-primary);">
+                        <span style="margin-right: 0.5rem;">📚</span>
+                        Primary Source References
+                    </h3>
+                    <p style="opacity: 0.8; margin: 0 0 1rem;">
+                        Search ancient texts for references to ${escapeHtml(entityData.name || metadata.id)}.
+                    </p>
+                    <a href="/corpus-explorer.html?term=${encodeURIComponent(entityData.name || metadata.id)}"
+                       class="btn-primary"
+                       style="display: inline-block; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; background: var(--color-primary); color: white;">
+                        🔍 Search Ancient Texts
+                    </a>
+                </section>
+            `;
+            return;
+        }
+
+        // Render queries as clickable links
+        container.innerHTML = `
+            <section class="corpus-search-section" style="margin-top: 2rem;">
+                <h3 style="margin: 0 0 1rem; color: var(--color-primary);">
+                    <span style="margin-right: 0.5rem;">📚</span>
+                    Primary Source References
+                </h3>
+                <div class="corpus-queries-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    ${queries.map(query => `
+                        <a href="/corpus-explorer.html?term=${encodeURIComponent(query.query?.term || entityData.name)}&type=${query.queryType || 'github'}"
+                           class="glass-card corpus-query-link"
+                           style="display: flex; align-items: center; gap: 1rem; padding: 1rem; text-decoration: none; border-radius: 8px;">
+                            <span style="font-size: 1.25rem;">${query.queryType === 'github' ? '📜' : '🔍'}</span>
+                            <div style="flex: 1;">
+                                <strong style="color: var(--color-primary);">${escapeHtml(query.label)}</strong>
+                                ${query.description ? `<p style="margin: 0.25rem 0 0; font-size: 0.85rem; opacity: 0.7;">${escapeHtml(query.description)}</p>` : ''}
+                            </div>
+                            <span style="opacity: 0.5;">→</span>
+                        </a>
+                    `).join('')}
+                </div>
+                <div style="margin-top: 1rem; text-align: center;">
+                    <a href="/corpus-explorer.html?term=${encodeURIComponent(entityData.name || metadata.id)}"
+                       style="color: var(--color-primary); font-size: 0.9rem;">
+                        Search for more references →
+                    </a>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Escape HTML for safe rendering
+     */
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     function populateAttributeGrids(data) {

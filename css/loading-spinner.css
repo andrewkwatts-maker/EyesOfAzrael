@@ -244,3 +244,75 @@
         background: rgba(0, 0, 0, 0.3);
     }
 }
+
+/* ============================================
+   LOADING STATE TRANSITIONS
+   Smooth fade-out/fade-in for content replacement
+   ============================================ */
+
+/* Loading spinner fade-out animation */
+.loading-spinner-wrapper.fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+
+/* Content fade-in after loading */
+.content-loaded {
+    animation: contentFadeIn 0.4s ease-out forwards;
+}
+
+@keyframes contentFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading container fade-out */
+.loading-container.fade-out {
+    opacity: 0 !important;
+    transition: opacity 0.3s ease-out !important;
+    pointer-events: none;
+}
+
+/* Skeleton to content transition */
+.skeleton-fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+    pointer-events: none;
+}
+
+/* Prevent layout shift during transitions */
+.loading-transition-active {
+    overflow: hidden;
+    min-height: inherit;
+}
+
+/* Initial loading spinner (from index.html) specific styles */
+#main-content > .loading-container {
+    position: relative;
+    z-index: 10;
+}
+
+/* Ensure smooth transition when SPA replaces initial content */
+#main-content.transitioning > * {
+    transition: opacity 0.3s ease-out;
+}
+
+/* Reduced motion support for transitions */
+@media (prefers-reduced-motion: reduce) {
+    .loading-spinner-wrapper.fade-out,
+    .content-loaded,
+    .loading-container.fade-out,
+    .skeleton-fade-out,
+    #main-content.transitioning > * {
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}

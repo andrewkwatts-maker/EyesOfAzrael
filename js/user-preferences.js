@@ -54,7 +54,7 @@ class UserPreferences {
                 animationsEnabled: true
             },
             contentFilters: {
-                showUserContent: true,
+                showUserContent: false, // Default: OFF - show only standard content
                 showTheories: true,
                 showSubmissions: true,
                 showApprovedOnly: false,

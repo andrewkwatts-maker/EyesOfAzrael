@@ -1,5 +1,5 @@
 /**
- * Browse Category View - POLISHED VERSION
+ * Browse Category View - POLISHED VERSION with Content Filtering
  * Displays a grid of entities for a specific category (deities, creatures, etc.)
  * Fetches from Firebase and renders dynamically
  *
@@ -14,12 +14,14 @@
  * - Quick filter chips
  * - Statistics summary
  * - Empty states with helpful CTAs
+ * - Content filter toggle (standard vs community content)
  */
 
 class BrowseCategoryView {
     constructor(firestore) {
         this.db = firestore;
         this.cache = window.cacheManager || new FirebaseCacheManager({ db: firestore });
+        this.assetService = new AssetService();
         this.entities = [];
         this.filteredEntities = [];
         this.displayedEntities = [];
@@ -37,6 +39,10 @@ class BrowseCategoryView {
         this.selectedDomains = new Set();
         this.selectedTypes = new Set();
 
+        // Content filter
+        this.contentFilter = null;
+        this.showUserContent = false;
+
         // Pagination/Virtual scrolling
         this.currentPage = 1;
         this.itemsPerPage = 24;
@@ -49,56 +55,89 @@ class BrowseCategoryView {
     }
 
     /**
-     * Render browse view for a category
+     * Render browse view for a category with smooth loading transitions
      * @param {HTMLElement} container - Container to render into
      * @param {Object} options - { category, mythology }
      */
     async render(container, options = {}) {
         this.category = options.category;
         this.mythology = options.mythology;
+        this.container = container;
 
         console.log(`[Browse View] Rendering ${this.category}${this.mythology ? ` (${this.mythology})` : ''}`);
 
-        // Show loading state
+        // Show loading state with skeleton
         container.innerHTML = this.getLoadingHTML();
+        container.classList.add('has-skeleton');
 
         try {
             // Load entities from Firebase
             await this.loadEntities();
 
+            // Fade out loading before replacing content
+            const loadingEl = container.querySelector('.loading-container');
+            if (loadingEl) {
+                loadingEl.classList.add('fade-out');
+                loadingEl.style.opacity = '0';
+                loadingEl.style.transition = 'opacity 0.2s ease-out';
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+
             // Render content
             container.innerHTML = this.getBrowseHTML();
+            container.classList.remove('has-skeleton');
+
+            // Initialize content filter
+            await this.initContentFilter();
+
             this.attachEventListeners();
 
             // Apply initial filters
             this.applyFilters();
 
-            // Hide loading spinner
-            window.dispatchEvent(new CustomEvent('first-render-complete', {
-                detail: { view: 'browse', category: this.category }
+            // Trigger fade-in animation
+            requestAnimationFrame(() => {
+                const content = container.firstElementChild;
+                if (content) {
+                    content.classList.add('content-loaded');
+                }
+            });
+
+            // Hide loading spinner (use document for consistency)
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { view: 'browse', category: this.category, timestamp: Date.now() }
             }));
+
+            console.log(`[Browse View] Render complete for ${this.category}`);
 
         } catch (error) {
             console.error('[Browse View] Error:', error);
             this.showError(container, error);
+
+            // Emit error event
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: { view: 'browse', category: this.category, error: error.message }
+            }));
         }
     }
 
     /**
-     * Load entities from Firebase
+     * Load entities from Firebase using AssetService
      */
     async loadEntities() {
         console.log(`[Browse View] Loading ${this.category} from Firebase...`);
 
         try {
-            // Build query
-            const collection = this.category;
-            const query = this.mythology ? { mythology: this.mythology } : {};
+            // Check user preference for community content
+            const prefsService = new UserPreferencesService();
+            await prefsService.init();
+            this.showUserContent = prefsService.shouldShowUserContent();
 
-            // Fetch from cache manager
-            this.entities = await this.cache.getList(collection, query, {
-                ttl: this.cache.defaultTTL[collection] || 3600000,
-                orderBy: 'name asc',
+            // Fetch using AssetService (handles standard + community assets)
+            this.entities = await this.assetService.getAssets(this.category, {
+                mythology: this.mythology,
+                includeUserContent: this.showUserContent,
+                orderBy: 'name',
                 limit: 500
             });
 
@@ -115,12 +154,106 @@ class BrowseCategoryView {
             this.availableTypes = this.extractUniqueTypes(this.entities);
 
             console.log(`[Browse View] Loaded ${this.entities.length} ${this.category}`);
+            console.log(`[Browse View] Standard: ${this.entities.filter(e => e.isStandard).length}, Community: ${this.entities.filter(e => !e.isStandard).length}`);
             console.log(`[Browse View] Found ${this.availableDomains.size} unique domains`);
 
         } catch (error) {
             console.error('[Browse View] Error loading entities:', error);
             throw error;
         }
+    }
+
+    /**
+     * Initialize content filter component
+     */
+    async initContentFilter() {
+        const filterContainer = document.getElementById('contentFilterContainer');
+        if (!filterContainer) {
+            console.warn('[Browse View] Content filter container not found');
+            return;
+        }
+
+        // Create content filter instance
+        this.contentFilter = new ContentFilter({
+            container: filterContainer,
+            category: this.category,
+            mythology: this.mythology,
+            onToggle: async (showUserContent) => {
+                this.showUserContent = showUserContent;
+                await this.reloadEntities();
+            }
+        });
+    }
+
+    /**
+     * Reload entities when content filter changes
+     */
+    async reloadEntities() {
+        console.log(`[Browse View] Reloading with showUserContent: ${this.showUserContent}`);
+
+        try {
+            // Re-fetch entities
+            this.entities = await this.assetService.getAssets(this.category, {
+                mythology: this.mythology,
+                includeUserContent: this.showUserContent,
+                orderBy: 'name',
+                limit: 500
+            });
+
+            // Add metadata
+            this.entities = this.entities.map((entity, index) => ({
+                ...entity,
+                _popularity: this.calculatePopularity(entity),
+                _dateAdded: entity.dateAdded || entity.createdAt || Date.now() - (index * 1000)
+            }));
+
+            // Re-group and re-extract
+            this.groupedEntities = this.groupByMythology(this.entities);
+            this.availableDomains = this.extractUniqueDomains(this.entities);
+            this.availableTypes = this.extractUniqueTypes(this.entities);
+
+            // Re-apply filters
+            this.currentPage = 1;
+            this.applyFilters();
+
+            // Update stats
+            this.updateStats();
+
+        } catch (error) {
+            console.error('[Browse View] Error reloading entities:', error);
+        }
+    }
+
+    /**
+     * Update statistics display
+     */
+    updateStats() {
+        const statsEl = document.getElementById('browseStats');
+        if (!statsEl) return;
+
+        const totalCount = this.entities.length;
+        const mythCount = Object.keys(this.groupedEntities).length;
+        const domainCount = this.availableDomains.size;
+
+        statsEl.innerHTML = `
+            <span class="stat-badge">
+                <span class="stat-icon">📊</span>
+                <span class="stat-value">${totalCount}</span>
+                <span class="stat-label">${this.category}</span>
+            </span>
+            <span class="stat-badge">
+                <span class="stat-icon">🌍</span>
+                <span class="stat-value">${mythCount}</span>
+                <span class="stat-label">mythologies</span>
+            </span>
+            ${domainCount > 0 ? `
+                <span class="stat-badge">
+                    <span class="stat-icon">🏷️</span>
+                    <span class="stat-value">${domainCount}</span>
+                    <span class="stat-label">domains</span>
+                </span>
+            ` : ''}
+        `;
     }
 
     /**
@@ -321,6 +454,9 @@ class BrowseCategoryView {
             <div class="browse-view">
                 <!-- Header -->
                 ${this.getHeaderHTML(categoryInfo)}
+
+                <!-- Content Filter Toggle -->
+                <div id="contentFilterContainer"></div>
 
                 <!-- Quick Filters & Statistics -->
                 ${this.getQuickFiltersHTML()}
@@ -558,12 +694,18 @@ class BrowseCategoryView {
         // Truncate description based on density
         const maxLines = this.viewDensity === 'compact' ? 2 : (this.viewDensity === 'comfortable' ? 3 : 5);
 
+        // Determine badge
+        const badgeHTML = entity.isStandard
+            ? '' // No badge for standard content
+            : `<span class="user-content-badge" title="Created by ${entity.userId || 'community contributor'}">Community</span>`;
+
         return `
             <a href="#/entity/${this.category}/${entity.mythology}/${entity.id}"
-               class="entity-card"
+               class="entity-card ${entity.isStandard ? '' : 'entity-card-community'}"
                data-entity-id="${entity.id}"
                data-mythology="${entity.mythology}"
                data-name="${entity.name.toLowerCase()}">
+                ${badgeHTML}
                 <div class="entity-card-header">
                     ${iconHTML}
                     <div class="entity-card-info">
@@ -2179,10 +2321,9 @@ class BrowseCategoryView {
     }
 }
 
-// ES Module Export
-export { BrowseCategoryView };
-
-// Legacy global export
+// Global export for non-module script loading
+// Note: ES module export removed to prevent SyntaxError in non-module context
 if (typeof window !== 'undefined') {
     window.BrowseCategoryView = BrowseCategoryView;
+    console.log('[BrowseCategoryView] Class registered globally');
 }

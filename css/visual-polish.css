@@ -643,3 +643,520 @@ html {
         display: none !important;
     }
 }
+
+/* ============================================
+   FINAL UX POLISH - Agent 12 Additions
+   ============================================ */
+
+/* Enhanced Smooth Scroll Behavior */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px; /* Account for sticky header */
+}
+
+/* Smooth scroll for specific containers */
+.view-container,
+.main-content,
+#main-content {
+    scroll-behavior: smooth;
+}
+
+/* Enhanced Focus States for all interactive elements */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible,
+[role="button"]:focus-visible,
+[role="link"]:focus-visible {
+    outline: 3px solid var(--color-accent, #ffd93d);
+    outline-offset: 3px;
+    box-shadow:
+        0 0 0 6px rgba(255, 217, 61, 0.25),
+        0 0 20px rgba(255, 217, 61, 0.15);
+    transition: outline-offset 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Navigation link focus enhancement */
+.nav-link:focus-visible {
+    outline: 3px solid var(--color-accent, #ffd93d);
+    outline-offset: 4px;
+    border-radius: 8px;
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+}
+
+/* Card focus indicators */
+.landing-category-card:focus-visible,
+.mythology-card:focus-visible,
+.universal-grid-card:focus-visible,
+.feature-card:focus-visible {
+    outline: 3px solid var(--color-accent, #ffd93d);
+    outline-offset: 4px;
+    transform: translateY(-6px) scale(1.01);
+    border-color: var(--color-accent, #ffd93d);
+}
+
+/* Missing ARIA Labels - Loading States */
+.loading-container[role="status"] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Live region for screen readers */
+.sr-live-region {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Color Contrast Improvements for Text */
+.landing-category-description,
+.landing-hero-description,
+.landing-section-subtitle,
+.feature-card p {
+    color: var(--color-text-secondary, #b0b5c3);
+}
+
+/* High contrast text for important content */
+.landing-hero-title,
+.landing-hero-subtitle,
+.landing-section-header,
+.landing-category-name {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Enhanced Error States with better contrast */
+.error-page,
+.error-message {
+    color: #ff8a8a;
+    background: rgba(255, 100, 100, 0.1);
+    border: 2px solid rgba(255, 100, 100, 0.3);
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.error-page h1,
+.error-page h2 {
+    color: #ffa0a0;
+}
+
+/* User-Friendly Error Handling Styling */
+.error-page {
+    text-align: center;
+    max-width: 600px;
+    margin: 4rem auto;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.error-page .btn-primary {
+    margin-top: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Consistent Loading State Styling */
+.loading-container {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 1.5rem;
+}
+
+.loading-message {
+    color: var(--color-text-secondary, #adb5bd);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.loading-submessage {
+    color: var(--color-text-muted, #6c757d);
+    font-size: 0.9rem;
+    margin-top: -0.5rem;
+}
+
+/* Transition Animations for View Changes */
+.view-transition-enter {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.view-transition-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+.view-transition-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.view-transition-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+/* Footer Link Accessibility */
+.footer-links a {
+    color: var(--color-text-secondary, #adb5bd);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 0.5rem;
+    margin: -0.5rem;
+    border-radius: 4px;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.footer-links a:hover,
+.footer-links a:focus {
+    color: var(--color-primary, #8b7fff);
+    background-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+    text-decoration-thickness: 2px;
+}
+
+.footer-links a:focus-visible {
+    outline: 2px solid var(--color-accent, #ffd93d);
+    outline-offset: 2px;
+}
+
+/* Site Footer Enhancement */
+.site-footer {
+    margin-top: auto;
+    background: rgba(var(--color-bg-secondary-rgb, 21, 26, 53), 0.8);
+    border-top: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.6);
+    padding: 2rem;
+    text-align: center;
+}
+
+.footer-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.footer-links {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Enhanced Transitions for Interactive Elements */
+.interactive-element,
+[role="button"],
+[role="link"],
+a,
+button {
+    transition:
+        color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Better Visual Feedback for Active States */
+a:active,
+button:active,
+[role="button"]:active {
+    transform: scale(0.98);
+    transition-duration: 0.1s;
+}
+
+/* Search Input Enhancements */
+input[type="search"],
+input[type="text"],
+.search-input,
+.search-input-large {
+    transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        background-color 0.3s ease;
+}
+
+input[type="search"]:focus,
+input[type="text"]:focus,
+.search-input:focus,
+.search-input-large:focus {
+    border-color: var(--color-primary, #8b7fff);
+    box-shadow:
+        0 0 0 4px rgba(var(--color-primary-rgb, 139, 127, 255), 0.2),
+        0 4px 16px rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+    outline: none;
+}
+
+/* Keyboard Navigation Visibility */
+body.keyboard-navigation *:focus {
+    outline: 3px solid var(--color-accent, #ffd93d) !important;
+    outline-offset: 3px !important;
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets */
+    .nav-link,
+    .footer-links a,
+    .btn,
+    button {
+        min-height: 48px;
+        min-width: 48px;
+        padding: 12px 16px;
+    }
+
+    /* Remove hover animations on touch */
+    .card:hover,
+    .mythology-card:hover,
+    .landing-category-card:hover {
+        transform: none;
+    }
+
+    /* Active state for touch */
+    .card:active,
+    .mythology-card:active,
+    .landing-category-card:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+}
+
+/* High Contrast Mode Enhancements */
+@media (prefers-contrast: high) {
+    .landing-category-card,
+    .feature-card,
+    .mythology-card {
+        border-width: 3px;
+    }
+
+    a, button {
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+    }
+
+    .error-page {
+        border-width: 3px;
+    }
+
+    /* Ensure focus is very visible */
+    *:focus-visible {
+        outline-width: 4px !important;
+        outline-offset: 4px !important;
+    }
+}
+
+/* Dark Mode Color Consistency */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --focus-ring-color: #ffd93d;
+        --error-color: #ff8a8a;
+        --success-color: #6ee7b7;
+    }
+}
+
+/* Notification Toast Improvements */
+.toast-notification,
+.notification {
+    animation: slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Consistent Border Radius System */
+:root {
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
+}
+
+/* Ensure all cards use consistent radius */
+.card,
+.mythology-card,
+.landing-category-card,
+.feature-card,
+.universal-grid-card {
+    border-radius: var(--radius-xl, 16px);
+}
+
+.btn,
+.btn-primary,
+.btn-secondary {
+    border-radius: var(--radius-lg, 12px);
+}
+
+/* Empty State Styling */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--color-text-secondary, #adb5bd);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--color-text-primary, #f8f9fa);
+}
+
+.empty-state-description {
+    max-width: 400px;
+    margin: 0 auto 1.5rem;
+    line-height: 1.6;
+}
+
+/* Selection Styling */
+::selection {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+    color: var(--color-text-primary, #ffffff);
+}
+
+/* Scrollbar Styling (Webkit) */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(var(--color-bg-secondary-rgb, 21, 26, 53), 0.5);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.6);
+}
+
+/* Firefox Scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 127, 255, 0.4) rgba(21, 26, 53, 0.5);
+}
+
+/* ============================================
+   CONSOLIDATED LOADING STATE TRANSITIONS
+   Ensures smooth spinner-to-content transitions
+   ============================================ */
+
+/* Container with skeleton state */
+.has-skeleton {
+    min-height: 400px;
+    position: relative;
+}
+
+/* Universal fade-out class for all loading elements */
+.fade-out {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease-out !important;
+}
+
+/* Content appearing after loading */
+.content-loaded {
+    animation: smoothFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes smoothFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading container fade-out transition */
+.loading-container {
+    transition: opacity 0.3s ease-out;
+}
+
+.loading-container.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Skeleton loading elements fade-out */
+.skeleton-loading.fade-out,
+.skeleton-card.fade-out {
+    opacity: 0;
+    transform: scale(0.98);
+    transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+}
+
+/* Main content transition states */
+#main-content {
+    transition: opacity 0.2s ease-out;
+}
+
+#main-content.transitioning {
+    opacity: 0.5;
+}
+
+/* Spinner wrapper transitions */
+.loading-spinner-wrapper {
+    transition: opacity 0.3s ease-out;
+}
+
+.loading-spinner-wrapper.fade-out {
+    opacity: 0;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .fade-out,
+    .content-loaded,
+    .loading-container,
+    .skeleton-loading.fade-out,
+    .loading-spinner-wrapper,
+    #main-content {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .content-loaded {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}

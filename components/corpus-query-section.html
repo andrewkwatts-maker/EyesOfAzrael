@@ -1,0 +1,311 @@
+<!--
+  Corpus Query Section Template
+  Include this on entity pages to show user queries
+
+  Usage:
+  1. Include this template in your page
+  2. Initialize with: new UserQueriesDisplay(container, { entityType, entityId })
+-->
+
+<!-- User Queries Section Container -->
+<template id="user-queries-section-template">
+  <section class="entity-section user-queries-section">
+    <div class="section-header">
+      <h3 class="section-title">
+        <svg class="section-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+        </svg>
+        Corpus Searches
+      </h3>
+      <p class="section-description">Custom searches for related texts and references</p>
+    </div>
+    <div class="user-queries-container" id="entity-user-queries">
+      <!-- UserQueriesDisplay component renders here -->
+    </div>
+  </section>
+</template>
+
+<!-- Query Card Template -->
+<template id="query-card-template">
+  <div class="query-card" data-query-id="">
+    <div class="query-card-header">
+      <span class="query-label"></span>
+      <span class="query-type-badge"></span>
+    </div>
+    <div class="query-card-meta">
+      <span class="query-term"></span>
+      <span class="query-mythology"></span>
+    </div>
+    <div class="query-card-footer">
+      <div class="query-voting">
+        <button class="vote-btn upvote" data-vote="1" aria-label="Upvote">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 4l4 4H9v4H7V8H4l4-4z"/>
+          </svg>
+        </button>
+        <span class="vote-count">0</span>
+        <button class="vote-btn downvote" data-vote="-1" aria-label="Downvote">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 12l-4-4h3V4h2v4h3l-4 4z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="query-actions">
+        <button class="query-action-btn execute" title="Execute Query" aria-label="Execute">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M4 2v12l8-6-8-6z"/>
+          </svg>
+        </button>
+        <button class="query-action-btn edit" title="Edit Query" aria-label="Edit">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10z"/>
+          </svg>
+        </button>
+        <button class="query-action-btn delete" title="Delete Query" aria-label="Delete">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5z"/>
+            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- Add Query Button Template -->
+<template id="add-query-button-template">
+  <button class="add-query-btn" type="button">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+    </svg>
+    <span>Add Search Query</span>
+  </button>
+</template>
+
+<!-- Query Editor Modal Template -->
+<template id="query-editor-modal-template">
+  <div class="query-editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-modal-title">
+    <div class="query-editor-modal-backdrop"></div>
+    <div class="query-editor-modal-content">
+      <div class="query-editor-container">
+        <!-- CorpusQueryEditor component renders here -->
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- Login Prompt Template -->
+<template id="query-login-prompt-template">
+  <div class="query-login-prompt" role="dialog" aria-modal="true" aria-labelledby="login-prompt-title">
+    <div class="prompt-content">
+      <h3 id="login-prompt-title">Sign in Required</h3>
+      <p>You need to be signed in to create custom search queries.</p>
+      <div class="prompt-actions">
+        <button class="btn-secondary prompt-cancel" type="button">Cancel</button>
+        <button class="btn-primary prompt-signin" type="button">Sign In</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- Toast Notification Template -->
+<template id="query-toast-template">
+  <div class="query-toast" role="alert" aria-live="polite">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" class="toast-icon">
+      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+    </svg>
+    <span class="toast-message"></span>
+  </div>
+</template>
+
+<!-- Inline Query Result Template -->
+<template id="query-result-inline-template">
+  <div class="query-result-inline">
+    <div class="result-header">
+      <span class="result-name"></span>
+      <span class="result-mythology"></span>
+    </div>
+    <p class="result-description"></p>
+    <a href="#" class="result-link">View Details</a>
+  </div>
+</template>
+
+<!-- Empty State Template -->
+<template id="queries-empty-template">
+  <div class="queries-empty">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="currentColor" opacity="0.3">
+      <path d="M24 4C12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20S35.046 4 24 4zm0 36c-8.837 0-16-7.163-16-16S15.163 8 24 8s16 7.163 16 16-7.163 16-16 16z"/>
+      <path d="M22 22h4v12h-4zm0-8h4v4h-4z"/>
+    </svg>
+    <p class="empty-title">No custom searches yet</p>
+    <p class="empty-description">Create a search to save your favorite queries</p>
+  </div>
+</template>
+
+<style>
+  /* Section Styles */
+  .user-queries-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: var(--cqe-bg, #ffffff);
+    border-radius: var(--cqe-radius-lg, 12px);
+    border: 1px solid var(--cqe-border, #e2e8f0);
+  }
+
+  .section-header {
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.25rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--cqe-text, #1a202c);
+  }
+
+  .section-icon {
+    color: var(--cqe-primary, #667eea);
+  }
+
+  .section-description {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--cqe-text-secondary, #718096);
+  }
+
+  /* Result Inline Styles */
+  .query-result-inline {
+    padding: 0.75rem;
+    background: var(--cqe-bg-secondary, #f7fafc);
+    border-radius: var(--cqe-radius, 8px);
+    border-left: 3px solid var(--cqe-primary, #667eea);
+    margin-bottom: 0.5rem;
+  }
+
+  .query-result-inline .result-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .query-result-inline .result-name {
+    font-weight: 600;
+    color: var(--cqe-text, #1a202c);
+  }
+
+  .query-result-inline .result-mythology {
+    background: var(--cqe-primary, #667eea);
+    color: white;
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .query-result-inline .result-description {
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    color: var(--cqe-text-secondary, #718096);
+    line-height: 1.5;
+  }
+
+  .query-result-inline .result-link {
+    font-size: 0.875rem;
+    color: var(--cqe-primary, #667eea);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .query-result-inline .result-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Empty State Styles */
+  .queries-empty {
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .queries-empty svg {
+    margin-bottom: 1rem;
+  }
+
+  .empty-title {
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+    color: var(--cqe-text, #1a202c);
+  }
+
+  .empty-description {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--cqe-text-secondary, #718096);
+  }
+
+  /* Toast Icon Color */
+  .query-toast.success .toast-icon {
+    color: var(--cqe-success, #10b981);
+  }
+
+  .query-toast.error .toast-icon {
+    color: var(--cqe-danger, #ef4444);
+  }
+</style>
+
+<script>
+  // Auto-initialize user queries sections on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    // Find all query containers with data attributes
+    const containers = document.querySelectorAll('[data-user-queries][data-entity-type][data-entity-id]');
+
+    containers.forEach(container => {
+      const entityType = container.dataset.entityType;
+      const entityId = container.dataset.entityId;
+
+      if (entityType && entityId && window.UserQueriesDisplay) {
+        new window.UserQueriesDisplay(container, {
+          entityType,
+          entityId,
+          showAddButton: true,
+          showPublicQueries: true
+        });
+      }
+    });
+  });
+
+  // Helper function to add query section to entity pages
+  window.addCorpusQuerySection = function(containerSelector, entityType, entityId) {
+    const container = document.querySelector(containerSelector);
+    if (!container) {
+      console.error('[CorpusQuerySection] Container not found:', containerSelector);
+      return null;
+    }
+
+    // Create section from template
+    const template = document.getElementById('user-queries-section-template');
+    if (template) {
+      const section = template.content.cloneNode(true);
+      container.appendChild(section);
+    }
+
+    // Get the queries container
+    const queriesContainer = container.querySelector('#entity-user-queries') || container;
+
+    // Initialize display
+    if (window.UserQueriesDisplay) {
+      return new window.UserQueriesDisplay(queriesContainer, {
+        entityType,
+        entityId,
+        showAddButton: true,
+        showPublicQueries: true
+      });
+    }
+
+    return null;
+  };
+</script>

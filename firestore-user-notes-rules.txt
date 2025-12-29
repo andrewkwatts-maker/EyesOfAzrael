@@ -1,0 +1,64 @@
+/**
+ * Firestore Security Rules for User Notes
+ *
+ * Add these rules to your firestore.rules file in the Firebase console.
+ * These rules enforce:
+ * - Public read access to notes
+ * - Authenticated users can create notes
+ * - Only note owners can update/delete their notes
+ */
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // User Notes Collection
+    match /user_notes/{assetType}/{assetId}/notes/{noteId} {
+
+      // Anyone can read notes (public access)
+      allow read: if true;
+
+      // Only authenticated users can create notes
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.keys().hasAll(['userId', 'userName', 'content', 'createdAt', 'updatedAt', 'votes', 'isEdited', 'assetType', 'assetId'])
+                    && request.resource.data.content is string
+                    && request.resource.data.content.size() >= 20
+                    && request.resource.data.content.size() <= 2000;
+
+      // Only note owner can update their notes
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.content is string
+                    && request.resource.data.content.size() >= 20
+                    && request.resource.data.content.size() <= 2000;
+
+      // Only note owner can delete their notes
+      allow delete: if request.auth != null
+                    && resource.data.userId == request.auth.uid;
+    }
+
+    // Asset type document (used as parent for organizing notes)
+    match /user_notes/{assetType} {
+      allow read: if true;
+      allow write: if false; // Don't allow direct writes to asset type documents
+    }
+  }
+}
+
+/**
+ * Required Firestore Indexes
+ *
+ * Add these indexes in the Firebase console:
+ *
+ * Collection: user_notes/{assetType}/{assetId}/notes
+ * Fields:
+ *   1. votes (Descending) + createdAt (Descending)
+ *   2. createdAt (Descending)
+ *   3. userId (Ascending) + createdAt (Descending)
+ *
+ * Collection Group: notes (for querying all user notes across assets)
+ * Fields:
+ *   1. userId (Ascending) + createdAt (Descending)
+ */

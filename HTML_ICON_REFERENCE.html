@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon System Visual Reference - Eyes of Azrael</title>
+    <link rel="stylesheet" href="/css/entity-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 3px solid #667eea;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .category-section {
+            margin-bottom: 3rem;
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .category-header h2 {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        .category-count {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .icon-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .icon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .icon-display {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-display img {
+            width: 64px;
+            height: 64px;
+            transition: transform 0.3s ease;
+        }
+
+        .icon-card:hover .icon-display img {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .icon-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .icon-path {
+            font-size: 0.75rem;
+            color: #999;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .size-demo {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .size-demo h3 {
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .size-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .size-item {
+            text-align: center;
+        }
+
+        .size-label {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .usage-example {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .usage-example code {
+            background: #fff;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e0e0e0;
+            text-align: center;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .icon-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Icon System Visual Reference</h1>
+            <p class="subtitle">Eyes of Azrael Mythology Database</p>
+        </header>
+
+        <!-- Statistics -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">138</div>
+                <div class="stat-label">Total Icons</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">312</div>
+                <div class="stat-label">Files Updated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">9</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">63.8%</div>
+                <div class="stat-label">Coverage Rate</div>
+            </div>
+        </div>
+
+        <!-- Size Demonstration -->
+        <div class="size-demo">
+            <h3>Icon Size Classes</h3>
+            <div class="size-row">
+                <div class="size-item">
+                    <img src="/icons/deity-icon.svg" alt="Deity icon" class="entity-icon small">
+                    <div class="size-label">Small (32×32)</div>
+                </div>
+                <div class="size-item">
+                    <img src="/icons/deity-icon.svg" alt="Deity icon" class="entity-icon medium">
+                    <div class="size-label">Medium (48×48)</div>
+                </div>
+                <div class="size-item">
+                    <img src="/icons/deity-icon.svg" alt="Deity icon" class="entity-icon large">
+                    <div class="size-label">Large (64×64)</div>
+                </div>
+                <div class="size-item">
+                    <img src="/icons/deity-icon.svg" alt="Deity icon" class="entity-icon xlarge">
+                    <div class="size-label">XLarge (96×96)</div>
+                </div>
+                <div class="size-item">
+                    <img src="/icons/deity-icon.svg" alt="Deity icon" class="entity-icon hero-size">
+                    <div class="size-label">Hero (128×128)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deity Domains -->
+        <section class="category-section">
+            <div class="category-header">
+                <h2>⚡ Deity Domains</h2>
+                <span class="category-count">15 icons</span>
+            </div>
+            <div class="icon-grid">
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/war.svg" alt="War"></div>
+                    <div class="icon-name">War</div>
+                    <div class="icon-path">/deity-domains/war.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/wisdom.svg" alt="Wisdom"></div>
+                    <div class="icon-name">Wisdom</div>
+                    <div class="icon-path">/deity-domains/wisdom.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/love.svg" alt="Love"></div>
+                    <div class="icon-name">Love</div>
+                    <div class="icon-path">/deity-domains/love.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/death.svg" alt="Death"></div>
+                    <div class="icon-name">Death</div>
+                    <div class="icon-path">/deity-domains/death.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/sky.svg" alt="Sky"></div>
+                    <div class="icon-name">Sky</div>
+                    <div class="icon-path">/deity-domains/sky.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/earth.svg" alt="Earth"></div>
+                    <div class="icon-name">Earth</div>
+                    <div class="icon-path">/deity-domains/earth.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/sea.svg" alt="Sea"></div>
+                    <div class="icon-name">Sea</div>
+                    <div class="icon-path">/deity-domains/sea.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/sun.svg" alt="Sun"></div>
+                    <div class="icon-name">Sun</div>
+                    <div class="icon-path">/deity-domains/sun.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/moon.svg" alt="Moon"></div>
+                    <div class="icon-name">Moon</div>
+                    <div class="icon-path">/deity-domains/moon.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/trickster.svg" alt="Trickster"></div>
+                    <div class="icon-name">Trickster</div>
+                    <div class="icon-path">/deity-domains/trickster.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/healing.svg" alt="Healing"></div>
+                    <div class="icon-name">Healing</div>
+                    <div class="icon-path">/deity-domains/healing.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/fertility.svg" alt="Fertility"></div>
+                    <div class="icon-name">Fertility</div>
+                    <div class="icon-path">/deity-domains/fertility.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/fire.svg" alt="Fire"></div>
+                    <div class="icon-name">Fire</div>
+                    <div class="icon-path">/deity-domains/fire.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/creator.svg" alt="Creator"></div>
+                    <div class="icon-name">Creator</div>
+                    <div class="icon-path">/deity-domains/creator.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/deity-domains/justice.svg" alt="Justice"></div>
+                    <div class="icon-name">Justice</div>
+                    <div class="icon-path">/deity-domains/justice.svg</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Creatures -->
+        <section class="category-section">
+            <div class="category-header">
+                <h2>🐉 Creatures</h2>
+                <span class="category-count">10 icons</span>
+            </div>
+            <div class="icon-grid">
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/creatures/dragon.svg" alt="Dragon"></div>
+                    <div class="icon-name">Dragon</div>
+                    <div class="icon-path">/creatures/dragon.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/creatures/serpent.svg" alt="Serpent"></div>
+                    <div class="icon-name">Serpent</div>
+                    <div class="icon-path">/creatures/serpent.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/creatures/bird.svg" alt="Bird"></div>
+                    <div class="icon-name">Bird</div>
+                    <div class="icon-path">/creatures/bird.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/creatures/beast.svg" alt="Beast"></div>
+                    <div class="icon-name">Beast</div>
+                    <div class="icon-path">/creatures/beast.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/creatures/hybrid.svg" alt="Hybrid"></div>
+                    <div class="icon-name">Hybrid</div>
+                    <div class="icon-path">/creatures/hybrid.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/creatures/giant.svg" alt="Giant"></div>
+                    <div class="icon-name">Giant</div>
+                    <div class="icon-path">/creatures/giant.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/creatures/spirit.svg" alt="Spirit"></div>
+                    <div class="icon-name">Spirit</div>
+                    <div class="icon-path">/creatures/spirit.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/creatures/demon.svg" alt="Demon"></div>
+                    <div class="icon-name">Demon</div>
+                    <div class="icon-path">/creatures/demon.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/creatures/angel.svg" alt="Angel"></div>
+                    <div class="icon-name">Angel</div>
+                    <div class="icon-path">/creatures/angel.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/creatures/undead.svg" alt="Undead"></div>
+                    <div class="icon-name">Undead</div>
+                    <div class="icon-path">/creatures/undead.svg</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Heroes -->
+        <section class="category-section">
+            <div class="category-header">
+                <h2>🦸 Heroes</h2>
+                <span class="category-count">10 icons</span>
+            </div>
+            <div class="icon-grid">
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/heroes/warrior.svg" alt="Warrior"></div>
+                    <div class="icon-name">Warrior</div>
+                    <div class="icon-path">/heroes/warrior.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/heroes/king.svg" alt="King"></div>
+                    <div class="icon-name">King</div>
+                    <div class="icon-path">/heroes/king.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/heroes/prophet.svg" alt="Prophet"></div>
+                    <div class="icon-name">Prophet</div>
+                    <div class="icon-path">/heroes/prophet.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/heroes/demigod.svg" alt="Demigod"></div>
+                    <div class="icon-name">Demigod</div>
+                    <div class="icon-path">/heroes/demigod.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/heroes/sage.svg" alt="Sage"></div>
+                    <div class="icon-name">Sage</div>
+                    <div class="icon-path">/heroes/sage.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/heroes/champion.svg" alt="Champion"></div>
+                    <div class="icon-name">Champion</div>
+                    <div class="icon-path">/heroes/champion.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/heroes/trickster.svg" alt="Trickster"></div>
+                    <div class="icon-name">Trickster</div>
+                    <div class="icon-path">/heroes/trickster.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/heroes/maiden.svg" alt="Maiden"></div>
+                    <div class="icon-name">Maiden</div>
+                    <div class="icon-path">/heroes/maiden.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/heroes/monk.svg" alt="Monk"></div>
+                    <div class="icon-name">Monk</div>
+                    <div class="icon-path">/heroes/monk.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/heroes/queen.svg" alt="Queen"></div>
+                    <div class="icon-name">Queen</div>
+                    <div class="icon-path">/heroes/queen.svg</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Places -->
+        <section class="category-section">
+            <div class="category-header">
+                <h2>🏔️ Places</h2>
+                <span class="category-count">10 icons</span>
+            </div>
+            <div class="icon-grid">
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/places/mountain.svg" alt="Mountain"></div>
+                    <div class="icon-name">Mountain</div>
+                    <div class="icon-path">/places/mountain.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/places/temple.svg" alt="Temple"></div>
+                    <div class="icon-name">Temple</div>
+                    <div class="icon-path">/places/temple.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/places/underworld.svg" alt="Underworld"></div>
+                    <div class="icon-name">Underworld</div>
+                    <div class="icon-path">/places/underworld.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/places/realm.svg" alt="Realm"></div>
+                    <div class="icon-name">Realm</div>
+                    <div class="icon-path">/places/realm.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/places/city.svg" alt="City"></div>
+                    <div class="icon-name">City</div>
+                    <div class="icon-path">/places/city.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/places/river.svg" alt="River"></div>
+                    <div class="icon-name">River</div>
+                    <div class="icon-path">/places/river.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/places/cave.svg" alt="Cave"></div>
+                    <div class="icon-name">Cave</div>
+                    <div class="icon-path">/places/cave.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/places/island.svg" alt="Island"></div>
+                    <div class="icon-name">Island</div>
+                    <div class="icon-path">/places/island.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/places/palace.svg" alt="Palace"></div>
+                    <div class="icon-name">Palace</div>
+                    <div class="icon-path">/places/palace.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/places/shrine.svg" alt="Shrine"></div>
+                    <div class="icon-name">Shrine</div>
+                    <div class="icon-path">/places/shrine.svg</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Texts -->
+        <section class="category-section">
+            <div class="category-header">
+                <h2>📜 Texts</h2>
+                <span class="category-count">10 icons</span>
+            </div>
+            <div class="icon-grid">
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/texts/scroll.svg" alt="Scroll"></div>
+                    <div class="icon-name">Scroll</div>
+                    <div class="icon-path">/texts/scroll.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/texts/book.svg" alt="Book"></div>
+                    <div class="icon-name">Book</div>
+                    <div class="icon-path">/texts/book.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/texts/tablet.svg" alt="Tablet"></div>
+                    <div class="icon-name">Tablet</div>
+                    <div class="icon-path">/texts/tablet.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/texts/codex.svg" alt="Codex"></div>
+                    <div class="icon-name">Codex</div>
+                    <div class="icon-path">/texts/codex.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/texts/manuscript.svg" alt="Manuscript"></div>
+                    <div class="icon-name">Manuscript</div>
+                    <div class="icon-path">/texts/manuscript.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/texts/prayer.svg" alt="Prayer"></div>
+                    <div class="icon-name">Prayer</div>
+                    <div class="icon-path">/texts/prayer.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/texts/sutra.svg" alt="Sutra"></div>
+                    <div class="icon-name">Sutra</div>
+                    <div class="icon-path">/texts/sutra.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/texts/tome.svg" alt="Tome"></div>
+                    <div class="icon-name">Tome</div>
+                    <div class="icon-path">/texts/tome.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/texts/papyrus.svg" alt="Papyrus"></div>
+                    <div class="icon-name">Papyrus</div>
+                    <div class="icon-path">/texts/papyrus.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/texts/grimoire.svg" alt="Grimoire"></div>
+                    <div class="icon-name">Grimoire</div>
+                    <div class="icon-path">/texts/grimoire.svg</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rituals -->
+        <section class="category-section">
+            <div class="category-header">
+                <h2>🕯️ Rituals</h2>
+                <span class="category-count">10 icons</span>
+            </div>
+            <div class="icon-grid">
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/rituals/offering.svg" alt="Offering"></div>
+                    <div class="icon-name">Offering</div>
+                    <div class="icon-path">/rituals/offering.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/rituals/divination.svg" alt="Divination"></div>
+                    <div class="icon-name">Divination</div>
+                    <div class="icon-path">/rituals/divination.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/rituals/celebration.svg" alt="Celebration"></div>
+                    <div class="icon-name">Celebration</div>
+                    <div class="icon-path">/rituals/celebration.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/rituals/initiation.svg" alt="Initiation"></div>
+                    <div class="icon-name">Initiation</div>
+                    <div class="icon-path">/rituals/initiation.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/rituals/sacrifice.svg" alt="Sacrifice"></div>
+                    <div class="icon-name">Sacrifice</div>
+                    <div class="icon-path">/rituals/sacrifice.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/rituals/purification.svg" alt="Purification"></div>
+                    <div class="icon-name">Purification</div>
+                    <div class="icon-path">/rituals/purification.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/rituals/invocation.svg" alt="Invocation"></div>
+                    <div class="icon-name">Invocation</div>
+                    <div class="icon-path">/rituals/invocation.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/rituals/meditation.svg" alt="Meditation"></div>
+                    <div class="icon-name">Meditation</div>
+                    <div class="icon-path">/rituals/meditation.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/rituals/blessing.svg" alt="Blessing"></div>
+                    <div class="icon-name">Blessing</div>
+                    <div class="icon-path">/rituals/blessing.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/rituals/consecration.svg" alt="Consecration"></div>
+                    <div class="icon-name">Consecration</div>
+                    <div class="icon-path">/rituals/consecration.svg</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Items -->
+        <section class="category-section">
+            <div class="category-header">
+                <h2>⚔️ Items</h2>
+                <span class="category-count">10 icons</span>
+            </div>
+            <div class="icon-grid">
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/items/weapon.svg" alt="Weapon"></div>
+                    <div class="icon-name">Weapon</div>
+                    <div class="icon-path">/items/weapon.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/items/artifact.svg" alt="Artifact"></div>
+                    <div class="icon-name">Artifact</div>
+                    <div class="icon-path">/items/artifact.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/items/tool.svg" alt="Tool"></div>
+                    <div class="icon-name">Tool</div>
+                    <div class="icon-path">/items/tool.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/items/treasure.svg" alt="Treasure"></div>
+                    <div class="icon-name">Treasure</div>
+                    <div class="icon-path">/items/treasure.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/items/relic.svg" alt="Relic"></div>
+                    <div class="icon-name">Relic</div>
+                    <div class="icon-path">/items/relic.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/items/staff.svg" alt="Staff"></div>
+                    <div class="icon-name">Staff</div>
+                    <div class="icon-path">/items/staff.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/items/crown.svg" alt="Crown"></div>
+                    <div class="icon-name">Crown</div>
+                    <div class="icon-path">/items/crown.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/items/chalice.svg" alt="Chalice"></div>
+                    <div class="icon-name">Chalice</div>
+                    <div class="icon-path">/items/chalice.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/items/amulet.svg" alt="Amulet"></div>
+                    <div class="icon-name">Amulet</div>
+                    <div class="icon-path">/items/amulet.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/items/ring.svg" alt="Ring"></div>
+                    <div class="icon-name">Ring</div>
+                    <div class="icon-path">/items/ring.svg</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Herbs -->
+        <section class="category-section">
+            <div class="category-header">
+                <h2>🌿 Herbs</h2>
+                <span class="category-count">10 icons</span>
+            </div>
+            <div class="icon-grid">
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/herbs/tree.svg" alt="Tree"></div>
+                    <div class="icon-name">Tree</div>
+                    <div class="icon-path">/herbs/tree.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/herbs/flower.svg" alt="Flower"></div>
+                    <div class="icon-name">Flower</div>
+                    <div class="icon-path">/herbs/flower.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/herbs/root.svg" alt="Root"></div>
+                    <div class="icon-name">Root</div>
+                    <div class="icon-path">/herbs/root.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/herbs/vine.svg" alt="Vine"></div>
+                    <div class="icon-name">Vine</div>
+                    <div class="icon-path">/herbs/vine.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/herbs/grain.svg" alt="Grain"></div>
+                    <div class="icon-name">Grain</div>
+                    <div class="icon-path">/herbs/grain.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/herbs/leaf.svg" alt="Leaf"></div>
+                    <div class="icon-name">Leaf</div>
+                    <div class="icon-path">/herbs/leaf.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/herbs/mushroom.svg" alt="Mushroom"></div>
+                    <div class="icon-name">Mushroom</div>
+                    <div class="icon-path">/herbs/mushroom.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/herbs/lotus.svg" alt="Lotus"></div>
+                    <div class="icon-name">Lotus</div>
+                    <div class="icon-path">/herbs/lotus.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/herbs/berry.svg" alt="Berry"></div>
+                    <div class="icon-name">Berry</div>
+                    <div class="icon-path">/herbs/berry.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/herbs/fern.svg" alt="Fern"></div>
+                    <div class="icon-name">Fern</div>
+                    <div class="icon-path">/herbs/fern.svg</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Symbols -->
+        <section class="category-section">
+            <div class="category-header">
+                <h2>🔯 Symbols</h2>
+                <span class="category-count">10 icons</span>
+            </div>
+            <div class="icon-grid">
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/symbols/cross.svg" alt="Cross"></div>
+                    <div class="icon-name">Cross</div>
+                    <div class="icon-path">/symbols/cross.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/symbols/star.svg" alt="Star"></div>
+                    <div class="icon-name">Star</div>
+                    <div class="icon-path">/symbols/star.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/symbols/crescent.svg" alt="Crescent"></div>
+                    <div class="icon-name">Crescent</div>
+                    <div class="icon-path">/symbols/crescent.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/symbols/ankh.svg" alt="Ankh"></div>
+                    <div class="icon-name">Ankh</div>
+                    <div class="icon-path">/symbols/ankh.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/symbols/pentagram.svg" alt="Pentagram"></div>
+                    <div class="icon-name">Pentagram</div>
+                    <div class="icon-path">/symbols/pentagram.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/symbols/om.svg" alt="Om"></div>
+                    <div class="icon-name">Om</div>
+                    <div class="icon-path">/symbols/om.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/symbols/yin-yang.svg" alt="Yin-Yang"></div>
+                    <div class="icon-name">Yin-Yang</div>
+                    <div class="icon-path">/symbols/yin-yang.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/symbols/triquetra.svg" alt="Triquetra"></div>
+                    <div class="icon-name">Triquetra</div>
+                    <div class="icon-path">/symbols/triquetra.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/symbols/eye.svg" alt="Eye"></div>
+                    <div class="icon-name">Eye</div>
+                    <div class="icon-path">/symbols/eye.svg</div>
+                </div>
+                <div class="icon-card">
+                    <div class="icon-display"><img src="/icons/symbols/triskele.svg" alt="Triskele"></div>
+                    <div class="icon-name">Triskele</div>
+                    <div class="icon-path">/symbols/triskele.svg</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Usage Examples -->
+        <section class="category-section">
+            <div class="category-header">
+                <h2>💡 Usage Examples</h2>
+            </div>
+
+            <div class="usage-example">
+                <strong>Basic Icon Display:</strong>
+                <pre><code>&lt;img src="/icons/deity-icon.svg" alt="Deity" class="entity-icon"&gt;</code></pre>
+            </div>
+
+            <div class="usage-example">
+                <strong>Large Hero Icon:</strong>
+                <pre><code>&lt;img src="/icons/deity-domains/war.svg" alt="War" class="entity-icon hero-size"&gt;</code></pre>
+            </div>
+
+            <div class="usage-example">
+                <strong>Small Inline Icon:</strong>
+                <pre><code>&lt;img src="/icons/creatures/dragon.svg" alt="Dragon" class="entity-icon small"&gt;</code></pre>
+            </div>
+
+            <div class="usage-example">
+                <strong>Icon with Container:</strong>
+                <pre><code>&lt;div class="entity-icon-container"&gt;
+  &lt;img src="/icons/places/temple.svg"
+       alt="Temple"
+       class="entity-icon large"
+       loading="lazy"&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Eyes of Azrael Icon System</strong></p>
+            <p>Generated: 2025-12-29 | AGENT 3 Deployment</p>
+            <p>Total Icons: 138 | Categories: 9 | Coverage: 63.8%</p>
+        </div>
+    </div>
+</body>
+</html>

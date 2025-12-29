@@ -127,8 +127,24 @@ class AuthManager {
 
     /**
      * Update authentication UI
+     * NOTE: This function is designed to work with multiple page types:
+     * - Pages using auth-guard-simple.js (index.html, dashboard.html) - uses body classes
+     * - Standalone pages (login.html) - uses element visibility
      */
     updateAuthUI(user) {
+        // Check if auth guard is active (body has auth-related classes)
+        const hasAuthGuard = document.body.classList.contains('auth-loading') ||
+                           document.body.classList.contains('authenticated') ||
+                           document.body.classList.contains('not-authenticated');
+
+        if (hasAuthGuard) {
+            // Auth guard is managing UI state - don't interfere
+            // Just update user info in header if it exists
+            this.updateHeaderUserInfo(user);
+            return;
+        }
+
+        // Legacy UI update for standalone pages (login.html, etc.)
         const authContainer = document.getElementById('auth-container');
         const userInfo = document.getElementById('user-info');
         const signInBtn = document.getElementById('sign-in-btn');
@@ -170,6 +186,34 @@ class AuthManager {
 
             if (signInBtn) signInBtn.style.display = 'block';
             if (signOutBtn) signOutBtn.style.display = 'none';
+        }
+    }
+
+    /**
+     * Update user info in header (works with auth-guard pages)
+     */
+    updateHeaderUserInfo(user) {
+        const userInfo = document.getElementById('userInfo');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const signOutBtn = document.getElementById('signOutBtn');
+
+        if (!userInfo) return;
+
+        if (user) {
+            userInfo.style.display = 'flex';
+            if (userName) {
+                userName.textContent = user.displayName || user.email;
+            }
+            if (userAvatar && user.photoURL) {
+                userAvatar.src = user.photoURL;
+                userAvatar.alt = user.displayName || 'User';
+            }
+            if (signOutBtn) {
+                signOutBtn.style.display = 'block';
+            }
+        } else {
+            userInfo.style.display = 'none';
         }
     }
 
