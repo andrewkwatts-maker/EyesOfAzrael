@@ -99,36 +99,77 @@
             const colors = this.data.colors || {};
             const primaryColor = colors.primary || '#667eea';
             const mythologies = this.data.mythologies || [];
+            const primaryMythology = this.data.primaryMythology || (mythologies.length > 0 ? mythologies[0] : 'unknown');
+            const mythologyLower = primaryMythology.toLowerCase();
+            const iconContent = this.renderIconWithFallback(this.data.icon, this.data.name);
 
             return `
                 <div class="entity-card entity-card-compact glass-card"
                      data-entity-id="${this.entityId}"
                      data-entity-type="${this.entityType}"
-                     style="--entity-primary-color: ${primaryColor};">
+                     data-mythology="${mythologyLower}"
+                     style="--entity-primary-color: ${primaryColor};"
+                     tabindex="0"
+                     role="article"
+                     aria-label="${this.escapeHtml(this.data.name)}">
 
                     <div class="entity-card-header">
-                        ${this.data.icon ? `<div class="entity-icon-large">${this.data.icon}</div>` : ''}
+                        <div class="entity-icon-large card-icon" aria-hidden="true">${iconContent}</div>
                         <div class="entity-info">
-                            <h3>
+                            <h3 class="card-title">
                                 <a href="${this.getEntityUrl()}">${this.escapeHtml(this.data.name)}</a>
                             </h3>
-                            ${this.renderTypeBadge()}
-                            ${mythologies.length > 0 ? this.renderMythologyBadges(mythologies) : ''}
+                            <div class="card-meta">
+                                ${this.renderTypeBadge()}
+                                ${mythologies.length > 0 ? this.renderMythologyBadges(mythologies) : ''}
+                            </div>
                         </div>
                     </div>
 
                     ${this.data.shortDescription ? `
-                        <p class="entity-short-desc">${this.escapeHtml(this.data.shortDescription)}</p>
+                        <p class="entity-short-desc card-description">${this.escapeHtml(this.data.shortDescription)}</p>
                     ` : ''}
+
+                    ${this.renderWhisper(primaryMythology)}
 
                     ${this.renderCompactMetadata()}
 
-                    <div class="entity-card-footer">
-                        <a href="${this.getEntityUrl()}" class="btn-primary">View Details</a>
-                        ${this.interactive ? `<button class="btn-secondary entity-expand" data-id="${this.entityId}" data-type="${this.entityType}">Expand</button>` : ''}
+                    <div class="entity-card-footer grid-card-footer">
+                        <a href="${this.getEntityUrl()}" class="btn-view-details" aria-label="View details for ${this.escapeHtml(this.data.name)}">View Details</a>
+                        ${this.interactive ? `<button class="btn-secondary entity-expand" data-id="${this.entityId}" data-type="${this.entityType}" aria-label="Expand ${this.escapeHtml(this.data.name)}">Expand</button>` : ''}
+                        <button class="btn-icon entity-favorite"
+                                data-entity-id="${this.entityId}"
+                                data-entity-type="${this.entityType}"
+                                data-entity-name="${this.escapeHtml(this.data.name)}"
+                                data-entity-mythology="${mythologyLower}"
+                                data-entity-icon="${this.data.icon || ''}"
+                                aria-label="Add ${this.escapeHtml(this.data.name)} to favorites"
+                                title="Add to Personal Pantheon">
+                            <span class="favorite-icon">☆</span>
+                        </button>
                     </div>
                 </div>
             `;
+        }
+
+        /**
+         * Render icon with fallback
+         */
+        renderIconWithFallback(icon, name) {
+            if (!icon) {
+                // Generate fallback from first letter of name
+                if (name) {
+                    return `<span class="icon-fallback">${name.charAt(0).toUpperCase()}</span>`;
+                }
+                return '✨';
+            }
+
+            // Check if icon is an image URL
+            if (typeof icon === 'string' && (icon.includes('.svg') || icon.includes('.png') || icon.includes('.jpg') || icon.startsWith('http'))) {
+                return `<img src="${icon}" alt="" class="entity-icon-img" loading="lazy" onerror="this.parentElement.textContent='✨'">`;
+            }
+
+            return icon;
         }
 
         /**
@@ -203,6 +244,33 @@
             const label = this.capitalize(this.entityType);
 
             return `<span class="entity-type-badge" data-type="${this.entityType}">${icon} ${label}</span>`;
+        }
+
+        /**
+         * Render a mythology whisper - atmospheric quote
+         * Only renders 30% of the time to keep it special
+         */
+        renderWhisper(mythology) {
+            // Only show whisper 30% of the time to keep it special
+            if (Math.random() > 0.3) return '';
+
+            // Check if MythologyWhispers is available
+            if (typeof MythologyWhispers === 'undefined') return '';
+
+            try {
+                const whisper = MythologyWhispers.getWhisper(mythology);
+                if (!whisper) return '';
+
+                return `
+                    <div class="entity-whisper" aria-hidden="true">
+                        <span class="entity-whisper-text">${this.escapeHtml(whisper.text)}</span>
+                        <span class="entity-whisper-source">${this.escapeHtml(whisper.source)}</span>
+                    </div>
+                `;
+            } catch (error) {
+                console.warn('[EntityCard] Failed to render whisper:', error);
+                return '';
+            }
         }
 
         /**
@@ -665,6 +733,78 @@
                 shareBtn.addEventListener('click', () => {
                     this.shareEntity();
                 });
+            }
+
+            // Favorite button
+            const favoriteBtn = this.container.querySelector('.entity-favorite');
+            if (favoriteBtn) {
+                // Check initial favorite state
+                this.checkFavoriteState(favoriteBtn);
+
+                favoriteBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    await this.toggleFavorite(favoriteBtn);
+                });
+            }
+        }
+
+        /**
+         * Check if entity is already favorited and update UI
+         */
+        async checkFavoriteState(button) {
+            if (!window.EyesOfAzrael?.favorites) return;
+
+            try {
+                const entityId = button.dataset.entityId;
+                const entityType = button.dataset.entityType;
+                const isFavorited = await window.EyesOfAzrael.favorites.isFavorited(entityId, entityType);
+
+                if (isFavorited) {
+                    button.classList.add('favorited');
+                    button.querySelector('.favorite-icon').textContent = '★';
+                    button.setAttribute('aria-label', `Remove ${button.dataset.entityName} from favorites`);
+                }
+            } catch (error) {
+                console.warn('[EntityCard] Could not check favorite state:', error);
+            }
+        }
+
+        /**
+         * Toggle favorite state
+         */
+        async toggleFavorite(button) {
+            if (!window.EyesOfAzrael?.favorites) {
+                console.warn('[EntityCard] FavoritesService not available');
+                // Show tooltip or message that login is required
+                alert('Please sign in to add favorites');
+                return;
+            }
+
+            const entity = {
+                id: button.dataset.entityId,
+                type: button.dataset.entityType,
+                name: button.dataset.entityName,
+                mythology: button.dataset.entityMythology,
+                icon: button.dataset.entityIcon
+            };
+
+            try {
+                const result = await window.EyesOfAzrael.favorites.toggleFavorite(entity);
+
+                if (result.success) {
+                    if (result.isFavorited) {
+                        button.classList.add('favorited');
+                        button.querySelector('.favorite-icon').textContent = '★';
+                        button.setAttribute('aria-label', `Remove ${entity.name} from favorites`);
+                    } else {
+                        button.classList.remove('favorited');
+                        button.querySelector('.favorite-icon').textContent = '☆';
+                        button.setAttribute('aria-label', `Add ${entity.name} to favorites`);
+                    }
+                }
+            } catch (error) {
+                console.error('[EntityCard] Failed to toggle favorite:', error);
             }
         }
 
