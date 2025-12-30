@@ -161,7 +161,7 @@ class LoadingSpinnerManager {
     }
 
     /**
-     * Get spinner HTML
+     * Get spinner HTML - Uses sacred geometry for mystical loading experience
      * @param {string} message - Loading message
      * @param {string} size - Spinner size
      * @param {string} spinnerId - Unique spinner ID
@@ -171,14 +171,39 @@ class LoadingSpinnerManager {
     getSpinnerHTML(message, size, spinnerId, className = '') {
         const sizeClass = `spinner-${size}`;
 
+        // Use sacred geometry loader for the mystical mythology experience
         return `
             <div class="loading-spinner-wrapper ${className}" data-spinner-id="${spinnerId}">
-                <div class="loading-spinner ${sizeClass}">
-                    <div class="spinner-icon"></div>
+                <div class="sacred-loader ${sizeClass}" role="status" aria-label="Loading">
+                    <div class="sacred-loader-ring"></div>
+                    <div class="sacred-loader-ring"></div>
+                    <div class="sacred-loader-ring"></div>
+                    <div class="sacred-loader-center"></div>
                 </div>
-                ${message ? `<p class="spinner-message">${message}</p>` : ''}
+                ${message ? `<p class="spinner-message">${this.getAtmosphericMessage(message)}</p>` : ''}
             </div>
         `;
+    }
+
+    /**
+     * Transform a standard loading message into something more atmospheric
+     * @param {string} message - Original message
+     * @returns {string} - Atmospheric message
+     */
+    getAtmosphericMessage(message) {
+        // Map standard messages to more mystical alternatives
+        const atmosphericMessages = {
+            'Loading...': 'Summoning ancient wisdom...',
+            'Loading': 'Summoning ancient wisdom...',
+            'loading...': 'Summoning ancient wisdom...',
+            'Loading entities...': 'Awakening the old gods...',
+            'Loading entity...': 'Invoking the spirit...',
+            'Searching...': 'Consulting the oracles...',
+            'Please wait...': 'The veil parts slowly...',
+            'Fetching data...': 'Reading the sacred texts...'
+        };
+
+        return atmosphericMessages[message] || message;
     }
 
     /**
