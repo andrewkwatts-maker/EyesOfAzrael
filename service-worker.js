@@ -1,7 +1,13 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.18.0
+ * Version: 2.19.0
+ *
+ * Changes in 2.19.0:
+ * - Fix "UserPreferencesService is not defined" error on browse pages
+ * - Add user-preferences.js to index.html (base class)
+ * - Add user-preferences-service.js to index.html
+ * - Fix ES module export in user-preferences-service.js
  *
  * Changes in 2.18.0:
  * - Polish entity card presentation in browse views
@@ -126,7 +132,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.18.0';
+const CACHE_VERSION = 'v2.19.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';
