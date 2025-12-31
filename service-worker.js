@@ -1,7 +1,13 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.9.2
+ * Version: 2.10.0
+ *
+ * Changes in 2.10.0:
+ * - Fix landing page not rendering: race condition in app-coordinator.js
+ * - Add safety timeout in app-init-simple.js for content visibility
+ * - Improve CSS visibility handling in landing-page-view.js
+ * - Add critical CSS safeguards in index.html
  *
  * Changes in 2.9.2:
  * - Fix lazy-loader race condition: check firebase.apps.length before calling auth()

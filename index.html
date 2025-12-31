@@ -97,10 +97,22 @@
         /* Auth-guard CSS will override when needed for auth flow */
         #main-content {
             display: block;
+            opacity: 1;
+            visibility: visible;
         }
 
         /* Safety: Landing page must always be visible once rendered */
-        .landing-page-view {
+        /* Use high specificity to override skeleton/loading CSS classes */
+        .landing-page-view,
+        #main-content.content-loaded .landing-page-view,
+        #main-content > .landing-page-view {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: block !important;
+        }
+
+        /* Override any loading-related classes that might hide content */
+        #main-content.content-loaded {
             opacity: 1 !important;
             visibility: visible !important;
         }

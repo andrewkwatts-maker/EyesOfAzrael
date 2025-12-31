@@ -271,6 +271,10 @@
     /**
      * Trigger the initial route handling
      * Separated for cleaner error handling and retry logic
+     *
+     * IMPORTANT: SPANavigation.initRouter() already calls handleRoute() during construction.
+     * We should NOT call handleRoute() again unless the first call failed.
+     * Instead, we just verify that navigation is ready and the route was handled.
      */
     function triggerInitialRoute() {
         // Prevent double-triggering
@@ -286,12 +290,38 @@
         if (window.EyesOfAzrael && window.EyesOfAzrael.navigation) {
             console.log(`[App Coordinator +${elapsed}ms] Navigation initialized successfully`);
 
-            // Trigger initial route with error handling
-            try {
-                window.EyesOfAzrael.navigation.handleRoute();
+            // Check if SPANavigation already handled the initial route
+            // SPANavigation.initRouter() calls handleRoute() during construction
+            const navigation = window.EyesOfAzrael.navigation;
+            const currentRoute = navigation.currentRoute;
+
+            // If currentRoute is set, SPANavigation already handled the initial route
+            if (currentRoute !== null) {
+                console.log(`[App Coordinator +${elapsed}ms] Route already handled by SPANavigation: ${currentRoute}`);
                 initState.routeTriggered.status = true;
                 initState.routeTriggered.timestamp = Math.round(performance.now() - startTime);
-                logStateChange('initState', 'routeTriggered', true, 'Initial route handled');
+                logStateChange('initState', 'routeTriggered', true, 'Route already handled by SPANavigation');
+                return;
+            }
+
+            // Only call handleRoute if it wasn't already called or if navigation lock is free
+            // This handles edge cases where SPANavigation constructor failed to call handleRoute
+            if (navigation._isNavigating) {
+                console.log(`[App Coordinator +${elapsed}ms] Navigation in progress, waiting...`);
+                // Navigation is already in progress, mark as triggered and let it complete
+                initState.routeTriggered.status = true;
+                initState.routeTriggered.timestamp = Math.round(performance.now() - startTime);
+                logStateChange('initState', 'routeTriggered', true, 'Navigation already in progress');
+                return;
+            }
+
+            // Trigger initial route with error handling (fallback case)
+            try {
+                console.log(`[App Coordinator +${elapsed}ms] Triggering handleRoute (fallback)...`);
+                navigation.handleRoute();
+                initState.routeTriggered.status = true;
+                initState.routeTriggered.timestamp = Math.round(performance.now() - startTime);
+                logStateChange('initState', 'routeTriggered', true, 'Initial route handled (fallback)');
             } catch (error) {
                 console.error(`[App Coordinator +${elapsed}ms] Error triggering route:`, error);
 

@@ -149,19 +149,17 @@ class LandingPageView {
                 console.error('[Landing Page] ERROR: container is null or undefined');
                 throw new Error('Container element is required');
             }
-            console.log('[Landing Page] Container valid:', container.tagName);
+            console.log('[Landing Page] Container valid:', container.tagName, container.id);
 
             // RENDER IMMEDIATELY - no skeleton delay (prevents race condition with lazy loader)
             console.log('[Landing Page] Setting final HTML...');
             container.innerHTML = this.getLandingHTML();
-            container.classList.remove('has-skeleton', 'content-loading');
-            container.classList.add('content-loaded');
 
-            // FORCE body to authenticated state FIRST (before setting styles)
-            // This is critical - CSS uses !important rules based on body class
-            document.body.classList.add('authenticated');
-            document.body.classList.remove('not-authenticated', 'auth-loading');
-            console.log('[Landing Page] Body classes updated to authenticated');
+            // CRITICAL: Remove ALL classes that could hide content
+            // These classes from skeleton-screens.css and visual-polish.css set opacity: 0
+            container.classList.remove('has-skeleton', 'content-loading', 'fade-out', 'transitioning');
+            container.classList.add('content-loaded');
+            console.log('[Landing Page] Container classes updated');
 
             // Hide auth overlay if it exists (must come BEFORE showing content)
             // NOTE: Using !important here is REQUIRED because auth-guard-simple.js
@@ -179,19 +177,27 @@ class LandingPageView {
                 loadingScreen.style.setProperty('display', 'none', 'important');
             }
 
-            // Ensure container visibility
+            // Hide any loading-container elements that might be covering content
+            const loadingContainers = document.querySelectorAll('.loading-container');
+            loadingContainers.forEach((lc, index) => {
+                lc.style.display = 'none';
+                console.log(`[Landing Page] Hidden loading-container ${index + 1}`);
+            });
+
+            // CRITICAL: Ensure container visibility with inline styles
+            // These inline styles have highest specificity and override CSS classes
             // NOTE: !important flags here override potential CSS conflicts from
             // auth states or lazy-loading systems that may hide content initially
-            container.style.opacity = '1';
-            container.style.display = 'block';
-            container.style.visibility = 'visible';
-            console.log('[Landing Page] Container made visible');
+            container.style.setProperty('opacity', '1', 'important');
+            container.style.setProperty('display', 'block', 'important');
+            container.style.setProperty('visibility', 'visible', 'important');
+            console.log('[Landing Page] Container made visible with inline styles');
 
             const view = container.querySelector('.landing-page-view');
             if (view) {
-                view.style.opacity = '1';
-                view.style.display = 'block';
-                view.style.visibility = 'visible';
+                view.style.setProperty('opacity', '1', 'important');
+                view.style.setProperty('display', 'block', 'important');
+                view.style.setProperty('visibility', 'visible', 'important');
                 console.log('[Landing Page] View element made visible');
             } else {
                 console.warn('[Landing Page] WARNING: .landing-page-view element not found in container');
