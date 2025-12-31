@@ -1,7 +1,11 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.19.0
+ * Version: 2.20.0
+ *
+ * Changes in 2.20.0:
+ * - Fix "ContentFilter is not defined" error on browse pages
+ * - Add content-filter.js to index.html
  *
  * Changes in 2.19.0:
  * - Fix "UserPreferencesService is not defined" error on browse pages
@@ -132,7 +136,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.19.0';
+const CACHE_VERSION = 'v2.20.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';
