@@ -339,12 +339,20 @@
     }
 
     /**
-     * Set up login button handler
+     * Set up login button handlers
+     * Handles both the overlay login button and the header sign-in button
      */
     function setupLoginButton() {
+        // Overlay login button
         const loginBtn = document.getElementById('google-login-btn');
         if (loginBtn) {
             loginBtn.addEventListener('click', handleLogin);
+        }
+
+        // Header sign-in button (new minimalist header)
+        const headerSignInBtn = document.getElementById('signInBtn');
+        if (headerSignInBtn) {
+            headerSignInBtn.addEventListener('click', handleLogin);
         }
     }
 
@@ -475,14 +483,22 @@
 
     /**
      * Update user display in header
+     * Shows user info when logged in, sign-in button when logged out
      */
     function updateUserDisplay(user) {
         const userInfo = document.getElementById('userInfo');
         const userName = document.getElementById('userName');
         const userAvatar = document.getElementById('userAvatar');
+        const signInBtn = document.getElementById('signInBtn');
 
-        if (user && userInfo) {
-            userInfo.style.display = 'flex';
+        if (user) {
+            // User is logged in - show user info, hide sign-in button
+            document.body.classList.add('authenticated');
+            document.body.classList.remove('not-authenticated');
+
+            if (userInfo) {
+                userInfo.style.display = 'flex';
+            }
             if (userName) {
                 userName.textContent = user.displayName || user.email;
             }
@@ -490,8 +506,20 @@
                 userAvatar.src = user.photoURL;
                 userAvatar.alt = user.displayName || 'User';
             }
-        } else if (userInfo) {
-            userInfo.style.display = 'none';
+            if (signInBtn) {
+                signInBtn.style.display = 'none';
+            }
+        } else {
+            // User is logged out - show sign-in button, hide user info
+            document.body.classList.remove('authenticated');
+            document.body.classList.add('not-authenticated');
+
+            if (userInfo) {
+                userInfo.style.display = 'none';
+            }
+            if (signInBtn) {
+                signInBtn.style.display = 'inline-flex';
+            }
         }
     }
 
