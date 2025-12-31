@@ -1,7 +1,10 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.12.3
+ * Version: 2.12.4
+ *
+ * Changes in 2.12.4:
+ * - Remove "DOM Ready" from startup checklist (timing issue, not dependency)
  *
  * Changes in 2.12.3:
  * - Changed JS files to STALE_WHILE_REVALIDATE caching (faster updates)
@@ -71,7 +74,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.12.3';
+const CACHE_VERSION = 'v2.12.4';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';
