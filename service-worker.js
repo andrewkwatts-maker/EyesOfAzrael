@@ -1,7 +1,12 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.12.2
+ * Version: 2.12.3
+ *
+ * Changes in 2.12.3:
+ * - Changed JS files to STALE_WHILE_REVALIDATE caching (faster updates)
+ * - Added auto-refresh on SW update (no user action needed)
+ * - Users will always get fresh JS on their next visit
  *
  * Changes in 2.12.2:
  * - Fix Firebase race condition in lazy-loader.js
@@ -66,7 +71,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.12.2';
+const CACHE_VERSION = 'v2.12.3';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';
@@ -115,8 +120,11 @@ const ROUTE_STRATEGIES = [
   // API calls - network first
   { pattern: /\/api\//, strategy: CACHE_STRATEGIES.NETWORK_FIRST },
 
-  // Static assets - cache first
-  { pattern: /\.(css|js|png|jpg|jpeg|svg|webp|woff2|woff|ttf|ico)$/i, strategy: CACHE_STRATEGIES.CACHE_FIRST },
+  // JavaScript files - stale while revalidate (ensures fresh code on next visit)
+  { pattern: /\.js$/i, strategy: CACHE_STRATEGIES.STALE_WHILE_REVALIDATE },
+
+  // Other static assets - cache first (images, fonts, CSS change less often)
+  { pattern: /\.(css|png|jpg|jpeg|svg|webp|woff2|woff|ttf|ico)$/i, strategy: CACHE_STRATEGIES.CACHE_FIRST },
 
   // HTML pages - stale while revalidate
   { pattern: /\.html$/i, strategy: CACHE_STRATEGIES.STALE_WHILE_REVALIDATE }
