@@ -340,10 +340,12 @@ class AssetService {
     }
 }
 
-// ES Module Export
-export { AssetService };
-
-// Legacy global export
+// Global export for browser usage
 if (typeof window !== 'undefined') {
     window.AssetService = AssetService;
+}
+
+// CommonJS export for Node.js
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = AssetService;
 }
