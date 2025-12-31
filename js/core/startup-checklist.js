@@ -1,3 +1,4 @@
+console.log('[LAYER13-DEBUG] startup-checklist.js started loading');
 /**
  * Eyes of Azrael - Startup Checklist
  *
