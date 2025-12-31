@@ -1,4 +1,6 @@
-console.log('[LAYER14-DEBUG] spa-navigation.js started loading');
+// First line confirms script loading
+console.log('[SPA Navigation] Script loaded');
+
 /**
  * Single Page Application Navigation System
  * Handles dynamic routing and content loading from Firebase

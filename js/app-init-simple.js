@@ -1,3 +1,6 @@
+// CRITICAL: First line must be a simple log to confirm script is loading
+console.log('[App Init] Script loaded - starting execution');
+
 /**
  * Simple Application Initialization
  * Ensures proper loading order and error handling

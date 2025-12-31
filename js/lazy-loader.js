@@ -119,6 +119,38 @@ class ProgressiveLazyLoader {
     }
 
     /**
+     * Check if Firebase is properly initialized and safe to use
+     * @returns {boolean} True if Firebase is initialized
+     */
+    _isFirebaseInitialized() {
+        try {
+            // Multiple layers of checks to prevent race conditions
+            if (typeof firebase === 'undefined') {
+                return false;
+            }
+            if (!firebase.apps) {
+                return false;
+            }
+            if (!Array.isArray(firebase.apps)) {
+                return false;
+            }
+            if (firebase.apps.length === 0) {
+                return false;
+            }
+            // Extra verification - try to get the app without throwing
+            const app = firebase.app();
+            if (!app) {
+                return false;
+            }
+            return true;
+        } catch (e) {
+            // Any error means Firebase isn't ready
+            console.debug('[Lazy Loader] Firebase not initialized:', e.message);
+            return false;
+        }
+    }
+
+    /**
      * Phase 2: Load Auth UI (Target: 100ms)
      */
     async loadAuthUI() {
@@ -126,19 +158,32 @@ class ProgressiveLazyLoader {
         console.log('[Lazy Loader] Phase 2: Loading Auth UI...');
 
         try {
-            // Check if Firebase Auth is available AND initialized
-            // firebase.auth exists but calling it before initializeApp() throws an error
-            if (typeof firebase !== 'undefined' && firebase.auth && firebase.apps && firebase.apps.length > 0) {
-                const auth = firebase.auth();
-
-                // Quick auth state check (don't wait for full auth)
-                const unsubscribe = auth.onAuthStateChanged((user) => {
-                    this.updateUserUI(user);
-                    unsubscribe(); // Only need first update
-                }, (error) => {
-                    console.warn('[Lazy Loader] Auth check failed:', error);
-                });
+            // Check if Firebase is properly initialized
+            // This is a critical guard - firebase.auth() throws if called before initializeApp()
+            if (!this._isFirebaseInitialized()) {
+                console.debug('[Lazy Loader] Firebase not initialized yet, skipping auth UI in lazy loader');
+                console.debug('[Lazy Loader] Auth will be handled by app-init-simple.js or auth-guard-simple.js');
+                this.markPhaseComplete('auth', phaseStart);
+                return;
             }
+
+            // Additional safety: wrap in try-catch even after guard passes
+            let auth;
+            try {
+                auth = firebase.auth();
+            } catch (authError) {
+                console.warn('[Lazy Loader] Could not get Firebase auth:', authError.message);
+                this.markPhaseComplete('auth', phaseStart);
+                return;
+            }
+
+            // Quick auth state check (don't wait for full auth)
+            const unsubscribe = auth.onAuthStateChanged((user) => {
+                this.updateUserUI(user);
+                unsubscribe(); // Only need first update
+            }, (error) => {
+                console.warn('[Lazy Loader] Auth check failed:', error);
+            });
 
             this.markPhaseComplete('auth', phaseStart);
         } catch (error) {
