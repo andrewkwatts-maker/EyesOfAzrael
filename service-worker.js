@@ -1,7 +1,12 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.14.0
+ * Version: 2.15.0
+ *
+ * Changes in 2.15.0:
+ * - Add collection name mapping in asset-service.js (archetypes → concepts)
+ * - Add --color-surface-rgb and --color-border-rgb CSS variables to styles.css
+ * - Fix theme backgrounds in browse views
  *
  * Changes in 2.14.0:
  * - FIX CRITICAL: accessibility.css rule [aria-live] was hiding #main-content
@@ -99,7 +104,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.14.0';
+const CACHE_VERSION = 'v2.15.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';

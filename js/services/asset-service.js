@@ -24,6 +24,23 @@ class AssetService {
         this.queryCache = new Map();
         this.cacheTimestamp = new Map();
         this.cacheDuration = 5 * 60 * 1000; // 5 minutes
+
+        // Collection name mapping (URL category → Firebase collection)
+        // This handles cases where the URL uses a different name than the Firebase collection
+        this.collectionMap = {
+            'archetypes': 'concepts',    // archetypes maps to concepts collection
+            'cosmologies': 'cosmology',  // plural to singular
+            // Add more mappings as needed
+        };
+    }
+
+    /**
+     * Get the actual Firebase collection name for a category
+     * @param {string} category - URL category name
+     * @returns {string} Firebase collection name
+     */
+    getCollectionName(category) {
+        return this.collectionMap[category] || category;
     }
 
     /**
@@ -118,19 +135,23 @@ class AssetService {
     async getStandardAssets(type, options = {}) {
         const { mythology = null, orderBy = 'name', limit = 500 } = options;
 
+        // Map URL category to Firebase collection name
+        const collectionName = this.getCollectionName(type);
+        console.log(`[AssetService] Mapping category "${type}" → collection "${collectionName}"`);
+
         try {
             // Use cache manager if available
             if (this.cache) {
                 const query = mythology ? { mythology } : {};
-                return await this.cache.getList(type, query, {
-                    ttl: this.cache.defaultTTL[type] || 3600000,
+                return await this.cache.getList(collectionName, query, {
+                    ttl: this.cache.defaultTTL[collectionName] || 3600000,
                     orderBy: `${orderBy} asc`,
                     limit
                 });
             }
 
             // Fallback: Direct Firebase query
-            let query = this.db.collection(type);
+            let query = this.db.collection(collectionName);
 
             if (mythology) {
                 query = query.where('mythology', '==', mythology);
@@ -156,9 +177,12 @@ class AssetService {
     async getUserAssets(type, options = {}) {
         const { mythology = null, limit = 500 } = options;
 
+        // Map URL category to Firebase collection name
+        const collectionName = this.getCollectionName(type);
+
         try {
             // Query using collectionGroup to get all user assets across all users
-            let query = this.db.collectionGroup(type)
+            let query = this.db.collectionGroup(collectionName)
                 .where('isPublic', '==', true);
 
             if (mythology) {
