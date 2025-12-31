@@ -41,9 +41,15 @@
 
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // New service worker installed, notify user
-            console.log('[SW] New version available!');
-            notifyUpdate();
+            // New service worker installed - auto-activate and refresh
+            console.log('[SW] New version available - auto-updating...');
+
+            // Skip waiting to activate new SW immediately
+            newWorker.postMessage({ type: 'SKIP_WAITING' });
+
+            // The controllerchange event will trigger the page reload
+            // But show a brief notification first
+            showToast('Updating to new version...', 'info');
           }
         });
       });
@@ -87,7 +93,7 @@
     updatePrompt.className = 'sw-update-prompt';
     updatePrompt.innerHTML = `
       <div class="sw-update-content">
-        <div class="sw-update-icon"><‰</div>
+        <div class="sw-update-icon"><ï¿½</div>
         <div class="sw-update-text">
           <h3>Update Available!</h3>
           <p>A new version of Eyes of Azrael is ready.</p>
