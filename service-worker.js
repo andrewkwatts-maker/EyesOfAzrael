@@ -1,7 +1,11 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.20.0
+ * Version: 2.20.1
+ *
+ * Changes in 2.20.1:
+ * - Fix ES module export in content-filter.js (was breaking script execution)
+ * - Remove `export { ContentFilter }` which caused syntax error in non-module context
  *
  * Changes in 2.20.0:
  * - Fix "ContentFilter is not defined" error on browse pages
@@ -136,7 +140,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.20.0';
+const CACHE_VERSION = 'v2.20.1';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';

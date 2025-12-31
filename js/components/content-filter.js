@@ -422,10 +422,12 @@ class ContentFilter {
     }
 }
 
-// ES Module Export
-export { ContentFilter };
-
-// Legacy global export
+// Global export for browser usage
 if (typeof window !== 'undefined') {
     window.ContentFilter = ContentFilter;
+}
+
+// CommonJS export for Node.js
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ContentFilter;
 }
