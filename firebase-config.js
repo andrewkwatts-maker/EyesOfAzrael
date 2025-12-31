@@ -1,9 +1,13 @@
 /**
  * Firebase Configuration
  * Eyes of Azrael
+ *
+ * NOTE: Using window.firebaseConfig to ensure global accessibility
+ * for dependency checking in app-init-simple.js
  */
 
-const firebaseConfig = {
+// Attach to window for global access (const doesn't attach to window object)
+window.firebaseConfig = {
   apiKey: "AIzaSyB7bFdte6f81-bNMsdITgnnnWq7aBNMXRw",
   authDomain: "eyesofazrael.firebaseapp.com",
   projectId: "eyesofazrael",
@@ -13,6 +17,8 @@ const firebaseConfig = {
   measurementId: "G-ECC98XJ9W9"
 };
 
+// Also create local reference for backwards compatibility
+const firebaseConfig = window.firebaseConfig;
+
 // Don't initialize here - let app-init.js handle it
-// Just export the config
 console.log('✅ Firebase config loaded');

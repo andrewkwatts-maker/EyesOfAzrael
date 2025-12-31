@@ -1,7 +1,12 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.9.0
+ * Version: 2.9.1
+ *
+ * Changes in 2.9.1:
+ * - CRITICAL FIX: firebaseConfig now uses window.firebaseConfig
+ * - Fixes "Firebase config not found" error on production
+ * - const declarations don't attach to window object, causing init failure
  *
  * Changes in 2.9.0:
  * - 12-agent polish sprint for home page display chain
@@ -28,7 +33,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.9.0';
+const CACHE_VERSION = 'v2.9.1';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';
