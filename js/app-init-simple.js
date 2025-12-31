@@ -468,6 +468,19 @@
         });
 
         showError(error);
+
+        // CRITICAL: Still dispatch app-initialized even on error
+        // This prevents other components (like app-coordinator) from waiting forever
+        // The error has already been shown to the user via showError()
+        const initDuration = (performance.now() - initState.startTime).toFixed(2);
+        document.dispatchEvent(new CustomEvent('app-initialized', {
+            detail: {
+                duration: parseFloat(initDuration),
+                error: error.message,
+                warnings: initState.warnings,
+                missingDependencies: initState.missingDependencies
+            }
+        }));
     }
 
     /**

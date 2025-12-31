@@ -72,7 +72,7 @@ class FirebaseCacheManager {
                 const memoryData = this.getFromMemory(cacheKey);
                 if (memoryData && !this.isExpired(memoryData, ttl)) {
                     this.recordHit(startTime);
-                    console.log(`[CacheManager] =š Memory hit: ${cacheKey}`);
+                    console.log(`[CacheManager] =ï¿½ Memory hit: ${cacheKey}`);
                     return memoryData.data;
                 }
 
@@ -82,7 +82,7 @@ class FirebaseCacheManager {
                     // Promote to memory cache
                     this.memoryCache.set(cacheKey, sessionData);
                     this.recordHit(startTime);
-                    console.log(`[CacheManager] =™ Session hit: ${cacheKey}`);
+                    console.log(`[CacheManager] =ï¿½ Session hit: ${cacheKey}`);
                     return sessionData.data;
                 }
 
@@ -93,7 +93,7 @@ class FirebaseCacheManager {
                     this.memoryCache.set(cacheKey, localData);
                     this.setToSessionStorage(cacheKey, localData);
                     this.recordHit(startTime);
-                    console.log(`[CacheManager] =› Local hit: ${cacheKey}`);
+                    console.log(`[CacheManager] =ï¿½ Local hit: ${cacheKey}`);
                     return localData.data;
                 }
             }
@@ -147,7 +147,7 @@ class FirebaseCacheManager {
             this.setToLocalStorage(cacheKey, cacheEntry);
 
             this.metrics.sets++;
-            console.log(`[CacheManager] =¾ Cached: ${cacheKey} (TTL: ${ttl}ms)`);
+            console.log(`[CacheManager] =ï¿½ Cached: ${cacheKey} (TTL: ${ttl}ms)`);
 
         } catch (error) {
             console.error(`[CacheManager] Error caching ${cacheKey}:`, error);
@@ -166,7 +166,7 @@ class FirebaseCacheManager {
             this.memoryCache.delete(cacheKey);
             sessionStorage.removeItem(cacheKey);
             localStorage.removeItem(cacheKey);
-            console.log(`[CacheManager] =Ñ Invalidated: ${cacheKey}`);
+            console.log(`[CacheManager] =ï¿½ Invalidated: ${cacheKey}`);
         } else {
             // Invalidate entire collection
             const prefix = `cache_${collection}_`;
@@ -184,7 +184,7 @@ class FirebaseCacheManager {
             // Clear from localStorage
             this.clearStorageByPrefix(localStorage, prefix);
 
-            console.log(`[CacheManager] =Ñ Invalidated collection: ${collection}`);
+            console.log(`[CacheManager] =ï¿½ Invalidated collection: ${collection}`);
         }
 
         this.metrics.invalidations++;
@@ -200,16 +200,26 @@ class FirebaseCacheManager {
         this.clearStorageByPrefix(sessionStorage, 'cache_');
         this.clearStorageByPrefix(localStorage, 'cache_');
 
-        console.log('[CacheManager] =Ñ All caches cleared');
+        console.log('[CacheManager] =ï¿½ All caches cleared');
     }
 
     /**
-     * Fetch data from Firebase
+     * Check if browser is online
+     * @returns {boolean}
+     */
+    isOnline() {
+        return typeof navigator !== 'undefined' ? navigator.onLine : true;
+    }
+
+    /**
+     * Fetch data from Firebase with offline fallback
      */
     async fetchFromFirebase(collection, id) {
         if (!this.db) {
             throw new Error('Firebase Firestore not initialized');
         }
+
+        const cacheKey = this.generateKey(collection, id);
 
         try {
             const doc = await this.db.collection(collection).doc(id).get();
@@ -222,6 +232,22 @@ class FirebaseCacheManager {
 
         } catch (error) {
             console.error(`[CacheManager] Firebase fetch error (${collection}/${id}):`, error);
+
+            // If offline, try to return stale cache data
+            if (!this.isOnline() || error.code === 'unavailable') {
+                console.log(`[CacheManager] Offline - attempting to serve stale cache for: ${cacheKey}`);
+
+                // Try all cache layers even if expired
+                const staleData = this.getFromMemory(cacheKey) ||
+                                  this.getFromSessionStorage(cacheKey) ||
+                                  this.getFromLocalStorage(cacheKey);
+
+                if (staleData && staleData.data) {
+                    console.log(`[CacheManager] Serving stale cache for: ${cacheKey}`);
+                    return staleData.data;
+                }
+            }
+
             throw error;
         }
     }
@@ -243,7 +269,7 @@ class FirebaseCacheManager {
 
                 if (cached && !this.isExpired(cached, ttl)) {
                     this.recordHit(performance.now());
-                    console.log(`[CacheManager] =š List cache hit: ${cacheKey}`);
+                    console.log(`[CacheManager] =ï¿½ List cache hit: ${cacheKey}`);
                     return cached.data;
                 }
             }
@@ -301,6 +327,22 @@ class FirebaseCacheManager {
 
         } catch (error) {
             console.error(`[CacheManager] Error fetching list ${cacheKey}:`, error);
+
+            // If offline, try to return stale cache data
+            if (!this.isOnline() || error.code === 'unavailable') {
+                console.log(`[CacheManager] Offline - attempting to serve stale list cache for: ${cacheKey}`);
+
+                // Try all cache layers even if expired
+                const staleData = this.getFromMemory(cacheKey) ||
+                                  this.getFromSessionStorage(cacheKey) ||
+                                  this.getFromLocalStorage(cacheKey);
+
+                if (staleData && staleData.data) {
+                    console.log(`[CacheManager] Serving stale list cache for: ${cacheKey} (${staleData.data.length} items)`);
+                    return staleData.data;
+                }
+            }
+
             throw error;
         }
     }
@@ -351,6 +393,18 @@ class FirebaseCacheManager {
 
         } catch (error) {
             console.error(`[CacheManager] Error fetching metadata:`, error);
+
+            // If offline, try to return stale cache data
+            if (!this.isOnline() || error.code === 'unavailable') {
+                const staleData = this.getFromMemory(cacheKey) ||
+                                  this.getFromLocalStorage(cacheKey);
+
+                if (staleData && staleData.data) {
+                    console.log(`[CacheManager] Serving stale metadata for: ${cacheKey}`);
+                    return staleData.data;
+                }
+            }
+
             return null;
         }
     }
@@ -400,7 +454,7 @@ class FirebaseCacheManager {
      */
     printStats() {
         const stats = this.getStats();
-        console.log('[CacheManager] =Ê Performance Statistics:');
+        console.log('[CacheManager] =ï¿½ Performance Statistics:');
         console.log(`  Cache Hits: ${stats.hits} (${stats.hitRate})`);
         console.log(`  Cache Misses: ${stats.misses}`);
         console.log(`  Cache Sets: ${stats.sets}`);

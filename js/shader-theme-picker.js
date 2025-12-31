@@ -161,6 +161,14 @@
             return;
         }
 
+        // Check if legacy header-theme-picker.js has created its own button
+        // If so, remove it to prevent duplicate buttons
+        const legacyPicker = document.querySelector('.theme-picker-dropdown');
+        if (legacyPicker) {
+            console.warn('[Shader Theme Picker] Found legacy theme picker dropdown, removing to prevent duplicates');
+            legacyPicker.remove();
+        }
+
         // Ensure DOM is ready
         if (!document.body) {
             console.warn('[Shader Theme Picker] DOM not ready, deferring initialization');
@@ -520,6 +528,12 @@
             return;
         }
 
+        // Prevent duplicate dropdown creation
+        if (container.querySelector('.theme-dropdown')) {
+            console.log('[Shader Theme Picker] Dropdown already exists, skipping creation');
+            return;
+        }
+
         // Only add dropdown on desktop (wider than 768px)
         // Mobile will use the simple toggle button
         const isMobile = window.innerWidth <= 768;
@@ -541,7 +555,9 @@
         const themeButton = document.getElementById('themeToggle');
 
         // Event: Toggle dropdown on button click (desktop only)
-        if (themeButton) {
+        // Use data attribute to prevent duplicate listener attachment
+        if (themeButton && !themeButton.dataset.dropdownConnected) {
+            themeButton.dataset.dropdownConnected = 'true';
             themeButton.addEventListener('click', (e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -632,12 +648,16 @@
 
     /**
      * Update button icon to match current theme
+     * Note: This is a legacy function for emoji-based theme buttons.
+     * The current implementation uses SVG icons which are updated via updateThemeToggleButton()
      */
     function updateButtonIcon() {
+        // Look for legacy emoji-based theme picker button
         const button = document.querySelector('.theme-picker-btn');
         if (button && themeConfig?.themes?.[currentTheme]) {
             button.textContent = themeConfig.themes[currentTheme].icon || '🎨';
         }
+        // Note: SVG-based theme toggle is handled by updateThemeToggleButton()
     }
 
     /**

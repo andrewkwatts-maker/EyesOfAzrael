@@ -125,13 +125,14 @@ class SPANavigation {
         }
 
         // Listen for optimistic auth verification (fires when Firebase confirms/denies cached auth)
+        // Use { once: true } to prevent memory leak from persistent listener
         document.addEventListener('auth-verified', (event) => {
             if (!event.detail?.authenticated) {
                 spaWarn('Optimistic auth verification FAILED');
             } else {
                 spaLog('Optimistic auth verified successfully');
             }
-        });
+        }, { once: true });
 
         // ALWAYS initialize router immediately - handleRoute() decides auth requirements per route
         if (document.readyState === 'loading') {
@@ -157,15 +158,25 @@ class SPANavigation {
         return new Promise((resolve, reject) => {
             spaLog('waitForAuth() promise created at:', new Date().toISOString());
 
+            // Check if Firebase is available
+            if (typeof firebase === 'undefined' || !firebase.auth) {
+                spaError('Firebase SDK not available!');
+                // Return consistent object instead of rejecting to prevent unhandled errors
+                resolve({ user: null, timedOut: false, error: 'Firebase SDK not available' });
+                return;
+            }
+
             // Use Firebase auth directly (compatible with auth guard)
             const auth = firebase.auth();
             if (!auth) {
                 spaError('Firebase auth not available!');
-                reject(new Error('Firebase auth not available'));
+                // Return consistent object instead of rejecting
+                resolve({ user: null, timedOut: false, error: 'Firebase auth not available' });
                 return;
             }
 
             let resolved = false;
+            let unsubscribe = null;
 
             // Timeout fallback: resolve with explicit timeout state after 5 seconds
             // This prevents routes from being blocked indefinitely on network issues
@@ -173,6 +184,10 @@ class SPANavigation {
                 if (!resolved) {
                     resolved = true;
                     spaWarn('Auth timeout after 5s - resolving with null (not authenticated). This may indicate slow network or Firebase SDK issues.');
+                    // Clean up listener to prevent memory leak
+                    if (unsubscribe) {
+                        unsubscribe();
+                    }
                     // Return explicit state so caller knows it timed out
                     resolve({ user: null, timedOut: true });
                 }
@@ -181,22 +196,32 @@ class SPANavigation {
             spaLog('Registering onAuthStateChanged listener...');
 
             // Firebase auth ready check - just resolve, auth guard handles UI
-            const unsubscribe = auth.onAuthStateChanged((user) => {
-                if (resolved) {
-                    spaLog('Auth state changed after timeout - ignoring');
-                    unsubscribe();
-                    return;
-                }
+            try {
+                unsubscribe = auth.onAuthStateChanged((user) => {
+                    if (resolved) {
+                        spaLog('Auth state changed after timeout - ignoring');
+                        return;
+                    }
 
+                    resolved = true;
+                    clearTimeout(timeoutId);
+
+                    spaLog('onAuthStateChanged fired, user:', user ? user.email : 'null');
+
+                    // Clean up listener
+                    if (unsubscribe) {
+                        unsubscribe();
+                    }
+
+                    // Return explicit state so caller knows auth completed normally
+                    resolve({ user, timedOut: false });
+                });
+            } catch (error) {
+                spaError('Error setting up auth listener:', error);
                 resolved = true;
                 clearTimeout(timeoutId);
-
-                spaLog('onAuthStateChanged fired, user:', user ? user.email : 'null');
-                unsubscribe();
-
-                // Return explicit state so caller knows auth completed normally
-                resolve({ user, timedOut: false });
-            });
+                resolve({ user: null, timedOut: false, error: error.message });
+            }
 
             spaLog('waitForAuth() setup complete, waiting for auth state change...');
         });
@@ -270,8 +295,18 @@ class SPANavigation {
         this._lastNavigatedHash = null;
         this._navigationLock = null; // Promise-based navigation lock
 
-        // Handle hash changes with debouncing to prevent double-navigation
-        window.addEventListener('hashchange', (e) => {
+        // Store bound event handlers for cleanup
+        this._boundHandlers = {
+            hashchange: null,
+            popstate: null,
+            click: null
+        };
+
+        // Store view-specific cleanup functions
+        this._viewCleanupCallbacks = [];
+
+        // Create bound handlers for proper cleanup
+        this._boundHandlers.hashchange = (e) => {
             const newHash = window.location.hash;
             spaLog('hashchange event triggered, hash:', newHash);
 
@@ -294,19 +329,16 @@ class SPANavigation {
                     spaLog('Skipping hashchange - navigation already in progress');
                 }
             }, 10);
-        });
+        };
 
-        window.addEventListener('popstate', (e) => {
+        this._boundHandlers.popstate = (e) => {
             spaLog('popstate event triggered, state:', e.state);
             if (!this._isNavigating) {
                 this.handleRoute();
             }
-        });
+        };
 
-        spaLog('Event listeners registered (hashchange, popstate)');
-
-        // Intercept link clicks - improved to handle all hash link formats
-        document.addEventListener('click', (e) => {
+        this._boundHandlers.click = (e) => {
             // Find the closest anchor element (handles clicks on child elements)
             const link = e.target.closest('a[href]');
 
@@ -323,7 +355,17 @@ class SPANavigation {
                 // Use the href attribute directly for navigation (more reliable than link.hash)
                 this.navigate(href);
             }
-        }, true); // Use capture phase to intercept before other handlers
+        };
+
+        // Handle hash changes with debouncing to prevent double-navigation
+        window.addEventListener('hashchange', this._boundHandlers.hashchange);
+
+        window.addEventListener('popstate', this._boundHandlers.popstate);
+
+        spaLog('Event listeners registered (hashchange, popstate)');
+
+        // Intercept link clicks - improved to handle all hash link formats
+        document.addEventListener('click', this._boundHandlers.click, true); // Use capture phase to intercept before other handlers
 
         spaLog('Link click interceptor registered');
 
@@ -459,6 +501,9 @@ class SPANavigation {
             return;
         }
 
+        // Run cleanup for previous view before rendering new content
+        this._runViewCleanup();
+
         // Add to history
         this.addToHistory(path);
 
@@ -504,6 +549,7 @@ class SPANavigation {
                 await this.renderSearch();
             } else if (this.routes.corpus_explorer.test(path)) {
                 spaLog('Matched CORPUS EXPLORER route - redirecting to standalone page');
+                this._isNavigating = false; // Reset before redirect
                 window.location.href = 'corpus-explorer.html';
                 return;
             } else if (this.routes.compare.test(path)) {
@@ -1539,28 +1585,36 @@ class SPANavigation {
     showLoading() {
         const mainContent = document.getElementById('main-content');
         if (mainContent) {
-            // Check if there's existing content to fade out
-            const existingContent = mainContent.firstElementChild;
-            if (existingContent && !existingContent.classList.contains('loading-container')) {
-                // Fade out existing content first
-                existingContent.classList.add('fade-out');
-                existingContent.style.opacity = '0';
-                existingContent.style.transition = 'opacity 0.15s ease-out';
+            // Clear any pending loading timeout
+            if (this._loadingTimeout) {
+                clearTimeout(this._loadingTimeout);
+                this._loadingTimeout = null;
             }
 
-            // Use requestAnimationFrame for smooth transition
-            requestAnimationFrame(() => {
-                mainContent.innerHTML = `
-                    <div class="loading-container" role="status" aria-live="polite">
-                        <div class="spinner-container">
-                            <div class="spinner-ring"></div>
-                            <div class="spinner-ring"></div>
-                            <div class="spinner-ring"></div>
-                        </div>
-                        <p class="loading-message">Loading...</p>
+            // Set loading immediately to prevent flicker/race conditions
+            mainContent.innerHTML = `
+                <div class="loading-container" role="status" aria-live="polite">
+                    <div class="spinner-container">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
                     </div>
-                `;
-            });
+                    <p class="loading-message">Loading...</p>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Hide loading spinner explicitly (useful for error recovery)
+     */
+    hideLoading() {
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            const loadingContainer = mainContent.querySelector('.loading-container');
+            if (loadingContainer) {
+                loadingContainer.remove();
+            }
         }
     }
 
@@ -1644,6 +1698,78 @@ class SPANavigation {
 
     goBack() {
         window.history.back();
+    }
+
+    /**
+     * Register a cleanup callback to be run when navigating away from current view
+     * @param {Function} callback - Cleanup function to call
+     */
+    registerViewCleanup(callback) {
+        if (typeof callback === 'function') {
+            this._viewCleanupCallbacks.push(callback);
+        }
+    }
+
+    /**
+     * Run all registered view cleanup callbacks
+     * Called automatically before rendering a new view
+     */
+    _runViewCleanup() {
+        if (this._viewCleanupCallbacks && this._viewCleanupCallbacks.length > 0) {
+            spaLog(`Running ${this._viewCleanupCallbacks.length} view cleanup callbacks`);
+            for (const callback of this._viewCleanupCallbacks) {
+                try {
+                    callback();
+                } catch (error) {
+                    spaError('View cleanup callback error:', error);
+                }
+            }
+            this._viewCleanupCallbacks = [];
+        }
+    }
+
+    /**
+     * Destroy the SPA navigation instance and clean up all event listeners
+     * Call this if you need to completely tear down the SPA
+     */
+    destroy() {
+        spaLog('Destroying SPA navigation instance');
+
+        // Run any remaining view cleanup
+        this._runViewCleanup();
+
+        // Clear debounce timers
+        if (this._navigationDebounceTimer) {
+            clearTimeout(this._navigationDebounceTimer);
+            this._navigationDebounceTimer = null;
+        }
+
+        if (this._loadingTimeout) {
+            clearTimeout(this._loadingTimeout);
+            this._loadingTimeout = null;
+        }
+
+        // Remove event listeners
+        if (this._boundHandlers) {
+            if (this._boundHandlers.hashchange) {
+                window.removeEventListener('hashchange', this._boundHandlers.hashchange);
+            }
+            if (this._boundHandlers.popstate) {
+                window.removeEventListener('popstate', this._boundHandlers.popstate);
+            }
+            if (this._boundHandlers.click) {
+                document.removeEventListener('click', this._boundHandlers.click, true);
+            }
+        }
+
+        // Clear references
+        this.db = null;
+        this.auth = null;
+        this.renderer = null;
+        this._boundHandlers = null;
+        this._viewCleanupCallbacks = null;
+
+        spaLog('SPA navigation destroyed');
     }
 }
 

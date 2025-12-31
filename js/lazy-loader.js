@@ -5,9 +5,13 @@
  * Loading Phases:
  * 1. Critical HTML + CSS (instant) - Already rendered
  * 2. Auth check + User UI (100ms) - High priority
- * 3. Main content structure (200ms) - Show skeleton screens
- * 4. Firebase data (300-500ms) - Load actual data
+ * 3. Main content structure (200ms) - Show skeleton screens (if app not ready)
+ * 4. Firebase data (300-500ms) - Wait for app initialization
  * 5. Shaders + Enhancements (1s+) - Nice-to-have features
+ *
+ * IMPORTANT: This loader coordinates with app-init-simple.js and spa-navigation.js
+ * to avoid race conditions. It will NOT override content if the app has already
+ * started rendering.
  */
 
 class ProgressiveLazyLoader {
@@ -23,6 +27,11 @@ class ProgressiveLazyLoader {
         this.metrics = {};
         this.observers = new Map();
 
+        // Track coordination state with other components
+        this._appInitialized = false;
+        this._firstRenderComplete = false;
+        this._skeletonActive = false;
+
         console.log('[Lazy Loader] Initialized');
     }
 
@@ -32,16 +41,19 @@ class ProgressiveLazyLoader {
     async start() {
         console.log('[Lazy Loader] Starting progressive loading...');
 
+        // Setup event listeners for coordination with other components
+        this._setupEventListeners();
+
         // Phase 1: Critical (already done by server/HTML)
         this.markPhaseComplete('critical');
 
         // Phase 2: Auth Check (100ms target)
         await this.loadAuthUI();
 
-        // Phase 3: Structure (200ms target)
+        // Phase 3: Structure (200ms target) - only if app hasn't started rendering
         await this.loadStructure();
 
-        // Phase 4: Data (300-500ms target)
+        // Phase 4: Data (300-500ms target) - coordinate with app initialization
         await this.loadData();
 
         // Phase 5: Enhancements (1s+ - non-blocking)
@@ -49,6 +61,61 @@ class ProgressiveLazyLoader {
 
         // Report metrics
         this.reportMetrics();
+    }
+
+    /**
+     * Setup event listeners to coordinate with app-init-simple.js and spa-navigation.js
+     */
+    _setupEventListeners() {
+        // Listen for app initialization
+        document.addEventListener('app-initialized', (event) => {
+            console.log('[Lazy Loader] App initialized event received');
+            this._appInitialized = true;
+        }, { once: true });
+
+        // Listen for first render complete from SPA navigation
+        document.addEventListener('first-render-complete', (event) => {
+            console.log('[Lazy Loader] First render complete event received:', event.detail?.route);
+            this._firstRenderComplete = true;
+
+            // Remove skeleton if still active
+            if (this._skeletonActive) {
+                this._removeSkeleton();
+            }
+        }, { once: true });
+
+        // Listen for render errors
+        document.addEventListener('render-error', (event) => {
+            console.warn('[Lazy Loader] Render error event received:', event.detail?.route);
+            this._firstRenderComplete = true;
+
+            // Remove skeleton on error too
+            if (this._skeletonActive) {
+                this._removeSkeleton();
+            }
+        }, { once: true });
+    }
+
+    /**
+     * Remove skeleton screen with smooth transition
+     */
+    _removeSkeleton() {
+        const mainContent = document.getElementById('main-content');
+        if (!mainContent) return;
+
+        const skeleton = mainContent.querySelector('.skeleton-mythology-grid');
+        if (skeleton) {
+            skeleton.classList.add('fade-out');
+            setTimeout(() => {
+                // Only remove if it's still our skeleton (not replaced by actual content)
+                if (mainContent.querySelector('.skeleton-mythology-grid')) {
+                    skeleton.remove();
+                }
+            }, 300);
+        }
+
+        this._skeletonActive = false;
+        console.log('[Lazy Loader] Skeleton removed');
     }
 
     /**
@@ -81,6 +148,7 @@ class ProgressiveLazyLoader {
 
     /**
      * Phase 3: Load Structure with Skeleton Screens (Target: 200ms)
+     * Only shows skeleton if app hasn't already started rendering content
      */
     async loadStructure() {
         const phaseStart = performance.now();
@@ -90,11 +158,34 @@ class ProgressiveLazyLoader {
             const mainContent = document.getElementById('main-content');
             if (!mainContent) return;
 
-            // Show skeleton screen immediately
-            mainContent.innerHTML = this.getSkeletonHTML();
+            // Check if content has already been rendered by SPA navigation
+            // Look for view-specific classes that indicate real content
+            const hasRealContent = mainContent.querySelector(
+                '.landing-page-view, .home-view, .mythologies-grid, .browse-category-view, ' +
+                '.entity-page, .search-container, .compare-view, .dashboard-view'
+            );
 
-            // Add smooth transition class
-            mainContent.classList.add('content-loading');
+            // Also check if the loading container is still showing (default state)
+            const hasOnlyLoader = mainContent.querySelector('.loading-container') &&
+                                  mainContent.children.length === 1;
+
+            if (hasRealContent) {
+                console.log('[Lazy Loader] Real content already rendered, skipping skeleton');
+                this.markPhaseComplete('structure', phaseStart);
+                return;
+            }
+
+            // Only show skeleton if we still have the initial loading spinner
+            if (hasOnlyLoader) {
+                console.log('[Lazy Loader] Showing skeleton screen');
+                mainContent.innerHTML = this.getSkeletonHTML();
+                this._skeletonActive = true;
+
+                // Add smooth transition class
+                mainContent.classList.add('content-loading');
+            } else {
+                console.log('[Lazy Loader] Content state unclear, preserving current content');
+            }
 
             this.markPhaseComplete('structure', phaseStart);
         } catch (error) {
@@ -111,15 +202,22 @@ class ProgressiveLazyLoader {
         console.log('[Lazy Loader] Phase 4: Loading data...');
 
         try {
-            // Wait for app to be initialized
-            await this.waitForApp();
+            // Wait for app to be initialized (with timeout)
+            const appReady = await this.waitForApp();
 
-            // Trigger the normal app initialization
-            const event = new CustomEvent('lazy-load-data');
-            document.dispatchEvent(event);
+            if (!appReady) {
+                console.warn('[Lazy Loader] App initialization timed out, proceeding anyway');
+            }
 
-            // Replace skeleton with real content
-            await this.replaceSkeletonWithContent();
+            // Trigger the lazy-load-data event (for any components listening)
+            document.dispatchEvent(new CustomEvent('lazy-load-data'));
+
+            // Wait for content replacement if skeleton is active
+            if (this._skeletonActive) {
+                await this.replaceSkeletonWithContent();
+            } else {
+                console.log('[Lazy Loader] No skeleton active, skipping replacement');
+            }
 
             this.markPhaseComplete('data', phaseStart);
         } catch (error) {
@@ -158,11 +256,18 @@ class ProgressiveLazyLoader {
 
     /**
      * Load shaders (deferred)
+     * Note: app-init-simple.js may have already initialized shaders
      */
     async loadShaders() {
         console.log('[Lazy Loader] Loading shaders...');
 
         try {
+            // Check if shaders are already initialized by app-init-simple.js
+            if (window.EyesOfAzrael?.shaders) {
+                console.log('[Lazy Loader] Shaders already initialized by app, skipping');
+                return;
+            }
+
             if (typeof ShaderThemeManager !== 'undefined') {
                 window.EyesOfAzrael = window.EyesOfAzrael || {};
                 window.EyesOfAzrael.shaders = new ShaderThemeManager({
@@ -327,6 +432,7 @@ class ProgressiveLazyLoader {
 
     /**
      * Replace skeleton with actual content
+     * Waits for SPA navigation to render the actual view
      */
     async replaceSkeletonWithContent() {
         console.log('[Lazy Loader] Replacing skeleton with content...');
@@ -334,24 +440,49 @@ class ProgressiveLazyLoader {
         const mainContent = document.getElementById('main-content');
         if (!mainContent) return;
 
-        // Add fade-out animation to skeleton
-        mainContent.classList.add('content-loaded');
+        // If first render is already complete, just remove skeleton
+        if (this._firstRenderComplete) {
+            console.log('[Lazy Loader] First render already complete');
+            this._removeSkeleton();
+            mainContent.classList.add('content-loaded');
+            return;
+        }
 
         // Wait for navigation to render the actual page
         await new Promise(resolve => {
+            let resolved = false;
+
             const checkInterval = setInterval(() => {
-                const homeView = mainContent.querySelector('.home-view');
-                if (homeView) {
+                // Check for any view-specific content classes
+                const hasView = mainContent.querySelector(
+                    '.landing-page-view, .home-view, .mythologies-grid, .browse-category-view, ' +
+                    '.entity-page, .search-container, .compare-view, .dashboard-view, ' +
+                    '.mythology-page, .category-page, .error-page'
+                );
+
+                if (hasView || this._firstRenderComplete) {
                     clearInterval(checkInterval);
-                    resolve();
+                    if (!resolved) {
+                        resolved = true;
+                        console.log('[Lazy Loader] Content detected, completing replacement');
+                        this._removeSkeleton();
+                        mainContent.classList.add('content-loaded');
+                        resolve();
+                    }
                 }
             }, 50);
 
-            // Timeout after 3 seconds
+            // Timeout after 5 seconds (increased from 3s for slower connections)
             setTimeout(() => {
                 clearInterval(checkInterval);
-                resolve();
-            }, 3000);
+                if (!resolved) {
+                    resolved = true;
+                    console.warn('[Lazy Loader] Content replacement timeout');
+                    this._removeSkeleton();
+                    mainContent.classList.add('content-loaded');
+                    resolve();
+                }
+            }, 5000);
         });
     }
 
@@ -376,17 +507,47 @@ class ProgressiveLazyLoader {
 
     /**
      * Wait for app to be initialized
+     * @returns {Promise<boolean>} True if app initialized, false if timed out
      */
     async waitForApp() {
         return new Promise((resolve) => {
-            if (window.EyesOfAzrael && window.EyesOfAzrael.navigation) {
-                resolve();
-            } else {
-                document.addEventListener('app-initialized', () => resolve(), { once: true });
-
-                // Timeout after 5 seconds
-                setTimeout(() => resolve(), 5000);
+            // Check if already initialized
+            if (this._appInitialized || (window.EyesOfAzrael && window.EyesOfAzrael.navigation)) {
+                console.log('[Lazy Loader] App already initialized');
+                resolve(true);
+                return;
             }
+
+            let resolved = false;
+
+            // Listen for app-initialized event
+            const handleInit = () => {
+                if (!resolved) {
+                    resolved = true;
+                    console.log('[Lazy Loader] App initialized via event');
+                    resolve(true);
+                }
+            };
+
+            document.addEventListener('app-initialized', handleInit, { once: true });
+
+            // Also check for first-render-complete as a fallback
+            document.addEventListener('first-render-complete', () => {
+                if (!resolved) {
+                    resolved = true;
+                    console.log('[Lazy Loader] First render complete, app ready');
+                    resolve(true);
+                }
+            }, { once: true });
+
+            // Timeout after 8 seconds (increased for slow connections)
+            setTimeout(() => {
+                if (!resolved) {
+                    resolved = true;
+                    console.warn('[Lazy Loader] waitForApp timed out after 8s');
+                    resolve(false);
+                }
+            }, 8000);
         });
     }
 
@@ -430,13 +591,36 @@ class ProgressiveLazyLoader {
     }
 
     /**
-     * Cleanup observers
+     * Cleanup observers and reset state
      */
     destroy() {
         console.log('[Lazy Loader] Cleaning up...');
 
+        // Disconnect all observers
         this.observers.forEach(observer => observer.disconnect());
         this.observers.clear();
+
+        // Reset state
+        this._appInitialized = false;
+        this._firstRenderComplete = false;
+        this._skeletonActive = false;
+
+        console.log('[Lazy Loader] Cleanup complete');
+    }
+
+    /**
+     * Get current state for debugging
+     */
+    getState() {
+        return {
+            phases: { ...this.phases },
+            metrics: { ...this.metrics },
+            appInitialized: this._appInitialized,
+            firstRenderComplete: this._firstRenderComplete,
+            skeletonActive: this._skeletonActive,
+            observerCount: this.observers.size,
+            elapsedTime: Math.round(performance.now() - this.loadStartTime)
+        };
     }
 }
 
@@ -454,11 +638,7 @@ if (document.readyState === 'loading') {
 // Expose for debugging
 window.debugLazyLoader = () => {
     if (window.lazyLoader) {
-        return {
-            phases: window.lazyLoader.phases,
-            metrics: window.lazyLoader.metrics,
-            observers: window.lazyLoader.observers.size
-        };
+        return window.lazyLoader.getState();
     }
     return null;
 };

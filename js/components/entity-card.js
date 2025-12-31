@@ -46,7 +46,7 @@
          * Validate entityType - must be one of the allowed types
          */
         validateEntityType(entityType) {
-            const validTypes = ['deity', 'hero', 'creature', 'item', 'place', 'concept', 'magic', 'archetype', 'text', 'ritual', 'herb', 'symbol'];
+            const validTypes = ['deity', 'hero', 'creature', 'item', 'place', 'concept', 'magic', 'archetype', 'text', 'ritual', 'herb', 'symbol', 'cosmology', 'mythology'];
             if (!entityType || typeof entityType !== 'string') {
                 console.error('[EntityCard] Invalid entityType: must be a non-empty string');
                 return null;
@@ -201,17 +201,57 @@
             if (!icon) {
                 // Generate fallback from first letter of name
                 if (name) {
-                    return `<span class="icon-fallback">${name.charAt(0).toUpperCase()}</span>`;
+                    return `<span class="icon-fallback">${this.escapeHtml(name.charAt(0).toUpperCase())}</span>`;
                 }
-                return '✨';
+                return '&#10024;'; // Sparkles emoji as HTML entity
             }
 
-            // Check if icon is an image URL
+            // Check if icon is an image URL - validate URL safety
             if (typeof icon === 'string' && (icon.includes('.svg') || icon.includes('.png') || icon.includes('.jpg') || icon.startsWith('http'))) {
-                return `<img src="${icon}" alt="" class="entity-icon-img" loading="lazy" onerror="this.parentElement.textContent='✨'">`;
+                // Validate URL to prevent javascript: and data: XSS attacks
+                const sanitizedUrl = this.sanitizeUrl(icon);
+                if (!sanitizedUrl) {
+                    return '&#10024;'; // Fallback if URL is invalid
+                }
+                return `<img src="${this.escapeAttr(sanitizedUrl)}" alt="" class="entity-icon-img" loading="lazy" onerror="this.onerror=null;this.parentElement.textContent='&#10024;'">`;
             }
 
-            return icon;
+            // Escape any text/emoji icon to prevent XSS
+            return this.escapeHtml(icon);
+        }
+
+        /**
+         * Sanitize URL to prevent XSS attacks via javascript: or data: URLs
+         * @param {string} url - The URL to sanitize
+         * @returns {string|null} - Sanitized URL or null if invalid
+         */
+        sanitizeUrl(url) {
+            if (!url || typeof url !== 'string') return null;
+
+            // Trim and normalize
+            const trimmedUrl = url.trim().toLowerCase();
+
+            // Block dangerous URL schemes
+            const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:'];
+            for (const scheme of dangerousSchemes) {
+                if (trimmedUrl.startsWith(scheme)) {
+                    console.warn('[EntityCard] Blocked potentially dangerous URL:', url.substring(0, 50));
+                    return null;
+                }
+            }
+
+            // Allow http, https, and relative URLs
+            if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://') || trimmedUrl.startsWith('/') || trimmedUrl.startsWith('./')) {
+                return url;
+            }
+
+            // Block any other scheme (anything with : before /)
+            if (trimmedUrl.indexOf(':') < trimmedUrl.indexOf('/') && trimmedUrl.indexOf(':') !== -1) {
+                console.warn('[EntityCard] Blocked URL with unknown scheme:', url.substring(0, 50));
+                return null;
+            }
+
+            return url;
         }
 
         /**
@@ -272,17 +312,23 @@
          */
         renderTypeBadge() {
             const typeIcons = {
-                deity: '👑',
-                item: '⚔️',
-                place: '🏛️',
-                concept: '💭',
-                magic: '✨',
-                creature: '🐉',
-                hero: '🦸',
-                archetype: '🎭'
+                deity: '&#128081;',       // Crown
+                item: '&#9876;',          // Crossed swords
+                place: '&#127963;',       // Classical building
+                concept: '&#128173;',     // Thought bubble
+                magic: '&#10024;',        // Sparkles
+                creature: '&#128009;',    // Dragon
+                hero: '&#129464;',        // Superhero
+                archetype: '&#127917;',   // Theater masks
+                ritual: '&#128718;',      // Candle
+                text: '&#128220;',        // Scroll
+                herb: '&#127807;',        // Herb/leaf
+                symbol: '&#9889;',        // Lightning bolt
+                cosmology: '&#127756;',   // Globe with meridians
+                mythology: '&#127760;'    // Globe
             };
 
-            const icon = typeIcons[this.entityType] || '';
+            const icon = typeIcons[this.entityType] || '&#10024;';
             const label = this.capitalize(this.entityType);
 
             return `<span class="entity-type-badge" data-type="${this.escapeAttr(this.entityType)}">${icon} ${this.escapeHtml(label)}</span>`;
@@ -338,22 +384,24 @@
         renderCompactMetadata() {
             const metadata = [];
 
-            // Category
+            // Category - escape the value
             if (this.data.category) {
-                metadata.push(`<strong>Category:</strong> ${this.capitalize(this.data.category.replace(/-/g, ' '))}`);
+                const categoryDisplay = this.escapeHtml(this.capitalize(this.data.category.replace(/-/g, ' ')));
+                metadata.push(`<strong>Category:</strong> ${categoryDisplay}`);
             }
 
-            // Primary element
+            // Primary element - escape the value
             const element = this.data.element || this.data.metaphysicalProperties?.primaryElement;
             if (element) {
-                metadata.push(`<strong>Element:</strong> ${this.capitalize(element)}`);
+                const elementDisplay = this.escapeHtml(this.capitalize(element));
+                metadata.push(`<strong>Element:</strong> ${elementDisplay}`);
             }
 
-            // Connection count
+            // Connection count - numeric, safe
             if (this.data.relatedCount) {
                 const total = Object.values(this.data.relatedCount).reduce((sum, n) => sum + n, 0);
                 if (total > 0) {
-                    metadata.push(`<strong>Connections:</strong> ${total}`);
+                    metadata.push(`<strong>Connections:</strong> ${parseInt(total, 10)}`);
                 }
             }
 
@@ -395,19 +443,19 @@
                         ${ling.originalName ? `
                             <div class="property-card">
                                 <div class="property-label">Original Name</div>
-                                <div class="property-value">${ling.originalName}</div>
+                                <div class="property-value">${this.escapeHtml(ling.originalName)}</div>
                             </div>
                         ` : ''}
                         ${ling.transliteration ? `
                             <div class="property-card">
                                 <div class="property-label">Transliteration</div>
-                                <div class="property-value">${ling.transliteration}</div>
+                                <div class="property-value">${this.escapeHtml(ling.transliteration)}</div>
                             </div>
                         ` : ''}
                         ${ling.pronunciation ? `
                             <div class="property-card">
                                 <div class="property-label">Pronunciation</div>
-                                <div class="property-value"><code>${ling.pronunciation}</code></div>
+                                <div class="property-value"><code>${this.escapeHtml(ling.pronunciation)}</code></div>
                             </div>
                         ` : ''}
                         ${ling.etymology?.meaning ? `
@@ -651,25 +699,25 @@
                         ${meta.primaryElement ? `
                             <div class="property-card">
                                 <div class="property-label">Element</div>
-                                <div class="property-value">${this.capitalize(meta.primaryElement)}</div>
+                                <div class="property-value">${this.escapeHtml(this.capitalize(meta.primaryElement))}</div>
                             </div>
                         ` : ''}
                         ${meta.planet ? `
                             <div class="property-card">
                                 <div class="property-label">Planet</div>
-                                <div class="property-value">${meta.planet}</div>
+                                <div class="property-value">${this.escapeHtml(meta.planet)}</div>
                             </div>
                         ` : ''}
                         ${meta.sefirot && meta.sefirot.length > 0 ? `
                             <div class="property-card">
                                 <div class="property-label">Sefirot</div>
-                                <div class="property-value">${meta.sefirot.map(s => this.capitalize(s)).join(', ')}</div>
+                                <div class="property-value">${meta.sefirot.map(s => this.escapeHtml(this.capitalize(s))).join(', ')}</div>
                             </div>
                         ` : ''}
                         ${meta.chakras && meta.chakras.length > 0 ? `
                             <div class="property-card">
                                 <div class="property-label">Chakras</div>
-                                <div class="property-value">${meta.chakras.map(c => this.capitalize(c)).join(', ')}</div>
+                                <div class="property-value">${meta.chakras.map(c => this.escapeHtml(this.capitalize(c))).join(', ')}</div>
                             </div>
                         ` : ''}
                     </div>
@@ -743,9 +791,10 @@
          * Render mini entity card for related entities
          */
         renderMiniEntityCard(entity) {
+            const safeUrl = this.sanitizeUrl(entity.url) || '#';
             return `
-                <a href="${entity.url || ''}" class="entity-mini-card">
-                    ${entity.icon ? `<span class="entity-icon">${entity.icon}</span>` : ''}
+                <a href="${this.escapeAttr(safeUrl)}" class="entity-mini-card">
+                    ${entity.icon ? `<span class="entity-icon">${this.escapeHtml(entity.icon)}</span>` : ''}
                     <span class="entity-name">${this.escapeHtml(entity.name)}</span>
                 </a>
             `;
@@ -762,14 +811,16 @@
                 <div class="entity-section sources-section">
                     <h2>Ancient Sources</h2>
                     <ul class="sources-list">
-                        ${sources.map(source => `
+                        ${sources.map(source => {
+                            const safeCorpusUrl = source.corpusUrl ? this.sanitizeUrl(source.corpusUrl) : null;
+                            return `
                             <li>
                                 ${source.author ? `<strong>${this.escapeHtml(source.author)}</strong>, ` : ''}
                                 <em>${this.escapeHtml(source.text || source.title)}</em>
                                 ${source.passage ? `, ${this.escapeHtml(source.passage)}` : ''}
-                                ${source.corpusUrl ? `<a href="${source.corpusUrl}" class="corpus-link">📜 View</a>` : ''}
+                                ${safeCorpusUrl ? `<a href="${this.escapeAttr(safeCorpusUrl)}" class="corpus-link">&#128220; View</a>` : ''}
                             </li>
-                        `).join('')}
+                        `}).join('')}
                     </ul>
                 </div>
             `;

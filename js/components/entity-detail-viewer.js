@@ -446,17 +446,17 @@ class EntityDetailViewer {
         this.animationDelay = 0;
 
         return `
-            <article class="entity-detail-viewer" data-entity-id="${entity.id}" data-entity-type="${entityType}" data-mythology="${mythology}">
+            <article class="entity-detail-viewer" data-entity-id="${this.escapeAttr(entity.id)}" data-entity-type="${this.escapeAttr(entityType)}" data-mythology="${this.escapeAttr(mythology)}">
                 <!-- Breadcrumb Navigation -->
                 ${this.renderBreadcrumb(mythology, entityType, entity.name || entity.title)}
 
                 <!-- Hero Section -->
-                <header class="entity-hero-enhanced" style="--primary-color: ${primaryColor}; --secondary-color: ${secondaryColor}; --mythos-primary: ${primaryColor}; --mythos-secondary: ${secondaryColor};">
+                <header class="entity-hero-enhanced" style="--primary-color: ${this.escapeAttr(primaryColor)}; --secondary-color: ${this.escapeAttr(secondaryColor)}; --mythos-primary: ${this.escapeAttr(primaryColor)}; --mythos-secondary: ${this.escapeAttr(secondaryColor)};">
                     <div class="entity-hero-background" aria-hidden="true"></div>
                     <div class="entity-hero-content">
                         ${entity.icon ? `
                             <div class="entity-icon-large" aria-hidden="true">
-                                <span class="icon-float">${entity.icon}</span>
+                                <span class="icon-float">${this.escapeHtml(entity.icon)}</span>
                             </div>
                         ` : ''}
                         <div class="entity-hero-text">
@@ -496,16 +496,16 @@ class EntityDetailViewer {
                         <span class="action-icon" aria-hidden="true">&#8592;</span>
                         <span class="action-text">Back</span>
                     </button>
-                    <button class="quick-action-btn" onclick="EntityDetailViewer.shareEntity('${this.escapeHtml(entity.name || entity.title)}', '${entity.id}')" aria-label="Share this entity">
+                    <button class="quick-action-btn" data-action="share" data-entity-name="${this.escapeAttr(entity.name || entity.title)}" data-entity-id="${this.escapeAttr(entity.id)}" aria-label="Share this entity">
                         <span class="action-icon" aria-hidden="true">&#128279;</span>
                         <span class="action-text">Share</span>
                     </button>
-                    <button class="quick-action-btn" onclick="EntityDetailViewer.bookmarkEntity('${entity.id}')" aria-label="Bookmark this entity">
+                    <button class="quick-action-btn" data-action="bookmark" data-entity-id="${this.escapeAttr(entity.id)}" aria-label="Bookmark this entity">
                         <span class="action-icon" aria-hidden="true">&#9733;</span>
                         <span class="action-text">Bookmark</span>
                     </button>
                     ${entity.corpusQueries && entity.corpusQueries.length > 0 ? `
-                        <button class="quick-action-btn quick-action-primary" onclick="EntityDetailViewer.scrollToSection('corpus-section')" aria-label="View primary sources">
+                        <button class="quick-action-btn quick-action-primary" data-action="scroll-to" data-section="corpus-section" aria-label="View primary sources">
                             <span class="action-icon" aria-hidden="true">&#128214;</span>
                             <span class="action-text">Sources</span>
                         </button>
@@ -771,11 +771,17 @@ class EntityDetailViewer {
     }
 
     /**
-     * Render markdown-like text
+     * Render markdown-like text with XSS protection
+     * First escapes HTML, then applies markdown formatting
      */
     renderMarkdown(text) {
         if (!text) return '';
-        return text
+
+        // First escape HTML to prevent XSS
+        let escaped = this.escapeHtml(text);
+
+        // Then apply markdown formatting to the escaped text
+        return escaped
             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.+?)\*/g, '<em>$1</em>')
             .replace(/\n\n/g, '</p><p>')
@@ -1652,15 +1658,17 @@ class EntityDetailViewer {
                                 </li>
                             `;
                         }
+                        // Sanitize URL to prevent javascript: XSS
+                        const safeUrl = source.url ? this.sanitizeUrl(source.url) : null;
                         return `
                             <li class="source-item source-item-detailed" role="listitem">
                                 <span class="source-number">${index + 1}</span>
                                 <div class="source-content">
                                     ${source.title ? `<cite class="source-title">${this.escapeHtml(source.title)}</cite>` : ''}
                                     ${source.author ? `<span class="source-author">by ${this.escapeHtml(source.author)}</span>` : ''}
-                                    ${source.date || source.year ? `<span class="source-date">(${this.escapeHtml(source.date || source.year)})</span>` : ''}
+                                    ${source.date || source.year ? `<span class="source-date">(${this.escapeHtml(String(source.date || source.year))})</span>` : ''}
                                     ${source.publisher ? `<span class="source-publisher">${this.escapeHtml(source.publisher)}</span>` : ''}
-                                    ${source.url ? `<a href="${this.escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer" class="source-link">View Source &#8599;</a>` : ''}
+                                    ${safeUrl ? `<a href="${this.escapeAttr(safeUrl)}" target="_blank" rel="noopener noreferrer" class="source-link">View Source &#8599;</a>` : ''}
                                     ${source.citation ? `<p class="source-citation">${this.escapeHtml(source.citation)}</p>` : ''}
                                 </div>
                             </li>
@@ -1851,7 +1859,7 @@ class EntityDetailViewer {
             'sacred-herb': 'herbs',
             'practice': 'rituals',
             'ceremony': 'rituals',
-            'concept': 'archetypes'
+            'concept': 'concepts'
         };
 
         // Normalize input: lowercase and remove hyphens for lookup
@@ -1898,6 +1906,84 @@ class EntityDetailViewer {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    /**
+     * Escape attribute value for safe HTML attribute insertion
+     * More thorough than escapeHtml for attribute contexts
+     */
+    escapeAttr(text) {
+        if (text === null || text === undefined) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    /**
+     * Sanitize URL to prevent XSS attacks via javascript: or data: URLs
+     * @param {string} url - The URL to sanitize
+     * @returns {string|null} - Sanitized URL or null if invalid
+     */
+    sanitizeUrl(url) {
+        if (!url || typeof url !== 'string') return null;
+
+        // Trim and normalize
+        const trimmedUrl = url.trim().toLowerCase();
+
+        // Block dangerous URL schemes
+        const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:'];
+        for (const scheme of dangerousSchemes) {
+            if (trimmedUrl.startsWith(scheme)) {
+                console.warn('[EntityDetailViewer] Blocked potentially dangerous URL:', url.substring(0, 50));
+                return null;
+            }
+        }
+
+        // Allow http, https, hash routes, and relative URLs
+        if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://') ||
+            trimmedUrl.startsWith('#') || trimmedUrl.startsWith('/') || trimmedUrl.startsWith('./')) {
+            return url;
+        }
+
+        // Block any other scheme (anything with : before /)
+        if (trimmedUrl.indexOf(':') < trimmedUrl.indexOf('/') && trimmedUrl.indexOf(':') !== -1) {
+            console.warn('[EntityDetailViewer] Blocked URL with unknown scheme:', url.substring(0, 50));
+            return null;
+        }
+
+        return url;
+    }
+
+    /**
+     * Attach event listeners to quick action buttons
+     * Called after rendering to set up event delegation
+     */
+    attachEventListeners() {
+        const container = document.querySelector('.entity-detail-viewer');
+        if (!container) return;
+
+        // Use event delegation for quick action buttons
+        container.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+
+            const action = btn.dataset.action;
+
+            switch (action) {
+                case 'share':
+                    EntityDetailViewer.shareEntity(btn.dataset.entityName, btn.dataset.entityId);
+                    break;
+                case 'bookmark':
+                    EntityDetailViewer.bookmarkEntity(btn.dataset.entityId);
+                    break;
+                case 'scroll-to':
+                    EntityDetailViewer.scrollToSection(btn.dataset.section);
+                    break;
+            }
+        });
     }
 }
 
