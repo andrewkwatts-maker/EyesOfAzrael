@@ -1,7 +1,18 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.11.0
+ * Version: 2.12.0
+ *
+ * Changes in 2.12.0:
+ * - Added robustness infrastructure (4-phase implementation)
+ * - New core/assertions.js for strong type checking
+ * - New core/service-container.js for SOLID-compliant DI
+ * - New core/startup-checklist.js for pre-flight validation
+ * - New components/diagnostic-panel.js for user-facing diagnostics
+ * - New validate-and-backup.bat for automated validation
+ * - New scripts/validate-and-report.js for entity validation
+ * - Added css/diagnostic-panel.css for diagnostic styling
+ * - Updated app-init-simple.js to use startup checklist
  *
  * Changes in 2.11.0:
  * - CRITICAL FIX: Add window.SPANavigation export
@@ -49,7 +60,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.11.0';
+const CACHE_VERSION = 'v2.12.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';
