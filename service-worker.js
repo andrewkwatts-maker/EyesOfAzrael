@@ -1,7 +1,11 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.12.5
+ * Version: 2.12.6
+ *
+ * Changes in 2.12.6:
+ * - Add extensive logging to showWarningBadge for debugging
+ * - Wrap badge insertion in try-catch with fallback
  *
  * Changes in 2.12.5:
  * - Fix insertBefore error in showWarningBadge (check parentNode)
@@ -77,7 +81,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.12.5';
+const CACHE_VERSION = 'v2.12.6';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';
