@@ -8,11 +8,33 @@
  * - Responsive layouts with mobile-first design
  * - Theme integration and Firebase data structure
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 (function() {
     'use strict';
+
+    // Explicit collection name mapping for edge cases
+    // Maps entity type singular to Firebase collection name
+    const COLLECTION_NAME_MAP = {
+        deity: 'deities',
+        hero: 'heroes',
+        creature: 'creatures',
+        cosmology: 'cosmology',
+        ritual: 'rituals',
+        herb: 'herbs',
+        concept: 'concepts',
+        symbol: 'symbols',
+        text: 'texts',
+        item: 'items',
+        place: 'places',
+        magic: 'magic',
+        mythology: 'mythologies',
+        archetype: 'archetypes'
+    };
+
+    // Valid entity types for validation
+    const VALID_ENTITY_TYPES = new Set(Object.keys(COLLECTION_NAME_MAP));
 
     // Entity type configuration with icons and metadata
     const ENTITY_TYPE_CONFIG = {
@@ -106,11 +128,14 @@
         constructor(options = {}) {
             this.db = options.db || (window.firebase && window.firebase.firestore());
             this.container = options.container;
-            this.entityType = options.entityType || 'deity';
             this.displayMode = options.displayMode || 'grid';
             this.theme = options.theme || 'auto';
             this.entities = [];
-            this.config = ENTITY_TYPE_CONFIG[this.entityType] || ENTITY_TYPE_CONFIG.deity;
+
+            // Validate and set entity type with warning for unknown types
+            const requestedType = options.entityType || 'deity';
+            this.entityType = this._validateEntityType(requestedType);
+            this.config = ENTITY_TYPE_CONFIG[this.entityType] || this._getDefaultConfig();
 
             // Sorting and filtering
             this.sortField = options.sortField || 'name';
@@ -124,6 +149,76 @@
             // Callbacks
             this.onEntityClick = options.onEntityClick || null;
             this.onRenderComplete = options.onRenderComplete || null;
+
+            // Render cache for performance optimization
+            this._renderCache = new Map();
+            this._cacheEnabled = options.cacheEnabled !== false; // Default to enabled
+            this._cacheMaxSize = options.cacheMaxSize || 100;
+        }
+
+        /**
+         * Validate entity type and log warning if unknown
+         * @param {string} type - The entity type to validate
+         * @returns {string} - Validated entity type or default
+         */
+        _validateEntityType(type) {
+            if (!type || typeof type !== 'string') {
+                console.warn(`[UniversalEntityRenderer] Invalid entity type provided: ${type}. Using default 'deity'.`);
+                return 'deity';
+            }
+
+            const normalizedType = type.toLowerCase().trim();
+
+            if (!VALID_ENTITY_TYPES.has(normalizedType)) {
+                console.warn(
+                    `[UniversalEntityRenderer] Unknown entity type '${type}'. ` +
+                    `Valid types are: ${Array.from(VALID_ENTITY_TYPES).join(', ')}. ` +
+                    `Using default 'deity'.`
+                );
+                return 'deity';
+            }
+
+            return normalizedType;
+        }
+
+        /**
+         * Get default configuration for unknown entity types
+         * @returns {Object} - Default configuration object
+         */
+        _getDefaultConfig() {
+            return {
+                icon: '✨',
+                label: 'Entity',
+                plural: 'Entities',
+                collection: 'entities',
+                primaryFields: ['name', 'description']
+            };
+        }
+
+        /**
+         * Get collection name for entity type using explicit mapping
+         * @param {string} entityType - The entity type
+         * @returns {string} - The Firebase collection name
+         */
+        _getCollectionName(entityType) {
+            // First check explicit mapping
+            if (COLLECTION_NAME_MAP[entityType]) {
+                return COLLECTION_NAME_MAP[entityType];
+            }
+
+            // Fall back to config if available
+            if (this.config && this.config.collection) {
+                return this.config.collection;
+            }
+
+            // Last resort: attempt pluralization
+            console.warn(`[UniversalEntityRenderer] No collection mapping for '${entityType}'. Attempting auto-pluralization.`);
+            if (entityType.endsWith('y')) {
+                return entityType.slice(0, -1) + 'ies';
+            } else if (entityType.endsWith('s') || entityType.endsWith('x') || entityType.endsWith('ch') || entityType.endsWith('sh')) {
+                return entityType + 'es';
+            }
+            return entityType + 's';
         }
 
         /**
@@ -131,7 +226,7 @@
          */
         async render() {
             if (!this.container) {
-                console.error('UniversalEntityRenderer: No container specified');
+                console.error('[UniversalEntityRenderer] No container specified');
                 return;
             }
 
@@ -146,25 +241,51 @@
                 // Apply sorting and filtering
                 const processedEntities = this.processEntities(this.entities);
 
-                // Render based on display mode
-                switch (this.displayMode) {
-                    case 'grid':
-                        this.renderGrid(processedEntities);
-                        break;
-                    case 'list':
-                        this.renderList(processedEntities);
-                        break;
-                    case 'table':
-                        this.renderTable(processedEntities);
-                        break;
-                    case 'panel':
-                        this.renderPanel(processedEntities);
-                        break;
-                    case 'inline':
-                        this.renderInline(processedEntities);
-                        break;
-                    default:
-                        this.renderGrid(processedEntities);
+                // Check cache first
+                const cacheKey = this._generateCacheKey(processedEntities);
+                if (this._cacheEnabled && this._renderCache.has(cacheKey)) {
+                    const cachedHTML = this._renderCache.get(cacheKey);
+                    this._applyRenderedHTML(cachedHTML);
+                    this.attachEventListeners();
+                    if (this.onRenderComplete) {
+                        this.onRenderComplete(processedEntities);
+                    }
+                    return;
+                }
+
+                // Render based on display mode with error handling
+                let renderedHTML = '';
+                try {
+                    switch (this.displayMode) {
+                        case 'grid':
+                            renderedHTML = this._renderGridHTML(processedEntities);
+                            break;
+                        case 'list':
+                            renderedHTML = this._renderListHTML(processedEntities);
+                            break;
+                        case 'table':
+                            renderedHTML = this._renderTableHTML(processedEntities);
+                            break;
+                        case 'panel':
+                            renderedHTML = this._renderPanelHTML(processedEntities);
+                            break;
+                        case 'inline':
+                            renderedHTML = this._renderInlineHTML(processedEntities);
+                            break;
+                        default:
+                            console.warn(`[UniversalEntityRenderer] Unknown display mode '${this.displayMode}', falling back to grid.`);
+                            renderedHTML = this._renderGridHTML(processedEntities);
+                    }
+                } catch (renderError) {
+                    console.error('[UniversalEntityRenderer] Error during rendering:', renderError);
+                    this.showRenderError(renderError, this.displayMode);
+                    return;
+                }
+
+                // Apply rendered HTML and cache it
+                this._applyRenderedHTML(renderedHTML);
+                if (this._cacheEnabled) {
+                    this._cacheRenderedHTML(cacheKey, renderedHTML);
                 }
 
                 // Attach event listeners
@@ -176,8 +297,74 @@
                 }
 
             } catch (error) {
-                console.error('UniversalEntityRenderer: Render error', error);
+                console.error('[UniversalEntityRenderer] Render error:', error);
                 this.showError(error);
+            }
+        }
+
+        /**
+         * Generate cache key based on entity IDs, display mode, and sorting
+         */
+        _generateCacheKey(entities) {
+            const entityIds = entities.map(e => e.id).join(',');
+            return `${this.entityType}:${this.displayMode}:${this.sortField}:${this.sortDirection}:${entityIds}`;
+        }
+
+        /**
+         * Cache rendered HTML with size limit
+         */
+        _cacheRenderedHTML(key, html) {
+            // Enforce cache size limit
+            if (this._renderCache.size >= this._cacheMaxSize) {
+                // Remove oldest entry (first key in Map)
+                const firstKey = this._renderCache.keys().next().value;
+                this._renderCache.delete(firstKey);
+            }
+            this._renderCache.set(key, html);
+        }
+
+        /**
+         * Apply rendered HTML to container
+         */
+        _applyRenderedHTML(html) {
+            const containerEl = typeof this.container === 'string'
+                ? document.querySelector(this.container)
+                : this.container;
+
+            if (containerEl) {
+                containerEl.innerHTML = html;
+                containerEl.classList.add('universal-renderer-container');
+            }
+        }
+
+        /**
+         * Invalidate cache (call when entity data changes)
+         */
+        invalidateCache() {
+            this._renderCache.clear();
+        }
+
+        /**
+         * Show render-specific error with user-friendly message
+         */
+        showRenderError(error, displayMode) {
+            const containerEl = typeof this.container === 'string'
+                ? document.querySelector(this.container)
+                : this.container;
+
+            if (containerEl) {
+                containerEl.innerHTML = `
+                    <div class="universal-error render-error">
+                        <div class="error-icon">⚠️</div>
+                        <h3>Display Error</h3>
+                        <p>Unable to render ${this.config.plural.toLowerCase()} in ${displayMode} mode.</p>
+                        <p class="error-details">${this.escapeHtml(error.message || 'An unexpected error occurred.')}</p>
+                        <div class="error-actions">
+                            <button class="btn-retry" onclick="location.reload()">Refresh Page</button>
+                            <button class="btn-secondary" onclick="this.closest('.universal-error').remove()">Dismiss</button>
+                        </div>
+                    </div>
+                `;
             }
         }
 
@@ -189,7 +376,9 @@
                 throw new Error('Firebase Firestore not initialized');
             }
 
-            let query = this.db.collection(this.config.collection);
+            // Use explicit collection mapping
+            const collectionName = this._getCollectionName(this.entityType);
+            let query = this.db.collection(collectionName);
 
             // Apply filters
             Object.entries(this.filters).forEach(([field, value]) => {
@@ -237,23 +426,53 @@
         }
 
         /**
-         * Render grid layout
+         * Render grid layout (legacy method for backward compatibility)
          */
         renderGrid(entities) {
-            const containerEl = typeof this.container === 'string'
-                ? document.querySelector(this.container)
-                : this.container;
+            const html = this._renderGridHTML(entities);
+            this._applyRenderedHTML(html);
+        }
 
-            if (!containerEl) return;
-
-            const gridHTML = `
+        /**
+         * Generate grid layout HTML
+         */
+        _renderGridHTML(entities) {
+            return `
                 <div class="universal-grid" data-entity-type="${this.entityType}">
-                    ${entities.map(entity => this.renderGridCard(entity)).join('')}
+                    ${entities.map(entity => this._safeRenderGridCard(entity)).join('')}
                 </div>
             `;
+        }
 
-            containerEl.innerHTML = gridHTML;
-            containerEl.classList.add('universal-renderer-container');
+        /**
+         * Safe wrapper for grid card rendering with error handling
+         */
+        _safeRenderGridCard(entity) {
+            try {
+                return this.renderGridCard(entity);
+            } catch (error) {
+                console.error(`[UniversalEntityRenderer] Error rendering grid card for entity ${entity?.id}:`, error);
+                return this._renderErrorCard(entity, 'grid');
+            }
+        }
+
+        /**
+         * Render fallback error card when individual entity fails
+         */
+        _renderErrorCard(entity, mode) {
+            const entityName = this._safeGetProperty(entity, 'name') ||
+                               this._safeGetProperty(entity, 'title') ||
+                               'Unknown Entity';
+            const entityId = entity?.id || 'unknown';
+
+            return `
+                <div class="entity-card error-card" data-entity-id="${entityId}" data-entity-type="${this.entityType}">
+                    <div class="error-card-content">
+                        <span class="error-icon">⚠️</span>
+                        <span class="error-text">Unable to display: ${this.escapeHtml(entityName)}</span>
+                    </div>
+                </div>
+            `;
         }
 
         /**
@@ -363,23 +582,34 @@
         }
 
         /**
-         * Render list layout
+         * Render list layout (legacy method for backward compatibility)
          */
         renderList(entities) {
-            const containerEl = typeof this.container === 'string'
-                ? document.querySelector(this.container)
-                : this.container;
+            const html = this._renderListHTML(entities);
+            this._applyRenderedHTML(html);
+        }
 
-            if (!containerEl) return;
-
-            const listHTML = `
+        /**
+         * Generate list layout HTML
+         */
+        _renderListHTML(entities) {
+            return `
                 <div class="universal-list" data-entity-type="${this.entityType}">
-                    ${entities.map(entity => this.renderListItem(entity)).join('')}
+                    ${entities.map(entity => this._safeRenderListItem(entity)).join('')}
                 </div>
             `;
+        }
 
-            containerEl.innerHTML = listHTML;
-            containerEl.classList.add('universal-renderer-container');
+        /**
+         * Safe wrapper for list item rendering with error handling
+         */
+        _safeRenderListItem(entity) {
+            try {
+                return this.renderListItem(entity);
+            } catch (error) {
+                console.error(`[UniversalEntityRenderer] Error rendering list item for entity ${entity?.id}:`, error);
+                return this._renderErrorCard(entity, 'list');
+            }
         }
 
         /**
@@ -451,18 +681,20 @@
         }
 
         /**
-         * Render table layout
+         * Render table layout (legacy method for backward compatibility)
          */
         renderTable(entities) {
-            const containerEl = typeof this.container === 'string'
-                ? document.querySelector(this.container)
-                : this.container;
+            const html = this._renderTableHTML(entities);
+            this._applyRenderedHTML(html);
+        }
 
-            if (!containerEl) return;
-
+        /**
+         * Generate table layout HTML
+         */
+        _renderTableHTML(entities) {
             const columns = this.getTableColumns();
 
-            const tableHTML = `
+            return `
                 <div class="universal-table-container">
                     <table class="universal-table" data-entity-type="${this.entityType}">
                         <thead>
@@ -477,14 +709,30 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${entities.map(entity => this.renderTableRow(entity, columns)).join('')}
+                            ${entities.map(entity => this._safeRenderTableRow(entity, columns)).join('')}
                         </tbody>
                     </table>
                 </div>
             `;
+        }
 
-            containerEl.innerHTML = tableHTML;
-            containerEl.classList.add('universal-renderer-container');
+        /**
+         * Safe wrapper for table row rendering with error handling
+         */
+        _safeRenderTableRow(entity, columns) {
+            try {
+                return this.renderTableRow(entity, columns);
+            } catch (error) {
+                console.error(`[UniversalEntityRenderer] Error rendering table row for entity ${entity?.id}:`, error);
+                const entityName = this._safeGetProperty(entity, 'name') || 'Unknown';
+                return `
+                    <tr class="error-row" data-entity-id="${entity?.id || 'unknown'}">
+                        <td colspan="${columns.length + 1}">
+                            <span class="error-icon">⚠️</span> Unable to display: ${this.escapeHtml(entityName)}
+                        </td>
+                    </tr>
+                `;
+            }
         }
 
         /**
@@ -530,23 +778,34 @@
         }
 
         /**
-         * Render panel layout (detailed cards)
+         * Render panel layout (legacy method for backward compatibility)
          */
         renderPanel(entities) {
-            const containerEl = typeof this.container === 'string'
-                ? document.querySelector(this.container)
-                : this.container;
+            const html = this._renderPanelHTML(entities);
+            this._applyRenderedHTML(html);
+        }
 
-            if (!containerEl) return;
-
-            const panelHTML = `
+        /**
+         * Generate panel layout HTML
+         */
+        _renderPanelHTML(entities) {
+            return `
                 <div class="universal-panel-container" data-entity-type="${this.entityType}">
-                    ${entities.map(entity => this.renderPanelCard(entity)).join('')}
+                    ${entities.map(entity => this._safeRenderPanelCard(entity)).join('')}
                 </div>
             `;
+        }
 
-            containerEl.innerHTML = panelHTML;
-            containerEl.classList.add('universal-renderer-container');
+        /**
+         * Safe wrapper for panel card rendering with error handling
+         */
+        _safeRenderPanelCard(entity) {
+            try {
+                return this.renderPanelCard(entity);
+            } catch (error) {
+                console.error(`[UniversalEntityRenderer] Error rendering panel card for entity ${entity?.id}:`, error);
+                return this._renderErrorCard(entity, 'panel');
+            }
         }
 
         /**
@@ -622,23 +881,35 @@
         }
 
         /**
-         * Render inline layout (for embedding in text)
+         * Render inline layout (legacy method for backward compatibility)
          */
         renderInline(entities) {
-            const containerEl = typeof this.container === 'string'
-                ? document.querySelector(this.container)
-                : this.container;
+            const html = this._renderInlineHTML(entities);
+            this._applyRenderedHTML(html);
+        }
 
-            if (!containerEl) return;
-
-            const inlineHTML = `
+        /**
+         * Generate inline layout HTML
+         */
+        _renderInlineHTML(entities) {
+            return `
                 <span class="universal-inline" data-entity-type="${this.entityType}">
-                    ${entities.map(entity => this.renderInlineItem(entity)).join(', ')}
+                    ${entities.map(entity => this._safeRenderInlineItem(entity)).join(', ')}
                 </span>
             `;
+        }
 
-            containerEl.innerHTML = inlineHTML;
-            containerEl.classList.add('universal-renderer-container');
+        /**
+         * Safe wrapper for inline item rendering with error handling
+         */
+        _safeRenderInlineItem(entity) {
+            try {
+                return this.renderInlineItem(entity);
+            } catch (error) {
+                console.error(`[UniversalEntityRenderer] Error rendering inline item for entity ${entity?.id}:`, error);
+                const entityName = this._safeGetProperty(entity, 'name') || 'Unknown';
+                return `<span class="inline-error">${this.escapeHtml(entityName)}</span>`;
+            }
         }
 
         /**
@@ -767,6 +1038,55 @@
         }
 
         /**
+         * Safe property accessor with fallback
+         * Validates property exists before accessing and provides fallback
+         * @param {Object} entity - The entity object
+         * @param {string} property - The property path (supports dot notation)
+         * @param {*} fallback - Fallback value if property doesn't exist (default: null)
+         * @returns {*} - Property value or fallback
+         */
+        _safeGetProperty(entity, property, fallback = null) {
+            if (!entity || typeof entity !== 'object') {
+                return fallback;
+            }
+
+            try {
+                const value = this.getNestedValue(entity, property);
+                return value !== undefined && value !== null ? value : fallback;
+            } catch (error) {
+                console.warn(`[UniversalEntityRenderer] Error accessing property '${property}':`, error);
+                return fallback;
+            }
+        }
+
+        /**
+         * Validate that required fields exist in entity data
+         * Returns object with validation results
+         * @param {Object} entity - The entity to validate
+         * @param {Array<string>} requiredFields - List of required field paths
+         * @returns {Object} - { isValid: boolean, missingFields: string[] }
+         */
+        _validateEntityFields(entity, requiredFields = ['name']) {
+            const missingFields = [];
+
+            if (!entity || typeof entity !== 'object') {
+                return { isValid: false, missingFields: requiredFields };
+            }
+
+            for (const field of requiredFields) {
+                const value = this._safeGetProperty(entity, field);
+                if (value === null || value === undefined || value === '') {
+                    missingFields.push(field);
+                }
+            }
+
+            return {
+                isValid: missingFields.length === 0,
+                missingFields
+            };
+        }
+
+        /**
          * Capitalize string
          */
         capitalize(str) {
@@ -796,9 +1116,12 @@
          * Set entity type and reload
          */
         async setEntityType(type) {
-            this.entityType = type;
-            this.config = ENTITY_TYPE_CONFIG[type] || ENTITY_TYPE_CONFIG.deity;
+            // Validate the new entity type
+            this.entityType = this._validateEntityType(type);
+            this.config = ENTITY_TYPE_CONFIG[this.entityType] || this._getDefaultConfig();
             this.entities = [];
+            // Invalidate cache when entity type changes
+            this.invalidateCache();
             await this.render();
         }
 
@@ -808,6 +1131,8 @@
         async setFilters(filters) {
             this.filters = filters;
             this.entities = [];
+            // Invalidate cache when filters change
+            this.invalidateCache();
             await this.render();
         }
 
@@ -816,6 +1141,8 @@
          */
         async refresh() {
             this.entities = [];
+            // Invalidate cache on refresh
+            this.invalidateCache();
             await this.render();
         }
     }
@@ -823,7 +1150,9 @@
     // Export to window
     window.UniversalEntityRenderer = UniversalEntityRenderer;
 
-    // Also export config for external use
+    // Also export config and utilities for external use
     window.ENTITY_TYPE_CONFIG = ENTITY_TYPE_CONFIG;
+    window.COLLECTION_NAME_MAP = COLLECTION_NAME_MAP;
+    window.VALID_ENTITY_TYPES = VALID_ENTITY_TYPES;
 
 })();

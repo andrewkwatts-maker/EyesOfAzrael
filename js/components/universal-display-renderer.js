@@ -2,10 +2,22 @@
  * Universal Display Renderer
  *
  * Renders any entity in any display mode using standardized metadata
- * Supports: grid, table, list, panel, inline, hoverable, expandable
+ *
+ * Supported display modes:
+ * - 'grid': Card-based grid layout (2-wide mobile, 4-wide desktop)
+ * - 'table': Sortable, filterable table view
+ * - 'list': Vertical list with optional expansion
+ * - 'panel': Detailed cards with multiple sections
+ * - 'inline': Mini badges for inline text usage
  */
 
 class UniversalDisplayRenderer {
+    /**
+     * Supported display modes
+     * @type {string[]}
+     */
+    static SUPPORTED_MODES = ['grid', 'table', 'list', 'panel', 'inline'];
+
     constructor(options = {}) {
         this.options = {
             defaultDisplayMode: 'grid',
@@ -18,11 +30,72 @@ class UniversalDisplayRenderer {
     }
 
     /**
+     * Validate and normalize entities input
+     * @param {*} entities - Input to validate
+     * @returns {Array} Normalized array of entities
+     */
+    validateEntities(entities) {
+        // Handle null/undefined
+        if (entities == null) {
+            console.warn('[UniversalDisplayRenderer] Received null/undefined entities, returning empty array');
+            return [];
+        }
+
+        // Handle array input
+        if (Array.isArray(entities)) {
+            return entities.filter(entity => {
+                if (entity == null) {
+                    console.warn('[UniversalDisplayRenderer] Filtered out null/undefined entity from array');
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        // Handle single entity object
+        if (typeof entities === 'object') {
+            return [entities];
+        }
+
+        // Unexpected input type
+        console.warn(`[UniversalDisplayRenderer] Unexpected entities type: ${typeof entities}, returning empty array`);
+        return [];
+    }
+
+    /**
+     * Render empty state message
+     * @param {string} displayMode - The display mode being used
+     * @returns {string} Empty state HTML
+     */
+    renderEmptyState(displayMode) {
+        return `
+            <div class="entity-empty-state" data-display-mode="${this.escapeHtml(displayMode)}">
+                <div class="empty-state-icon">🔍</div>
+                <p class="empty-state-message">No results found</p>
+                <p class="empty-state-hint">Try adjusting your search or filters</p>
+            </div>
+        `;
+    }
+
+    /**
      * Main render method - dispatches to specific renderer
+     * @param {Array|Object|null} entities - Entities to render
+     * @param {string} displayMode - Display mode (grid, table, list, panel, inline)
+     * @param {string|HTMLElement|null} container - Container element or ID
+     * @returns {string} Rendered HTML
+     * @throws {Error} If container ID is provided but element not found
      */
     render(entities, displayMode = 'grid', container = null) {
-        if (!Array.isArray(entities)) {
-            entities = [entities];
+        // Validate and normalize entities
+        const validatedEntities = this.validateEntities(entities);
+
+        // Check for empty entities
+        if (validatedEntities.length === 0) {
+            const html = this.renderEmptyState(displayMode);
+            if (container) {
+                this.setContainerContent(container, html);
+            }
+            return html;
         }
 
         const renderers = {
@@ -33,18 +106,49 @@ class UniversalDisplayRenderer {
             'inline': this.renderInline.bind(this)
         };
 
+        // Validate display mode
+        if (!UniversalDisplayRenderer.SUPPORTED_MODES.includes(displayMode)) {
+            console.warn(
+                `[UniversalDisplayRenderer] Unknown display mode '${displayMode}', ` +
+                `falling back to 'grid'. Supported modes: ${UniversalDisplayRenderer.SUPPORTED_MODES.join(', ')}`
+            );
+        }
+
         const renderer = renderers[displayMode] || renderers.grid;
-        const html = renderer(entities);
+        const html = renderer(validatedEntities);
 
         if (container) {
-            if (typeof container === 'string') {
-                document.getElementById(container).innerHTML = html;
-            } else {
-                container.innerHTML = html;
-            }
+            this.setContainerContent(container, html);
         }
 
         return html;
+    }
+
+    /**
+     * Set content on a container element with proper error handling
+     * @param {string|HTMLElement} container - Container element or ID
+     * @param {string} html - HTML content to set
+     * @throws {Error} If container ID is provided but element not found
+     */
+    setContainerContent(container, html) {
+        if (typeof container === 'string') {
+            const element = document.getElementById(container);
+            if (!element) {
+                throw new Error(
+                    `[UniversalDisplayRenderer] Container element not found: ` +
+                    `document.getElementById('${container}') returned null. ` +
+                    `Ensure the element exists in the DOM before calling render().`
+                );
+            }
+            element.innerHTML = html;
+        } else if (container && typeof container.innerHTML !== 'undefined') {
+            container.innerHTML = html;
+        } else {
+            throw new Error(
+                `[UniversalDisplayRenderer] Invalid container: expected DOM element or element ID string, ` +
+                `received ${typeof container}`
+            );
+        }
     }
 
     /**
@@ -66,38 +170,40 @@ class UniversalDisplayRenderer {
         const display = entity.gridDisplay || this.generateGridDisplay(entity);
         const hoverInfo = this.options.enableHover ? this.renderHoverInfo(entity) : '';
         const editIcon = this.renderEditIcon(entity);
-        const mythology = (entity.mythology || 'unknown').toLowerCase();
+        const mythology = this.escapeAttr((entity.mythology || 'unknown').toLowerCase());
         const iconContent = this.renderIconWithFallback(entity.icon);
+        const entityId = this.escapeAttr(entity.id);
+        const entityType = this.escapeAttr(entity.entityType);
 
         return `
             <div class="entity-card grid-card"
-                 data-entity-id="${entity.id}"
+                 data-entity-id="${entityId}"
                  data-mythology="${mythology}"
-                 data-entity-type="${entity.entityType}"
-                 data-importance="${entity.importance || 50}"
-                 data-created-by="${entity.createdBy || ''}"
+                 data-entity-type="${entityType}"
+                 data-importance="${this.escapeAttr(entity.importance || 50)}"
+                 data-created-by="${this.escapeAttr(entity.createdBy || '')}"
                  tabindex="0"
                  role="article"
-                 aria-label="${this.escapeHtml(display.title || entity.name)}">
+                 aria-label="${this.escapeAttr(display.title || entity.name)}">
 
                 ${editIcon}
 
-                ${display.badge ? `<div class="card-badge">${display.badge}</div>` : ''}
+                ${display.badge ? `<div class="card-badge">${this.escapeHtml(display.badge)}</div>` : ''}
 
                 <div class="card-icon" aria-hidden="true">
                     ${iconContent}
                 </div>
 
                 <h3 class="card-title">
-                    <a href="#/mythology/${entity.mythology}/${entity.entityType}/${entity.id}"
+                    <a href="#/mythology/${this.escapeAttr(entity.mythology)}/${entityType}/${entityId}"
                        class="entity-link">
                         ${this.escapeHtml(display.title || entity.name)}
                     </a>
                 </h3>
 
                 <div class="card-meta">
-                    <span class="entity-type-badge" data-type="${entity.entityType}">${this.getEntityTypeIcon(entity.entityType)} ${this.formatLabel(entity.entityType)}</span>
-                    <span class="mythology-badge" data-mythology="${mythology}">${this.formatLabel(entity.mythology)}</span>
+                    <span class="entity-type-badge" data-type="${entityType}">${this.getEntityTypeIcon(entity.entityType)} ${this.escapeHtml(this.formatLabel(entity.entityType))}</span>
+                    <span class="mythology-badge" data-mythology="${mythology}">${this.escapeHtml(this.formatLabel(entity.mythology))}</span>
                 </div>
 
                 ${display.subtitle ? `<p class="card-description">${this.escapeHtml(display.subtitle)}</p>` : ''}
@@ -111,16 +217,21 @@ class UniversalDisplayRenderer {
 
     /**
      * Render icon with fallback
+     * @param {string} icon - Icon URL or emoji
+     * @returns {string} Safe HTML for icon
      */
     renderIconWithFallback(icon) {
-        if (!icon) return '✨';
+        if (!icon) return '&#10024;'; // Sparkle emoji as HTML entity
 
         // Check if icon is an image URL
         if (typeof icon === 'string' && (icon.includes('.svg') || icon.includes('.png') || icon.includes('.jpg') || icon.startsWith('http'))) {
-            return `<img src="${icon}" alt="" class="entity-icon-img" loading="lazy" onerror="this.parentElement.textContent='✨'">`;
+            const sanitizedUrl = this.sanitizeUrl(icon);
+            if (!sanitizedUrl) return '&#10024;';
+            return `<img src="${this.escapeAttr(sanitizedUrl)}" alt="" class="entity-icon-img" loading="lazy" onerror="this.parentElement.textContent='&#10024;'">`;
         }
 
-        return icon;
+        // For emoji or text icons, escape HTML
+        return this.escapeHtml(icon);
     }
 
     /**
@@ -144,12 +255,13 @@ class UniversalDisplayRenderer {
     }
 
     renderStats(stats) {
+        if (!Array.isArray(stats)) return '';
         return `
             <div class="card-stats">
                 ${stats.map(stat => `
                     <div class="stat-item">
-                        <span class="stat-label">${stat.label}:</span>
-                        <span class="stat-value">${stat.value}</span>
+                        <span class="stat-label">${this.escapeHtml(stat.label)}:</span>
+                        <span class="stat-value">${this.escapeHtml(stat.value)}</span>
                     </div>
                 `).join('')}
             </div>
@@ -162,8 +274,8 @@ class UniversalDisplayRenderer {
 
         return `
             <div class="hover-info">
-                ${hover.quick ? `<p class="hover-quick">${hover.quick}</p>` : ''}
-                ${hover.domains ? `
+                ${hover.quick ? `<p class="hover-quick">${this.escapeHtml(hover.quick)}</p>` : ''}
+                ${hover.domains && Array.isArray(hover.domains) ? `
                     <div class="hover-domains">
                         ${hover.domains.map(d => this.renderHoverableTerm(d, 'domain', entity)).join(' ')}
                     </div>
@@ -173,19 +285,22 @@ class UniversalDisplayRenderer {
     }
 
     renderHoverableTerm(term, type, entity) {
+        const escapedTerm = this.escapeHtml(term);
+        const escapedType = this.escapeAttr(type);
+
         if (!this.options.enableCorpusLinks) {
-            return `<span class="term-badge">${term}</span>`;
+            return `<span class="term-badge">${escapedTerm}</span>`;
         }
 
-        const corpusLink = `/search?term=${encodeURIComponent(term)}&mythology=${entity.mythology}`;
+        const corpusLink = `/search?term=${encodeURIComponent(term)}&mythology=${encodeURIComponent(entity.mythology || '')}`;
 
         return `
-            <a href="${corpusLink}"
-               class="hoverable-term ${type}-term"
-               data-term="${term}"
-               data-type="${type}"
-               title="Search corpus for '${term}'">
-                ${term}
+            <a href="${this.escapeAttr(corpusLink)}"
+               class="hoverable-term ${escapedType}-term"
+               data-term="${this.escapeAttr(term)}"
+               data-type="${escapedType}"
+               title="Search corpus for '${this.escapeAttr(term)}'">
+                ${escapedTerm}
             </a>
         `;
     }
@@ -194,16 +309,17 @@ class UniversalDisplayRenderer {
      * Render Table Display (sortable, filterable)
      */
     renderTable(entities) {
-        if (entities.length === 0) return '<p>No entities to display</p>';
+        // Empty check handled by main render method, but keep for direct calls
+        if (entities.length === 0) return this.renderEmptyState('table');
 
         const firstEntity = entities[0];
         const tableConfig = firstEntity.tableDisplay || this.generateTableDisplay(firstEntity);
 
         const headers = Object.entries(tableConfig.columns).map(([field, config]) => `
             <th class="${config.sortable ? 'sortable' : ''}"
-                data-field="${field}"
-                data-sort-type="${config.type || 'string'}">
-                ${config.label}
+                data-field="${this.escapeAttr(field)}"
+                data-sort-type="${this.escapeAttr(config.type || 'string')}">
+                ${this.escapeHtml(config.label)}
                 ${config.sortable ? '<span class="sort-indicator"></span>' : ''}
             </th>
         `).join('');
@@ -214,8 +330,8 @@ class UniversalDisplayRenderer {
             <div class="entity-table-container">
                 <table class="entity-table"
                        data-display-mode="table"
-                       data-default-sort="${tableConfig.defaultSort || 'name'}"
-                       data-default-order="${tableConfig.defaultOrder || 'asc'}">
+                       data-default-sort="${this.escapeAttr(tableConfig.defaultSort || 'name')}"
+                       data-default-order="${this.escapeAttr(tableConfig.defaultOrder || 'asc')}">
                     <thead>
                         <tr>${headers}</tr>
                     </thead>
@@ -231,13 +347,13 @@ class UniversalDisplayRenderer {
         const cells = Object.keys(tableConfig.columns).map(field => {
             const value = this.getNestedValue(entity, field);
             const formatted = this.formatTableCell(value, field, entity);
-            return `<td data-field="${field}">${formatted}</td>`;
+            return `<td data-field="${this.escapeAttr(field)}">${formatted}</td>`;
         }).join('');
 
         return `
             <tr class="entity-row"
-                data-entity-id="${entity.id}"
-                data-mythology="${entity.mythology}">
+                data-entity-id="${this.escapeAttr(entity.id)}"
+                data-mythology="${this.escapeAttr(entity.mythology)}">
                 ${cells}
             </tr>
         `;
@@ -245,18 +361,20 @@ class UniversalDisplayRenderer {
 
     formatTableCell(value, field, entity) {
         if (Array.isArray(value)) {
-            return value.slice(0, 3).join(', ') + (value.length > 3 ? '...' : '');
+            const escapedItems = value.slice(0, 3).map(v => this.escapeHtml(v));
+            return escapedItems.join(', ') + (value.length > 3 ? '...' : '');
         }
 
         if (field === 'name') {
-            return `<a href="#/mythology/${entity.mythology}/${entity.entityType}/${entity.id}">${value}</a>`;
+            const href = `#/mythology/${this.escapeAttr(entity.mythology)}/${this.escapeAttr(entity.entityType)}/${this.escapeAttr(entity.id)}`;
+            return `<a href="${href}">${this.escapeHtml(value)}</a>`;
         }
 
         if (typeof value === 'object' && value !== null) {
-            return JSON.stringify(value);
+            return this.escapeHtml(JSON.stringify(value));
         }
 
-        return value || '—';
+        return this.escapeHtml(value) || '—';
     }
 
     /**
@@ -276,25 +394,26 @@ class UniversalDisplayRenderer {
     renderListItem(entity) {
         const display = entity.listDisplay || this.generateListDisplay(entity);
         const expandable = this.options.enableExpand && display.expandable;
+        const iconContent = this.escapeHtml(display.icon || entity.icon || '•');
 
         return `
             <li class="entity-list-item ${expandable ? 'expandable' : ''}"
-                data-entity-id="${entity.id}"
-                data-mythology="${entity.mythology}">
+                data-entity-id="${this.escapeAttr(entity.id)}"
+                data-mythology="${this.escapeAttr(entity.mythology)}">
 
                 <div class="list-item-main" ${expandable ? 'onclick="this.parentElement.classList.toggle(\'expanded\')"' : ''}>
-                    <span class="list-icon">${display.icon || entity.icon || '•'}</span>
+                    <span class="list-icon">${iconContent}</span>
                     <div class="list-content">
-                        <div class="list-primary">${display.primary || entity.name}</div>
-                        ${display.secondary ? `<div class="list-secondary">${display.secondary}</div>` : ''}
-                        ${display.meta ? `<div class="list-meta">${display.meta}</div>` : ''}
+                        <div class="list-primary">${this.escapeHtml(display.primary || entity.name)}</div>
+                        ${display.secondary ? `<div class="list-secondary">${this.escapeHtml(display.secondary)}</div>` : ''}
+                        ${display.meta ? `<div class="list-meta">${this.escapeHtml(display.meta)}</div>` : ''}
                     </div>
-                    ${expandable ? '<span class="expand-indicator">▼</span>' : ''}
+                    ${expandable ? '<span class="expand-indicator">&#9660;</span>' : ''}
                 </div>
 
                 ${expandable && display.expandedContent ? `
                     <div class="list-item-expanded">
-                        ${display.expandedContent}
+                        ${this.escapeHtml(display.expandedContent)}
                     </div>
                 ` : ''}
             </li>
@@ -317,21 +436,23 @@ class UniversalDisplayRenderer {
 
     renderPanelCard(entity) {
         const display = entity.panelDisplay || this.generatePanelDisplay(entity);
-        const layout = display.layout || 'standard';
+        const layout = this.escapeAttr(display.layout || 'standard');
 
         const sections = (display.sections || []).map(section =>
             this.renderPanelSection(section, entity)
         ).join('');
 
+        const iconContent = this.escapeHtml(entity.icon || '&#10024;');
+
         return `
             <article class="entity-panel panel-${layout}"
-                     data-entity-id="${entity.id}"
-                     data-mythology="${entity.mythology}">
+                     data-entity-id="${this.escapeAttr(entity.id)}"
+                     data-mythology="${this.escapeAttr(entity.mythology)}">
 
                 <header class="panel-header">
-                    <div class="panel-icon">${entity.icon || '✨'}</div>
-                    <h2 class="panel-title">${entity.name}</h2>
-                    ${entity.subtitle ? `<p class="panel-subtitle">${entity.subtitle}</p>` : ''}
+                    <div class="panel-icon">${iconContent}</div>
+                    <h2 class="panel-title">${this.escapeHtml(entity.name)}</h2>
+                    ${entity.subtitle ? `<p class="panel-subtitle">${this.escapeHtml(entity.subtitle)}</p>` : ''}
                 </header>
 
                 <div class="panel-body">
@@ -342,9 +463,11 @@ class UniversalDisplayRenderer {
                     <footer class="panel-footer">
                         <h4>Related</h4>
                         <div class="related-entities">
-                            ${entity.relatedIds.slice(0, 5).map(id =>
-                                `<a href="#/${id}" class="related-link">${id.split('_')[1]}</a>`
-                            ).join('')}
+                            ${entity.relatedIds.slice(0, 5).map(id => {
+                                const escapedId = this.escapeAttr(id);
+                                const displayName = this.escapeHtml((id.split('_')[1] || id));
+                                return `<a href="#/${escapedId}" class="related-link">${displayName}</a>`;
+                            }).join('')}
                         </div>
                     </footer>
                 ` : ''}
@@ -367,15 +490,15 @@ class UniversalDisplayRenderer {
     renderAttributesSection(section, entity) {
         return `
             <section class="panel-section attributes-section">
-                <h3 class="section-title">${section.title}</h3>
+                <h3 class="section-title">${this.escapeHtml(section.title)}</h3>
                 <div class="attributes-grid">
                     ${Object.entries(section.data || {}).map(([key, value]) => `
                         <div class="attribute-item">
-                            <span class="attribute-label">${this.formatLabel(key)}:</span>
+                            <span class="attribute-label">${this.escapeHtml(this.formatLabel(key))}:</span>
                             <span class="attribute-value">
                                 ${Array.isArray(value) ?
                                     value.map(v => this.renderHoverableTerm(v, key, entity)).join(', ') :
-                                    value
+                                    this.escapeHtml(value)
                                 }
                             </span>
                         </div>
@@ -388,9 +511,9 @@ class UniversalDisplayRenderer {
     renderTextSection(section, entity) {
         return `
             <section class="panel-section text-section">
-                <h3 class="section-title">${section.title}</h3>
+                <h3 class="section-title">${this.escapeHtml(section.title)}</h3>
                 <div class="section-content">
-                    ${section.content}
+                    ${this.escapeHtml(section.content)}
                 </div>
             </section>
         `;
@@ -399,9 +522,9 @@ class UniversalDisplayRenderer {
     renderListSection(section, entity) {
         return `
             <section class="panel-section list-section">
-                <h3 class="section-title">${section.title}</h3>
+                <h3 class="section-title">${this.escapeHtml(section.title)}</h3>
                 <ul class="section-list">
-                    ${(section.items || []).map(item => `<li>${item}</li>`).join('')}
+                    ${(section.items || []).map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}
                 </ul>
             </section>
         `;
@@ -410,10 +533,10 @@ class UniversalDisplayRenderer {
     renderGridSection(section, entity) {
         return `
             <section class="panel-section grid-section">
-                <h3 class="section-title">${section.title}</h3>
+                <h3 class="section-title">${this.escapeHtml(section.title)}</h3>
                 <div class="section-grid">
                     ${(section.items || []).map(item => `
-                        <div class="grid-item">${item}</div>
+                        <div class="grid-item">${this.escapeHtml(item)}</div>
                     `).join('')}
                 </div>
             </section>
@@ -424,15 +547,18 @@ class UniversalDisplayRenderer {
      * Render Inline Display (mini badges, used in text)
      */
     renderInline(entities) {
-        return entities.map(entity => `
-            <a href="#/mythology/${entity.mythology}/${entity.entityType}/${entity.id}"
-               class="entity-inline"
-               data-entity-id="${entity.id}"
-               title="${entity.description}">
-                <span class="inline-icon">${entity.icon}</span>
-                <span class="inline-name">${entity.name}</span>
-            </a>
-        `).join(' ');
+        return entities.map(entity => {
+            const href = `#/mythology/${this.escapeAttr(entity.mythology)}/${this.escapeAttr(entity.entityType)}/${this.escapeAttr(entity.id)}`;
+            return `
+                <a href="${href}"
+                   class="entity-inline"
+                   data-entity-id="${this.escapeAttr(entity.id)}"
+                   title="${this.escapeAttr(entity.description || '')}">
+                    <span class="inline-icon">${this.escapeHtml(entity.icon || '')}</span>
+                    <span class="inline-name">${this.escapeHtml(entity.name)}</span>
+                </a>
+            `;
+        }).join(' ');
     }
 
     /**
@@ -514,11 +640,11 @@ class UniversalDisplayRenderer {
 
         return `
             <button class="edit-icon-btn"
-                    data-entity-id="${entity.id}"
-                    data-collection="${collection}"
-                    aria-label="Edit ${entity.name}"
+                    data-entity-id="${this.escapeAttr(entity.id)}"
+                    data-collection="${this.escapeAttr(collection)}"
+                    aria-label="Edit ${this.escapeAttr(entity.name)}"
                     title="Edit this entity">
-                ✏️
+                &#9998;
             </button>
         `;
     }
@@ -578,13 +704,51 @@ class UniversalDisplayRenderer {
     }
 
     /**
-     * Escape HTML to prevent XSS
+     * Escape HTML to prevent XSS in content
+     * @param {*} str - String to escape
+     * @returns {string} Escaped string safe for HTML content
      */
     escapeHtml(str) {
-        if (!str) return '';
+        if (str == null) return '';
+        const strValue = String(str);
         const div = document.createElement('div');
-        div.textContent = str;
+        div.textContent = strValue;
         return div.innerHTML;
+    }
+
+    /**
+     * Escape string for use in HTML attributes
+     * Handles quotes and other special characters
+     * @param {*} str - String to escape
+     * @returns {string} Escaped string safe for HTML attributes
+     */
+    escapeAttr(str) {
+        if (str == null) return '';
+        const strValue = String(str);
+        return strValue
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    /**
+     * Sanitize a URL to prevent javascript: and data: XSS attacks
+     * @param {string} url - URL to sanitize
+     * @returns {string} Sanitized URL or empty string if unsafe
+     */
+    sanitizeUrl(url) {
+        if (!url || typeof url !== 'string') return '';
+        const trimmed = url.trim().toLowerCase();
+        // Block javascript:, data:, and vbscript: protocols
+        if (trimmed.startsWith('javascript:') ||
+            trimmed.startsWith('data:') ||
+            trimmed.startsWith('vbscript:')) {
+            console.warn('[UniversalDisplayRenderer] Blocked potentially dangerous URL:', url);
+            return '';
+        }
+        return url;
     }
 }
 

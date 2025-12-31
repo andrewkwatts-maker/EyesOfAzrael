@@ -15,15 +15,16 @@
     font-style: italic;
     font-size: 0.95rem;
     line-height: 1.7;
-    color: var(--color-text-secondary);
-    border-left: 2px solid rgba(var(--color-primary-rgb), 0.4);
+    color: var(--color-text-secondary, #a0a0a0);
+    border-left: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
     background: linear-gradient(
         90deg,
-        rgba(var(--color-primary-rgb), 0.05) 0%,
+        rgba(var(--color-primary-rgb, 139, 127, 255), 0.05) 0%,
         transparent 100%
     );
     opacity: 0;
     animation: whisperReveal 1.5s ease-out 0.5s forwards;
+    will-change: opacity, transform;
 }
 
 .entity-whisper::before {
@@ -32,7 +33,7 @@
     top: -0.5rem;
     left: 0.5rem;
     font-size: 3rem;
-    color: rgba(var(--color-primary-rgb), 0.15);
+    color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
     font-family: Georgia, serif;
     line-height: 1;
 }
@@ -47,7 +48,7 @@
     margin-top: 0.5rem;
     font-size: 0.8rem;
     font-style: normal;
-    color: var(--color-text-muted);
+    color: var(--color-text-muted, #666);
     text-align: right;
 }
 
@@ -68,7 +69,7 @@
 
 /* Hover effect for card whispers */
 .entity-card:hover .entity-whisper {
-    border-left-color: rgba(var(--color-primary-rgb), 0.7);
+    border-left-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.7);
 }
 
 /* ==========================================
@@ -87,9 +88,10 @@
     width: 100%;
     height: 100%;
     border: 2px solid transparent;
-    border-top-color: var(--color-primary);
+    border-top-color: var(--color-primary, #8b7fff);
     border-radius: 50%;
     animation: sacredSpin 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+    will-change: transform;
 }
 
 .sacred-loader-ring:nth-child(2) {
@@ -97,7 +99,7 @@
     height: 70%;
     top: 15%;
     left: 15%;
-    border-top-color: var(--color-secondary);
+    border-top-color: var(--color-secondary, #ff7fcc);
     animation-duration: 2s;
     animation-direction: reverse;
 }
@@ -107,7 +109,7 @@
     height: 40%;
     top: 30%;
     left: 30%;
-    border-top-color: var(--color-accent);
+    border-top-color: var(--color-accent, #7fffcc);
     animation-duration: 1s;
 }
 
@@ -118,9 +120,10 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: var(--color-primary);
+    background: var(--color-primary, #8b7fff);
     border-radius: 50%;
     animation: sacredPulse 1s ease-in-out infinite;
+    will-change: transform, opacity;
 }
 
 @keyframes sacredSpin {
@@ -171,12 +174,13 @@
     background: conic-gradient(
         from 0deg,
         transparent 0deg,
-        rgba(var(--color-primary-rgb), 0.1) 60deg,
+        rgba(var(--color-primary-rgb, 139, 127, 255), 0.1) 60deg,
         transparent 120deg
     );
     animation: summonRotate 3s linear infinite;
     opacity: 0;
     transition: opacity 0.3s ease;
+    will-change: transform;
 }
 
 .entity-summoning.summoning::before {
@@ -250,10 +254,10 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.25rem 0.75rem;
-    background: rgba(var(--color-bg-card-rgb), 0.8);
+    background: rgba(var(--color-bg-card-rgb, 30, 30, 40), 0.8);
     border-radius: 20px;
     font-size: 0.75rem;
-    color: var(--color-text-muted);
+    color: var(--color-text-muted, #666);
 }
 
 .temporal-depth-icon {
@@ -275,13 +279,13 @@
     padding: 0.25rem 0.625rem;
     background: linear-gradient(
         135deg,
-        rgba(var(--color-primary-rgb), 0.2),
-        rgba(var(--color-secondary-rgb), 0.2)
+        rgba(var(--color-primary-rgb, 139, 127, 255), 0.2),
+        rgba(var(--color-secondary-rgb, 255, 127, 204), 0.2)
     );
-    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
     border-radius: 16px;
     font-size: 0.7rem;
-    color: var(--color-text-secondary);
+    color: var(--color-text-secondary, #a0a0a0);
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -289,8 +293,8 @@
 .cross-cultural-badge:hover {
     background: linear-gradient(
         135deg,
-        rgba(var(--color-primary-rgb), 0.3),
-        rgba(var(--color-secondary-rgb), 0.3)
+        rgba(var(--color-primary-rgb, 139, 127, 255), 0.3),
+        rgba(var(--color-secondary-rgb, 255, 127, 204), 0.3)
     );
     transform: translateY(-1px);
 }
@@ -311,18 +315,30 @@
     height: 36px;
     padding: 0;
     background: transparent;
-    border: 1px solid rgba(var(--color-border-primary-rgb), 0.5);
+    border: 1px solid rgba(var(--color-border-primary-rgb, 100, 100, 120), 0.5);
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    color: var(--color-text-muted);
+    color: var(--color-text-muted, #666);
 }
 
 .entity-favorite:hover {
-    background: rgba(var(--color-accent-rgb), 0.1);
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb, 127, 255, 204), 0.1);
+    border-color: var(--color-accent, #7fffcc);
+    color: var(--color-accent, #7fffcc);
     transform: scale(1.1);
+}
+
+/* Focus state for accessibility - keyboard navigation */
+.entity-favorite:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb, 127, 255, 204), 0.4);
+    border-color: var(--color-accent, #7fffcc);
+}
+
+.entity-favorite:focus-visible {
+    outline: 2px solid var(--color-accent, #7fffcc);
+    outline-offset: 2px;
 }
 
 .entity-favorite:active {
@@ -330,13 +346,14 @@
 }
 
 .entity-favorite.favorited {
-    background: rgba(var(--color-accent-rgb), 0.2);
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb, 127, 255, 204), 0.2);
+    border-color: var(--color-accent, #7fffcc);
+    color: var(--color-accent, #7fffcc);
 }
 
 .entity-favorite.favorited .favorite-icon {
     animation: favoriteAdded 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
 }
 
 .favorite-icon {
@@ -346,11 +363,11 @@
 }
 
 .entity-favorite.favorited .favorite-icon::before {
-    content: '★';
+    content: '\2605'; /* Filled star - better Unicode support */
 }
 
 .entity-favorite:not(.favorited) .favorite-icon::before {
-    content: '☆';
+    content: '\2606'; /* Empty star - better Unicode support */
 }
 
 /* Override default content for icon display */
@@ -378,15 +395,70 @@
     .entity-whisper {
         padding: 0.75rem 1rem;
         font-size: 0.9rem;
+        margin: 0.75rem 0;
     }
 
     .entity-whisper::before {
         font-size: 2rem;
+        top: -0.25rem;
+    }
+
+    .entity-whisper-source {
+        font-size: 0.75rem;
     }
 
     .sacred-loader {
         width: 60px;
         height: 60px;
+        margin: 1.5rem auto;
+    }
+
+    .sacred-loader-center {
+        width: 8px;
+        height: 8px;
+    }
+
+    .entity-favorite {
+        width: 32px;
+        height: 32px;
+    }
+
+    .favorite-icon {
+        font-size: 1.1rem;
+    }
+
+    .cross-cultural-badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    .temporal-depth {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+    }
+}
+
+/* Small mobile adjustments */
+@media (max-width: 480px) {
+    .entity-whisper {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        line-height: 1.6;
+    }
+
+    .entity-whisper::before {
+        font-size: 1.5rem;
+        left: 0.25rem;
+    }
+
+    .sacred-loader {
+        width: 50px;
+        height: 50px;
+    }
+
+    .sacred-loader-center {
+        width: 6px;
+        height: 6px;
     }
 }
 
@@ -395,28 +467,61 @@
    ========================================== */
 
 @media (prefers-reduced-motion: reduce) {
+    /* Remove will-change hints when not animating */
+    .entity-whisper,
+    .sacred-loader-ring,
+    .sacred-loader-center,
+    .entity-summoning::before,
+    .entity-favorite.favorited .favorite-icon {
+        will-change: auto;
+    }
+
     .entity-whisper {
         animation: none;
         opacity: 1;
+        transform: none;
     }
 
     .sacred-loader-ring {
         animation: none;
+        /* Static state: show rings without rotation */
+        border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+        border-top-color: var(--color-primary, #8b7fff);
+    }
+
+    .sacred-loader-ring:nth-child(2) {
+        border-top-color: var(--color-secondary, #ff7fcc);
+    }
+
+    .sacred-loader-ring:nth-child(3) {
+        border-top-color: var(--color-accent, #7fffcc);
     }
 
     .sacred-loader-center {
         animation: none;
+        opacity: 1;
     }
 
     .entity-summoning::before {
         animation: none;
+        display: none; /* Hide entirely for reduced motion */
     }
 
-    @keyframes whisperReveal {
-        0%, 100% {
-            opacity: 1;
-            transform: none;
-        }
+    .entity-favorite.favorited .favorite-icon {
+        animation: none;
+    }
+
+    .entity-favorite:hover,
+    .cross-cultural-badge:hover {
+        transform: none;
+    }
+
+    /* Disable all transitions for truly reduced motion */
+    .entity-favorite,
+    .cross-cultural-badge,
+    .entity-card::after,
+    .favorite-icon {
+        transition: none;
     }
 }
 

@@ -8,7 +8,7 @@
  * - Cubic-bezier micro-animations
  * - 8px grid spacing system
  * - Enhanced glass-morphism
- * - Skeleton loading states
+ * - SVG icons with emoji fallbacks for error handling
  * - WCAG 2.1 AA compliance
  * - Performance optimized (lazy loading, CSS containment)
  */
@@ -85,7 +85,7 @@ class LandingPageView {
                 name: 'Archetypes',
                 icon: 'icons/categories/archetypes.svg',
                 description: 'Universal patterns in mythology and storytelling',
-                route: '#/archetypes',
+                route: '#/browse/archetypes',
                 color: '#b965e6',
                 order: 7
             },
@@ -94,7 +94,7 @@ class LandingPageView {
                 name: 'Magic Systems',
                 icon: 'icons/categories/magic.svg',
                 description: 'Mystical practices and esoteric traditions',
-                route: '#/magic',
+                route: '#/browse/magic',
                 color: '#f85a8f',
                 order: 8
             },
@@ -164,6 +164,9 @@ class LandingPageView {
             console.log('[Landing Page] Body classes updated to authenticated');
 
             // Hide auth overlay if it exists (must come BEFORE showing content)
+            // NOTE: Using !important here is REQUIRED because auth-guard-simple.js
+            // uses inline styles with !important to show the overlay. We must
+            // override those styles to ensure content is visible after auth.
             const authOverlay = document.getElementById('auth-overlay');
             if (authOverlay) {
                 authOverlay.style.setProperty('display', 'none', 'important');
@@ -176,17 +179,19 @@ class LandingPageView {
                 loadingScreen.style.setProperty('display', 'none', 'important');
             }
 
-            // Force container and view to be visible with !important
-            container.style.setProperty('opacity', '1', 'important');
-            container.style.setProperty('display', 'block', 'important');
-            container.style.setProperty('visibility', 'visible', 'important');
+            // Ensure container visibility
+            // NOTE: !important flags here override potential CSS conflicts from
+            // auth states or lazy-loading systems that may hide content initially
+            container.style.opacity = '1';
+            container.style.display = 'block';
+            container.style.visibility = 'visible';
             console.log('[Landing Page] Container made visible');
 
             const view = container.querySelector('.landing-page-view');
             if (view) {
-                view.style.setProperty('opacity', '1', 'important');
-                view.style.setProperty('display', 'block', 'important');
-                view.style.setProperty('visibility', 'visible', 'important');
+                view.style.opacity = '1';
+                view.style.display = 'block';
+                view.style.visibility = 'visible';
                 console.log('[Landing Page] View element made visible');
             } else {
                 console.warn('[Landing Page] WARNING: .landing-page-view element not found in container');
@@ -1151,126 +1156,32 @@ class LandingPageView {
     }
 
     /**
-     * Get skeleton loading HTML (shown while content loads)
+     * Emoji fallbacks for each category (used when SVG icons fail to load)
      */
-    getSkeletonHTML() {
-        return `
-            <div class="landing-page-view">
-                <section class="landing-hero-section skeleton-loading">
-                    <div class="skeleton-icon"></div>
-                    <div class="skeleton-title"></div>
-                    <div class="skeleton-subtitle"></div>
-                    <div class="skeleton-description"></div>
-                </section>
-
-                <section class="landing-categories-section">
-                    <div class="skeleton-section-header"></div>
-                    <div class="landing-category-grid">
-                        ${Array(12).fill(0).map(() => `
-                            <div class="landing-category-card skeleton-card">
-                                <div class="skeleton-icon small"></div>
-                                <div class="skeleton-text"></div>
-                                <div class="skeleton-text short"></div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </section>
-            </div>
-
-            <style>
-                .skeleton-loading {
-                    pointer-events: none;
-                    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
-                }
-
-                .skeleton-loading.fade-out {
-                    opacity: 0;
-                    transform: scale(0.98);
-                    pointer-events: none;
-                }
-
-                .skeleton-icon,
-                .skeleton-icon.small,
-                .skeleton-title,
-                .skeleton-subtitle,
-                .skeleton-description,
-                .skeleton-section-header,
-                .skeleton-text {
-                    background: linear-gradient(
-                        90deg,
-                        rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.5) 0%,
-                        rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8) 50%,
-                        rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.5) 100%
-                    );
-                    background-size: 200% 100%;
-                    animation: skeletonLoading 1.5s ease-in-out infinite;
-                    border-radius: 8px;
-                }
-
-                @keyframes skeletonLoading {
-                    0% { background-position: 200% 0; }
-                    100% { background-position: -200% 0; }
-                }
-
-                .skeleton-icon {
-                    width: 5rem;
-                    height: 5rem;
-                    margin: 0 auto 16px;
-                    border-radius: 50%;
-                }
-
-                .skeleton-icon.small {
-                    width: 3rem;
-                    height: 3rem;
-                    margin-bottom: 16px;
-                }
-
-                .skeleton-title {
-                    width: 60%;
-                    height: 3rem;
-                    margin: 0 auto 16px;
-                }
-
-                .skeleton-subtitle {
-                    width: 80%;
-                    height: 1.5rem;
-                    margin: 0 auto 24px;
-                }
-
-                .skeleton-description {
-                    width: 90%;
-                    height: 1rem;
-                    margin: 0 auto 8px;
-                }
-
-                .skeleton-section-header {
-                    width: 40%;
-                    height: 2rem;
-                    margin: 0 auto 32px;
-                }
-
-                .skeleton-text {
-                    width: 100%;
-                    height: 1rem;
-                    margin-bottom: 8px;
-                }
-
-                .skeleton-text.short {
-                    width: 70%;
-                }
-
-                .skeleton-card {
-                    pointer-events: none;
-                }
-            </style>
-        `;
+    getEmojiFallbacks() {
+        return {
+            mythologies: '🌍',
+            deities: '👑',
+            heroes: '🦸',
+            creatures: '🐉',
+            items: '⚔️',
+            places: '🏛️',
+            archetypes: '🎭',
+            magic: '✨',
+            herbs: '🌿',
+            rituals: '🕯️',
+            texts: '📜',
+            symbols: '☯️'
+        };
     }
 
     /**
      * Get asset type card HTML
-     * Now renders SVG icons with proper styling and accessibility
+     * Renders SVG icons with error handling and emoji fallbacks
      */
     getAssetTypeCardHTML(type) {
+        const emojiFallback = this.getEmojiFallbacks()[type.id] || '📄';
+
         return `
             <a href="${type.route}"
                class="landing-category-card"
@@ -1282,7 +1193,9 @@ class LandingPageView {
                      alt="${type.name} icon"
                      class="landing-category-icon"
                      loading="lazy"
-                     decoding="async" />
+                     decoding="async"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                <span class="landing-category-icon-fallback" style="display: none; font-size: 2.5rem;">${emojiFallback}</span>
                 <h3 class="landing-category-name">${type.name}</h3>
                 <p class="landing-category-description">${type.description}</p>
             </a>

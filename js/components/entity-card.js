@@ -9,8 +9,9 @@
 
     class EntityCard {
         constructor(options) {
-            this.entityId = options.entityId;
-            this.entityType = options.entityType;
+            // Input validation
+            this.entityId = this.validateEntityId(options.entityId);
+            this.entityType = this.validateEntityType(options.entityType);
             this.displayMode = options.displayMode || 'compact'; // 'mini', 'compact', 'full'
             this.container = options.container;
             this.mythology = options.mythology || null;
@@ -18,12 +19,62 @@
             this.loader = options.loader || window.entityLoader;
             this.onLoad = options.onLoad || null;
             this.interactive = options.interactive !== false;
+
+            // Track event listeners for cleanup
+            this._eventListeners = [];
+            this._isDestroyed = false;
+        }
+
+        /**
+         * Validate entityId - must be a non-empty string with safe characters
+         */
+        validateEntityId(entityId) {
+            if (!entityId || typeof entityId !== 'string') {
+                console.error('[EntityCard] Invalid entityId: must be a non-empty string');
+                return null;
+            }
+            // Sanitize: only allow alphanumeric, hyphens, underscores
+            const sanitized = entityId.trim();
+            if (!/^[a-zA-Z0-9_-]+$/.test(sanitized)) {
+                console.error('[EntityCard] Invalid entityId: contains unsafe characters');
+                return null;
+            }
+            return sanitized;
+        }
+
+        /**
+         * Validate entityType - must be one of the allowed types
+         */
+        validateEntityType(entityType) {
+            const validTypes = ['deity', 'hero', 'creature', 'item', 'place', 'concept', 'magic', 'archetype', 'text', 'ritual', 'herb', 'symbol'];
+            if (!entityType || typeof entityType !== 'string') {
+                console.error('[EntityCard] Invalid entityType: must be a non-empty string');
+                return null;
+            }
+            const normalized = entityType.toLowerCase().trim();
+            if (!validTypes.includes(normalized)) {
+                console.warn(`[EntityCard] Unknown entityType "${normalized}", proceeding with caution`);
+            }
+            return normalized;
         }
 
         /**
          * Load and render the entity card
          */
         async render() {
+            // Check if destroyed
+            if (this._isDestroyed) {
+                console.warn('[EntityCard] Cannot render: card has been destroyed');
+                return false;
+            }
+
+            // Validate inputs before proceeding
+            if (!this.entityId || !this.entityType) {
+                const error = new Error('Invalid entityId or entityType');
+                this.renderError(error);
+                return false;
+            }
+
             try {
                 // Load entity data
                 this.data = await this.loader.loadEntity(this.entityId, this.entityType);
@@ -82,10 +133,10 @@
 
             return `
                 <span class="entity-card entity-card-mini"
-                      data-entity-id="${this.entityId}"
-                      data-entity-type="${this.entityType}">
-                    <a href="${url}" class="entity-mini-link" title="${this.escapeHtml(this.data.shortDescription || this.data.name)}">
-                        ${this.data.icon ? `<span class="entity-icon">${this.data.icon}</span>` : ''}
+                      data-entity-id="${this.escapeAttr(this.entityId)}"
+                      data-entity-type="${this.escapeAttr(this.entityType)}">
+                    <a href="${url}" class="entity-mini-link" title="${this.escapeAttr(this.data.shortDescription || this.data.name)}">
+                        ${this.data.icon ? `<span class="entity-icon">${this.escapeHtml(this.data.icon)}</span>` : ''}
                         <span class="entity-name">${this.escapeHtml(this.data.name)}</span>
                     </a>
                 </span>
@@ -105,13 +156,13 @@
 
             return `
                 <div class="entity-card entity-card-compact glass-card"
-                     data-entity-id="${this.entityId}"
-                     data-entity-type="${this.entityType}"
-                     data-mythology="${mythologyLower}"
-                     style="--entity-primary-color: ${primaryColor};"
+                     data-entity-id="${this.escapeAttr(this.entityId)}"
+                     data-entity-type="${this.escapeAttr(this.entityType)}"
+                     data-mythology="${this.escapeAttr(mythologyLower)}"
+                     style="--entity-primary-color: ${this.escapeAttr(primaryColor)};"
                      tabindex="0"
                      role="article"
-                     aria-label="${this.escapeHtml(this.data.name)}">
+                     aria-label="${this.escapeAttr(this.data.name)}">
 
                     <div class="entity-card-header">
                         <div class="entity-icon-large card-icon" aria-hidden="true">${iconContent}</div>
@@ -136,17 +187,8 @@
 
                     <div class="entity-card-footer grid-card-footer">
                         <a href="${this.getEntityUrl()}" class="btn-view-details" aria-label="View details for ${this.escapeHtml(this.data.name)}">View Details</a>
-                        ${this.interactive ? `<button class="btn-secondary entity-expand" data-id="${this.entityId}" data-type="${this.entityType}" aria-label="Expand ${this.escapeHtml(this.data.name)}">Expand</button>` : ''}
-                        <button class="btn-icon entity-favorite"
-                                data-entity-id="${this.entityId}"
-                                data-entity-type="${this.entityType}"
-                                data-entity-name="${this.escapeHtml(this.data.name)}"
-                                data-entity-mythology="${mythologyLower}"
-                                data-entity-icon="${this.data.icon || ''}"
-                                aria-label="Add ${this.escapeHtml(this.data.name)} to favorites"
-                                title="Add to Personal Pantheon">
-                            <span class="favorite-icon">☆</span>
-                        </button>
+                        ${this.interactive ? `<button class="btn-secondary entity-expand" data-id="${this.escapeAttr(this.entityId)}" data-type="${this.escapeAttr(this.entityType)}" aria-label="Expand ${this.escapeHtml(this.data.name)}">Expand</button>` : ''}
+                        ${this.renderFavoriteButton(mythologyLower)}
                     </div>
                 </div>
             `;
@@ -182,15 +224,15 @@
 
             return `
                 <div class="entity-card entity-card-full glass-card"
-                     data-entity-id="${this.entityId}"
-                     data-entity-type="${this.entityType}">
+                     data-entity-id="${this.escapeAttr(this.entityId)}"
+                     data-entity-type="${this.escapeAttr(this.entityType)}">
 
                     <!-- Hero Section -->
-                    <div class="entity-hero" style="background: linear-gradient(135deg, ${primary}, ${secondary});">
-                        ${this.data.icon ? `<div class="entity-icon-hero">${this.data.icon}</div>` : ''}
+                    <div class="entity-hero" style="background: linear-gradient(135deg, ${this.escapeAttr(primary)}, ${this.escapeAttr(secondary)});">
+                        ${this.data.icon ? `<div class="entity-icon-hero">${this.escapeHtml(this.data.icon)}</div>` : ''}
                         <h1 class="entity-title">${this.escapeHtml(this.data.name)}</h1>
                         ${this.data.linguistic?.originalName ? `
-                            <div class="entity-original-name">${this.data.linguistic.originalName}</div>
+                            <div class="entity-original-name">${this.escapeHtml(this.data.linguistic.originalName)}</div>
                         ` : ''}
                         ${this.data.shortDescription ? `
                             <p class="entity-subtitle">${this.escapeHtml(this.data.shortDescription)}</p>
@@ -214,11 +256,11 @@
                     <!-- Footer Actions -->
                     <div class="entity-card-footer">
                         <a href="${this.getEntityUrl()}" class="btn-primary">Full Page</a>
-                        <button class="btn-secondary corpus-search" data-term="${this.escapeHtml(this.data.name)}">
-                            📜 Search Texts
+                        <button class="btn-secondary corpus-search" data-term="${this.escapeAttr(this.data.name)}">
+                            Search Texts
                         </button>
-                        <button class="btn-secondary share-entity" data-id="${this.entityId}">
-                            🔗 Share
+                        <button class="btn-secondary share-entity" data-id="${this.escapeAttr(this.entityId)}">
+                            Share
                         </button>
                     </div>
                 </div>
@@ -240,10 +282,10 @@
                 archetype: '🎭'
             };
 
-            const icon = typeIcons[this.entityType] || '📌';
+            const icon = typeIcons[this.entityType] || '';
             const label = this.capitalize(this.entityType);
 
-            return `<span class="entity-type-badge" data-type="${this.entityType}">${icon} ${label}</span>`;
+            return `<span class="entity-type-badge" data-type="${this.escapeAttr(this.entityType)}">${icon} ${this.escapeHtml(label)}</span>`;
         }
 
         /**
@@ -282,8 +324,8 @@
             return `
                 <div class="entity-mythology-badges">
                     ${mythologies.map(myth => `
-                        <span class="mythology-badge" data-mythology="${myth}">
-                            ${this.capitalize(myth)}
+                        <span class="mythology-badge" data-mythology="${this.escapeAttr(myth)}">
+                            ${this.escapeHtml(this.capitalize(myth))}
                         </span>
                     `).join('')}
                 </div>
@@ -487,16 +529,112 @@
 
         /**
          * Render concept properties
+         * TODO: Implement proper rendering for concept entities.
+         * Concepts may include properties such as:
+         * - philosophical principles/foundations
+         * - related traditions
+         * - symbolic meanings
+         * - abstract vs. concrete manifestations
+         * Currently returns empty string as concept entity data schema is not yet finalized.
          */
         renderConceptProperties() {
-            return '';
+            // Return empty until concept schema is finalized
+            // Check if we have any concept-specific data to render
+            if (!this.data) return '';
+
+            const props = [];
+
+            // Render any available concept-like properties
+            if (this.data.principles && this.data.principles.length > 0) {
+                props.push(`
+                    <div class="attribute-block">
+                        <h3>Principles</h3>
+                        <div class="tag-list">
+                            ${this.data.principles.map(p => `<span class="tag">${this.escapeHtml(p)}</span>`).join('')}
+                        </div>
+                    </div>
+                `);
+            }
+
+            if (this.data.traditions && this.data.traditions.length > 0) {
+                props.push(`
+                    <div class="attribute-block">
+                        <h3>Traditions</h3>
+                        <div class="tag-list">
+                            ${this.data.traditions.map(t => `<span class="tag">${this.escapeHtml(t)}</span>`).join('')}
+                        </div>
+                    </div>
+                `);
+            }
+
+            if (props.length === 0) return '';
+
+            return `
+                <div class="entity-section">
+                    <h2>Conceptual Attributes</h2>
+                    ${props.join('')}
+                </div>
+            `;
         }
 
         /**
          * Render magic properties
+         * TODO: Implement proper rendering for magic/spell entities.
+         * Magic entities may include properties such as:
+         * - spell components/ingredients
+         * - casting requirements
+         * - magical effects and duration
+         * - associated traditions/schools
+         * - power level/difficulty
+         * Currently returns empty string as magic entity data schema is not yet finalized.
          */
         renderMagicProperties() {
-            return '';
+            // Return empty until magic schema is finalized
+            // Check if we have any magic-specific data to render
+            if (!this.data) return '';
+
+            const props = [];
+
+            // Render any available magic-like properties
+            if (this.data.components && this.data.components.length > 0) {
+                props.push(`
+                    <div class="attribute-block">
+                        <h3>Components</h3>
+                        <div class="tag-list">
+                            ${this.data.components.map(c => `<span class="tag">${this.escapeHtml(c)}</span>`).join('')}
+                        </div>
+                    </div>
+                `);
+            }
+
+            if (this.data.effects && this.data.effects.length > 0) {
+                props.push(`
+                    <div class="attribute-block">
+                        <h3>Effects</h3>
+                        <div class="tag-list">
+                            ${this.data.effects.map(e => `<span class="tag">${this.escapeHtml(e)}</span>`).join('')}
+                        </div>
+                    </div>
+                `);
+            }
+
+            if (this.data.school) {
+                props.push(`
+                    <div class="attribute-block">
+                        <h3>School/Tradition</h3>
+                        <p>${this.escapeHtml(this.data.school)}</p>
+                    </div>
+                `);
+            }
+
+            if (props.length === 0) return '';
+
+            return `
+                <div class="entity-section">
+                    <h2>Magical Properties</h2>
+                    ${props.join('')}
+                </div>
+            `;
         }
 
         /**
@@ -706,47 +844,97 @@
         }
 
         /**
+         * Add event listener with tracking for cleanup
+         * @private
+         */
+        _addTrackedListener(element, event, handler) {
+            if (!element) return;
+            element.addEventListener(event, handler);
+            this._eventListeners.push({ element, event, handler });
+        }
+
+        /**
          * Attach event listeners
          */
         attachEventListeners() {
+            // Clean up any existing listeners first
+            this._cleanupEventListeners();
+
             // Expand button
             const expandBtn = this.container.querySelector('.entity-expand');
             if (expandBtn) {
-                expandBtn.addEventListener('click', () => {
+                const expandHandler = () => {
                     this.displayMode = 'full';
                     this.render();
-                });
+                };
+                this._addTrackedListener(expandBtn, 'click', expandHandler);
             }
 
             // Corpus search button
             const corpusBtn = this.container.querySelector('.corpus-search');
             if (corpusBtn) {
-                corpusBtn.addEventListener('click', () => {
+                const corpusHandler = () => {
                     const term = corpusBtn.dataset.term;
                     window.location.href = `/corpus-search.html?term=${encodeURIComponent(term)}`;
-                });
+                };
+                this._addTrackedListener(corpusBtn, 'click', corpusHandler);
             }
 
             // Share button
             const shareBtn = this.container.querySelector('.share-entity');
             if (shareBtn) {
-                shareBtn.addEventListener('click', () => {
+                const shareHandler = () => {
                     this.shareEntity();
-                });
+                };
+                this._addTrackedListener(shareBtn, 'click', shareHandler);
             }
 
-            // Favorite button
+            // Favorite button - only attach if FavoritesService might be available
             const favoriteBtn = this.container.querySelector('.entity-favorite');
             if (favoriteBtn) {
-                // Check initial favorite state
+                // Check initial favorite state (gracefully handles missing service)
                 this.checkFavoriteState(favoriteBtn);
 
-                favoriteBtn.addEventListener('click', async (e) => {
+                const favoriteHandler = async (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     await this.toggleFavorite(favoriteBtn);
-                });
+                };
+                this._addTrackedListener(favoriteBtn, 'click', favoriteHandler);
             }
+        }
+
+        /**
+         * Clean up tracked event listeners
+         * @private
+         */
+        _cleanupEventListeners() {
+            this._eventListeners.forEach(({ element, event, handler }) => {
+                try {
+                    element.removeEventListener(event, handler);
+                } catch (e) {
+                    // Element may have been removed from DOM
+                }
+            });
+            this._eventListeners = [];
+        }
+
+        /**
+         * Destroy the entity card and clean up resources
+         */
+        destroy() {
+            this._isDestroyed = true;
+            this._cleanupEventListeners();
+
+            // Clear container
+            if (this.container && typeof this.container !== 'string') {
+                this.container.innerHTML = '';
+            }
+
+            // Clear references
+            this.data = null;
+            this.loader = null;
+            this.onLoad = null;
         }
 
         /**
@@ -851,6 +1039,34 @@
         }
 
         /**
+         * Check if FavoritesService is available
+         */
+        isFavoritesServiceAvailable() {
+            return !!(window.EyesOfAzrael?.favorites);
+        }
+
+        /**
+         * Render favorite button - only if service is potentially available
+         * Gracefully degrades if FavoritesService isn't loaded
+         */
+        renderFavoriteButton(mythologyLower) {
+            // Always render the button, but handle missing service gracefully at click time
+            // This allows for async loading of the FavoritesService
+            return `
+                <button class="btn-icon entity-favorite"
+                        data-entity-id="${this.escapeAttr(this.entityId)}"
+                        data-entity-type="${this.escapeAttr(this.entityType)}"
+                        data-entity-name="${this.escapeAttr(this.data.name)}"
+                        data-entity-mythology="${this.escapeAttr(mythologyLower)}"
+                        data-entity-icon="${this.escapeAttr(this.data.icon || '')}"
+                        aria-label="Add ${this.escapeHtml(this.data.name)} to favorites"
+                        title="Add to Personal Pantheon">
+                    <span class="favorite-icon">☆</span>
+                </button>
+            `;
+        }
+
+        /**
          * Escape HTML
          */
         escapeHtml(text) {
@@ -858,6 +1074,20 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        /**
+         * Escape attribute value for safe HTML attribute insertion
+         * More thorough than escapeHtml for attribute contexts
+         */
+        escapeAttr(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
         }
     }
 
