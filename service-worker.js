@@ -1,7 +1,22 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.15.0
+ * Version: 2.17.1
+ *
+ * Changes in 2.17.1:
+ * - Fix theme shader background not showing (body bg was covering WebGL canvas)
+ * - Add shader-active class to body when shader is enabled
+ * - Add CSS rule to make body background transparent when shader-active
+ *
+ * Changes in 2.17.0:
+ * - Add asset-service.js to index.html (was missing, causing "AssetService is not defined")
+ * - Fix ES module export syntax in asset-service.js (use window export for browser)
+ *
+ * Changes in 2.16.0:
+ * - Add 12 magic system entities (Heka, Seidr, Galdr, Kabbalah, etc.)
+ * - Add 12 sacred symbol entities (Ankh, Om, Valknut, Pentagram, etc.)
+ * - Remove [SPA DEBUG] console.log statements from spa-navigation.js
+ * - Clean up debug logging, keep conditional spaLog system (SPA_DEBUG=false)
  *
  * Changes in 2.15.0:
  * - Add collection name mapping in asset-service.js (archetypes → concepts)
@@ -104,7 +119,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.15.0';
+const CACHE_VERSION = 'v2.17.1';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';

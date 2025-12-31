@@ -429,12 +429,16 @@
             const shaderName = SHADER_MAPPING[themeName] || 'night';
             try {
                 await shaderManager.activate(shaderName);
+                // Make body background semi-transparent so shader shows through
+                body.classList.add('shader-active');
                 console.log(`[Shader Theme Picker] Activated shader: ${shaderName}`);
             } catch (error) {
                 console.warn('[Shader Theme Picker] Shader activation failed:', error);
+                body.classList.remove('shader-active');
             }
         } else if (shaderManager) {
             shaderManager.deactivate();
+            body.classList.remove('shader-active');
         }
 
         // Update UI
