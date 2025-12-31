@@ -262,6 +262,7 @@ class EntityLoader {
 
     /**
      * Search entities across all collections
+     * Uses parallel queries to improve performance
      * @param {string} searchTerm - Search query
      * @param {Object} options - Search options
      */
@@ -271,34 +272,39 @@ class EntityLoader {
             'places', 'concepts', 'magic', 'user_theories', 'mythologies'
         ];
 
-        const results = [];
+        const searchTermLower = searchTerm.toLowerCase();
+        const limitPerCollection = options.limitPerCollection || 10;
 
-        for (const collection of collections) {
-            try {
-                // Search by name (Firestore doesn't have full-text search, so we use array-contains on searchTerms)
-                const snapshot = await firebase.firestore()
-                    .collection(collection)
-                    .where('searchTerms', 'array-contains', searchTerm.toLowerCase())
-                    .limit(10)
-                    .get();
-
-                snapshot.forEach(doc => {
-                    results.push({
+        // Execute all collection searches in parallel
+        const searchPromises = collections.map(collection => {
+            return firebase.firestore()
+                .collection(collection)
+                .where('searchTerms', 'array-contains', searchTermLower)
+                .limit(limitPerCollection)
+                .get()
+                .then(snapshot => {
+                    return snapshot.docs.map(doc => ({
                         id: doc.id,
                         collection: collection,
                         ...doc.data()
-                    });
+                    }));
+                })
+                .catch(error => {
+                    console.error(`[EntityLoader] Error searching ${collection}:`, error);
+                    return []; // Return empty array on error to not break Promise.all
                 });
-            } catch (error) {
-                console.error(`Error searching ${collection}:`, error);
-            }
-        }
+        });
 
-        return results;
+        // Wait for all searches to complete
+        const searchResults = await Promise.all(searchPromises);
+
+        // Flatten results from all collections
+        return searchResults.flat();
     }
 
     /**
      * Get cross-referenced entities
+     * Uses batch loading to avoid N+1 query problem
      * @param {Object} entity - Entity with cross-references
      */
     static async loadCrossReferences(entity) {
@@ -310,26 +316,69 @@ class EntityLoader {
 
         const crossRefs = entity.crossReferences || entity.relatedEntities;
 
+        // Group all IDs by collection for batch loading
+        const batchesByCollection = new Map();
+
         for (const [type, ids] of Object.entries(crossRefs)) {
             if (!ids || ids.length === 0) continue;
 
             const collection = this.getCollectionName(type.replace(/s$/, ''));
-            references[type] = [];
+            const limitedIds = ids.slice(0, 5); // Limit to 5 per type
 
-            for (const id of ids.slice(0, 5)) { // Limit to 5 per type
-                try {
-                    const doc = await firebase.firestore()
-                        .collection(collection)
-                        .doc(id)
-                        .get();
-
-                    if (doc.exists) {
-                        references[type].push({ id: doc.id, ...doc.data() });
-                    }
-                } catch (error) {
-                    console.error(`Error loading cross-reference ${id}:`, error);
-                }
+            if (!batchesByCollection.has(collection)) {
+                batchesByCollection.set(collection, { types: [], ids: [] });
             }
+
+            const batch = batchesByCollection.get(collection);
+            limitedIds.forEach(id => {
+                batch.ids.push(id);
+                batch.types.push(type);
+            });
+
+            // Initialize references array for this type
+            references[type] = [];
+        }
+
+        // Execute batch queries using Promise.all for parallel loading
+        const batchPromises = [];
+
+        for (const [collection, batch] of batchesByCollection.entries()) {
+            // Firestore 'in' queries support up to 30 items per query
+            // Split into chunks of 30 if needed
+            const chunkSize = 30;
+            for (let i = 0; i < batch.ids.length; i += chunkSize) {
+                const idChunk = batch.ids.slice(i, i + chunkSize);
+
+                const queryPromise = firebase.firestore()
+                    .collection(collection)
+                    .where(firebase.firestore.FieldPath.documentId(), 'in', idChunk)
+                    .get()
+                    .then(snapshot => {
+                        return { collection, snapshot, idMap: new Map(idChunk.map((id, idx) => [id, batch.types[i + idx]])) };
+                    })
+                    .catch(error => {
+                        console.error(`[EntityLoader] Error loading batch from ${collection}:`, error);
+                        return null;
+                    });
+
+                batchPromises.push(queryPromise);
+            }
+        }
+
+        // Process all batch results
+        const results = await Promise.all(batchPromises);
+
+        for (const result of results) {
+            if (!result) continue;
+
+            const { snapshot, idMap } = result;
+
+            snapshot.docs.forEach(doc => {
+                const type = idMap.get(doc.id);
+                if (type && references[type]) {
+                    references[type].push({ id: doc.id, ...doc.data() });
+                }
+            });
         }
 
         return references;

@@ -384,7 +384,11 @@ class LandingPageView {
                     animation: smoothFloat 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
                     will-change: transform;
                     line-height: 1;
-                    display: inline-block;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: clamp(4rem, 8vw, 6rem);
+                    height: clamp(4rem, 8vw, 6rem);
                 }
 
                 @keyframes smoothFloat {
@@ -716,7 +720,8 @@ class LandingPageView {
                     object-fit: contain;
                     opacity: 0.9;
 
-                    /* Color theming for SVG */
+                    /* Color theming for SVG - use card color */
+                    color: var(--card-color, var(--color-primary, #8b7fff));
                     filter:
                         drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3))
                         drop-shadow(0 0 12px var(--card-color));
@@ -732,6 +737,35 @@ class LandingPageView {
                 .landing-category-card:hover .landing-category-icon {
                     transform: scale(1.15) rotateZ(5deg);
                     opacity: 1;
+                    filter:
+                        drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))
+                        drop-shadow(0 0 24px var(--card-color))
+                        brightness(1.1);
+                }
+
+                /* Emoji Fallback Icon - Shown when SVG fails to load */
+                .landing-category-icon-fallback {
+                    width: clamp(2rem, 3vw, 2.5rem);
+                    height: clamp(2rem, 3vw, 2.5rem);
+                    margin-bottom: 12px;
+                    font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+                    line-height: 1;
+                    text-align: center;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    filter:
+                        drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3))
+                        drop-shadow(0 0 12px var(--card-color));
+
+                    transition:
+                        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
+                .landing-category-card:hover .landing-category-icon-fallback {
+                    transform: scale(1.15) rotateZ(5deg);
                     filter:
                         drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))
                         drop-shadow(0 0 24px var(--card-color))
@@ -905,10 +939,15 @@ class LandingPageView {
                         font-size: 1.125rem; /* Ensure readable on small screens */
                     }
 
-                    .landing-category-icon {
+                    .landing-category-icon,
+                    .landing-category-icon-fallback {
                         width: 2.5rem;
                         height: 2.5rem;
                         margin-bottom: 12px;
+                    }
+
+                    .landing-category-icon-fallback {
+                        font-size: 2rem;
                     }
                 }
 
@@ -1038,9 +1077,14 @@ class LandingPageView {
                     }
 
                     /* Increase tap targets */
-                    .landing-category-icon {
+                    .landing-category-icon,
+                    .landing-category-icon-fallback {
                         width: 3rem;
                         height: 3rem;
+                    }
+
+                    .landing-category-icon-fallback {
+                        font-size: 2.5rem;
                     }
 
                     /* Ensure links have adequate touch targets */
@@ -1085,7 +1129,8 @@ class LandingPageView {
                         transform: none;
                     }
 
-                    .landing-category-card:hover .landing-category-icon {
+                    .landing-category-card:hover .landing-category-icon,
+                    .landing-category-card:hover .landing-category-icon-fallback {
                         transform: none;
                     }
                 }
@@ -1194,8 +1239,8 @@ class LandingPageView {
                      class="landing-category-icon"
                      loading="lazy"
                      decoding="async"
-                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                <span class="landing-category-icon-fallback" style="display: none; font-size: 2.5rem;">${emojiFallback}</span>
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                <span class="landing-category-icon-fallback" style="display: none;" aria-hidden="true">${emojiFallback}</span>
                 <h3 class="landing-category-name">${type.name}</h3>
                 <p class="landing-category-description">${type.description}</p>
             </a>

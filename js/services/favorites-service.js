@@ -47,11 +47,14 @@ class FavoritesService {
 
         // In-memory cache for performance
         this._cache = new Map();
-        this._cacheTimestamp = null;
+        this._cacheTimestamps = new Map(); // Per-user cache timestamps
         this._cacheTTL = 5 * 60 * 1000; // 5 minutes
 
         // O(1) lookup Set for isFavorited() - keyed by composite key
         this._favoritedLookup = new Map(); // userId -> Set<compositeKey>
+
+        // Pending fetch promises to prevent race conditions
+        this._pendingFetches = new Map(); // userId -> Promise
 
         // Event emitter for reactive updates
         this._listeners = new Set();
@@ -61,13 +64,46 @@ class FavoritesService {
 
         // Listen for online/offline status for sync
         if (typeof window !== 'undefined') {
-            window.addEventListener('online', () => this._syncPendingChanges());
+            window.addEventListener('online', () => this._onOnline());
         }
 
         // Collection name for favorites
         this.COLLECTION = 'user_favorites';
 
+        // Restore pending changes from localStorage on initialization
+        this._restorePendingChangesFromStorage();
+
         console.log('[FavoritesService] Initialized');
+    }
+
+    /**
+     * Handle coming back online - restore pending changes and sync
+     * @private
+     */
+    _onOnline() {
+        const user = this._getCurrentUser();
+        if (user) {
+            // Ensure pending changes are loaded from localStorage before syncing
+            this._loadPendingChanges(user.uid);
+            this._syncPendingChanges();
+        }
+    }
+
+    /**
+     * Restore pending changes from localStorage on initialization
+     * @private
+     */
+    _restorePendingChangesFromStorage() {
+        try {
+            // Look for any pending changes in localStorage
+            const keys = Object.keys(localStorage).filter(k => k.startsWith('eoa_favorites_pending_'));
+            keys.forEach(key => {
+                const userId = key.replace('eoa_favorites_pending_', '');
+                this._loadPendingChanges(userId);
+            });
+        } catch (error) {
+            console.warn('[FavoritesService] Failed to restore pending changes:', error);
+        }
     }
 
     // ============================================
@@ -113,26 +149,25 @@ class FavoritesService {
             return favorites;
         }
 
-        try {
-            // Check if Firebase is available
-            if (!this.db) {
-                throw new Error('Firebase not initialized');
+        // Check if there's already a pending fetch for this user to prevent race conditions
+        if (this._pendingFetches.has(user.uid)) {
+            const result = await this._pendingFetches.get(user.uid);
+            if (returnResultObject) {
+                return {
+                    success: true,
+                    data: result,
+                    status: 'authenticated'
+                };
             }
+            return result;
+        }
 
-            const snapshot = await this.db
-                .collection('users')
-                .doc(user.uid)
-                .collection(this.COLLECTION)
-                .orderBy('addedAt', 'desc')
-                .get();
+        // Create the fetch promise
+        const fetchPromise = this._fetchFavoritesFromFirebase(user.uid);
+        this._pendingFetches.set(user.uid, fetchPromise);
 
-            const favorites = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-
-            // Update cache and lookup Set
-            this._updateCache(user.uid, favorites);
+        try {
+            const favorites = await fetchPromise;
 
             if (returnResultObject) {
                 return {
@@ -146,6 +181,11 @@ class FavoritesService {
             console.error('[FavoritesService] Failed to get favorites:', error);
             const localFavorites = this._getFromLocalStorage(user.uid);
 
+            // Populate cache and lookup Set from localStorage fallback
+            if (localFavorites.length > 0) {
+                this._updateCacheFromLocalStorage(user.uid, localFavorites);
+            }
+
             if (returnResultObject) {
                 return {
                     success: localFavorites.length > 0,
@@ -155,7 +195,62 @@ class FavoritesService {
                 };
             }
             return localFavorites;
+        } finally {
+            // Clean up pending fetch
+            this._pendingFetches.delete(user.uid);
         }
+    }
+
+    /**
+     * Internal method to fetch favorites from Firebase
+     * @private
+     */
+    async _fetchFavoritesFromFirebase(userId) {
+        // Check if Firebase is available
+        if (!this.db) {
+            throw new Error('Firebase not initialized');
+        }
+
+        const snapshot = await this.db
+            .collection('users')
+            .doc(userId)
+            .collection(this.COLLECTION)
+            .orderBy('addedAt', 'desc')
+            .get();
+
+        const favorites = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        // Update cache and lookup Set
+        this._updateCache(userId, favorites);
+
+        return favorites;
+    }
+
+    /**
+     * Update cache from localStorage fallback (with shorter TTL)
+     * @private
+     */
+    _updateCacheFromLocalStorage(userId, favorites) {
+        const map = new Map();
+        const lookupSet = new Set();
+
+        favorites.forEach(f => {
+            // Generate id if not present (localStorage may not have it)
+            const id = f.id || this._generateDocId(f.entityId, f.entityType);
+            map.set(id, { ...f, id });
+            // Build O(1) lookup Set
+            const compositeKey = this._generateCompositeKey(f.entityId, f.entityType);
+            lookupSet.add(compositeKey);
+        });
+
+        this._cache.set(userId, map);
+        this._favoritedLookup.set(userId, lookupSet);
+        // Use shorter TTL for localStorage-sourced cache (1 minute)
+        // to encourage re-fetching from Firebase when back online
+        this._cacheTimestamps.set(userId, Date.now() - (this._cacheTTL - 60000));
     }
 
     /**
@@ -211,15 +306,17 @@ class FavoritesService {
         }
 
         // Need to populate the lookup Set - fetch favorites
-        await this.getFavorites();
+        // This will populate both cache and lookup Set
+        const favorites = await this.getFavorites();
 
-        // Now check the Set
+        // After getFavorites, the lookup Set should be populated
+        // Check the Set first for O(1) lookup
         if (this._favoritedLookup.has(userId)) {
             return this._favoritedLookup.get(userId).has(compositeKey);
         }
 
-        // Fallback to linear search (shouldn't happen)
-        const favorites = await this.getFavorites();
+        // Fallback to linear search only if lookup Set wasn't populated
+        // (e.g., if getFavorites returned from localStorage without rebuilding Set)
         return favorites.some(f =>
             f.entityId === entityId && f.entityType === entityType
         );
@@ -545,33 +642,95 @@ class FavoritesService {
      * @returns {Promise<{success: boolean}>}
      */
     async clearAll() {
-        const user = this._getCurrentUser();
-        if (!user) {
-            return { success: false, error: 'Not authenticated' };
+        // Explicit auth check
+        const authState = this._checkAuthState();
+        if (!authState.authenticated) {
+            return {
+                success: false,
+                error: 'Not authenticated',
+                code: 'AUTH_REQUIRED'
+            };
         }
 
+        const user = authState.user;
+        const isOnline = this._isOnline();
+
+        if (this.db && isOnline) {
+            try {
+                const snapshot = await this.db
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection(this.COLLECTION)
+                    .get();
+
+                const batch = this.db.batch();
+                snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+
+                // Clear all caches and storage
+                this._cache.delete(user.uid);
+                this._favoritedLookup.delete(user.uid);
+                this._cacheTimestamps.delete(user.uid);
+                this._clearLocalStorage(user.uid);
+                this._clearPendingChanges(user.uid);
+
+                // Emit event
+                this._emit('favorites-cleared', { userId: user.uid });
+
+                console.log('[FavoritesService] Cleared all favorites');
+                return { success: true };
+            } catch (error) {
+                console.error('[FavoritesService] Failed to clear favorites from Firebase:', error);
+                // Fallback to offline clear
+                return this._clearAllOffline(user.uid);
+            }
+        } else {
+            // Offline mode
+            return this._clearAllOffline(user.uid);
+        }
+    }
+
+    /**
+     * Clear all favorites in offline mode
+     * @private
+     */
+    _clearAllOffline(userId) {
         try {
-            const snapshot = await this.db
-                .collection('users')
-                .doc(user.uid)
-                .collection(this.COLLECTION)
-                .get();
+            // Get current favorites to track pending removes
+            const currentFavorites = Array.from(this._cache.get(userId)?.values() || []);
 
-            const batch = this.db.batch();
-            snapshot.docs.forEach(doc => batch.delete(doc.ref));
-            await batch.commit();
+            // Track all as pending removes
+            currentFavorites.forEach(favorite => {
+                const docId = this._generateDocId(favorite.entityId, favorite.entityType);
+                this._trackPendingRemove(userId, {
+                    docId,
+                    entityId: favorite.entityId,
+                    entityType: favorite.entityType
+                });
+            });
 
-            // Clear cache
-            this._cache.delete(user.uid);
-            this._clearLocalStorage(user.uid);
+            // Clear all caches and storage
+            this._cache.delete(userId);
+            this._favoritedLookup.delete(userId);
+            this._cacheTimestamps.delete(userId);
+            this._clearLocalStorage(userId);
 
             // Emit event
-            this._emit('favorites-cleared', { userId: user.uid });
+            this._emit('favorites-cleared', { userId, offline: true });
 
-            return { success: true };
+            console.log('[FavoritesService] Cleared all favorites offline');
+            return {
+                success: true,
+                offline: true,
+                message: 'Cleared locally. Will sync when online.'
+            };
         } catch (error) {
-            console.error('[FavoritesService] Failed to clear favorites:', error);
-            return { success: false, error: error.message };
+            console.error('[FavoritesService] Failed to clear favorites offline:', error);
+            return {
+                success: false,
+                error: error.message,
+                code: 'OFFLINE_CLEAR_FAILED'
+            };
         }
     }
 
@@ -670,8 +829,9 @@ class FavoritesService {
      */
     _isCacheValid(userId) {
         if (!this._cache.has(userId)) return false;
-        if (!this._cacheTimestamp) return false;
-        return (Date.now() - this._cacheTimestamp) < this._cacheTTL;
+        const timestamp = this._cacheTimestamps.get(userId);
+        if (!timestamp) return false;
+        return (Date.now() - timestamp) < this._cacheTTL;
     }
 
     /**
@@ -691,7 +851,7 @@ class FavoritesService {
 
         this._cache.set(userId, map);
         this._favoritedLookup.set(userId, lookupSet);
-        this._cacheTimestamp = Date.now();
+        this._cacheTimestamps.set(userId, Date.now());
     }
 
     /**
@@ -752,7 +912,7 @@ class FavoritesService {
         // Clear cache for user
         this._cache.delete(targetUserId);
         this._favoritedLookup.delete(targetUserId);
-        this._cacheTimestamp = null;
+        this._cacheTimestamps.delete(targetUserId);
 
         console.log('[FavoritesService] Cache invalidated for user:', targetUserId);
 

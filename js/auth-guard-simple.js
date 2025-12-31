@@ -352,7 +352,14 @@
         // Header sign-in button (new minimalist header)
         const headerSignInBtn = document.getElementById('signInBtn');
         if (headerSignInBtn) {
-            headerSignInBtn.addEventListener('click', handleLogin);
+            // Remove any existing listeners to prevent duplicates
+            headerSignInBtn.replaceWith(headerSignInBtn.cloneNode(true));
+            const newHeaderSignInBtn = document.getElementById('signInBtn');
+            newHeaderSignInBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('[Auth Guard] Header Sign In button clicked');
+                handleLogin();
+            });
         }
     }
 
@@ -362,7 +369,14 @@
     function setupLogoutButton() {
         const logoutBtn = document.getElementById('signOutBtn');
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', handleLogout);
+            // Remove any existing listeners to prevent duplicates
+            logoutBtn.replaceWith(logoutBtn.cloneNode(true));
+            const newLogoutBtn = document.getElementById('signOutBtn');
+            newLogoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('[Auth Guard] Sign Out button clicked');
+                handleLogout();
+            });
         }
     }
 
@@ -407,14 +421,34 @@
     async function handleLogin() {
         console.log('[Auth Guard] Login button clicked');
 
+        // Check if Firebase is available
+        if (typeof firebase === 'undefined' || !firebase.auth) {
+            console.error('[Auth Guard] Firebase not available for login');
+            showAuthError('Authentication service unavailable. Please refresh the page.');
+            return;
+        }
+
+        // Check if user is already logged in
+        const auth = firebase.auth();
+        if (auth.currentUser) {
+            console.log('[Auth Guard] User already logged in:', auth.currentUser.email);
+            return;
+        }
+
         const loginBtn = document.getElementById('google-login-btn');
+        const headerSignInBtn = document.getElementById('signInBtn');
+
+        // Disable both buttons during login
         if (loginBtn) {
             loginBtn.disabled = true;
             loginBtn.textContent = 'Signing in...';
         }
+        if (headerSignInBtn) {
+            headerSignInBtn.disabled = true;
+            headerSignInBtn.textContent = 'Signing in...';
+        }
 
         try {
-            const auth = firebase.auth();
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.addScope('profile');
             provider.addScope('email');
@@ -426,26 +460,89 @@
         } catch (error) {
             console.error('[Auth Guard] Login error:', error);
 
-            // Handle specific errors
+            // Handle specific errors with user-friendly messages
             if (error.code === 'auth/popup-closed-by-user') {
                 console.log('[Auth Guard] User closed popup');
+                // No alert needed - user intentionally closed
             } else if (error.code === 'auth/popup-blocked') {
-                alert('Please allow popups for this site to sign in.');
-            } else if (error.code !== 'auth/cancelled-popup-request') {
-                alert('Sign in failed: ' + error.message);
+                showAuthError('Popup blocked. Please allow popups for this site to sign in.');
+            } else if (error.code === 'auth/cancelled-popup-request') {
+                console.log('[Auth Guard] Popup request cancelled (another popup may be open)');
+            } else if (error.code === 'auth/network-request-failed') {
+                showAuthError('Network error. Please check your connection and try again.');
+            } else if (error.code === 'auth/too-many-requests') {
+                showAuthError('Too many attempts. Please wait a moment and try again.');
+            } else {
+                showAuthError('Sign in failed: ' + (error.message || 'Unknown error'));
             }
 
-            // Reset button safely (handles missing button gracefully)
+            // Reset buttons safely
             resetLoginButton(loginBtn);
+            resetHeaderSignInButton(headerSignInBtn);
+        }
+    }
+
+    /**
+     * Show authentication error to user
+     * @param {string} message - Error message to display
+     */
+    function showAuthError(message) {
+        // Try to use toast notifications if available
+        if (window.ToastNotifications && typeof window.ToastNotifications.show === 'function') {
+            window.ToastNotifications.show(message, 'error');
+        } else {
+            // Fallback to alert
+            alert(message);
+        }
+    }
+
+    /**
+     * Reset header sign-in button to default state
+     * @param {HTMLElement|null} btn - The button element
+     */
+    function resetHeaderSignInButton(btn) {
+        const signInBtn = btn || document.getElementById('signInBtn');
+        if (!signInBtn) return;
+
+        try {
+            signInBtn.disabled = false;
+            signInBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Sign In
+            `;
+        } catch (e) {
+            console.error('[Auth Guard] Error resetting header sign-in button:', e);
         }
     }
 
     /**
      * Handle logout button click
-     * @param {boolean} skipConfirmation - If true, skip the confirmation dialog
+     * @param {boolean|Event} skipConfirmationOrEvent - If true, skip dialog; if Event, extract from it
      */
-    async function handleLogout(skipConfirmation = false) {
+    async function handleLogout(skipConfirmationOrEvent = false) {
         console.log('[Auth Guard] Logout button clicked');
+
+        // Handle case where this is called as an event handler
+        let skipConfirmation = false;
+        if (skipConfirmationOrEvent === true) {
+            skipConfirmation = true;
+        } else if (skipConfirmationOrEvent && typeof skipConfirmationOrEvent.preventDefault === 'function') {
+            // This is an Event object from addEventListener
+            skipConfirmationOrEvent.preventDefault();
+            skipConfirmation = false;
+        }
+
+        // Check if Firebase is available
+        if (typeof firebase === 'undefined' || !firebase.auth) {
+            console.error('[Auth Guard] Firebase not available for logout');
+            showAuthError('Unable to sign out. Please refresh the page.');
+            return;
+        }
 
         // Show confirmation dialog unless skipped
         if (!skipConfirmation) {
@@ -456,14 +553,38 @@
             }
         }
 
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.disabled = true;
+            signOutBtn.textContent = 'Signing out...';
+        }
+
         try {
             await firebase.auth().signOut();
             console.log('[Auth Guard] Logout successful');
 
             // Clear cached user data on logout to prevent stale data
             clearCachedUserData();
+
+            // Show success message if toast is available
+            if (window.ToastNotifications && typeof window.ToastNotifications.show === 'function') {
+                window.ToastNotifications.show('Signed out successfully', 'success');
+            }
         } catch (error) {
             console.error('[Auth Guard] Logout error:', error);
+
+            // Reset button state
+            if (signOutBtn) {
+                signOutBtn.disabled = false;
+                signOutBtn.textContent = 'Sign Out';
+            }
+
+            // Show error message
+            if (error.code === 'auth/network-request-failed') {
+                showAuthError('Network error. Please check your connection and try again.');
+            } else {
+                showAuthError('Sign out failed: ' + (error.message || 'Unknown error'));
+            }
         }
     }
 
@@ -482,8 +603,20 @@
     }
 
     /**
+     * Default avatar SVG as data URI for users without a photo
+     */
+    const DEFAULT_AVATAR = 'data:image/svg+xml,' + encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="20" fill="#8b7fff"/>
+            <circle cx="20" cy="16" r="7" fill="#f8f9fa"/>
+            <path d="M8 36c0-8 5-12 12-12s12 4 12 12" fill="#f8f9fa"/>
+        </svg>
+    `);
+
+    /**
      * Update user display in header
      * Shows user info when logged in, sign-in button when logged out
+     * Note: Body classes are managed by handleAuthenticated/handleNotAuthenticated
      */
     function updateUserDisplay(user) {
         const userInfo = document.getElementById('userInfo');
@@ -493,29 +626,33 @@
 
         if (user) {
             // User is logged in - show user info, hide sign-in button
-            document.body.classList.add('authenticated');
-            document.body.classList.remove('not-authenticated');
-
             if (userInfo) {
                 userInfo.style.display = 'flex';
             }
             if (userName) {
-                userName.textContent = user.displayName || user.email;
+                userName.textContent = user.displayName || user.email || 'User';
             }
-            if (userAvatar && user.photoURL) {
-                userAvatar.src = user.photoURL;
-                userAvatar.alt = user.displayName || 'User';
+            if (userAvatar) {
+                // Use photoURL if available, otherwise use default avatar
+                userAvatar.src = user.photoURL || DEFAULT_AVATAR;
+                userAvatar.alt = user.displayName || 'User profile';
+                // Handle image load errors by falling back to default
+                userAvatar.onerror = function() {
+                    this.onerror = null; // Prevent infinite loop
+                    this.src = DEFAULT_AVATAR;
+                };
             }
             if (signInBtn) {
                 signInBtn.style.display = 'none';
             }
         } else {
             // User is logged out - show sign-in button, hide user info
-            document.body.classList.remove('authenticated');
-            document.body.classList.add('not-authenticated');
-
             if (userInfo) {
                 userInfo.style.display = 'none';
+            }
+            if (userAvatar) {
+                userAvatar.src = '';
+                userAvatar.alt = '';
             }
             if (signInBtn) {
                 signInBtn.style.display = 'inline-flex';
@@ -532,6 +669,11 @@
         showLoginOverlay: showLoginOverlay,
         isReady: () => authInitialized,
         /**
+         * Initiate login flow
+         * @returns {Promise<void>}
+         */
+        login: handleLogin,
+        /**
          * Logout the current user
          * @param {boolean} skipConfirmation - If true, logout immediately without confirmation
          */
@@ -544,7 +686,14 @@
         /**
          * Clear all cached user data
          */
-        clearCache: clearCachedUserData
+        clearCache: clearCachedUserData,
+        /**
+         * Re-initialize button handlers (useful after dynamic DOM updates)
+         */
+        reinitButtons: () => {
+            setupLoginButton();
+            setupLogoutButton();
+        }
     };
 
     // Initialize when DOM is ready

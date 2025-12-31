@@ -489,14 +489,14 @@
 
             return `
                 <div class="entity-card universal-grid-card"
-                     data-entity-id="${entity.id}"
-                     data-entity-type="${this.entityType}"
-                     data-mythology="${mythologyLower}"
-                     data-importance="${entity.importance || 50}"
-                     style="--entity-color: ${primaryColor}"
+                     data-entity-id="${this.escapeAttr(entity.id)}"
+                     data-entity-type="${this.escapeAttr(this.entityType)}"
+                     data-mythology="${this.escapeAttr(mythologyLower)}"
+                     data-importance="${parseInt(entity.importance, 10) || 50}"
+                     style="--entity-color: ${this.escapeAttr(primaryColor)}"
                      tabindex="0"
                      role="article"
-                     aria-label="${this.escapeHtml(entity.name || entity.title)}">
+                     aria-label="${this.escapeAttr(entity.name || entity.title)}">
 
                     <div class="grid-card-header">
                         <div class="grid-card-icon" aria-hidden="true">${iconContent}</div>
@@ -504,12 +504,12 @@
 
                     <div class="grid-card-body">
                         <h3 class="grid-card-title">
-                            <a href="${this.getEntityUrl(entity)}">${this.escapeHtml(entity.name || entity.title)}</a>
+                            <a href="${this.escapeAttr(this.sanitizeUrl(this.getEntityUrl(entity)) || '#')}">${this.escapeHtml(entity.name || entity.title)}</a>
                         </h3>
 
                         <div class="grid-card-meta">
-                            <span class="entity-type-badge" data-type="${this.entityType}">${this.config.icon} ${this.config.label}</span>
-                            <span class="mythology-badge" data-mythology="${mythologyLower}">${this.capitalize(mythology)}</span>
+                            <span class="entity-type-badge" data-type="${this.escapeAttr(this.entityType)}">${this.config.icon} ${this.escapeHtml(this.config.label)}</span>
+                            <span class="mythology-badge" data-mythology="${this.escapeAttr(mythologyLower)}">${this.escapeHtml(this.capitalize(mythology))}</span>
                         </div>
 
                         ${entity.shortDescription ? `
@@ -520,7 +520,7 @@
                     </div>
 
                     <div class="grid-card-footer">
-                        <a href="${this.getEntityUrl(entity)}" class="btn-view-details" aria-label="View details for ${this.escapeHtml(entity.name || entity.title)}">View Details</a>
+                        <a href="${this.escapeAttr(this.sanitizeUrl(this.getEntityUrl(entity)) || '#')}" class="btn-view-details" aria-label="View details for ${this.escapeAttr(entity.name || entity.title)}">View Details</a>
                     </div>
                 </div>
             `;
@@ -537,11 +537,63 @@
 
             // Check if icon is an SVG URL or path
             if (typeof icon === 'string' && (icon.includes('.svg') || icon.includes('.png') || icon.includes('.jpg'))) {
-                return `<img src="${icon}" alt="" class="entity-icon-img" loading="lazy" onerror="this.parentElement.innerHTML='${fallbackIcon || '✨'}'">`;
+                // Sanitize URL to prevent javascript: and data: XSS attacks
+                const sanitizedUrl = this.sanitizeUrl(icon);
+                if (!sanitizedUrl) {
+                    return fallbackIcon || '&#10024;'; // Fallback if URL is invalid
+                }
+                return `<img src="${this.escapeAttr(sanitizedUrl)}" alt="" class="entity-icon-img" loading="lazy" onerror="this.onerror=null;this.parentElement.innerHTML='${fallbackIcon || '&#10024;'}'">`;
             }
 
-            // Emoji or text icon
-            return icon;
+            // Emoji or text icon - escape to prevent XSS
+            return this.escapeHtml(icon);
+        }
+
+        /**
+         * Sanitize URL to prevent XSS attacks via javascript: or data: URLs
+         * @param {string} url - The URL to sanitize
+         * @returns {string|null} - Sanitized URL or null if invalid
+         */
+        sanitizeUrl(url) {
+            if (!url || typeof url !== 'string') return null;
+
+            // Trim and normalize
+            const trimmedUrl = url.trim().toLowerCase();
+
+            // Block dangerous URL schemes
+            const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:'];
+            for (const scheme of dangerousSchemes) {
+                if (trimmedUrl.startsWith(scheme)) {
+                    console.warn('[UniversalEntityRenderer] Blocked potentially dangerous URL:', url.substring(0, 50));
+                    return null;
+                }
+            }
+
+            // Allow http, https, and relative URLs
+            if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://') || trimmedUrl.startsWith('/') || trimmedUrl.startsWith('./')) {
+                return url;
+            }
+
+            // Block any other scheme (anything with : before /)
+            if (trimmedUrl.indexOf(':') < trimmedUrl.indexOf('/') && trimmedUrl.indexOf(':') !== -1) {
+                console.warn('[UniversalEntityRenderer] Blocked URL with unknown scheme:', url.substring(0, 50));
+                return null;
+            }
+
+            return url;
+        }
+
+        /**
+         * Escape attribute value for safe HTML attribute insertion
+         */
+        escapeAttr(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
         }
 
         /**
@@ -622,12 +674,12 @@
 
             return `
                 <div class="universal-list-item"
-                     data-entity-id="${entity.id}"
-                     data-entity-type="${this.entityType}"
-                     data-mythology="${mythologyLower}"
+                     data-entity-id="${this.escapeAttr(entity.id)}"
+                     data-entity-type="${this.escapeAttr(this.entityType)}"
+                     data-mythology="${this.escapeAttr(mythologyLower)}"
                      tabindex="0"
                      role="article"
-                     aria-label="${this.escapeHtml(entity.name || entity.title)}">
+                     aria-label="${this.escapeAttr(entity.name || entity.title)}">
 
                     <div class="list-item-icon" aria-hidden="true">
                         ${iconContent}
@@ -636,11 +688,11 @@
                     <div class="list-item-content">
                         <div class="list-item-header">
                             <h3 class="list-item-title">
-                                <a href="${this.getEntityUrl(entity)}">${this.escapeHtml(entity.name || entity.title)}</a>
+                                <a href="${this.escapeAttr(this.sanitizeUrl(this.getEntityUrl(entity)) || '#')}">${this.escapeHtml(entity.name || entity.title)}</a>
                             </h3>
                             <div class="list-item-badges">
-                                <span class="entity-type-badge" data-type="${this.entityType}">${this.config.icon} ${this.config.label}</span>
-                                <span class="mythology-badge" data-mythology="${mythologyLower}">${this.capitalize(mythology)}</span>
+                                <span class="entity-type-badge" data-type="${this.escapeAttr(this.entityType)}">${this.config.icon} ${this.escapeHtml(this.config.label)}</span>
+                                <span class="mythology-badge" data-mythology="${this.escapeAttr(mythologyLower)}">${this.escapeHtml(this.capitalize(mythology))}</span>
                             </div>
                         </div>
 
@@ -652,7 +704,7 @@
                     </div>
 
                     <div class="list-item-actions">
-                        <a href="${this.getEntityUrl(entity)}" class="btn-view-details" aria-label="View ${this.escapeHtml(entity.name || entity.title)}">View</a>
+                        <a href="${this.escapeAttr(this.sanitizeUrl(this.getEntityUrl(entity)) || '#')}" class="btn-view-details" aria-label="View ${this.escapeAttr(entity.name || entity.title)}">View</a>
                     </div>
                 </div>
             `;
@@ -756,8 +808,9 @@
          * Render single table row
          */
         renderTableRow(entity, columns) {
+            const safeUrl = this.sanitizeUrl(this.getEntityUrl(entity)) || '#';
             return `
-                <tr data-entity-id="${entity.id}" data-entity-type="${this.entityType}">
+                <tr data-entity-id="${this.escapeAttr(entity.id)}" data-entity-type="${this.escapeAttr(this.entityType)}">
                     ${columns.map(col => {
                         const value = this.getNestedValue(entity, col.field);
                         const displayValue = Array.isArray(value)
@@ -765,13 +818,13 @@
                             : (value || '-');
 
                         if (col.field === 'name') {
-                            return `<td class="name-cell"><a href="${this.getEntityUrl(entity)}">${this.escapeHtml(entity.name || entity.title)}</a></td>`;
+                            return `<td class="name-cell"><a href="${this.escapeAttr(safeUrl)}">${this.escapeHtml(entity.name || entity.title)}</a></td>`;
                         }
 
-                        return `<td>${this.escapeHtml(displayValue)}</td>`;
+                        return `<td>${this.escapeHtml(String(displayValue))}</td>`;
                     }).join('')}
                     <td class="actions-cell">
-                        <a href="${this.getEntityUrl(entity)}" class="btn-table-action">View</a>
+                        <a href="${this.escapeAttr(safeUrl)}" class="btn-table-action">View</a>
                     </td>
                 </tr>
             `;
@@ -818,15 +871,15 @@
 
             return `
                 <div class="universal-panel-card glass-card"
-                     data-entity-id="${entity.id}"
-                     data-entity-type="${this.entityType}"
-                     style="--entity-primary: ${primary}; --entity-secondary: ${secondary}">
+                     data-entity-id="${this.escapeAttr(entity.id)}"
+                     data-entity-type="${this.escapeAttr(this.entityType)}"
+                     style="--entity-primary: ${this.escapeAttr(primary)}; --entity-secondary: ${this.escapeAttr(secondary)}">
 
-                    <div class="panel-hero" style="background: linear-gradient(135deg, ${primary}, ${secondary})">
-                        ${entity.icon ? `<div class="panel-icon">${entity.icon}</div>` : `<div class="panel-icon">${this.config.icon}</div>`}
+                    <div class="panel-hero" style="background: linear-gradient(135deg, ${this.escapeAttr(primary)}, ${this.escapeAttr(secondary)})">
+                        ${entity.icon ? `<div class="panel-icon">${this.escapeHtml(entity.icon)}</div>` : `<div class="panel-icon">${this.config.icon}</div>`}
                         <h2 class="panel-title">${this.escapeHtml(entity.name || entity.title)}</h2>
                         ${entity.linguistic?.originalName ? `
-                            <div class="panel-subtitle">${entity.linguistic.originalName}</div>
+                            <div class="panel-subtitle">${this.escapeHtml(entity.linguistic.originalName)}</div>
                         ` : ''}
                     </div>
 
@@ -845,8 +898,8 @@
                         ${this.renderPanelFields(entity)}
 
                         <div class="panel-actions">
-                            <a href="${this.getEntityUrl(entity)}" class="btn-primary">Full Details</a>
-                            <button class="btn-secondary panel-expand" data-entity-id="${entity.id}">Expand</button>
+                            <a href="${this.escapeAttr(this.sanitizeUrl(this.getEntityUrl(entity)) || '#')}" class="btn-primary">Full Details</a>
+                            <button class="btn-secondary panel-expand" data-entity-id="${this.escapeAttr(entity.id)}">Expand</button>
                         </div>
                     </div>
                 </div>
@@ -916,13 +969,14 @@
          * Render single inline item
          */
         renderInlineItem(entity) {
+            const safeUrl = this.sanitizeUrl(this.getEntityUrl(entity)) || '#';
             return `
-                <a href="${this.getEntityUrl(entity)}"
+                <a href="${this.escapeAttr(safeUrl)}"
                    class="inline-entity-link"
-                   data-entity-id="${entity.id}"
-                   data-entity-type="${this.entityType}"
-                   title="${this.escapeHtml(entity.shortDescription || entity.name)}">
-                    ${entity.icon ? `<span class="inline-icon">${entity.icon}</span>` : ''}
+                   data-entity-id="${this.escapeAttr(entity.id)}"
+                   data-entity-type="${this.escapeAttr(this.entityType)}"
+                   title="${this.escapeAttr(entity.shortDescription || entity.name)}">
+                    ${entity.icon ? `<span class="inline-icon">${this.escapeHtml(entity.icon)}</span>` : ''}
                     ${this.escapeHtml(entity.name || entity.title)}
                 </a>
             `;

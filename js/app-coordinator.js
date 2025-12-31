@@ -182,9 +182,10 @@
         // Print diagnostic every check
         printDiagnosticReport();
 
-        // Need DOM, auth, and app ready before initializing navigation
+        // CHANGED: Only need DOM and app ready for public routes
+        // Auth is optional - public routes don't require authentication
+        // SPANavigation handles auth requirements per-route
         if (initState.domReady.status &&
-            initState.authReady.status &&
             initState.appReady.status &&
             !initState.navigationReady.status) {
 
@@ -256,8 +257,8 @@
             // Log what we're still waiting for
             const waiting = [];
             if (!initState.domReady.status) waiting.push('DOM');
-            if (!initState.authReady.status) waiting.push('Auth');
             if (!initState.appReady.status) waiting.push('App');
+            // Note: Auth is no longer required for initial navigation
 
             if (waiting.length > 0) {
                 console.log(`[App Coordinator +${elapsed}ms] Still waiting for: ${waiting.join(', ')}`);

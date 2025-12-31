@@ -84,15 +84,36 @@ class FirebaseCRUDManager {
      * Read a single entity by ID
      * @param {string} collection - Collection name
      * @param {string} id - Document ID
-     * @returns {Promise<{success: boolean, data?: Object, error?: string}>}
+     * @returns {Promise<{success: boolean, data?: Object, error?: string, code?: string}>}
      */
     async read(collection, id) {
         try {
+            // Validate inputs
+            if (!collection || typeof collection !== 'string') {
+                return {
+                    success: false,
+                    error: 'Invalid collection name',
+                    code: 'INVALID_COLLECTION'
+                };
+            }
+
+            if (!id || typeof id !== 'string') {
+                return {
+                    success: false,
+                    error: 'Invalid document ID',
+                    code: 'INVALID_ID'
+                };
+            }
+
             const docRef = this.db.collection(collection).doc(id);
             const doc = await docRef.get();
 
             if (!doc.exists) {
-                throw new Error('Entity not found');
+                return {
+                    success: false,
+                    error: 'Entity not found',
+                    code: 'NOT_FOUND'
+                };
             }
 
             const data = {
@@ -107,9 +128,21 @@ class FirebaseCRUDManager {
 
         } catch (error) {
             console.error('[CRUD] Read error:', error);
+
+            // Provide specific error codes for common Firestore errors
+            let code = 'UNKNOWN_ERROR';
+            if (error.code === 'permission-denied') {
+                code = 'PERMISSION_DENIED';
+            } else if (error.code === 'unavailable') {
+                code = 'OFFLINE';
+            } else if (error.code === 'not-found') {
+                code = 'NOT_FOUND';
+            }
+
             return {
                 success: false,
-                error: error.message
+                error: error.message,
+                code
             };
         }
     }
@@ -118,33 +151,63 @@ class FirebaseCRUDManager {
      * Read multiple entities with query options
      * @param {string} collection - Collection name
      * @param {Object} options - Query options
-     * @returns {Promise<{success: boolean, data?: Array, count?: number, error?: string}>}
+     * @returns {Promise<{success: boolean, data?: Array, count?: number, error?: string, code?: string}>}
      */
     async readMany(collection, options = {}) {
         try {
+            // Validate collection name
+            if (!collection || typeof collection !== 'string') {
+                return {
+                    success: false,
+                    error: 'Invalid collection name',
+                    code: 'INVALID_COLLECTION',
+                    data: []
+                };
+            }
+
             let query = this.db.collection(collection);
 
-            // Apply filters
+            // Apply filters with validation
             if (options.where) {
-                options.where.forEach(([field, operator, value]) => {
+                if (!Array.isArray(options.where)) {
+                    return {
+                        success: false,
+                        error: 'options.where must be an array',
+                        code: 'INVALID_OPTIONS',
+                        data: []
+                    };
+                }
+
+                for (const filter of options.where) {
+                    if (!Array.isArray(filter) || filter.length !== 3) {
+                        console.warn('[CRUD] Invalid where clause, skipping:', filter);
+                        continue;
+                    }
+                    const [field, operator, value] = filter;
                     query = query.where(field, operator, value);
-                });
+                }
             }
 
             // Apply ordering
             if (options.orderBy) {
-                const [field, direction = 'asc'] = options.orderBy;
+                const [field, direction = 'asc'] = Array.isArray(options.orderBy)
+                    ? options.orderBy
+                    : [options.orderBy, 'asc'];
                 query = query.orderBy(field, direction);
             }
 
-            // Apply limit
+            // Apply limit (with maximum cap to prevent runaway queries)
+            const maxLimit = 500;
             if (options.limit) {
-                query = query.limit(options.limit);
+                query = query.limit(Math.min(options.limit, maxLimit));
+            } else {
+                // Default limit to prevent loading too much data
+                query = query.limit(100);
             }
 
-            // Apply offset
-            if (options.offset) {
-                query = query.offset(options.offset);
+            // Apply startAfter for pagination (offset is not efficient in Firestore)
+            if (options.startAfter) {
+                query = query.startAfter(options.startAfter);
             }
 
             // Execute query
@@ -159,14 +222,31 @@ class FirebaseCRUDManager {
                 success: true,
                 data,
                 count: data.length,
-                total: snapshot.size
+                total: snapshot.size,
+                hasMore: data.length === (options.limit || 100),
+                lastDoc: snapshot.docs[snapshot.docs.length - 1] || null
             };
 
         } catch (error) {
             console.error('[CRUD] ReadMany error:', error);
+
+            // Provide specific error codes for common Firestore errors
+            let code = 'UNKNOWN_ERROR';
+            if (error.code === 'permission-denied') {
+                code = 'PERMISSION_DENIED';
+            } else if (error.code === 'unavailable') {
+                code = 'OFFLINE';
+            } else if (error.code === 'failed-precondition') {
+                code = 'INDEX_REQUIRED';
+            } else if (error.code === 'invalid-argument') {
+                code = 'INVALID_QUERY';
+            }
+
             return {
                 success: false,
-                error: error.message
+                error: error.message,
+                code,
+                data: [] // Always return empty array on error for safe iteration
             };
         }
     }
