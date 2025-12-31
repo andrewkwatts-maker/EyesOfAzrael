@@ -4,6 +4,13 @@
  * Dynamically loads and renders creature/monster/being content from Firebase
  * Supports: physical description, abilities, habitat, myths, encounters
  *
+ * Features:
+ * - Polished card-based layout
+ * - Animated section reveals
+ * - Mobile-friendly responsive design
+ * - Accessible markup with proper ARIA
+ * - Visual hierarchy with icons
+ *
  * Usage:
  * <div data-creature-content data-mythology="greek" data-entity="hydra" data-allow-edit="true"></div>
  */
@@ -13,6 +20,7 @@ class CreatureRenderer {
         this.db = firebase.firestore();
         this.auth = firebase.auth();
         this.cache = new Map();
+        this.animationDelay = 0;
     }
 
     /**
@@ -138,41 +146,93 @@ class CreatureRenderer {
     }
 
     /**
+     * Get animation style
+     */
+    getAnimationStyle() {
+        const delay = this.animationDelay;
+        this.animationDelay += 0.05;
+        return `style="--animation-delay: ${delay}s"`;
+    }
+
+    /**
      * Render header with title and description
      */
     renderHeader(creature) {
         return `
-            <div class="creature-header">
-                <h1>${creature.icon || '🐉'} ${creature.name}</h1>
-                ${creature.subtitle ? `<p class="subtitle">${creature.subtitle}</p>` : ''}
-                ${creature.shortDescription ? `<p class="short-description">${creature.shortDescription}</p>` : ''}
-                ${creature.creatureType ? `<span class="creature-type-badge">${creature.creatureType}</span>` : ''}
-            </div>
+            <header class="creature-header detail-header" ${this.getAnimationStyle()}>
+                <div class="creature-icon-large" aria-hidden="true">
+                    <span class="icon-float">${creature.icon || '&#128009;'}</span>
+                </div>
+                <div class="creature-header-content">
+                    <h1 class="creature-title">${this.escapeHtml(creature.name)}</h1>
+                    ${creature.subtitle ? `<p class="creature-subtitle">${this.escapeHtml(creature.subtitle)}</p>` : ''}
+                    ${creature.shortDescription ? `<p class="creature-description">${this.escapeHtml(creature.shortDescription)}</p>` : ''}
+                    <div class="creature-badges">
+                        ${creature.creatureType ? `<span class="creature-type-badge">${this.escapeHtml(creature.creatureType)}</span>` : ''}
+                        ${creature.classification ? `<span class="creature-classification-badge">${this.escapeHtml(creature.classification)}</span>` : ''}
+                        ${creature.mythology ? `<span class="mythology-badge">${this.capitalize(creature.mythology)}</span>` : ''}
+                    </div>
+                </div>
+            </header>
         `;
+    }
+
+    /**
+     * Escape HTML
+     */
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    /**
+     * Capitalize string
+     */
+    capitalize(str) {
+        if (!str) return '';
+        return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
     /**
      * Render physical description
      */
     renderPhysicalDescription(description) {
-        let html = '<section class="creature-physical"><h2>👁️ Physical Description</h2>';
+        let html = `<section class="creature-physical detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">&#128065;</span>
+                Physical Description
+            </h2>`;
 
         if (typeof description === 'string') {
-            html += `<p>${description}</p>`;
+            html += `<div class="section-prose"><p>${this.escapeHtml(description)}</p></div>`;
         } else if (typeof description === 'object') {
+            html += '<div class="description-grid">';
             if (description.appearance) {
-                html += `<div class="description-card"><h3>Appearance</h3><p>${description.appearance}</p></div>`;
+                html += `
+                    <div class="description-card">
+                        <h3 class="card-title">Appearance</h3>
+                        <p class="card-content">${this.escapeHtml(description.appearance)}</p>
+                    </div>`;
             }
             if (description.size) {
-                html += `<div class="description-card"><h3>Size</h3><p>${description.size}</p></div>`;
+                html += `
+                    <div class="description-card">
+                        <h3 class="card-title">Size</h3>
+                        <p class="card-content">${this.escapeHtml(description.size)}</p>
+                    </div>`;
             }
             if (description.features && description.features.length > 0) {
-                html += '<div class="description-card"><h3>Notable Features</h3><ul>';
-                description.features.forEach(feature => {
-                    html += `<li>${feature}</li>`;
-                });
-                html += '</ul></div>';
+                html += `
+                    <div class="description-card description-card-wide">
+                        <h3 class="card-title">Notable Features</h3>
+                        <ul class="feature-list">
+                            ${description.features.map(feature => `<li class="feature-item">${this.escapeHtml(feature)}</li>`).join('')}
+                        </ul>
+                    </div>`;
             }
+            html += '</div>';
         }
 
         html += '</section>';
@@ -183,17 +243,28 @@ class CreatureRenderer {
      * Render abilities and powers
      */
     renderAbilities(abilities) {
-        let html = '<section class="creature-abilities"><h2>⚡ Abilities & Powers</h2>';
-        html += '<div class="abilities-grid">';
+        let html = `<section class="creature-abilities detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">&#9889;</span>
+                Abilities & Powers
+            </h2>
+            <div class="abilities-grid" role="list">`;
 
-        abilities.forEach(ability => {
+        abilities.forEach((ability, index) => {
             if (typeof ability === 'string') {
-                html += `<div class="ability-card"><p>${ability}</p></div>`;
+                html += `
+                    <div class="ability-card" role="listitem" style="--animation-delay: ${0.05 * index}s">
+                        <div class="ability-icon" aria-hidden="true">&#10024;</div>
+                        <p class="ability-text">${this.escapeHtml(ability)}</p>
+                    </div>`;
             } else if (ability.name) {
                 html += `
-                    <div class="ability-card">
-                        <h3>${ability.name}</h3>
-                        ${ability.description ? `<p>${ability.description}</p>` : ''}
+                    <div class="ability-card ability-card-detailed" role="listitem" style="--animation-delay: ${0.05 * index}s">
+                        <div class="ability-icon" aria-hidden="true">${ability.icon || '&#9889;'}</div>
+                        <div class="ability-content">
+                            <h3 class="ability-name">${this.escapeHtml(ability.name)}</h3>
+                            ${ability.description ? `<p class="ability-description">${this.escapeHtml(ability.description)}</p>` : ''}
+                        </div>
                     </div>
                 `;
             }
@@ -207,20 +278,47 @@ class CreatureRenderer {
      * Render habitat
      */
     renderHabitat(habitat) {
-        let html = '<section class="creature-habitat"><h2>🏞️ Habitat</h2>';
+        let html = `<section class="creature-habitat detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">&#127966;</span>
+                Habitat
+            </h2>`;
 
         if (typeof habitat === 'string') {
-            html += `<p>${habitat}</p>`;
+            html += `<div class="section-prose"><p>${this.escapeHtml(habitat)}</p></div>`;
         } else if (typeof habitat === 'object') {
+            html += '<div class="habitat-grid">';
             if (habitat.location) {
-                html += `<p><strong>Location:</strong> ${habitat.location}</p>`;
+                html += `
+                    <div class="habitat-item">
+                        <span class="habitat-icon" aria-hidden="true">&#128205;</span>
+                        <div class="habitat-content">
+                            <span class="habitat-label">Location</span>
+                            <span class="habitat-value">${this.escapeHtml(habitat.location)}</span>
+                        </div>
+                    </div>`;
             }
             if (habitat.environment) {
-                html += `<p><strong>Environment:</strong> ${habitat.environment}</p>`;
+                html += `
+                    <div class="habitat-item">
+                        <span class="habitat-icon" aria-hidden="true">&#127795;</span>
+                        <div class="habitat-content">
+                            <span class="habitat-label">Environment</span>
+                            <span class="habitat-value">${this.escapeHtml(habitat.environment)}</span>
+                        </div>
+                    </div>`;
             }
             if (habitat.territory) {
-                html += `<p><strong>Territory:</strong> ${habitat.territory}</p>`;
+                html += `
+                    <div class="habitat-item">
+                        <span class="habitat-icon" aria-hidden="true">&#128506;</span>
+                        <div class="habitat-content">
+                            <span class="habitat-label">Territory</span>
+                            <span class="habitat-value">${this.escapeHtml(habitat.territory)}</span>
+                        </div>
+                    </div>`;
             }
+            html += '</div>';
         }
 
         html += '</section>';
@@ -231,9 +329,14 @@ class CreatureRenderer {
      * Render origin story
      */
     renderOrigin(origin) {
-        let html = '<section class="creature-origin"><h2>📖 Origin</h2>';
+        let html = `<section class="creature-origin detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">&#128214;</span>
+                Origin Story
+            </h2>
+            <div class="section-prose">`;
         html += this.renderContent(origin);
-        html += '</section>';
+        html += '</div></section>';
         return html;
     }
 
@@ -241,18 +344,40 @@ class CreatureRenderer {
      * Render famous encounters
      */
     renderEncounters(encounters) {
-        let html = '<section class="creature-encounters"><h2>⚔️ Famous Encounters</h2>';
-        html += '<div class="encounters-list">';
+        let html = `<section class="creature-encounters detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">&#9876;</span>
+                Famous Encounters
+            </h2>
+            <div class="encounters-timeline">`;
 
         encounters.forEach((encounter, index) => {
             if (typeof encounter === 'string') {
-                html += `<div class="encounter-card"><p>${encounter}</p></div>`;
+                html += `
+                    <div class="encounter-card" style="--animation-delay: ${0.1 * index}s">
+                        <div class="encounter-marker">${index + 1}</div>
+                        <div class="encounter-content">
+                            <p class="encounter-text">${this.escapeHtml(encounter)}</p>
+                        </div>
+                    </div>`;
             } else if (encounter.hero) {
                 html += `
-                    <div class="encounter-card">
-                        <h3>${encounter.hero}${encounter.title ? ` - ${encounter.title}` : ''}</h3>
-                        ${encounter.description ? `<p>${encounter.description}</p>` : ''}
-                        ${encounter.outcome ? `<p class="outcome"><strong>Outcome:</strong> ${encounter.outcome}</p>` : ''}
+                    <div class="encounter-card encounter-card-detailed" style="--animation-delay: ${0.1 * index}s">
+                        <div class="encounter-marker">${index + 1}</div>
+                        <div class="encounter-content">
+                            <h3 class="encounter-hero">
+                                <span class="hero-icon" aria-hidden="true">&#9876;</span>
+                                ${this.escapeHtml(encounter.hero)}
+                                ${encounter.title ? `<span class="encounter-title-divider">-</span> ${this.escapeHtml(encounter.title)}` : ''}
+                            </h3>
+                            ${encounter.description ? `<p class="encounter-description">${this.escapeHtml(encounter.description)}</p>` : ''}
+                            ${encounter.outcome ? `
+                                <div class="encounter-outcome">
+                                    <span class="outcome-label">Outcome:</span>
+                                    <span class="outcome-value">${this.escapeHtml(encounter.outcome)}</span>
+                                </div>
+                            ` : ''}
+                        </div>
                     </div>
                 `;
             }
@@ -266,21 +391,33 @@ class CreatureRenderer {
      * Render symbolism
      */
     renderSymbolism(symbolism) {
-        let html = '<section class="creature-symbolism"><h2>🔮 Symbolism</h2>';
+        let html = `<section class="creature-symbolism detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">&#128302;</span>
+                Symbolism & Meaning
+            </h2>`;
 
         if (typeof symbolism === 'string') {
-            html += `<p>${symbolism}</p>`;
+            html += `<div class="section-prose"><p>${this.escapeHtml(symbolism)}</p></div>`;
         } else if (typeof symbolism === 'object') {
+            html += '<div class="symbolism-grid">';
             if (symbolism.represents && symbolism.represents.length > 0) {
-                html += '<div class="symbolism-card"><h3>Represents</h3><ul>';
-                symbolism.represents.forEach(rep => {
-                    html += `<li>${rep}</li>`;
-                });
-                html += '</ul></div>';
+                html += `
+                    <div class="symbolism-card">
+                        <h3 class="symbolism-card-title">Represents</h3>
+                        <ul class="symbolism-list">
+                            ${symbolism.represents.map(rep => `<li class="symbolism-item">${this.escapeHtml(rep)}</li>`).join('')}
+                        </ul>
+                    </div>`;
             }
             if (symbolism.culturalSignificance) {
-                html += `<div class="symbolism-card"><h3>Cultural Significance</h3><p>${symbolism.culturalSignificance}</p></div>`;
+                html += `
+                    <div class="symbolism-card symbolism-card-wide">
+                        <h3 class="symbolism-card-title">Cultural Significance</h3>
+                        <p class="symbolism-text">${this.escapeHtml(symbolism.culturalSignificance)}</p>
+                    </div>`;
             }
+            html += '</div>';
         }
 
         html += '</section>';
@@ -319,20 +456,35 @@ class CreatureRenderer {
      * Render sources section
      */
     renderSources(sources) {
-        let html = '<section class="sources-section"><h2>📚 Sources</h2><ul class="sources-list">';
+        let html = `<section class="sources-section detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">&#128218;</span>
+                References & Sources
+            </h2>
+            <ol class="sources-list" role="list">`;
 
-        sources.forEach(source => {
+        sources.forEach((source, index) => {
             if (typeof source === 'string') {
-                html += `<li>${source}</li>`;
+                html += `
+                    <li class="source-item" role="listitem">
+                        <span class="source-number">${index + 1}</span>
+                        <span class="source-text">${this.escapeHtml(source)}</span>
+                    </li>`;
             } else if (source.title) {
-                html += `<li><strong>${source.title}</strong>`;
-                if (source.author) html += ` by ${source.author}`;
-                if (source.date) html += ` (${source.date})`;
-                html += `</li>`;
+                html += `
+                    <li class="source-item source-item-detailed" role="listitem">
+                        <span class="source-number">${index + 1}</span>
+                        <div class="source-content">
+                            <cite class="source-title">${this.escapeHtml(source.title)}</cite>
+                            ${source.author ? `<span class="source-author">by ${this.escapeHtml(source.author)}</span>` : ''}
+                            ${source.date ? `<span class="source-date">(${this.escapeHtml(source.date)})</span>` : ''}
+                            ${source.url ? `<a href="${this.escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer" class="source-link">View &#8599;</a>` : ''}
+                        </div>
+                    </li>`;
             }
         });
 
-        html += '</ul></section>';
+        html += '</ol></section>';
         return html;
     }
 

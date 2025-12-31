@@ -2,6 +2,9 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 
+/* Entity Card & Grid Polish - Unified styling for all entity cards */
+@import url('css/entity-card-polish.css');
+
 :root {
     /* Use CSS variables from theme-base.css */
     /* Refined Sefirot Colors - More sophisticated palette */
@@ -89,7 +92,7 @@ header {
 }
 
 .header-content {
-    max-width: 1400px;
+    max-width: 1680px;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -192,9 +195,9 @@ nav a:hover::after {
     color: var(--text-muted);
 }
 
-/* Main Content */
+/* Main Content - Centered container for ultra-wide screens */
 main {
-    max-width: 1400px;
+    max-width: 1680px;
     margin: 2rem auto;
     padding: 0 2rem 4rem;
 }
@@ -223,12 +226,30 @@ main {
     line-height: 1.8;
 }
 
-/* Grid Layouts - More breathing room */
+/* Grid Layouts - Fixed 4 columns on desktop */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
     margin-top: 2rem;
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1rem;
+}
+
+/* Tablet: 3 columns */
+@media (max-width: 1200px) {
+    .grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Tablet portrait: 2 columns */
+@media (max-width: 900px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* Cards - Modern Elevated Design */
@@ -373,11 +394,27 @@ main {
     box-shadow: 0 12px 40px rgba(251, 176, 111, 0.2);
 }
 
-/* Names Grid */
+/* Names Grid - Fixed 4 columns on desktop */
 .names-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.25rem;
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Names Grid responsive */
+@media (max-width: 1200px) {
+    .names-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .names-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .name-card {
@@ -599,7 +636,7 @@ ul li::marker {
     color: var(--accent-primary);
 }
 
-/* Responsive */
+/* Responsive - Tablet */
 @media (max-width: 768px) {
     .header-content {
         flex-direction: column;
@@ -612,7 +649,14 @@ ul li::marker {
     }
 
     .grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        padding: 0 0.75rem;
+    }
+
+    .names-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
 
     h1 {
@@ -629,6 +673,151 @@ ul li::marker {
 
     .intro, .detail-header, .detail-section {
         padding: 1.5rem;
+    }
+}
+
+/* Mobile Portrait - 2 columns (375px-480px viewport) */
+@media (max-width: 480px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    .names-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .card {
+        padding: 1rem;
+    }
+
+    .name-card {
+        padding: 1rem;
+    }
+
+    .card h3 {
+        font-size: 1.1rem;
+    }
+
+    .name-card .hebrew {
+        font-size: 1.8rem;
+    }
+}
+
+/* ============================================
+   MOBILE LANDSCAPE - 4 COLUMNS
+   Target: 667px-896px width with reduced height
+   ============================================ */
+@media (max-width: 896px) and (orientation: landscape) {
+    .header-content {
+        flex-direction: row;
+        gap: 1rem;
+        padding: 0.5rem 1rem;
+    }
+
+    nav ul {
+        gap: 0.25rem;
+    }
+
+    nav a {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    /* 4-column grid for landscape */
+    .grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.75rem;
+        padding: 0 0.5rem;
+    }
+
+    .names-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.25rem;
+    }
+
+    .detail-header h2 {
+        font-size: 1.5rem;
+    }
+
+    main {
+        padding: 0 0.5rem 1rem;
+        margin: 0.5rem auto;
+    }
+
+    .intro, .detail-header, .detail-section {
+        padding: 0.75rem 1rem;
+    }
+
+    /* Compact cards for landscape */
+    .card {
+        padding: 0.75rem;
+    }
+
+    .card h3 {
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .card .subtitle {
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .card .description {
+        display: none;
+    }
+
+    .card .attributes {
+        margin-top: 0.5rem;
+        gap: 0.25rem;
+    }
+
+    .tag {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    /* Sefirot card compact */
+    .sefirah-card .position {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+
+    /* Name cards compact */
+    .name-card {
+        padding: 0.75rem;
+    }
+
+    .name-card .hebrew {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .name-card .number {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+
+    /* Search compact */
+    .search-container {
+        margin: 0.75rem auto;
+        padding: 0 0.5rem;
+    }
+
+    #searchBox {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
     }
 }
 

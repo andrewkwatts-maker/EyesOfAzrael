@@ -1,0 +1,1162 @@
+/**
+ * Entity Card & Grid Polish System
+ * Unified, consistent styling for all entity display components
+ *
+ * Features:
+ * - Consistent card sizing and spacing
+ * - Mythology-specific color accents
+ * - Icon rendering with fallbacks
+ * - Text truncation with ellipsis
+ * - Smooth hover/focus/active states
+ * - WCAG AA accessibility compliance
+ * - Responsive breakpoints
+ *
+ * Last updated: 2025-12-29
+ */
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES - Design Tokens
+   ============================================================================ */
+
+:root {
+    /* Card Dimensions */
+    --card-min-height: 220px;
+    --card-min-height-compact: 160px;
+    --card-min-height-detailed: 280px;
+
+    /* Card Padding */
+    --card-padding: 1.25rem;
+    --card-padding-compact: 0.875rem;
+    --card-padding-detailed: 1.75rem;
+
+    /* Card Border */
+    --card-border-width: 2px;
+    --card-border-radius: 1rem;
+    --card-accent-height: 4px;
+
+    /* Icon Sizes */
+    --icon-size-sm: 2rem;
+    --icon-size-md: 2.75rem;
+    --icon-size-lg: 3.5rem;
+    --icon-size-xl: 5rem;
+
+    /* Grid Gaps */
+    --grid-gap-compact: 0.75rem;
+    --grid-gap-default: 1.25rem;
+    --grid-gap-detailed: 1.5rem;
+
+    /* Text Line Clamps */
+    --description-lines: 3;
+    --description-lines-compact: 2;
+    --description-lines-detailed: 4;
+
+    /* Transition Timing */
+    --card-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --hover-lift: -6px;
+    --hover-scale: 1.02;
+
+    /* Default Entity Color */
+    --entity-accent: var(--color-primary, #8b7fff);
+    --entity-accent-rgb: var(--color-primary-rgb, 139, 127, 255);
+}
+
+/* ============================================================================
+   MYTHOLOGY COLOR ACCENTS
+   Applied via data-mythology attribute or --mythos-* variables
+   ============================================================================ */
+
+/* Greek - Golden */
+.entity-card[data-mythology="greek"],
+[data-mythology="greek"] .entity-card {
+    --entity-accent: #DAA520;
+    --entity-accent-rgb: 218, 165, 32;
+}
+
+/* Norse - Ice Blue */
+.entity-card[data-mythology="norse"],
+[data-mythology="norse"] .entity-card {
+    --entity-accent: #4682B4;
+    --entity-accent-rgb: 70, 130, 180;
+}
+
+/* Egyptian - Desert Gold */
+.entity-card[data-mythology="egyptian"],
+[data-mythology="egyptian"] .entity-card {
+    --entity-accent: #CD853F;
+    --entity-accent-rgb: 205, 133, 63;
+}
+
+/* Hindu - Saffron */
+.entity-card[data-mythology="hindu"],
+[data-mythology="hindu"] .entity-card {
+    --entity-accent: #FF6347;
+    --entity-accent-rgb: 255, 99, 71;
+}
+
+/* Buddhist - Enlightenment Gold */
+.entity-card[data-mythology="buddhist"],
+[data-mythology="buddhist"] .entity-card {
+    --entity-accent: #FFD700;
+    --entity-accent-rgb: 255, 215, 0;
+}
+
+/* Chinese - Imperial Red */
+.entity-card[data-mythology="chinese"],
+[data-mythology="chinese"] .entity-card {
+    --entity-accent: #DC143C;
+    --entity-accent-rgb: 220, 20, 60;
+}
+
+/* Japanese - Sacred Red */
+.entity-card[data-mythology="japanese"],
+[data-mythology="japanese"] .entity-card {
+    --entity-accent: #C41E3A;
+    --entity-accent-rgb: 196, 30, 58;
+}
+
+/* Celtic - Forest Green */
+.entity-card[data-mythology="celtic"],
+[data-mythology="celtic"] .entity-card {
+    --entity-accent: #228B22;
+    --entity-accent-rgb: 34, 139, 34;
+}
+
+/* Roman - Imperial Purple */
+.entity-card[data-mythology="roman"],
+[data-mythology="roman"] .entity-card {
+    --entity-accent: #800080;
+    --entity-accent-rgb: 128, 0, 128;
+}
+
+/* Sumerian/Babylonian - Clay Terracotta */
+.entity-card[data-mythology="sumerian"],
+.entity-card[data-mythology="babylonian"],
+[data-mythology="sumerian"] .entity-card,
+[data-mythology="babylonian"] .entity-card {
+    --entity-accent: #CD853F;
+    --entity-accent-rgb: 205, 133, 63;
+}
+
+/* Aztec/Mayan - Turquoise */
+.entity-card[data-mythology="aztec"],
+.entity-card[data-mythology="mayan"],
+[data-mythology="aztec"] .entity-card,
+[data-mythology="mayan"] .entity-card {
+    --entity-accent: #40E0D0;
+    --entity-accent-rgb: 64, 224, 208;
+}
+
+/* African - Savanna Gold */
+.entity-card[data-mythology="african"],
+.entity-card[data-mythology="yoruba"],
+[data-mythology="african"] .entity-card,
+[data-mythology="yoruba"] .entity-card {
+    --entity-accent: #DAA520;
+    --entity-accent-rgb: 218, 165, 32;
+}
+
+/* Slavic - Deep Forest */
+.entity-card[data-mythology="slavic"],
+[data-mythology="slavic"] .entity-card {
+    --entity-accent: #2F4F2F;
+    --entity-accent-rgb: 47, 79, 47;
+}
+
+/* ============================================================================
+   ENTITY TYPE COLOR ACCENTS
+   Applied via data-entity-type attribute
+   ============================================================================ */
+
+.entity-card[data-entity-type="deity"] { --type-color: #FFD700; }
+.entity-card[data-entity-type="hero"] { --type-color: #FF6B6B; }
+.entity-card[data-entity-type="creature"] { --type-color: #4CAF50; }
+.entity-card[data-entity-type="item"] { --type-color: #2196F3; }
+.entity-card[data-entity-type="place"] { --type-color: #9C27B0; }
+.entity-card[data-entity-type="concept"] { --type-color: #00BCD4; }
+.entity-card[data-entity-type="magic"] { --type-color: #E91E63; }
+.entity-card[data-entity-type="ritual"] { --type-color: #795548; }
+.entity-card[data-entity-type="herb"] { --type-color: #8BC34A; }
+.entity-card[data-entity-type="symbol"] { --type-color: #FFC107; }
+.entity-card[data-entity-type="text"] { --type-color: #607D8B; }
+
+/* ============================================================================
+   UNIFIED GRID CONTAINER
+   ============================================================================ */
+
+.entity-grid,
+.universal-grid,
+.pantheon-grid,
+.deities-grid,
+.heroes-grid,
+.creatures-grid,
+.items-grid,
+.places-grid {
+    display: grid;
+    gap: var(--grid-gap-default);
+    width: 100%;
+    padding: var(--spacing-md, 1rem);
+
+    /* Default: 4 columns on large screens */
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Tablet: 3 columns */
+@media (max-width: 1200px) {
+    .entity-grid,
+    .universal-grid,
+    .pantheon-grid,
+    .deities-grid,
+    .heroes-grid,
+    .creatures-grid,
+    .items-grid,
+    .places-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Mobile Landscape / Small Tablet: 2 columns */
+@media (max-width: 900px) {
+    .entity-grid,
+    .universal-grid,
+    .pantheon-grid,
+    .deities-grid,
+    .heroes-grid,
+    .creatures-grid,
+    .items-grid,
+    .places-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--grid-gap-compact);
+    }
+}
+
+/* Mobile Portrait: 2 columns (compact) */
+@media (max-width: 600px) {
+    .entity-grid,
+    .universal-grid,
+    .pantheon-grid,
+    .deities-grid,
+    .heroes-grid,
+    .creatures-grid,
+    .items-grid,
+    .places-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+}
+
+/* Very Small: 1 column */
+@media (max-width: 400px) {
+    .entity-grid,
+    .universal-grid,
+    .pantheon-grid,
+    .deities-grid,
+    .heroes-grid,
+    .creatures-grid,
+    .items-grid,
+    .places-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Grid density modifiers */
+.entity-grid.compact,
+.universal-grid.compact {
+    gap: var(--grid-gap-compact);
+}
+
+.entity-grid.detailed,
+.universal-grid.detailed {
+    gap: var(--grid-gap-detailed);
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 1200px) {
+    .entity-grid.detailed,
+    .universal-grid.detailed {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .entity-grid.detailed,
+    .universal-grid.detailed {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================================
+   UNIFIED ENTITY CARD - Base Styles
+   ============================================================================ */
+
+.entity-card,
+.universal-grid-card,
+.grid-card {
+    /* Layout */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: var(--card-min-height);
+    padding: var(--card-padding);
+    overflow: hidden;
+
+    /* Visual */
+    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--card-border-width) solid rgba(var(--entity-accent-rgb), 0.25);
+    border-radius: var(--card-border-radius);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+
+    /* Behavior */
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+
+    /* Animation */
+    transition:
+        transform var(--card-transition),
+        border-color var(--card-transition),
+        box-shadow var(--card-transition);
+    will-change: transform;
+}
+
+/* Top accent bar (hidden by default) */
+.entity-card::before,
+.universal-grid-card::before,
+.grid-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--card-accent-height);
+    background: linear-gradient(
+        90deg,
+        var(--entity-accent),
+        rgba(var(--entity-accent-rgb), 0.6)
+    );
+    opacity: 0;
+    transition: opacity var(--card-transition);
+    z-index: 1;
+}
+
+/* ============================================================================
+   CARD HOVER STATES
+   ============================================================================ */
+
+.entity-card:hover,
+.universal-grid-card:hover,
+.grid-card:hover {
+    transform: translateY(var(--hover-lift)) scale(var(--hover-scale));
+    border-color: var(--entity-accent);
+    box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.35),
+        0 0 24px rgba(var(--entity-accent-rgb), 0.25);
+}
+
+.entity-card:hover::before,
+.universal-grid-card:hover::before,
+.grid-card:hover::before {
+    opacity: 1;
+}
+
+/* Hover glow effect */
+.entity-card::after,
+.universal-grid-card::after,
+.grid-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(var(--entity-accent-rgb), 0.12) 0%,
+        transparent 60%
+    );
+    transition: opacity var(--card-transition);
+}
+
+.entity-card:hover::after,
+.universal-grid-card:hover::after,
+.grid-card:hover::after {
+    opacity: 1;
+}
+
+/* ============================================================================
+   CARD FOCUS STATES (Accessibility)
+   ============================================================================ */
+
+.entity-card:focus,
+.entity-card:focus-visible,
+.universal-grid-card:focus,
+.universal-grid-card:focus-visible,
+.grid-card:focus,
+.grid-card:focus-visible {
+    outline: 3px solid var(--entity-accent);
+    outline-offset: 3px;
+    box-shadow:
+        0 0 0 6px rgba(var(--entity-accent-rgb), 0.2),
+        0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.entity-card:focus:not(:focus-visible),
+.universal-grid-card:focus:not(:focus-visible),
+.grid-card:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ============================================================================
+   CARD ACTIVE STATES
+   ============================================================================ */
+
+.entity-card:active,
+.universal-grid-card:active,
+.grid-card:active {
+    transform: translateY(-3px) scale(1.01);
+    transition-duration: 0.1s;
+}
+
+/* ============================================================================
+   CARD ICON CONTAINER
+   ============================================================================ */
+
+.entity-card .entity-icon,
+.entity-card .card-icon,
+.entity-card .grid-card-icon,
+.universal-grid-card .grid-card-icon,
+.grid-card .card-icon {
+    /* Layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
+    margin: 0 auto 0.75rem auto;
+
+    /* Text (for emoji icons) */
+    font-size: calc(var(--icon-size-lg) * 0.7);
+    line-height: 1;
+
+    /* Animation */
+    transition: transform var(--card-transition), filter var(--card-transition);
+    filter: drop-shadow(0 2px 6px rgba(var(--entity-accent-rgb), 0.3));
+}
+
+/* Icon hover effect */
+.entity-card:hover .entity-icon,
+.entity-card:hover .card-icon,
+.entity-card:hover .grid-card-icon,
+.universal-grid-card:hover .grid-card-icon,
+.grid-card:hover .card-icon {
+    transform: scale(1.1) rotate(3deg);
+    filter: drop-shadow(0 4px 12px rgba(var(--entity-accent-rgb), 0.5));
+}
+
+/* SVG/Image Icons */
+.entity-card .entity-icon img,
+.entity-card .card-icon img,
+.universal-grid-card .grid-card-icon img,
+img.entity-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+/* Icon Fallback */
+.entity-icon-fallback,
+.icon-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
+    background: linear-gradient(
+        135deg,
+        rgba(var(--entity-accent-rgb), 0.2),
+        rgba(var(--entity-accent-rgb), 0.1)
+    );
+    border: 2px dashed rgba(var(--entity-accent-rgb), 0.3);
+    border-radius: 12px;
+    font-size: calc(var(--icon-size-lg) * 0.5);
+    color: rgba(var(--entity-accent-rgb), 0.7);
+}
+
+/* Icon size modifiers */
+.entity-icon.small,
+.card-icon.small {
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+    font-size: calc(var(--icon-size-sm) * 0.7);
+}
+
+.entity-icon.medium,
+.card-icon.medium {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+    font-size: calc(var(--icon-size-md) * 0.7);
+}
+
+.entity-icon.large,
+.card-icon.large {
+    width: var(--icon-size-xl);
+    height: var(--icon-size-xl);
+    font-size: calc(var(--icon-size-xl) * 0.7);
+}
+
+/* ============================================================================
+   CARD TITLE
+   ============================================================================ */
+
+.entity-card .entity-name,
+.entity-card .card-title,
+.entity-card .grid-card-title,
+.universal-grid-card .grid-card-title,
+.grid-card .card-title {
+    /* Typography */
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: center;
+    color: var(--color-text-primary, #e5e7eb);
+
+    /* Truncation */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    /* Spacing */
+    margin: 0 0 0.5rem 0;
+    padding: 0;
+}
+
+.entity-card .entity-name a,
+.entity-card .card-title a,
+.entity-card .grid-card-title a,
+.universal-grid-card .grid-card-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--card-transition);
+}
+
+.entity-card:hover .entity-name,
+.entity-card:hover .card-title,
+.entity-card:hover .grid-card-title,
+.universal-grid-card:hover .grid-card-title {
+    color: var(--entity-accent);
+}
+
+/* ============================================================================
+   CARD SHORT DESCRIPTION
+   ============================================================================ */
+
+.entity-card .entity-subtitle,
+.entity-card .card-description,
+.entity-card .grid-card-description,
+.entity-card .entity-short-desc,
+.universal-grid-card .grid-card-description,
+.grid-card .card-description {
+    /* Typography */
+    font-size: 0.85rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: center;
+    color: var(--color-text-secondary, #9ca3af);
+
+    /* Truncation with ellipsis */
+    display: -webkit-box;
+    -webkit-line-clamp: var(--description-lines);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    /* Spacing */
+    margin: 0 0 0.75rem 0;
+    flex: 1;
+}
+
+/* ============================================================================
+   CARD BADGES (Mythology & Entity Type)
+   ============================================================================ */
+
+.entity-card .card-meta,
+.entity-card .grid-card-meta,
+.entity-card .entity-badges,
+.universal-grid-card .grid-card-meta {
+    display: flex;
+    gap: 0.375rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+
+.entity-type-badge,
+.mythology-badge,
+.card-badge {
+    /* Layout */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.625rem;
+
+    /* Visual */
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: 9999px;
+    white-space: nowrap;
+
+    /* Animation */
+    transition:
+        transform var(--card-transition),
+        background-color var(--card-transition);
+}
+
+/* Entity Type Badge */
+.entity-type-badge {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+    color: var(--color-primary, #8b7fff);
+}
+
+/* Mythology Badge */
+.mythology-badge {
+    background: rgba(var(--entity-accent-rgb), 0.2);
+    border: 1px solid rgba(var(--entity-accent-rgb), 0.4);
+    color: var(--entity-accent);
+}
+
+/* Badge hover */
+.entity-type-badge:hover,
+.mythology-badge:hover {
+    transform: scale(1.05);
+}
+
+/* ============================================================================
+   CARD TAGS
+   ============================================================================ */
+
+.entity-card .entity-tags,
+.entity-card .card-tags,
+.entity-card .grid-card-fields,
+.universal-grid-card .grid-card-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    justify-content: center;
+    margin-top: auto;
+    padding-top: 0.5rem;
+}
+
+.entity-card .tag,
+.entity-card .field-item,
+.universal-grid-card .field-item {
+    padding: 0.2rem 0.5rem;
+    background: rgba(var(--color-secondary-rgb, 236, 72, 153), 0.15);
+    border: 1px solid rgba(var(--color-secondary-rgb, 236, 72, 153), 0.3);
+    border-radius: 0.375rem;
+    font-size: 0.7rem;
+    color: var(--color-text-secondary, #9ca3af);
+
+    /* Truncation for long tags */
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.entity-card .tag .field-label,
+.entity-card .field-item .field-label {
+    font-weight: 600;
+    color: var(--color-text-primary, #e5e7eb);
+}
+
+/* ============================================================================
+   CARD FOOTER / ACTION BUTTON
+   ============================================================================ */
+
+.entity-card .card-footer,
+.entity-card .grid-card-footer,
+.universal-grid-card .grid-card-footer {
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(var(--entity-accent-rgb), 0.2);
+    display: flex;
+    justify-content: center;
+}
+
+.entity-card .btn-view-details,
+.universal-grid-card .btn-view-details {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 1.25rem;
+
+    background: linear-gradient(
+        135deg,
+        var(--entity-accent),
+        rgba(var(--entity-accent-rgb), 0.8)
+    );
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    border-radius: 0.625rem;
+
+    transition:
+        transform var(--card-transition),
+        box-shadow var(--card-transition);
+}
+
+.entity-card .btn-view-details:hover,
+.universal-grid-card .btn-view-details:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(var(--entity-accent-rgb), 0.4);
+}
+
+/* ============================================================================
+   COMPACT CARD VARIANT
+   ============================================================================ */
+
+.entity-card.compact,
+.universal-grid-card.compact,
+.density-compact .entity-card,
+.density-compact .universal-grid-card {
+    min-height: var(--card-min-height-compact);
+    padding: var(--card-padding-compact);
+}
+
+.density-compact .entity-icon,
+.density-compact .card-icon,
+.density-compact .grid-card-icon {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+    font-size: calc(var(--icon-size-md) * 0.7);
+    margin-bottom: 0.5rem;
+}
+
+.density-compact .entity-name,
+.density-compact .card-title,
+.density-compact .grid-card-title {
+    font-size: 0.95rem;
+    -webkit-line-clamp: 1;
+}
+
+.density-compact .entity-subtitle,
+.density-compact .card-description,
+.density-compact .grid-card-description {
+    font-size: 0.75rem;
+    -webkit-line-clamp: var(--description-lines-compact);
+}
+
+.density-compact .entity-type-badge,
+.density-compact .mythology-badge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.5rem;
+}
+
+/* ============================================================================
+   DETAILED CARD VARIANT
+   ============================================================================ */
+
+.entity-card.detailed,
+.universal-grid-card.detailed,
+.density-detailed .entity-card,
+.density-detailed .universal-grid-card {
+    min-height: var(--card-min-height-detailed);
+    padding: var(--card-padding-detailed);
+}
+
+.density-detailed .entity-icon,
+.density-detailed .card-icon,
+.density-detailed .grid-card-icon {
+    width: var(--icon-size-xl);
+    height: var(--icon-size-xl);
+    font-size: calc(var(--icon-size-xl) * 0.7);
+    margin-bottom: 1rem;
+}
+
+.density-detailed .entity-name,
+.density-detailed .card-title,
+.density-detailed .grid-card-title {
+    font-size: 1.3rem;
+}
+
+.density-detailed .entity-subtitle,
+.density-detailed .card-description,
+.density-detailed .grid-card-description {
+    font-size: 0.95rem;
+    -webkit-line-clamp: var(--description-lines-detailed);
+}
+
+/* ============================================================================
+   LIST VIEW CARD STYLES
+   ============================================================================ */
+
+.entity-grid.list-view .entity-card,
+.entity-grid.list-view .universal-grid-card,
+.universal-list .universal-list-item {
+    flex-direction: row;
+    align-items: center;
+    min-height: auto;
+    padding: 1rem 1.25rem;
+    gap: 1rem;
+}
+
+.entity-grid.list-view .entity-icon,
+.entity-grid.list-view .card-icon,
+.entity-grid.list-view .grid-card-icon {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.entity-grid.list-view .card-content,
+.entity-grid.list-view .grid-card-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.entity-grid.list-view .entity-name,
+.entity-grid.list-view .card-title,
+.entity-grid.list-view .grid-card-title {
+    text-align: left;
+    margin-bottom: 0.25rem;
+}
+
+.entity-grid.list-view .entity-subtitle,
+.entity-grid.list-view .card-description,
+.entity-grid.list-view .grid-card-description {
+    text-align: left;
+    margin-bottom: 0;
+}
+
+.entity-grid.list-view .card-meta,
+.entity-grid.list-view .grid-card-meta {
+    justify-content: flex-start;
+}
+
+/* ============================================================================
+   LOADING STATE SKELETON
+   ============================================================================ */
+
+.entity-card.loading,
+.entity-card.skeleton,
+.universal-grid-card.loading {
+    pointer-events: none;
+}
+
+.entity-card.loading .entity-icon,
+.entity-card.loading .card-title,
+.entity-card.loading .card-description,
+.entity-card.skeleton .entity-icon,
+.entity-card.skeleton .card-title,
+.entity-card.skeleton .card-description {
+    background: linear-gradient(
+        90deg,
+        rgba(var(--color-border-rgb, 42, 47, 74), 0.3) 0%,
+        rgba(var(--color-border-rgb, 42, 47, 74), 0.5) 50%,
+        rgba(var(--color-border-rgb, 42, 47, 74), 0.3) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    color: transparent;
+    border-radius: 0.5rem;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ============================================================================
+   EMPTY STATE
+   ============================================================================ */
+
+.entity-grid-empty,
+.universal-grid-empty,
+.empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+
+    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.4);
+    border: 2px dashed rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+    border-radius: var(--card-border-radius);
+}
+
+.empty-state .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+    filter: grayscale(0.5);
+}
+
+.empty-state .empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #e5e7eb);
+    margin-bottom: 0.75rem;
+}
+
+.empty-state .empty-message {
+    font-size: 1rem;
+    color: var(--color-text-secondary, #9ca3af);
+    max-width: 400px;
+    line-height: 1.6;
+}
+
+/* ============================================================================
+   ERROR STATE
+   ============================================================================ */
+
+.entity-card.error,
+.entity-card-error {
+    border-color: rgba(239, 68, 68, 0.4);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.entity-card.error::before,
+.entity-card-error::before {
+    background: #ef4444;
+    opacity: 1;
+}
+
+/* ============================================================================
+   ACCESSIBILITY - HIGH CONTRAST MODE
+   ============================================================================ */
+
+@media (prefers-contrast: high) {
+    .entity-card,
+    .universal-grid-card,
+    .grid-card {
+        border-width: 3px;
+        border-color: var(--entity-accent);
+    }
+
+    .entity-type-badge,
+    .mythology-badge {
+        border-width: 2px;
+        font-weight: 700;
+    }
+
+    .entity-card:focus,
+    .universal-grid-card:focus,
+    .grid-card:focus {
+        outline-width: 4px;
+        outline-offset: 4px;
+    }
+}
+
+/* ============================================================================
+   ACCESSIBILITY - REDUCED MOTION
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .entity-card,
+    .universal-grid-card,
+    .grid-card,
+    .entity-icon,
+    .card-icon,
+    .grid-card-icon,
+    .entity-type-badge,
+    .mythology-badge,
+    .btn-view-details {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .entity-card:hover,
+    .universal-grid-card:hover,
+    .grid-card:hover {
+        transform: none;
+    }
+
+    .entity-card:hover .entity-icon,
+    .entity-card:hover .card-icon,
+    .universal-grid-card:hover .grid-card-icon {
+        transform: none;
+    }
+
+    .entity-card.loading .entity-icon,
+    .entity-card.loading .card-title,
+    .entity-card.loading .card-description,
+    .entity-card.skeleton .entity-icon,
+    .entity-card.skeleton .card-title,
+    .entity-card.skeleton .card-description {
+        animation: none;
+        opacity: 0.6;
+    }
+}
+
+/* ============================================================================
+   RESPONSIVE - MOBILE OPTIMIZATIONS
+   ============================================================================ */
+
+@media (max-width: 600px) {
+    .entity-card,
+    .universal-grid-card,
+    .grid-card {
+        min-height: 180px;
+        padding: 0.875rem;
+    }
+
+    .entity-icon,
+    .card-icon,
+    .grid-card-icon {
+        width: var(--icon-size-md);
+        height: var(--icon-size-md);
+        font-size: calc(var(--icon-size-md) * 0.7);
+        margin-bottom: 0.5rem;
+    }
+
+    .entity-name,
+    .card-title,
+    .grid-card-title {
+        font-size: 0.95rem;
+    }
+
+    .entity-subtitle,
+    .card-description,
+    .grid-card-description {
+        font-size: 0.8rem;
+        -webkit-line-clamp: 2;
+    }
+
+    .entity-type-badge,
+    .mythology-badge {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.5rem;
+    }
+
+    .btn-view-details {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.875rem;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .entity-card:hover,
+    .universal-grid-card:hover,
+    .grid-card:hover {
+        transform: none;
+    }
+
+    .entity-card:active,
+    .universal-grid-card:active,
+    .grid-card:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+
+    .entity-card:hover::before,
+    .universal-grid-card:hover::before,
+    .grid-card:hover::before {
+        opacity: 0;
+    }
+
+    .entity-card:active::before,
+    .universal-grid-card:active::before,
+    .grid-card:active::before {
+        opacity: 1;
+    }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+    .entity-card,
+    .universal-grid-card,
+    .grid-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border: 1px solid #ccc;
+        background: white;
+        color: black;
+        box-shadow: none;
+        backdrop-filter: none;
+    }
+
+    .entity-card::before,
+    .entity-card::after,
+    .universal-grid-card::before,
+    .universal-grid-card::after {
+        display: none;
+    }
+
+    .btn-view-details,
+    .card-footer,
+    .grid-card-footer {
+        display: none;
+    }
+}
+
+/* ============================================================================
+   STAGGERED ANIMATION ON LOAD
+   ============================================================================ */
+
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.entity-grid > .entity-card,
+.entity-grid > .universal-grid-card,
+.universal-grid > .universal-grid-card {
+    animation: cardFadeIn 0.4s ease-out backwards;
+}
+
+.entity-grid > :nth-child(1),
+.universal-grid > :nth-child(1) { animation-delay: 0.05s; }
+.entity-grid > :nth-child(2),
+.universal-grid > :nth-child(2) { animation-delay: 0.1s; }
+.entity-grid > :nth-child(3),
+.universal-grid > :nth-child(3) { animation-delay: 0.15s; }
+.entity-grid > :nth-child(4),
+.universal-grid > :nth-child(4) { animation-delay: 0.2s; }
+.entity-grid > :nth-child(5),
+.universal-grid > :nth-child(5) { animation-delay: 0.25s; }
+.entity-grid > :nth-child(6),
+.universal-grid > :nth-child(6) { animation-delay: 0.3s; }
+.entity-grid > :nth-child(7),
+.universal-grid > :nth-child(7) { animation-delay: 0.35s; }
+.entity-grid > :nth-child(8),
+.universal-grid > :nth-child(8) { animation-delay: 0.4s; }
+.entity-grid > :nth-child(n+9),
+.universal-grid > :nth-child(n+9) { animation-delay: 0.45s; }
+
+/* Disable stagger on mobile for performance */
+@media (max-width: 768px) {
+    .entity-grid > .entity-card,
+    .entity-grid > .universal-grid-card,
+    .universal-grid > .universal-grid-card {
+        animation-delay: 0s !important;
+    }
+}
+
+/* ============================================================================
+   END OF ENTITY CARD POLISH CSS
+   ============================================================================ */

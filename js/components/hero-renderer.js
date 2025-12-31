@@ -4,6 +4,14 @@
  * Dynamically loads and renders hero/demigod content from Firebase
  * Supports: biography, deeds, divine connections, worship, legacy
  *
+ * Features:
+ * - Polished card-based layout with timeline support
+ * - Animated section reveals
+ * - Mobile-friendly responsive design
+ * - Accessible markup with proper ARIA
+ * - Visual hierarchy with icons
+ * - Quest/achievement timeline displays
+ *
  * Usage:
  * <div data-hero-content data-mythology="greek" data-entity="heracles" data-allow-edit="true"></div>
  */
@@ -13,6 +21,34 @@ class HeroRenderer {
         this.db = firebase.firestore();
         this.auth = firebase.auth();
         this.cache = new Map();
+        this.animationDelay = 0;
+    }
+
+    /**
+     * Get animation style with incremented delay
+     */
+    getAnimationStyle() {
+        const delay = this.animationDelay;
+        this.animationDelay += 0.05;
+        return `style="--animation-delay: ${delay}s"`;
+    }
+
+    /**
+     * Escape HTML for security
+     */
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    /**
+     * Capitalize string
+     */
+    capitalize(str) {
+        if (!str) return '';
+        return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
     /**
@@ -67,16 +103,25 @@ class HeroRenderer {
      * Render hero content
      */
     async renderHero(container, mythology, entityId, allowEdit = false) {
-        container.innerHTML = '<div class="loading-spinner">Loading hero data...</div>';
+        container.innerHTML = `
+            <div class="loading-state">
+                <div class="loading-spinner-ring"></div>
+                <p>Loading hero data...</p>
+            </div>`;
 
+        this.animationDelay = 0;
         const hero = await this.fetchHero(mythology, entityId);
 
         if (!hero) {
-            container.innerHTML = '<div class="error-message">Hero data not found. Content will load from HTML.</div>';
+            container.innerHTML = `
+                <div class="error-state">
+                    <span class="error-icon" aria-hidden="true">&#9888;</span>
+                    <p>Hero data not found. Content will load from HTML.</p>
+                </div>`;
             return;
         }
 
-        let html = '';
+        let html = '<article class="hero-detail-article">';
 
         // Header section
         html += this.renderHeader(hero);
@@ -121,6 +166,7 @@ class HeroRenderer {
             html += this.renderEditButton(mythology, entityId);
         }
 
+        html += '</article>';
         container.innerHTML = html;
     }
 
@@ -129,11 +175,21 @@ class HeroRenderer {
      */
     renderHeader(hero) {
         return `
-            <div class="hero-header">
-                <h1>${hero.icon || '⭐'} ${hero.name}</h1>
-                ${hero.subtitle ? `<p class="subtitle">${hero.subtitle}</p>` : ''}
-                ${hero.shortDescription ? `<p class="short-description">${hero.shortDescription}</p>` : ''}
-            </div>
+            <header class="hero-header detail-header" ${this.getAnimationStyle()}>
+                <div class="hero-icon-large" aria-hidden="true">
+                    <span class="icon-float">${hero.icon || '&#9734;'}</span>
+                </div>
+                <div class="hero-header-content">
+                    <h1 class="hero-title">${this.escapeHtml(hero.name)}</h1>
+                    ${hero.subtitle ? `<p class="hero-subtitle">${this.escapeHtml(hero.subtitle)}</p>` : ''}
+                    ${hero.shortDescription ? `<p class="hero-description">${this.escapeHtml(hero.shortDescription)}</p>` : ''}
+                    <div class="hero-badges">
+                        <span class="entity-type-badge">Hero</span>
+                        ${hero.mythology ? `<span class="mythology-badge">${this.capitalize(hero.mythology)}</span>` : ''}
+                        ${hero.era ? `<span class="era-badge">${this.escapeHtml(hero.era)}</span>` : ''}
+                    </div>
+                </div>
+            </header>
         `;
     }
 
@@ -141,33 +197,76 @@ class HeroRenderer {
      * Render biography section
      */
     renderBiography(biography) {
-        let html = '<section class="hero-biography"><h2>📖 Biography</h2>';
+        let html = `<section class="hero-biography detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">&#128214;</span>
+                Biography
+            </h2>
+            <div class="biography-grid">`;
 
         if (biography.birth) {
-            html += `<div class="biography-section"><h3>Birth & Origins</h3>${this.renderContent(biography.birth)}</div>`;
+            html += `
+                <div class="biography-card" ${this.getAnimationStyle()}>
+                    <h3 class="biography-card-title">
+                        <span class="card-icon" aria-hidden="true">&#127774;</span>
+                        Birth & Origins
+                    </h3>
+                    <div class="biography-card-content">${this.renderContent(biography.birth)}</div>
+                </div>`;
         }
 
         if (biography.earlyLife) {
-            html += `<div class="biography-section"><h3>Early Life</h3>${this.renderContent(biography.earlyLife)}</div>`;
+            html += `
+                <div class="biography-card" ${this.getAnimationStyle()}>
+                    <h3 class="biography-card-title">
+                        <span class="card-icon" aria-hidden="true">&#127793;</span>
+                        Early Life
+                    </h3>
+                    <div class="biography-card-content">${this.renderContent(biography.earlyLife)}</div>
+                </div>`;
         }
 
         if (biography.majorEvents && biography.majorEvents.length > 0) {
-            html += '<div class="biography-section"><h3>Major Life Events</h3><ul>';
-            biography.majorEvents.forEach(event => {
-                html += `<li>${event}</li>`;
-            });
-            html += '</ul></div>';
+            html += `
+                <div class="biography-card biography-card-wide" ${this.getAnimationStyle()}>
+                    <h3 class="biography-card-title">
+                        <span class="card-icon" aria-hidden="true">&#128197;</span>
+                        Major Life Events
+                    </h3>
+                    <ul class="major-events-list">
+                        ${biography.majorEvents.map((event, i) => `
+                            <li class="major-event-item" style="--animation-delay: ${0.05 * i}s">
+                                <span class="event-bullet" aria-hidden="true">&#9679;</span>
+                                ${this.escapeHtml(event)}
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>`;
         }
 
         if (biography.death) {
-            html += `<div class="biography-section"><h3>Death & Apotheosis</h3>${this.renderContent(biography.death)}</div>`;
+            html += `
+                <div class="biography-card" ${this.getAnimationStyle()}>
+                    <h3 class="biography-card-title">
+                        <span class="card-icon" aria-hidden="true">&#9876;</span>
+                        Death & Apotheosis
+                    </h3>
+                    <div class="biography-card-content">${this.renderContent(biography.death)}</div>
+                </div>`;
         }
 
         if (biography.legacy) {
-            html += `<div class="biography-section"><h3>Legacy</h3>${this.renderContent(biography.legacy)}</div>`;
+            html += `
+                <div class="biography-card" ${this.getAnimationStyle()}>
+                    <h3 class="biography-card-title">
+                        <span class="card-icon" aria-hidden="true">&#127942;</span>
+                        Legacy
+                    </h3>
+                    <div class="biography-card-content">${this.renderContent(biography.legacy)}</div>
+                </div>`;
         }
 
-        html += '</section>';
+        html += '</div></section>';
         return html;
     }
 
@@ -175,20 +274,33 @@ class HeroRenderer {
      * Render deeds/quests/labors
      */
     renderDeeds(deeds) {
-        let html = '<section class="hero-deeds"><h2>⚔️ Heroic Deeds</h2>';
+        let html = `<section class="hero-deeds detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">&#9876;</span>
+                Heroic Deeds
+            </h2>`;
 
         // Sort by order if available
         const sortedDeeds = [...deeds].sort((a, b) => (a.order || 0) - (b.order || 0));
 
-        html += '<div class="deeds-timeline">';
+        html += '<div class="deeds-timeline" role="list">';
         sortedDeeds.forEach((deed, index) => {
             html += `
-                <div class="deed-card">
-                    <div class="deed-number">${deed.order || index + 1}</div>
-                    <h3>${deed.title}</h3>
-                    ${this.renderContent(deed.description)}
-                    ${deed.outcome ? `<p class="deed-outcome"><strong>Outcome:</strong> ${deed.outcome}</p>` : ''}
-                </div>
+                <article class="deed-card" role="listitem" style="--animation-delay: ${0.1 * index}s">
+                    <div class="deed-marker">
+                        <span class="deed-number">${deed.order || index + 1}</span>
+                    </div>
+                    <div class="deed-content">
+                        <h3 class="deed-title">${this.escapeHtml(deed.title)}</h3>
+                        <div class="deed-description">${this.renderContent(deed.description)}</div>
+                        ${deed.outcome ? `
+                            <div class="deed-outcome">
+                                <span class="outcome-label">Outcome:</span>
+                                <span class="outcome-value">${this.escapeHtml(deed.outcome)}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </article>
             `;
         });
         html += '</div></section>';
@@ -200,29 +312,60 @@ class HeroRenderer {
      * Render divine connections
      */
     renderDivineConnections(connections) {
-        let html = '<section class="divine-connections"><h2>✨ Divine Connections</h2>';
+        let html = `<section class="divine-connections detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">&#10024;</span>
+                Divine Connections
+            </h2>
+            <div class="connections-grid">`;
 
         if (connections.parentDivine) {
-            html += `<div class="connection-card"><h3>Divine Parent</h3><p>${connections.parentDivine}</p></div>`;
+            html += `
+                <div class="connection-card" ${this.getAnimationStyle()}>
+                    <div class="connection-icon" aria-hidden="true">&#9734;</div>
+                    <div class="connection-content">
+                        <h3 class="connection-title">Divine Parent</h3>
+                        <p class="connection-value">${this.escapeHtml(connections.parentDivine)}</p>
+                    </div>
+                </div>`;
         }
 
         if (connections.parentMortal) {
-            html += `<div class="connection-card"><h3>Mortal Parent</h3><p>${connections.parentMortal}</p></div>`;
+            html += `
+                <div class="connection-card" ${this.getAnimationStyle()}>
+                    <div class="connection-icon" aria-hidden="true">&#128101;</div>
+                    <div class="connection-content">
+                        <h3 class="connection-title">Mortal Parent</h3>
+                        <p class="connection-value">${this.escapeHtml(connections.parentMortal)}</p>
+                    </div>
+                </div>`;
         }
 
         if (connections.patron) {
-            html += `<div class="connection-card"><h3>Divine Patron</h3><p>${connections.patron}</p></div>`;
+            html += `
+                <div class="connection-card" ${this.getAnimationStyle()}>
+                    <div class="connection-icon" aria-hidden="true">&#128588;</div>
+                    <div class="connection-content">
+                        <h3 class="connection-title">Divine Patron</h3>
+                        <p class="connection-value">${this.escapeHtml(connections.patron)}</p>
+                    </div>
+                </div>`;
         }
 
         if (connections.adversaries && connections.adversaries.length > 0) {
-            html += '<div class="connection-card"><h3>Divine Adversaries</h3><ul>';
-            connections.adversaries.forEach(adv => {
-                html += `<li>${adv}</li>`;
-            });
-            html += '</ul></div>';
+            html += `
+                <div class="connection-card connection-card-wide" ${this.getAnimationStyle()}>
+                    <div class="connection-icon adversary-icon" aria-hidden="true">&#9888;</div>
+                    <div class="connection-content">
+                        <h3 class="connection-title">Divine Adversaries</h3>
+                        <ul class="adversaries-list">
+                            ${connections.adversaries.map(adv => `<li class="adversary-item">${this.escapeHtml(adv)}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>`;
         }
 
-        html += '</section>';
+        html += '</div></section>';
         return html;
     }
 
@@ -230,33 +373,47 @@ class HeroRenderer {
      * Render worship practices
      */
     renderWorship(worship) {
-        let html = '<section class="hero-worship"><h2>🙏 Worship & Veneration</h2>';
+        let html = `<section class="hero-worship detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">&#128588;</span>
+                Worship & Veneration
+            </h2>
+            <div class="worship-grid">`;
 
         if (worship.cultCenters && worship.cultCenters.length > 0) {
-            html += '<div class="worship-card"><h3>Cult Centers</h3><ul>';
-            worship.cultCenters.forEach(center => {
-                html += `<li>${center}</li>`;
-            });
-            html += '</ul></div>';
+            html += `
+                <div class="worship-card" ${this.getAnimationStyle()}>
+                    <div class="worship-card-icon" aria-hidden="true">&#127963;</div>
+                    <h3 class="worship-card-title">Cult Centers</h3>
+                    <ul class="worship-list">
+                        ${worship.cultCenters.map(center => `<li class="worship-item">${this.escapeHtml(center)}</li>`).join('')}
+                    </ul>
+                </div>`;
         }
 
         if (worship.festivals && worship.festivals.length > 0) {
-            html += '<div class="worship-card"><h3>Festivals</h3><ul>';
-            worship.festivals.forEach(festival => {
-                html += `<li>${festival}</li>`;
-            });
-            html += '</ul></div>';
+            html += `
+                <div class="worship-card" ${this.getAnimationStyle()}>
+                    <div class="worship-card-icon" aria-hidden="true">&#127881;</div>
+                    <h3 class="worship-card-title">Festivals</h3>
+                    <ul class="worship-list">
+                        ${worship.festivals.map(festival => `<li class="worship-item">${this.escapeHtml(festival)}</li>`).join('')}
+                    </ul>
+                </div>`;
         }
 
         if (worship.offerings && worship.offerings.length > 0) {
-            html += '<div class="worship-card"><h3>Ritual Offerings</h3><ul>';
-            worship.offerings.forEach(offering => {
-                html += `<li>${offering}</li>`;
-            });
-            html += '</ul></div>';
+            html += `
+                <div class="worship-card" ${this.getAnimationStyle()}>
+                    <div class="worship-card-icon" aria-hidden="true">&#127860;</div>
+                    <h3 class="worship-card-title">Ritual Offerings</h3>
+                    <ul class="worship-list">
+                        ${worship.offerings.map(offering => `<li class="worship-item">${this.escapeHtml(offering)}</li>`).join('')}
+                    </ul>
+                </div>`;
         }
 
-        html += '</section>';
+        html += '</div></section>';
         return html;
     }
 
@@ -264,21 +421,32 @@ class HeroRenderer {
      * Render legacy section
      */
     renderLegacy(legacy) {
-        let html = '<section class="hero-legacy"><h2>📜 Legacy</h2>';
+        let html = `<section class="hero-legacy detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">&#128220;</span>
+                Legacy
+            </h2>
+            <div class="legacy-grid">`;
 
         if (legacy.culturalImpact) {
-            html += `<div class="legacy-card"><h3>Cultural Impact</h3>${this.renderContent(legacy.culturalImpact)}</div>`;
+            html += `
+                <div class="legacy-card legacy-card-wide" ${this.getAnimationStyle()}>
+                    <h3 class="legacy-card-title">Cultural Impact</h3>
+                    <div class="legacy-card-content">${this.renderContent(legacy.culturalImpact)}</div>
+                </div>`;
         }
 
         if (legacy.modernReferences && legacy.modernReferences.length > 0) {
-            html += '<div class="legacy-card"><h3>Modern References</h3><ul>';
-            legacy.modernReferences.forEach(ref => {
-                html += `<li>${ref}</li>`;
-            });
-            html += '</ul></div>';
+            html += `
+                <div class="legacy-card" ${this.getAnimationStyle()}>
+                    <h3 class="legacy-card-title">Modern References</h3>
+                    <ul class="modern-refs-list">
+                        ${legacy.modernReferences.map(ref => `<li class="modern-ref-item">${this.escapeHtml(ref)}</li>`).join('')}
+                    </ul>
+                </div>`;
         }
 
-        html += '</section>';
+        html += '</div></section>';
         return html;
     }
 
@@ -288,10 +456,10 @@ class HeroRenderer {
     renderSections(sections) {
         let html = '';
 
-        sections.forEach(section => {
-            html += `<section class="content-section">`;
-            html += `<h2>${section.title}</h2>`;
-            html += this.renderContent(section.content);
+        sections.forEach((section, index) => {
+            html += `<section class="content-section detail-section" ${this.getAnimationStyle()}>`;
+            html += `<h2 class="section-title">${this.escapeHtml(section.title)}</h2>`;
+            html += `<div class="section-prose">${this.renderContent(section.content)}</div>`;
             html += `</section>`;
         });
 
@@ -303,9 +471,9 @@ class HeroRenderer {
      */
     renderContent(content) {
         if (Array.isArray(content)) {
-            return content.map(p => `<p>${p}</p>`).join('');
+            return content.map(p => `<p>${this.escapeHtml(p)}</p>`).join('');
         } else if (typeof content === 'string') {
-            return `<p>${content}</p>`;
+            return `<p>${this.escapeHtml(content)}</p>`;
         }
         return '';
     }
@@ -314,20 +482,34 @@ class HeroRenderer {
      * Render sources section
      */
     renderSources(sources) {
-        let html = '<section class="sources-section"><h2>📚 Sources</h2><ul class="sources-list">';
+        let html = `<section class="sources-section detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">&#128218;</span>
+                References & Sources
+            </h2>
+            <ol class="sources-list" role="list">`;
 
-        sources.forEach(source => {
+        sources.forEach((source, index) => {
             if (typeof source === 'string') {
-                html += `<li>${source}</li>`;
+                html += `
+                    <li class="source-item" role="listitem">
+                        <span class="source-number">${index + 1}</span>
+                        <span class="source-text">${this.escapeHtml(source)}</span>
+                    </li>`;
             } else if (source.title) {
-                html += `<li><strong>${source.title}</strong>`;
-                if (source.author) html += ` by ${source.author}`;
-                if (source.date) html += ` (${source.date})`;
-                html += `</li>`;
+                html += `
+                    <li class="source-item source-item-detailed" role="listitem">
+                        <span class="source-number">${index + 1}</span>
+                        <div class="source-content">
+                            <cite class="source-title">${this.escapeHtml(source.title)}</cite>
+                            ${source.author ? `<span class="source-author">by ${this.escapeHtml(source.author)}</span>` : ''}
+                            ${source.date ? `<span class="source-date">(${this.escapeHtml(source.date)})</span>` : ''}
+                        </div>
+                    </li>`;
             }
         });
 
-        html += '</ul></section>';
+        html += '</ol></section>';
         return html;
     }
 
@@ -337,8 +519,8 @@ class HeroRenderer {
     renderEditButton(mythology, entityId) {
         return `
             <div class="edit-controls">
-                <button class="btn-edit" onclick="window.location.href='/admin/edit-hero.html?mythology=${mythology}&id=${entityId}'">
-                    ✏️ Edit Hero
+                <button class="btn-edit" onclick="window.location.href='/admin/edit-hero.html?mythology=${mythology}&id=${entityId}'" aria-label="Edit this hero">
+                    <span aria-hidden="true">&#9998;</span> Edit Hero
                 </button>
             </div>
         `;

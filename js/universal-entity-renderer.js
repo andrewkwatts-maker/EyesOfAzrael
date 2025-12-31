@@ -263,15 +263,24 @@
             const colors = entity.colors || {};
             const primaryColor = colors.primary || '#667eea';
             const mythology = entity.mythology || entity.primaryMythology || 'unknown';
+            const mythologyLower = mythology.toLowerCase();
+
+            // Generate icon with fallback
+            const iconContent = this.renderIconWithFallback(entity.icon, this.config.icon, entity.name);
 
             return `
-                <div class="universal-grid-card"
+                <div class="entity-card universal-grid-card"
                      data-entity-id="${entity.id}"
                      data-entity-type="${this.entityType}"
-                     style="--entity-color: ${primaryColor}">
+                     data-mythology="${mythologyLower}"
+                     data-importance="${entity.importance || 50}"
+                     style="--entity-color: ${primaryColor}"
+                     tabindex="0"
+                     role="article"
+                     aria-label="${this.escapeHtml(entity.name || entity.title)}">
 
                     <div class="grid-card-header">
-                        ${entity.icon ? `<div class="grid-card-icon">${entity.icon}</div>` : `<div class="grid-card-icon">${this.config.icon}</div>`}
+                        <div class="grid-card-icon" aria-hidden="true">${iconContent}</div>
                     </div>
 
                     <div class="grid-card-body">
@@ -280,8 +289,8 @@
                         </h3>
 
                         <div class="grid-card-meta">
-                            <span class="entity-type-badge">${this.config.label}</span>
-                            <span class="mythology-badge">${this.capitalize(mythology)}</span>
+                            <span class="entity-type-badge" data-type="${this.entityType}">${this.config.icon} ${this.config.label}</span>
+                            <span class="mythology-badge" data-mythology="${mythologyLower}">${this.capitalize(mythology)}</span>
                         </div>
 
                         ${entity.shortDescription ? `
@@ -292,10 +301,38 @@
                     </div>
 
                     <div class="grid-card-footer">
-                        <a href="${this.getEntityUrl(entity)}" class="btn-view-details">View Details</a>
+                        <a href="${this.getEntityUrl(entity)}" class="btn-view-details" aria-label="View details for ${this.escapeHtml(entity.name || entity.title)}">View Details</a>
                     </div>
                 </div>
             `;
+        }
+
+        /**
+         * Render icon with fallback support
+         */
+        renderIconWithFallback(icon, fallbackIcon, entityName) {
+            if (!icon) {
+                // Use fallback icon or generate from entity name
+                return fallbackIcon || this.generateFallbackIcon(entityName);
+            }
+
+            // Check if icon is an SVG URL or path
+            if (typeof icon === 'string' && (icon.includes('.svg') || icon.includes('.png') || icon.includes('.jpg'))) {
+                return `<img src="${icon}" alt="" class="entity-icon-img" loading="lazy" onerror="this.parentElement.innerHTML='${fallbackIcon || '✨'}'">`;
+            }
+
+            // Emoji or text icon
+            return icon;
+        }
+
+        /**
+         * Generate fallback icon from entity name
+         */
+        generateFallbackIcon(name) {
+            if (!name) return '✨';
+            // Return first character as fallback
+            const firstChar = name.charAt(0).toUpperCase();
+            return `<span class="icon-fallback">${firstChar}</span>`;
         }
 
         /**
@@ -350,14 +387,20 @@
          */
         renderListItem(entity) {
             const mythology = entity.mythology || entity.primaryMythology || 'unknown';
+            const mythologyLower = mythology.toLowerCase();
+            const iconContent = this.renderIconWithFallback(entity.icon, this.config.icon, entity.name);
 
             return `
                 <div class="universal-list-item"
                      data-entity-id="${entity.id}"
-                     data-entity-type="${this.entityType}">
+                     data-entity-type="${this.entityType}"
+                     data-mythology="${mythologyLower}"
+                     tabindex="0"
+                     role="article"
+                     aria-label="${this.escapeHtml(entity.name || entity.title)}">
 
-                    <div class="list-item-icon">
-                        ${entity.icon || this.config.icon}
+                    <div class="list-item-icon" aria-hidden="true">
+                        ${iconContent}
                     </div>
 
                     <div class="list-item-content">
@@ -366,8 +409,8 @@
                                 <a href="${this.getEntityUrl(entity)}">${this.escapeHtml(entity.name || entity.title)}</a>
                             </h3>
                             <div class="list-item-badges">
-                                <span class="entity-type-badge">${this.config.label}</span>
-                                <span class="mythology-badge">${this.capitalize(mythology)}</span>
+                                <span class="entity-type-badge" data-type="${this.entityType}">${this.config.icon} ${this.config.label}</span>
+                                <span class="mythology-badge" data-mythology="${mythologyLower}">${this.capitalize(mythology)}</span>
                             </div>
                         </div>
 
@@ -379,7 +422,7 @@
                     </div>
 
                     <div class="list-item-actions">
-                        <a href="${this.getEntityUrl(entity)}" class="btn-view-details">View</a>
+                        <a href="${this.getEntityUrl(entity)}" class="btn-view-details" aria-label="View ${this.escapeHtml(entity.name || entity.title)}">View</a>
                     </div>
                 </div>
             `;

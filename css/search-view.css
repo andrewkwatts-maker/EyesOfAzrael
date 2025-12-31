@@ -494,11 +494,28 @@
     to { transform: rotate(360deg); }
 }
 
-/* Results grid (reuse existing entity-grid styles with enhancements) */
+/* Results grid - Fixed 4 columns on desktop */
 .universal-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 24px;
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Tablet: 3 columns */
+@media (max-width: 1200px) {
+    .universal-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Tablet portrait: 2 columns */
+@media (max-width: 900px) {
+    .universal-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .grid-card {
@@ -746,7 +763,7 @@
     }
 
     .universal-grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 16px;
     }
 
@@ -756,6 +773,101 @@
 
     .filter-actions button {
         width: 100%;
+    }
+}
+
+/* Mobile Portrait: 2 columns (375px-480px viewport) */
+@media (max-width: 480px) {
+    .universal-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 0.5rem;
+    }
+
+    .grid-card {
+        padding: 1rem;
+    }
+
+    .card-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .card-title {
+        font-size: 1rem;
+    }
+
+    .card-subtitle {
+        font-size: 0.8rem;
+        min-height: auto;
+    }
+
+    .card-badge {
+        padding: 2px 8px;
+        font-size: 9px;
+    }
+}
+
+/* Mobile Landscape: 4 columns */
+@media (max-width: 896px) and (orientation: landscape) {
+    .search-header h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .search-input-wrapper {
+        padding: 0.5rem;
+    }
+
+    .search-input {
+        font-size: 14px;
+        padding: 0.5rem 1rem;
+    }
+
+    .results-controls {
+        flex-direction: row;
+        padding: 0.5rem;
+    }
+
+    .universal-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 12px;
+    }
+
+    /* Compact cards for search results in landscape */
+    .grid-card {
+        padding: 12px;
+    }
+
+    .card-icon {
+        font-size: 32px;
+        margin-bottom: 8px;
+    }
+
+    .card-title {
+        font-size: 14px;
+        margin-bottom: 4px;
+    }
+
+    .card-subtitle {
+        font-size: 12px;
+        min-height: auto;
+        margin-bottom: 8px;
+        -webkit-line-clamp: 2;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .card-stats {
+        display: none;
+    }
+
+    .card-badge {
+        font-size: 9px;
+        padding: 2px 8px;
+        top: 8px;
+        right: 8px;
     }
 }
 

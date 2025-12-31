@@ -3,17 +3,34 @@
  * Displays comprehensive view of a single entity
  *
  * Features:
- * - Hero section with entity info
+ * - Hero section with entity info and animated icons
  * - All entity attributes organized by sections
- * - Related entities (using displayOptions)
+ * - Related entities (using displayOptions and relatedEntities schema)
+ * - Corpus queries with primary source citations
+ * - Linguistic information with etymology and alternate names
+ * - Geographical information with coordinates
+ * - Temporal information with dates and cultural periods
+ * - Cultural context with worship practices, festivals, and modern legacy
+ * - Metaphysical properties (elements, chakras, etc.)
+ * - Archetypes section
  * - Edit button for authenticated users
  * - Share/bookmark functionality
+ * - Smooth transitions and animations
+ * - Mobile-friendly responsive layout
+ * - Proper typography hierarchy
+ *
+ * Uses ComprehensiveMetadataRenderer for complete metadata coverage
+ *
+ * @version 2.0.0 - Enhanced metadata support
  */
 
 class EntityDetailViewer {
     constructor(options = {}) {
         this.db = options.db || (window.firebase && window.firebase.firestore());
         this.router = options.router;
+        this.animationDelay = 0;
+        // Check if ComprehensiveMetadataRenderer is available for extended rendering
+        this.useComprehensiveRenderer = options.useComprehensiveRenderer !== false && window.ComprehensiveMetadataRenderer;
     }
 
     /**
@@ -124,72 +141,407 @@ class EntityDetailViewer {
         const colors = entity.colors || {};
         const primaryColor = colors.primary || '#667eea';
         const secondaryColor = colors.secondary || '#764ba2';
+        this.animationDelay = 0;
 
         return `
-            <div class="entity-detail-viewer" data-entity-id="${entity.id}">
+            <article class="entity-detail-viewer" data-entity-id="${entity.id}" data-entity-type="${entityType}" data-mythology="${mythology}">
+                <!-- Breadcrumb Navigation -->
+                ${this.renderBreadcrumb(mythology, entityType, entity.name || entity.title)}
+
                 <!-- Hero Section -->
-                <div class="entity-hero" style="--primary-color: ${primaryColor}; --secondary-color: ${secondaryColor};">
-                    <div class="entity-hero-background"></div>
+                <header class="entity-hero-enhanced" style="--primary-color: ${primaryColor}; --secondary-color: ${secondaryColor}; --mythos-primary: ${primaryColor}; --mythos-secondary: ${secondaryColor};">
+                    <div class="entity-hero-background" aria-hidden="true"></div>
                     <div class="entity-hero-content">
-                        ${entity.icon ? `<div class="entity-icon-large">${entity.icon}</div>` : ''}
-                        <h1 class="entity-title">${this.escapeHtml(entity.name || entity.title)}</h1>
-                        ${entity.linguistic?.originalName ? `
-                            <div class="entity-subtitle">${this.escapeHtml(entity.linguistic.originalName)}</div>
+                        ${entity.icon ? `
+                            <div class="entity-icon-large" aria-hidden="true">
+                                <span class="icon-float">${entity.icon}</span>
+                            </div>
                         ` : ''}
+                        <div class="entity-hero-text">
+                            <h1 class="entity-title">${this.escapeHtml(entity.name || entity.title)}</h1>
+                            ${entity.linguistic?.originalName ? `
+                                <p class="entity-original-name" lang="${this.getLanguageCode(mythology)}">${this.escapeHtml(entity.linguistic.originalName)}</p>
+                            ` : ''}
+                            ${entity.linguistic?.pronunciation ? `
+                                <p class="entity-pronunciation">/${this.escapeHtml(entity.linguistic.pronunciation)}/</p>
+                            ` : ''}
 
-                        <div class="entity-badges">
-                            <span class="entity-type-badge">${this.getEntityTypeLabel(entityType)}</span>
-                            <span class="mythology-badge">${this.capitalize(mythology)}</span>
-                        </div>
+                            <div class="entity-badges" role="list" aria-label="Entity classification">
+                                <span class="entity-type-badge" role="listitem">${this.getEntityTypeLabel(entityType)}</span>
+                                <span class="mythology-badge mythology-${mythology}" role="listitem">${this.capitalize(mythology)}</span>
+                                ${entity.categories?.map(cat => `<span class="category-badge" role="listitem">${this.capitalize(cat)}</span>`).join('') || ''}
+                            </div>
 
-                        ${entity.shortDescription ? `
-                            <p class="entity-hero-description">${this.escapeHtml(entity.shortDescription)}</p>
-                        ` : ''}
+                            ${entity.shortDescription ? `
+                                <p class="entity-hero-description">${this.escapeHtml(entity.shortDescription)}</p>
+                            ` : ''}
 
-                        <!-- Actions -->
-                        <div class="entity-actions">
-                            <button class="btn-secondary" onclick="window.history.back()">
-                                ← Back
-                            </button>
-                            <button class="btn-secondary" onclick="navigator.share ? navigator.share({title: '${this.escapeHtml(entity.name)}', url: window.location.href}) : alert('Sharing not supported')">
-                                Share
-                            </button>
+                            ${entity.epithets && entity.epithets.length > 0 ? `
+                                <div class="entity-epithets" role="list" aria-label="Epithets">
+                                    ${entity.epithets.slice(0, 5).map(epithet => `
+                                        <span class="epithet-tag" role="listitem">${this.escapeHtml(epithet)}</span>
+                                    `).join('')}
+                                    ${entity.epithets.length > 5 ? `<span class="epithet-more">+${entity.epithets.length - 5} more</span>` : ''}
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
-                </div>
+                </header>
+
+                <!-- Quick Actions Bar -->
+                <nav class="entity-quick-actions" aria-label="Quick actions">
+                    <button class="quick-action-btn" onclick="window.history.back()" aria-label="Go back">
+                        <span class="action-icon" aria-hidden="true">&#8592;</span>
+                        <span class="action-text">Back</span>
+                    </button>
+                    <button class="quick-action-btn" onclick="EntityDetailViewer.shareEntity('${this.escapeHtml(entity.name || entity.title)}', '${entity.id}')" aria-label="Share this entity">
+                        <span class="action-icon" aria-hidden="true">&#128279;</span>
+                        <span class="action-text">Share</span>
+                    </button>
+                    <button class="quick-action-btn" onclick="EntityDetailViewer.bookmarkEntity('${entity.id}')" aria-label="Bookmark this entity">
+                        <span class="action-icon" aria-hidden="true">&#9733;</span>
+                        <span class="action-text">Bookmark</span>
+                    </button>
+                    ${entity.corpusQueries && entity.corpusQueries.length > 0 ? `
+                        <button class="quick-action-btn quick-action-primary" onclick="EntityDetailViewer.scrollToSection('corpus-section')" aria-label="View primary sources">
+                            <span class="action-icon" aria-hidden="true">&#128214;</span>
+                            <span class="action-text">Sources</span>
+                        </button>
+                    ` : ''}
+                </nav>
 
                 <!-- Main Content -->
-                <div class="entity-content">
-                    <!-- Primary Information -->
-                    ${this.renderPrimaryInfo(entity, entityType)}
+                <div class="entity-main-content">
+                    <!-- Primary Information Grid -->
+                    ${this.renderPrimaryInfoGrid(entity, entityType)}
 
                     <!-- Full Description -->
-                    ${entity.fullDescription ? `
-                        <div class="entity-section">
-                            <h2 class="section-title">Overview</h2>
-                            <div class="entity-description">
-                                ${this.escapeHtml(entity.fullDescription)}
+                    ${entity.fullDescription || entity.description ? `
+                        <section class="entity-section entity-section-description" ${this.getAnimationStyle()}>
+                            <h2 class="section-title">
+                                <span class="section-icon" aria-hidden="true">&#128220;</span>
+                                Overview
+                            </h2>
+                            <div class="entity-description prose">
+                                ${this.renderMarkdown(entity.fullDescription || entity.description)}
                             </div>
-                        </div>
+                        </section>
                     ` : ''}
 
                     <!-- Type-Specific Sections -->
                     ${this.renderTypeSpecificSections(entity, entityType)}
 
                     <!-- Linguistic Information -->
-                    ${entity.linguistic ? this.renderLinguisticInfo(entity.linguistic) : ''}
+                    ${entity.linguistic ? this.renderLinguisticInfo(entity.linguistic, entity) : ''}
+
+                    <!-- Geographical Information -->
+                    ${entity.geographical ? this.renderGeographicalInfo(entity.geographical) : ''}
+
+                    <!-- Temporal Information -->
+                    ${entity.temporal ? this.renderTemporalInfo(entity.temporal) : ''}
 
                     <!-- Cultural Context -->
-                    ${entity.culturalContext ? this.renderCulturalContext(entity.culturalContext) : ''}
+                    ${entity.cultural || entity.culturalContext ? this.renderCulturalContext(entity.cultural || entity.culturalContext) : ''}
 
-                    <!-- Related Entities -->
-                    ${Object.keys(relatedEntities).length > 0 ? this.renderRelatedEntities(relatedEntities, mythology) : ''}
+                    <!-- Metaphysical Properties -->
+                    ${entity.metaphysicalProperties ? this.renderMetaphysicalProperties(entity.metaphysicalProperties) : ''}
 
-                    <!-- Sources -->
+                    <!-- Archetypes -->
+                    ${entity.archetypes && entity.archetypes.length > 0 ? this.renderArchetypes(entity.archetypes) : ''}
+
+                    <!-- Corpus Queries / Primary Sources -->
+                    ${entity.corpusQueries ? this.renderCorpusQueries(entity.corpusQueries) : ''}
+
+                    <!-- Related Entities (from schema) -->
+                    ${entity.relatedEntities ? this.renderSchemaRelatedEntities(entity.relatedEntities, mythology) : ''}
+
+                    <!-- Related Entities (from displayOptions) -->
+                    ${Object.keys(relatedEntities).length > 0 ? this.renderRelatedEntities(relatedEntities, mythology, entityType) : ''}
+
+                    <!-- Sources & References -->
                     ${entity.sources ? this.renderSources(entity.sources) : ''}
+
+                    <!-- Metadata Footer -->
+                    ${this.renderMetadataFooter(entity)}
                 </div>
-            </div>
+            </article>
         `;
+    }
+
+    /**
+     * Render breadcrumb navigation
+     */
+    renderBreadcrumb(mythology, entityType, entityName) {
+        return `
+            <nav class="entity-breadcrumb" aria-label="Breadcrumb">
+                <ol class="breadcrumb-list">
+                    <li class="breadcrumb-item">
+                        <a href="#/" class="breadcrumb-link">Home</a>
+                    </li>
+                    <li class="breadcrumb-separator" aria-hidden="true">&#8250;</li>
+                    <li class="breadcrumb-item">
+                        <a href="#/mythology/${mythology}" class="breadcrumb-link">${this.capitalize(mythology)}</a>
+                    </li>
+                    <li class="breadcrumb-separator" aria-hidden="true">&#8250;</li>
+                    <li class="breadcrumb-item">
+                        <a href="#/mythology/${mythology}/${entityType}" class="breadcrumb-link">${this.getEntityTypeLabel(entityType)}s</a>
+                    </li>
+                    <li class="breadcrumb-separator" aria-hidden="true">&#8250;</li>
+                    <li class="breadcrumb-item breadcrumb-current" aria-current="page">
+                        ${this.escapeHtml(entityName)}
+                    </li>
+                </ol>
+            </nav>
+        `;
+    }
+
+    /**
+     * Render primary info as a grid
+     */
+    renderPrimaryInfoGrid(entity, entityType) {
+        const fields = this.getPrimaryFields(entityType);
+        const items = fields
+            .map(field => {
+                const value = this.getNestedValue(entity, field.path);
+                if (!value) return null;
+                return { ...field, value };
+            })
+            .filter(Boolean);
+
+        if (items.length === 0) return '';
+
+        return `
+            <section class="entity-section entity-section-attributes" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">&#10024;</span>
+                    Key Attributes
+                </h2>
+                <div class="entity-attributes-grid" role="list">
+                    ${items.map(item => `
+                        <div class="entity-attribute-card" role="listitem" ${this.getAnimationStyle()}>
+                            <div class="attribute-icon" aria-hidden="true">${item.icon || '&#9679;'}</div>
+                            <div class="attribute-content">
+                                <dt class="attribute-label">${item.label}</dt>
+                                <dd class="attribute-value">${this.formatAttributeValue(item.value)}</dd>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Format attribute value for display
+     */
+    formatAttributeValue(value) {
+        if (Array.isArray(value)) {
+            return value.map(v => `<span class="attribute-tag">${this.escapeHtml(v)}</span>`).join('');
+        }
+        return this.escapeHtml(String(value));
+    }
+
+    /**
+     * Get animation style with incremented delay
+     */
+    getAnimationStyle() {
+        const delay = this.animationDelay;
+        this.animationDelay += 0.05;
+        return `style="--animation-delay: ${delay}s"`;
+    }
+
+    /**
+     * Render corpus queries section
+     */
+    renderCorpusQueries(corpusQueries) {
+        if (!corpusQueries || corpusQueries.length === 0) return '';
+
+        return `
+            <section class="entity-section entity-section-corpus" id="corpus-section" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">&#128214;</span>
+                    Primary Sources
+                </h2>
+                <p class="section-description">
+                    References from ancient texts and scholarly sources
+                </p>
+                <div class="corpus-queries-list">
+                    ${corpusQueries.map((query, index) => `
+                        <article class="corpus-query-card" ${this.getAnimationStyle()}>
+                            <header class="corpus-query-header">
+                                <span class="corpus-source-icon" aria-hidden="true">${this.getSourceIcon(query.source)}</span>
+                                <div class="corpus-source-info">
+                                    <h3 class="corpus-source-title">${this.escapeHtml(query.source || 'Unknown Source')}</h3>
+                                    ${query.reference ? `<p class="corpus-reference">${this.escapeHtml(query.reference)}</p>` : ''}
+                                </div>
+                            </header>
+                            ${query.text ? `
+                                <blockquote class="corpus-query-text">
+                                    <p>${this.escapeHtml(query.text)}</p>
+                                </blockquote>
+                            ` : ''}
+                            ${query.context ? `
+                                <p class="corpus-query-context">${this.escapeHtml(query.context)}</p>
+                            ` : ''}
+                            <footer class="corpus-query-footer">
+                                ${query.date ? `<span class="corpus-date">${this.escapeHtml(query.date)}</span>` : ''}
+                                ${query.author ? `<span class="corpus-author">by ${this.escapeHtml(query.author)}</span>` : ''}
+                            </footer>
+                        </article>
+                    `).join('')}
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Get source icon based on source type
+     */
+    getSourceIcon(source) {
+        if (!source) return '&#128220;';
+        const s = source.toLowerCase();
+        if (s.includes('iliad') || s.includes('odyssey')) return '&#9875;';
+        if (s.includes('bible') || s.includes('testament')) return '&#10013;';
+        if (s.includes('veda') || s.includes('upanishad')) return '&#128329;';
+        if (s.includes('edda') || s.includes('norse')) return '&#9889;';
+        if (s.includes('egypt')) return '&#9765;';
+        if (s.includes('epic') || s.includes('saga')) return '&#9876;';
+        return '&#128214;';
+    }
+
+    /**
+     * Get language code for mythology
+     */
+    getLanguageCode(mythology) {
+        const codes = {
+            'greek': 'grc',
+            'egyptian': 'egy',
+            'norse': 'non',
+            'hindu': 'sa',
+            'celtic': 'cel',
+            'mesopotamian': 'akk',
+            'japanese': 'ja',
+            'chinese': 'zh'
+        };
+        return codes[mythology] || 'en';
+    }
+
+    /**
+     * Render metadata footer
+     */
+    renderMetadataFooter(entity) {
+        const hasMetadata = entity.createdAt || entity.updatedAt || entity.createdBy;
+        if (!hasMetadata) return '';
+
+        return `
+            <footer class="entity-metadata-footer">
+                <div class="metadata-item">
+                    <span class="metadata-label">Last updated:</span>
+                    <time class="metadata-value" datetime="${entity.updatedAt || entity.createdAt}">
+                        ${this.formatDate(entity.updatedAt || entity.createdAt)}
+                    </time>
+                </div>
+                ${entity.version ? `
+                    <div class="metadata-item">
+                        <span class="metadata-label">Version:</span>
+                        <span class="metadata-value">${entity.version}</span>
+                    </div>
+                ` : ''}
+            </footer>
+        `;
+    }
+
+    /**
+     * Format date for display
+     */
+    formatDate(dateValue) {
+        if (!dateValue) return 'Unknown';
+        try {
+            const date = dateValue.toDate ? dateValue.toDate() : new Date(dateValue);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch (e) {
+            return 'Unknown';
+        }
+    }
+
+    /**
+     * Render markdown-like text
+     */
+    renderMarkdown(text) {
+        if (!text) return '';
+        return text
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>')
+            .split('</p><p>')
+            .map(p => `<p>${p}</p>`)
+            .join('');
+    }
+
+    /**
+     * Static helper for sharing
+     */
+    static shareEntity(name, id) {
+        const url = window.location.href;
+        if (navigator.share) {
+            navigator.share({
+                title: name,
+                text: `Learn about ${name} in mythology`,
+                url: url
+            }).catch(console.error);
+        } else {
+            navigator.clipboard.writeText(url).then(() => {
+                EntityDetailViewer.showToast('Link copied to clipboard!');
+            }).catch(() => {
+                alert('Could not copy link. URL: ' + url);
+            });
+        }
+    }
+
+    /**
+     * Static helper for bookmarking
+     */
+    static bookmarkEntity(id) {
+        const bookmarks = JSON.parse(localStorage.getItem('entityBookmarks') || '[]');
+        if (bookmarks.includes(id)) {
+            EntityDetailViewer.showToast('Already bookmarked!');
+        } else {
+            bookmarks.push(id);
+            localStorage.setItem('entityBookmarks', JSON.stringify(bookmarks));
+            EntityDetailViewer.showToast('Bookmarked!');
+        }
+    }
+
+    /**
+     * Static helper to scroll to section
+     */
+    static scrollToSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    /**
+     * Show toast notification
+     */
+    static showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'entity-toast';
+        toast.textContent = message;
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
     }
 
     /**
@@ -270,64 +622,640 @@ class EntityDetailViewer {
     }
 
     /**
-     * Render linguistic information
+     * Render linguistic information (enhanced)
      */
-    renderLinguisticInfo(linguistic) {
+    renderLinguisticInfo(linguistic, entity = {}) {
         if (!linguistic || Object.keys(linguistic).length === 0) return '';
 
+        // Also check for alternate names from entity root
+        const alternateNames = linguistic.alternativeNames || linguistic.alternateNames || entity.alternateNames || entity.alternativeNames || [];
+        const epithets = entity.epithets || [];
+
         return `
-            <div class="entity-section">
-                <h2 class="section-title">Linguistic Information</h2>
-                <div class="entity-attributes-grid">
+            <section class="entity-section entity-section-linguistic" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">&#127759;</span>
+                    Linguistic Information
+                </h2>
+                <div class="linguistic-grid">
                     ${linguistic.originalName ? `
-                        <div class="entity-attribute">
-                            <div class="attribute-label">Original Name:</div>
-                            <div class="attribute-value">${this.escapeHtml(linguistic.originalName)}</div>
+                        <div class="linguistic-card">
+                            <dt class="linguistic-label">Original Name</dt>
+                            <dd class="linguistic-value linguistic-original">${this.escapeHtml(linguistic.originalName)}</dd>
                         </div>
                     ` : ''}
-                    ${linguistic.etymology ? `
-                        <div class="entity-attribute">
-                            <div class="attribute-label">Etymology:</div>
-                            <div class="attribute-value">${this.escapeHtml(linguistic.etymology)}</div>
+                    ${linguistic.transliteration ? `
+                        <div class="linguistic-card">
+                            <dt class="linguistic-label">Transliteration</dt>
+                            <dd class="linguistic-value">${this.escapeHtml(linguistic.transliteration)}</dd>
                         </div>
                     ` : ''}
                     ${linguistic.pronunciation ? `
-                        <div class="entity-attribute">
-                            <div class="attribute-label">Pronunciation:</div>
-                            <div class="attribute-value">${this.escapeHtml(linguistic.pronunciation)}</div>
+                        <div class="linguistic-card">
+                            <dt class="linguistic-label">Pronunciation</dt>
+                            <dd class="linguistic-value linguistic-pronunciation">${this.escapeHtml(linguistic.pronunciation)}</dd>
+                        </div>
+                    ` : ''}
+                    ${linguistic.languageCode || linguistic.originalScript ? `
+                        <div class="linguistic-card">
+                            <dt class="linguistic-label">Language/Script</dt>
+                            <dd class="linguistic-value">${this.escapeHtml(linguistic.originalScript || linguistic.languageCode)}</dd>
+                        </div>
+                    ` : ''}
+                    ${linguistic.etymology ? `
+                        <div class="linguistic-card linguistic-card-wide">
+                            <dt class="linguistic-label">Etymology</dt>
+                            <dd class="linguistic-value">${this.formatEtymology(linguistic.etymology)}</dd>
+                        </div>
+                    ` : ''}
+                    ${alternateNames.length > 0 ? `
+                        <div class="linguistic-card linguistic-card-wide">
+                            <dt class="linguistic-label">Alternate Names</dt>
+                            <dd class="linguistic-value linguistic-alternates">
+                                ${alternateNames.map(name => {
+                                    if (typeof name === 'object') {
+                                        return `<span class="alternate-name" title="${this.escapeHtml(name.context || name.language || '')}">${this.escapeHtml(name.name)}</span>`;
+                                    }
+                                    return `<span class="alternate-name">${this.escapeHtml(name)}</span>`;
+                                }).join('')}
+                            </dd>
+                        </div>
+                    ` : ''}
+                    ${epithets.length > 0 ? `
+                        <div class="linguistic-card linguistic-card-wide">
+                            <dt class="linguistic-label">Epithets &amp; Titles</dt>
+                            <dd class="linguistic-value linguistic-epithets">
+                                ${epithets.map(epithet => `<span class="epithet-tag">${this.escapeHtml(epithet)}</span>`).join('')}
+                            </dd>
+                        </div>
+                    ` : ''}
+                    ${linguistic.cognates && linguistic.cognates.length > 0 ? `
+                        <div class="linguistic-card linguistic-card-wide">
+                            <dt class="linguistic-label">Related Names in Other Traditions</dt>
+                            <dd class="linguistic-value linguistic-cognates">
+                                ${linguistic.cognates.map(cog => `
+                                    <span class="cognate-item">
+                                        <span class="cognate-name">${this.escapeHtml(cog.name || cog.word)}</span>
+                                        ${cog.tradition || cog.language ? `<span class="cognate-tradition">(${this.escapeHtml(cog.tradition || cog.language)})</span>` : ''}
+                                        ${cog.meaning ? `<span class="cognate-meaning"> - ${this.escapeHtml(cog.meaning)}</span>` : ''}
+                                    </span>
+                                `).join('')}
+                            </dd>
                         </div>
                     ` : ''}
                 </div>
-            </div>
+            </section>
         `;
     }
 
     /**
-     * Render cultural context
+     * Render geographical information
+     */
+    renderGeographicalInfo(geographical) {
+        if (!geographical || Object.keys(geographical).length === 0) return '';
+
+        const hasData = geographical.originPoint || geographical.primaryLocation ||
+                       geographical.region || geographical.culturalArea ||
+                       geographical.modernCountries?.length > 0;
+
+        if (!hasData) return '';
+
+        const location = geographical.originPoint || geographical.primaryLocation;
+        const coords = location?.coordinates;
+
+        return `
+            <section class="entity-section entity-section-geographical" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">&#127757;</span>
+                    Geographical Information
+                </h2>
+                <div class="geographical-grid">
+                    ${location ? `
+                        <div class="location-card" ${this.getAnimationStyle()}>
+                            ${location.name ? `<h3 class="location-name">${this.escapeHtml(location.name)}</h3>` : ''}
+                            ${location.description ? `<p class="location-description">${this.escapeHtml(location.description)}</p>` : ''}
+                            ${location.type ? `<span class="location-type-badge">${this.escapeHtml(location.type)}</span>` : ''}
+                            ${location.significance ? `<p class="location-significance"><em>${this.escapeHtml(location.significance)}</em></p>` : ''}
+                            ${coords && (coords.latitude !== undefined || coords.lat !== undefined) ? `
+                                <div class="coordinates-display">
+                                    <span class="coord-icon" aria-hidden="true">&#128205;</span>
+                                    <span class="coord-value">${this.formatCoordinates(coords)}</span>
+                                    ${coords.accuracy ? `<span class="coord-accuracy">(${this.escapeHtml(coords.accuracy)})</span>` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+
+                    <div class="geo-details-grid">
+                        ${geographical.region ? `
+                            <div class="geo-item">
+                                <dt class="geo-label">Region</dt>
+                                <dd class="geo-value">${this.escapeHtml(geographical.region)}</dd>
+                            </div>
+                        ` : ''}
+                        ${geographical.culturalArea ? `
+                            <div class="geo-item">
+                                <dt class="geo-label">Cultural Area</dt>
+                                <dd class="geo-value">${this.escapeHtml(geographical.culturalArea)}</dd>
+                            </div>
+                        ` : ''}
+                        ${geographical.modernCountries?.length > 0 ? `
+                            <div class="geo-item">
+                                <dt class="geo-label">Modern Countries</dt>
+                                <dd class="geo-value">${geographical.modernCountries.map(c => this.escapeHtml(c)).join(', ')}</dd>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Format coordinates for display
+     */
+    formatCoordinates(coords) {
+        const lat = coords.latitude ?? coords.lat;
+        const lng = coords.longitude ?? coords.lng;
+        if (lat === undefined || lng === undefined) return 'Unknown';
+
+        const latDir = lat >= 0 ? 'N' : 'S';
+        const lngDir = lng >= 0 ? 'E' : 'W';
+        return `${Math.abs(lat).toFixed(2)}${latDir}, ${Math.abs(lng).toFixed(2)}${lngDir}`;
+    }
+
+    /**
+     * Render temporal information
+     */
+    renderTemporalInfo(temporal) {
+        if (!temporal || Object.keys(temporal).length === 0) return '';
+
+        const hasData = temporal.mythologicalDate || temporal.historicalDate ||
+                       temporal.firstAttestation || temporal.peakPopularity ||
+                       temporal.culturalPeriod;
+
+        if (!hasData) return '';
+
+        return `
+            <section class="entity-section entity-section-temporal" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">&#128197;</span>
+                    Temporal Information
+                </h2>
+                <div class="temporal-grid">
+                    ${temporal.mythologicalDate ? `
+                        <div class="temporal-card">
+                            <dt class="temporal-label">Mythological Date</dt>
+                            <dd class="temporal-value">${this.formatDateObject(temporal.mythologicalDate)}</dd>
+                        </div>
+                    ` : ''}
+                    ${temporal.historicalDate ? `
+                        <div class="temporal-card">
+                            <dt class="temporal-label">Historical Date</dt>
+                            <dd class="temporal-value">${this.formatDateObject(temporal.historicalDate)}</dd>
+                        </div>
+                    ` : ''}
+                    ${temporal.culturalPeriod ? `
+                        <div class="temporal-card">
+                            <dt class="temporal-label">Cultural Period</dt>
+                            <dd class="temporal-value">${this.escapeHtml(temporal.culturalPeriod)}</dd>
+                        </div>
+                    ` : ''}
+                    ${temporal.firstAttestation ? `
+                        <div class="temporal-card temporal-card-wide">
+                            <dt class="temporal-label">First Attestation</dt>
+                            <dd class="temporal-value">
+                                ${temporal.firstAttestation.date?.display ? `<span class="attestation-date">${this.escapeHtml(temporal.firstAttestation.date.display)}</span>` : ''}
+                                ${temporal.firstAttestation.source ? ` - <span class="attestation-source">${this.escapeHtml(temporal.firstAttestation.source)}</span>` : ''}
+                                ${temporal.firstAttestation.type ? `<span class="attestation-type badge">${this.escapeHtml(temporal.firstAttestation.type)}</span>` : ''}
+                                ${temporal.firstAttestation.confidence ? `<span class="attestation-confidence badge confidence-${temporal.firstAttestation.confidence}">${this.escapeHtml(temporal.firstAttestation.confidence)}</span>` : ''}
+                            </dd>
+                        </div>
+                    ` : ''}
+                    ${temporal.peakPopularity ? `
+                        <div class="temporal-card temporal-card-wide">
+                            <dt class="temporal-label">Peak Popularity</dt>
+                            <dd class="temporal-value">
+                                ${temporal.peakPopularity.display ? this.escapeHtml(temporal.peakPopularity.display) : ''}
+                                ${temporal.peakPopularity.context ? `<p class="peak-context">${this.escapeHtml(temporal.peakPopularity.context)}</p>` : ''}
+                            </dd>
+                        </div>
+                    ` : ''}
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Format date object for display
+     */
+    formatDateObject(dateObj) {
+        if (!dateObj) return '';
+        if (dateObj.display) return this.escapeHtml(dateObj.display);
+        if (dateObj.start?.display && dateObj.end?.display) {
+            return `${this.escapeHtml(dateObj.start.display)} - ${this.escapeHtml(dateObj.end.display)}`;
+        }
+        if (dateObj.year) {
+            const yearStr = dateObj.year < 0 ? `${Math.abs(dateObj.year)} BCE` : `${dateObj.year} CE`;
+            return dateObj.circa ? `c. ${yearStr}` : yearStr;
+        }
+        return '';
+    }
+
+    /**
+     * Render metaphysical properties
+     */
+    renderMetaphysicalProperties(metaphysical) {
+        if (!metaphysical || Object.keys(metaphysical).length === 0) return '';
+
+        const hasData = metaphysical.primaryElement || metaphysical.element ||
+                       metaphysical.domains?.length > 0 || metaphysical.energyType ||
+                       metaphysical.chakra || metaphysical.planet || metaphysical.zodiac?.length > 0 ||
+                       metaphysical.sefirot?.length > 0;
+
+        if (!hasData) return '';
+
+        return `
+            <section class="entity-section entity-section-metaphysical" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">&#10024;</span>
+                    Metaphysical Properties
+                </h2>
+                <div class="metaphysical-grid">
+                    ${metaphysical.primaryElement || metaphysical.element ? `
+                        <div class="metaphysical-card element-${(metaphysical.primaryElement || metaphysical.element).toLowerCase()}">
+                            <dt class="metaphysical-label">Element</dt>
+                            <dd class="metaphysical-value">${this.capitalize(metaphysical.primaryElement || metaphysical.element)}</dd>
+                        </div>
+                    ` : ''}
+                    ${metaphysical.energyType ? `
+                        <div class="metaphysical-card">
+                            <dt class="metaphysical-label">Energy Type</dt>
+                            <dd class="metaphysical-value">${this.capitalize(metaphysical.energyType)}</dd>
+                        </div>
+                    ` : ''}
+                    ${metaphysical.chakra ? `
+                        <div class="metaphysical-card chakra-${metaphysical.chakra}">
+                            <dt class="metaphysical-label">Chakra</dt>
+                            <dd class="metaphysical-value">${this.formatChakra(metaphysical.chakra)}</dd>
+                        </div>
+                    ` : ''}
+                    ${metaphysical.planet ? `
+                        <div class="metaphysical-card">
+                            <dt class="metaphysical-label">Planet</dt>
+                            <dd class="metaphysical-value">${this.formatPlanet(metaphysical.planet)}</dd>
+                        </div>
+                    ` : ''}
+                    ${metaphysical.domains?.length > 0 ? `
+                        <div class="metaphysical-card metaphysical-card-wide">
+                            <dt class="metaphysical-label">Domains</dt>
+                            <dd class="metaphysical-value metaphysical-tags">
+                                ${metaphysical.domains.map(domain => `<span class="domain-tag">${this.escapeHtml(domain)}</span>`).join('')}
+                            </dd>
+                        </div>
+                    ` : ''}
+                    ${metaphysical.zodiac?.length > 0 ? `
+                        <div class="metaphysical-card">
+                            <dt class="metaphysical-label">Zodiac</dt>
+                            <dd class="metaphysical-value metaphysical-tags">
+                                ${metaphysical.zodiac.map(sign => `<span class="zodiac-tag">${this.formatZodiac(sign)}</span>`).join('')}
+                            </dd>
+                        </div>
+                    ` : ''}
+                    ${metaphysical.sefirot?.length > 0 ? `
+                        <div class="metaphysical-card">
+                            <dt class="metaphysical-label">Sefirot</dt>
+                            <dd class="metaphysical-value metaphysical-tags">
+                                ${metaphysical.sefirot.map(sefirah => `<span class="sefirah-tag">${this.capitalize(sefirah)}</span>`).join('')}
+                            </dd>
+                        </div>
+                    ` : ''}
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Format chakra name
+     */
+    formatChakra(chakra) {
+        const chakraMap = {
+            'root': 'Root (Muladhara)',
+            'sacral': 'Sacral (Svadhisthana)',
+            'solar-plexus': 'Solar Plexus (Manipura)',
+            'heart': 'Heart (Anahata)',
+            'throat': 'Throat (Vishuddha)',
+            'third-eye': 'Third Eye (Ajna)',
+            'crown': 'Crown (Sahasrara)'
+        };
+        return chakraMap[chakra] || this.capitalize(chakra);
+    }
+
+    /**
+     * Format planet name with symbol
+     */
+    formatPlanet(planet) {
+        const planetSymbols = {
+            'sun': '&#9737; Sun',
+            'moon': '&#9789; Moon',
+            'mercury': '&#9791; Mercury',
+            'venus': '&#9792; Venus',
+            'mars': '&#9794; Mars',
+            'jupiter': '&#9795; Jupiter',
+            'saturn': '&#9796; Saturn',
+            'uranus': '&#9797; Uranus',
+            'neptune': '&#9798; Neptune',
+            'pluto': '&#9799; Pluto'
+        };
+        return planetSymbols[planet?.toLowerCase()] || this.capitalize(planet);
+    }
+
+    /**
+     * Format zodiac sign with symbol
+     */
+    formatZodiac(sign) {
+        const zodiacSymbols = {
+            'aries': '&#9800; Aries',
+            'taurus': '&#9801; Taurus',
+            'gemini': '&#9802; Gemini',
+            'cancer': '&#9803; Cancer',
+            'leo': '&#9804; Leo',
+            'virgo': '&#9805; Virgo',
+            'libra': '&#9806; Libra',
+            'scorpio': '&#9807; Scorpio',
+            'sagittarius': '&#9808; Sagittarius',
+            'capricorn': '&#9809; Capricorn',
+            'aquarius': '&#9810; Aquarius',
+            'pisces': '&#9811; Pisces'
+        };
+        return zodiacSymbols[sign?.toLowerCase()] || this.capitalize(sign);
+    }
+
+    /**
+     * Render archetypes section
+     */
+    renderArchetypes(archetypes) {
+        if (!archetypes || archetypes.length === 0) return '';
+
+        return `
+            <section class="entity-section entity-section-archetypes" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">&#127917;</span>
+                    Mythological Archetypes
+                </h2>
+                <div class="archetypes-grid">
+                    ${archetypes.map(archetype => {
+                        const archetypeName = typeof archetype === 'string' ? archetype : archetype.name;
+                        const archetypeId = typeof archetype === 'string' ? archetype : archetype.id;
+                        return `
+                            <a href="#/archetypes/${this.escapeHtml(archetypeId)}" class="archetype-card" ${this.getAnimationStyle()}>
+                                <span class="archetype-icon" aria-hidden="true">&#127917;</span>
+                                <span class="archetype-name">${this.capitalize(archetypeName.replace(/-/g, ' '))}</span>
+                            </a>
+                        `;
+                    }).join('')}
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render related entities from schema (relatedEntities object)
+     */
+    renderSchemaRelatedEntities(relatedEntities, mythology) {
+        if (!relatedEntities || Object.keys(relatedEntities).length === 0) return '';
+
+        const categories = [
+            { key: 'deities', label: 'Related Deities', icon: '&#9734;' },
+            { key: 'heroes', label: 'Related Heroes', icon: '&#9876;' },
+            { key: 'creatures', label: 'Related Creatures', icon: '&#128009;' },
+            { key: 'places', label: 'Related Places', icon: '&#127968;' },
+            { key: 'items', label: 'Related Items', icon: '&#9876;' },
+            { key: 'concepts', label: 'Related Concepts', icon: '&#128161;' },
+            { key: 'archetypes', label: 'Related Archetypes', icon: '&#127917;' }
+        ];
+
+        const hasAnyRelated = categories.some(cat => relatedEntities[cat.key]?.length > 0);
+        if (!hasAnyRelated) return '';
+
+        return `
+            <section class="entity-section entity-section-schema-related" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">&#128279;</span>
+                    Connections
+                </h2>
+                <div class="schema-related-container">
+                    ${categories.map(cat => {
+                        const entities = relatedEntities[cat.key];
+                        if (!entities || entities.length === 0) return '';
+
+                        return `
+                            <div class="schema-related-group" ${this.getAnimationStyle()}>
+                                <h3 class="related-group-title">${cat.icon} ${cat.label}</h3>
+                                <div class="schema-related-grid">
+                                    ${entities.map(entity => `
+                                        <a href="#/mythology/${entity.mythology || mythology}/${cat.key.replace(/s$/, '')}/${entity.id}"
+                                           class="schema-related-card"
+                                           title="${this.escapeHtml(entity.relationship || '')}">
+                                            ${entity.icon ? `<span class="related-entity-icon">${entity.icon}</span>` : `<span class="related-entity-icon" aria-hidden="true">${cat.icon}</span>`}
+                                            <div class="related-entity-info">
+                                                <span class="related-entity-name">${this.escapeHtml(entity.name)}</span>
+                                                ${entity.relationship ? `<span class="related-entity-relationship">${this.escapeHtml(entity.relationship)}</span>` : ''}
+                                            </div>
+                                        </a>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Format etymology for display
+     */
+    formatEtymology(etymology) {
+        if (typeof etymology === 'string') {
+            return this.escapeHtml(etymology);
+        }
+        if (etymology.meaning) {
+            let result = `<strong>Meaning:</strong> ${this.escapeHtml(etymology.meaning)}`;
+            if (etymology.root) {
+                result += `<br><strong>Root:</strong> ${this.escapeHtml(etymology.root)}`;
+            }
+            if (etymology.language) {
+                result += `<br><strong>Language:</strong> ${this.escapeHtml(etymology.language)}`;
+            }
+            return result;
+        }
+        return '';
+    }
+
+    /**
+     * Render cultural context (enhanced for new schema)
      */
     renderCulturalContext(context) {
         if (!context || Object.keys(context).length === 0) return '';
 
+        const hasData = context.region || context.period || context.socialRole ||
+                       context.worshipPractices?.length > 0 || context.worshipCenters?.length > 0 ||
+                       context.festivals?.length > 0 || context.modernLegacy ||
+                       context.demographicAppeal?.length > 0;
+
+        if (!hasData) return '';
+
         return `
-            <div class="entity-section">
-                <h2 class="section-title">Cultural Context</h2>
-                <div class="entity-attributes-grid">
-                    ${context.region ? `
-                        <div class="entity-attribute">
-                            <div class="attribute-label">Region:</div>
-                            <div class="attribute-value">${this.escapeHtml(context.region)}</div>
+            <section class="entity-section entity-section-cultural" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">&#127963;</span>
+                    Cultural Context
+                </h2>
+                <div class="cultural-content-container">
+                    ${context.socialRole ? `
+                        <div class="cultural-highlight">
+                            <h3 class="cultural-subsection-title">Social Role</h3>
+                            <p class="cultural-social-role">${this.escapeHtml(context.socialRole)}</p>
                         </div>
                     ` : ''}
-                    ${context.period ? `
-                        <div class="entity-attribute">
-                            <div class="attribute-label">Time Period:</div>
-                            <div class="attribute-value">${this.escapeHtml(context.period)}</div>
+
+                    <div class="cultural-grid">
+                        ${context.region ? `
+                            <div class="cultural-card">
+                                <div class="cultural-icon" aria-hidden="true">&#127758;</div>
+                                <div class="cultural-content">
+                                    <dt class="cultural-label">Region</dt>
+                                    <dd class="cultural-value">${this.escapeHtml(context.region)}</dd>
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${context.period ? `
+                            <div class="cultural-card">
+                                <div class="cultural-icon" aria-hidden="true">&#128197;</div>
+                                <div class="cultural-content">
+                                    <dt class="cultural-label">Time Period</dt>
+                                    <dd class="cultural-value">${this.escapeHtml(context.period)}</dd>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    ${context.worshipPractices?.length > 0 ? `
+                        <div class="cultural-section">
+                            <h3 class="cultural-subsection-title">&#128722; Worship Practices</h3>
+                            <ul class="worship-practices-list">
+                                ${context.worshipPractices.map(practice => `
+                                    <li class="worship-practice-item">${this.escapeHtml(practice)}</li>
+                                `).join('')}
+                            </ul>
                         </div>
                     ` : ''}
+
+                    ${context.worshipCenters?.length > 0 ? `
+                        <div class="cultural-section">
+                            <h3 class="cultural-subsection-title">&#127963; Worship Centers</h3>
+                            <div class="cultural-tags">
+                                ${context.worshipCenters.map(c => `<span class="cultural-tag">${this.escapeHtml(c)}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${context.festivals?.length > 0 ? `
+                        <div class="cultural-section">
+                            <h3 class="cultural-subsection-title">&#127881; Festivals</h3>
+                            <div class="festivals-grid">
+                                ${context.festivals.map(f => {
+                                    if (typeof f === 'string') {
+                                        return `<div class="festival-card"><span class="festival-icon" aria-hidden="true">&#127881;</span> ${this.escapeHtml(f)}</div>`;
+                                    }
+                                    return `
+                                        <div class="festival-card">
+                                            <strong>${this.escapeHtml(f.name)}</strong>
+                                            ${f.date ? `<span class="festival-date">${this.escapeHtml(f.date)}</span>` : ''}
+                                            ${f.description ? `<p>${this.escapeHtml(f.description)}</p>` : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
                     ${context.significance ? `
-                        <div class="entity-attribute full-width">
-                            <div class="attribute-label">Cultural Significance:</div>
-                            <div class="attribute-value">${this.escapeHtml(context.significance)}</div>
+                        <div class="cultural-section">
+                            <h3 class="cultural-subsection-title">&#128161; Cultural Significance</h3>
+                            <p class="cultural-significance">${this.escapeHtml(context.significance)}</p>
+                        </div>
+                    ` : ''}
+
+                    ${context.demographicAppeal?.length > 0 ? `
+                        <div class="cultural-section">
+                            <h3 class="cultural-subsection-title">&#128101; Demographic Appeal</h3>
+                            <ul class="demographic-list">
+                                ${context.demographicAppeal.map(demo => `
+                                    <li class="demographic-item">${this.escapeHtml(demo)}</li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+
+                    ${this.renderModernLegacy(context.modernLegacy)}
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render modern legacy section
+     */
+    renderModernLegacy(legacy) {
+        if (!legacy) return '';
+
+        if (typeof legacy === 'string') {
+            return `
+                <div class="cultural-section">
+                    <h3 class="cultural-subsection-title">&#127760; Modern Legacy</h3>
+                    <p>${this.escapeHtml(legacy)}</p>
+                </div>
+            `;
+        }
+
+        const hasData = legacy.literature || legacy.philosophy || legacy.education ||
+                       legacy.art || legacy.popCulture || legacy.references?.length > 0;
+        if (!hasData) return '';
+
+        return `
+            <div class="cultural-section">
+                <h3 class="cultural-subsection-title">&#127760; Modern Legacy</h3>
+                <div class="legacy-grid">
+                    ${legacy.literature ? `
+                        <div class="legacy-item">
+                            <dt class="legacy-label">Literature</dt>
+                            <dd class="legacy-value">${this.escapeHtml(legacy.literature)}</dd>
+                        </div>
+                    ` : ''}
+                    ${legacy.philosophy ? `
+                        <div class="legacy-item">
+                            <dt class="legacy-label">Philosophy</dt>
+                            <dd class="legacy-value">${this.escapeHtml(legacy.philosophy)}</dd>
+                        </div>
+                    ` : ''}
+                    ${legacy.education ? `
+                        <div class="legacy-item">
+                            <dt class="legacy-label">Education</dt>
+                            <dd class="legacy-value">${this.escapeHtml(legacy.education)}</dd>
+                        </div>
+                    ` : ''}
+                    ${legacy.art ? `
+                        <div class="legacy-item">
+                            <dt class="legacy-label">Art</dt>
+                            <dd class="legacy-value">${this.escapeHtml(legacy.art)}</dd>
+                        </div>
+                    ` : ''}
+                    ${legacy.popCulture ? `
+                        <div class="legacy-item">
+                            <dt class="legacy-label">Pop Culture</dt>
+                            <dd class="legacy-value">${this.escapeHtml(legacy.popCulture)}</dd>
                         </div>
                     ` : ''}
                 </div>
@@ -338,25 +1266,66 @@ class EntityDetailViewer {
     /**
      * Render related entities
      */
-    renderRelatedEntities(relatedEntities, mythology) {
+    renderRelatedEntities(relatedEntities, mythology, entityType) {
         return `
-            <div class="entity-section">
-                <h2 class="section-title">Related Entities</h2>
-                ${Object.entries(relatedEntities).map(([type, data]) => `
-                    <div class="related-entities-group">
-                        <h3 class="related-group-title">${data.label}</h3>
-                        <div class="related-entities-list">
-                            ${data.entities.map(entity => `
-                                <a href="#/mythology/${mythology}/${type}/${entity.id}" class="related-entity-card">
-                                    ${entity.icon ? `<span class="related-entity-icon">${entity.icon}</span>` : ''}
-                                    <span class="related-entity-name">${this.escapeHtml(entity.name || entity.title)}</span>
-                                </a>
-                            `).join('')}
+            <section class="entity-section entity-section-related" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">&#128279;</span>
+                    Related Entities
+                </h2>
+                <div class="related-entities-container">
+                    ${Object.entries(relatedEntities).map(([type, data]) => `
+                        <div class="related-entities-group" ${this.getAnimationStyle()}>
+                            <h3 class="related-group-title">${data.label}</h3>
+                            <div class="related-entities-grid" role="list">
+                                ${data.entities.map(entity => `
+                                    <a href="#/mythology/${mythology}/${type}/${entity.id}"
+                                       class="related-entity-card"
+                                       role="listitem"
+                                       aria-label="View ${this.escapeHtml(entity.name || entity.title)}">
+                                        <div class="related-entity-icon" aria-hidden="true">
+                                            ${entity.icon || this.getDefaultIcon(type)}
+                                        </div>
+                                        <div class="related-entity-info">
+                                            <span class="related-entity-name">${this.escapeHtml(entity.name || entity.title)}</span>
+                                            ${entity.shortDescription ? `
+                                                <span class="related-entity-desc">${this.truncate(entity.shortDescription, 60)}</span>
+                                            ` : ''}
+                                        </div>
+                                        <span class="related-entity-arrow" aria-hidden="true">&#8594;</span>
+                                    </a>
+                                `).join('')}
+                            </div>
                         </div>
-                    </div>
-                `).join('')}
-            </div>
+                    `).join('')}
+                </div>
+            </section>
         `;
+    }
+
+    /**
+     * Get default icon for entity type
+     */
+    getDefaultIcon(type) {
+        const icons = {
+            deity: '&#9734;',
+            hero: '&#9876;',
+            creature: '&#128009;',
+            place: '&#127968;',
+            item: '&#9876;',
+            concept: '&#128161;',
+            ritual: '&#128722;',
+            text: '&#128220;'
+        };
+        return icons[type] || '&#9679;';
+    }
+
+    /**
+     * Truncate text
+     */
+    truncate(text, maxLength) {
+        if (!text || text.length <= maxLength) return this.escapeHtml(text || '');
+        return this.escapeHtml(text.substring(0, maxLength)) + '...';
     }
 
     /**
@@ -366,14 +1335,37 @@ class EntityDetailViewer {
         if (!sources || sources.length === 0) return '';
 
         return `
-            <div class="entity-section">
-                <h2 class="section-title">Sources</h2>
-                <ul class="sources-list">
-                    ${sources.map(source => `
-                        <li class="source-item">${this.escapeHtml(source)}</li>
-                    `).join('')}
-                </ul>
-            </div>
+            <section class="entity-section entity-section-sources" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">&#128218;</span>
+                    References & Sources
+                </h2>
+                <ol class="sources-list" role="list">
+                    ${sources.map((source, index) => {
+                        if (typeof source === 'string') {
+                            return `
+                                <li class="source-item" role="listitem">
+                                    <span class="source-number">${index + 1}</span>
+                                    <span class="source-text">${this.escapeHtml(source)}</span>
+                                </li>
+                            `;
+                        }
+                        return `
+                            <li class="source-item source-item-detailed" role="listitem">
+                                <span class="source-number">${index + 1}</span>
+                                <div class="source-content">
+                                    ${source.title ? `<cite class="source-title">${this.escapeHtml(source.title)}</cite>` : ''}
+                                    ${source.author ? `<span class="source-author">by ${this.escapeHtml(source.author)}</span>` : ''}
+                                    ${source.date || source.year ? `<span class="source-date">(${this.escapeHtml(source.date || source.year)})</span>` : ''}
+                                    ${source.publisher ? `<span class="source-publisher">${this.escapeHtml(source.publisher)}</span>` : ''}
+                                    ${source.url ? `<a href="${this.escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer" class="source-link">View Source &#8599;</a>` : ''}
+                                    ${source.citation ? `<p class="source-citation">${this.escapeHtml(source.citation)}</p>` : ''}
+                                </div>
+                            </li>
+                        `;
+                    }).join('')}
+                </ol>
+            </section>
         `;
     }
 
@@ -441,20 +1433,53 @@ class EntityDetailViewer {
     getPrimaryFields(entityType) {
         const fieldMap = {
             'deity': [
-                { label: 'Domains', path: 'domains' },
-                { label: 'Symbols', path: 'symbols' },
-                { label: 'Element', path: 'element' },
-                { label: 'Gender', path: 'gender' }
+                { label: 'Domains', path: 'domains', icon: '&#127760;' },
+                { label: 'Symbols', path: 'symbols', icon: '&#10024;' },
+                { label: 'Element', path: 'element', icon: '&#128293;' },
+                { label: 'Gender', path: 'gender', icon: '&#9892;' },
+                { label: 'Sacred Animals', path: 'sacredAnimals', icon: '&#128038;' },
+                { label: 'Sacred Plants', path: 'sacredPlants', icon: '&#127793;' }
             ],
             'hero': [
-                { label: 'Parentage', path: 'parentage' },
-                { label: 'Legacy', path: 'legacy' },
-                { label: 'Era', path: 'era' }
+                { label: 'Title', path: 'title', icon: '&#128081;' },
+                { label: 'Parentage', path: 'parentage', icon: '&#128106;' },
+                { label: 'Birthplace', path: 'birthplace', icon: '&#127968;' },
+                { label: 'Era', path: 'era', icon: '&#128197;' },
+                { label: 'Legacy', path: 'legacy', icon: '&#127942;' },
+                { label: 'Weapons', path: 'weapons', icon: '&#9876;' }
             ],
             'creature': [
-                { label: 'Type', path: 'type' },
-                { label: 'Habitat', path: 'habitat' },
-                { label: 'Abilities', path: 'abilities' }
+                { label: 'Classification', path: 'classification', icon: '&#128195;' },
+                { label: 'Habitat', path: 'habitat', icon: '&#127966;' },
+                { label: 'Abilities', path: 'abilities', icon: '&#9889;' },
+                { label: 'Weaknesses', path: 'weaknesses', icon: '&#128683;' },
+                { label: 'Origin', path: 'origin', icon: '&#128218;' }
+            ],
+            'ritual': [
+                { label: 'Type', path: 'ritualType', icon: '&#128722;' },
+                { label: 'Purpose', path: 'purpose', icon: '&#127919;' },
+                { label: 'Frequency', path: 'timing.frequency', icon: '&#128197;' },
+                { label: 'Participants', path: 'participants', icon: '&#128101;' }
+            ],
+            'cosmology': [
+                { label: 'Type', path: 'cosmologyType', icon: '&#127760;' },
+                { label: 'Realms', path: 'structure.realms', icon: '&#127752;' },
+                { label: 'Era', path: 'era', icon: '&#128197;' }
+            ],
+            'text': [
+                { label: 'Author', path: 'author', icon: '&#9997;' },
+                { label: 'Period', path: 'period', icon: '&#128197;' },
+                { label: 'Language', path: 'language', icon: '&#127759;' },
+                { label: 'Genre', path: 'genre', icon: '&#128218;' }
+            ],
+            'herb': [
+                { label: 'Uses', path: 'uses', icon: '&#127807;' },
+                { label: 'Properties', path: 'properties', icon: '&#9879;' },
+                { label: 'Habitat', path: 'habitat', icon: '&#127966;' }
+            ],
+            'symbol': [
+                { label: 'Meanings', path: 'meanings', icon: '&#128161;' },
+                { label: 'Associated Deities', path: 'associatedDeities', icon: '&#9734;' }
             ]
         };
 

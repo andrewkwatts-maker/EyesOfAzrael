@@ -292,30 +292,56 @@ svg {
     }
 }
 
-/* Single column for very narrow screens - moved outside to avoid nesting issues */
+/* Mobile Portrait: 2 columns (375px-480px viewport) */
 @media (max-width: 480px) {
     .grid,
     .deity-grid,
     .mythology-grid,
     .universal-grid {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
         padding: 0.5rem;
     }
 
     .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    /* Landing page specific - ensure proper column count */
+    /* Landing page specific - 2 columns for touch-friendly browsing */
     .landing-category-grid {
-        grid-template-columns: 1fr !important;
-        gap: 12px;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px;
     }
 
     .landing-features-grid {
-        grid-template-columns: 1fr !important;
-        gap: 12px;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px;
+    }
+
+    /* Compact cards for 2-column mobile portrait */
+    .card,
+    .deity-card,
+    .mythology-card,
+    .universal-grid-card {
+        padding: 0.75rem;
+    }
+}
+
+/* Very small screens (below 360px): still 2 columns but tighter */
+@media (max-width: 360px) {
+    .grid,
+    .deity-grid,
+    .mythology-grid,
+    .universal-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.375rem;
+        padding: 0.375rem;
+    }
+
+    .landing-category-grid,
+    .landing-features-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px;
     }
 }
 
@@ -617,9 +643,11 @@ svg {
 
 /* ============================================
    MOBILE LANDSCAPE OPTIMIZATIONS
+   4-column grid layout for horizontal mobile viewing
+   Target: 667px-896px width with reduced height (< 500px)
    ============================================ */
 
-@media (max-width: 768px) and (orientation: landscape) {
+@media (max-width: 896px) and (orientation: landscape) {
     /* Reduce header height */
     .site-header {
         padding: 0.5rem 1rem;
@@ -627,27 +655,191 @@ svg {
 
     /* Optimize vertical space */
     .hero-section {
-        padding: 1.5rem 1rem;
+        padding: 1rem 1rem;
     }
 
     h1 {
-        font-size: 1.75rem;
-    }
-
-    h2 {
         font-size: 1.5rem;
     }
 
-    /* Horizontal scrolling for grids */
-    .universal-grid {
-        grid-template-columns: repeat(4, minmax(200px, 1fr));
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scroll-snap-type: x mandatory;
+    h2 {
+        font-size: 1.25rem;
     }
 
-    .universal-grid-card {
-        scroll-snap-align: start;
+    h3 {
+        font-size: 1.1rem;
+    }
+
+    /* Section spacing optimizations */
+    .section,
+    .intro,
+    .detail-section {
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Universal Grid - 4 columns in landscape */
+    .universal-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    /* Main grids - 4 columns in landscape */
+    .grid,
+    .deity-grid,
+    .mythology-grid,
+    .entity-grid,
+    .search-results-grid,
+    .browse-grid,
+    .results-grid,
+    .category-grid,
+    .entity-types-grid,
+    .stats-grid,
+    .features-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.75rem;
+    }
+
+    /* Home view mythology grid */
+    .home-view .mythology-grid,
+    .mythology-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.75rem;
+    }
+
+    /* Landing page grids */
+    .landing-category-grid,
+    .landing-features-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.75rem;
+    }
+
+    /* Entity results grid - 4 columns */
+    .entity-results-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.75rem;
+    }
+
+    /* Names grid for smaller items */
+    .names-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.5rem;
+    }
+
+    /* Compact card styling for landscape */
+    .card,
+    .deity-card,
+    .mythology-card,
+    .universal-grid-card,
+    .entity-card,
+    .feature-card,
+    .stat-card,
+    .grid-card,
+    .landing-category-card {
+        padding: 0.75rem;
+        border-radius: 10px;
+    }
+
+    /* Compact card icons */
+    .card-icon,
+    .deity-icon,
+    .mythology-card-icon,
+    .grid-card-icon,
+    .feature-icon,
+    .landing-category-icon {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Compact card titles */
+    .card h3,
+    .card-title,
+    .deity-card h3,
+    .mythology-card-title,
+    .grid-card-title,
+    .landing-category-name {
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Compact card descriptions */
+    .card p,
+    .card-subtitle,
+    .mythology-card-description,
+    .grid-card-description,
+    .landing-category-description {
+        font-size: 0.75rem;
+        line-height: 1.4;
+        -webkit-line-clamp: 2;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Compact badges and tags */
+    .tag,
+    .badge,
+    .entity-type-badge,
+    .mythology-badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.4rem;
+    }
+
+    /* Reduce vertical height of cards */
+    .universal-grid-card,
+    .mythology-card,
+    .deity-card {
+        min-height: auto;
+    }
+
+    /* Hide less important elements in landscape */
+    .card .description,
+    .grid-card-footer,
+    .card .attributes,
+    .mythology-card-arrow {
+        display: none;
+    }
+
+    /* Container adjustments */
+    main,
+    .container,
+    .view-container {
+        padding: 0.5rem;
+    }
+
+    /* Search container compact */
+    .search-container {
+        margin: 0.75rem auto;
+        padding: 0 0.5rem;
+    }
+
+    #searchBox {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Extra wide landscape phones (e.g., newer iPhones in landscape) */
+@media (min-width: 667px) and (max-width: 932px) and (max-height: 500px) and (orientation: landscape) {
+    /* Ensure 4 columns with better sizing */
+    .universal-grid,
+    .grid,
+    .deity-grid,
+    .mythology-grid,
+    .entity-grid,
+    .search-results-grid,
+    .browse-grid {
+        grid-template-columns: repeat(4, minmax(140px, 1fr)) !important;
+        gap: 0.75rem;
+    }
+
+    /* Card minimum width for readability */
+    .universal-grid-card,
+    .mythology-card,
+    .deity-card,
+    .card {
+        min-width: 140px;
     }
 }
 
