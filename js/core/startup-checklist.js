@@ -229,18 +229,35 @@ const StartupChecklist = {
      * @param {Object} results - Results from runAll()
      */
     showWarningBadge(results) {
-        // Only show if there are optional failures but no critical failures
-        if (results.optionalFailures.length === 0) return;
+        console.log('[WarningBadge] Starting showWarningBadge...');
+        console.log('[WarningBadge] Optional failures:', results.optionalFailures);
 
-        const header = document.querySelector('.header-actions') ||
-                      document.querySelector('.site-header');
+        // Only show if there are optional failures but no critical failures
+        if (results.optionalFailures.length === 0) {
+            console.log('[WarningBadge] No optional failures, skipping badge');
+            return;
+        }
+
+        // Try multiple selectors for the header
+        const headerSelectors = ['.header-actions', '.site-header', 'header', '.header'];
+        let header = null;
+
+        for (const selector of headerSelectors) {
+            header = document.querySelector(selector);
+            if (header) {
+                console.log('[WarningBadge] Found header with selector:', selector);
+                console.log('[WarningBadge] Header element:', header.tagName, header.className);
+                break;
+            }
+        }
 
         if (!header) {
-            console.warn('[Startup Check] Could not find header for warning badge');
+            console.warn('[WarningBadge] Could not find header with any selector:', headerSelectors);
             return;
         }
 
         // Create warning badge
+        console.log('[WarningBadge] Creating badge element...');
         const badge = document.createElement('button');
         badge.className = 'diagnostic-badge';
         badge.setAttribute('aria-label', `${results.optionalFailures.length} features unavailable`);
@@ -255,19 +272,42 @@ const StartupChecklist = {
             this._showWarningModal(results);
         });
 
-        // Insert badge before other header actions
-        // Note: querySelector finds elements anywhere in subtree, but insertBefore
-        // requires reference node to be a direct child. Check parentNode first.
-        const firstChild = header.querySelector('.icon-btn, button');
-        if (firstChild && firstChild.parentNode === header) {
-            header.insertBefore(badge, firstChild);
-        } else {
-            // Either no button found, or it's nested - just append
-            header.appendChild(badge);
+        // Wrap insertion in try-catch for safety
+        try {
+            // Look for a direct child button to insert before
+            const firstChild = header.querySelector('.icon-btn, button');
+            console.log('[WarningBadge] Looking for firstChild with selector ".icon-btn, button"');
+            console.log('[WarningBadge] firstChild found:', firstChild ? 'yes' : 'no');
+
+            if (firstChild) {
+                console.log('[WarningBadge] firstChild tag:', firstChild.tagName);
+                console.log('[WarningBadge] firstChild class:', firstChild.className);
+                console.log('[WarningBadge] firstChild.parentNode:', firstChild.parentNode?.tagName, firstChild.parentNode?.className);
+                console.log('[WarningBadge] header === firstChild.parentNode:', header === firstChild.parentNode);
+            }
+
+            if (firstChild && firstChild.parentNode === header) {
+                console.log('[WarningBadge] Inserting badge before firstChild (direct child)');
+                header.insertBefore(badge, firstChild);
+            } else {
+                console.log('[WarningBadge] Appending badge to header (no direct child found)');
+                header.appendChild(badge);
+            }
+            console.log('[WarningBadge] Badge inserted successfully');
+        } catch (error) {
+            console.error('[WarningBadge] Error inserting badge:', error);
+            console.error('[WarningBadge] Attempting fallback appendChild...');
+            try {
+                header.appendChild(badge);
+                console.log('[WarningBadge] Fallback appendChild succeeded');
+            } catch (fallbackError) {
+                console.error('[WarningBadge] Fallback also failed:', fallbackError);
+            }
         }
 
         // Add badge styles if not already present
         this._injectBadgeStyles();
+        console.log('[WarningBadge] showWarningBadge complete');
     },
 
     /**
