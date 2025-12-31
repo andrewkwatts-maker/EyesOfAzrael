@@ -353,6 +353,54 @@
             emitAppReady(`render-error:${route}`);
         });
 
+        // SAFETY TIMEOUT: Force content visibility after 5 seconds if first-render-complete never fires
+        // This prevents blank page scenarios due to race conditions or uncaught errors
+        const safetyTimeout = setTimeout(() => {
+            if (!loadingHidden) {
+                console.warn('[App Init] SAFETY TIMEOUT: first-render-complete not received after 5s, forcing visibility');
+
+                // Force main content to be visible
+                const mainContent = document.getElementById('main-content');
+                if (mainContent) {
+                    mainContent.style.setProperty('opacity', '1', 'important');
+                    mainContent.style.setProperty('display', 'block', 'important');
+                    mainContent.style.setProperty('visibility', 'visible', 'important');
+
+                    // Check if there's any content in main-content
+                    const hasContent = mainContent.children.length > 0 &&
+                        !mainContent.querySelector('.loading-container') &&
+                        !mainContent.querySelector('.spinner-container');
+
+                    if (!hasContent) {
+                        console.error('[App Init] SAFETY TIMEOUT: main-content appears empty, attempting emergency render');
+                        // Try to trigger a render
+                        if (window.EyesOfAzrael && window.EyesOfAzrael.navigation) {
+                            try {
+                                // Force reset navigation lock in case it's stuck
+                                const nav = window.EyesOfAzrael.navigation;
+                                if (nav._isNavigating) {
+                                    console.warn('[App Init] Navigation lock was stuck, resetting');
+                                    nav._isNavigating = false;
+                                    nav._activeNavigationId = null;
+                                }
+                                nav.handleRoute();
+                            } catch (e) {
+                                console.error('[App Init] Emergency render failed:', e);
+                            }
+                        }
+                    }
+                }
+
+                hideAllLoadingIndicators('safety-timeout');
+                emitAppReady('safety-timeout');
+            }
+        }, 5000);
+
+        // Clear safety timeout if render completes normally
+        document.addEventListener('first-render-complete', () => {
+            clearTimeout(safetyTimeout);
+        }, { once: true });
+
         // Step 8: Initialize SPANavigation (requires renderer)
         console.log('[App] [8/12] Initializing Navigation...');
         if (dependencyExists('SPANavigation')) {
