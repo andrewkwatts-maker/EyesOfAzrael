@@ -1,7 +1,12 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.13.0
+ * Version: 2.14.0
+ *
+ * Changes in 2.14.0:
+ * - FIX CRITICAL: accessibility.css rule [aria-live] was hiding #main-content
+ * - The rule positioned ALL aria-live elements 10000px off-screen
+ * - Added :not() exclusions for main, section, #main-content, .view-container
  *
  * Changes in 2.13.0:
  * - Add [SPA DEBUG] console.log statements throughout handleRoute/renderHome
@@ -94,7 +99,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.13.0';
+const CACHE_VERSION = 'v2.14.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';

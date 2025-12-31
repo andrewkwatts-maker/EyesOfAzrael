@@ -149,9 +149,10 @@ button:disabled,
     -webkit-tap-highlight-color: rgba(147, 112, 219, 0.3);
 }
 
-/* Live region announcements */
-[aria-live="polite"],
-[aria-live="assertive"] {
+/* Live region announcements - ONLY for dedicated announcement containers */
+/* Exclude structural elements (main, section, div with IDs) that use aria-live for dynamic updates */
+[aria-live="polite"]:not(main):not(section):not(#main-content):not(.view-container),
+[aria-live="assertive"]:not(main):not(section):not(#main-content):not(.view-container) {
     position: absolute;
     left: -10000px;
     width: 1px;
