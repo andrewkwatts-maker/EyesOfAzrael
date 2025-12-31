@@ -460,7 +460,8 @@
 
         if (moonIcon && sunIcon) {
             // Determine if current theme is "light" or "dark"
-            const isLightTheme = ['day', 'sacred', 'light'].includes(themeName);
+            // Only day and light themes have light backgrounds
+            const isLightTheme = ['day', 'light'].includes(themeName);
 
             // Toggle SVG visibility
             moonIcon.style.display = isLightTheme ? 'none' : 'block';
