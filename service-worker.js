@@ -1,7 +1,13 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.10.0
+ * Version: 2.11.0
+ *
+ * Changes in 2.11.0:
+ * - CRITICAL FIX: Add window.SPANavigation export
+ * - SPANavigation class was not attached to window object
+ * - app-init-simple.js uses dependencyExists() which checks window[name]
+ * - Without export, navigation was never initialized, causing blank page
  *
  * Changes in 2.10.0:
  * - Fix landing page not rendering: race condition in app-coordinator.js
@@ -43,7 +49,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.9.2';
+const CACHE_VERSION = 'v2.11.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';

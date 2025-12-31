@@ -1851,3 +1851,10 @@ class SPANavigation {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = SPANavigation;
 }
+
+// Global export for non-module script loading (browser context)
+// This is REQUIRED for app-init-simple.js to find the class via dependencyExists()
+if (typeof window !== 'undefined') {
+    window.SPANavigation = SPANavigation;
+    console.log('[SPANavigation] Class registered globally');
+}
