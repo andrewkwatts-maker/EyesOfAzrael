@@ -1,3 +1,4 @@
+console.log('[LAYER13-DEBUG] assertions.js started loading');
 /**
  * Eyes of Azrael - Assertion Utilities
  *
