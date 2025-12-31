@@ -445,15 +445,37 @@
 
     /**
      * Update the #themeToggle button icon to match current theme
+     * Supports both emoji icons and SVG sun/moon icons
      */
     function updateThemeToggleButton() {
         const themeToggle = document.getElementById('themeToggle');
-        if (themeToggle && themeConfig?.themes?.[currentTheme]) {
-            const icon = themeConfig.themes[currentTheme].icon;
-            if (icon) {
-                themeToggle.textContent = icon;
-                themeToggle.setAttribute('aria-label', `Current theme: ${themeConfig.themes[currentTheme].name}. Click to change theme.`);
-            }
+        if (!themeToggle) return;
+
+        const themeName = currentTheme || 'night';
+        const themeData = themeConfig?.themes?.[themeName];
+
+        // Check if using SVG icons (new minimalist design)
+        const moonIcon = themeToggle.querySelector('.theme-icon-moon');
+        const sunIcon = themeToggle.querySelector('.theme-icon-sun');
+
+        if (moonIcon && sunIcon) {
+            // Determine if current theme is "light" or "dark"
+            const isLightTheme = ['day', 'sacred', 'light'].includes(themeName);
+
+            // Toggle SVG visibility
+            moonIcon.style.display = isLightTheme ? 'none' : 'block';
+            sunIcon.style.display = isLightTheme ? 'block' : 'none';
+
+            // Update aria-label
+            themeToggle.setAttribute('aria-label',
+                `Current theme: ${themeData?.name || themeName}. Click to change theme.`
+            );
+        } else if (themeData?.icon) {
+            // Legacy: Use emoji icon
+            themeToggle.textContent = themeData.icon;
+            themeToggle.setAttribute('aria-label',
+                `Current theme: ${themeData.name}. Click to change theme.`
+            );
         }
     }
 
