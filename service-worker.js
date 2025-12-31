@@ -1,7 +1,19 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.8.1
+ * Version: 2.9.0
+ *
+ * Changes in 2.9.0:
+ * - 12-agent polish sprint for home page display chain
+ * - Fixed race conditions in SPA navigation
+ * - Added navigation validity checks for async renders
+ * - Improved landing page view with golden ratio typography
+ * - Enhanced entity card with standardized sizing
+ * - Fixed firebase cache manager TTL handling
+ * - Improved entity-renderer-firebase with batch loading
+ * - Enhanced browse-category-view with responsive grid
+ * - Fixed app-init-simple event sequencing
+ * - Added fallback mechanisms for missing dependencies
  *
  * Changes in 2.8.1:
  * - Fixed social sharing meta images to use existing icon
@@ -16,7 +28,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.8.1';
+const CACHE_VERSION = 'v2.9.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';

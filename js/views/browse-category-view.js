@@ -525,21 +525,23 @@ class BrowseCategoryView {
             .slice(0, 10);
 
         return `
-            <div class="quick-filters">
+            <div class="quick-filters" role="region" aria-label="Quick filters">
                 <div class="quick-filter-section">
-                    <h3 class="quick-filter-title">
-                        <span class="quick-filter-icon">🌍</span>
+                    <h3 class="quick-filter-title" id="mythology-filter-heading">
+                        <span class="quick-filter-icon" aria-hidden="true">🌍</span>
                         Quick Filter by Mythology
                     </h3>
-                    <div class="filter-chips">
+                    <div class="filter-chips" role="group" aria-labelledby="mythology-filter-heading">
                         ${topMythologies.map(([myth, entities]) => `
                             <button
+                                type="button"
                                 class="filter-chip"
                                 data-filter-type="mythology"
                                 data-filter-value="${myth}"
-                                aria-pressed="${this.selectedMythologies.has(myth)}">
+                                aria-pressed="${this.selectedMythologies.has(myth)}"
+                                aria-label="Filter by ${this.capitalize(myth)} mythology (${entities.length} entities)">
                                 <span class="chip-label">${this.capitalize(myth)}</span>
-                                <span class="chip-count">${entities.length}</span>
+                                <span class="chip-count" aria-hidden="true">${entities.length}</span>
                             </button>
                         `).join('')}
                     </div>
@@ -547,18 +549,20 @@ class BrowseCategoryView {
 
                 ${this.availableDomains.size > 0 && this.category === 'deities' ? `
                     <div class="quick-filter-section">
-                        <h3 class="quick-filter-title">
-                            <span class="quick-filter-icon">🏷️</span>
+                        <h3 class="quick-filter-title" id="domain-filter-heading">
+                            <span class="quick-filter-icon" aria-hidden="true">🏷️</span>
                             Filter by Domain
                         </h3>
-                        <div class="filter-chips">
+                        <div class="filter-chips" role="group" aria-labelledby="domain-filter-heading">
                             ${topDomains.map(domain => `
                                 <button
+                                    type="button"
                                     class="filter-chip"
                                     data-filter-type="domain"
-                                    data-filter-value="${domain}"
-                                    aria-pressed="${this.selectedDomains.has(domain)}">
-                                    <span class="chip-label">${domain}</span>
+                                    data-filter-value="${this.escapeHtml(domain)}"
+                                    aria-pressed="${this.selectedDomains.has(domain)}"
+                                    aria-label="Filter by ${domain} domain">
+                                    <span class="chip-label">${this.escapeHtml(domain)}</span>
                                 </button>
                             `).join('')}
                         </div>
@@ -566,10 +570,10 @@ class BrowseCategoryView {
                 ` : ''}
 
                 <!-- Active Filters Display -->
-                <div class="active-filters" id="activeFilters" style="display: none;">
+                <div class="active-filters" id="activeFilters" style="display: none;" role="status" aria-live="polite">
                     <span class="active-filters-label">Active filters:</span>
-                    <div class="active-filter-chips"></div>
-                    <button class="clear-filters-btn" id="clearFiltersBtn">Clear all</button>
+                    <div class="active-filter-chips" aria-label="Currently active filters"></div>
+                    <button type="button" class="clear-filters-btn" id="clearFiltersBtn" aria-label="Clear all active filters">Clear all</button>
                 </div>
             </div>
         `;
@@ -704,7 +708,10 @@ class BrowseCategoryView {
                class="entity-card ${entity.isStandard ? '' : 'entity-card-community'}"
                data-entity-id="${entity.id}"
                data-mythology="${entity.mythology}"
-               data-name="${entity.name.toLowerCase()}">
+               data-entity-type="${this.category.replace(/s$/, '')}"
+               data-name="${entity.name.toLowerCase()}"
+               role="article"
+               aria-label="${this.escapeHtml(entity.name)} - ${this.capitalize(entity.mythology)} ${this.category.replace(/s$/, '')}">
                 ${badgeHTML}
                 <div class="entity-card-header">
                     ${iconHTML}
@@ -955,25 +962,31 @@ class BrowseCategoryView {
             if (this.selectedMythologies.has(value)) {
                 this.selectedMythologies.delete(value);
                 chip.setAttribute('aria-pressed', 'false');
+                chip.classList.remove('active');
             } else {
                 this.selectedMythologies.add(value);
                 chip.setAttribute('aria-pressed', 'true');
+                chip.classList.add('active');
             }
         } else if (type === 'domain') {
             if (this.selectedDomains.has(value)) {
                 this.selectedDomains.delete(value);
                 chip.setAttribute('aria-pressed', 'false');
+                chip.classList.remove('active');
             } else {
                 this.selectedDomains.add(value);
                 chip.setAttribute('aria-pressed', 'true');
+                chip.classList.add('active');
             }
         } else if (type === 'type') {
             if (this.selectedTypes.has(value)) {
                 this.selectedTypes.delete(value);
                 chip.setAttribute('aria-pressed', 'false');
+                chip.classList.remove('active');
             } else {
                 this.selectedTypes.add(value);
                 chip.setAttribute('aria-pressed', 'true');
+                chip.classList.add('active');
             }
         }
 
@@ -991,9 +1004,14 @@ class BrowseCategoryView {
         this.selectedTypes.clear();
 
         // Update UI
-        document.getElementById('searchFilter').value = '';
+        const searchFilter = document.getElementById('searchFilter');
+        if (searchFilter) {
+            searchFilter.value = '';
+        }
+
         document.querySelectorAll('.filter-chip').forEach(chip => {
             chip.setAttribute('aria-pressed', 'false');
+            chip.classList.remove('active');
         });
 
         this.applyFilters();
@@ -1005,7 +1023,10 @@ class BrowseCategoryView {
      */
     updateActiveFilters() {
         const container = document.getElementById('activeFilters');
+        if (!container) return;
+
         const chipsContainer = container.querySelector('.active-filter-chips');
+        if (!chipsContainer) return;
 
         const hasFilters = this.searchTerm || this.selectedMythologies.size > 0 ||
                           this.selectedDomains.size > 0 || this.selectedTypes.size > 0;
@@ -1087,9 +1108,11 @@ class BrowseCategoryView {
         filtered.sort((a, b) => {
             switch (this.sortBy) {
                 case 'mythology':
-                    const mythCompare = a.mythology.localeCompare(b.mythology);
+                    const mythA = a.mythology || '';
+                    const mythB = b.mythology || '';
+                    const mythCompare = mythA.localeCompare(mythB);
                     if (mythCompare !== 0) return mythCompare;
-                    return a.name.localeCompare(b.name);
+                    return (a.name || '').localeCompare(b.name || '');
 
                 case 'popularity':
                     return (b._popularity || 0) - (a._popularity || 0);
@@ -1099,7 +1122,7 @@ class BrowseCategoryView {
 
                 case 'name':
                 default:
-                    return a.name.localeCompare(b.name);
+                    return (a.name || '').localeCompare(b.name || '');
             }
         });
 
@@ -1262,14 +1285,26 @@ class BrowseCategoryView {
         clearTimeout(this.scrollTimeout);
         this.scrollTimeout = setTimeout(() => {
             const container = document.getElementById('entityContainer');
+            if (!container) return;
+
             const scrollTop = container.scrollTop;
-            const itemHeight = 300; // Approximate card height
+            const containerWidth = container.offsetWidth;
 
-            const start = Math.floor(scrollTop / itemHeight) * 3; // 3 columns
-            const end = start + 30; // Show 30 items at a time
+            // Calculate columns based on container width (responsive)
+            let columns = 1;
+            if (containerWidth >= 1200) columns = 4;
+            else if (containerWidth >= 900) columns = 3;
+            else if (containerWidth >= 600) columns = 2;
 
-            if (start !== this.visibleRange.start) {
-                this.visibleRange = { start, end };
+            const itemHeight = this.viewDensity === 'compact' ? 200 : (this.viewDensity === 'detailed' ? 350 : 280);
+            const rowHeight = itemHeight + 24; // Include gap
+
+            const start = Math.floor(scrollTop / rowHeight) * columns;
+            const visibleRows = Math.ceil(container.offsetHeight / rowHeight) + 2; // Add buffer rows
+            const end = start + (visibleRows * columns);
+
+            if (start !== this.visibleRange.start || end !== this.visibleRange.end) {
+                this.visibleRange = { start: Math.max(0, start), end: Math.min(this.filteredEntities.length, end) };
                 this.updateGrid();
             }
         }, 100);
@@ -1427,11 +1462,17 @@ class BrowseCategoryView {
                     transform: translateY(-2px);
                 }
 
-                .filter-chip[aria-pressed="true"] {
+                .filter-chip[aria-pressed="true"],
+                .filter-chip.active {
                     background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
                     border-color: var(--color-primary);
                     color: white;
                     box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+                }
+
+                .filter-chip:focus {
+                    outline: 2px solid var(--color-primary);
+                    outline-offset: 2px;
                 }
 
                 .chip-label {
@@ -1734,11 +1775,12 @@ class BrowseCategoryView {
                     gap: var(--spacing-lg, 1.5rem);
                     margin-bottom: var(--spacing-xl, 2rem);
                     transition: opacity var(--transition-fast, 0.15s ease);
+                    width: 100%;
                 }
 
                 /* Grid View */
                 .entity-grid.grid-view {
-                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
                 }
 
                 /* List View */
@@ -1752,19 +1794,22 @@ class BrowseCategoryView {
                 }
 
                 .entity-grid.density-compact.grid-view {
-                    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                    grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
                 }
 
                 /* Density: Detailed */
                 .entity-grid.density-detailed.grid-view {
-                    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                    grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
+                    gap: var(--spacing-xl, 2rem);
                 }
 
                 /* ==========================================
                    Entity Cards
                    ========================================== */
                 .entity-card {
-                    display: block;
+                    display: flex;
+                    flex-direction: column;
+                    min-height: 200px;
                     background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.6);
                     backdrop-filter: blur(10px);
                     -webkit-backdrop-filter: blur(10px);
@@ -1782,11 +1827,13 @@ class BrowseCategoryView {
                 /* Compact density */
                 .density-compact .entity-card {
                     padding: var(--spacing-md, 1rem);
+                    min-height: 160px;
                 }
 
                 /* Detailed density */
                 .density-detailed .entity-card {
                     padding: var(--spacing-xl, 2rem);
+                    min-height: 280px;
                 }
 
                 .entity-card::before {
@@ -1913,6 +1960,7 @@ class BrowseCategoryView {
                     -webkit-box-orient: vertical;
                     overflow: hidden;
                     text-overflow: ellipsis;
+                    flex: 1 1 auto;
                 }
 
                 .density-compact .entity-description {
@@ -1928,12 +1976,14 @@ class BrowseCategoryView {
                 .entity-tags {
                     display: flex;
                     gap: var(--spacing-xs, 0.25rem);
-                    margin-top: var(--spacing-md, 1rem);
+                    margin-top: auto;
+                    padding-top: var(--spacing-sm, 0.5rem);
                     flex-wrap: wrap;
                 }
 
                 .density-compact .entity-tags {
-                    margin-top: var(--spacing-sm, 0.5rem);
+                    margin-top: auto;
+                    padding-top: var(--spacing-xs, 0.25rem);
                 }
 
                 .tag {
@@ -2012,11 +2062,20 @@ class BrowseCategoryView {
 
                 .entity-grid.list-view .entity-card-header {
                     margin-bottom: 0;
-                    min-width: 300px;
+                    min-width: 0;
+                    flex: 0 0 auto;
+                    max-width: 280px;
                 }
 
                 .entity-grid.list-view .entity-description {
                     flex: 1;
+                    min-width: 0;
+                }
+
+                .entity-grid.list-view .entity-tags {
+                    flex: 0 0 auto;
+                    max-width: 200px;
+                    justify-content: flex-end;
                 }
 
                 /* ==========================================
@@ -2125,18 +2184,30 @@ class BrowseCategoryView {
                    Responsive Design
                    ========================================== */
 
-                /* Tablet */
-                @media (max-width: 1024px) {
+                /* Large Tablet */
+                @media (max-width: 1200px) {
                     .entity-grid.grid-view {
-                        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                        grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
                     }
 
-                    .density-compact.grid-view {
-                        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                    .entity-grid.density-compact.grid-view {
+                        grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
                     }
 
-                    .density-detailed.grid-view {
-                        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                    .entity-grid.density-detailed.grid-view {
+                        grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+                    }
+                }
+
+                /* Small Tablet */
+                @media (max-width: 900px) {
+                    .entity-grid.grid-view {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: var(--spacing-md, 1rem);
+                    }
+
+                    .entity-grid.density-detailed.grid-view {
+                        grid-template-columns: repeat(2, 1fr);
                     }
                 }
 
@@ -2191,11 +2262,22 @@ class BrowseCategoryView {
 
                     .entity-grid.list-view .entity-card {
                         flex-direction: column;
-                        align-items: flex-start;
+                        align-items: stretch;
+                        gap: var(--spacing-md, 1rem);
                     }
 
                     .entity-grid.list-view .entity-card-header {
-                        min-width: 100%;
+                        max-width: 100%;
+                        width: 100%;
+                    }
+
+                    .entity-grid.list-view .entity-description {
+                        -webkit-line-clamp: 2;
+                    }
+
+                    .entity-grid.list-view .entity-tags {
+                        max-width: 100%;
+                        justify-content: flex-start;
                     }
 
                     .view-label {
@@ -2209,6 +2291,10 @@ class BrowseCategoryView {
 
                 /* Small mobile */
                 @media (max-width: 480px) {
+                    .browse-view {
+                        padding: var(--spacing-sm, 0.5rem);
+                    }
+
                     .browse-title {
                         font-size: 1.5rem;
                     }
@@ -2217,8 +2303,14 @@ class BrowseCategoryView {
                         font-size: 0.9rem;
                     }
 
+                    .entity-grid.grid-view {
+                        grid-template-columns: 1fr;
+                        gap: var(--spacing-sm, 0.5rem);
+                    }
+
                     .entity-card {
                         padding: var(--spacing-md, 1rem);
+                        min-height: 140px;
                     }
 
                     .entity-icon {
@@ -2238,6 +2330,10 @@ class BrowseCategoryView {
                     .filter-chip {
                         font-size: 0.75rem;
                         padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+                    }
+
+                    .entity-description {
+                        -webkit-line-clamp: 2;
                     }
                 }
 

@@ -14,7 +14,7 @@
  * - Metaphysical properties (elements, chakras, etc.)
  * - Archetypes section
  * - Edit button for authenticated users
- * - Share/bookmark functionality
+ * - Share/bookmark functionality with toggle support
  * - Smooth transitions and animations
  * - Mobile-friendly responsive layout
  * - Proper typography hierarchy
@@ -26,9 +26,16 @@
  * - Enhanced error logging with context (entity ID, type, step)
  * - Comprehensive entity type to collection name mapping
  *
+ * Bug Fixes (v2.2.0):
+ * - Fixed related entity URL routing (proper singular entity types)
+ * - Fixed markdown rendering producing invalid nested <p> tags
+ * - Fixed bookmark toggle functionality (now properly adds/removes)
+ * - Added automatic event listener attachment after render
+ * - Added normalizeEntityTypeForRoute for proper interlinking
+ *
  * Uses ComprehensiveMetadataRenderer for complete metadata coverage
  *
- * @version 2.1.0 - Performance optimizations and error handling
+ * @version 2.2.0 - Bug fixes for routing, markdown, and bookmarks
  */
 
 class EntityDetailViewer {
@@ -75,6 +82,12 @@ class EntityDetailViewer {
             if (entity.displayOptions?.relatedEntities?.length > 0) {
                 this.loadRelatedEntitiesAsync(entity, mythology, entityType);
             }
+
+            // Schedule event listener attachment after DOM update
+            // Use requestAnimationFrame to ensure DOM is ready
+            requestAnimationFrame(() => {
+                this.attachEventListeners();
+            });
 
             return html;
 
@@ -500,8 +513,8 @@ class EntityDetailViewer {
                         <span class="action-icon" aria-hidden="true">&#128279;</span>
                         <span class="action-text">Share</span>
                     </button>
-                    <button class="quick-action-btn" data-action="bookmark" data-entity-id="${this.escapeAttr(entity.id)}" aria-label="Bookmark this entity">
-                        <span class="action-icon" aria-hidden="true">&#9733;</span>
+                    <button class="quick-action-btn${EntityDetailViewer.isBookmarked(entity.id) ? ' bookmarked' : ''}" data-action="bookmark" data-entity-id="${this.escapeAttr(entity.id)}" aria-label="Bookmark this entity">
+                        <span class="action-icon" aria-hidden="true">${EntityDetailViewer.isBookmarked(entity.id) ? '&#9733;' : '&#9734;'}</span>
                         <span class="action-text">Bookmark</span>
                     </button>
                     ${entity.corpusQueries && entity.corpusQueries.length > 0 ? `
@@ -780,14 +793,18 @@ class EntityDetailViewer {
         // First escape HTML to prevent XSS
         let escaped = this.escapeHtml(text);
 
-        // Then apply markdown formatting to the escaped text
-        return escaped
+        // Apply markdown formatting to the escaped text
+        // 1. Bold and italic
+        escaped = escaped
             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.+?)\*/g, '<em>$1</em>')
-            .replace(/\n\n/g, '</p><p>')
-            .replace(/\n/g, '<br>')
-            .split('</p><p>')
-            .map(p => `<p>${p}</p>`)
+            .replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+        // 2. Split into paragraphs by double newlines, then wrap each
+        const paragraphs = escaped.split(/\n\n+/);
+        return paragraphs
+            .map(p => p.trim())
+            .filter(p => p.length > 0)
+            .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`)
             .join('');
     }
 
@@ -812,17 +829,50 @@ class EntityDetailViewer {
     }
 
     /**
-     * Static helper for bookmarking
+     * Static helper for bookmarking (toggle)
      */
     static bookmarkEntity(id) {
         const bookmarks = JSON.parse(localStorage.getItem('entityBookmarks') || '[]');
-        if (bookmarks.includes(id)) {
-            EntityDetailViewer.showToast('Already bookmarked!');
+        const index = bookmarks.indexOf(id);
+
+        if (index !== -1) {
+            // Already bookmarked - remove it
+            bookmarks.splice(index, 1);
+            localStorage.setItem('entityBookmarks', JSON.stringify(bookmarks));
+            EntityDetailViewer.showToast('Bookmark removed');
+            // Update button visual state
+            EntityDetailViewer.updateBookmarkButton(id, false);
         } else {
+            // Not bookmarked - add it
             bookmarks.push(id);
             localStorage.setItem('entityBookmarks', JSON.stringify(bookmarks));
             EntityDetailViewer.showToast('Bookmarked!');
+            // Update button visual state
+            EntityDetailViewer.updateBookmarkButton(id, true);
         }
+    }
+
+    /**
+     * Update bookmark button visual state
+     */
+    static updateBookmarkButton(entityId, isBookmarked) {
+        const btn = document.querySelector(`[data-action="bookmark"][data-entity-id="${entityId}"]`);
+        if (btn) {
+            const icon = btn.querySelector('.action-icon');
+            if (icon) {
+                // Filled star for bookmarked, empty star for not bookmarked
+                icon.innerHTML = isBookmarked ? '&#9733;' : '&#9734;';
+            }
+            btn.classList.toggle('bookmarked', isBookmarked);
+        }
+    }
+
+    /**
+     * Check if entity is bookmarked
+     */
+    static isBookmarked(id) {
+        const bookmarks = JSON.parse(localStorage.getItem('entityBookmarks') || '[]');
+        return bookmarks.includes(id);
     }
 
     /**
@@ -1334,13 +1384,13 @@ class EntityDetailViewer {
         if (!relatedEntities || Object.keys(relatedEntities).length === 0) return '';
 
         const categories = [
-            { key: 'deities', label: 'Related Deities', icon: '&#9734;' },
-            { key: 'heroes', label: 'Related Heroes', icon: '&#9876;' },
-            { key: 'creatures', label: 'Related Creatures', icon: '&#128009;' },
-            { key: 'places', label: 'Related Places', icon: '&#127968;' },
-            { key: 'items', label: 'Related Items', icon: '&#9876;' },
-            { key: 'concepts', label: 'Related Concepts', icon: '&#128161;' },
-            { key: 'archetypes', label: 'Related Archetypes', icon: '&#127917;' }
+            { key: 'deities', singular: 'deity', label: 'Related Deities', icon: '&#9734;' },
+            { key: 'heroes', singular: 'hero', label: 'Related Heroes', icon: '&#9876;' },
+            { key: 'creatures', singular: 'creature', label: 'Related Creatures', icon: '&#128009;' },
+            { key: 'places', singular: 'place', label: 'Related Places', icon: '&#127968;' },
+            { key: 'items', singular: 'item', label: 'Related Items', icon: '&#9876;' },
+            { key: 'concepts', singular: 'concept', label: 'Related Concepts', icon: '&#128161;' },
+            { key: 'archetypes', singular: 'archetype', label: 'Related Archetypes', icon: '&#127917;' }
         ];
 
         const hasAnyRelated = categories.some(cat => relatedEntities[cat.key]?.length > 0);
@@ -1362,7 +1412,7 @@ class EntityDetailViewer {
                                 <h3 class="related-group-title">${cat.icon} ${cat.label}</h3>
                                 <div class="schema-related-grid">
                                     ${entities.map(entity => `
-                                        <a href="#/mythology/${entity.mythology || mythology}/${cat.key.replace(/s$/, '')}/${entity.id}"
+                                        <a href="#/mythology/${entity.mythology || mythology}/${cat.singular}/${entity.id}"
                                            class="schema-related-card"
                                            title="${this.escapeHtml(entity.relationship || '')}">
                                             ${entity.icon ? `<span class="related-entity-icon">${entity.icon}</span>` : `<span class="related-entity-icon" aria-hidden="true">${cat.icon}</span>`}
@@ -1582,17 +1632,23 @@ class EntityDetailViewer {
                     Related Entities
                 </h2>
                 <div class="related-entities-container">
-                    ${Object.entries(relatedEntities).map(([type, data]) => `
+                    ${Object.entries(relatedEntities).map(([type, data]) => {
+                        // Normalize the type for URL routing (ensure singular form)
+                        const routeType = this.normalizeEntityTypeForRoute(type);
+                        return `
                         <div class="related-entities-group" ${this.getAnimationStyle()}>
                             <h3 class="related-group-title">${data.label}</h3>
                             <div class="related-entities-grid" role="list">
-                                ${data.entities.map(entity => `
-                                    <a href="#/mythology/${mythology}/${type}/${entity.id}"
+                                ${data.entities.map(entity => {
+                                    // Use entity's type if available, otherwise derive from relationship type
+                                    const entityRouteType = entity.type ? this.normalizeEntityTypeForRoute(entity.type) : routeType;
+                                    return `
+                                    <a href="#/mythology/${entity.mythology || mythology}/${entityRouteType}/${entity.id}"
                                        class="related-entity-card"
                                        role="listitem"
                                        aria-label="View ${this.escapeHtml(entity.name || entity.title)}">
                                         <div class="related-entity-icon" aria-hidden="true">
-                                            ${entity.icon || this.getDefaultIcon(type)}
+                                            ${entity.icon || this.getDefaultIcon(entityRouteType)}
                                         </div>
                                         <div class="related-entity-info">
                                             <span class="related-entity-name">${this.escapeHtml(entity.name || entity.title)}</span>
@@ -1602,13 +1658,54 @@ class EntityDetailViewer {
                                         </div>
                                         <span class="related-entity-arrow" aria-hidden="true">&#8594;</span>
                                     </a>
-                                `).join('')}
+                                `}).join('')}
                             </div>
                         </div>
-                    `).join('')}
+                    `}).join('')}
                 </div>
             </section>
         `;
+    }
+
+    /**
+     * Normalize entity type for URL routing
+     * Converts plural forms and relationship type names to singular route types
+     * @param {string} type - Entity type or relationship type
+     * @returns {string} Normalized singular entity type for routing
+     */
+    normalizeEntityTypeForRoute(type) {
+        if (!type) return 'entity';
+
+        const normalized = type.toLowerCase();
+
+        // Map of plural/relationship types to singular route types
+        const typeMap = {
+            'deities': 'deity',
+            'heroes': 'hero',
+            'creatures': 'creature',
+            'places': 'place',
+            'items': 'item',
+            'texts': 'text',
+            'rituals': 'ritual',
+            'symbols': 'symbol',
+            'herbs': 'herb',
+            'archetypes': 'archetype',
+            'concepts': 'concept',
+            // Relationship type patterns
+            'associated_deities': 'deity',
+            'related_deities': 'deity',
+            'associated_heroes': 'hero',
+            'related_heroes': 'hero',
+            'associated_creatures': 'creature',
+            'related_creatures': 'creature',
+            'parent': 'deity',
+            'children': 'deity',
+            'siblings': 'deity',
+            'consort': 'deity',
+            'offspring': 'deity'
+        };
+
+        return typeMap[normalized] || normalized;
     }
 
     /**

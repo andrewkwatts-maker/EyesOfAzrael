@@ -32,6 +32,18 @@ class FirebaseCacheManager {
             entities: 300000,         // 5 minutes - entity details
             lists: 600000,            // 10 minutes - entity lists
             search: 604800000,        // 7 days - search index
+            pages: 3600000,           // 1 hour - page content (home, etc.)
+            deities: 1800000,         // 30 minutes - deity lists
+            heroes: 1800000,          // 30 minutes - hero lists
+            creatures: 1800000,       // 30 minutes - creature lists
+            items: 1800000,           // 30 minutes - item lists
+            places: 1800000,          // 30 minutes - place lists
+            texts: 1800000,           // 30 minutes - text lists
+            rituals: 1800000,         // 30 minutes - ritual lists
+            herbs: 1800000,           // 30 minutes - herb lists
+            archetypes: 1800000,      // 30 minutes - archetype lists
+            symbols: 1800000,         // 30 minutes - symbol lists
+            magic: 1800000,           // 30 minutes - magic lists
             temporary: 60000          // 1 minute - temporary data
         };
 
@@ -256,20 +268,39 @@ class FirebaseCacheManager {
      * Fetch list from Firebase with caching
      */
     async getList(collection, filters = {}, options = {}) {
-        const cacheKey = this.generateListKey(collection, filters);
-        const ttl = options.ttl || this.defaultTTL.lists;
+        const cacheKey = this.generateListKey(collection, filters, options);
+        const ttl = options.ttl || this.defaultTTL[collection] || this.defaultTTL.lists;
         const forceRefresh = options.forceRefresh || false;
 
         try {
-            // Check cache
+            // Check cache (all layers)
             if (!forceRefresh) {
-                const cached = this.getFromMemory(cacheKey) ||
-                               this.getFromSessionStorage(cacheKey) ||
-                               this.getFromLocalStorage(cacheKey);
+                // Check memory first (fastest)
+                let cached = this.getFromMemory(cacheKey);
+                let cacheSource = 'memory';
+
+                // Try sessionStorage if not in memory
+                if (!cached || this.isExpired(cached, ttl)) {
+                    cached = this.getFromSessionStorage(cacheKey);
+                    cacheSource = 'session';
+                }
+
+                // Try localStorage if not in session
+                if (!cached || this.isExpired(cached, ttl)) {
+                    cached = this.getFromLocalStorage(cacheKey);
+                    cacheSource = 'local';
+                }
 
                 if (cached && !this.isExpired(cached, ttl)) {
+                    // Promote to faster cache layers
+                    if (cacheSource === 'local') {
+                        this.memoryCache.set(cacheKey, cached);
+                        this.setToSessionStorage(cacheKey, cached);
+                    } else if (cacheSource === 'session') {
+                        this.memoryCache.set(cacheKey, cached);
+                    }
                     this.recordHit(performance.now());
-                    console.log(`[CacheManager] =� List cache hit: ${cacheKey}`);
+                    console.log(`[CacheManager] List cache hit (${cacheSource}): ${cacheKey}`);
                     return cached.data;
                 }
             }
@@ -318,6 +349,8 @@ class FirebaseCacheManager {
 
             this.memoryCache.set(cacheKey, cacheEntry);
             this.setToSessionStorage(cacheKey, cacheEntry);
+            // Also persist to localStorage for cross-session caching
+            this.setToLocalStorage(cacheKey, cacheEntry);
 
             const responseTime = performance.now() - startTime;
             this.recordQuery(responseTime);
@@ -413,21 +446,68 @@ class FirebaseCacheManager {
      * Warm cache for frequently accessed data
      */
     async warmCache() {
-        console.log('[CacheManager] =% Warming cache...');
+        console.log('[CacheManager] Warming cache...');
 
         try {
             // Warm mythology list
-            const mythologies = await this.getList('mythologies', {}, { ttl: this.defaultTTL.mythologies });
+            const mythologies = await this.getList('mythologies', {}, {
+                ttl: this.defaultTTL.mythologies,
+                orderBy: 'order asc',
+                limit: 50
+            });
             console.log(`[CacheManager] Cached ${mythologies.length} mythologies`);
 
             // Warm metadata
             const metadata = await this.getMetadata('mythology_counts');
             console.log(`[CacheManager] Cached mythology metadata`);
 
-            console.log('[CacheManager] =% Cache warming complete');
+            console.log('[CacheManager] Cache warming complete');
 
         } catch (error) {
             console.error('[CacheManager] Error warming cache:', error);
+        }
+    }
+
+    /**
+     * Prefetch home page data for faster initial load
+     * Call this early in the app lifecycle
+     */
+    async prefetchHomeData() {
+        console.log('[CacheManager] Prefetching home page data...');
+
+        try {
+            const promises = [];
+
+            // Prefetch mythologies (primary home content)
+            promises.push(
+                this.getList('mythologies', {}, {
+                    ttl: this.defaultTTL.mythologies,
+                    orderBy: 'order asc',
+                    limit: 50
+                }).catch(err => {
+                    console.warn('[CacheManager] Failed to prefetch mythologies:', err);
+                    return [];
+                })
+            );
+
+            // Prefetch home page config if using PageAssetRenderer
+            promises.push(
+                this.get('pages', 'home', { ttl: this.defaultTTL.pages }).catch(err => {
+                    console.warn('[CacheManager] Failed to prefetch home page config:', err);
+                    return null;
+                })
+            );
+
+            const results = await Promise.all(promises);
+            const [mythologies, homeConfig] = results;
+
+            console.log(`[CacheManager] Prefetch complete: ${mythologies?.length || 0} mythologies, home config: ${homeConfig ? 'loaded' : 'not found'}`);
+
+            return { mythologies, homeConfig };
+
+        } catch (error) {
+            console.error('[CacheManager] Error prefetching home data:', error);
+            return { mythologies: [], homeConfig: null };
         }
     }
 
@@ -454,7 +534,7 @@ class FirebaseCacheManager {
      */
     printStats() {
         const stats = this.getStats();
-        console.log('[CacheManager] =� Performance Statistics:');
+        console.log('[CacheManager] Performance Statistics:');
         console.log(`  Cache Hits: ${stats.hits} (${stats.hitRate})`);
         console.log(`  Cache Misses: ${stats.misses}`);
         console.log(`  Cache Sets: ${stats.sets}`);
@@ -464,27 +544,139 @@ class FirebaseCacheManager {
         console.log(`  Memory Cache Size: ${stats.memoryCacheSize} entries`);
     }
 
+    /**
+     * Clear all stale/expired entries from storage
+     * Useful for maintenance and freeing up storage space
+     */
+    clearStaleEntries() {
+        let clearedCount = 0;
+        const now = Date.now();
+
+        // Clear stale memory cache entries
+        for (const [key, entry] of this.memoryCache.entries()) {
+            if (this.isExpired(entry, 0)) {
+                this.memoryCache.delete(key);
+                clearedCount++;
+            }
+        }
+
+        // Clear stale sessionStorage entries
+        const sessionKeysToRemove = [];
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key && key.startsWith('cache_')) {
+                try {
+                    const entry = JSON.parse(sessionStorage.getItem(key));
+                    if (this.isExpired(entry, 0)) {
+                        sessionKeysToRemove.push(key);
+                    }
+                } catch (e) {
+                    // Invalid entry, remove it
+                    sessionKeysToRemove.push(key);
+                }
+            }
+        }
+        sessionKeysToRemove.forEach(key => {
+            sessionStorage.removeItem(key);
+            clearedCount++;
+        });
+
+        // Clear stale localStorage entries
+        const localKeysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('cache_') && key !== 'cache_metrics') {
+                try {
+                    const entry = JSON.parse(localStorage.getItem(key));
+                    if (this.isExpired(entry, 0)) {
+                        localKeysToRemove.push(key);
+                    }
+                } catch (e) {
+                    // Invalid entry, remove it
+                    localKeysToRemove.push(key);
+                }
+            }
+        }
+        localKeysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+            clearedCount++;
+        });
+
+        console.log(`[CacheManager] Cleared ${clearedCount} stale entries`);
+        return clearedCount;
+    }
+
+    /**
+     * Get cache health information
+     * Useful for debugging and monitoring
+     */
+    getCacheHealth() {
+        const now = Date.now();
+        let totalEntries = 0;
+        let expiredEntries = 0;
+        let freshEntries = 0;
+        let totalSize = 0;
+
+        // Analyze memory cache
+        for (const [key, entry] of this.memoryCache.entries()) {
+            totalEntries++;
+            if (this.isExpired(entry, 0)) {
+                expiredEntries++;
+            } else {
+                freshEntries++;
+            }
+        }
+
+        // Estimate localStorage usage
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('cache_')) {
+                const value = localStorage.getItem(key);
+                if (value) {
+                    totalSize += value.length * 2; // UTF-16 = 2 bytes per char
+                }
+            }
+        }
+
+        return {
+            memoryEntries: this.memoryCache.size,
+            totalEntries,
+            freshEntries,
+            expiredEntries,
+            storageSizeBytes: totalSize,
+            storageSizeKB: (totalSize / 1024).toFixed(2) + ' KB',
+            hitRate: this.getStats().hitRate,
+            healthy: expiredEntries < totalEntries * 0.5 // Healthy if less than 50% expired
+        };
+    }
+
     // ==================== HELPER METHODS ====================
 
     generateKey(collection, id) {
         return `cache_${collection}_${id}`;
     }
 
-    generateListKey(collection, filters) {
+    generateListKey(collection, filters, options = {}) {
         const filterStr = Object.entries(filters)
             .sort()
             .map(([k, v]) => `${k}:${v}`)
             .join('_');
-        return `cache_list_${collection}_${filterStr}`;
+        // Include orderBy and limit in cache key to prevent cache collisions
+        const orderBy = options.orderBy || 'default';
+        const limit = options.limit || 20;
+        return `cache_list_${collection}_${filterStr}_${orderBy}_${limit}`;
     }
 
     getDefaultTTL(collection) {
         return this.defaultTTL[collection] || this.defaultTTL.temporary;
     }
 
-    isExpired(cacheEntry, ttl) {
+    isExpired(cacheEntry, fallbackTTL) {
         if (!cacheEntry || !cacheEntry.timestamp) return true;
         const age = Date.now() - cacheEntry.timestamp;
+        // Use the stored TTL from the cache entry if available,
+        // otherwise fall back to the provided TTL
+        const ttl = cacheEntry.ttl || fallbackTTL;
         return age > ttl;
     }
 
@@ -588,8 +780,10 @@ class FirebaseCacheManager {
 
     recordHit(startTime) {
         this.metrics.hits++;
-        const responseTime = performance.now() - startTime;
-        this.recordQuery(responseTime);
+        // Note: We don't record cache hit times to query metrics
+        // because they skew the average Firebase response time.
+        // Cache hits are essentially instant (<1ms) and shouldn't
+        // be counted as "queries" to Firebase.
     }
 
     recordMiss() {

@@ -75,9 +75,29 @@
                 return false;
             }
 
+            // Resolve container element
+            if (typeof this.container === 'string') {
+                const element = document.getElementById(this.container) ||
+                              document.querySelector(this.container);
+                if (element) {
+                    this.container = element;
+                } else {
+                    console.error('[EntityCard] Container not found:', this.container);
+                    return false;
+                }
+            }
+
+            // Show loading state
+            this.renderLoading();
+
             try {
                 // Load entity data
                 this.data = await this.loader.loadEntity(this.entityId, this.entityType);
+
+                // Check if destroyed during async load
+                if (this._isDestroyed) {
+                    return false;
+                }
 
                 // Generate HTML based on display mode
                 let html = '';
@@ -96,16 +116,8 @@
                 }
 
                 // Insert into container
-                if (typeof this.container === 'string') {
-                    const element = document.getElementById(this.container) ||
-                                  document.querySelector(this.container);
-                    if (element) {
-                        element.innerHTML = html;
-                        this.container = element;
-                    }
-                } else {
-                    this.container.innerHTML = html;
-                }
+                this.container.innerHTML = html;
+                this.container.removeAttribute('aria-busy');
 
                 // Attach event listeners
                 if (this.interactive) {
@@ -123,6 +135,32 @@
                 this.renderError(error);
                 return false;
             }
+        }
+
+        /**
+         * Render loading placeholder
+         */
+        renderLoading() {
+            if (!this.container) return;
+
+            this.container.setAttribute('aria-busy', 'true');
+            this.container.innerHTML = `
+                <div class="entity-card entity-card-compact entity-card-loading glass-card skeleton"
+                     role="article"
+                     aria-label="Loading entity...">
+                    <div class="entity-card-header">
+                        <div class="entity-icon-large card-icon skeleton-icon" aria-hidden="true"></div>
+                        <div class="entity-info">
+                            <div class="card-title skeleton-text"></div>
+                            <div class="card-meta skeleton-text skeleton-text-sm"></div>
+                        </div>
+                    </div>
+                    <p class="entity-short-desc card-description skeleton-text"></p>
+                    <div class="entity-card-footer grid-card-footer">
+                        <span class="skeleton-button"></span>
+                    </div>
+                </div>
+            `;
         }
 
         /**
@@ -198,26 +236,35 @@
          * Render icon with fallback
          */
         renderIconWithFallback(icon, name) {
+            const fallbackLetter = name ? this.escapeHtml(name.charAt(0).toUpperCase()) : '';
+            const fallbackHtml = fallbackLetter
+                ? `<span class="icon-fallback">${fallbackLetter}</span>`
+                : '<span class="icon-fallback" aria-hidden="true">&#10024;</span>';
+
             if (!icon) {
-                // Generate fallback from first letter of name
-                if (name) {
-                    return `<span class="icon-fallback">${this.escapeHtml(name.charAt(0).toUpperCase())}</span>`;
-                }
-                return '&#10024;'; // Sparkles emoji as HTML entity
+                return fallbackHtml;
             }
 
             // Check if icon is an image URL - validate URL safety
-            if (typeof icon === 'string' && (icon.includes('.svg') || icon.includes('.png') || icon.includes('.jpg') || icon.startsWith('http'))) {
+            if (typeof icon === 'string' && (icon.includes('.svg') || icon.includes('.png') || icon.includes('.jpg') || icon.includes('.webp') || icon.startsWith('http'))) {
                 // Validate URL to prevent javascript: and data: XSS attacks
                 const sanitizedUrl = this.sanitizeUrl(icon);
                 if (!sanitizedUrl) {
-                    return '&#10024;'; // Fallback if URL is invalid
+                    return fallbackHtml;
                 }
-                return `<img src="${this.escapeAttr(sanitizedUrl)}" alt="" class="entity-icon-img" loading="lazy" onerror="this.onerror=null;this.parentElement.textContent='&#10024;'">`;
+                // Use data attribute for fallback to avoid inline event handler
+                return `<img src="${this.escapeAttr(sanitizedUrl)}"
+                             alt=""
+                             class="entity-icon-img"
+                             loading="lazy"
+                             decoding="async"
+                             data-fallback-letter="${this.escapeAttr(fallbackLetter || '&#10024;')}"
+                             width="56"
+                             height="56">`;
             }
 
             // Escape any text/emoji icon to prevent XSS
-            return this.escapeHtml(icon);
+            return `<span class="entity-icon-text" aria-hidden="true">${this.escapeHtml(icon)}</span>`;
         }
 
         /**
@@ -737,7 +784,7 @@
                     <h2>Geography</h2>
                     ${geo.region ? `<p><strong>Region:</strong> ${this.escapeHtml(geo.region)}</p>` : ''}
                     ${geo.modernCountries && geo.modernCountries.length > 0 ? `
-                        <p><strong>Modern Countries:</strong> ${geo.modernCountries.join(', ')}</p>
+                        <p><strong>Modern Countries:</strong> ${geo.modernCountries.map(c => this.escapeHtml(c)).join(', ')}</p>
                     ` : ''}
                 </div>
             `;
@@ -911,10 +958,48 @@
             // Clean up any existing listeners first
             this._cleanupEventListeners();
 
+            // Handle image load errors with fallback
+            const iconImages = this.container.querySelectorAll('.entity-icon-img');
+            iconImages.forEach(img => {
+                const errorHandler = () => {
+                    const fallback = img.dataset.fallbackLetter || '&#10024;';
+                    const parent = img.parentElement;
+                    if (parent) {
+                        const span = document.createElement('span');
+                        span.className = 'icon-fallback';
+                        span.setAttribute('aria-hidden', 'true');
+                        span.innerHTML = fallback;
+                        parent.replaceChild(span, img);
+                    }
+                };
+                this._addTrackedListener(img, 'error', errorHandler);
+            });
+
+            // Keyboard navigation for card (Enter/Space to navigate)
+            const card = this.container.querySelector('.entity-card[tabindex="0"]');
+            if (card) {
+                const keyHandler = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        // Don't trigger if focus is on a button or link inside the card
+                        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') {
+                            return;
+                        }
+                        e.preventDefault();
+                        const detailsLink = card.querySelector('.btn-view-details');
+                        if (detailsLink) {
+                            detailsLink.click();
+                        }
+                    }
+                };
+                this._addTrackedListener(card, 'keydown', keyHandler);
+            }
+
             // Expand button
             const expandBtn = this.container.querySelector('.entity-expand');
             if (expandBtn) {
-                const expandHandler = () => {
+                const expandHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     this.displayMode = 'full';
                     this.render();
                 };
@@ -924,7 +1009,9 @@
             // Corpus search button
             const corpusBtn = this.container.querySelector('.corpus-search');
             if (corpusBtn) {
-                const corpusHandler = () => {
+                const corpusHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     const term = corpusBtn.dataset.term;
                     window.location.href = `/corpus-search.html?term=${encodeURIComponent(term)}`;
                 };
@@ -934,7 +1021,9 @@
             // Share button
             const shareBtn = this.container.querySelector('.share-entity');
             if (shareBtn) {
-                const shareHandler = () => {
+                const shareHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     this.shareEntity();
                 };
                 this._addTrackedListener(shareBtn, 'click', shareHandler);
@@ -1070,11 +1159,17 @@
         }
 
         /**
-         * Render markdown (basic)
+         * Render markdown (basic) with XSS protection
+         * First escapes HTML, then applies markdown transformations
          */
         renderMarkdown(text) {
             if (!text) return '';
-            return text
+
+            // First escape the raw text to prevent XSS
+            let escaped = this.escapeHtml(text);
+
+            // Then apply markdown transformations on the escaped text
+            return escaped
                 .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.+?)\*/g, '<em>$1</em>')
                 .replace(/\n\n/g, '</p><p>')

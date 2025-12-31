@@ -271,12 +271,96 @@
             console.warn('[App] UniversalDisplayRenderer not found - display features limited');
         }
 
+        // Track if loading has been hidden to prevent duplicate operations
+        let loadingHidden = false;
+
+        /**
+         * Hide all loading indicators smoothly
+         * Handles both initial loader in #main-content and any other loading containers
+         */
+        function hideAllLoadingIndicators(source = 'unknown') {
+            if (loadingHidden) {
+                console.debug(`[App Init] Loading already hidden, skipping (source: ${source})`);
+                return;
+            }
+            loadingHidden = true;
+
+            console.log(`[App Init] Hiding loading indicators (source: ${source})`);
+
+            // Hide all loading containers with smooth transition
+            const loadingContainers = document.querySelectorAll('.loading-container');
+            loadingContainers.forEach((container, index) => {
+                // Add fade-out class for CSS transition
+                container.classList.add('fade-out');
+                container.style.opacity = '0';
+                container.style.transition = 'opacity 0.3s ease-out';
+                container.style.pointerEvents = 'none';
+
+                setTimeout(() => {
+                    container.style.display = 'none';
+                    console.debug(`[App Init] Loading container ${index + 1} hidden`);
+                }, 300);
+            });
+
+            // Also hide auth loading screen if present
+            const authLoadingScreen = document.getElementById('auth-loading-screen');
+            if (authLoadingScreen && authLoadingScreen.style.display !== 'none') {
+                authLoadingScreen.style.opacity = '0';
+                authLoadingScreen.style.transition = 'opacity 0.3s ease-out';
+                setTimeout(() => {
+                    authLoadingScreen.style.display = 'none';
+                    console.debug('[App Init] Auth loading screen hidden');
+                }, 300);
+            }
+        }
+
+        /**
+         * Emit app-ready event after first render
+         */
+        function emitAppReady(source) {
+            if (initState.firstRenderComplete) {
+                return; // Already emitted
+            }
+            initState.firstRenderComplete = true;
+
+            const totalDuration = (performance.now() - initState.startTime).toFixed(2);
+            console.log(`[App] App fully ready in ${totalDuration}ms (source: ${source})`);
+
+            document.dispatchEvent(new CustomEvent('app-ready', {
+                detail: {
+                    source,
+                    totalDuration: parseFloat(totalDuration),
+                    initState: { ...initState }
+                }
+            }));
+        }
+
+        // IMPORTANT: Set up first-render-complete listener BEFORE initializing navigation
+        // This prevents race conditions where the event fires before we're listening
+        document.addEventListener('first-render-complete', (event) => {
+            const route = event.detail?.route || 'unknown';
+            console.log(`[App Init] First render complete for route: ${route}`);
+            hideAllLoadingIndicators(`first-render-complete:${route}`);
+            emitAppReady(`first-render-complete:${route}`);
+        });
+
+        // Also listen for render errors to hide loading on failure
+        document.addEventListener('render-error', (event) => {
+            const route = event.detail?.route || 'unknown';
+            console.warn(`[App Init] Render error for route: ${route}, hiding loading`);
+            hideAllLoadingIndicators(`render-error:${route}`);
+            // Still emit app-ready on error so the app is interactive
+            emitAppReady(`render-error:${route}`);
+        });
+
         // Step 8: Initialize SPANavigation (requires renderer)
         console.log('[App] [8/12] Initializing Navigation...');
         if (dependencyExists('SPANavigation')) {
             if (!window.EyesOfAzrael.renderer) {
                 console.error('[App] SPANavigation requires UniversalDisplayRenderer but it is not available');
                 initState.warnings.push('SPANavigation skipped - missing renderer dependency');
+                // Show fallback content since navigation won't work
+                showNavigationFallback();
             } else {
                 try {
                     window.EyesOfAzrael.navigation = new SPANavigation(
@@ -289,10 +373,14 @@
                 } catch (error) {
                     console.error('[App] SPANavigation initialization failed:', error);
                     initState.warnings.push(`Navigation failed: ${error.message}`);
+                    // Show fallback content since navigation failed
+                    showNavigationFallback();
                 }
             }
         } else {
             console.warn('[App] SPANavigation not found - routing unavailable');
+            // Show fallback content since navigation is not available
+            showNavigationFallback();
         }
 
         // Step 9: Initialize EnhancedCorpusSearch
@@ -366,87 +454,6 @@
             }
         }));
 
-        // Track if loading has been hidden to prevent duplicate operations
-        let loadingHidden = false;
-
-        /**
-         * Hide all loading indicators smoothly
-         * Handles both initial loader in #main-content and any other loading containers
-         */
-        function hideAllLoadingIndicators(source = 'unknown') {
-            if (loadingHidden) {
-                console.debug(`[App Init] Loading already hidden, skipping (source: ${source})`);
-                return;
-            }
-            loadingHidden = true;
-
-            console.log(`[App Init] Hiding loading indicators (source: ${source})`);
-
-            // Hide all loading containers with smooth transition
-            const loadingContainers = document.querySelectorAll('.loading-container');
-            loadingContainers.forEach((container, index) => {
-                // Add fade-out class for CSS transition
-                container.classList.add('fade-out');
-                container.style.opacity = '0';
-                container.style.transition = 'opacity 0.3s ease-out';
-                container.style.pointerEvents = 'none';
-
-                setTimeout(() => {
-                    container.style.display = 'none';
-                    console.debug(`[App Init] Loading container ${index + 1} hidden`);
-                }, 300);
-            });
-
-            // Also hide auth loading screen if present
-            const authLoadingScreen = document.getElementById('auth-loading-screen');
-            if (authLoadingScreen && authLoadingScreen.style.display !== 'none') {
-                authLoadingScreen.style.opacity = '0';
-                authLoadingScreen.style.transition = 'opacity 0.3s ease-out';
-                setTimeout(() => {
-                    authLoadingScreen.style.display = 'none';
-                    console.debug('[App Init] Auth loading screen hidden');
-                }, 300);
-            }
-        }
-
-        /**
-         * Emit app-ready event after first render
-         */
-        function emitAppReady(source) {
-            if (initState.firstRenderComplete) {
-                return; // Already emitted
-            }
-            initState.firstRenderComplete = true;
-
-            const totalDuration = (performance.now() - initState.startTime).toFixed(2);
-            console.log(`[App] App fully ready in ${totalDuration}ms (source: ${source})`);
-
-            document.dispatchEvent(new CustomEvent('app-ready', {
-                detail: {
-                    source,
-                    totalDuration: parseFloat(totalDuration),
-                    initState: { ...initState }
-                }
-            }));
-        }
-
-        // Listen for first render complete from SPANavigation
-        document.addEventListener('first-render-complete', (event) => {
-            const route = event.detail?.route || 'unknown';
-            console.log(`[App Init] First render complete for route: ${route}`);
-            hideAllLoadingIndicators(`first-render-complete:${route}`);
-            emitAppReady(`first-render-complete:${route}`);
-        });
-
-        // Also listen for render errors to hide loading on failure
-        document.addEventListener('render-error', (event) => {
-            const route = event.detail?.route || 'unknown';
-            console.warn(`[App Init] Render error for route: ${route}, hiding loading`);
-            hideAllLoadingIndicators(`render-error:${route}`);
-            // Still emit app-ready on error so the app is interactive
-            emitAppReady(`render-error:${route}`);
-        });
-
         // Fallback: Hide loading after timeout if first-render-complete never fires
         setTimeout(() => {
             if (!loadingHidden) {
@@ -485,34 +492,32 @@
 
     /**
      * Setup authentication UI
+     * NOTE: Auth state changes and UI updates are handled by auth-guard-simple.js
+     * This function only sets up additional sign-out button handlers that may not
+     * be covered by the auth guard (e.g., dynamically added buttons).
+     *
      * @param {firebase.auth.Auth} auth - Firebase auth instance
      */
     function setupAuthUI(auth) {
-        const userInfo = document.getElementById('userInfo');
-        const userName = document.getElementById('userName');
-        const userAvatar = document.getElementById('userAvatar');
-        const signOutBtn = document.getElementById('signOutBtn');
+        // NOTE: We intentionally DO NOT add another onAuthStateChanged listener here
+        // because auth-guard-simple.js already handles:
+        // - User info display (userInfo, userName, userAvatar)
+        // - Auth state changes
+        // - Sign in/out button visibility
+        // Adding a duplicate listener would cause race conditions and double updates.
 
-        if (!userInfo) {
-            console.debug('[App] Auth UI elements not found in DOM');
+        // Only set up sign-out button handler if AuthGuard hasn't already
+        // (AuthGuard exposes a reinitButtons method for this purpose)
+        if (window.AuthGuard && typeof window.AuthGuard.reinitButtons === 'function') {
+            // Auth guard is available - let it handle button setup
+            console.debug('[App] Auth UI delegated to AuthGuard');
             return;
         }
 
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                userInfo.style.display = 'flex';
-                if (userName) {
-                    userName.textContent = user.displayName || user.email;
-                }
-                if (userAvatar && user.photoURL) {
-                    userAvatar.src = user.photoURL;
-                }
-            } else {
-                userInfo.style.display = 'none';
-            }
-        });
-
-        if (signOutBtn) {
+        // Fallback: Set up sign-out button if auth guard is not available
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn && !signOutBtn._appInitHandlerAttached) {
+            signOutBtn._appInitHandlerAttached = true;
             signOutBtn.addEventListener('click', async () => {
                 try {
                     await auth.signOut();
@@ -520,9 +525,10 @@
                     console.error('[Auth] Sign out error:', error);
                 }
             });
+            console.debug('[App] Auth UI fallback setup complete');
+        } else {
+            console.debug('[App] Auth UI elements not found or already initialized');
         }
-
-        console.debug('[App] Auth UI setup complete');
     }
 
     /**
@@ -626,17 +632,30 @@
     }
 
     /**
+     * Escape HTML special characters for safe display
+     * @param {string} text - Text to escape
+     * @returns {string} - Escaped text
+     */
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    /**
      * Show error message to user
      * @param {Error} error - The error to display
      */
     function showError(error) {
         const mainContent = document.getElementById('main-content');
         if (mainContent) {
-            // Escape HTML in error message
-            const safeMessage = error.message
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
+            // Escape HTML in both message and stack trace
+            const safeMessage = escapeHtml(error.message);
+            const safeStack = escapeHtml(error.stack || 'No stack trace available');
 
             mainContent.innerHTML = `
                 <div class="error-container" style="
@@ -650,11 +669,58 @@
                     <p style="color: #ef4444; margin: 1rem 0;">${safeMessage}</p>
                     <details style="text-align: left; margin: 1rem 0; padding: 1rem; background: rgba(0,0,0,0.1); border-radius: 8px;">
                         <summary style="cursor: pointer;">Technical Details</summary>
-                        <pre style="margin-top: 0.5rem; white-space: pre-wrap; font-size: 0.85rem;">${error.stack || 'No stack trace available'}</pre>
+                        <pre style="margin-top: 0.5rem; white-space: pre-wrap; font-size: 0.85rem;">${safeStack}</pre>
                     </details>
                     <button onclick="location.reload()" class="btn-primary" style="margin-top: 1rem;">Reload Page</button>
                 </div>
             `;
+        }
+    }
+
+    /**
+     * Show fallback content when navigation fails to initialize
+     * Provides basic links to main sections of the site
+     */
+    function showNavigationFallback() {
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            console.log('[App] Showing navigation fallback content');
+            mainContent.innerHTML = `
+                <div class="navigation-fallback" style="
+                    text-align: center;
+                    padding: 3rem;
+                    max-width: 800px;
+                    margin: 2rem auto;
+                ">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">&#128065;</div>
+                    <h1>Eyes of Azrael</h1>
+                    <p style="color: var(--color-text-secondary, #9ca3af); margin: 1rem 0 2rem;">
+                        Navigation failed to initialize. You can still explore using the links below.
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-bottom: 2rem;">
+                        <a href="#/mythologies" style="padding: 0.75rem 1.5rem; background: var(--color-primary, #8b7fff); color: white; text-decoration: none; border-radius: 8px;">
+                            Explore Mythologies
+                        </a>
+                        <a href="#/browse/deities" style="padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.1); color: inherit; text-decoration: none; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+                            Browse Deities
+                        </a>
+                        <a href="#/search" style="padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.1); color: inherit; text-decoration: none; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+                            Search
+                        </a>
+                    </div>
+                    <button onclick="location.reload()" class="btn-secondary" style="padding: 0.5rem 1rem; cursor: pointer;">
+                        Reload Page
+                    </button>
+                </div>
+            `;
+
+            // Dispatch first-render-complete so loading indicators are hidden
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: {
+                    route: 'navigation-fallback',
+                    timestamp: Date.now()
+                }
+            }));
         }
     }
 

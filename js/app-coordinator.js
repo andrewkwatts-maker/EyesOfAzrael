@@ -2,6 +2,17 @@
  * Application Coordinator - Enhanced Version
  * Manages initialization order and ensures auth + navigation work together
  * With detailed state tracking and diagnostic logging
+ *
+ * INITIALIZATION FLOW:
+ * 1. DOM ready (immediate or via DOMContentLoaded)
+ * 2. app-initialized event (from app-init-simple.js)
+ * 3. Navigation trigger (handleRoute called)
+ * 4. auth-ready event (optional, does not block public routes)
+ *
+ * ERROR RECOVERY:
+ * - Timeout fallback if app-initialized never fires (10 seconds)
+ * - Timeout fallback if navigation not available (15 seconds)
+ * - Error boundaries to prevent UI blocking
  */
 
 (function() {
@@ -9,13 +20,22 @@
 
     console.log('[App Coordinator] Starting enhanced coordinator...');
 
+    // Configuration
+    const CONFIG = {
+        APP_INIT_TIMEOUT: 10000,      // 10 seconds to wait for app-initialized
+        NAVIGATION_TIMEOUT: 15000,     // 15 seconds to wait for navigation
+        HEALTH_CHECK_INTERVAL: 5000,   // 5 seconds between health checks
+        MAX_HEALTH_CHECKS: 12          // Stop after 1 minute
+    };
+
     // Track initialization state with timestamps
     const initState = {
         domReady: { status: false, timestamp: null },
         authReady: { status: false, timestamp: null, user: null },
         appReady: { status: false, timestamp: null },
         navigationReady: { status: false, timestamp: null },
-        routeTriggered: { status: false, timestamp: null }
+        routeTriggered: { status: false, timestamp: null },
+        timedOut: { status: false, timestamp: null, reason: null }
     };
 
     // Track loaded classes/components
@@ -148,6 +168,9 @@
         initState.domReady.status = true;
         initState.domReady.timestamp = 0;
         logStateChange('initState', 'domReady', true, 'already ready');
+        // IMPORTANT: Still need to call checkAndInitialize for already-ready DOM
+        // Use setTimeout to ensure this runs after other synchronous script setup
+        setTimeout(() => checkAndInitialize(), 0);
     }
 
     // Listen for auth ready (from auth-guard-simple.js)
@@ -161,17 +184,50 @@
     });
 
     // Listen for app initialized (from app-init-simple.js)
-    document.addEventListener('app-initialized', () => {
+    document.addEventListener('app-initialized', (event) => {
         initState.appReady.status = true;
         initState.appReady.timestamp = Math.round(performance.now() - startTime);
-        logStateChange('initState', 'appReady', true);
+        const hasError = event.detail?.error ? ` (with error: ${event.detail.error})` : '';
+        logStateChange('initState', 'appReady', true, hasError);
         checkAndInitialize();
     });
+
+    // Timeout fallback: If app-initialized never fires, attempt to proceed anyway
+    // This handles cases where app-init-simple.js fails silently
+    setTimeout(() => {
+        if (!initState.appReady.status) {
+            const elapsed = Math.round(performance.now() - startTime);
+            console.warn(`[App Coordinator +${elapsed}ms] app-initialized timeout after ${CONFIG.APP_INIT_TIMEOUT}ms`);
+
+            initState.timedOut.status = true;
+            initState.timedOut.timestamp = elapsed;
+            initState.timedOut.reason = 'app-initialized timeout';
+
+            // Check if we can still proceed (navigation might be available)
+            checkComponents();
+            checkGlobalState();
+
+            if (globalState.navigation) {
+                console.log('[App Coordinator] Navigation available despite timeout, attempting to trigger route...');
+                initState.appReady.status = true; // Mark as ready to allow proceeding
+                initState.appReady.timestamp = elapsed;
+                checkAndInitialize();
+            } else {
+                console.error('[App Coordinator] Navigation not available after timeout');
+                showFallbackContent('Application failed to initialize. Please refresh the page.');
+            }
+        }
+    }, CONFIG.APP_INIT_TIMEOUT);
 
     /**
      * Check if all prerequisites are met and initialize navigation
      */
     function checkAndInitialize() {
+        // Prevent re-entry if already triggered
+        if (initState.routeTriggered.status) {
+            return;
+        }
+
         // Update component and global states
         checkComponents();
         checkGlobalState();
@@ -179,8 +235,10 @@
         const elapsed = Math.round(performance.now() - startTime);
         console.log(`[App Coordinator +${elapsed}ms] Checking prerequisites...`);
 
-        // Print diagnostic every check
-        printDiagnosticReport();
+        // Print diagnostic every check (but not too verbose)
+        if (elapsed > 1000 || !initState.appReady.status) {
+            printDiagnosticReport();
+        }
 
         // CHANGED: Only need DOM and app ready for public routes
         // Auth is optional - public routes don't require authentication
@@ -195,63 +253,7 @@
 
             // Small delay to ensure all scripts are loaded
             setTimeout(() => {
-                const delayedElapsed = Math.round(performance.now() - startTime);
-
-                // Re-check global state after delay
-                checkGlobalState();
-
-                if (window.EyesOfAzrael && window.EyesOfAzrael.navigation) {
-                    console.log(`[App Coordinator +${delayedElapsed}ms] ✅ Navigation initialized successfully`);
-
-                    // Trigger initial route
-                    try {
-                        window.EyesOfAzrael.navigation.handleRoute();
-                        initState.routeTriggered.status = true;
-                        initState.routeTriggered.timestamp = Math.round(performance.now() - startTime);
-                        logStateChange('initState', 'routeTriggered', true, 'Initial route handled');
-                    } catch (error) {
-                        console.error(`[App Coordinator +${delayedElapsed}ms] ❌ Error triggering route:`, error);
-                        printDiagnosticReport();
-                    }
-                } else {
-                    console.error(`[App Coordinator +${delayedElapsed}ms] ❌ Navigation NOT found!`);
-
-                    // Detailed diagnostic
-                    console.group('🔍 Navigation Failure Diagnosis');
-                    console.log('window.EyesOfAzrael exists:', !!window.EyesOfAzrael);
-
-                    if (window.EyesOfAzrael) {
-                        console.log('window.EyesOfAzrael contents:', Object.keys(window.EyesOfAzrael));
-                        console.log('renderer exists:', !!window.EyesOfAzrael.renderer);
-                        console.log('navigation exists:', !!window.EyesOfAzrael.navigation);
-                    }
-
-                    console.log('UniversalDisplayRenderer class defined:', typeof UniversalDisplayRenderer !== 'undefined');
-                    console.log('SPANavigation class defined:', typeof SPANavigation !== 'undefined');
-                    console.log('HomeView class defined:', typeof HomeView !== 'undefined');
-
-                    // Check if scripts loaded
-                    const scripts = Array.from(document.querySelectorAll('script[src]'))
-                        .map(s => s.src.split('/').pop());
-                    console.log('Loaded scripts:', scripts);
-
-                    // Check for specific scripts
-                    const requiredScripts = [
-                        'universal-display-renderer.js',
-                        'spa-navigation.js',
-                        'home-view.js',
-                        'app-init-simple.js'
-                    ];
-                    const missingScripts = requiredScripts.filter(name =>
-                        !scripts.some(src => src.includes(name))
-                    );
-                    if (missingScripts.length > 0) {
-                        console.error('❌ Missing required scripts:', missingScripts);
-                    }
-
-                    console.groupEnd();
-                    printDiagnosticReport();
-                }
+                triggerInitialRoute();
             }, 100);
         } else {
             // Log what we're still waiting for
@@ -264,6 +266,119 @@
                 console.log(`[App Coordinator +${elapsed}ms] Still waiting for: ${waiting.join(', ')}`);
             }
         }
+    }
+
+    /**
+     * Trigger the initial route handling
+     * Separated for cleaner error handling and retry logic
+     */
+    function triggerInitialRoute() {
+        // Prevent double-triggering
+        if (initState.routeTriggered.status) {
+            return;
+        }
+
+        const elapsed = Math.round(performance.now() - startTime);
+
+        // Re-check global state after delay
+        checkGlobalState();
+
+        if (window.EyesOfAzrael && window.EyesOfAzrael.navigation) {
+            console.log(`[App Coordinator +${elapsed}ms] Navigation initialized successfully`);
+
+            // Trigger initial route with error handling
+            try {
+                window.EyesOfAzrael.navigation.handleRoute();
+                initState.routeTriggered.status = true;
+                initState.routeTriggered.timestamp = Math.round(performance.now() - startTime);
+                logStateChange('initState', 'routeTriggered', true, 'Initial route handled');
+            } catch (error) {
+                console.error(`[App Coordinator +${elapsed}ms] Error triggering route:`, error);
+
+                // Attempt recovery: show error content instead of blank page
+                showFallbackContent('Failed to load the page. Error: ' + (error.message || 'Unknown error'));
+
+                // Still mark as triggered to prevent infinite loops
+                initState.routeTriggered.status = true;
+                initState.routeTriggered.timestamp = Math.round(performance.now() - startTime);
+
+                printDiagnosticReport();
+            }
+        } else {
+            console.error(`[App Coordinator +${elapsed}ms] Navigation NOT found!`);
+
+            // Detailed diagnostic
+            console.group('Navigation Failure Diagnosis');
+            console.log('window.EyesOfAzrael exists:', !!window.EyesOfAzrael);
+
+            if (window.EyesOfAzrael) {
+                console.log('window.EyesOfAzrael contents:', Object.keys(window.EyesOfAzrael));
+                console.log('renderer exists:', !!window.EyesOfAzrael.renderer);
+                console.log('navigation exists:', !!window.EyesOfAzrael.navigation);
+            }
+
+            console.log('UniversalDisplayRenderer class defined:', typeof UniversalDisplayRenderer !== 'undefined');
+            console.log('SPANavigation class defined:', typeof SPANavigation !== 'undefined');
+            console.log('HomeView class defined:', typeof HomeView !== 'undefined');
+
+            // Check if scripts loaded
+            const scripts = Array.from(document.querySelectorAll('script[src]'))
+                .map(s => s.src.split('/').pop());
+            console.log('Loaded scripts:', scripts);
+
+            // Check for specific scripts
+            const requiredScripts = [
+                'universal-display-renderer.js',
+                'spa-navigation.js',
+                'home-view.js',
+                'app-init-simple.js'
+            ];
+            const missingScripts = requiredScripts.filter(name =>
+                !scripts.some(src => src.includes(name))
+            );
+            if (missingScripts.length > 0) {
+                console.error('Missing required scripts:', missingScripts);
+            }
+
+            console.groupEnd();
+            printDiagnosticReport();
+
+            // Don't show fallback immediately - let health check handle it
+            // This allows more time for async loading
+        }
+    }
+
+    /**
+     * Show fallback content when initialization fails completely
+     * This prevents the user from seeing a blank page
+     * @param {string} message - Error message to display
+     */
+    function showFallbackContent(message) {
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            mainContent.innerHTML = `
+                <div class="error-container" style="text-align: center; padding: 3rem; max-width: 600px; margin: 2rem auto;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">&#9888;</div>
+                    <h1 style="color: #ef4444; margin-bottom: 1rem;">Initialization Error</h1>
+                    <p style="color: #9ca3af; margin-bottom: 2rem;">${message}</p>
+                    <button onclick="location.reload()" class="btn-primary" style="
+                        padding: 0.75rem 1.5rem;
+                        background: #3b82f6;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 1rem;
+                    ">Reload Page</button>
+                </div>
+            `;
+        }
+
+        // Also hide any loading spinners
+        const loadingContainers = document.querySelectorAll('.loading-container');
+        loadingContainers.forEach(container => {
+            container.style.display = 'none';
+        });
     }
 
     // Expose debugging functions
@@ -289,24 +404,31 @@
         checkAndInitialize();
     };
 
-    // Periodic health check (every 5 seconds for first minute)
+    // Periodic health check
     let healthCheckCount = 0;
     const healthCheckInterval = setInterval(() => {
         healthCheckCount++;
 
-        if (healthCheckCount > 12) { // Stop after 1 minute
+        if (healthCheckCount > CONFIG.MAX_HEALTH_CHECKS) {
             clearInterval(healthCheckInterval);
+
+            // Final check: if route still not triggered, show fallback
+            if (!initState.routeTriggered.status) {
+                const elapsed = Math.round(performance.now() - startTime);
+                console.error(`[App Coordinator +${elapsed}ms] Route never triggered after ${CONFIG.MAX_HEALTH_CHECKS} health checks`);
+                showFallbackContent('The page took too long to load. Please check your connection and refresh.');
+            }
             return;
         }
 
         if (!initState.routeTriggered.status) {
             const elapsed = Math.round(performance.now() - startTime);
-            console.warn(`[App Coordinator +${elapsed}ms] ⚠️ Route not triggered yet (check ${healthCheckCount}/12)`);
+            console.warn(`[App Coordinator +${elapsed}ms] Route not triggered yet (check ${healthCheckCount}/${CONFIG.MAX_HEALTH_CHECKS})`);
             checkAndInitialize();
         } else {
             clearInterval(healthCheckInterval);
-            console.log('[App Coordinator] ✅ Health check passed, stopping monitoring');
+            console.log('[App Coordinator] Health check passed, stopping monitoring');
         }
-    }, 5000);
+    }, CONFIG.HEALTH_CHECK_INTERVAL);
 
 })();

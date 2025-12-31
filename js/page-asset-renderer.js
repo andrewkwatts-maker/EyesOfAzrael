@@ -159,19 +159,25 @@ class PageAssetRenderer {
      * Generate hero section HTML
      */
     getHeroHTML(hero) {
-        const { title, subtitle, icon, cta = [] } = hero;
+        const { title = '', subtitle = '', icon = '', cta = [] } = hero;
+
+        // Skip rendering if no title
+        if (!title) {
+            console.warn('[Page Renderer] Hero section has no title, skipping render');
+            return '';
+        }
 
         return `
             <section class="page-hero-section">
-                ${icon ? `<div class="hero-icon-display">${icon}</div>` : ''}
-                <h1 class="hero-title">${title}</h1>
-                ${subtitle ? `<p class="hero-subtitle">${subtitle}</p>` : ''}
+                ${icon ? `<div class="hero-icon-display">${this.renderIcon(icon)}</div>` : ''}
+                <h1 class="hero-title">${this.escapeHtml(title)}</h1>
+                ${subtitle ? `<p class="hero-subtitle">${this.escapeHtml(subtitle)}</p>` : ''}
                 ${cta.length > 0 ? `
                     <div class="hero-actions">
                         ${cta.map(button => `
-                            <a href="${button.link}"
+                            <a href="${this.escapeAttr(button.link || '#/')}"
                                class="btn ${button.primary ? 'btn-primary' : 'btn-secondary'}">
-                                ${button.icon || ''} ${button.text}
+                                ${button.icon ? this.renderIcon(button.icon) : ''} ${this.escapeHtml(button.text || '')}
                             </a>
                         `).join('')}
                     </div>
@@ -181,21 +187,82 @@ class PageAssetRenderer {
     }
 
     /**
+     * Render icon - handles both emoji/text and image URLs
+     * @param {string} icon - Icon string (emoji, text, or URL)
+     * @returns {string} Rendered icon HTML
+     */
+    renderIcon(icon) {
+        if (!icon) return '';
+
+        // Check if icon is an image URL
+        if (typeof icon === 'string' &&
+            (icon.includes('.svg') || icon.includes('.png') || icon.includes('.jpg') || icon.startsWith('http'))) {
+            const sanitizedUrl = this.sanitizeUrl(icon);
+            if (!sanitizedUrl) return '';
+            return `<img src="${this.escapeAttr(sanitizedUrl)}" alt="" class="icon-img" loading="lazy" onerror="this.style.display='none'">`;
+        }
+
+        // For emoji or text icons, escape HTML
+        return this.escapeHtml(icon);
+    }
+
+    /**
+     * Sanitize a URL to prevent javascript: and data: XSS attacks
+     * @param {string} url - URL to sanitize
+     * @returns {string} Sanitized URL or empty string if unsafe
+     */
+    sanitizeUrl(url) {
+        if (!url || typeof url !== 'string') return '';
+        const trimmed = url.trim().toLowerCase();
+        // Block javascript:, data:, and vbscript: protocols
+        if (trimmed.startsWith('javascript:') ||
+            trimmed.startsWith('data:') ||
+            trimmed.startsWith('vbscript:')) {
+            console.warn('[Page Renderer] Blocked potentially dangerous URL:', url);
+            return '';
+        }
+        return url;
+    }
+
+    /**
+     * Escape string for use in HTML attributes
+     * @param {*} str - String to escape
+     * @returns {string} Escaped string safe for HTML attributes
+     */
+    escapeAttr(str) {
+        if (str == null) return '';
+        const strValue = String(str);
+        return strValue
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    /**
      * Generate section HTML
      */
     getSectionHTML(section) {
-        const { title, description, cards = [], icon = '📄' } = section;
+        const { title = '', description = '', cards = [], icon = '' } = section;
+        const sectionId = section.id || '';
+
+        // Skip rendering if no title
+        if (!title) {
+            console.warn('[Page Renderer] Section has no title, skipping render');
+            return '';
+        }
 
         return `
-            <section class="page-section" data-section="${section.id}">
+            <section class="page-section" data-section="${this.escapeAttr(sectionId)}">
                 <div class="section-header">
                     <h2 class="section-title">
-                        <span class="section-icon">${icon}</span>
-                        ${title}
+                        ${icon ? `<span class="section-icon">${this.renderIcon(icon)}</span>` : ''}
+                        ${this.escapeHtml(title)}
                     </h2>
-                    ${description ? `<p class="section-description">${description}</p>` : ''}
+                    ${description ? `<p class="section-description">${this.escapeHtml(description)}</p>` : ''}
                     ${section.link ? `
-                        <a href="${section.link}" class="section-link">View All →</a>
+                        <a href="${this.escapeAttr(section.link)}" class="section-link">View All</a>
                     ` : ''}
                 </div>
                 <div class="section-content">
@@ -210,7 +277,8 @@ class PageAssetRenderer {
      */
     getCardsHTML(cards, section) {
         if (!cards || cards.length === 0) {
-            return `<p class="no-content">No ${section.collection} available yet.</p>`;
+            const collectionName = this.escapeHtml(section.collection || 'content');
+            return `<p class="no-content">No ${collectionName} available yet.</p>`;
         }
 
         return `
@@ -224,21 +292,36 @@ class PageAssetRenderer {
      * Generate individual card HTML (matching standardized card styling)
      */
     getCardHTML(card, section) {
+        if (!card) return '';
+
         const link = this.getCardLink(card, section);
-        const icon = card.icon || section.icon || '📄';
+        const icon = card.icon || section.icon || '';
         const name = card.name || card.title || 'Untitled';
         const description = card.description || card.subtitle || '';
+        const cardId = card.id || '';
 
         return `
-            <a href="${link}" class="panel-card" data-card-id="${card.id}">
-                <span class="card-icon">${icon}</span>
+            <a href="${this.escapeAttr(link)}" class="panel-card" data-card-id="${this.escapeAttr(cardId)}">
+                ${icon ? `<span class="card-icon">${this.renderIcon(icon)}</span>` : ''}
                 <h3 class="card-title">${this.escapeHtml(name)}</h3>
-                ${description ? `<p class="card-description">${this.escapeHtml(description)}</p>` : ''}
+                ${description ? `<p class="card-description">${this.escapeHtml(this.truncateText(description, 150))}</p>` : ''}
                 ${card.metadata?.status ? `
-                    <span class="card-status">${card.metadata.status}</span>
+                    <span class="card-status">${this.escapeHtml(card.metadata.status)}</span>
                 ` : ''}
             </a>
         `;
+    }
+
+    /**
+     * Truncate text to a maximum length
+     * @param {string} text - Text to truncate
+     * @param {number} maxLength - Maximum length
+     * @returns {string} Truncated text with ellipsis if needed
+     */
+    truncateText(text, maxLength = 150) {
+        if (!text || typeof text !== 'string') return '';
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength).trim() + '...';
     }
 
     /**
@@ -253,25 +336,49 @@ class PageAssetRenderer {
 
     /**
      * Get link for a card
+     * @param {Object} card - Card data
+     * @param {Object} section - Section configuration
+     * @returns {string} Navigation link
      */
     getCardLink(card, section) {
-        const collection = section.collection;
+        const collection = section?.collection || '';
+        const cardId = card?.id || '';
+
+        // Return home if no valid card ID
+        if (!cardId) return '#/';
 
         switch (collection) {
             case 'mythologies':
-                return `#/mythology/${card.id}`;
+                return `#/mythology/${cardId}`;
+            case 'deities':
+                return `#/browse/deities/${cardId}`;
+            case 'heroes':
+                return `#/browse/heroes/${cardId}`;
+            case 'creatures':
+                return `#/browse/creatures/${cardId}`;
             case 'places':
-                return `#/place/${card.id}`;
+                return `#/browse/places/${cardId}`;
             case 'items':
-                return `#/item/${card.id}`;
+                return `#/browse/items/${cardId}`;
             case 'archetypes':
-                return `#/archetype/${card.id}`;
+                return `#/browse/archetypes/${cardId}`;
+            case 'rituals':
+                return `#/browse/rituals/${cardId}`;
+            case 'herbs':
+                return `#/browse/herbs/${cardId}`;
+            case 'texts':
+                return `#/browse/texts/${cardId}`;
+            case 'symbols':
+                return `#/browse/symbols/${cardId}`;
+            case 'magic':
+                return `#/browse/magic/${cardId}`;
             case 'theories':
-                return `#/theory/${card.id}`;
+                return `#/theory/${cardId}`;
             case 'submissions':
-                return `#/submission/${card.id}`;
+                return `#/submission/${cardId}`;
             default:
-                return `#/${collection}/${card.id}`;
+                // Fallback: use collection as route segment if available
+                return collection ? `#/${collection}/${cardId}` : `#/entity/${cardId}`;
         }
     }
 
@@ -290,42 +397,69 @@ class PageAssetRenderer {
 
     /**
      * Loading state HTML
+     * @param {string} message - Optional loading message
+     * @returns {string} Loading HTML
      */
-    getLoadingHTML() {
+    getLoadingHTML(message = 'Loading page...') {
         return `
-            <div class="loading-container">
+            <div class="loading-container" role="status" aria-live="polite">
                 <div class="spinner-container">
                     <div class="spinner-ring"></div>
                     <div class="spinner-ring"></div>
                     <div class="spinner-ring"></div>
                 </div>
-                <p class="loading-message">Loading page...</p>
+                <p class="loading-message">${this.escapeHtml(message)}</p>
             </div>
         `;
     }
 
     /**
      * Not found HTML
+     * @param {string} pageId - Page ID that was not found
+     * @returns {string} Not found HTML
      */
     getNotFoundHTML(pageId) {
+        const escapedPageId = this.escapeHtml(pageId || 'unknown');
         return `
-            <div class="error-container">
-                <h1>Page Not Found</h1>
-                <p>The page "${pageId}" could not be found.</p>
-                <a href="#/" class="btn btn-primary">Return Home</a>
+            <div class="error-container" role="alert" style="text-align: center; padding: 4rem 2rem;">
+                <div class="error-icon" style="font-size: 4rem; margin-bottom: 1.5rem;">🔍</div>
+                <h1 style="color: var(--color-text-primary, #e5e7eb); margin-bottom: 1rem;">Page Not Found</h1>
+                <p style="color: var(--color-text-secondary, #9ca3af); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+                    The page "${escapedPageId}" could not be found. It may have been moved or deleted.
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="#/" class="btn btn-primary" style="padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none;">
+                        Return Home
+                    </a>
+                </div>
             </div>
         `;
     }
 
     /**
      * Error HTML
+     * @param {Error|string} error - Error object or message
+     * @returns {string} Error HTML
      */
     getErrorHTML(error) {
+        const errorMessage = this.escapeHtml(
+            (error && typeof error === 'object' && error.message) ? error.message : String(error || 'An unexpected error occurred')
+        );
         return `
-            <div class="error-container">
-                <h1>Error Loading Page</h1>
-                <p>${error.message}</p>
-                <button onclick="location.reload()" class="btn btn-primary">Retry</button>
+            <div class="error-container" role="alert" style="text-align: center; padding: 4rem 2rem;">
+                <div class="error-icon" style="font-size: 4rem; margin-bottom: 1.5rem;">⚠️</div>
+                <h1 style="color: var(--color-error, #ef4444); margin-bottom: 1rem;">Error Loading Page</h1>
+                <p style="color: var(--color-text-secondary, #9ca3af); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+                    ${errorMessage}
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="location.reload()" class="btn btn-primary" style="padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer;">
+                        Retry
+                    </button>
+                    <a href="#/" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none;">
+                        Return Home
+                    </a>
+                </div>
             </div>
         `;
     }
