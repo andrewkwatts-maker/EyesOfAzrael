@@ -650,6 +650,67 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ===== MODERATION BANS COLLECTION =====
+    // Path: /moderation_bans/{userId}
+    // Tracks banned users whose content should be hidden
+
+    match /moderation_bans/{userId} {
+      // Only admin can read banned users list
+      allow read: if isAdminEmail();
+
+      // Only admin can ban users
+      allow create: if isAdminEmail()
+                    && request.resource.data.keys().hasAll(['userId', 'bannedBy', 'bannedAt', 'status'])
+                    && request.resource.data.userId == userId
+                    && request.resource.data.bannedBy == request.auth.uid
+                    && request.resource.data.status == 'active';
+
+      // Only admin can update ban status (unban)
+      allow update: if isAdminEmail()
+                    && request.resource.data.userId == resource.data.userId;
+
+      // Only admin can delete bans
+      allow delete: if isAdminEmail();
+    }
+
+    // ===== MODERATION FLAGS COLLECTION =====
+    // Path: /moderation_flags/{flagId}
+    // Tracks flagged content for admin review
+
+    match /moderation_flags/{flagId} {
+      // Only admin can read flags
+      allow read: if isAdminEmail();
+
+      // Only admin can create flags
+      allow create: if isAdminEmail()
+                    && request.resource.data.keys().hasAll(['contentType', 'contentId', 'reason', 'flaggedBy', 'flaggedAt', 'status'])
+                    && request.resource.data.flaggedBy == request.auth.uid
+                    && request.resource.data.status == 'pending';
+
+      // Only admin can update flags (resolve them)
+      allow update: if isAdminEmail();
+
+      // Only admin can delete flags
+      allow delete: if isAdminEmail();
+    }
+
+    // ===== MODERATION HISTORY COLLECTION =====
+    // Path: /moderation_history/{historyId}
+    // Audit log of all moderation actions
+
+    match /moderation_history/{historyId} {
+      // Only admin can read moderation history
+      allow read: if isAdminEmail();
+
+      // Only admin can create history entries
+      allow create: if isAdminEmail()
+                    && request.resource.data.keys().hasAll(['action', 'performedBy', 'timestamp'])
+                    && request.resource.data.performedBy == request.auth.uid;
+
+      // History entries should not be updated or deleted (audit trail)
+      allow update, delete: if false;
+    }
+
     // ===== DEFAULT FALLBACK FOR UNDEFINED COLLECTIONS =====
     // Allow read access to any collection not explicitly defined above
     // This is useful for new collections during development

@@ -15,12 +15,13 @@
 
 .universal-grid {
     display: grid;
-    /* Desktop: 4 columns (default) */
+    /* Desktop: Fixed 4 columns - not auto-fill */
     grid-template-columns: repeat(4, 1fr);
     gap: var(--spacing-lg, 1.5rem);
     width: 100%;
+    max-width: 1600px;
     margin: 0 auto;
-    padding: var(--spacing-md, 1rem);
+    padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
 }
 
 /* Tablet: 3 columns */
@@ -30,11 +31,39 @@
     }
 }
 
-/* Mobile Landscape: 4 columns */
-@media (max-width: 768px) and (orientation: landscape) {
+/* Mobile Landscape: 4 columns (extended range for all landscape phones) */
+@media (max-width: 896px) and (orientation: landscape) {
     .universal-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: var(--spacing-md, 1rem);
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: var(--spacing-sm, 0.75rem);
+        padding: var(--spacing-sm, 0.5rem);
+    }
+
+    /* Compact cards in landscape */
+    .universal-grid-card {
+        padding: var(--spacing-sm, 0.75rem);
+    }
+
+    .grid-card-icon {
+        font-size: var(--font-size-3xl, 1.75rem);
+        margin-bottom: var(--spacing-xs, 0.25rem);
+    }
+
+    .grid-card-title {
+        font-size: var(--font-size-sm, 0.875rem);
+    }
+
+    .grid-card-description {
+        -webkit-line-clamp: 2;
+        font-size: var(--font-size-xs, 0.75rem);
+    }
+
+    .grid-card-meta {
+        display: none;
+    }
+
+    .grid-card-footer {
+        display: none;
     }
 }
 
@@ -55,10 +84,24 @@
     }
 }
 
-/* Single column for very small screens */
+/* Very small screens: still 2 columns but tighter spacing */
 @media (max-width: 400px) {
     .universal-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-xs, 0.25rem);
+        padding: var(--spacing-xs, 0.25rem);
+    }
+
+    .universal-grid-card {
+        padding: var(--spacing-sm, 0.5rem);
+    }
+
+    .grid-card-icon {
+        font-size: var(--font-size-2xl, 1.5rem);
+    }
+
+    .grid-card-title {
+        font-size: var(--font-size-xs, 0.75rem);
     }
 }
 

@@ -251,13 +251,33 @@ body.theme-transitioning * {
     font-size: var(--font-size-sm);
 }
 
-/* === Grid Layouts === */
+/* === Grid Layouts - Fixed 4 columns on desktop === */
 
 .deity-grid,
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: var(--spacing-lg);
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 var(--spacing-md, 1rem);
+}
+
+/* Tablet: 3 columns */
+@media (max-width: 1200px) {
+    .deity-grid,
+    .grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Tablet portrait: 2 columns */
+@media (max-width: 900px) {
+    .deity-grid,
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .deity-card,
@@ -573,6 +593,7 @@ body > .theme-picker {
 
 /* === Responsive Design === */
 
+/* Tablet: 2 columns */
 @media (max-width: 768px) {
     .hero-section {
         padding: var(--spacing-2xl) var(--spacing-md);
@@ -580,7 +601,9 @@ body > .theme-picker {
 
     .deity-grid,
     .grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+        padding: 0 var(--spacing-sm, 0.5rem);
     }
 
     .nav-bar {
@@ -593,10 +616,63 @@ body > .theme-picker {
     }
 }
 
-@media (min-width: 768px) and (max-width: 1024px) {
+/* Mobile Portrait: 2 columns (375px-480px viewport) */
+@media (max-width: 480px) {
     .deity-grid,
     .grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+    }
+
+    .deity-card,
+    .card {
+        padding: var(--spacing-md);
+    }
+
+    .deity-icon {
+        font-size: var(--font-size-4xl);
+    }
+}
+
+/* Note: Main responsive breakpoints for grid are defined above with the grid layout */
+@media (min-width: 768px) and (max-width: 900px) {
+    .deity-grid,
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Mobile Landscape: 4 columns for horizontal phone viewing */
+@media (max-width: 896px) and (orientation: landscape) {
+    .hero-section {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    .deity-grid,
+    .grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: var(--spacing-sm);
+        padding: 0 var(--spacing-xs, 0.25rem);
+    }
+
+    .deity-card,
+    .card {
+        padding: var(--spacing-sm);
+    }
+
+    .deity-icon {
+        font-size: var(--font-size-3xl);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .deity-card h3,
+    .card h3 {
+        font-size: var(--font-size-sm);
+    }
+
+    /* Compact nav for landscape */
+    .nav-bar {
+        padding: var(--spacing-xs) var(--spacing-sm);
     }
 }
 

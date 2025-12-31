@@ -1,0 +1,698 @@
+/**
+ * Admin Moderation Panel Styles
+ * Styling for the admin content moderation UI
+ * Uses existing styling patterns from the project
+ */
+
+/* ============================================
+   ADMIN BUTTON IN HEADER
+   ============================================ */
+
+.admin-moderation-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 165, 0, 0.2));
+    border: 1px solid rgba(255, 165, 0, 0.4);
+    border-radius: 20px;
+    color: #ffa500;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+}
+
+.admin-moderation-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 165, 0, 0.3));
+    border-color: #ffa500;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+}
+
+.admin-moderation-btn:focus-visible {
+    outline: 2px solid #ffa500;
+    outline-offset: 2px;
+}
+
+.admin-moderation-btn .admin-icon {
+    font-size: 1rem;
+}
+
+@media (max-width: 640px) {
+    .admin-moderation-btn .admin-label {
+        display: none;
+    }
+
+    .admin-moderation-btn {
+        padding: 0.5rem;
+    }
+}
+
+/* ============================================
+   MODERATION PANEL
+   ============================================ */
+
+.admin-moderation-panel {
+    position: fixed;
+    top: 70px;
+    right: 1rem;
+    width: 450px;
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 90px);
+    background: rgba(26, 31, 58, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 16px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 165, 0, 0.1);
+    z-index: 10001;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scale(0.98);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.admin-moderation-panel.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+/* ============================================
+   PANEL HEADER
+   ============================================ */
+
+.moderation-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.15), rgba(255, 165, 0, 0.15));
+    border-bottom: 1px solid rgba(255, 165, 0, 0.2);
+}
+
+.moderation-panel-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffa500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.moderation-close-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 50%;
+    color: #adb5bd;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.moderation-close-btn:hover {
+    background: rgba(255, 107, 107, 0.3);
+    color: #ff6b6b;
+}
+
+/* ============================================
+   STATS BAR
+   ============================================ */
+
+.moderation-stats {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 165, 0, 0.1);
+}
+
+.mod-stat {
+    flex: 1;
+    text-align: center;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.mod-stat-value {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffa500;
+}
+
+.mod-stat-label {
+    display: block;
+    font-size: 0.7rem;
+    color: #adb5bd;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.25rem;
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+
+.moderation-tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(255, 165, 0, 0.2);
+}
+
+.mod-tab {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #adb5bd;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mod-tab:hover {
+    background: rgba(255, 165, 0, 0.1);
+    color: #ffa500;
+}
+
+.mod-tab.active {
+    color: #ffa500;
+    border-bottom-color: #ffa500;
+    background: rgba(255, 165, 0, 0.1);
+}
+
+/* ============================================
+   CONTENT AREA
+   ============================================ */
+
+.moderation-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    min-height: 200px;
+    max-height: 350px;
+}
+
+/* Custom scrollbar */
+.moderation-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.moderation-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.moderation-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 165, 0, 0.3);
+    border-radius: 3px;
+}
+
+.moderation-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 165, 0, 0.5);
+}
+
+/* ============================================
+   LIST ITEMS
+   ============================================ */
+
+.mod-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.mod-list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 165, 0, 0.1);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.mod-list-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 165, 0, 0.25);
+}
+
+.mod-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.mod-item-title {
+    font-weight: 600;
+    color: #f8f9fa;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    word-break: break-word;
+}
+
+.mod-item-subtitle {
+    color: #adb5bd;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.mod-item-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.mod-item-reason {
+    color: #ff6b6b;
+}
+
+.mod-item-date {
+    color: #6c757d;
+}
+
+.mod-item-status {
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.mod-item-status.status-pending {
+    background: rgba(255, 212, 59, 0.2);
+    color: #ffd43b;
+}
+
+.mod-item-status.status-resolved {
+    background: rgba(74, 222, 128, 0.2);
+    color: #4ade80;
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
+
+.mod-item-action {
+    padding: 0.4rem 0.75rem;
+    background: rgba(255, 165, 0, 0.15);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 6px;
+    color: #ffa500;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.mod-item-action:hover {
+    background: rgba(255, 165, 0, 0.25);
+    border-color: #ffa500;
+}
+
+.mod-item-action.danger {
+    background: rgba(255, 107, 107, 0.15);
+    border-color: rgba(255, 107, 107, 0.3);
+    color: #ff6b6b;
+}
+
+.mod-item-action.danger:hover {
+    background: rgba(255, 107, 107, 0.25);
+    border-color: #ff6b6b;
+}
+
+.mod-item-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+/* ============================================
+   HISTORY LIST
+   ============================================ */
+
+.mod-history-list .mod-list-item {
+    flex-direction: row;
+    align-items: center;
+}
+
+.mod-history-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 165, 0, 0.15);
+    border-radius: 50%;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.mod-empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #6c757d;
+}
+
+.mod-empty-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.75rem;
+    opacity: 0.5;
+}
+
+.mod-empty-state p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   BOTTOM ACTIONS
+   ============================================ */
+
+.moderation-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 165, 0, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.mod-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.6rem 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 8px;
+    color: #adb5bd;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mod-action-btn:hover {
+    background: rgba(255, 165, 0, 0.15);
+    border-color: #ffa500;
+    color: #ffa500;
+}
+
+.mod-action-btn.primary {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 165, 0, 0.2));
+    border-color: #ffa500;
+    color: #ffa500;
+}
+
+.mod-action-btn.primary:hover {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 165, 0, 0.3));
+    box-shadow: 0 4px 12px rgba(255, 165, 0, 0.2);
+}
+
+/* ============================================
+   DIALOG OVERLAY
+   ============================================ */
+
+.mod-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10002;
+    padding: 1rem;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.mod-dialog {
+    width: 400px;
+    max-width: 100%;
+    background: rgba(26, 31, 58, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.mod-dialog h3 {
+    margin: 0 0 1.25rem;
+    color: #ffa500;
+    font-size: 1.1rem;
+}
+
+.mod-form-group {
+    margin-bottom: 1rem;
+}
+
+.mod-form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #adb5bd;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.mod-form-group input,
+.mod-form-group textarea,
+.mod-form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 8px;
+    color: #f8f9fa;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.mod-form-group input:focus,
+.mod-form-group textarea:focus,
+.mod-form-group select:focus {
+    outline: none;
+    border-color: #ffa500;
+    box-shadow: 0 0 0 3px rgba(255, 165, 0, 0.1);
+}
+
+.mod-form-group input::placeholder,
+.mod-form-group textarea::placeholder {
+    color: #6c757d;
+}
+
+.mod-form-group select {
+    cursor: pointer;
+}
+
+.mod-form-group select option {
+    background: #1a1f3a;
+    color: #f8f9fa;
+}
+
+.mod-dialog-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.mod-dialog-actions .mod-action-btn {
+    flex: 1;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+    .admin-moderation-panel {
+        top: 60px;
+        right: 0.5rem;
+        left: 0.5rem;
+        width: auto;
+        max-height: calc(100vh - 80px);
+    }
+
+    .moderation-content {
+        max-height: 300px;
+    }
+
+    .moderation-stats {
+        flex-wrap: wrap;
+    }
+
+    .mod-stat {
+        min-width: calc(33% - 0.35rem);
+    }
+
+    .mod-list-item {
+        flex-direction: column;
+    }
+
+    .mod-item-actions {
+        flex-direction: row;
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+
+    .mod-item-action {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .moderation-panel-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .moderation-panel-header h2 {
+        font-size: 1rem;
+    }
+
+    .mod-tab {
+        padding: 0.6rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .moderation-actions {
+        flex-wrap: wrap;
+    }
+
+    .mod-action-btn {
+        flex: 1 1 calc(50% - 0.25rem);
+        font-size: 0.75rem;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-moderation-panel,
+    .mod-dialog-overlay,
+    .mod-dialog {
+        animation: none;
+        transition: opacity 0.1s ease;
+    }
+}
+
+.mod-tab:focus-visible,
+.mod-item-action:focus-visible,
+.mod-action-btn:focus-visible {
+    outline: 2px solid #ffa500;
+    outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .admin-moderation-panel {
+        border-width: 2px;
+    }
+
+    .mod-list-item {
+        border-width: 2px;
+    }
+
+    .mod-item-action,
+    .mod-action-btn {
+        border-width: 2px;
+    }
+}
+
+/* ============================================
+   ADMIN TOOLS SECTION IN EXTENDED MENU
+   ============================================ */
+
+.admin-tools-section {
+    border-top: 1px solid rgba(255, 165, 0, 0.3);
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+.admin-tools-section h3 {
+    color: #ffa500 !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-tools-section .section-icon {
+    font-size: 1.1rem;
+}
+
+.panel-nav-link.admin-link {
+    background: rgba(255, 165, 0, 0.08);
+    border: 1px solid rgba(255, 165, 0, 0.15);
+    transition: all 0.2s ease;
+}
+
+.panel-nav-link.admin-link:hover {
+    background: rgba(255, 165, 0, 0.15);
+    border-color: rgba(255, 165, 0, 0.35);
+    transform: translateX(4px);
+}
+
+.panel-nav-link.admin-link .link-icon {
+    font-size: 1rem;
+}
+
+/* Admin notification badge */
+.admin-notification-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background: #ff6b6b;
+    border-radius: 9px;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-left: auto;
+}
