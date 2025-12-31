@@ -1,7 +1,11 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.9.1
+ * Version: 2.9.2
+ *
+ * Changes in 2.9.2:
+ * - Fix lazy-loader race condition: check firebase.apps.length before calling auth()
+ * - Prevents "Firebase App not created" error in lazy-loader.js
  *
  * Changes in 2.9.1:
  * - CRITICAL FIX: firebaseConfig now uses window.firebaseConfig
@@ -33,7 +37,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.9.1';
+const CACHE_VERSION = 'v2.9.2';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';
