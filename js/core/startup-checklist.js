@@ -35,12 +35,8 @@ const StartupChecklist = {
      */
     checks: [
         // Critical checks - app cannot run without these
-        {
-            name: 'DOM Ready',
-            check: () => document.readyState !== 'loading',
-            critical: true,
-            guidance: 'Wait for DOMContentLoaded event before initializing'
-        },
+        // NOTE: DOM Ready removed - it's a timing issue, not a dependency.
+        // app-init-simple.js handles waiting for DOM ready separately.
         {
             name: 'Firebase SDK',
             check: () => typeof firebase !== 'undefined' && firebase.apps !== undefined,
