@@ -64,7 +64,8 @@ const CONFIG = {
         'greek', 'norse', 'egyptian', 'hindu', 'buddhist', 'christian',
         'islamic', 'babylonian', 'sumerian', 'persian', 'roman', 'celtic',
         'chinese', 'japanese', 'aztec', 'mayan', 'yoruba', 'jewish', 'tarot',
-        'universal', 'multiple'
+        'universal', 'multiple', 'shinto', 'finnish', 'hermetic', 'alchemy',
+        'african-diaspora', 'theravada', 'shia', 'iranian', 'aesir', 'vanir'
     ],
 
     // Valid entity types
