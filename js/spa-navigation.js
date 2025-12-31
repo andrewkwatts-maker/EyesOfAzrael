@@ -461,8 +461,11 @@ class SPANavigation {
      * Handle current route
      */
     async handleRoute() {
+        console.log('[SPA DEBUG] handleRoute() ENTRY');
+
         // Prevent concurrent route handling (race condition guard)
         if (this._isNavigating) {
+            console.log('[SPA DEBUG] handleRoute() BLOCKED - _isNavigating=true');
             spaLog('Route handling already in progress, skipping');
             return;
         }
@@ -478,6 +481,7 @@ class SPANavigation {
         const hash = window.location.hash || '#/';
         const path = hash.replace('#', '');
 
+        console.log('[SPA DEBUG] handleRoute() processing path:', path);
         spaLog(`handleRoute() called for path: ${path}`);
 
         // Track page view
@@ -541,10 +545,12 @@ class SPANavigation {
         this.showLoading();
 
         try {
+            console.log('[SPA DEBUG] Matching route for path:', path);
             spaLog('Matching route pattern for path:', path);
 
             // Match route
             if (this.routes.home.test(path)) {
+                console.log('[SPA DEBUG] MATCHED HOME ROUTE - calling renderHome()');
                 spaLog('Matched HOME route');
                 await this.renderHome();
             } else if (this.routes.mythologies.test(path)) {
@@ -635,11 +641,14 @@ class SPANavigation {
      * Shows loading spinner while fetching, error message if fails
      */
     async renderHome() {
+        console.log('[SPA DEBUG] renderHome() ENTRY');
         spaLog('renderHome() called');
 
         const mainContent = document.getElementById('main-content');
+        console.log('[SPA DEBUG] mainContent element:', mainContent ? 'FOUND' : 'NULL');
 
         if (!mainContent) {
+            console.error('[SPA DEBUG] CRITICAL: main-content NOT FOUND');
             spaError('CRITICAL: main-content element not found!');
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: {
@@ -654,12 +663,19 @@ class SPANavigation {
         // Show loading spinner while preparing content
         mainContent.innerHTML = this.getLoadingHTML('Loading home page...');
 
+        console.log('[SPA DEBUG] Checking LandingPageView availability...');
+        console.log('[SPA DEBUG] typeof LandingPageView:', typeof LandingPageView);
+        console.log('[SPA DEBUG] window.LandingPageView:', typeof window.LandingPageView);
+
         // PRIORITY: Use LandingPageView for home page (shows ONLY 12 asset type categories)
         if (typeof LandingPageView !== 'undefined') {
+            console.log('[SPA DEBUG] LandingPageView IS available - creating instance...');
             spaLog('LandingPageView class available, using it...');
             try {
                 const landingView = new LandingPageView(this.db);
+                console.log('[SPA DEBUG] LandingPageView instance created, calling render()...');
                 await landingView.render(mainContent);
+                console.log('[SPA DEBUG] LandingPageView.render() completed');
 
                 // Check if navigation was superseded during async render
                 if (!this.isNavigationValid()) {
@@ -678,6 +694,7 @@ class SPANavigation {
                 }));
                 return;
             } catch (error) {
+                console.error('[SPA DEBUG] LandingPageView.render() FAILED:', error);
                 spaError('LandingPageView.render() failed:', error);
                 // Check navigation validity before falling back
                 if (!this.isNavigationValid()) {
@@ -686,6 +703,8 @@ class SPANavigation {
                 }
                 // Continue to fallbacks
             }
+        } else {
+            console.warn('[SPA DEBUG] LandingPageView NOT available - will try fallbacks');
         }
 
         // Fallback: Try PageAssetRenderer (dynamic Firebase page loading)
