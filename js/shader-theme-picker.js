@@ -204,7 +204,8 @@
 
     /**
      * Connect to the existing #themeToggle button in the header
-     * This button exists in index.html and should work with our theme system
+     * On mobile: Click cycles through themes
+     * On desktop: Click is handled by createHeaderThemePicker to open dropdown
      */
     function connectThemeToggleButton() {
         const themeToggle = document.getElementById('themeToggle');
@@ -217,20 +218,19 @@
             // Mark as connected
             themeToggle.dataset.shaderPickerConnected = 'true';
 
-            // Update button icon to match current theme
-            const currentThemeConfig = themeConfig?.themes?.[currentTheme];
-            if (currentThemeConfig?.icon) {
-                themeToggle.textContent = currentThemeConfig.icon;
+            // On mobile only: Add click handler to cycle through themes
+            // On desktop, createHeaderThemePicker handles the click to show dropdown
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                themeToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    cycleToNextTheme();
+                });
+                console.log('[Shader Theme Picker] Mobile: Connected cycle-through to #themeToggle');
+            } else {
+                console.log('[Shader Theme Picker] Desktop: #themeToggle will use dropdown');
             }
-
-            // Add click handler to cycle through themes
-            themeToggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                cycleToNextTheme();
-            });
-
-            console.log('[Shader Theme Picker] Connected to #themeToggle button');
         }
     }
 
@@ -509,30 +509,26 @@
 
     /**
      * Create header theme picker with dropdown
+     * On desktop: Shows dropdown with all themes on hover/click
+     * On mobile: Uses the existing toggle button for cycling
      */
     function createHeaderThemePicker() {
-        // Keep existing theme toggle button - it's now connected for quick cycling
-        // Don't remove it; instead we add the dropdown picker alongside it
+        // Find the existing theme picker container in HTML
+        const container = document.getElementById('themePickerContainer');
+        if (!container) {
+            console.warn('[Shader Theme Picker] No themePickerContainer found, skipping dropdown');
+            return;
+        }
 
-        // Create container
-        const container = document.createElement('div');
-        container.className = 'theme-picker-dropdown';
-        container.setAttribute('role', 'navigation');
-        container.setAttribute('aria-label', 'Theme selector');
+        // Only add dropdown on desktop (wider than 768px)
+        // Mobile will use the simple toggle button
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            console.log('[Shader Theme Picker] Mobile detected, using simple toggle');
+            return;
+        }
 
-        // Create theme button
-        const themeButton = document.createElement('button');
-        themeButton.className = 'icon-btn theme-picker-btn';
-        themeButton.setAttribute('aria-label', 'Select theme');
-        themeButton.setAttribute('aria-haspopup', 'true');
-        themeButton.setAttribute('aria-expanded', 'false');
-        themeButton.setAttribute('title', 'Change theme');
-
-        // Set icon from current theme
-        const currentThemeConfig = themeConfig?.themes?.[currentTheme];
-        themeButton.textContent = currentThemeConfig?.icon || '🎨';
-
-        // Create dropdown
+        // Create dropdown (attached to existing container)
         dropdown = document.createElement('div');
         dropdown.className = 'theme-dropdown';
         dropdown.setAttribute('role', 'menu');
@@ -541,13 +537,19 @@
         // Build dropdown content
         buildDropdownContent();
 
-        // Event: Toggle dropdown
-        themeButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isOpen = dropdown.style.display === 'block';
-            dropdown.style.display = isOpen ? 'none' : 'block';
-            themeButton.setAttribute('aria-expanded', !isOpen);
-        });
+        // Get the existing toggle button
+        const themeButton = document.getElementById('themeToggle');
+
+        // Event: Toggle dropdown on button click (desktop only)
+        if (themeButton) {
+            themeButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const isOpen = dropdown.style.display === 'block';
+                dropdown.style.display = isOpen ? 'none' : 'block';
+                themeButton.setAttribute('aria-expanded', !isOpen);
+            });
+        }
 
         // Event: Handle theme selection
         dropdown.addEventListener('click', (e) => {
@@ -556,7 +558,7 @@
                 const themeName = option.dataset.theme;
                 applyTheme(themeName, true);
                 dropdown.style.display = 'none';
-                themeButton.setAttribute('aria-expanded', 'false');
+                if (themeButton) themeButton.setAttribute('aria-expanded', 'false');
             }
         });
 
@@ -564,21 +566,15 @@
         document.addEventListener('click', (e) => {
             if (!container.contains(e.target)) {
                 dropdown.style.display = 'none';
-                themeButton.setAttribute('aria-expanded', 'false');
+                if (themeButton) themeButton.setAttribute('aria-expanded', 'false');
             }
         });
 
-        // Add elements to container
-        container.appendChild(themeButton);
+        // Add dropdown to container
         container.appendChild(dropdown);
+        container.classList.add('has-dropdown');
 
-        // Add to header actions
-        const headerActions = document.querySelector('.header-actions');
-        if (headerActions) {
-            headerActions.insertBefore(container, headerActions.firstChild);
-        }
-
-        console.log('[Shader Theme Picker] UI created');
+        console.log('[Shader Theme Picker] Desktop dropdown UI created');
     }
 
     /**
