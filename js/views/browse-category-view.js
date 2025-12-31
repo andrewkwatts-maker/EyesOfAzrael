@@ -1809,19 +1809,22 @@ class BrowseCategoryView {
                 .entity-card {
                     display: flex;
                     flex-direction: column;
-                    min-height: 200px;
-                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.6);
-                    backdrop-filter: blur(10px);
-                    -webkit-backdrop-filter: blur(10px);
-                    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
-                    border-radius: var(--radius-xl, 1rem);
-                    padding: var(--spacing-lg, 1.5rem);
+                    min-height: 180px;
+                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.65);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    border: 1.5px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.25);
+                    border-radius: var(--radius-lg, 0.875rem);
+                    padding: 1.25rem;
                     text-decoration: none;
                     color: inherit;
-                    transition: all var(--transition-base, 0.3s ease);
+                    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                                border-color 0.25s ease,
+                                box-shadow 0.25s ease;
                     cursor: pointer;
                     position: relative;
                     overflow: hidden;
+                    will-change: transform;
                 }
 
                 /* Compact density */
@@ -1849,10 +1852,11 @@ class BrowseCategoryView {
                 }
 
                 .entity-card:hover {
-                    transform: translateY(-4px);
-                    border-color: var(--color-primary);
-                    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
-                                0 0 20px rgba(var(--color-primary-rgb), 0.3);
+                    transform: translateY(-5px) scale(1.02);
+                    border-color: rgba(var(--color-primary-rgb), 0.6);
+                    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35),
+                                0 0 0 1px rgba(var(--color-primary-rgb), 0.15),
+                                0 0 24px rgba(var(--color-primary-rgb), 0.2);
                 }
 
                 .entity-card:hover::before {
@@ -1883,10 +1887,15 @@ class BrowseCategoryView {
                 }
 
                 .entity-icon {
-                    font-size: 2.5rem;
+                    font-size: 2.25rem;
                     line-height: 1;
-                    filter: drop-shadow(0 2px 4px rgba(var(--color-primary-rgb), 0.3));
+                    filter: drop-shadow(0 2px 6px rgba(var(--color-primary-rgb), 0.35));
                     flex-shrink: 0;
+                    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
+                .entity-card:hover .entity-icon {
+                    transform: scale(1.08);
                 }
 
                 .density-compact .entity-icon {
