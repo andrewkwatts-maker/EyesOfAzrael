@@ -1,7 +1,14 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.17.1
+ * Version: 2.18.0
+ *
+ * Changes in 2.18.0:
+ * - Polish entity card presentation in browse views
+ * - Improve card hover effects with scale and shadow
+ * - Add icon hover animation
+ * - Reduce card min-height for more compact feel
+ * - Better CSS transitions with cubic-bezier timing
  *
  * Changes in 2.17.1:
  * - Fix theme shader background not showing (body bg was covering WebGL canvas)
@@ -119,7 +126,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.17.1';
+const CACHE_VERSION = 'v2.18.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';
