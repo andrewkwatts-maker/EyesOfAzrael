@@ -666,3 +666,10 @@ class PermissionManager {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { FirebaseCRUDManager, EntityValidator, PermissionManager };
 }
+
+// Export for browser
+if (typeof window !== 'undefined') {
+    window.FirebaseCRUDManager = FirebaseCRUDManager;
+    window.EntityValidator = EntityValidator;
+    window.PermissionManager = PermissionManager;
+}
