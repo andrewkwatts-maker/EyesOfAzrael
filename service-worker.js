@@ -1,7 +1,11 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.12.7
+ * Version: 2.12.8
+ *
+ * Changes in 2.12.8:
+ * - Force visibility on ALL parent elements in landing page render
+ * - Add diagnostic logging for content verification
  *
  * Changes in 2.12.7:
  * - Add window.AuthManager export to auth-manager.js
@@ -86,7 +90,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.12.7';
+const CACHE_VERSION = 'v2.12.8';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';
