@@ -19,9 +19,16 @@
  * - Mobile-friendly responsive layout
  * - Proper typography hierarchy
  *
+ * Performance Features (v2.1.0):
+ * - Batched Firebase queries for related entities (fixes N+1 problem)
+ * - Entity caching with 5-minute TTL
+ * - Async loading of related entities with loading states
+ * - Enhanced error logging with context (entity ID, type, step)
+ * - Comprehensive entity type to collection name mapping
+ *
  * Uses ComprehensiveMetadataRenderer for complete metadata coverage
  *
- * @version 2.0.0 - Enhanced metadata support
+ * @version 2.1.0 - Performance optimizations and error handling
  */
 
 class EntityDetailViewer {
@@ -31,6 +38,13 @@ class EntityDetailViewer {
         this.animationDelay = 0;
         // Check if ComprehensiveMetadataRenderer is available for extended rendering
         this.useComprehensiveRenderer = options.useComprehensiveRenderer !== false && window.ComprehensiveMetadataRenderer;
+
+        // Cache for related entities to avoid refetching
+        this.relatedEntityCache = new Map();
+        this.CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL
+
+        // Maximum IDs per Firebase 'in' query
+        this.MAX_IDS_PER_QUERY = 10;
     }
 
     /**
@@ -39,71 +53,228 @@ class EntityDetailViewer {
      * @returns {string} HTML string
      */
     async render(route) {
-        try {
-            const { mythology, entityType, entityId } = route;
+        const { mythology, entityType, entityId } = route;
+        const context = { mythology, entityType, entityId, step: 'initialization' };
 
+        try {
             // Load entity data
+            context.step = 'loading-entity';
             const entity = await this.loadEntity(mythology, entityType, entityId);
 
             if (!entity) {
+                console.warn(`[EntityDetailViewer] Entity not found: ${entityType}/${entityId} in ${mythology}`);
                 return this.renderNotFound(entityId);
             }
 
-            // Load related entities
-            const relatedEntities = await this.loadRelatedEntities(entity);
+            // Generate initial HTML with loading placeholder for related entities
+            context.step = 'generating-html';
+            const relatedEntities = {};
+            const html = this.generateHTML(entity, relatedEntities, mythology, entityType);
 
-            // Generate HTML
-            return this.generateHTML(entity, relatedEntities, mythology, entityType);
+            // Schedule async loading of related entities
+            if (entity.displayOptions?.relatedEntities?.length > 0) {
+                this.loadRelatedEntitiesAsync(entity, mythology, entityType);
+            }
+
+            return html;
 
         } catch (error) {
-            console.error('[EntityDetailViewer] Render error:', error);
+            this.logError('Render error', error, context);
             throw error;
         }
     }
 
     /**
-     * Load entity from Firebase
+     * Load related entities asynchronously and update the DOM
+     * @param {object} entity - The main entity
+     * @param {string} mythology - Mythology name
+     * @param {string} entityType - Entity type
      */
-    async loadEntity(mythology, entityType, entityId) {
-        if (!this.db) {
-            throw new Error('Firebase Firestore not initialized');
-        }
-
-        const collection = this.getCollectionName(entityType);
-
-        const doc = await this.db.collection(collection).doc(entityId).get();
-
-        if (!doc.exists) {
-            return null;
-        }
-
-        return {
-            id: doc.id,
-            ...doc.data()
+    async loadRelatedEntitiesAsync(entity, mythology, entityType) {
+        const context = {
+            entityId: entity.id,
+            entityType,
+            step: 'loading-related-entities'
         };
+
+        try {
+            // Show loading indicator
+            this.showRelatedEntitiesLoading();
+
+            // Load related entities
+            const relatedEntities = await this.loadRelatedEntities(entity);
+
+            // Update the DOM with loaded related entities
+            if (Object.keys(relatedEntities).length > 0) {
+                this.updateRelatedEntitiesSection(relatedEntities, mythology, entityType);
+            } else {
+                this.hideRelatedEntitiesLoading();
+            }
+        } catch (error) {
+            this.logError('Failed to load related entities', error, context);
+            this.hideRelatedEntitiesLoading();
+        }
     }
 
     /**
-     * Load related entities
+     * Show loading indicator for related entities section
+     */
+    showRelatedEntitiesLoading() {
+        const container = document.querySelector('.entity-detail-viewer');
+        if (!container) return;
+
+        // Check if loading placeholder already exists
+        if (container.querySelector('.related-entities-loading')) return;
+
+        const loadingHTML = `
+            <section class="entity-section entity-section-related related-entities-loading" style="--animation-delay: 0s">
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">&#128279;</span>
+                    Related Entities
+                </h2>
+                <div class="related-entities-container">
+                    <div class="loading-indicator" role="status" aria-live="polite">
+                        <div class="loading-spinner"></div>
+                        <p class="loading-text">Loading related entities...</p>
+                    </div>
+                </div>
+            </section>
+        `;
+
+        // Insert before metadata footer or at the end
+        const footer = container.querySelector('.entity-metadata-footer');
+        if (footer) {
+            footer.insertAdjacentHTML('beforebegin', loadingHTML);
+        } else {
+            const mainContent = container.querySelector('.entity-main-content');
+            if (mainContent) {
+                mainContent.insertAdjacentHTML('beforeend', loadingHTML);
+            }
+        }
+    }
+
+    /**
+     * Hide loading indicator for related entities
+     */
+    hideRelatedEntitiesLoading() {
+        const loadingSection = document.querySelector('.related-entities-loading');
+        if (loadingSection) {
+            loadingSection.remove();
+        }
+    }
+
+    /**
+     * Update the related entities section in the DOM
+     * @param {object} relatedEntities - Loaded related entities
+     * @param {string} mythology - Mythology name
+     * @param {string} entityType - Entity type
+     */
+    updateRelatedEntitiesSection(relatedEntities, mythology, entityType) {
+        // Remove loading indicator
+        this.hideRelatedEntitiesLoading();
+
+        const container = document.querySelector('.entity-detail-viewer');
+        if (!container) return;
+
+        // Generate new related entities HTML
+        const html = this.renderRelatedEntities(relatedEntities, mythology, entityType);
+
+        // Insert before metadata footer or at the end
+        const footer = container.querySelector('.entity-metadata-footer');
+        if (footer) {
+            footer.insertAdjacentHTML('beforebegin', html);
+        } else {
+            const mainContent = container.querySelector('.entity-main-content');
+            if (mainContent) {
+                mainContent.insertAdjacentHTML('beforeend', html);
+            }
+        }
+    }
+
+    /**
+     * Load entity from Firebase
+     * @param {string} mythology - Mythology name
+     * @param {string} entityType - Entity type (deity, hero, creature, etc.)
+     * @param {string} entityId - Entity document ID
+     * @returns {Promise<object|null>} Entity data or null if not found
+     */
+    async loadEntity(mythology, entityType, entityId) {
+        const context = { mythology, entityType, entityId, step: 'loading-entity' };
+
+        if (!this.db) {
+            throw new Error(`[EntityDetailViewer] Firebase Firestore not initialized (${entityType}/${entityId})`);
+        }
+
+        try {
+            const collection = this.getCollectionName(entityType);
+            const doc = await this.db.collection(collection).doc(entityId).get();
+
+            if (!doc.exists) {
+                return null;
+            }
+
+            return {
+                id: doc.id,
+                ...doc.data()
+            };
+        } catch (error) {
+            this.logError('Failed to load entity from Firebase', error, context);
+            throw error;
+        }
+    }
+
+    /**
+     * Load related entities with batched queries to fix N+1 problem
+     * @param {object} entity - The main entity containing displayOptions.relatedEntities
+     * @returns {Promise<object>} Related entities grouped by relationship type
      */
     async loadRelatedEntities(entity) {
         const related = {};
+        const context = {
+            entityId: entity.id,
+            step: 'loading-related-entities'
+        };
 
         // Check for relationships in displayOptions
-        if (entity.displayOptions?.relatedEntities) {
-            for (const relationship of entity.displayOptions.relatedEntities) {
-                try {
-                    const entities = await this.loadEntitiesByIds(
-                        relationship.collection,
-                        relationship.ids || []
-                    );
-                    related[relationship.type] = {
+        if (!entity.displayOptions?.relatedEntities) {
+            return related;
+        }
+
+        // Process all relationships in parallel using batched queries
+        const relationshipPromises = entity.displayOptions.relatedEntities.map(async (relationship) => {
+            const relationshipContext = {
+                ...context,
+                relationshipType: relationship.type,
+                collection: relationship.collection
+            };
+
+            try {
+                const entities = await this.loadEntitiesByIdsBatched(
+                    relationship.collection,
+                    relationship.ids || [],
+                    relationshipContext
+                );
+
+                return {
+                    type: relationship.type,
+                    data: {
                         label: relationship.label || relationship.type,
                         entities: entities
-                    };
-                } catch (error) {
-                    console.error(`[EntityDetailViewer] Error loading ${relationship.type}:`, error);
-                }
+                    }
+                };
+            } catch (error) {
+                this.logError(`Failed to load ${relationship.type} relationship`, error, relationshipContext);
+                return null;
+            }
+        });
+
+        // Wait for all relationships to load
+        const results = await Promise.all(relationshipPromises);
+
+        // Build related entities object
+        for (const result of results) {
+            if (result && result.data.entities.length > 0) {
+                related[result.type] = result.data;
             }
         }
 
@@ -111,27 +282,158 @@ class EntityDetailViewer {
     }
 
     /**
-     * Load multiple entities by IDs
+     * Load multiple entities by IDs using batched Firebase 'in' queries
+     * Fixes N+1 query problem by fetching up to 10 entities per query
+     * Also uses caching to avoid refetching same entities
+     *
+     * @param {string} collection - Firebase collection name
+     * @param {string[]} ids - Array of entity IDs to fetch
+     * @param {object} context - Error context for logging
+     * @returns {Promise<object[]>} Array of entity objects
      */
-    async loadEntitiesByIds(collection, ids) {
+    async loadEntitiesByIdsBatched(collection, ids, context = {}) {
         if (!ids || ids.length === 0) return [];
 
+        // Deduplicate IDs
+        const uniqueIds = [...new Set(ids)];
         const entities = [];
-        for (const id of ids.slice(0, 10)) { // Limit to 10
-            try {
-                const doc = await this.db.collection(collection).doc(id).get();
-                if (doc.exists) {
-                    entities.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                }
-            } catch (error) {
-                console.error(`[EntityDetailViewer] Error loading entity ${id}:`, error);
+        const uncachedIds = [];
+
+        // Check cache first
+        for (const id of uniqueIds) {
+            const cacheKey = `${collection}:${id}`;
+            const cached = this.getCachedEntity(cacheKey);
+            if (cached) {
+                entities.push(cached);
+            } else {
+                uncachedIds.push(id);
             }
         }
 
+        // If all entities were cached, return early
+        if (uncachedIds.length === 0) {
+            return entities;
+        }
+
+        // Split uncached IDs into chunks of MAX_IDS_PER_QUERY (Firebase 'in' query limit is 10)
+        const chunks = this.chunkArray(uncachedIds, this.MAX_IDS_PER_QUERY);
+
+        // Execute batched queries in parallel
+        const chunkPromises = chunks.map(async (chunk, chunkIndex) => {
+            const chunkContext = { ...context, chunkIndex, chunkSize: chunk.length };
+
+            try {
+                // Use Firebase 'in' query to fetch multiple documents at once
+                const snapshot = await this.db
+                    .collection(collection)
+                    .where(window.firebase.firestore.FieldPath.documentId(), 'in', chunk)
+                    .get();
+
+                const chunkEntities = [];
+                snapshot.forEach(doc => {
+                    const entityData = {
+                        id: doc.id,
+                        ...doc.data()
+                    };
+
+                    // Cache the entity
+                    const cacheKey = `${collection}:${doc.id}`;
+                    this.setCachedEntity(cacheKey, entityData);
+
+                    chunkEntities.push(entityData);
+                });
+
+                return chunkEntities;
+            } catch (error) {
+                this.logError(`Failed to batch fetch entities from ${collection}`, error, chunkContext);
+                return [];
+            }
+        });
+
+        // Wait for all chunks to complete
+        const chunkResults = await Promise.all(chunkPromises);
+
+        // Flatten chunk results and add to entities
+        for (const chunkEntities of chunkResults) {
+            entities.push(...chunkEntities);
+        }
+
         return entities;
+    }
+
+    /**
+     * Split an array into chunks of specified size
+     * @param {any[]} array - Array to split
+     * @param {number} size - Maximum chunk size
+     * @returns {any[][]} Array of chunks
+     */
+    chunkArray(array, size) {
+        const chunks = [];
+        for (let i = 0; i < array.length; i += size) {
+            chunks.push(array.slice(i, i + size));
+        }
+        return chunks;
+    }
+
+    /**
+     * Get entity from cache if not expired
+     * @param {string} cacheKey - Cache key (collection:id)
+     * @returns {object|null} Cached entity or null
+     */
+    getCachedEntity(cacheKey) {
+        const cached = this.relatedEntityCache.get(cacheKey);
+        if (!cached) return null;
+
+        // Check if cache has expired
+        if (Date.now() - cached.timestamp > this.CACHE_TTL) {
+            this.relatedEntityCache.delete(cacheKey);
+            return null;
+        }
+
+        return cached.data;
+    }
+
+    /**
+     * Store entity in cache
+     * @param {string} cacheKey - Cache key (collection:id)
+     * @param {object} entity - Entity data to cache
+     */
+    setCachedEntity(cacheKey, entity) {
+        this.relatedEntityCache.set(cacheKey, {
+            data: entity,
+            timestamp: Date.now()
+        });
+    }
+
+    /**
+     * Clear expired entries from cache
+     */
+    cleanCache() {
+        const now = Date.now();
+        for (const [key, value] of this.relatedEntityCache.entries()) {
+            if (now - value.timestamp > this.CACHE_TTL) {
+                this.relatedEntityCache.delete(key);
+            }
+        }
+    }
+
+    /**
+     * Log error with context information
+     * @param {string} message - Error message
+     * @param {Error} error - Error object
+     * @param {object} context - Context information (entityId, entityType, step, etc.)
+     */
+    logError(message, error, context = {}) {
+        const contextStr = Object.entries(context)
+            .map(([key, value]) => `${key}=${value}`)
+            .join(', ');
+
+        console.error(
+            `[EntityDetailViewer] ${message}` +
+            (contextStr ? ` (${contextStr})` : '') +
+            ':',
+            error
+        );
     }
 
     /**
@@ -1505,21 +1807,72 @@ class EntityDetailViewer {
     }
 
     /**
-     * Get collection name
+     * Get Firebase collection name from entity type
+     * Maps singular entity types to their plural collection names
+     *
+     * @param {string} entityType - Singular entity type (deity, hero, creature, etc.)
+     * @returns {string} Firebase collection name
      */
     getCollectionName(entityType) {
+        // Comprehensive mapping of entity types to Firebase collections
         const typeMap = {
+            // Core entity types
             'deity': 'deities',
             'hero': 'heroes',
             'creature': 'creatures',
-            'cosmology': 'cosmology',
+
+            // Location and object types
+            'place': 'places',
+            'item': 'items',
+
+            // Cultural and conceptual types
+            'archetype': 'archetypes',
             'ritual': 'rituals',
-            'herb': 'herbs',
             'text': 'texts',
-            'symbol': 'symbols'
+            'symbol': 'symbols',
+            'herb': 'herbs',
+
+            // Special cases (already plural or no change needed)
+            'cosmology': 'cosmology',
+            'mythology': 'mythologies',
+            'magic': 'magic',
+
+            // Alternative naming conventions
+            'god': 'deities',
+            'goddess': 'deities',
+            'monster': 'creatures',
+            'beast': 'creatures',
+            'artifact': 'items',
+            'weapon': 'items',
+            'location': 'places',
+            'sacred-place': 'places',
+            'sacred-text': 'texts',
+            'sacred-item': 'items',
+            'sacred-herb': 'herbs',
+            'practice': 'rituals',
+            'ceremony': 'rituals',
+            'concept': 'archetypes'
         };
 
-        return typeMap[entityType] || entityType + 's';
+        // Normalize input: lowercase and remove hyphens for lookup
+        const normalizedType = entityType.toLowerCase();
+
+        // Check for exact match first
+        if (typeMap[normalizedType]) {
+            return typeMap[normalizedType];
+        }
+
+        // If not found, apply standard pluralization
+        // Handle common pluralization rules
+        if (normalizedType.endsWith('y')) {
+            return normalizedType.slice(0, -1) + 'ies';
+        }
+        if (normalizedType.endsWith('s') || normalizedType.endsWith('x') ||
+            normalizedType.endsWith('ch') || normalizedType.endsWith('sh')) {
+            return normalizedType + 'es';
+        }
+
+        return normalizedType + 's';
     }
 
     /**

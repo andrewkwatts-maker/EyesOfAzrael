@@ -22,8 +22,27 @@
     let currentUser = null;
     let authInitialized = false;
 
-    // LocalStorage key for remembering user
-    const LAST_USER_KEY = 'eoa_last_user_email';
+    // LocalStorage keys for remembering user
+    // SECURITY NOTE: We store a hashed version of the email for privacy.
+    // The hash is used only for display purposes (showing "Welcome back") and
+    // is not used for authentication. Actual auth is always verified via Firebase.
+    const LAST_USER_KEY = 'eoa_last_user_email_hash';
+    const LAST_USER_DISPLAY_KEY = 'eoa_last_user_display';
+
+    /**
+     * Simple hash function for email obfuscation (not cryptographic security)
+     * Used only to avoid storing plaintext email in localStorage
+     */
+    function hashEmail(email) {
+        if (!email) return '';
+        // Create a simple masked version: first 2 chars + *** + domain
+        const parts = email.split('@');
+        if (parts.length !== 2) return '***';
+        const local = parts[0];
+        const domain = parts[1];
+        const masked = local.substring(0, 2) + '***@' + domain;
+        return masked;
+    }
 
     /**
      * Initialize auth guard when DOM is ready
@@ -38,20 +57,31 @@
             return;
         }
 
-        // Initialize Firebase if needed
+        // Initialize Firebase if needed (check if already initialized)
         if (firebase.apps.length === 0 && typeof firebaseConfig !== 'undefined') {
+            console.log('[Auth Guard] Initializing Firebase...');
             firebase.initializeApp(firebaseConfig);
+        } else if (firebase.apps.length > 0) {
+            console.log('[Auth Guard] Firebase already initialized, skipping...');
         }
 
         const auth = firebase.auth();
 
         // Set up auth state listener - this is the ONLY place we handle auth state
-        auth.onAuthStateChanged((user) => {
+        auth.onAuthStateChanged(async (user) => {
             console.log('[Auth Guard] Auth state changed:', user ? user.email : 'null');
             authInitialized = true;
 
             if (user) {
-                handleAuthenticated(user);
+                // Validate token is still valid before showing authenticated UI
+                const isValid = await validateSession(user);
+                if (isValid) {
+                    handleAuthenticated(user);
+                } else {
+                    console.log('[Auth Guard] Session invalid, signing out...');
+                    await auth.signOut();
+                    handleNotAuthenticated();
+                }
             } else {
                 handleNotAuthenticated();
             }
@@ -71,6 +101,52 @@
         // IMPORTANT: Show content immediately - don't wait for auth
         // The site is public, auth is optional enhancement
         showContent();
+    }
+
+    /**
+     * Validate user session by checking token validity
+     * @param {firebase.User} user - The Firebase user object
+     * @returns {Promise<boolean>} - True if session is valid
+     */
+    async function validateSession(user) {
+        if (!user) return false;
+
+        try {
+            // Get fresh token to validate session
+            // forceRefresh: false - use cached token if not expired
+            // forceRefresh: true would force a refresh every time
+            const tokenResult = await user.getIdTokenResult(false);
+
+            // Check if token is expired (shouldn't happen with valid session)
+            const expirationTime = new Date(tokenResult.expirationTime).getTime();
+            const now = Date.now();
+
+            if (expirationTime < now) {
+                console.warn('[Auth Guard] Token expired, attempting refresh...');
+                // Force refresh the token
+                await user.getIdToken(true);
+            }
+
+            return true;
+        } catch (error) {
+            console.error('[Auth Guard] Session validation failed:', error);
+
+            // Token refresh failed - session is invalid
+            if (error.code === 'auth/user-token-expired' ||
+                error.code === 'auth/user-disabled' ||
+                error.code === 'auth/user-not-found') {
+                return false;
+            }
+
+            // Network errors - give benefit of doubt, don't log out
+            if (error.code === 'auth/network-request-failed') {
+                console.warn('[Auth Guard] Network error during validation, assuming valid');
+                return true;
+            }
+
+            // Unknown error - log out to be safe
+            return false;
+        }
     }
 
     /**
@@ -112,9 +188,10 @@
         // Show user info in header
         updateUserDisplay(user);
 
-        // Remember user for next visit
+        // Remember user for next visit (store masked email for privacy)
         try {
-            localStorage.setItem(LAST_USER_KEY, user.email);
+            localStorage.setItem(LAST_USER_KEY, hashEmail(user.email));
+            localStorage.setItem(LAST_USER_DISPLAY_KEY, user.displayName || '');
         } catch (e) {
             // localStorage might be blocked
         }
@@ -216,25 +293,48 @@
     }
 
     /**
-     * Pre-fill last user email for convenience
+     * Pre-fill last user info for convenience
+     * Uses masked email (not full email) for privacy
      */
     function prefillLastUserEmail() {
         try {
-            const lastEmail = localStorage.getItem(LAST_USER_KEY);
-            if (lastEmail) {
-                const authCard = document.querySelector('.auth-card');
-                if (authCard && !authCard.querySelector('.welcome-back-msg')) {
-                    const welcomeMsg = document.createElement('div');
-                    welcomeMsg.className = 'welcome-back-msg';
-                    welcomeMsg.innerHTML = `<p>Welcome back! Last signed in as ${lastEmail}</p>`;
-                    const loginBtn = authCard.querySelector('.google-login-btn');
-                    if (loginBtn) {
-                        authCard.insertBefore(welcomeMsg, loginBtn);
-                    }
+            const maskedEmail = localStorage.getItem(LAST_USER_KEY);
+            const displayName = localStorage.getItem(LAST_USER_DISPLAY_KEY);
+
+            // Validate cached data exists and has reasonable format
+            if (!maskedEmail || maskedEmail.length < 5) {
+                // Invalid or missing cached data - clear stale entries
+                clearCachedUserData();
+                return;
+            }
+
+            // Validate masked email format (should contain @ and ***)
+            if (!maskedEmail.includes('@') || !maskedEmail.includes('***')) {
+                // Looks like old format (full email) - clear for privacy
+                console.log('[Auth Guard] Clearing old format cached email');
+                clearCachedUserData();
+                return;
+            }
+
+            const authCard = document.querySelector('.auth-card');
+            if (authCard && !authCard.querySelector('.welcome-back-msg')) {
+                const welcomeMsg = document.createElement('div');
+                welcomeMsg.className = 'welcome-back-msg';
+
+                // Show display name if available, otherwise show masked email
+                const displayText = displayName
+                    ? `Welcome back, ${displayName}!`
+                    : `Welcome back! (${maskedEmail})`;
+
+                welcomeMsg.innerHTML = `<p>${displayText}</p>`;
+                const loginBtn = authCard.querySelector('.google-login-btn');
+                if (loginBtn) {
+                    authCard.insertBefore(welcomeMsg, loginBtn);
                 }
             }
         } catch (e) {
             // localStorage might be blocked
+            console.warn('[Auth Guard] Could not access localStorage:', e);
         }
     }
 
@@ -255,6 +355,41 @@
         const logoutBtn = document.getElementById('signOutBtn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', handleLogout);
+        }
+    }
+
+    /**
+     * Google login button HTML for resetting button state
+     */
+    const GOOGLE_LOGIN_BTN_HTML = `
+        <svg viewBox="0 0 48 48" style="width: 20px; height: 20px; margin-right: 12px;">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.30-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+        </svg>
+        Sign in with Google
+    `;
+
+    /**
+     * Reset login button to default state
+     * @param {HTMLElement|null} btn - The button element (optional, will find by ID if not provided)
+     */
+    function resetLoginButton(btn) {
+        // Try to find button if not provided
+        const loginBtn = btn || document.getElementById('google-login-btn');
+
+        // Safety check - button might not exist in DOM
+        if (!loginBtn) {
+            console.warn('[Auth Guard] Login button not found in DOM, cannot reset');
+            return;
+        }
+
+        try {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = GOOGLE_LOGIN_BTN_HTML;
+        } catch (e) {
+            console.error('[Auth Guard] Error resetting login button:', e);
         }
     }
 
@@ -292,33 +427,49 @@
                 alert('Sign in failed: ' + error.message);
             }
 
-            // Reset button
-            if (loginBtn) {
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = `
-                    <svg viewBox="0 0 48 48" style="width: 20px; height: 20px; margin-right: 12px;">
-                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.30-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                    </svg>
-                    Sign in with Google
-                `;
-            }
+            // Reset button safely (handles missing button gracefully)
+            resetLoginButton(loginBtn);
         }
     }
 
     /**
      * Handle logout button click
+     * @param {boolean} skipConfirmation - If true, skip the confirmation dialog
      */
-    async function handleLogout() {
+    async function handleLogout(skipConfirmation = false) {
         console.log('[Auth Guard] Logout button clicked');
+
+        // Show confirmation dialog unless skipped
+        if (!skipConfirmation) {
+            const confirmed = confirm('Are you sure you want to sign out?');
+            if (!confirmed) {
+                console.log('[Auth Guard] Logout cancelled by user');
+                return;
+            }
+        }
 
         try {
             await firebase.auth().signOut();
             console.log('[Auth Guard] Logout successful');
+
+            // Clear cached user data on logout to prevent stale data
+            clearCachedUserData();
         } catch (error) {
             console.error('[Auth Guard] Logout error:', error);
+        }
+    }
+
+    /**
+     * Clear cached user data from localStorage
+     */
+    function clearCachedUserData() {
+        try {
+            localStorage.removeItem(LAST_USER_KEY);
+            localStorage.removeItem(LAST_USER_DISPLAY_KEY);
+            // Also clear legacy key if it exists
+            localStorage.removeItem('eoa_last_user_email');
+        } catch (e) {
+            // localStorage might be blocked
         }
     }
 
@@ -351,7 +502,21 @@
         isAuthenticated: () => isAuthenticated,
         getCurrentUser: () => currentUser,
         showLoginOverlay: showLoginOverlay,
-        isReady: () => authInitialized
+        isReady: () => authInitialized,
+        /**
+         * Logout the current user
+         * @param {boolean} skipConfirmation - If true, logout immediately without confirmation
+         */
+        logout: (skipConfirmation = false) => handleLogout(skipConfirmation),
+        /**
+         * Validate the current session
+         * @returns {Promise<boolean>} - True if session is valid
+         */
+        validateSession: () => currentUser ? validateSession(currentUser) : Promise.resolve(false),
+        /**
+         * Clear all cached user data
+         */
+        clearCache: clearCachedUserData
     };
 
     // Initialize when DOM is ready

@@ -5,10 +5,20 @@
  * Protected routes (dashboard, compare) require authentication
  */
 
+// Debug mode - set to true to enable verbose logging
+const SPA_DEBUG = false;
+
+// Conditional logging helper
+const spaLog = (...args) => {
+    if (SPA_DEBUG) console.log('[SPA]', ...args);
+};
+const spaWarn = (...args) => console.warn('[SPA]', ...args);
+const spaError = (...args) => console.error('[SPA]', ...args);
+
 class SPANavigation {
     constructor(firestore, authManager, renderer) {
         const constructorStart = performance.now();
-        console.log('[SPA] 🔧 Constructor called at:', new Date().toISOString());
+        spaLog('Constructor called at:', new Date().toISOString());
 
         this.db = firestore;
         this.auth = authManager;
@@ -21,7 +31,7 @@ class SPANavigation {
         // Verify required view classes are loaded (initialization order check)
         this.verifyDependencies();
 
-        console.log('[SPA] Properties initialized:', {
+        spaLog('Properties initialized:', {
             hasDB: !!this.db,
             hasAuth: !!this.auth,
             hasRenderer: !!this.renderer,
@@ -53,65 +63,61 @@ class SPANavigation {
         const hasOptimisticAuth = window._eoaOptimisticAuth === true;
         const syncCheckEnd = performance.now();
 
-        console.log(`[SPA] ⚡ Synchronous auth check took: ${(syncCheckEnd - syncCheckStart).toFixed(2)}ms`);
-        console.log(`[SPA] ⚡ Optimistic auth: ${hasOptimisticAuth}, currentUser: ${!!currentUser}`);
+        spaLog(`Synchronous auth check took: ${(syncCheckEnd - syncCheckStart).toFixed(2)}ms`);
+        spaLog(`Optimistic auth: ${hasOptimisticAuth}, currentUser: ${!!currentUser}`);
 
         if (currentUser || hasOptimisticAuth) {
             // Fast path: User already authenticated OR using cached optimistic auth
             const fastPathEnd = performance.now();
-            if (currentUser) {
-                console.log('[SPA] ✨ CurrentUser available immediately:', currentUser.email);
-            } else {
-                console.log('[SPA] ✨ Using OPTIMISTIC auth from cache (instant start)');
-            }
-            console.log('[SPA] ⚡ FAST PATH: Auth already ready');
-            console.log(`[SPA] 📊 Total constructor time (fast path): ${(fastPathEnd - constructorStart).toFixed(2)}ms`);
+            spaLog(currentUser ? `CurrentUser available immediately: ${currentUser.email}` : 'Using OPTIMISTIC auth from cache (instant start)');
+            spaLog(`FAST PATH: Auth already ready in ${(fastPathEnd - constructorStart).toFixed(2)}ms`);
 
             this.authReady = true;
         } else {
             // User not authenticated yet - still initialize router for public routes
-            console.log('[SPA] 🔒 No currentUser or optimistic auth, will resolve async...');
-            console.log('[SPA] 📖 Router will initialize immediately for public routes');
+            spaLog('No currentUser or optimistic auth, will resolve async...');
 
             // Listen for auth state changes to update authReady flag
-            this.waitForAuth().then((user) => {
+            this.waitForAuth().then((result) => {
                 const slowPathEnd = performance.now();
-                console.log('[SPA] ✅ waitForAuth() resolved with user:', user ? user.email : 'null');
-                console.log(`[SPA] 📊 Total auth wait time: ${(slowPathEnd - constructorStart).toFixed(2)}ms`);
+                const user = result?.user || result;
+                const timedOut = result?.timedOut || false;
+
+                if (timedOut) {
+                    spaWarn(`waitForAuth() timed out after ${(slowPathEnd - constructorStart).toFixed(2)}ms`);
+                } else {
+                    spaLog(`waitForAuth() resolved with user: ${user ? user.email : 'null'} in ${(slowPathEnd - constructorStart).toFixed(2)}ms`);
+                }
 
                 this.authReady = true;
-                console.log('[SPA] 🔓 Auth ready flag set to true');
 
                 // Re-trigger route if we were on a protected route waiting for auth
                 const currentPath = (window.location.hash || '#/').replace('#', '');
                 const protectedRoutes = ['dashboard', 'compare'];
                 const isProtectedRoute = protectedRoutes.some(route => currentPath.includes(route));
                 if (isProtectedRoute) {
-                    console.log('[SPA] 🔄 Re-handling protected route now that auth is ready');
+                    spaLog('Re-handling protected route now that auth is ready');
                     this.handleRoute();
                 }
             }).catch((error) => {
-                console.error('[SPA] ❌ waitForAuth() rejected with error:', error);
+                spaError('waitForAuth() rejected with error:', error);
                 // Even on error, mark auth as ready (just not authenticated)
                 // This prevents routes from being blocked indefinitely
                 this.authReady = true;
-                console.log('[SPA] 🔓 Auth ready flag set to true (error fallback)');
             });
 
             // Also listen for auth-ready event from auth-guard-simple.js (backup mechanism)
-            // This ensures we catch auth state even if our onAuthStateChanged fires late
             document.addEventListener('auth-ready', (event) => {
-                console.log('[SPA] 🔔 Received auth-ready event from auth guard:', event.detail);
+                spaLog('Received auth-ready event from auth guard:', event.detail);
                 if (!this.authReady) {
                     this.authReady = true;
-                    console.log('[SPA] 🔓 Auth ready flag set via auth-ready event');
 
                     // Re-trigger protected routes if user is authenticated
                     const currentPath = (window.location.hash || '#/').replace('#', '');
                     const protectedRoutes = ['dashboard', 'compare'];
                     const isProtectedRoute = protectedRoutes.some(route => currentPath.includes(route));
                     if (isProtectedRoute && event.detail && event.detail.authenticated) {
-                        console.log('[SPA] 🔄 Re-handling protected route after auth-ready event');
+                        spaLog('Re-handling protected route after auth-ready event');
                         this.handleRoute();
                     }
                 }
@@ -121,63 +127,63 @@ class SPANavigation {
         // Listen for optimistic auth verification (fires when Firebase confirms/denies cached auth)
         document.addEventListener('auth-verified', (event) => {
             if (!event.detail?.authenticated) {
-                console.log('[SPA] ⚠️ Optimistic auth verification FAILED');
-                // Auth guard will handle showing the login overlay
+                spaWarn('Optimistic auth verification FAILED');
             } else {
-                console.log('[SPA] ✅ Optimistic auth verified successfully');
+                spaLog('Optimistic auth verified successfully');
             }
         });
 
         // ALWAYS initialize router immediately - handleRoute() decides auth requirements per route
         if (document.readyState === 'loading') {
-            console.log('[SPA] 📄 DOM still loading, waiting for DOMContentLoaded...');
+            spaLog('DOM still loading, waiting for DOMContentLoaded...');
             document.addEventListener('DOMContentLoaded', () => {
-                console.log('[SPA] 📄 DOMContentLoaded fired, initializing router...');
+                spaLog('DOMContentLoaded fired, initializing router...');
                 this.initRouter();
             });
         } else {
-            console.log('[SPA] 📄 DOM already loaded, initializing router immediately...');
+            spaLog('DOM already loaded, initializing router immediately...');
             this.initRouter();
         }
 
-        console.log('[SPA] 🏁 Constructor completed');
+        spaLog('Constructor completed');
     }
 
     /**
      * Wait for Firebase Auth to be ready
      * Includes timeout fallback to prevent indefinite blocking
+     * @returns {Promise<{user: firebase.User|null, timedOut: boolean}>} Auth result with timeout state
      */
     async waitForAuth() {
         return new Promise((resolve, reject) => {
-            console.log('[SPA] ⏳ waitForAuth() promise created at:', new Date().toISOString());
+            spaLog('waitForAuth() promise created at:', new Date().toISOString());
 
             // Use Firebase auth directly (compatible with auth guard)
             const auth = firebase.auth();
             if (!auth) {
-                console.error('[SPA] ❌ Firebase auth not available!');
+                spaError('Firebase auth not available!');
                 reject(new Error('Firebase auth not available'));
                 return;
             }
 
             let resolved = false;
 
-            // Timeout fallback: resolve with null after 5 seconds if auth never fires
+            // Timeout fallback: resolve with explicit timeout state after 5 seconds
             // This prevents routes from being blocked indefinitely on network issues
             const timeoutId = setTimeout(() => {
                 if (!resolved) {
                     resolved = true;
-                    console.warn('[SPA] ⏰ Auth timeout after 5s - resolving with null (not authenticated)');
-                    console.log('[SPA] 💡 This may indicate slow network or Firebase SDK issues');
-                    resolve(null);
+                    spaWarn('Auth timeout after 5s - resolving with null (not authenticated). This may indicate slow network or Firebase SDK issues.');
+                    // Return explicit state so caller knows it timed out
+                    resolve({ user: null, timedOut: true });
                 }
             }, 5000);
 
-            console.log('[SPA] 📡 Registering onAuthStateChanged listener...');
+            spaLog('Registering onAuthStateChanged listener...');
 
             // Firebase auth ready check - just resolve, auth guard handles UI
             const unsubscribe = auth.onAuthStateChanged((user) => {
                 if (resolved) {
-                    console.log('[SPA] ⚠️ Auth state changed after timeout - ignoring');
+                    spaLog('Auth state changed after timeout - ignoring');
                     unsubscribe();
                     return;
                 }
@@ -185,18 +191,14 @@ class SPANavigation {
                 resolved = true;
                 clearTimeout(timeoutId);
 
-                const timestamp = new Date().toISOString();
-                console.log('[SPA] 🔔 onAuthStateChanged fired at:', timestamp);
-                console.log('[SPA] 👤 User state:', user ? `Logged in as ${user.email}` : 'Logged out');
-                console.log('[SPA] 🧹 Unsubscribing from auth state listener');
-
+                spaLog('onAuthStateChanged fired, user:', user ? user.email : 'null');
                 unsubscribe();
 
-                console.log('[SPA] ✅ Resolving waitForAuth() promise with user:', user ? user.email : 'null');
-                resolve(user);
+                // Return explicit state so caller knows auth completed normally
+                resolve({ user, timedOut: false });
             });
 
-            console.log('[SPA] ⏸️ waitForAuth() promise setup complete, waiting for auth state change...');
+            spaLog('waitForAuth() setup complete, waiting for auth state change...');
         });
     }
 
@@ -229,7 +231,7 @@ class SPANavigation {
             }
         });
 
-        console.log('[SPA] Dependency check:', {
+        spaLog('Dependency check:', {
             loaded: loadedClasses.length,
             missing: missingClasses.length,
             loadedClasses: loadedClasses,
@@ -239,8 +241,8 @@ class SPANavigation {
         // Only warn about critical missing classes
         const criticalMissing = missingClasses.filter(c => c.critical);
         if (criticalMissing.length > 0) {
-            console.warn('[SPA] CRITICAL: Some view classes are not loaded:', criticalMissing.map(c => c.name));
-            console.warn('[SPA] This may indicate a script loading order issue in index.html');
+            spaWarn('CRITICAL: Some view classes are not loaded:', criticalMissing.map(c => c.name));
+            spaWarn('This may indicate a script loading order issue in index.html');
         }
 
         // Store for later reference
@@ -255,8 +257,8 @@ class SPANavigation {
      * Initialize router and event listeners
      */
     initRouter() {
-        console.log('[SPA] initRouter() called at:', new Date().toISOString());
-        console.log('[SPA] Current state:', {
+        spaLog('initRouter() called at:', new Date().toISOString());
+        spaLog('Current state:', {
             authReady: this.authReady,
             currentRoute: this.currentRoute,
             hash: window.location.hash
@@ -266,16 +268,16 @@ class SPANavigation {
         this._isNavigating = false;
         this._navigationDebounceTimer = null;
         this._lastNavigatedHash = null;
+        this._navigationLock = null; // Promise-based navigation lock
 
         // Handle hash changes with debouncing to prevent double-navigation
         window.addEventListener('hashchange', (e) => {
             const newHash = window.location.hash;
-            console.log('[SPA] 📍 hashchange event triggered, hash:', newHash);
-            console.log('[SPA] 📍 hashchange oldURL:', e.oldURL, 'newURL:', e.newURL);
+            spaLog('hashchange event triggered, hash:', newHash);
 
             // Skip if we just navigated to this hash (prevents double-handling)
             if (this._lastNavigatedHash === newHash) {
-                console.log('[SPA] ⏳ Skipping hashchange - same hash already processed');
+                spaLog('Skipping hashchange - same hash already processed');
                 this._lastNavigatedHash = null; // Reset for next navigation
                 return;
             }
@@ -289,19 +291,19 @@ class SPANavigation {
                 if (!this._isNavigating) {
                     this.handleRoute();
                 } else {
-                    console.log('[SPA] ⏳ Skipping hashchange - navigation already in progress');
+                    spaLog('Skipping hashchange - navigation already in progress');
                 }
             }, 10);
         });
 
         window.addEventListener('popstate', (e) => {
-            console.log('[SPA] 📍 popstate event triggered, state:', e.state);
+            spaLog('popstate event triggered, state:', e.state);
             if (!this._isNavigating) {
                 this.handleRoute();
             }
         });
 
-        console.log('[SPA] ✓ Event listeners registered (hashchange, popstate)');
+        spaLog('Event listeners registered (hashchange, popstate)');
 
         // Intercept link clicks - improved to handle all hash link formats
         document.addEventListener('click', (e) => {
@@ -314,7 +316,7 @@ class SPANavigation {
 
             // Check if this is a hash-based SPA link
             if (href && href.startsWith('#')) {
-                console.log('[SPA] 🔗 Intercepted link click, href:', href);
+                spaLog('Intercepted link click, href:', href);
                 e.preventDefault();
                 e.stopPropagation();
 
@@ -323,13 +325,13 @@ class SPANavigation {
             }
         }, true); // Use capture phase to intercept before other handlers
 
-        console.log('[SPA] ✓ Link click interceptor registered');
+        spaLog('Link click interceptor registered');
 
         // Initial route
-        console.log('[SPA] 🎯 Triggering initial route handler...');
+        spaLog('Triggering initial route handler...');
         this.handleRoute();
 
-        console.log('[SPA] 🏁 initRouter() completed');
+        spaLog('initRouter() completed');
     }
 
     /**
@@ -346,14 +348,14 @@ class SPANavigation {
         // Normalize path - ensure consistent format
         path = this.normalizePath(path);
 
-        console.log('[SPA] Navigating to:', path);
+        spaLog('Navigating to:', path);
 
         // Track that we're about to navigate to this hash (prevents double-handling)
         this._lastNavigatedHash = path;
 
         // Check if we're already at this path
         if (window.location.hash === path) {
-            console.log('[SPA] Already at this path, forcing route refresh');
+            spaLog('Already at this path, forcing route refresh');
             this.handleRoute();
             return;
         }
@@ -395,24 +397,19 @@ class SPANavigation {
     async handleRoute() {
         // Prevent concurrent route handling (race condition guard)
         if (this._isNavigating) {
-            console.log('[SPA] ⏳ Route handling already in progress, skipping');
+            spaLog('Route handling already in progress, skipping');
             return;
         }
 
+        // Acquire navigation lock
         this._isNavigating = true;
+        const navigationId = Date.now();
+        this._currentNavigationId = navigationId;
 
-        const timestamp = new Date().toISOString();
         const hash = window.location.hash || '#/';
         const path = hash.replace('#', '');
 
-        console.log('[SPA] ═══════════════════════════════════════');
-        console.log('[SPA] 🛣️  handleRoute() called at:', timestamp);
-        console.log('[SPA] 📍 Current hash:', hash);
-        console.log('[SPA] 📍 Parsed path:', path);
-        console.log('[SPA] 🔍 Pre-check state:', {
-            authReady: this.authReady,
-            currentRoute: this.currentRoute
-        });
+        spaLog(`handleRoute() called for path: ${path}`);
 
         // Track page view
         if (window.AnalyticsManager) {
@@ -433,124 +430,112 @@ class SPANavigation {
         // Only block for protected routes if auth is not ready
         if (isProtectedRoute) {
             if (!this.authReady) {
-                console.log('[SPA] ⏳ Auth not ready for protected route, showing loading state...');
-                console.log('[SPA] 💡 Tip: waitForAuth() may not have completed yet');
-                console.log('[SPA] ═══════════════════════════════════════');
+                spaLog('Auth not ready for protected route, showing loading state...');
                 this.showAuthWaitingState(mainContent);
-                this._isNavigating = false; // Reset flag on early return
+                this._isNavigating = false;
                 return;
             }
 
             // Verify user is authenticated via Firebase for protected routes
             const currentUser = firebase.auth().currentUser;
-            console.log('[SPA] 👤 Firebase currentUser:', currentUser ? currentUser.email : 'null');
+            spaLog('Firebase currentUser:', currentUser ? currentUser.email : 'null');
 
             if (!currentUser) {
-                console.log('[SPA] ⏳ No user found for protected route, showing loading state...');
-                console.log('[SPA] 💡 Tip: Firebase auth.currentUser is null (may be transient)');
-                console.log('[SPA] ═══════════════════════════════════════');
+                spaLog('No user found for protected route, showing loading state...');
                 this.showAuthWaitingState(mainContent);
-                this._isNavigating = false; // Reset flag on early return
+                this._isNavigating = false;
                 return;
             }
 
-            console.log('[SPA] ✓ Auth checks passed for protected route');
+            spaLog('Auth checks passed for protected route');
         } else {
             // For public routes, just log the auth state but don't block
-            const currentUser = firebase.auth().currentUser;
-            console.log('[SPA] 📖 Public route - auth state:', {
-                authReady: this.authReady,
-                currentUser: currentUser ? currentUser.email : 'not logged in'
-            });
+            spaLog('Public route - proceeding without auth check');
+        }
+
+        // Check if navigation was superseded
+        if (this._currentNavigationId !== navigationId) {
+            spaLog('Navigation superseded by newer request, aborting');
+            return;
         }
 
         // Add to history
         this.addToHistory(path);
-        console.log('[SPA] ✓ Added to history, total entries:', this.routeHistory.length);
 
         // Show loading
-        console.log('[SPA] 🔄 Showing loading spinner...');
         this.showLoading();
 
         try {
-            console.log('[SPA] 🔍 Matching route pattern for path:', path);
+            spaLog('Matching route pattern for path:', path);
 
             // Match route
             if (this.routes.home.test(path)) {
-                console.log('[SPA] ✅ Matched HOME route');
-                console.log('[SPA] 🏠 Calling renderHome()...');
+                spaLog('Matched HOME route');
                 await this.renderHome();
-                console.log('[SPA] ✓ renderHome() completed');
             } else if (this.routes.mythologies.test(path)) {
-                console.log('[SPA] ✅ Matched MYTHOLOGIES route');
+                spaLog('Matched MYTHOLOGIES route');
                 await this.renderMythologies();
             } else if (this.routes.browse_category_mythology.test(path)) {
                 const match = path.match(this.routes.browse_category_mythology);
-                console.log('[SPA] ✅ Matched BROWSE CATEGORY+MYTHOLOGY route:', match[1], match[2]);
+                spaLog('Matched BROWSE CATEGORY+MYTHOLOGY route:', match[1], match[2]);
                 await this.renderBrowseCategory(match[1], match[2]);
             } else if (this.routes.browse_category.test(path)) {
                 const match = path.match(this.routes.browse_category);
-                console.log('[SPA] ✅ Matched BROWSE CATEGORY route:', match[1]);
+                spaLog('Matched BROWSE CATEGORY route:', match[1]);
                 await this.renderBrowseCategory(match[1]);
             } else if (this.routes.entity_alt.test(path)) {
                 const match = path.match(this.routes.entity_alt);
-                console.log('[SPA] ✅ Matched ENTITY (alt format) route:', match[3]);
+                spaLog('Matched ENTITY (alt format) route:', match[3]);
                 await this.renderEntity(match[2], match[1], match[3]);
             } else if (this.routes.entity.test(path)) {
                 const match = path.match(this.routes.entity);
-                console.log('[SPA] ✅ Matched ENTITY route:', match[3]);
+                spaLog('Matched ENTITY route:', match[3]);
                 await this.renderEntity(match[1], match[2], match[3]);
             } else if (this.routes.category.test(path)) {
                 const match = path.match(this.routes.category);
-                console.log('[SPA] ✅ Matched CATEGORY route:', match[2]);
+                spaLog('Matched CATEGORY route:', match[2]);
                 await this.renderCategory(match[1], match[2]);
             } else if (this.routes.mythology.test(path)) {
                 const match = path.match(this.routes.mythology);
-                console.log('[SPA] ✅ Matched MYTHOLOGY route:', match[1]);
+                spaLog('Matched MYTHOLOGY route:', match[1]);
                 await this.renderMythology(match[1]);
             } else if (this.routes.search.test(path)) {
-                console.log('[SPA] ✅ Matched SEARCH route');
+                spaLog('Matched SEARCH route');
                 await this.renderSearch();
             } else if (this.routes.corpus_explorer.test(path)) {
-                console.log('[SPA] ✅ Matched CORPUS EXPLORER route - redirecting to standalone page');
+                spaLog('Matched CORPUS EXPLORER route - redirecting to standalone page');
                 window.location.href = 'corpus-explorer.html';
                 return;
             } else if (this.routes.compare.test(path)) {
-                console.log('[SPA] ✅ Matched COMPARE route');
+                spaLog('Matched COMPARE route');
                 await this.renderCompare();
             } else if (this.routes.dashboard.test(path)) {
-                console.log('[SPA] ✅ Matched DASHBOARD route');
+                spaLog('Matched DASHBOARD route');
                 await this.renderDashboard();
             } else if (this.routes.about.test(path)) {
-                console.log('[SPA] ✅ Matched ABOUT route');
+                spaLog('Matched ABOUT route');
                 await this.renderAbout();
             } else if (this.routes.privacy.test(path)) {
-                console.log('[SPA] ✅ Matched PRIVACY route');
+                spaLog('Matched PRIVACY route');
                 await this.renderPrivacy();
             } else if (this.routes.terms.test(path)) {
-                console.log('[SPA] ✅ Matched TERMS route');
+                spaLog('Matched TERMS route');
                 await this.renderTerms();
             } else {
-                console.log('[SPA] ⚠️  No route matched, rendering 404');
+                spaLog('No route matched, rendering 404');
                 await this.render404();
             }
 
             // Update breadcrumb
-            console.log('[SPA] 🍞 Updating breadcrumb...');
             this.updateBreadcrumb(path);
 
             // Store current route
             this.currentRoute = path;
-            console.log('[SPA] ✓ Current route stored:', this.currentRoute);
-
-            console.log('[SPA] ✅✅✅ Route rendered successfully ✅✅✅');
-            console.log('[SPA] ═══════════════════════════════════════');
+            spaLog('Route rendered successfully:', path);
 
         } catch (error) {
-            console.error('[SPA] ❌❌❌ Routing error:', error);
-            console.error('[SPA] Stack trace:', error.stack);
-            console.log('[SPA] ═══════════════════════════════════════');
-            this.renderError(error);
+            spaError('Routing error:', error);
+            this.renderError(error, path);
         } finally {
             // Always reset the navigation flag to allow future navigations
             this._isNavigating = false;
@@ -562,18 +547,12 @@ class SPANavigation {
      * Shows loading spinner while fetching, error message if fails
      */
     async renderHome() {
-        console.log('[SPA] ▶️  renderHome() called at:', new Date().toISOString());
+        spaLog('renderHome() called');
 
         const mainContent = document.getElementById('main-content');
-        console.log('[SPA] 🔍 Looking for main-content element...');
-        console.log('[SPA] 📦 main-content found:', !!mainContent);
 
         if (!mainContent) {
-            console.error('[SPA] ❌ CRITICAL: main-content element not found!');
-            console.error('[SPA] 💡 DOM may not be ready or element ID is wrong');
-
-            // Emit error event
-            console.log('[SPA] 📡 Emitting render-error event');
+            spaError('CRITICAL: main-content element not found!');
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: {
                     route: 'home',
@@ -584,27 +563,17 @@ class SPANavigation {
             return;
         }
 
-        console.log('[SPA] ✓ main-content element found:', {
-            tagName: mainContent.tagName,
-            className: mainContent.className,
-            display: mainContent.style.display,
-            innerHTML: mainContent.innerHTML.substring(0, 100) + '...'
-        });
-
         // Show loading spinner while preparing content
         mainContent.innerHTML = this.getLoadingHTML('Loading home page...');
 
         // PRIORITY: Use LandingPageView for home page (shows ONLY 12 asset type categories)
         if (typeof LandingPageView !== 'undefined') {
-            console.log('[SPA] 🔧 LandingPageView class available, using it...');
+            spaLog('LandingPageView class available, using it...');
             try {
                 const landingView = new LandingPageView(this.db);
-                console.log('[SPA] 📡 Calling landingView.render(mainContent)...');
                 await landingView.render(mainContent);
-                console.log('[SPA] ✅ Landing page rendered via LandingPageView');
+                spaLog('Landing page rendered via LandingPageView');
 
-                // Emit success event
-                console.log('[SPA] 📡 Emitting first-render-complete event (LandingPageView)');
                 document.dispatchEvent(new CustomEvent('first-render-complete', {
                     detail: {
                         route: 'home',
@@ -614,26 +583,23 @@ class SPANavigation {
                 }));
                 return;
             } catch (error) {
-                console.error('[SPA] ❌ LandingPageView.render() failed:', error);
+                spaError('LandingPageView.render() failed:', error);
                 // Continue to fallbacks
             }
         }
 
         // Fallback: Try PageAssetRenderer (dynamic Firebase page loading)
         if (typeof PageAssetRenderer !== 'undefined') {
-            console.log('[SPA] 🔧 PageAssetRenderer class available, trying...');
+            spaLog('PageAssetRenderer class available, trying...');
             try {
                 const renderer = new PageAssetRenderer(this.db);
-                console.log('[SPA] 📡 Calling renderer.loadPage("home")...');
                 const pageData = await renderer.loadPage('home');
 
                 if (pageData) {
-                    console.log('[SPA] ✅ Home page data loaded from Firebase');
+                    spaLog('Home page data loaded from Firebase');
                     await renderer.renderPage('home', mainContent);
-                    console.log('[SPA] ✅ Home page rendered via PageAssetRenderer');
+                    spaLog('Home page rendered via PageAssetRenderer');
 
-                    // Emit success event
-                    console.log('[SPA] 📡 Emitting first-render-complete event (PageAssetRenderer)');
                     document.dispatchEvent(new CustomEvent('first-render-complete', {
                         detail: {
                             route: 'home',
@@ -643,25 +609,20 @@ class SPANavigation {
                     }));
                     return;
                 } else {
-                    console.log('[SPA] ⚠️  Home page not found in Firebase, falling back to HomeView');
+                    spaLog('Home page not found in Firebase, falling back to HomeView');
                 }
             } catch (error) {
-                console.warn('[SPA] ⚠️  PageAssetRenderer failed, falling back to HomeView:', error);
+                spaWarn('PageAssetRenderer failed, falling back to HomeView:', error);
             }
-        } else {
-            console.log('[SPA] ℹ️  PageAssetRenderer class not defined, skipping');
         }
 
         // Fallback to HomeView class (old mythologies grid)
         if (typeof HomeView !== 'undefined') {
-            console.log('[SPA] 🔧 HomeView class available, using it...');
+            spaLog('HomeView class available, using it...');
             const homeView = new HomeView(this.db);
-            console.log('[SPA] 📡 Calling homeView.render(mainContent)...');
             await homeView.render(mainContent);
-            console.log('[SPA] ✅ Home page rendered via HomeView');
+            spaLog('Home page rendered via HomeView');
 
-            // Emit success event
-            console.log('[SPA] 📡 Emitting first-render-complete event (HomeView)');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
                     route: 'home',
@@ -670,12 +631,10 @@ class SPANavigation {
                 }
             }));
             return;
-        } else {
-            console.log('[SPA] ℹ️  No view classes defined, using inline fallback');
         }
 
         // Fallback to inline rendering if HomeView not available
-        console.warn('[SPA] ⚠️  Using inline fallback rendering (no HomeView or PageAssetRenderer)');
+        spaWarn('Using inline fallback rendering (no HomeView or PageAssetRenderer)');
 
         // Get all mythologies
         const mythologies = [
@@ -753,10 +712,8 @@ class SPANavigation {
             });
         }
 
-        console.log('[SPA] ✅ Home page rendered (inline fallback)');
+        spaLog('Home page rendered (inline fallback)');
 
-        // Emit success event
-        console.log('[SPA] 📡 Emitting first-render-complete event (inline)');
         document.dispatchEvent(new CustomEvent('first-render-complete', {
             detail: {
                 route: 'home',
@@ -764,6 +721,30 @@ class SPANavigation {
                 timestamp: Date.now()
             }
         }));
+    }
+
+    /**
+     * Retry helper with exponential backoff
+     * @param {Function} fn - Async function to retry
+     * @param {number} maxRetries - Maximum retry attempts (default 3)
+     * @param {number} baseDelay - Base delay in ms (default 1000)
+     * @returns {Promise} Result of fn or throws after max retries
+     */
+    async _retryWithBackoff(fn, maxRetries = 3, baseDelay = 1000) {
+        let lastError;
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                return await fn();
+            } catch (error) {
+                lastError = error;
+                if (attempt < maxRetries - 1) {
+                    const delay = baseDelay * Math.pow(2, attempt);
+                    spaLog(`Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+        throw lastError;
     }
 
     async loadMythologyCounts(mythologies) {
@@ -774,12 +755,14 @@ class SPANavigation {
 
             for (const collection of collections) {
                 try {
-                    const snapshot = await this.db.collection(collection)
-                        .where('mythology', '==', myth.id)
-                        .get();
+                    const snapshot = await this._retryWithBackoff(async () => {
+                        return await this.db.collection(collection)
+                            .where('mythology', '==', myth.id)
+                            .get();
+                    });
                     totalCount += snapshot.size;
                 } catch (error) {
-                    console.error(`Error loading count for ${myth.id}:`, error);
+                    spaError(`Error loading count for ${myth.id} after retries:`, error);
                 }
             }
 
@@ -795,11 +778,13 @@ class SPANavigation {
         if (!container) return;
 
         try {
-            const snapshot = await this.db.collection('deities')
-                .where('importance', '>=', 90)
-                .orderBy('importance', 'desc')
-                .limit(12)
-                .get();
+            const snapshot = await this._retryWithBackoff(async () => {
+                return await this.db.collection('deities')
+                    .where('importance', '>=', 90)
+                    .orderBy('importance', 'desc')
+                    .limit(12)
+                    .get();
+            });
 
             const entities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -809,7 +794,7 @@ class SPANavigation {
                 container.innerHTML = '<p>No featured entities found</p>';
             }
         } catch (error) {
-            console.error('Error loading featured entities:', error);
+            spaError('Error loading featured entities after retries:', error);
             container.innerHTML = '<p class="error">Error loading featured entities</p>';
         }
     }
@@ -818,16 +803,16 @@ class SPANavigation {
      * Render mythologies grid page
      */
     async renderMythologies() {
-        console.log('[SPA] ▶️  renderMythologies() called');
+        spaLog('renderMythologies() called');
         const mainContent = document.getElementById('main-content');
 
         if (typeof MythologiesView !== 'undefined') {
             const mythologiesView = new MythologiesView(this.db);
             await mythologiesView.render(mainContent);
-            console.log('[SPA] ✅ Mythologies grid rendered');
+            spaLog('Mythologies grid rendered');
         } else {
             mainContent.innerHTML = `<div class="error-page"><h1>Mythologies View not available</h1></div>`;
-            console.error('[SPA] MythologiesView class not found');
+            spaError('MythologiesView class not found');
         }
     }
 
@@ -835,53 +820,52 @@ class SPANavigation {
      * Render browse category page (deities, creatures, etc.)
      */
     async renderBrowseCategory(category, mythology = null) {
-        console.log(`[SPA] ▶️  renderBrowseCategory() called: ${category}${mythology ? ` (${mythology})` : ''}`);
+        spaLog(`renderBrowseCategory() called: ${category}${mythology ? ` (${mythology})` : ''}`);
         const mainContent = document.getElementById('main-content');
 
         if (typeof BrowseCategoryView !== 'undefined') {
             const browseView = new BrowseCategoryView(this.db);
             await browseView.render(mainContent, { category, mythology });
-            console.log('[SPA] ✅ Browse category rendered');
+            spaLog('Browse category rendered');
         } else {
             mainContent.innerHTML = `<div class="error-page"><h1>Browse View not available</h1></div>`;
-            console.error('[SPA] BrowseCategoryView class not found');
+            spaError('BrowseCategoryView class not found');
         }
     }
 
     async renderMythology(mythologyId) {
-        console.log('[SPA] ▶️  renderMythology() called');
+        spaLog('renderMythology() called');
 
         try {
             const mainContent = document.getElementById('main-content');
 
             // Check if MythologyOverview component is available
             if (typeof MythologyOverview !== 'undefined') {
-                console.log('[SPA] ✓ MythologyOverview class available, using it...');
+                spaLog('MythologyOverview class available, using it...');
                 const mythologyView = new MythologyOverview({ db: this.db, router: this });
                 const html = await mythologyView.render({ mythology: mythologyId });
                 mainContent.innerHTML = html;
-                console.log('[SPA] ✅ Mythology page rendered via MythologyOverview');
+                spaLog('Mythology page rendered via MythologyOverview');
             } else {
                 // Fallback to PageAssetRenderer for special mythology pages
-                console.log('[SPA] ⚠️  MythologyOverview not available, trying PageAssetRenderer...');
+                spaLog('MythologyOverview not available, trying PageAssetRenderer...');
                 if (typeof PageAssetRenderer !== 'undefined') {
                     const renderer = new PageAssetRenderer(this.db);
                     const pageData = await renderer.loadPage(`mythology-${mythologyId}`);
                     if (pageData) {
                         await renderer.renderPage(`mythology-${mythologyId}`, mainContent);
-                        console.log('[SPA] ✅ Mythology page rendered via PageAssetRenderer');
+                        spaLog('Mythology page rendered via PageAssetRenderer');
                     } else {
                         // Final fallback: basic mythology info
                         mainContent.innerHTML = await this.renderBasicMythologyPage(mythologyId);
-                        console.log('[SPA] ✅ Mythology page rendered (basic fallback)');
+                        spaLog('Mythology page rendered (basic fallback)');
                     }
                 } else {
                     mainContent.innerHTML = await this.renderBasicMythologyPage(mythologyId);
-                    console.log('[SPA] ✅ Mythology page rendered (basic fallback)');
+                    spaLog('Mythology page rendered (basic fallback)');
                 }
             }
 
-            console.log('[SPA] 📡 Emitting first-render-complete event');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
                     route: 'mythology',
@@ -890,8 +874,7 @@ class SPANavigation {
                 }
             }));
         } catch (error) {
-            console.error('[SPA] ❌ Mythology page render failed:', error);
-            console.log('[SPA] 📡 Emitting render-error event');
+            spaError('Mythology page render failed:', error);
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: {
                     route: 'mythology',
@@ -942,7 +925,7 @@ class SPANavigation {
                 counts[type] = snapshot.size;
                 totalCount += snapshot.size;
             } catch (error) {
-                console.error(`Error loading count for ${type}:`, error);
+                spaError(`Error loading count for ${type}:`, error);
                 counts[type] = 0;
             }
         }
@@ -975,25 +958,24 @@ class SPANavigation {
     }
 
     async renderCategory(mythology, category) {
-        console.log('[SPA] ▶️  renderCategory() called');
+        spaLog('renderCategory() called');
 
         try {
             const mainContent = document.getElementById('main-content');
 
             // Use BrowseCategoryView to render the category page
             if (typeof BrowseCategoryView !== 'undefined') {
-                console.log('[SPA] ✓ BrowseCategoryView class available, using it...');
+                spaLog('BrowseCategoryView class available, using it...');
                 const browseView = new BrowseCategoryView(this.db);
                 await browseView.render(mainContent, { category, mythology });
-                console.log('[SPA] ✅ Category page rendered via BrowseCategoryView');
+                spaLog('Category page rendered via BrowseCategoryView');
             } else {
                 // Fallback to basic category rendering
-                console.log('[SPA] ⚠️  BrowseCategoryView not available, using basic fallback...');
+                spaLog('BrowseCategoryView not available, using basic fallback...');
                 mainContent.innerHTML = await this.renderBasicCategoryPage(mythology, category);
-                console.log('[SPA] ✅ Category page rendered (basic fallback)');
+                spaLog('Category page rendered (basic fallback)');
             }
 
-            console.log('[SPA] 📡 Emitting first-render-complete event');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
                     route: 'category',
@@ -1003,8 +985,7 @@ class SPANavigation {
                 }
             }));
         } catch (error) {
-            console.error('[SPA] ❌ Category page render failed:', error);
-            console.log('[SPA] 📡 Emitting render-error event');
+            spaError('Category page render failed:', error);
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: {
                     route: 'category',
@@ -1047,7 +1028,7 @@ class SPANavigation {
                 .get();
             entities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         } catch (error) {
-            console.error(`Error loading ${category} for ${mythology}:`, error);
+            spaError(`Error loading ${category} for ${mythology}:`, error);
         }
 
         return `
@@ -1080,25 +1061,24 @@ class SPANavigation {
     }
 
     async renderEntity(mythology, categoryType, entityId) {
-        console.log('[SPA] ▶️  renderEntity() called');
+        spaLog('renderEntity() called');
 
         try {
             const mainContent = document.getElementById('main-content');
 
             // Use FirebaseEntityRenderer to render the entity
             if (typeof FirebaseEntityRenderer !== 'undefined') {
-                console.log('[SPA] ✓ FirebaseEntityRenderer class available, using it...');
+                spaLog('FirebaseEntityRenderer class available, using it...');
                 const entityRenderer = new FirebaseEntityRenderer();
                 await entityRenderer.loadAndRender(categoryType, entityId, mythology, mainContent);
-                console.log('[SPA] ✅ Entity page rendered via FirebaseEntityRenderer');
+                spaLog('Entity page rendered via FirebaseEntityRenderer');
             } else {
                 // Fallback to basic entity rendering
-                console.log('[SPA] ⚠️  FirebaseEntityRenderer not available, using basic fallback...');
+                spaLog('FirebaseEntityRenderer not available, using basic fallback...');
                 mainContent.innerHTML = await this.renderBasicEntityPage(mythology, categoryType, entityId);
-                console.log('[SPA] ✅ Entity page rendered (basic fallback)');
+                spaLog('Entity page rendered (basic fallback)');
             }
 
-            console.log('[SPA] 📡 Emitting first-render-complete event');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
                     route: 'entity',
@@ -1109,8 +1089,7 @@ class SPANavigation {
                 }
             }));
         } catch (error) {
-            console.error('[SPA] ❌ Entity page render failed:', error);
-            console.log('[SPA] 📡 Emitting render-error event');
+            spaError('Entity page render failed:', error);
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: {
                     route: 'entity',
@@ -1137,7 +1116,7 @@ class SPANavigation {
                 entity = { id: doc.id, ...doc.data() };
             }
         } catch (error) {
-            console.error(`Error loading entity ${entityId}:`, error);
+            spaError(`Error loading entity ${entityId}:`, error);
         }
 
         if (!entity) {
@@ -1201,14 +1180,14 @@ class SPANavigation {
     }
 
     async renderSearch() {
-        console.log('[SPA] ▶️  renderSearch() called');
+        spaLog('renderSearch() called');
 
         try {
             const mainContent = document.getElementById('main-content');
 
             // Check if SearchViewComplete class is available (preferred)
             if (typeof SearchViewComplete !== 'undefined') {
-                console.log('[SPA] ✓ SearchViewComplete class available, using it...');
+                spaLog('SearchViewComplete class available, using it...');
 
                 // Create and render complete search view
                 const searchView = new SearchViewComplete(this.db);
@@ -1216,11 +1195,10 @@ class SPANavigation {
                 // Store globally for pagination callbacks
                 window.searchViewInstance = searchView;
 
-                console.log('[SPA] 📡 Rendering SearchViewComplete...');
+                spaLog('Rendering SearchViewComplete...');
                 await searchView.render(mainContent);
 
-                console.log('[SPA] ✅ Search page rendered via SearchViewComplete');
-                console.log('[SPA] 📡 Emitting first-render-complete event');
+                spaLog('Search page rendered via SearchViewComplete');
                 document.dispatchEvent(new CustomEvent('first-render-complete', {
                     detail: {
                         route: 'search',
@@ -1233,7 +1211,7 @@ class SPANavigation {
 
             // Fallback to EnhancedCorpusSearch if available
             if (typeof EnhancedCorpusSearch !== 'undefined') {
-                console.log('[SPA] ⚠️  Falling back to EnhancedCorpusSearch...');
+                spaLog('Falling back to EnhancedCorpusSearch...');
 
                 const container = document.createElement('div');
                 container.id = 'search-container';
@@ -1242,10 +1220,8 @@ class SPANavigation {
 
                 const searchEngine = new EnhancedCorpusSearch(this.db);
                 // Note: EnhancedCorpusSearch may not have a render method
-                // This is a placeholder - you may need to implement a UI wrapper
 
-                console.log('[SPA] ✅ Search container created (EnhancedCorpusSearch)');
-                console.log('[SPA] 📡 Emitting first-render-complete event');
+                spaLog('Search container created (EnhancedCorpusSearch)');
                 document.dispatchEvent(new CustomEvent('first-render-complete', {
                     detail: {
                         route: 'search',
@@ -1257,7 +1233,7 @@ class SPANavigation {
             }
 
             // Final fallback - show error
-            console.error('[SPA] ❌ No search component available');
+            spaError('No search component available');
             mainContent.innerHTML = `
                 <div class="error-page">
                     <h1>Search Not Available</h1>
@@ -1267,8 +1243,7 @@ class SPANavigation {
             `;
 
         } catch (error) {
-            console.error('[SPA] ❌ Search page render failed:', error);
-            console.log('[SPA] 📡 Emitting render-error event');
+            spaError('Search page render failed:', error);
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: {
                     route: 'search',
@@ -1281,14 +1256,14 @@ class SPANavigation {
     }
 
     async renderCompare() {
-        console.log('[SPA] ▶️  renderCompare() called');
+        spaLog('renderCompare() called');
 
         try {
             const mainContent = document.getElementById('main-content');
 
             // Check if CompareView class is available
             if (typeof CompareView === 'undefined') {
-                console.error('[SPA] ❌ CompareView class not loaded');
+                spaError('CompareView class not loaded');
                 mainContent.innerHTML = `
                     <div class="error-page">
                         <h1>Error</h1>
@@ -1298,16 +1273,15 @@ class SPANavigation {
                 return;
             }
 
-            console.log('[SPA] ✓ CompareView class available');
+            spaLog('CompareView class available');
 
             // Create and render CompareView
             const compareView = new CompareView(this.db);
 
-            console.log('[SPA] 📡 Rendering CompareView...');
+            spaLog('Rendering CompareView...');
             await compareView.render(mainContent);
 
-            console.log('[SPA] ✅ Compare page rendered successfully');
-            console.log('[SPA] 📡 Emitting first-render-complete event');
+            spaLog('Compare page rendered successfully');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
                     route: 'compare',
@@ -1315,8 +1289,7 @@ class SPANavigation {
                 }
             }));
         } catch (error) {
-            console.error('[SPA] ❌ Compare page render failed:', error);
-            console.log('[SPA] 📡 Emitting render-error event');
+            spaError('Compare page render failed:', error);
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: {
                     route: 'compare',
@@ -1329,14 +1302,14 @@ class SPANavigation {
     }
 
     async renderDashboard() {
-        console.log('[SPA] ▶️  renderDashboard() called');
+        spaLog('renderDashboard() called');
 
         try {
             const mainContent = document.getElementById('main-content');
 
             // Check if UserDashboard class is available
             if (typeof UserDashboard === 'undefined') {
-                console.error('[SPA] ❌ UserDashboard class not loaded');
+                spaError('UserDashboard class not loaded');
                 mainContent.innerHTML = `
                     <div class="error-page">
                         <h1>Error</h1>
@@ -1348,7 +1321,7 @@ class SPANavigation {
 
             // Check if FirebaseCRUDManager is available
             if (typeof FirebaseCRUDManager === 'undefined') {
-                console.error('[SPA] ❌ FirebaseCRUDManager class not loaded');
+                spaError('FirebaseCRUDManager class not loaded');
                 mainContent.innerHTML = `
                     <div class="error-page">
                         <h1>Error</h1>
@@ -1358,7 +1331,7 @@ class SPANavigation {
                 return;
             }
 
-            console.log('[SPA] ✓ UserDashboard and dependencies available');
+            spaLog('UserDashboard and dependencies available');
 
             // Create CRUD manager instance
             const crudManager = new FirebaseCRUDManager(this.db, firebase.auth());
@@ -1369,16 +1342,15 @@ class SPANavigation {
                 auth: firebase.auth()
             });
 
-            console.log('[SPA] 📡 Rendering UserDashboard...');
+            spaLog('Rendering UserDashboard...');
             const dashboardHTML = await dashboard.render();
             mainContent.innerHTML = dashboardHTML;
 
             // Initialize dashboard event listeners
-            console.log('[SPA] 🔧 Initializing dashboard event listeners...');
+            spaLog('Initializing dashboard event listeners...');
             dashboard.initialize(mainContent);
 
-            console.log('[SPA] ✅ Dashboard page rendered successfully');
-            console.log('[SPA] 📡 Emitting first-render-complete event');
+            spaLog('Dashboard page rendered successfully');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
                     route: 'dashboard',
@@ -1386,8 +1358,7 @@ class SPANavigation {
                 }
             }));
         } catch (error) {
-            console.error('[SPA] ❌ Dashboard page render failed:', error);
-            console.log('[SPA] 📡 Emitting render-error event');
+            spaError('Dashboard page render failed:', error);
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: {
                     route: 'dashboard',
@@ -1400,7 +1371,7 @@ class SPANavigation {
     }
 
     async renderAbout() {
-        console.log('[SPA] ▶️  renderAbout() called');
+        spaLog('renderAbout() called');
 
         try {
             const mainContent = document.getElementById('main-content');
@@ -1411,8 +1382,7 @@ class SPANavigation {
                 mainContent.innerHTML = '<div class="error">AboutPage component not loaded</div>';
             }
 
-            console.log('[SPA] ✅ About page rendered');
-            console.log('[SPA] 📡 Emitting first-render-complete event');
+            spaLog('About page rendered');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
                     route: 'about',
@@ -1420,8 +1390,7 @@ class SPANavigation {
                 }
             }));
         } catch (error) {
-            console.error('[SPA] ❌ About page render failed:', error);
-            console.log('[SPA] 📡 Emitting render-error event');
+            spaError('About page render failed:', error);
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: {
                     route: 'about',
@@ -1434,7 +1403,7 @@ class SPANavigation {
     }
 
     async renderPrivacy() {
-        console.log('[SPA] ▶️  renderPrivacy() called');
+        spaLog('renderPrivacy() called');
 
         try {
             const mainContent = document.getElementById('main-content');
@@ -1445,8 +1414,7 @@ class SPANavigation {
                 mainContent.innerHTML = '<div class="error">PrivacyPage component not loaded</div>';
             }
 
-            console.log('[SPA] ✅ Privacy page rendered');
-            console.log('[SPA] 📡 Emitting first-render-complete event');
+            spaLog('Privacy page rendered');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
                     route: 'privacy',
@@ -1454,8 +1422,7 @@ class SPANavigation {
                 }
             }));
         } catch (error) {
-            console.error('[SPA] ❌ Privacy page render failed:', error);
-            console.log('[SPA] 📡 Emitting render-error event');
+            spaError('Privacy page render failed:', error);
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: {
                     route: 'privacy',
@@ -1468,7 +1435,7 @@ class SPANavigation {
     }
 
     async renderTerms() {
-        console.log('[SPA] ▶️  renderTerms() called');
+        spaLog('renderTerms() called');
 
         try {
             const mainContent = document.getElementById('main-content');
@@ -1479,8 +1446,7 @@ class SPANavigation {
                 mainContent.innerHTML = '<div class="error">TermsPage component not loaded</div>';
             }
 
-            console.log('[SPA] ✅ Terms page rendered');
-            console.log('[SPA] 📡 Emitting first-render-complete event');
+            spaLog('Terms page rendered');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
                     route: 'terms',
@@ -1488,8 +1454,7 @@ class SPANavigation {
                 }
             }));
         } catch (error) {
-            console.error('[SPA] ❌ Terms page render failed:', error);
-            console.log('[SPA] 📡 Emitting render-error event');
+            spaError('Terms page render failed:', error);
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: {
                     route: 'terms',
@@ -1502,7 +1467,7 @@ class SPANavigation {
     }
 
     async render404() {
-        console.log('[SPA] ▶️  render404() called');
+        spaLog('render404() called');
 
         try {
             const mainContent = document.getElementById('main-content');
@@ -1514,8 +1479,7 @@ class SPANavigation {
                 </div>
             `;
 
-            console.log('[SPA] ✅ 404 page rendered');
-            console.log('[SPA] 📡 Emitting first-render-complete event');
+            spaLog('404 page rendered');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: {
                     route: '404',
@@ -1523,8 +1487,7 @@ class SPANavigation {
                 }
             }));
         } catch (error) {
-            console.error('[SPA] ❌ 404 page render failed:', error);
-            console.log('[SPA] 📡 Emitting render-error event');
+            spaError('404 page render failed:', error);
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: {
                     route: '404',
@@ -1536,15 +1499,41 @@ class SPANavigation {
         }
     }
 
-    renderError(error) {
+    /**
+     * Render error page with route context and working retry button
+     * @param {Error} error - The error that occurred
+     * @param {string} failedRoute - The route that failed to load
+     */
+    renderError(error, failedRoute = null) {
         const mainContent = document.getElementById('main-content');
+        const route = failedRoute || this.currentRoute || window.location.hash || '#/';
+
         mainContent.innerHTML = `
-            <div class="error-page">
-                <h1>Error</h1>
-                <p>${error.message}</p>
-                <a href="#/" class="btn-primary">Return Home</a>
+            <div class="error-page" style="text-align: center; padding: 4rem 2rem;">
+                <div class="error-icon" style="font-size: 4rem; margin-bottom: 1.5rem;">&#9888;</div>
+                <h1 style="color: var(--color-error, #ef4444); margin-bottom: 1rem;">Error Loading Page</h1>
+                <p style="color: var(--color-text-secondary, #9ca3af); margin-bottom: 0.5rem; max-width: 500px; margin-left: auto; margin-right: auto;">${this.escapeHtml(error.message)}</p>
+                <p style="color: var(--color-text-muted, #6b7280); font-size: 0.875rem; margin-bottom: 2rem;">Failed route: <code style="background: rgba(0,0,0,0.2); padding: 0.25rem 0.5rem; border-radius: 4px;">${this.escapeHtml(route)}</code></p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button id="spa-retry-btn" class="btn btn-primary" style="padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; background: var(--color-primary, #3b82f6); color: white; border: none;">
+                        Retry
+                    </button>
+                    <a href="#/" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; background: rgba(255,255,255,0.1); color: inherit;">
+                        Return Home
+                    </a>
+                </div>
             </div>
         `;
+
+        // Attach retry button event listener
+        const retryBtn = document.getElementById('spa-retry-btn');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', () => {
+                spaLog('Retry button clicked, re-navigating to:', route);
+                this._isNavigating = false; // Reset navigation lock
+                this.handleRoute();
+            });
+        }
     }
 
     showLoading() {

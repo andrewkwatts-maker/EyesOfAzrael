@@ -21,17 +21,27 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
 
-    <!-- Code Splitting Performance Hints -->
-    <!-- Preload critical route for instant home page -->
-    <link rel="modulepreload" href="js/views/home-view.js" as="script" crossorigin>
+    <!-- ============================================
+         RESOURCE HINTS (Performance Optimization)
+         ============================================ -->
 
-    <!-- Prefetch likely next routes (loaded in background after initial render) -->
-    <link rel="prefetch" href="js/components/search-view-complete.js" as="script" crossorigin>
-    <link rel="prefetch" href="js/components/compare-view.js" as="script" crossorigin>
-
-    <!-- Preconnect to external resources -->
+    <!-- Preconnect to external resources (establish early connections) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://www.gstatic.com">
+
+    <!-- Font Preloading: Inter font for critical text rendering -->
+    <!-- Note: font-display: swap is set in styles.css via Google Fonts URL -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+
+    <!-- Preload critical route: landing-page-view.js is the first view loaded -->
+    <link rel="preload" href="js/views/landing-page-view.js" as="script">
+
+    <!-- Prefetch likely next routes (loaded in background after initial render) -->
+    <link rel="prefetch" href="js/components/search-view-complete.js" as="script">
+    <link rel="prefetch" href="js/components/compare-view.js" as="script">
 
     <!-- CRITICAL CSS - Inlined for instant rendering -->
     <style>
@@ -217,6 +227,7 @@
          ============================================ -->
 
     <!-- CRITICAL CSS - Render blocking (required for initial paint) -->
+    <!-- These must load synchronously to prevent FOUC (Flash of Unstyled Content) -->
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="themes/theme-base.css">
     <link rel="stylesheet" href="css/site-header.css">
@@ -224,11 +235,12 @@
     <link rel="stylesheet" href="css/loading-spinner.css">
     <link rel="stylesheet" href="css/skeleton-screens.css">
 
-    <!-- HIGH PRIORITY CSS - Preload for fast subsequent use -->
-    <link rel="preload" href="css/home-page.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="css/ui-components.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="css/universal-grid.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="css/accessibility.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <!-- HOME PAGE CSS - Load synchronously (first view, prevents FOUC) -->
+    <link rel="stylesheet" href="css/home-page.css">
+    <link rel="stylesheet" href="css/category-landing.css">
+    <link rel="stylesheet" href="css/ui-components.css">
+    <link rel="stylesheet" href="css/universal-grid.css">
+    <link rel="stylesheet" href="css/accessibility.css">
 
     <!-- DEFERRED CSS - Non-blocking async load -->
     <link rel="stylesheet" href="css/home-view.css" media="print" onload="this.media='all'">
@@ -263,6 +275,7 @@
 
     <!-- Fallback for browsers with JS disabled -->
     <noscript>
+        <!-- Load essential CSS synchronously for noscript fallback -->
         <link rel="stylesheet" href="css/home-page.css">
         <link rel="stylesheet" href="css/ui-components.css">
         <link rel="stylesheet" href="css/universal-grid.css">
@@ -287,6 +300,56 @@
         <link rel="stylesheet" href="css/shader-backgrounds.css">
         <link rel="stylesheet" href="css/panel-shaders.css">
         <link rel="stylesheet" href="css/hamburger-menu.css">
+
+        <!-- NoScript fallback styling -->
+        <style>
+            .noscript-message {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+                color: #f8f9fa;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem;
+                text-align: center;
+                z-index: 99999;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            }
+            .noscript-message h1 {
+                font-size: 2rem;
+                margin-bottom: 1rem;
+                color: #8b7fff;
+            }
+            .noscript-message p {
+                max-width: 500px;
+                line-height: 1.6;
+                margin-bottom: 1rem;
+                color: #adb5bd;
+            }
+            .noscript-message .contact-info {
+                margin-top: 1.5rem;
+                padding: 1rem 2rem;
+                background: rgba(139, 127, 255, 0.1);
+                border: 1px solid rgba(139, 127, 255, 0.3);
+                border-radius: 12px;
+            }
+            .noscript-message a {
+                color: #8b7fff;
+                text-decoration: none;
+            }
+            .noscript-message a:hover {
+                text-decoration: underline;
+            }
+            /* Hide main content when JS disabled */
+            .site-header, #main-content, .site-footer {
+                display: none !important;
+            }
+        </style>
     </noscript>
 
     <!-- Google Analytics 4 - Privacy-compliant analytics -->
@@ -311,10 +374,65 @@
 
     <!-- Firebase Config -->
     <script src="firebase-config.js"></script>
+
+    <!-- FOUC Prevention: Apply saved theme immediately before paint -->
+    <script>
+        (function() {
+            'use strict';
+            try {
+                var STORAGE_KEY = 'eoaplot-selected-theme';
+                var savedTheme = null;
+
+                // Try localStorage first
+                try {
+                    savedTheme = localStorage.getItem(STORAGE_KEY);
+                } catch (e) {
+                    // Try sessionStorage as fallback
+                    try {
+                        savedTheme = sessionStorage.getItem(STORAGE_KEY);
+                    } catch (e2) {}
+                }
+
+                // Apply theme class to html element immediately
+                if (savedTheme) {
+                    document.documentElement.setAttribute('data-theme', savedTheme);
+                    // Also set a class for CSS to use
+                    document.documentElement.classList.add('theme-' + savedTheme);
+                } else {
+                    // Default to night theme
+                    document.documentElement.setAttribute('data-theme', 'night');
+                    document.documentElement.classList.add('theme-night');
+                }
+            } catch (e) {
+                // Silent fail - shader-theme-picker.js will handle initialization
+            }
+        })();
+    </script>
 </head>
 <body>
     <!-- Skip to main content (Accessibility) -->
     <a href="#main-content" class="skip-to-main">Skip to main content</a>
+
+    <!-- NoScript Message: Displayed when JavaScript is disabled -->
+    <noscript>
+        <div class="noscript-message">
+            <h1>JavaScript Required</h1>
+            <p>
+                Eyes of Azrael is an interactive web application that requires JavaScript to function properly.
+                Please enable JavaScript in your browser settings to explore our comprehensive mythology encyclopedia.
+            </p>
+            <p>
+                Our application features an extensive database of world mythologies, deities, heroes,
+                mythical creatures, sacred texts, and more - all powered by modern web technologies.
+            </p>
+            <div class="contact-info">
+                <p><strong>Need help?</strong></p>
+                <p>
+                    Contact us at <a href="mailto:support@eyesofazrael.com">support@eyesofazrael.com</a>
+                </p>
+            </div>
+        </div>
+    </noscript>
 
     <!-- Site Header -->
     <header class="site-header">
@@ -594,7 +712,7 @@
             <!-- Corpus Search Section -->
             <div class="corpus-search-section">
                 <h3><span class="section-icon">🔍</span> Search the Corpus</h3>
-                <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 1rem;">
+                <p class="corpus-search-description">
                     Search across all mythological texts, entity data, and corpus queries.
                 </p>
 
@@ -661,8 +779,8 @@
                     <span>🔍</span> Search Corpus
                 </button>
 
-                <!-- Search Results Container -->
-                <div class="corpus-search-results" id="corpusSearchResults" style="display: none;">
+                <!-- Search Results Container (hidden by default, shown via JS) -->
+                <div class="corpus-search-results" id="corpusSearchResults" hidden>
                     <!-- Results will be dynamically inserted here -->
                 </div>
             </div>
@@ -713,24 +831,24 @@
                 </div>
             </div>
 
-            <!-- Admin Tools Section (Admin Only) -->
-            <div class="panel-nav-section admin-tools-section" id="adminToolsSection" style="display: none;">
-                <h3><span class="section-icon" style="color: #ffa500;">&#9881;</span> Admin Tools</h3>
+            <!-- Admin Tools Section (Admin Only - hidden by default, shown via JS) -->
+            <div class="panel-nav-section admin-tools-section" id="adminToolsSection" hidden>
+                <h3><span class="section-icon">&#9881;</span> Admin Tools</h3>
                 <div class="panel-nav-links">
                     <button class="panel-nav-link admin-link" id="openModerationPanel">
-                        <span class="link-icon" style="color: #ff6b6b;">&#128683;</span>
+                        <span class="link-icon icon-moderation">&#128683;</span>
                         <span>Content Moderation</span>
                     </button>
                     <button class="panel-nav-link admin-link" id="viewBannedUsers">
-                        <span class="link-icon" style="color: #ffa500;">&#128100;</span>
+                        <span class="link-icon icon-banned">&#128100;</span>
                         <span>Banned Users</span>
                     </button>
                     <button class="panel-nav-link admin-link" id="viewFlaggedContent">
-                        <span class="link-icon" style="color: #ffd43b;">&#9873;</span>
+                        <span class="link-icon icon-flagged">&#9873;</span>
                         <span>Flagged Content</span>
                     </button>
                     <button class="panel-nav-link admin-link" id="viewModerationHistory">
-                        <span class="link-icon" style="color: #6c757d;">&#128196;</span>
+                        <span class="link-icon icon-history">&#128196;</span>
                         <span>Moderation History</span>
                     </button>
                 </div>
@@ -765,84 +883,138 @@
         </div>
     </footer>
 
-    <!-- PERFORMANCE: Firebase Cache Manager (critical for fast loading) -->
+    <!-- ============================================
+         SCRIPT LOADING ORDER
+
+         Load order is critical for proper initialization:
+         1. Firebase SDK (loaded in <head>)
+         2. Firebase-dependent utilities (cache manager)
+         3. Core utilities (no dependencies)
+         4. UI components (theme, navigation)
+         5. Views and renderers
+         6. SPA Navigation (depends on views)
+         7. App Initialization (last)
+         ============================================ -->
+
+    <!-- ============================================
+         LAYER 1: Firebase-Dependent Utilities
+         Requires: Firebase SDK (loaded in head)
+         ============================================ -->
     <script src="js/firebase-cache-manager.js"></script>
 
-    <!-- PERFORMANCE: Progressive Lazy Loader (skeleton screens & deferred loading) -->
+    <!-- ============================================
+         LAYER 2: Core Utilities (No Dependencies)
+         These utilities can initialize independently
+         ============================================ -->
     <script src="js/lazy-loader.js"></script>
-
-    <!-- PWA: Service Worker Registration -->
-    <script src="js/sw-register.js"></script>
-    <script src="js/sw-update-notifier.js"></script>
-
-    <!-- Core Scripts -->
     <script src="js/debug-loading.js"></script>
     <script src="js/diagnostic-collector.js"></script>
     <script src="js/seo-manager.js"></script>
     <script src="js/toast-notifications.js"></script>
     <script src="js/image-optimizer.js"></script>
     <script src="js/utils/loading-spinner.js"></script>
-    <script src="js/app-coordinator.js"></script>
 
-    <!-- Authentication Guard (simplified - content always visible) -->
+    <!-- PWA: Service Worker Registration -->
+    <script src="js/sw-register.js"></script>
+    <script src="js/sw-update-notifier.js"></script>
+
+    <!-- ============================================
+         LAYER 3: App Coordination & Authentication
+         Requires: Core utilities
+         ============================================ -->
+    <script src="js/app-coordinator.js"></script>
     <script src="js/auth-guard-simple.js"></script>
-    <!-- Theme System: Comprehensive Shader Theme Picker -->
-    <!-- MUST load shader manager BEFORE theme picker -->
+    <script src="js/auth-manager.js"></script>
+
+    <!-- ============================================
+         LAYER 4: Theme System
+         Load order: shader-themes.js BEFORE shader-theme-picker.js
+         ============================================ -->
     <script src="js/shaders/shader-themes.js"></script>
     <script src="js/shader-theme-picker.js"></script>
 
-    <!-- Header Navigation (dropdowns & mobile menu) -->
+    <!-- ============================================
+         LAYER 5: UI Components & Navigation
+         Requires: Theme system, auth manager
+         ============================================ -->
     <script src="js/header-nav.js"></script>
 
-    <!-- Authentication -->
-    <script src="js/auth-manager.js"></script>
-
+    <!-- ============================================
+         LAYER 6: Data & Renderers
+         Requires: Firebase cache manager
+         ============================================ -->
     <script src="js/page-asset-renderer.js"></script>
-    <!-- Mythology Data - Whispers/Quotes for atmospheric effect -->
     <script src="js/data/mythology-whispers.js"></script>
-    <!-- Component Scripts -->
-    <script src="js/views/home-view.js"></script>
+    <script src="js/entity-renderer-firebase.js"></script>
+
+    <!-- ============================================
+         LAYER 7: View Classes
+         MUST load BEFORE spa-navigation.js
+         Load order: landing-page-view first (primary view)
+         ============================================ -->
     <script src="js/views/landing-page-view.js"></script>
+    <script src="js/views/home-view.js"></script>
     <script src="js/views/mythologies-view.js"></script>
     <script src="js/views/browse-category-view.js"></script>
+
+    <!-- ============================================
+         LAYER 8: Component Scripts
+         Requires: View classes, renderers
+         ============================================ -->
     <script src="js/components/mythology-overview.js"></script>
     <script src="js/components/universal-display-renderer.js"></script>
     <script src="js/components/compare-view.js"></script>
     <script src="js/components/entity-quick-view-modal.js"></script>
     <script src="js/components/entity-card-quick-view.js"></script>
-    <script src="js/entity-renderer-firebase.js"></script>
     <script src="js/components/corpus-search.js"></script>
     <script src="js/components/corpus-search-enhanced.js"></script>
     <script src="js/components/extended-menu-controller.js"></script>
-    <!-- Virtual Scroller (MUST load before search-view-complete.js) -->
+
+    <!-- Virtual Scroller: MUST load BEFORE search-view-complete.js -->
     <script src="js/components/virtual-scroller.js"></script>
     <script src="js/components/search-view-complete.js"></script>
-    <!-- Note: shader-themes.js and shader-theme-picker.js loaded earlier in the file -->
 
-    <!-- CRUD System - MUST load before SPA Navigation (dashboard route needs these) -->
+    <!-- ============================================
+         LAYER 9: CRUD System
+         MUST load BEFORE SPA Navigation (dashboard route needs these)
+         ============================================ -->
     <script src="js/firebase-crud-manager.js"></script>
     <script src="js/components/entity-form.js"></script>
     <script src="js/components/edit-entity-modal.js"></script>
     <script src="js/components/user-dashboard.js"></script>
 
-    <!-- Footer Pages - MUST load before SPA Navigation (routes need these) -->
+    <!-- ============================================
+         LAYER 10: Static Pages
+         MUST load BEFORE SPA Navigation (routes need these)
+         ============================================ -->
     <script src="js/components/about-page.js"></script>
     <script src="js/components/privacy-page.js"></script>
     <script src="js/components/terms-page.js"></script>
 
-    <!-- Admin Moderation System (Admin Only) -->
+    <!-- ============================================
+         LAYER 11: Services (Admin & User Features)
+         ============================================ -->
     <script src="js/services/moderation-service.js"></script>
     <script src="js/services/favorites-service.js"></script>
     <script src="js/components/admin-moderation-panel.js"></script>
 
-    <!-- Analytics & Monitoring -->
+    <!-- ============================================
+         LAYER 12: Analytics & Monitoring
+         ============================================ -->
     <script src="js/analytics.js"></script>
     <script src="js/privacy-controls.js"></script>
 
-    <!-- SPA Navigation - MUST load AFTER all view classes are defined -->
+    <!-- ============================================
+         LAYER 13: SPA Navigation
+         MUST load AFTER all view classes are defined
+         Registers routes and handles navigation
+         ============================================ -->
     <script src="js/spa-navigation.js"></script>
 
-    <!-- App Initialization - MUST be last -->
+    <!-- ============================================
+         LAYER 14: App Initialization
+         MUST be LAST - bootstraps the entire application
+         ============================================ -->
     <script src="js/app-init-simple.js"></script>
 </body>
 </html>
