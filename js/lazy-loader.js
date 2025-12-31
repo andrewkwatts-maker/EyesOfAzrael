@@ -126,8 +126,9 @@ class ProgressiveLazyLoader {
         console.log('[Lazy Loader] Phase 2: Loading Auth UI...');
 
         try {
-            // Check if Firebase Auth is available
-            if (typeof firebase !== 'undefined' && firebase.auth) {
+            // Check if Firebase Auth is available AND initialized
+            // firebase.auth exists but calling it before initializeApp() throws an error
+            if (typeof firebase !== 'undefined' && firebase.auth && firebase.apps && firebase.apps.length > 0) {
                 const auth = firebase.auth();
 
                 // Quick auth state check (don't wait for full auth)
