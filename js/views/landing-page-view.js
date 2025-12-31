@@ -203,6 +203,22 @@ class LandingPageView {
                 console.warn('[Landing Page] WARNING: .landing-page-view element not found in container');
             }
 
+            // AGGRESSIVE: Force ALL parent elements to be visible
+            let parent = container.parentElement;
+            while (parent && parent !== document.body) {
+                parent.style.setProperty('opacity', '1', 'important');
+                parent.style.setProperty('display', 'block', 'important');
+                parent.style.setProperty('visibility', 'visible', 'important');
+                parent.style.setProperty('position', 'relative', 'important');
+                parent.style.setProperty('z-index', '1', 'important');
+                parent = parent.parentElement;
+            }
+            console.log('[Landing Page] All parent elements made visible');
+
+            // DIAGNOSTIC: Log innerHTML length to verify content exists
+            console.log('[Landing Page] Content length:', container.innerHTML.length, 'chars');
+            console.log('[Landing Page] Has .landing-hero-title:', !!container.querySelector('.landing-hero-title'));
+
             this.attachEventListeners();
             this.isLoaded = true;
 
