@@ -459,11 +459,26 @@
 .entity-card .entity-icon img,
 .entity-card .card-icon img,
 .universal-grid-card .grid-card-icon img,
-img.entity-icon {
+img.entity-icon,
+.entity-icon-img {
     width: 100%;
     height: 100%;
+    max-width: var(--icon-size-lg);
+    max-height: var(--icon-size-lg);
     object-fit: contain;
     border-radius: 8px;
+    /* Prevent layout shift during load */
+    aspect-ratio: 1 / 1;
+    background: rgba(var(--entity-accent-rgb), 0.05);
+}
+
+/* Emoji/Text Icons */
+.entity-icon-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(var(--icon-size-lg) * 0.6);
+    line-height: 1;
 }
 
 /* Icon Fallback */
@@ -483,6 +498,8 @@ img.entity-icon {
     border-radius: 12px;
     font-size: calc(var(--icon-size-lg) * 0.5);
     color: rgba(var(--entity-accent-rgb), 0.7);
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
 /* Icon size modifiers */
@@ -852,6 +869,7 @@ img.entity-icon {
 
 .entity-card.loading,
 .entity-card.skeleton,
+.entity-card-loading,
 .universal-grid-card.loading {
     pointer-events: none;
 }
@@ -861,7 +879,10 @@ img.entity-icon {
 .entity-card.loading .card-description,
 .entity-card.skeleton .entity-icon,
 .entity-card.skeleton .card-title,
-.entity-card.skeleton .card-description {
+.entity-card.skeleton .card-description,
+.entity-card-loading .skeleton-icon,
+.entity-card-loading .skeleton-text,
+.entity-card-loading .skeleton-button {
     background: linear-gradient(
         90deg,
         rgba(var(--color-border-rgb, 42, 47, 74), 0.3) 0%,
@@ -872,6 +893,33 @@ img.entity-icon {
     animation: shimmer 1.5s ease-in-out infinite;
     color: transparent;
     border-radius: 0.5rem;
+}
+
+/* Skeleton icon placeholder */
+.entity-card-loading .skeleton-icon {
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
+    border-radius: 12px;
+}
+
+/* Skeleton text placeholders */
+.entity-card-loading .skeleton-text {
+    height: 1.2em;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.entity-card-loading .skeleton-text-sm {
+    height: 0.9em;
+    width: 60%;
+}
+
+/* Skeleton button placeholder */
+.entity-card-loading .skeleton-button {
+    display: inline-block;
+    width: 100px;
+    height: 2rem;
+    border-radius: 0.625rem;
 }
 
 @keyframes shimmer {

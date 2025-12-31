@@ -212,10 +212,14 @@ class LandingPageView {
             // Show error message in container
             if (container) {
                 container.innerHTML = `
-                    <div class="error-container" style="padding: 2rem; text-align: center; color: #ef4444;">
+                    <div class="error-container" role="alert" style="padding: 2rem; text-align: center; color: #ef4444;">
                         <h2>Error Loading Landing Page</h2>
-                        <p>${error.message}</p>
-                        <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer;">
+                        <p>${this.escapeHTML(error.message)}</p>
+                        <button onclick="location.reload()"
+                                style="margin-top: 1rem; padding: 0.75rem 1.5rem; cursor: pointer;
+                                       background: #ef4444; color: white; border: none; border-radius: 8px;
+                                       font-size: 1rem; min-height: 44px;"
+                                aria-label="Retry loading the page">
                             Retry
                         </button>
                     </div>
@@ -720,9 +724,11 @@ class LandingPageView {
                     object-fit: contain;
                     opacity: 0.9;
 
-                    /* Color theming for SVG - use card color */
-                    color: var(--card-color, var(--color-primary, #8b7fff));
+                    /* SVG icons loaded via <img> cannot inherit CSS color.
+                     * Use brightness(0) + invert(1) to make white, then sepia and hue-rotate
+                     * to approximate the card color. This provides visual consistency. */
                     filter:
+                        brightness(0) invert(1)
                         drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3))
                         drop-shadow(0 0 12px var(--card-color));
 
@@ -738,9 +744,10 @@ class LandingPageView {
                     transform: scale(1.15) rotateZ(5deg);
                     opacity: 1;
                     filter:
+                        brightness(0) invert(1)
                         drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))
                         drop-shadow(0 0 24px var(--card-color))
-                        brightness(1.1);
+                        brightness(1.2);
                 }
 
                 /* Emoji Fallback Icon - Shown when SVG fails to load */
@@ -997,8 +1004,8 @@ class LandingPageView {
                     }
                 }
 
-                /* Tablet (768px - 1023px) */
-                @media (min-width: 768px) and (max-width: 1023px) {
+                /* Tablet (768px - 899px) - 2 columns */
+                @media (min-width: 768px) and (max-width: 899px) {
                     .landing-category-grid {
                         grid-template-columns: repeat(2, 1fr);
                         gap: 20px; /* 2.5x8px grid */
@@ -1018,6 +1025,24 @@ class LandingPageView {
                     .landing-btn {
                         min-height: 48px;
                         touch-action: manipulation;
+                    }
+                }
+
+                /* Large Tablet (900px - 1023px) - 3 columns for better space usage */
+                @media (min-width: 900px) and (max-width: 1023px) {
+                    .landing-category-grid {
+                        grid-template-columns: repeat(3, 1fr);
+                        gap: 20px;
+                    }
+
+                    .landing-category-card {
+                        min-height: 160px;
+                        padding: 24px;
+                    }
+
+                    .landing-features-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 20px;
                     }
                 }
 
@@ -1201,6 +1226,15 @@ class LandingPageView {
     }
 
     /**
+     * Escape HTML special characters to prevent XSS
+     */
+    escapeHTML(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    /**
      * Emoji fallbacks for each category (used when SVG icons fail to load)
      */
     getEmojiFallbacks() {
@@ -1232,13 +1266,13 @@ class LandingPageView {
                class="landing-category-card"
                data-type="${type.id}"
                style="--card-color: ${type.color}"
-               role="link"
-               aria-label="Navigate to ${type.name}: ${type.description}">
+               aria-label="${type.name} - ${type.description}">
                 <img src="${type.icon}"
-                     alt="${type.name} icon"
+                     alt=""
                      class="landing-category-icon"
                      loading="lazy"
                      decoding="async"
+                     aria-hidden="true"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
                 <span class="landing-category-icon-fallback" style="display: none;" aria-hidden="true">${emojiFallback}</span>
                 <h3 class="landing-category-name">${type.name}</h3>

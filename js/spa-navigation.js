@@ -307,22 +307,34 @@ class SPANavigation {
 
         // Create bound handlers for proper cleanup
         this._boundHandlers.hashchange = (e) => {
-            const newHash = window.location.hash;
+            const newHash = window.location.hash || '#/';
             spaLog('hashchange event triggered, hash:', newHash);
 
-            // Skip if we just navigated to this hash (prevents double-handling)
+            // Skip if we just navigated to this hash via navigate() (prevents double-handling)
             if (this._lastNavigatedHash === newHash) {
-                spaLog('Skipping hashchange - same hash already processed');
+                spaLog('Skipping hashchange - same hash already processed via navigate()');
                 this._lastNavigatedHash = null; // Reset for next navigation
                 return;
             }
 
-            // Debounce rapid hash changes
+            // Clear any stale _lastNavigatedHash that doesn't match current hash
+            if (this._lastNavigatedHash && this._lastNavigatedHash !== newHash) {
+                this._lastNavigatedHash = null;
+            }
+
+            // Debounce rapid hash changes (e.g., from rapid back/forward button presses)
             if (this._navigationDebounceTimer) {
                 clearTimeout(this._navigationDebounceTimer);
             }
 
             this._navigationDebounceTimer = setTimeout(() => {
+                // Double-check hash hasn't changed during debounce
+                const currentHash = window.location.hash || '#/';
+                if (currentHash !== newHash) {
+                    spaLog('Hash changed during debounce, skipping stale navigation');
+                    return;
+                }
+
                 if (!this._isNavigating) {
                     this.handleRoute();
                 } else {
@@ -392,26 +404,35 @@ class SPANavigation {
 
         spaLog('Navigating to:', path);
 
-        // Track that we're about to navigate to this hash (prevents double-handling)
+        // Track that we're about to navigate to this hash (prevents double-handling from hashchange)
         this._lastNavigatedHash = path;
 
         // Check if we're already at this path
-        if (window.location.hash === path) {
+        const currentHash = window.location.hash || '#/';
+        if (currentHash === path) {
             spaLog('Already at this path, forcing route refresh');
+            // Reset navigation flag to allow re-render of same route
+            this._isNavigating = false;
             this.handleRoute();
             return;
         }
 
-        // Set the hash and handle the route
+        // Reset navigation flag before setting new hash
+        // This ensures handleRoute() can acquire the lock
+        this._isNavigating = false;
+
+        // Set the hash - this will trigger hashchange event
         if (options.replace) {
             window.history.replaceState(null, '', path);
+            // replaceState doesn't trigger hashchange, so we must call handleRoute directly
+            this.handleRoute();
         } else {
+            // Setting hash triggers hashchange which calls handleRoute via the event listener
+            // The _lastNavigatedHash check prevents the event handler from calling handleRoute again
             window.location.hash = path;
+            // Call handleRoute directly since hashchange handler will skip due to _lastNavigatedHash
+            this.handleRoute();
         }
-
-        // ALWAYS call handleRoute() directly - don't rely on hashchange event
-        // because it will be skipped due to deduplication (_lastNavigatedHash check)
-        this.handleRoute();
     }
 
     /**
@@ -445,8 +466,11 @@ class SPANavigation {
 
         // Acquire navigation lock
         this._isNavigating = true;
-        const navigationId = Date.now();
+        const navigationId = Date.now() + Math.random(); // Unique ID to prevent collisions
         this._currentNavigationId = navigationId;
+
+        // Store navigation ID for child methods to check
+        this._activeNavigationId = navigationId;
 
         const hash = window.location.hash || '#/';
         const path = hash.replace('#', '');
@@ -475,6 +499,7 @@ class SPANavigation {
                 spaLog('Auth not ready for protected route, showing loading state...');
                 this.showAuthWaitingState(mainContent);
                 this._isNavigating = false;
+                this._activeNavigationId = null;
                 return;
             }
 
@@ -486,6 +511,7 @@ class SPANavigation {
                 spaLog('No user found for protected route, showing loading state...');
                 this.showAuthWaitingState(mainContent);
                 this._isNavigating = false;
+                this._activeNavigationId = null;
                 return;
             }
 
@@ -498,6 +524,7 @@ class SPANavigation {
         // Check if navigation was superseded
         if (this._currentNavigationId !== navigationId) {
             spaLog('Navigation superseded by newer request, aborting');
+            // Don't reset flags here - the newer navigation owns them
             return;
         }
 
@@ -583,9 +610,21 @@ class SPANavigation {
             spaError('Routing error:', error);
             this.renderError(error, path);
         } finally {
-            // Always reset the navigation flag to allow future navigations
-            this._isNavigating = false;
+            // Only reset if this navigation still owns the lock
+            if (this._currentNavigationId === navigationId) {
+                this._isNavigating = false;
+                this._activeNavigationId = null;
+            }
         }
+    }
+
+    /**
+     * Check if the current render operation should continue
+     * Call this after any async operation in render methods
+     * @returns {boolean} true if navigation is still valid
+     */
+    isNavigationValid() {
+        return this._activeNavigationId === this._currentNavigationId;
     }
 
     /**
@@ -618,6 +657,13 @@ class SPANavigation {
             try {
                 const landingView = new LandingPageView(this.db);
                 await landingView.render(mainContent);
+
+                // Check if navigation was superseded during async render
+                if (!this.isNavigationValid()) {
+                    spaLog('renderHome: Navigation superseded after LandingPageView render, aborting');
+                    return;
+                }
+
                 spaLog('Landing page rendered via LandingPageView');
 
                 document.dispatchEvent(new CustomEvent('first-render-complete', {
@@ -630,6 +676,11 @@ class SPANavigation {
                 return;
             } catch (error) {
                 spaError('LandingPageView.render() failed:', error);
+                // Check navigation validity before falling back
+                if (!this.isNavigationValid()) {
+                    spaLog('renderHome: Navigation superseded after error, aborting fallback');
+                    return;
+                }
                 // Continue to fallbacks
             }
         }
@@ -641,9 +692,22 @@ class SPANavigation {
                 const renderer = new PageAssetRenderer(this.db);
                 const pageData = await renderer.loadPage('home');
 
+                // Check navigation validity after async load
+                if (!this.isNavigationValid()) {
+                    spaLog('renderHome: Navigation superseded during PageAssetRenderer load, aborting');
+                    return;
+                }
+
                 if (pageData) {
                     spaLog('Home page data loaded from Firebase');
                     await renderer.renderPage('home', mainContent);
+
+                    // Check again after render
+                    if (!this.isNavigationValid()) {
+                        spaLog('renderHome: Navigation superseded after PageAssetRenderer render, aborting');
+                        return;
+                    }
+
                     spaLog('Home page rendered via PageAssetRenderer');
 
                     document.dispatchEvent(new CustomEvent('first-render-complete', {
@@ -659,6 +723,9 @@ class SPANavigation {
                 }
             } catch (error) {
                 spaWarn('PageAssetRenderer failed, falling back to HomeView:', error);
+                if (!this.isNavigationValid()) {
+                    return;
+                }
             }
         }
 
@@ -667,6 +734,13 @@ class SPANavigation {
             spaLog('HomeView class available, using it...');
             const homeView = new HomeView(this.db);
             await homeView.render(mainContent);
+
+            // Check navigation validity after async render
+            if (!this.isNavigationValid()) {
+                spaLog('renderHome: Navigation superseded after HomeView render, aborting');
+                return;
+            }
+
             spaLog('Home page rendered via HomeView');
 
             document.dispatchEvent(new CustomEvent('first-render-complete', {

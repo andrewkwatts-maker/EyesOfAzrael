@@ -249,7 +249,10 @@ class UniversalDisplayRenderer {
             ritual: '🕯️',
             herb: '🌿',
             symbol: '⚡',
-            text: '📜'
+            text: '📜',
+            archetype: '🎭',
+            mythology: '🌍',
+            cosmology: '🌌'
         };
         return icons[entityType] || '📌';
     }
@@ -260,8 +263,8 @@ class UniversalDisplayRenderer {
             <div class="card-stats">
                 ${stats.map(stat => `
                     <div class="stat-item">
-                        <span class="stat-label">${this.escapeHtml(stat.label)}:</span>
-                        <span class="stat-value">${this.escapeHtml(stat.value)}</span>
+                        <span class="stat-label">${this.escapeHtml(String(stat.label || ''))}:</span>
+                        <span class="stat-value">${this.escapeHtml(String(stat.value ?? ''))}</span>
                     </div>
                 `).join('')}
             </div>
@@ -395,13 +398,14 @@ class UniversalDisplayRenderer {
         const display = entity.listDisplay || this.generateListDisplay(entity);
         const expandable = this.options.enableExpand && display.expandable;
         const iconContent = this.escapeHtml(display.icon || entity.icon || '•');
+        const entityId = this.escapeAttr(entity.id);
 
         return `
             <li class="entity-list-item ${expandable ? 'expandable' : ''}"
-                data-entity-id="${this.escapeAttr(entity.id)}"
+                data-entity-id="${entityId}"
                 data-mythology="${this.escapeAttr(entity.mythology)}">
 
-                <div class="list-item-main" ${expandable ? 'onclick="this.parentElement.classList.toggle(\'expanded\')"' : ''}>
+                <div class="list-item-main"${expandable ? ` data-expandable="true"` : ''}>
                     <span class="list-icon">${iconContent}</span>
                     <div class="list-content">
                         <div class="list-primary">${this.escapeHtml(display.primary || entity.name)}</div>
@@ -442,7 +446,8 @@ class UniversalDisplayRenderer {
             this.renderPanelSection(section, entity)
         ).join('');
 
-        const iconContent = this.escapeHtml(entity.icon || '&#10024;');
+        // Use renderIconWithFallback for consistency
+        const iconContent = this.renderIconWithFallback(entity.icon);
 
         return `
             <article class="entity-panel panel-${layout}"
@@ -464,8 +469,9 @@ class UniversalDisplayRenderer {
                         <h4>Related</h4>
                         <div class="related-entities">
                             ${entity.relatedIds.slice(0, 5).map(id => {
-                                const escapedId = this.escapeAttr(id);
-                                const displayName = this.escapeHtml((id.split('_')[1] || id));
+                                const idStr = String(id || '');
+                                const escapedId = this.escapeAttr(idStr);
+                                const displayName = this.escapeHtml(idStr.split('_')[1] || idStr);
                                 return `<a href="#/${escapedId}" class="related-link">${displayName}</a>`;
                             }).join('')}
                         </div>
@@ -565,17 +571,23 @@ class UniversalDisplayRenderer {
      * Generate display metadata if not present
      */
     generateGridDisplay(entity) {
+        // Safely truncate description to avoid cutting HTML entities
+        const description = entity.description || '';
+        const truncatedDesc = description.length > 100
+            ? description.substring(0, 100).replace(/&[^;]*$/, '') + '...'
+            : description;
+
         return {
             title: entity.name,
             subtitle: entity.subtitle || '',
             image: entity.image || null,
             badge: entity.importance > 80 ? 'Major' : null,
             stats: [
-                { label: 'Type', value: entity.entityType },
-                { label: 'Mythology', value: entity.mythology }
+                { label: 'Type', value: entity.entityType || '' },
+                { label: 'Mythology', value: entity.mythology || '' }
             ],
             hoverInfo: {
-                quick: entity.description?.substring(0, 100) + '...',
+                quick: truncatedDesc,
                 domains: entity.domains || entity.corpusSearch?.domains || []
             }
         };
@@ -595,13 +607,19 @@ class UniversalDisplayRenderer {
     }
 
     generateListDisplay(entity) {
+        // Safely truncate description to avoid cutting HTML entities
+        const description = entity.description || '';
+        const truncatedDesc = description.length > 150
+            ? description.substring(0, 150).replace(/&[^;]*$/, '')
+            : description;
+
         return {
             icon: entity.icon || '•',
-            primary: `${entity.name} - ${entity.subtitle || entity.entityType}`,
-            secondary: entity.description?.substring(0, 150),
-            meta: entity.mythology,
+            primary: `${entity.name || ''} - ${entity.subtitle || entity.entityType || ''}`,
+            secondary: truncatedDesc || null,
+            meta: entity.mythology || '',
             expandable: !!entity.longDescription,
-            expandedContent: entity.longDescription || entity.description
+            expandedContent: entity.longDescription || entity.description || ''
         };
     }
 
@@ -749,6 +767,44 @@ class UniversalDisplayRenderer {
             return '';
         }
         return url;
+    }
+
+    /**
+     * Attach event listeners to rendered content
+     * Call this after inserting rendered HTML into the DOM
+     * @param {HTMLElement|string} container - Container element or selector
+     */
+    attachEventListeners(container) {
+        const containerEl = typeof container === 'string'
+            ? document.querySelector(container)
+            : container;
+
+        if (!containerEl) return;
+
+        // Handle expandable list items via event delegation
+        containerEl.addEventListener('click', (e) => {
+            const listItemMain = e.target.closest('.list-item-main[data-expandable="true"]');
+            if (listItemMain) {
+                const listItem = listItemMain.closest('.entity-list-item');
+                if (listItem) {
+                    listItem.classList.toggle('expanded');
+                }
+            }
+        });
+
+        // Handle keyboard navigation for expandable items
+        containerEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                const listItemMain = e.target.closest('.list-item-main[data-expandable="true"]');
+                if (listItemMain) {
+                    e.preventDefault();
+                    const listItem = listItemMain.closest('.entity-list-item');
+                    if (listItem) {
+                        listItem.classList.toggle('expanded');
+                    }
+                }
+            }
+        });
     }
 }
 
