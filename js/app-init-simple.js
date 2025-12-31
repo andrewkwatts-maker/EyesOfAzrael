@@ -53,6 +53,47 @@
 
     console.log('[App] Starting initialization...');
 
+    // ============================================
+    // STEP 0: Run Startup Checklist (if available)
+    // ============================================
+    // The StartupChecklist provides early validation of critical dependencies
+    // and shows a diagnostic panel if something is missing.
+    if (typeof window.StartupChecklist !== 'undefined') {
+        console.log('[App] Running startup checklist...');
+        const checklistResults = window.StartupChecklist.runAll();
+
+        // If critical checks failed, show diagnostic panel and stop
+        if (!checklistResults.allCriticalPassed) {
+            console.error('[App] Critical startup checks failed!');
+
+            if (typeof window.DiagnosticPanel !== 'undefined') {
+                window.DiagnosticPanel.show(checklistResults);
+            } else {
+                window.StartupChecklist.showDiagnosticPanel(checklistResults);
+            }
+
+            // Dispatch error event for any listeners
+            document.dispatchEvent(new CustomEvent('app-init-failed', {
+                detail: { reason: 'startup-checklist', results: checklistResults }
+            }));
+
+            return; // Stop initialization
+        }
+
+        // If optional checks failed, show warning badge
+        if (!checklistResults.allPassed) {
+            console.warn('[App] Some optional startup checks failed');
+            // Defer showing badge until after DOM is ready
+            document.addEventListener('DOMContentLoaded', () => {
+                window.StartupChecklist.showWarningBadge(checklistResults);
+            }, { once: true });
+        }
+
+        console.log('[App] Startup checklist passed');
+    } else {
+        console.debug('[App] StartupChecklist not available, using legacy checks');
+    }
+
     /**
      * Safely call a function if it exists
      * @param {string} funcName - Name of the function to check
