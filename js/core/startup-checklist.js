@@ -256,10 +256,13 @@ const StartupChecklist = {
         });
 
         // Insert badge before other header actions
+        // Note: querySelector finds elements anywhere in subtree, but insertBefore
+        // requires reference node to be a direct child. Check parentNode first.
         const firstChild = header.querySelector('.icon-btn, button');
-        if (firstChild) {
+        if (firstChild && firstChild.parentNode === header) {
             header.insertBefore(badge, firstChild);
         } else {
+            // Either no button found, or it's nested - just append
             header.appendChild(badge);
         }
 

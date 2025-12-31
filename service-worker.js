@@ -1,7 +1,10 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.12.4
+ * Version: 2.12.5
+ *
+ * Changes in 2.12.5:
+ * - Fix insertBefore error in showWarningBadge (check parentNode)
  *
  * Changes in 2.12.4:
  * - Remove "DOM Ready" from startup checklist (timing issue, not dependency)
@@ -74,7 +77,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.12.4';
+const CACHE_VERSION = 'v2.12.5';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';
