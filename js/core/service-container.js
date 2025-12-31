@@ -1,4 +1,3 @@
-console.log('[LAYER13-DEBUG] service-container.js started loading');
 /**
  * Eyes of Azrael - Service Container
  *

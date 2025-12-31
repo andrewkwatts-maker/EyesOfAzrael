@@ -1,4 +1,3 @@
-console.log('[LAYER13-DEBUG] diagnostic-panel.js started loading');
 /**
  * Eyes of Azrael - Diagnostic Panel Component
  *

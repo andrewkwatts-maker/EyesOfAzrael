@@ -1,7 +1,13 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.12.0
+ * Version: 2.12.2
+ *
+ * Changes in 2.12.2:
+ * - Fix Firebase race condition in lazy-loader.js
+ * - Added _isFirebaseInitialized() method for robust Firebase state checking
+ * - Wrapped firebase.auth() in additional try-catch for safety
+ * - Removed temporary LAYER13/14 debug logs
  *
  * Changes in 2.12.0:
  * - Added robustness infrastructure (4-phase implementation)
