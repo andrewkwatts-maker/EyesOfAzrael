@@ -145,10 +145,12 @@ class UserPreferencesService {
     }
 }
 
-// ES Module Export
-export { UserPreferencesService };
-
-// Legacy global export
+// Global export for browser usage
 if (typeof window !== 'undefined') {
     window.UserPreferencesService = UserPreferencesService;
+}
+
+// CommonJS export for Node.js
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = UserPreferencesService;
 }
