@@ -543,6 +543,61 @@ class EntityDetailViewer {
                         </section>
                     ` : ''}
 
+                    <!-- Long Description (if different from description) -->
+                    ${entity.longDescription && entity.longDescription !== entity.description && entity.longDescription !== entity.fullDescription ? `
+                        <section class="entity-section entity-section-long-description" ${this.getAnimationStyle()}>
+                            <h2 class="section-title">
+                                <span class="section-icon" aria-hidden="true">&#128214;</span>
+                                Detailed Description
+                            </h2>
+                            <div class="entity-description prose">
+                                ${this.renderMarkdown(entity.longDescription)}
+                            </div>
+                        </section>
+                    ` : ''}
+
+                    <!-- Significance (for places) -->
+                    ${entity.significance && entity.significance !== entity.shortDescription ? `
+                        <section class="entity-section entity-section-significance" ${this.getAnimationStyle()}>
+                            <h2 class="section-title">
+                                <span class="section-icon" aria-hidden="true">&#10024;</span>
+                                Significance
+                            </h2>
+                            <div class="entity-description prose">
+                                ${this.renderMarkdown(entity.significance)}
+                            </div>
+                        </section>
+                    ` : ''}
+
+                    <!-- Symbolism -->
+                    ${entity.symbolism ? `
+                        <section class="entity-section entity-section-symbolism" ${this.getAnimationStyle()}>
+                            <h2 class="section-title">
+                                <span class="section-icon" aria-hidden="true">&#128302;</span>
+                                Symbolism & Meaning
+                            </h2>
+                            <div class="entity-description prose">
+                                ${this.renderMarkdown(entity.symbolism)}
+                            </div>
+                        </section>
+                    ` : ''}
+
+                    <!-- Usage (for items) -->
+                    ${entity.usage ? `
+                        <section class="entity-section entity-section-usage" ${this.getAnimationStyle()}>
+                            <h2 class="section-title">
+                                <span class="section-icon" aria-hidden="true">&#128295;</span>
+                                Powers & Usage
+                            </h2>
+                            <div class="entity-description prose">
+                                ${this.renderMarkdown(entity.usage)}
+                            </div>
+                        </section>
+                    ` : ''}
+
+                    <!-- Extended Content Sections -->
+                    ${entity.extendedContent && entity.extendedContent.length > 0 ? this.renderExtendedContent(entity.extendedContent) : ''}
+
                     <!-- Type-Specific Sections -->
                     ${this.renderTypeSpecificSections(entity, entityType)}
 
@@ -1350,6 +1405,81 @@ class EntityDetailViewer {
     }
 
     /**
+     * Render extended content sections (rich content array)
+     * Used for items with detailed subsections like "Creation Myth", "Powers and Abilities", etc.
+     */
+    renderExtendedContent(extendedContent) {
+        if (!extendedContent || extendedContent.length === 0) return '';
+
+        return extendedContent.map((section, index) => {
+            if (!section.content) return '';
+
+            // Choose an appropriate icon based on the section title
+            const icon = this.getSectionIcon(section.title);
+
+            return `
+                <section class="entity-section entity-section-extended" ${this.getAnimationStyle()}>
+                    <h2 class="section-title">
+                        <span class="section-icon" aria-hidden="true">${icon}</span>
+                        ${this.escapeHtml(section.title || `Section ${index + 1}`)}
+                    </h2>
+                    <div class="entity-description prose extended-content">
+                        ${this.renderMarkdown(section.content)}
+                    </div>
+                </section>
+            `;
+        }).join('');
+    }
+
+    /**
+     * Get an appropriate icon for an extended content section based on title
+     */
+    getSectionIcon(title) {
+        if (!title) return '&#128214;'; // Default book icon
+
+        const t = title.toLowerCase();
+
+        // Creation/Origin
+        if (t.includes('creation') || t.includes('origin') || t.includes('birth')) return '&#10024;';
+        if (t.includes('craft') || t.includes('forging') || t.includes('making')) return '&#128296;';
+
+        // Powers/Abilities
+        if (t.includes('power') || t.includes('abilit')) return '&#9889;';
+        if (t.includes('magic') || t.includes('enchant')) return '&#10024;';
+
+        // Description/Appearance
+        if (t.includes('appearance') || t.includes('description')) return '&#128065;';
+        if (t.includes('physical')) return '&#128170;';
+
+        // Stories/Myths
+        if (t.includes('myth') || t.includes('legend') || t.includes('tale')) return '&#128218;';
+        if (t.includes('story') || t.includes('narrative')) return '&#128220;';
+
+        // Deity/Association
+        if (t.includes('deity') || t.includes('god') || t.includes('associated')) return '&#9734;';
+
+        // Symbolism/Meaning
+        if (t.includes('symbol') || t.includes('meaning')) return '&#128302;';
+        if (t.includes('spiritual')) return '&#128591;';
+
+        // Modern/Culture
+        if (t.includes('modern') || t.includes('culture') || t.includes('popular')) return '&#127916;';
+        if (t.includes('depiction')) return '&#127912;';
+
+        // Related/Comparison
+        if (t.includes('related') || t.includes('similar') || t.includes('comparison')) return '&#128279;';
+        if (t.includes('weapon') || t.includes('item')) return '&#9876;';
+
+        // Worship/Ritual
+        if (t.includes('worship') || t.includes('ritual') || t.includes('ceremony')) return '&#128722;';
+
+        // History/Historical
+        if (t.includes('history') || t.includes('historical')) return '&#128197;';
+
+        return '&#128214;'; // Default: book icon
+    }
+
+    /**
      * Render archetypes section
      */
     renderArchetypes(archetypes) {
@@ -1887,6 +2017,31 @@ class EntityDetailViewer {
             'symbol': [
                 { label: 'Meanings', path: 'meanings', icon: '&#128161;' },
                 { label: 'Associated Deities', path: 'associatedDeities', icon: '&#9734;' }
+            ],
+            'item': [
+                { label: 'Item Type', path: 'itemType', icon: '&#128295;' },
+                { label: 'Materials', path: 'materials', icon: '&#128302;' },
+                { label: 'Wielders', path: 'wielders', icon: '&#9876;' },
+                { label: 'Created By', path: 'createdBy', icon: '&#128296;' },
+                { label: 'Powers', path: 'powers', icon: '&#10024;' },
+                { label: 'Origin', path: 'origin', icon: '&#127759;' }
+            ],
+            'place': [
+                { label: 'Place Type', path: 'placeType', icon: '&#127968;' },
+                { label: 'Location', path: 'location', icon: '&#128205;' },
+                { label: 'Inhabitants', path: 'inhabitants', icon: '&#128101;' },
+                { label: 'Status', path: 'status', icon: '&#10004;' },
+                { label: 'Accessibility', path: 'accessibility', icon: '&#128275;' }
+            ],
+            'magic': [
+                { label: 'Magic Type', path: 'magicType', icon: '&#10024;' },
+                { label: 'Practitioners', path: 'practitioners', icon: '&#128101;' },
+                { label: 'Techniques', path: 'techniques', icon: '&#128218;' },
+                { label: 'Tools', path: 'tools', icon: '&#128295;' }
+            ],
+            'concept': [
+                { label: 'Domain', path: 'domain', icon: '&#127760;' },
+                { label: 'Manifestations', path: 'manifestations', icon: '&#10024;' }
             ]
         };
 
