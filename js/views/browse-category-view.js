@@ -689,11 +689,8 @@ class BrowseCategoryView {
         const displayTags = allTags.slice(0, maxTags);
         const remainingTags = allTags.length - displayTags.length;
 
-        // Check if icon is SVG path or emoji
-        const isSvgIcon = icon && icon.includes('/');
-        const iconHTML = isSvgIcon
-            ? `<img src="${icon}" alt="${entity.name} icon" class="entity-icon" loading="lazy" />`
-            : `<span class="entity-icon">${icon}</span>`;
+        // Determine icon type and render appropriately
+        const iconHTML = this.renderIcon(icon, entity.name);
 
         // Truncate description based on density
         const maxLines = this.viewDensity === 'compact' ? 2 : (this.viewDensity === 'comfortable' ? 3 : 5);
@@ -836,6 +833,40 @@ class BrowseCategoryView {
             symbols: '☯️'
         };
         return icons[category] || '📖';
+    }
+
+    /**
+     * Render icon based on its type (inline SVG, URL, or emoji)
+     * @param {string} icon - The icon value
+     * @param {string} entityName - Entity name for alt text
+     * @returns {string} HTML string for the icon
+     */
+    renderIcon(icon, entityName) {
+        if (!icon) {
+            return `<span class="entity-icon">${this.getDefaultIcon(this.category)}</span>`;
+        }
+
+        // Check if it's inline SVG (starts with <svg)
+        const iconTrimmed = icon.trim();
+        if (iconTrimmed.toLowerCase().startsWith('<svg')) {
+            // Render inline SVG directly
+            return `<span class="entity-icon entity-icon-svg">${icon}</span>`;
+        }
+
+        // Check if it's a URL (http, https, or relative path starting with / or ./)
+        // Also check for image file extensions
+        const isUrl = iconTrimmed.startsWith('http://') ||
+                      iconTrimmed.startsWith('https://') ||
+                      iconTrimmed.startsWith('/') ||
+                      iconTrimmed.startsWith('./') ||
+                      /\.(svg|png|jpg|jpeg|webp|gif)$/i.test(iconTrimmed);
+
+        if (isUrl) {
+            return `<img src="${this.escapeHtml(iconTrimmed)}" alt="${this.escapeHtml(entityName)} icon" class="entity-icon" loading="lazy" />`;
+        }
+
+        // Otherwise, treat as emoji or text
+        return `<span class="entity-icon">${this.escapeHtml(icon)}</span>`;
     }
 
     /**
