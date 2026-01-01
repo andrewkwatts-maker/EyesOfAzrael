@@ -1444,8 +1444,8 @@ class BrowseCategoryView {
                     align-items: center;
                     gap: var(--spacing-xs, 0.25rem);
                     padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
-                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.8);
-                    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.5);
+                    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.2);
                     border-radius: var(--radius-full, 9999px);
                     color: var(--color-text-secondary);
                     font-size: var(--font-size-sm, 0.875rem);
@@ -1453,26 +1453,51 @@ class BrowseCategoryView {
                     cursor: pointer;
                     transition: all var(--transition-fast, 0.15s ease);
                     font-family: var(--font-primary);
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .filter-chip::before {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+                    opacity: 0;
+                    transition: opacity var(--transition-fast, 0.15s ease);
+                    border-radius: inherit;
+                    z-index: -1;
                 }
 
                 .filter-chip:hover {
-                    background: rgba(var(--color-primary-rgb), 0.2);
-                    border-color: rgba(var(--color-primary-rgb), 0.5);
+                    background: rgba(var(--color-primary-rgb), 0.15);
+                    border-color: rgba(var(--color-primary-rgb), 0.6);
                     color: var(--color-text-primary);
                     transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.2);
                 }
 
                 .filter-chip[aria-pressed="true"],
                 .filter-chip.active {
-                    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+                    background: transparent;
                     border-color: var(--color-primary);
                     color: white;
-                    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+                    box-shadow: 0 6px 16px rgba(var(--color-primary-rgb), 0.4);
+                    font-weight: var(--font-semibold, 600);
+                }
+
+                .filter-chip[aria-pressed="true"]::before,
+                .filter-chip.active::before {
+                    opacity: 1;
                 }
 
                 .filter-chip:focus {
                     outline: 2px solid var(--color-primary);
                     outline-offset: 2px;
+                }
+
+                .filter-chip:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
                 }
 
                 .chip-label {
@@ -1523,19 +1548,25 @@ class BrowseCategoryView {
                 .clear-filters-btn {
                     padding: var(--spacing-xs, 0.25rem) var(--spacing-md, 1rem);
                     background: transparent;
-                    border: 1px solid rgba(var(--color-text-secondary-rgb, 156, 163, 175), 0.3);
+                    border: 2px solid rgba(var(--color-text-secondary-rgb, 156, 163, 175), 0.3);
                     border-radius: var(--radius-md, 0.5rem);
                     color: var(--color-text-secondary);
                     font-size: var(--font-size-sm, 0.875rem);
+                    font-weight: var(--font-medium, 500);
                     cursor: pointer;
                     transition: all var(--transition-fast, 0.15s ease);
                     font-family: var(--font-primary);
                 }
 
                 .clear-filters-btn:hover {
-                    background: rgba(var(--color-danger-rgb, 239, 68, 68), 0.1);
+                    background: rgba(var(--color-danger-rgb, 239, 68, 68), 0.12);
                     border-color: var(--color-danger, #ef4444);
                     color: var(--color-danger, #ef4444);
+                    transform: translateY(-1px);
+                }
+
+                .clear-filters-btn:active {
+                    transform: translateY(0);
                 }
 
                 /* ==========================================
@@ -1684,7 +1715,7 @@ class BrowseCategoryView {
                     align-items: center;
                     gap: var(--spacing-xs, 0.25rem);
                     padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
-                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.8);
+                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.6);
                     border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
                     border-radius: var(--radius-lg, 0.75rem);
                     color: var(--color-text-secondary);
@@ -1693,11 +1724,29 @@ class BrowseCategoryView {
                     cursor: pointer;
                     transition: all var(--transition-fast, 0.15s ease);
                     font-family: var(--font-primary);
+                    position: relative;
+                }
+
+                .density-btn::after {
+                    content: '';
+                    position: absolute;
+                    right: 6px;
+                    width: 6px;
+                    height: 6px;
+                    background: currentColor;
+                    border-radius: 50%;
+                    opacity: 0;
+                    transition: opacity var(--transition-fast, 0.15s ease);
                 }
 
                 .density-btn:hover {
-                    border-color: rgba(var(--color-primary-rgb), 0.5);
+                    border-color: rgba(var(--color-primary-rgb), 0.6);
                     color: var(--color-text-primary);
+                    background: rgba(var(--color-primary-rgb), 0.1);
+                }
+
+                .density-btn:hover::after {
+                    opacity: 0.6;
                 }
 
                 .density-icon {
@@ -1707,26 +1756,28 @@ class BrowseCategoryView {
 
                 .density-menu {
                     position: absolute;
-                    top: calc(100% + var(--spacing-xs, 0.25rem));
+                    top: calc(100% + var(--spacing-sm, 0.5rem));
                     right: 0;
-                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.95);
-                    backdrop-filter: blur(10px);
-                    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
-                    border-radius: var(--radius-lg, 0.75rem);
+                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.98);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.4);
+                    border-radius: var(--radius-xl, 1rem);
                     padding: var(--spacing-xs, 0.25rem);
-                    min-width: 160px;
+                    min-width: 180px;
                     opacity: 0;
                     visibility: hidden;
-                    transform: translateY(-10px);
+                    transform: translateY(-12px) scale(0.95);
                     transition: all var(--transition-fast, 0.15s ease);
-                    box-shadow: var(--shadow-xl);
+                    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4),
+                                inset 0 1px 0 rgba(255, 255, 255, 0.1);
                     z-index: 100;
                 }
 
                 .density-menu.active {
                     opacity: 1;
                     visibility: visible;
-                    transform: translateY(0);
+                    transform: translateY(0) scale(1);
                 }
 
                 .density-option {
@@ -1744,17 +1795,23 @@ class BrowseCategoryView {
                     cursor: pointer;
                     transition: all var(--transition-fast, 0.15s ease);
                     font-family: var(--font-primary);
+                    margin: 2px 0;
                 }
 
                 .density-option:hover {
-                    background: rgba(var(--color-primary-rgb), 0.1);
+                    background: rgba(var(--color-primary-rgb), 0.15);
                     color: var(--color-text-primary);
+                    padding-left: 1.5rem;
                 }
 
                 .density-option.active {
-                    background: rgba(var(--color-primary-rgb), 0.2);
+                    background: linear-gradient(135deg,
+                        rgba(var(--color-primary-rgb), 0.3),
+                        rgba(var(--color-secondary-rgb), 0.2));
                     color: var(--color-primary);
                     font-weight: var(--font-semibold, 600);
+                    border-left: 3px solid var(--color-primary);
+                    padding-left: calc(1rem - 3px);
                 }
 
                 .option-icon {
@@ -2243,24 +2300,58 @@ class BrowseCategoryView {
 
                     .quick-filters {
                         padding: var(--spacing-md, 1rem);
+                        margin-bottom: var(--spacing-lg, 1.5rem);
+                    }
+
+                    .filter-chips {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                        gap: var(--spacing-sm, 0.5rem);
+                    }
+
+                    .filter-chip {
+                        padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+                        font-size: var(--font-size-xs, 0.75rem);
                     }
 
                     .browse-controls {
                         flex-direction: column;
                         align-items: stretch;
+                        gap: var(--spacing-md, 1rem);
                     }
 
                     .browse-filters {
                         flex-direction: column;
+                        gap: var(--spacing-md, 1rem);
                     }
 
                     .filter-group {
                         min-width: 100%;
                     }
 
+                    .filter-search {
+                        min-width: 100%;
+                    }
+
                     .view-controls {
-                        justify-content: center;
-                        flex-wrap: wrap;
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: var(--spacing-sm, 0.5rem);
+                        width: 100%;
+                    }
+
+                    .view-toggle {
+                        grid-column: 1 / -1;
+                    }
+
+                    .density-toggle {
+                        grid-column: 1 / -1;
+                    }
+
+                    .density-menu {
+                        right: auto;
+                        left: 0;
+                        min-width: 100%;
                     }
 
                     .entity-grid.grid-view,
@@ -2294,7 +2385,20 @@ class BrowseCategoryView {
                     }
 
                     .entity-preview {
-                        display: none; /* Hide previews on mobile */
+                        display: none;
+                    }
+
+                    .active-filters {
+                        flex-direction: column;
+                        gap: var(--spacing-sm, 0.5rem);
+                    }
+
+                    .active-filter-chips {
+                        width: 100%;
+                    }
+
+                    .clear-filters-btn {
+                        width: 100%;
                     }
                 }
 
@@ -2310,6 +2414,57 @@ class BrowseCategoryView {
 
                     .browse-description {
                         font-size: 0.9rem;
+                    }
+
+                    .quick-filters {
+                        padding: var(--spacing-sm, 0.5rem);
+                    }
+
+                    .filter-chips {
+                        grid-template-columns: 1fr;
+                        gap: var(--spacing-xs, 0.25rem);
+                    }
+
+                    .filter-chip {
+                        font-size: 0.7rem;
+                        padding: 0.25rem 0.5rem;
+                        justify-content: space-between;
+                    }
+
+                    .chip-count {
+                        font-size: 0.6rem;
+                        padding: 1px 4px;
+                    }
+
+                    .browse-filters {
+                        gap: var(--spacing-sm, 0.5rem);
+                    }
+
+                    .filter-label {
+                        font-size: 0.75rem;
+                    }
+
+                    .filter-select,
+                    .filter-input {
+                        font-size: 0.875rem;
+                        padding: 0.5rem;
+                    }
+
+                    .view-controls {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .view-toggle {
+                        width: 100%;
+                    }
+
+                    .density-toggle {
+                        width: 100%;
+                    }
+
+                    .density-btn {
+                        width: 100%;
+                        justify-content: center;
                     }
 
                     .entity-grid.grid-view {
@@ -2333,16 +2488,17 @@ class BrowseCategoryView {
                     }
 
                     .stat-badge {
-                        font-size: 0.85rem;
-                    }
-
-                    .filter-chip {
-                        font-size: 0.75rem;
-                        padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+                        font-size: 0.8rem;
+                        padding: 0.25rem 0.75rem;
                     }
 
                     .entity-description {
                         -webkit-line-clamp: 2;
+                        font-size: 0.8rem;
+                    }
+
+                    .active-filters {
+                        display: none;
                     }
                 }
 

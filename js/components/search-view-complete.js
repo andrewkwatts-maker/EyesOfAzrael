@@ -857,37 +857,52 @@ class SearchViewComplete {
             <div class="no-results" style="
                 text-align: center;
                 padding: 4rem 2rem;
-                background: rgba(255, 69, 0, 0.1);
-                border: 2px solid rgba(255, 69, 0, 0.3);
+                background: linear-gradient(135deg, rgba(255, 107, 107, 0.08), rgba(255, 152, 0, 0.08));
+                border: 2px dashed rgba(255, 107, 107, 0.3);
                 border-radius: var(--radius-lg, 16px);
             ">
                 <div class="no-results-icon" style="
                     font-size: 4rem;
                     margin-bottom: 1.5rem;
-                ">😕</div>
+                    animation: bounce 1s ease-in-out infinite;
+                ">🔍</div>
                 <p style="
                     font-size: 1.3rem;
-                    color: #ff6347;
+                    color: var(--color-text-primary);
                     font-weight: 600;
                     margin-bottom: 0.5rem;
-                ">No entities found for "${this.escapeHtml(this.state.query)}"</p>
+                ">No results for "${this.escapeHtml(this.state.query)}"</p>
                 <p class="no-results-hint" style="
                     font-size: 1rem;
                     color: var(--color-text-secondary);
                     margin-bottom: 2rem;
-                ">Try different keywords or check your filters</p>
-                <button id="clear-all-filters-btn" class="btn-secondary" style="
-                    min-height: 44px;
-                    padding: 0.75rem 2rem;
-                    background: linear-gradient(135deg, #ff6347, #ff4500);
-                    color: white;
-                    border: none;
-                    border-radius: var(--radius-md, 8px);
-                    font-size: 1rem;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all var(--transition-base);
-                ">Clear All Filters</button>
+                ">Try different keywords, refine your search, or adjust filters</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button id="clear-all-filters-btn" class="btn-secondary" style="
+                        min-height: 44px;
+                        padding: 0.75rem 1.5rem;
+                        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+                        color: white;
+                        border: none;
+                        border-radius: var(--radius-md, 8px);
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all var(--transition-base);
+                    ">Reset Filters</button>
+                    <button onclick="document.getElementById('search-input').focus()" class="btn-secondary" style="
+                        min-height: 44px;
+                        padding: 0.75rem 1.5rem;
+                        background: transparent;
+                        color: var(--color-primary);
+                        border: 2px solid var(--color-primary);
+                        border-radius: var(--radius-md, 8px);
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all var(--transition-base);
+                    ">Try Again</button>
+                </div>
             </div>
         `;
     }
@@ -897,9 +912,22 @@ class SearchViewComplete {
      */
     getLoadingHTML() {
         return `
-            <div class="search-loading">
+            <div class="search-loading" style="
+                text-align: center;
+                padding: 4rem 2rem;
+            ">
                 <div class="spinner"></div>
-                <p>Searching...</p>
+                <p style="
+                    font-size: 1.1rem;
+                    color: var(--color-text-secondary);
+                    margin-top: 1rem;
+                    font-weight: 500;
+                ">Searching across mythologies...</p>
+                <p style="
+                    font-size: 0.9rem;
+                    color: var(--color-text-tertiary);
+                    margin-top: 0.5rem;
+                ">This may take a moment</p>
             </div>
         `;
     }
@@ -1056,14 +1084,17 @@ class SearchViewComplete {
                 return;
             }
 
-            container.innerHTML = suggestions.map(term => `
+            container.innerHTML = suggestions.map((term, idx) => `
                 <div class="suggestion-item" data-query="${this.escapeHtml(term)}" style="
                     padding: 0.75rem 1rem;
                     cursor: pointer;
-                    transition: background 0.2s;
+                    transition: all 0.2s;
                     border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.1);
                     color: var(--color-text-primary);
+                    position: relative;
+                    animation: fadeIn 0.3s ease-out ${idx * 0.05}s both;
                 ">
+                    <span style="display: inline-block; margin-right: 0.5rem; opacity: 0.6; font-size: 0.9rem;">🔍</span>
                     <strong>${this.highlightMatch(term, query)}</strong>
                 </div>
             `).join('');

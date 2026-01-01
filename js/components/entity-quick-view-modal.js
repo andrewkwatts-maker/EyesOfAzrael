@@ -378,33 +378,79 @@ class EntityQuickViewModal {
      * Attach close handlers
      */
     attachCloseHandlers(overlay) {
-        // Close button
         const closeBtn = overlay.querySelector('.quick-view-close');
         closeBtn.addEventListener('click', () => this.close());
 
-        // Close button in actions
         const actionBtn = overlay.querySelector('[data-action="close"]');
         if (actionBtn) {
             actionBtn.addEventListener('click', () => this.close());
         }
 
-        // Click outside
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
                 this.close();
             }
         });
 
-        // ESC key
         const escHandler = (e) => {
             if (e.key === 'Escape') {
                 this.close();
             }
         };
         document.addEventListener('keydown', escHandler);
-
-        // Store handler for cleanup
         overlay._escHandler = escHandler;
+
+        this.setupFocusTrap(overlay);
+    }
+
+    /**
+     * Setup focus trap for modal
+     */
+    setupFocusTrap(overlay) {
+        const getFocusableElements = () => {
+            const selector = [
+                'button',
+                '[href]',
+                'input',
+                'select',
+                'textarea',
+                '[tabindex]:not([tabindex="-1"])',
+                '[role="button"]'
+            ].join(',');
+            return Array.from(overlay.querySelectorAll(selector)).filter(
+                el => !el.hasAttribute('disabled') && el.offsetParent !== null
+            );
+        };
+
+        const handleTabKey = (e) => {
+            const focusableElements = getFocusableElements();
+            if (focusableElements.length === 0) return;
+
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (e.key === 'Tab') {
+                if (e.shiftKey) {
+                    if (document.activeElement === firstElement) {
+                        e.preventDefault();
+                        lastElement.focus();
+                    }
+                } else {
+                    if (document.activeElement === lastElement) {
+                        e.preventDefault();
+                        firstElement.focus();
+                    }
+                }
+            }
+        };
+
+        overlay.addEventListener('keydown', handleTabKey);
+        overlay._focusTrapHandler = handleTabKey;
+
+        const focusableElements = getFocusableElements();
+        if (focusableElements.length > 0) {
+            focusableElements[0].focus();
+        }
     }
 
     /**
@@ -414,12 +460,14 @@ class EntityQuickViewModal {
         const modal = document.getElementById('quick-view-modal');
         if (!modal) return;
 
-        // Remove ESC handler
         if (modal._escHandler) {
             document.removeEventListener('keydown', modal._escHandler);
         }
 
-        // Animate out
+        if (modal._focusTrapHandler) {
+            modal.removeEventListener('keydown', modal._focusTrapHandler);
+        }
+
         modal.classList.remove('show');
         setTimeout(() => {
             modal.remove();

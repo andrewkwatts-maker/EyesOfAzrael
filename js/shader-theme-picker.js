@@ -428,17 +428,28 @@
         if (shadersEnabled && shaderManager) {
             const shaderName = SHADER_MAPPING[themeName] || 'night';
             try {
-                await shaderManager.activate(shaderName);
-                // Make body background semi-transparent so shader shows through
+                // Add shader-active class first (semi-transparent dark background as fallback)
                 body.classList.add('shader-active');
-                console.log(`[Shader Theme Picker] Activated shader: ${shaderName}`);
+
+                // Wait for shader to actually load and render
+                const success = await shaderManager.activate(shaderName);
+                if (success) {
+                    console.log(`[Shader Theme Picker] Activated shader: ${shaderName}`);
+                } else {
+                    // Shader failed to load - remove shader-active class to show solid dark background
+                    console.warn('[Shader Theme Picker] Shader activation returned false, falling back to solid background');
+                    body.classList.remove('shader-active');
+                    body.classList.remove('shader-rendering');
+                }
             } catch (error) {
                 console.warn('[Shader Theme Picker] Shader activation failed:', error);
                 body.classList.remove('shader-active');
+                body.classList.remove('shader-rendering');
             }
         } else if (shaderManager) {
             shaderManager.deactivate();
             body.classList.remove('shader-active');
+            body.classList.remove('shader-rendering');
         }
 
         // Update UI
@@ -449,7 +460,7 @@
         if (withTransition) {
             setTimeout(() => {
                 body.classList.remove('theme-transitioning');
-            }, 300);
+            }, 350);
         }
 
         console.log('[Shader Theme Picker] Applied theme:', themeName);
@@ -676,7 +687,6 @@
 
             option.classList.toggle('active', isActive);
 
-            // Update checkmark
             const existingCheck = option.querySelector('.theme-check');
             if (isActive && !existingCheck) {
                 const check = document.createElement('span');

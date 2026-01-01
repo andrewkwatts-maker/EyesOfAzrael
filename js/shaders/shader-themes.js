@@ -345,10 +345,11 @@ class ShaderThemeManager {
 
     /**
      * Activate shader background
+     * @returns {Promise<boolean>} True if shader was activated successfully
      */
-    activate(themeName) {
+    async activate(themeName) {
         if (!this.webglSupported) {
-            return;
+            return false;
         }
 
         // Add canvas to DOM if not already added
@@ -357,12 +358,17 @@ class ShaderThemeManager {
         }
 
         // Load theme and start rendering
-        this.loadTheme(themeName).then(success => {
-            if (success) {
-                this.enabled = true;
-                this.resume();
-            }
-        });
+        const success = await this.loadTheme(themeName);
+        if (success) {
+            this.enabled = true;
+            this.resume();
+
+            // Add class to indicate shader is actually rendering
+            document.body.classList.add('shader-rendering');
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -374,6 +380,9 @@ class ShaderThemeManager {
             this.canvas.parentElement.removeChild(this.canvas);
         }
         this.enabled = false;
+
+        // Remove shader-rendering class when deactivating
+        document.body.classList.remove('shader-rendering');
     }
 
     /**

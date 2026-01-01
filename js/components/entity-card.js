@@ -205,10 +205,10 @@
                     <div class="entity-card-header">
                         <div class="entity-icon-large card-icon" aria-hidden="true">${iconContent}</div>
                         <div class="entity-info">
-                            <h3 class="card-title">
+                            <h2 class="card-title">
                                 <a href="${this.getEntityUrl()}">${this.escapeHtml(this.data.name)}</a>
-                            </h3>
-                            <div class="card-meta">
+                            </h2>
+                            <div class="card-meta" role="doc-subtitle">
                                 ${this.renderTypeBadge()}
                                 ${mythologies.length > 0 ? this.renderMythologyBadges(mythologies) : ''}
                             </div>
@@ -224,7 +224,7 @@
                     ${this.renderCompactMetadata()}
 
                     <div class="entity-card-footer grid-card-footer">
-                        <a href="${this.getEntityUrl()}" class="btn-view-details" aria-label="View details for ${this.escapeHtml(this.data.name)}">View Details</a>
+                        <a href="${this.getEntityUrl()}" class="btn-view-details" aria-label="View full details for ${this.escapeHtml(this.data.name)}">View Details</a>
                         ${this.interactive ? `<button class="btn-secondary entity-expand" data-id="${this.escapeAttr(this.entityId)}" data-type="${this.escapeAttr(this.entityType)}" aria-label="Expand ${this.escapeHtml(this.data.name)}">Expand</button>` : ''}
                         ${this.renderFavoriteButton(mythologyLower)}
                     </div>
@@ -245,14 +245,11 @@
                 return fallbackHtml;
             }
 
-            // Check if icon is an image URL - validate URL safety
             if (typeof icon === 'string' && (icon.includes('.svg') || icon.includes('.png') || icon.includes('.jpg') || icon.includes('.webp') || icon.startsWith('http'))) {
-                // Validate URL to prevent javascript: and data: XSS attacks
                 const sanitizedUrl = this.sanitizeUrl(icon);
                 if (!sanitizedUrl) {
                     return fallbackHtml;
                 }
-                // Use data attribute for fallback to avoid inline event handler
                 return `<img src="${this.escapeAttr(sanitizedUrl)}"
                              alt=""
                              class="entity-icon-img"
@@ -260,7 +257,8 @@
                              decoding="async"
                              data-fallback-letter="${this.escapeAttr(fallbackLetter || '&#10024;')}"
                              width="56"
-                             height="56">`;
+                             height="56"
+                             data-fallback-html="${this.escapeAttr(fallbackHtml)}">`;
             }
 
             // Escape any text/emoji icon to prevent XSS
@@ -955,24 +953,28 @@
          * Attach event listeners
          */
         attachEventListeners() {
-            // Clean up any existing listeners first
             this._cleanupEventListeners();
 
-            // Handle image load errors with fallback
             const iconImages = this.container.querySelectorAll('.entity-icon-img');
             iconImages.forEach(img => {
                 const errorHandler = () => {
-                    const fallback = img.dataset.fallbackLetter || '&#10024;';
                     const parent = img.parentElement;
                     if (parent) {
+                        const fallbackHtml = img.dataset.fallbackHtml || `<span class="icon-fallback" aria-hidden="true">&#10024;</span>`;
                         const span = document.createElement('span');
                         span.className = 'icon-fallback';
                         span.setAttribute('aria-hidden', 'true');
-                        span.innerHTML = fallback;
+                        span.innerHTML = fallbackHtml.replace(/^<span class="icon-fallback"[^>]*>|<\/span>$/g, '');
                         parent.replaceChild(span, img);
                     }
                 };
+                const loadHandler = () => {
+                    img.style.opacity = '1';
+                };
+                img.style.opacity = '0.8';
+                img.style.transition = 'opacity 0.3s ease';
                 this._addTrackedListener(img, 'error', errorHandler);
+                this._addTrackedListener(img, 'load', loadHandler);
             });
 
             // Keyboard navigation for card (Enter/Space to navigate)
@@ -1090,8 +1092,8 @@
 
                 if (isFavorited) {
                     button.classList.add('favorited');
-                    button.querySelector('.favorite-icon').textContent = '★';
                     button.setAttribute('aria-label', `Remove ${button.dataset.entityName} from favorites`);
+                    button.setAttribute('aria-pressed', 'true');
                 }
             } catch (error) {
                 console.warn('[EntityCard] Could not check favorite state:', error);
@@ -1104,10 +1106,12 @@
         async toggleFavorite(button) {
             if (!window.EyesOfAzrael?.favorites) {
                 console.warn('[EntityCard] FavoritesService not available');
-                // Show tooltip or message that login is required
                 alert('Please sign in to add favorites');
                 return;
             }
+
+            button.disabled = true;
+            button.classList.add('loading');
 
             const entity = {
                 id: button.dataset.entityId,
@@ -1123,16 +1127,19 @@
                 if (result.success) {
                     if (result.isFavorited) {
                         button.classList.add('favorited');
-                        button.querySelector('.favorite-icon').textContent = '★';
                         button.setAttribute('aria-label', `Remove ${entity.name} from favorites`);
+                        button.setAttribute('aria-pressed', 'true');
                     } else {
                         button.classList.remove('favorited');
-                        button.querySelector('.favorite-icon').textContent = '☆';
                         button.setAttribute('aria-label', `Add ${entity.name} to favorites`);
+                        button.setAttribute('aria-pressed', 'false');
                     }
                 }
             } catch (error) {
                 console.error('[EntityCard] Failed to toggle favorite:', error);
+            } finally {
+                button.disabled = false;
+                button.classList.remove('loading');
             }
         }
 
@@ -1196,8 +1203,6 @@
          * Gracefully degrades if FavoritesService isn't loaded
          */
         renderFavoriteButton(mythologyLower) {
-            // Always render the button, but handle missing service gracefully at click time
-            // This allows for async loading of the FavoritesService
             return `
                 <button class="btn-icon entity-favorite"
                         data-entity-id="${this.escapeAttr(this.entityId)}"
@@ -1206,8 +1211,9 @@
                         data-entity-mythology="${this.escapeAttr(mythologyLower)}"
                         data-entity-icon="${this.escapeAttr(this.data.icon || '')}"
                         aria-label="Add ${this.escapeHtml(this.data.name)} to favorites"
-                        title="Add to Personal Pantheon">
-                    <span class="favorite-icon">☆</span>
+                        title="Add to Personal Pantheon"
+                        type="button">
+                    <span class="favorite-icon" aria-hidden="true">★</span>
                 </button>
             `;
         }

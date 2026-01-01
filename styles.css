@@ -83,10 +83,17 @@ body {
     transition: background-color 0.3s ease;
 }
 
-/* When WebGL shader is active, make body background transparent so shader shows */
+/* When WebGL shader is active, use semi-transparent dark background so shader shows through.
+   We use a dark overlay instead of fully transparent to ensure dark theme is maintained
+   even if the shader fails to load or render properly. */
 body.shader-active {
-    background: transparent;
+    background: rgba(10, 14, 39, 0.85);
     background-image: none;
+}
+
+/* When shader canvas is confirmed visible and rendering, make fully transparent */
+body.shader-active.shader-rendering {
+    background: transparent;
 }
 
 /* Header - Modern Glass Morphism */
@@ -618,22 +625,135 @@ table tr:hover {
 }
 
 /* Footer */
-footer {
-    background: var(--bg-secondary);
-    padding: 2.5rem 2rem;
-    text-align: center;
+.site-footer {
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, rgba(var(--color-bg-secondary), 0.8) 100%);
+    padding: 3rem 2rem;
     margin-top: 4rem;
     border-top: 1px solid var(--border-primary);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
 }
 
-footer a {
+.footer-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+}
+
+.site-footer p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+    margin: 0;
+}
+
+.footer-links {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.footer-links a {
     color: var(--accent-primary);
     text-decoration: none;
-    transition: color 0.3s ease;
+    font-weight: 500;
+    font-size: 0.95rem;
+    position: relative;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-footer a:hover {
+.footer-links a::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0.75rem;
+    right: 0.75rem;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.footer-links a:hover {
     color: var(--accent-secondary);
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.08);
+}
+
+.footer-links a:hover::before {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .site-footer {
+        padding: 2rem 1.5rem;
+        margin-top: 3rem;
+    }
+
+    .footer-container {
+        gap: 1.5rem;
+    }
+
+    .site-footer p {
+        font-size: 0.9rem;
+    }
+
+    .footer-links {
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .footer-links a {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.9rem;
+    }
+
+    .footer-links a::before {
+        left: 0.6rem;
+        right: 0.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .site-footer {
+        padding: 1.5rem 1rem;
+        margin-top: 2.5rem;
+    }
+
+    .footer-container {
+        gap: 1.25rem;
+    }
+
+    .site-footer p {
+        font-size: 0.85rem;
+        text-align: center;
+    }
+
+    .footer-links {
+        gap: 0.75rem;
+        flex-direction: column;
+    }
+
+    .footer-links a {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.85rem;
+        width: 100%;
+        text-align: center;
+        border-radius: 4px;
+    }
+
+    .footer-links a::before {
+        display: none;
+    }
+
+    .footer-links a:hover {
+        background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.12);
+    }
 }
 
 /* Lists - Better spacing */
