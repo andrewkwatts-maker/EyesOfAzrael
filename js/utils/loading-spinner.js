@@ -185,13 +185,7 @@ class LoadingSpinnerManager {
         `;
     }
 
-    /**
-     * Transform a standard loading message into something more atmospheric
-     * @param {string} message - Original message
-     * @returns {string} - Atmospheric message
-     */
     getAtmosphericMessage(message) {
-        // Map standard messages to more mystical alternatives
         const atmosphericMessages = {
             'Loading...': 'Summoning ancient wisdom...',
             'Loading': 'Summoning ancient wisdom...',
@@ -200,7 +194,12 @@ class LoadingSpinnerManager {
             'Loading entity...': 'Invoking the spirit...',
             'Searching...': 'Consulting the oracles...',
             'Please wait...': 'The veil parts slowly...',
-            'Fetching data...': 'Reading the sacred texts...'
+            'Fetching data...': 'Reading the sacred texts...',
+            'Loading content...': 'Unveiling the mysteries...',
+            'Loading page...': 'Traversing the realms...',
+            'Loading deities...': 'Calling upon the divine...',
+            'Loading creatures...': 'Summoning the beasts...',
+            'Loading places...': 'Visiting sacred grounds...'
         };
 
         return atmosphericMessages[message] || message;
@@ -248,7 +247,8 @@ class LoadingSpinnerManager {
             const wrappedPromises = promises.map(async (promise) => {
                 const result = await promise;
                 completed++;
-                this.updateMessage(spinnerId, `Loading... (${completed}/${total})`);
+                const percentage = Math.round((completed / total) * 100);
+                this.updateMessage(spinnerId, `Loading... ${percentage}%`);
                 return result;
             });
 
