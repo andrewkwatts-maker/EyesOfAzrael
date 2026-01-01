@@ -676,11 +676,51 @@ class BrowseCategoryView {
     }
 
     /**
+     * Sanitize and truncate description text
+     * Strips HTML tags, normalizes whitespace, and truncates to max characters
+     */
+    truncateDescription(description, maxChars) {
+        if (!description || typeof description !== 'string') {
+            return 'No description available';
+        }
+
+        // If description looks like a stringified object, try to extract meaningful text
+        if (description.startsWith('{') || description.startsWith('[')) {
+            try {
+                const parsed = JSON.parse(description);
+                // Try to extract a text field from the object
+                description = parsed.text || parsed.description || parsed.summary || 'No description available';
+            } catch (e) {
+                // Not valid JSON, continue with the string as-is
+            }
+        }
+
+        // Strip HTML tags
+        let cleanDesc = description.replace(/<[^>]*>/g, '');
+
+        // Normalize whitespace (replace newlines, tabs, multiple spaces with single space)
+        cleanDesc = cleanDesc.replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+        // Truncate to max characters
+        if (cleanDesc.length > maxChars) {
+            // Try to break at a word boundary
+            let truncated = cleanDesc.substring(0, maxChars);
+            const lastSpace = truncated.lastIndexOf(' ');
+            if (lastSpace > maxChars * 0.7) {
+                truncated = truncated.substring(0, lastSpace);
+            }
+            return truncated.trim() + '...';
+        }
+
+        return cleanDesc;
+    }
+
+    /**
      * Get entity card HTML
      */
     getEntityCardHTML(entity) {
         const icon = entity.icon || this.getDefaultIcon(this.category);
-        const description = entity.description || entity.summary || 'No description available';
+        const rawDescription = entity.description || entity.summary || 'No description available';
 
         // Get tags from domains or attributes
         const tags = entity.domains || entity.attributes || entity.roles || [];
@@ -692,7 +732,11 @@ class BrowseCategoryView {
         // Determine icon type and render appropriately
         const iconHTML = this.renderIcon(icon, entity.name);
 
-        // Truncate description based on density
+        // Truncate description based on density (character limits)
+        const maxChars = { compact: 150, comfortable: 250, detailed: 400 }[this.viewDensity] || 200;
+        const description = this.truncateDescription(rawDescription, maxChars);
+
+        // CSS line-clamp as fallback
         const maxLines = this.viewDensity === 'compact' ? 2 : (this.viewDensity === 'comfortable' ? 3 : 5);
 
         // Determine badge

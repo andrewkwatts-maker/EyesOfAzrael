@@ -206,7 +206,7 @@ class UniversalDisplayRenderer {
                     <span class="mythology-badge" data-mythology="${mythology}">${this.escapeHtml(this.formatLabel(entity.mythology))}</span>
                 </div>
 
-                ${display.subtitle ? `<p class="card-description">${this.escapeHtml(display.subtitle)}</p>` : ''}
+                ${display.subtitle ? `<p class="card-description">${this.escapeHtml(this.truncateText(display.subtitle, 120))}</p>` : ''}
 
                 ${display.stats ? this.renderStats(display.stats) : ''}
 
@@ -217,17 +217,26 @@ class UniversalDisplayRenderer {
 
     /**
      * Render icon with fallback
-     * @param {string} icon - Icon URL or emoji
+     * @param {string} icon - Icon URL, inline SVG, or emoji
      * @returns {string} Safe HTML for icon
      */
     renderIconWithFallback(icon) {
         if (!icon) return '&#10024;'; // Sparkle emoji as HTML entity
 
-        // Check if icon is an image URL
-        if (typeof icon === 'string' && (icon.includes('.svg') || icon.includes('.png') || icon.includes('.jpg') || icon.startsWith('http'))) {
-            const sanitizedUrl = this.sanitizeUrl(icon);
-            if (!sanitizedUrl) return '&#10024;';
-            return `<img src="${this.escapeAttr(sanitizedUrl)}" alt="" class="entity-icon-img" loading="lazy" onerror="this.parentElement.textContent='&#10024;'">`;
+        if (typeof icon === 'string') {
+            const trimmedIcon = icon.trim();
+
+            // Check if icon is inline SVG - render directly
+            if (trimmedIcon.startsWith('<svg')) {
+                return `<span class="entity-icon-svg">${icon}</span>`;
+            }
+
+            // Check if icon is an image URL
+            if (trimmedIcon.includes('.svg') || trimmedIcon.includes('.png') || trimmedIcon.includes('.jpg') || trimmedIcon.includes('.webp') || trimmedIcon.startsWith('http') || trimmedIcon.startsWith('/')) {
+                const sanitizedUrl = this.sanitizeUrl(trimmedIcon);
+                if (!sanitizedUrl) return '&#10024;';
+                return `<img src="${this.escapeAttr(sanitizedUrl)}" alt="" class="entity-icon-img" loading="lazy" onerror="this.parentElement.textContent='&#10024;'">`;
+            }
         }
 
         // For emoji or text icons, escape HTML
@@ -397,7 +406,7 @@ class UniversalDisplayRenderer {
     renderListItem(entity) {
         const display = entity.listDisplay || this.generateListDisplay(entity);
         const expandable = this.options.enableExpand && display.expandable;
-        const iconContent = this.escapeHtml(display.icon || entity.icon || '•');
+        const iconContent = this.renderIconWithFallback(display.icon || entity.icon || '•');
         const entityId = this.escapeAttr(entity.id);
 
         return `
@@ -555,12 +564,13 @@ class UniversalDisplayRenderer {
     renderInline(entities) {
         return entities.map(entity => {
             const href = `#/mythology/${this.escapeAttr(entity.mythology)}/${this.escapeAttr(entity.entityType)}/${this.escapeAttr(entity.id)}`;
+            const iconContent = this.renderIconWithFallback(entity.icon || '');
             return `
                 <a href="${href}"
                    class="entity-inline"
                    data-entity-id="${this.escapeAttr(entity.id)}"
                    title="${this.escapeAttr(entity.description || '')}">
-                    <span class="inline-icon">${this.escapeHtml(entity.icon || '')}</span>
+                    <span class="inline-icon">${iconContent}</span>
                     <span class="inline-name">${this.escapeHtml(entity.name)}</span>
                 </a>
             `;
@@ -571,11 +581,7 @@ class UniversalDisplayRenderer {
      * Generate display metadata if not present
      */
     generateGridDisplay(entity) {
-        // Safely truncate description to avoid cutting HTML entities
-        const description = entity.description || '';
-        const truncatedDesc = description.length > 100
-            ? description.substring(0, 100).replace(/&[^;]*$/, '') + '...'
-            : description;
+        const truncatedDesc = this.truncateText(entity.description, 100);
 
         return {
             title: entity.name,
@@ -607,11 +613,7 @@ class UniversalDisplayRenderer {
     }
 
     generateListDisplay(entity) {
-        // Safely truncate description to avoid cutting HTML entities
-        const description = entity.description || '';
-        const truncatedDesc = description.length > 150
-            ? description.substring(0, 150).replace(/&[^;]*$/, '')
-            : description;
+        const truncatedDesc = this.truncateText(entity.description, 150);
 
         return {
             icon: entity.icon || '•',
@@ -707,6 +709,20 @@ class UniversalDisplayRenderer {
     /**
      * Utility methods
      */
+
+    /**
+     * Truncate text to specified length, avoiding cutting HTML entities
+     * @param {string} text - Text to truncate
+     * @param {number} maxLength - Maximum length
+     * @returns {string} Truncated text with ellipsis if needed
+     */
+    truncateText(text, maxLength = 100) {
+        if (!text || typeof text !== 'string') return '';
+        if (text.length <= maxLength) return text;
+        // Truncate and remove any partial HTML entity at the end
+        return text.substring(0, maxLength).replace(/&[^;]*$/, '') + '...';
+    }
+
     getNestedValue(obj, path) {
         return path.split('.').reduce((current, key) => current?.[key], obj);
     }

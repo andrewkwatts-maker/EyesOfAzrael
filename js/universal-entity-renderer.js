@@ -513,7 +513,7 @@
                         </div>
 
                         ${entity.shortDescription ? `
-                            <p class="grid-card-description">${this.escapeHtml(entity.shortDescription)}</p>
+                            <p class="grid-card-description">${this.escapeHtml(this.truncateText(entity.shortDescription, 120))}</p>
                         ` : ''}
 
                         ${this.renderGridCardFields(entity)}
@@ -528,11 +528,17 @@
 
         /**
          * Render icon with fallback support
+         * Handles emoji, inline SVG, SVG URLs, and image URLs
          */
         renderIconWithFallback(icon, fallbackIcon, entityName) {
             if (!icon) {
                 // Use fallback icon or generate from entity name
                 return fallbackIcon || this.generateFallbackIcon(entityName);
+            }
+
+            // Check if icon is inline SVG - render directly without escaping
+            if (typeof icon === 'string' && icon.trim().startsWith('<svg')) {
+                return `<span class="entity-icon-svg">${icon}</span>`;
             }
 
             // Check if icon is an SVG URL or path
@@ -697,7 +703,7 @@
                         </div>
 
                         ${entity.shortDescription ? `
-                            <p class="list-item-description">${this.escapeHtml(entity.shortDescription)}</p>
+                            <p class="list-item-description">${this.escapeHtml(this.truncateText(entity.shortDescription, 150))}</p>
                         ` : ''}
 
                         ${this.renderListItemFields(entity)}
@@ -1156,6 +1162,17 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        /**
+         * Truncate text to specified length with ellipsis
+         * @param {string} text - Text to truncate
+         * @param {number} maxLength - Maximum length (default 150)
+         * @returns {string} Truncated text
+         */
+        truncateText(text, maxLength = 150) {
+            if (!text || text.length <= maxLength) return text || '';
+            return text.substring(0, maxLength).trim() + '...';
         }
 
         /**

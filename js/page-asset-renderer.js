@@ -187,23 +187,30 @@ class PageAssetRenderer {
     }
 
     /**
-     * Render icon - handles both emoji/text and image URLs
-     * @param {string} icon - Icon string (emoji, text, or URL)
+     * Render icon - handles inline SVG, image URLs, and emoji/text
+     * @param {string} icon - Icon string (inline SVG, URL, emoji, or text)
      * @returns {string} Rendered icon HTML
      */
     renderIcon(icon) {
         if (!icon) return '';
+        if (typeof icon !== 'string') return '';
+
+        const trimmed = icon.trim();
+
+        // Check if icon is inline SVG - render directly without escaping
+        if (trimmed.toLowerCase().startsWith('<svg')) {
+            return `<span class="entity-icon-svg">${icon}</span>`;
+        }
 
         // Check if icon is an image URL
-        if (typeof icon === 'string' &&
-            (icon.includes('.svg') || icon.includes('.png') || icon.includes('.jpg') || icon.startsWith('http'))) {
-            const sanitizedUrl = this.sanitizeUrl(icon);
+        if (trimmed.startsWith('http') || /\.(svg|png|jpg|jpeg|gif|webp)$/i.test(trimmed)) {
+            const sanitizedUrl = this.sanitizeUrl(trimmed);
             if (!sanitizedUrl) return '';
-            return `<img src="${this.escapeAttr(sanitizedUrl)}" alt="" class="icon-img" loading="lazy" onerror="this.style.display='none'">`;
+            return `<img src="${this.escapeAttr(sanitizedUrl)}" alt="" class="entity-icon" loading="lazy" onerror="this.style.display='none'">`;
         }
 
         // For emoji or text icons, escape HTML
-        return this.escapeHtml(icon);
+        return `<span class="entity-icon">${this.escapeHtml(icon)}</span>`;
     }
 
     /**
@@ -304,7 +311,7 @@ class PageAssetRenderer {
             <a href="${this.escapeAttr(link)}" class="panel-card" data-card-id="${this.escapeAttr(cardId)}">
                 ${icon ? `<span class="card-icon">${this.renderIcon(icon)}</span>` : ''}
                 <h3 class="card-title">${this.escapeHtml(name)}</h3>
-                ${description ? `<p class="card-description">${this.escapeHtml(this.truncateText(description, 150))}</p>` : ''}
+                ${description ? `<p class="card-description">${this.escapeHtml(this.truncateText(description, 250))}</p>` : ''}
                 ${card.metadata?.status ? `
                     <span class="card-status">${this.escapeHtml(card.metadata.status)}</span>
                 ` : ''}
@@ -315,13 +322,19 @@ class PageAssetRenderer {
     /**
      * Truncate text to a maximum length
      * @param {string} text - Text to truncate
-     * @param {number} maxLength - Maximum length
+     * @param {number} maxLength - Maximum length (default 250 chars for cards)
      * @returns {string} Truncated text with ellipsis if needed
      */
-    truncateText(text, maxLength = 150) {
+    truncateText(text, maxLength = 250) {
         if (!text || typeof text !== 'string') return '';
         if (text.length <= maxLength) return text;
-        return text.substring(0, maxLength).trim() + '...';
+        // Try to break at a word boundary
+        const truncated = text.substring(0, maxLength);
+        const lastSpace = truncated.lastIndexOf(' ');
+        if (lastSpace > maxLength * 0.8) {
+            return truncated.substring(0, lastSpace).trim() + '...';
+        }
+        return truncated.trim() + '...';
     }
 
     /**

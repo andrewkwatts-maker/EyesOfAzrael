@@ -469,7 +469,7 @@ class EntityDetailViewer {
                     <div class="entity-hero-content">
                         ${entity.icon ? `
                             <div class="entity-icon-large" aria-hidden="true">
-                                <span class="icon-float">${this.escapeHtml(entity.icon)}</span>
+                                <span class="icon-float">${this.renderIcon(entity.icon)}</span>
                             </div>
                         ` : ''}
                         <div class="entity-hero-text">
@@ -601,6 +601,9 @@ class EntityDetailViewer {
                     <!-- Type-Specific Sections -->
                     ${this.renderTypeSpecificSections(entity, entityType)}
 
+                    <!-- Dynamic Metadata Sections (renders all available metadata fields) -->
+                    ${this.renderAllMetadata(entity, entityType)}
+
                     <!-- Linguistic Information -->
                     ${entity.linguistic ? this.renderLinguisticInfo(entity.linguistic, entity) : ''}
 
@@ -689,7 +692,7 @@ class EntityDetailViewer {
                 <div class="entity-attributes-grid" role="list">
                     ${items.map(item => `
                         <div class="entity-attribute-card" role="listitem" ${this.getAnimationStyle()}>
-                            <div class="attribute-icon" aria-hidden="true">${item.icon || '&#9679;'}</div>
+                            <div class="attribute-icon" aria-hidden="true">${this.renderIcon(item.icon, '&#9679;')}</div>
                             <div class="attribute-content">
                                 <dt class="attribute-label">${item.label}</dt>
                                 <dd class="attribute-value">${this.formatAttributeValue(item.value)}</dd>
@@ -1545,7 +1548,7 @@ class EntityDetailViewer {
                                         <a href="#/mythology/${entity.mythology || mythology}/${cat.singular}/${entity.id}"
                                            class="schema-related-card"
                                            title="${this.escapeHtml(entity.relationship || '')}">
-                                            ${entity.icon ? `<span class="related-entity-icon">${entity.icon}</span>` : `<span class="related-entity-icon" aria-hidden="true">${cat.icon}</span>`}
+                                            <span class="related-entity-icon"${entity.icon ? '' : ' aria-hidden="true"'}>${this.renderIcon(entity.icon, cat.icon)}</span>
                                             <div class="related-entity-info">
                                                 <span class="related-entity-name">${this.escapeHtml(entity.name)}</span>
                                                 ${entity.relationship ? `<span class="related-entity-relationship">${this.escapeHtml(entity.relationship)}</span>` : ''}
@@ -1778,7 +1781,7 @@ class EntityDetailViewer {
                                        role="listitem"
                                        aria-label="View ${this.escapeHtml(entity.name || entity.title)}">
                                         <div class="related-entity-icon" aria-hidden="true">
-                                            ${entity.icon || this.getDefaultIcon(entityRouteType)}
+                                            ${this.renderIcon(entity.icon, this.getDefaultIcon(entityRouteType))}
                                         </div>
                                         <div class="related-entity-info">
                                             <span class="related-entity-name">${this.escapeHtml(entity.name || entity.title)}</span>
@@ -1943,6 +1946,1209 @@ class EntityDetailViewer {
                 </ul>
             </div>
         `;
+    }
+
+    /**
+     * Metadata field configuration for all entity types
+     * Defines how each metadata field should be rendered
+     */
+    getMetadataFieldConfig() {
+        return {
+            // Deity fields
+            symbolism: { icon: '&#128302;', label: 'Symbolism & Meaning', type: 'prose', collapsible: true },
+            domains: { icon: '&#127760;', label: 'Domains', type: 'tags' },
+            aliases: { icon: '&#128196;', label: 'Also Known As', type: 'tags' },
+            festivals: { icon: '&#127881;', label: 'Festivals', type: 'list' },
+            epithets: { icon: '&#128081;', label: 'Epithets & Titles', type: 'tags' },
+            attributes: { icon: '&#10024;', label: 'Attributes', type: 'tags' },
+            titles: { icon: '&#128081;', label: 'Titles', type: 'tags' },
+            sacredAnimals: { icon: '&#128038;', label: 'Sacred Animals', type: 'tags' },
+            sacredPlants: { icon: '&#127793;', label: 'Sacred Plants', type: 'tags' },
+            symbols: { icon: '&#10024;', label: 'Symbols', type: 'tags' },
+            worship: { icon: '&#128722;', label: 'Worship & Rituals', type: 'prose', collapsible: true },
+
+            // Hero fields
+            quests: { icon: '&#9876;', label: 'Legendary Quests', type: 'list', collapsible: true },
+            feats: { icon: '&#127942;', label: 'Heroic Feats', type: 'list', collapsible: true },
+            allies: { icon: '&#129309;', label: 'Allies & Companions', type: 'tags' },
+            companions: { icon: '&#129309;', label: 'Companions', type: 'tags' },
+            enemies: { icon: '&#9876;', label: 'Enemies & Adversaries', type: 'tags' },
+            weapons: { icon: '&#128481;', label: 'Weapons & Equipment', type: 'tags' },
+            abilities: { icon: '&#9889;', label: 'Abilities & Powers', type: 'list' },
+            parentage: { icon: '&#128106;', label: 'Parentage', type: 'prose' },
+
+            // Creature fields
+            weaknesses: { icon: '&#128683;', label: 'Weaknesses', type: 'list' },
+            habitat: { icon: '&#127966;', label: 'Habitat', type: 'prose' },
+            habitats: { icon: '&#127966;', label: 'Habitats', type: 'list' },
+            behavior: { icon: '&#128064;', label: 'Behavior', type: 'prose' },
+            classification: { icon: '&#128195;', label: 'Classification', type: 'prose' },
+            nature: { icon: '&#128051;', label: 'Nature', type: 'prose' },
+            physicalDescription: { icon: '&#128065;', label: 'Physical Description', type: 'prose' },
+            origin: { icon: '&#127759;', label: 'Origin', type: 'prose' },
+
+            // Item fields
+            powers: { icon: '&#10024;', label: 'Powers & Abilities', type: 'list' },
+            wielders: { icon: '&#128170;', label: 'Wielders', type: 'tags' },
+            materials: { icon: '&#128302;', label: 'Materials', type: 'tags' },
+            createdBy: { icon: '&#128296;', label: 'Created By', type: 'tags' },
+            itemType: { icon: '&#128295;', label: 'Item Type', type: 'prose' },
+
+            // Place fields
+            inhabitants: { icon: '&#128101;', label: 'Inhabitants', type: 'tags' },
+            significance: { icon: '&#10024;', label: 'Significance', type: 'prose' },
+            geography: { icon: '&#127757;', label: 'Geography', type: 'prose' },
+            location: { icon: '&#128205;', label: 'Location', type: 'prose' },
+            placeType: { icon: '&#127968;', label: 'Place Type', type: 'prose' },
+            accessibility: { icon: '&#128275;', label: 'Accessibility', type: 'prose' },
+            status: { icon: '&#10004;', label: 'Status', type: 'prose' },
+            associatedEvents: { icon: '&#128197;', label: 'Associated Events', type: 'list' },
+
+            // Ritual fields
+            purpose: { icon: '&#127919;', label: 'Purpose', type: 'prose' },
+            participants: { icon: '&#128101;', label: 'Participants', type: 'tags' },
+            timing: { icon: '&#128197;', label: 'Timing', type: 'prose' },
+            steps: { icon: '&#128221;', label: 'Ritual Steps', type: 'numbered-list', collapsible: true },
+            tools: { icon: '&#128295;', label: 'Tools & Implements', type: 'tags' },
+            procedure: { icon: '&#128221;', label: 'Procedure', type: 'prose', collapsible: true },
+            prohibitions: { icon: '&#128683;', label: 'Prohibitions', type: 'list' },
+            deities: { icon: '&#9734;', label: 'Associated Deities', type: 'tags' },
+
+            // Herb fields
+            properties: { icon: '&#9879;', label: 'Properties', type: 'list' },
+            preparations: { icon: '&#128171;', label: 'Preparations', type: 'list' },
+            preparation: { icon: '&#128171;', label: 'Preparation Methods', type: 'list' },
+            associations: { icon: '&#128279;', label: 'Associations', type: 'tags' },
+            uses: { icon: '&#127807;', label: 'Uses', type: 'list' },
+            rituals: { icon: '&#128722;', label: 'Ritual Uses', type: 'list' },
+
+            // Text/Source fields
+            primarySources: { icon: '&#128214;', label: 'Primary Sources', type: 'list', collapsible: true },
+            author: { icon: '&#9997;', label: 'Author', type: 'prose' },
+            period: { icon: '&#128197;', label: 'Period', type: 'prose' },
+            language: { icon: '&#127759;', label: 'Language', type: 'prose' },
+            genre: { icon: '&#128218;', label: 'Genre', type: 'prose' },
+
+            // General mythology story
+            mythology_story: { icon: '&#128218;', label: 'Mythology & Story', type: 'prose', collapsible: true },
+
+            // Historical & Archaeological fields
+            historicalPeriods: { icon: '&#128197;', label: 'Historical Periods', type: 'timeline' },
+            archaeologicalEvidence: { icon: '&#127970;', label: 'Archaeological Evidence', type: 'evidence-list', collapsible: true },
+            historicalContext: { icon: '&#128218;', label: 'Historical Context', type: 'prose', collapsible: true },
+            dateRange: { icon: '&#128197;', label: 'Date Range', type: 'date-range' },
+            era: { icon: '&#128197;', label: 'Era', type: 'prose' },
+
+            // Cosmology fields
+            cosmicRole: { icon: '&#127760;', label: 'Cosmic Role', type: 'prose' },
+            cosmicPosition: { icon: '&#10024;', label: 'Cosmic Position', type: 'prose' },
+            realms: { icon: '&#127752;', label: 'Realms', type: 'list' },
+            cosmologicalFunction: { icon: '&#128302;', label: 'Cosmological Function', type: 'prose' },
+
+            // Relationship fields
+            family: { icon: '&#128106;', label: 'Family', type: 'relationship-grid' },
+            parents: { icon: '&#128106;', label: 'Parents', type: 'entity-links' },
+            children: { icon: '&#128118;', label: 'Children', type: 'entity-links' },
+            siblings: { icon: '&#129309;', label: 'Siblings', type: 'entity-links' },
+            consorts: { icon: '&#128149;', label: 'Consorts', type: 'entity-links' },
+            offspring: { icon: '&#128118;', label: 'Offspring', type: 'entity-links' },
+
+            // Powers & Abilities (detailed)
+            divineAbilities: { icon: '&#9889;', label: 'Divine Abilities', type: 'ability-cards' },
+            magicalPowers: { icon: '&#10024;', label: 'Magical Powers', type: 'ability-cards' },
+            combatAbilities: { icon: '&#9876;', label: 'Combat Abilities', type: 'list' },
+
+            // Additional Item fields
+            enchantments: { icon: '&#10024;', label: 'Enchantments', type: 'list' },
+            curses: { icon: '&#128128;', label: 'Curses', type: 'list' },
+            requirements: { icon: '&#128275;', label: 'Requirements', type: 'list' },
+
+            // Cultural fields
+            worshipPractices: { icon: '&#128722;', label: 'Worship Practices', type: 'list' },
+            cultCenters: { icon: '&#127963;', label: 'Cult Centers', type: 'tags' },
+            worshipCenters: { icon: '&#127963;', label: 'Worship Centers', type: 'tags' },
+            modernLegacy: { icon: '&#127760;', label: 'Modern Legacy', type: 'legacy-object' },
+            demographicAppeal: { icon: '&#128101;', label: 'Demographic Appeal', type: 'list' },
+
+            // Appearance & Visual
+            appearance: { icon: '&#128065;', label: 'Appearance', type: 'prose' },
+            iconography: { icon: '&#127912;', label: 'Iconography', type: 'list' },
+            depictions: { icon: '&#127912;', label: 'Depictions', type: 'list' },
+            colors: { icon: '&#127912;', label: 'Sacred Colors', type: 'color-tags' },
+
+            // Concept fields
+            manifestations: { icon: '&#10024;', label: 'Manifestations', type: 'list' },
+            opposites: { icon: '&#9878;', label: 'Opposites & Contrasts', type: 'tags' },
+            personifications: { icon: '&#128100;', label: 'Personifications', type: 'list' },
+
+            // Media & References
+            mediaReferences: { icon: '&#127916;', label: 'Media References', type: 'media-grid' },
+            modernReferences: { icon: '&#127916;', label: 'Modern References', type: 'list' },
+            literaryReferences: { icon: '&#128218;', label: 'Literary References', type: 'reference-list', collapsible: true }
+        };
+    }
+
+    // ==================== UNIVERSAL METADATA FIELD RENDERER ====================
+
+    /**
+     * Universal method to render ANY metadata field type
+     * This is the main entry point for rendering any entity metadata
+     *
+     * @param {string} fieldName - The name of the metadata field
+     * @param {any} value - The value to render (can be any type)
+     * @param {object} options - Optional configuration override
+     *   - icon: Custom icon HTML
+     *   - label: Custom label
+     *   - type: Render type override
+     *   - collapsible: Whether section should be collapsible
+     *   - collapsed: Initial collapsed state (default false)
+     *   - maxItems: Maximum items before "show more" (for arrays)
+     * @returns {string} HTML string for the rendered field
+     */
+    renderMetadataField(fieldName, value, options = {}) {
+        // Skip empty/null/undefined values
+        if (value === null || value === undefined) return '';
+        if (Array.isArray(value) && value.length === 0) return '';
+        if (typeof value === 'string' && value.trim() === '') return '';
+        if (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) return '';
+
+        // Get field configuration from known fields or build from options
+        const fieldConfigs = this.getMetadataFieldConfig();
+        const baseConfig = fieldConfigs[fieldName] || {};
+        const config = { ...baseConfig, ...options };
+
+        // Auto-detect type if not specified
+        if (!config.type) {
+            config.type = this.detectFieldType(value);
+        }
+
+        // Generate label if not specified
+        if (!config.label) {
+            config.label = this.formatFieldLabel(fieldName);
+        }
+
+        // Default icon if not specified
+        if (!config.icon) {
+            config.icon = this.getDefaultFieldIcon(config.type);
+        }
+
+        // Render based on type
+        switch (config.type) {
+            case 'prose':
+            case 'text':
+            case 'string':
+                return this.renderProseField(config, value);
+
+            case 'tags':
+            case 'tag-cloud':
+                return this.renderTagsField(config, value);
+
+            case 'list':
+            case 'bulleted-list':
+                return this.renderListField(config, value);
+
+            case 'numbered-list':
+            case 'ordered-list':
+                return this.renderNumberedListField(config, value);
+
+            case 'object':
+            case 'key-value':
+                return this.renderObjectField(config, value);
+
+            case 'entity-links':
+            case 'links':
+                return this.renderEntityLinksField(config, value);
+
+            case 'relationship-grid':
+                return this.renderRelationshipGridField(config, value);
+
+            case 'ability-cards':
+                return this.renderAbilityCardsField(config, value);
+
+            case 'timeline':
+                return this.renderTimelineField(config, value);
+
+            case 'evidence-list':
+                return this.renderEvidenceListField(config, value);
+
+            case 'date-range':
+                return this.renderDateRangeField(config, value);
+
+            case 'legacy-object':
+                return this.renderLegacyObjectField(config, value);
+
+            case 'color-tags':
+                return this.renderColorTagsField(config, value);
+
+            case 'media-grid':
+                return this.renderMediaGridField(config, value);
+
+            case 'reference-list':
+                return this.renderReferenceListField(config, value);
+
+            default:
+                // Fall back to auto-detection
+                return this.renderAutoDetectedField(config, value);
+        }
+    }
+
+    /**
+     * Auto-detect the type of a field value
+     */
+    detectFieldType(value) {
+        if (Array.isArray(value)) {
+            if (value.length === 0) return 'tags';
+            const firstItem = value[0];
+            if (typeof firstItem === 'string') {
+                // Short strings = tags, long strings = list
+                const avgLength = value.reduce((sum, v) => sum + (v?.length || 0), 0) / value.length;
+                return avgLength > 50 ? 'list' : 'tags';
+            }
+            if (typeof firstItem === 'object') {
+                if (firstItem.id && firstItem.name) return 'entity-links';
+                if (firstItem.date || firstItem.period) return 'timeline';
+                return 'list';
+            }
+            return 'list';
+        }
+        if (typeof value === 'object') {
+            if (value.start && value.end) return 'date-range';
+            return 'object';
+        }
+        if (typeof value === 'string') {
+            return value.length > 200 ? 'prose' : 'tags';
+        }
+        return 'prose';
+    }
+
+    /**
+     * Format a field name into a human-readable label
+     */
+    formatFieldLabel(fieldName) {
+        return fieldName
+            // Handle camelCase
+            .replace(/([A-Z])/g, ' $1')
+            // Handle snake_case
+            .replace(/_/g, ' ')
+            // Capitalize first letter
+            .replace(/^./, str => str.toUpperCase())
+            .trim();
+    }
+
+    /**
+     * Get default icon for a field type
+     */
+    getDefaultFieldIcon(type) {
+        const icons = {
+            'prose': '&#128220;',
+            'text': '&#128220;',
+            'tags': '&#127991;',
+            'list': '&#128221;',
+            'numbered-list': '&#128221;',
+            'object': '&#128196;',
+            'entity-links': '&#128279;',
+            'relationship-grid': '&#128106;',
+            'ability-cards': '&#9889;',
+            'timeline': '&#128197;',
+            'evidence-list': '&#127970;',
+            'date-range': '&#128197;',
+            'legacy-object': '&#127760;',
+            'color-tags': '&#127912;',
+            'media-grid': '&#127916;',
+            'reference-list': '&#128218;'
+        };
+        return icons[type] || '&#128196;';
+    }
+
+    /**
+     * Render a prose/text field
+     */
+    renderProseField(config, value) {
+        const content = typeof value === 'object' ? JSON.stringify(value) : String(value);
+        if (!content.trim()) return '';
+
+        const collapsibleClass = config.collapsible ? 'collapsible-section' : '';
+        const collapsedClass = config.collapsed ? 'collapsed' : '';
+        const sectionId = `section-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-prose ${collapsibleClass} ${collapsedClass}"
+                     id="${sectionId}" ${this.getAnimationStyle()}>
+                <h2 class="section-title ${config.collapsible ? 'collapsible-trigger' : ''}"
+                    ${config.collapsible ? `onclick="EntityDetailViewer.toggleSection('${sectionId}')"` : ''}>
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                    ${config.collapsible ? '<span class="collapse-indicator" aria-hidden="true">&#9660;</span>' : ''}
+                </h2>
+                <div class="section-content collapsible-content">
+                    <div class="entity-description prose">
+                        ${this.renderMarkdown(content)}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render a tags field (inline tag cloud)
+     */
+    renderTagsField(config, value) {
+        const items = Array.isArray(value) ? value : [value];
+        if (items.length === 0) return '';
+
+        const maxItems = config.maxItems || 20;
+        const showAll = items.length <= maxItems;
+        const visibleItems = showAll ? items : items.slice(0, maxItems);
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-tags" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                </h2>
+                <div class="section-content">
+                    <div class="metadata-tags-container" role="list" aria-label="${this.escapeAttr(config.label)}">
+                        ${visibleItems.map(item => {
+                            const displayText = this.extractDisplayText(item);
+                            const tooltip = typeof item === 'object' ? (item.description || item.context || '') : '';
+                            return `<span class="metadata-tag" role="listitem" ${tooltip ? `title="${this.escapeAttr(tooltip)}"` : ''}>${this.escapeHtml(displayText)}</span>`;
+                        }).join('')}
+                        ${!showAll ? `<span class="metadata-tag metadata-tag-more">+${items.length - maxItems} more</span>` : ''}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render a bulleted list field
+     */
+    renderListField(config, value) {
+        const items = Array.isArray(value) ? value : [value];
+        if (items.length === 0) return '';
+
+        const collapsibleClass = config.collapsible ? 'collapsible-section' : '';
+        const collapsedClass = config.collapsed ? 'collapsed' : '';
+        const sectionId = `section-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-list ${collapsibleClass} ${collapsedClass}"
+                     id="${sectionId}" ${this.getAnimationStyle()}>
+                <h2 class="section-title ${config.collapsible ? 'collapsible-trigger' : ''}"
+                    ${config.collapsible ? `onclick="EntityDetailViewer.toggleSection('${sectionId}')"` : ''}>
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                    <span class="section-count">(${items.length})</span>
+                    ${config.collapsible ? '<span class="collapse-indicator" aria-hidden="true">&#9660;</span>' : ''}
+                </h2>
+                <div class="section-content collapsible-content">
+                    <ul class="metadata-list" role="list">
+                        ${items.map(item => {
+                            const displayText = this.extractDisplayText(item);
+                            const description = typeof item === 'object' ? (item.description || item.details || '') : '';
+                            return `
+                                <li class="metadata-list-item" role="listitem">
+                                    <span class="list-item-text">${this.escapeHtml(displayText)}</span>
+                                    ${description ? `<span class="list-item-description">${this.escapeHtml(description)}</span>` : ''}
+                                </li>
+                            `;
+                        }).join('')}
+                    </ul>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render a numbered/ordered list field
+     */
+    renderNumberedListField(config, value) {
+        const items = Array.isArray(value) ? value : [value];
+        if (items.length === 0) return '';
+
+        const collapsibleClass = config.collapsible ? 'collapsible-section' : '';
+        const collapsedClass = config.collapsed ? 'collapsed' : '';
+        const sectionId = `section-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-numbered-list ${collapsibleClass} ${collapsedClass}"
+                     id="${sectionId}" ${this.getAnimationStyle()}>
+                <h2 class="section-title ${config.collapsible ? 'collapsible-trigger' : ''}"
+                    ${config.collapsible ? `onclick="EntityDetailViewer.toggleSection('${sectionId}')"` : ''}>
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                    ${config.collapsible ? '<span class="collapse-indicator" aria-hidden="true">&#9660;</span>' : ''}
+                </h2>
+                <div class="section-content collapsible-content">
+                    <ol class="metadata-numbered-list" role="list">
+                        ${items.map((item, index) => {
+                            const displayText = this.extractDisplayText(item);
+                            return `
+                                <li class="metadata-numbered-item" role="listitem">
+                                    <span class="step-number">${index + 1}</span>
+                                    <span class="step-content">${this.escapeHtml(displayText)}</span>
+                                </li>
+                            `;
+                        }).join('')}
+                    </ol>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render an object as key-value pairs
+     */
+    renderObjectField(config, value) {
+        if (!value || typeof value !== 'object' || Array.isArray(value)) return '';
+
+        const entries = Object.entries(value).filter(([key, val]) => {
+            if (key.startsWith('_')) return false;
+            if (val === null || val === undefined) return false;
+            if (Array.isArray(val) && val.length === 0) return false;
+            if (typeof val === 'string' && val.trim() === '') return false;
+            return true;
+        });
+
+        if (entries.length === 0) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-object" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                </h2>
+                <div class="section-content">
+                    <dl class="metadata-object-grid">
+                        ${entries.map(([key, val]) => {
+                            const keyLabel = this.formatFieldLabel(key);
+                            const displayVal = Array.isArray(val) ? val.map(v => this.extractDisplayText(v)).join(', ') :
+                                typeof val === 'object' ? this.extractDisplayText(val) : String(val);
+                            return `
+                                <div class="metadata-object-item">
+                                    <dt class="metadata-object-key">${this.escapeHtml(keyLabel)}</dt>
+                                    <dd class="metadata-object-value">${this.escapeHtml(displayVal)}</dd>
+                                </div>
+                            `;
+                        }).join('')}
+                    </dl>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render entity links (clickable references to other entities)
+     */
+    renderEntityLinksField(config, value) {
+        const items = Array.isArray(value) ? value : [value];
+        if (items.length === 0) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-entity-links" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                </h2>
+                <div class="section-content">
+                    <div class="entity-links-grid" role="list">
+                        ${items.map(item => {
+                            const name = typeof item === 'string' ? item : (item.name || item.title || item.id);
+                            const id = typeof item === 'string' ? item.toLowerCase().replace(/\s+/g, '-') : item.id;
+                            const mythology = typeof item === 'object' ? item.mythology : '';
+                            const entityType = typeof item === 'object' ? item.type : 'entity';
+                            const rawIcon = typeof item === 'object' ? item.icon : null;
+                            const relationship = typeof item === 'object' ? item.relationship : '';
+
+                            const href = mythology && id ? `#/mythology/${mythology}/${this.normalizeEntityTypeForRoute(entityType)}/${id}` : '#';
+
+                            return `
+                                <a href="${href}" class="entity-link-card" role="listitem">
+                                    <span class="entity-link-icon" aria-hidden="true">${this.renderIcon(rawIcon, this.getDefaultIcon(entityType))}</span>
+                                    <span class="entity-link-name">${this.escapeHtml(name)}</span>
+                                    ${relationship ? `<span class="entity-link-relationship">${this.escapeHtml(relationship)}</span>` : ''}
+                                </a>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render a relationship grid (for family trees, etc.)
+     */
+    renderRelationshipGridField(config, value) {
+        if (!value || typeof value !== 'object') return '';
+
+        const categories = ['parents', 'siblings', 'consorts', 'children', 'offspring'];
+        const hasData = categories.some(cat => value[cat]?.length > 0);
+        if (!hasData) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-relationships" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                </h2>
+                <div class="section-content">
+                    <div class="relationship-grid">
+                        ${categories.map(cat => {
+                            const items = value[cat];
+                            if (!items || items.length === 0) return '';
+                            const catLabel = this.formatFieldLabel(cat);
+                            return `
+                                <div class="relationship-category">
+                                    <h3 class="relationship-category-title">${catLabel}</h3>
+                                    <div class="relationship-items">
+                                        ${items.map(item => {
+                                            const name = typeof item === 'string' ? item : (item.name || item.title);
+                                            const rawIcon = typeof item === 'object' ? item.icon : null;
+                                            return `
+                                                <span class="relationship-item">
+                                                    <span class="relationship-icon">${this.renderIcon(rawIcon, '&#128100;')}</span>
+                                                    ${this.escapeHtml(name)}
+                                                </span>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render ability cards (for powers, abilities with details)
+     */
+    renderAbilityCardsField(config, value) {
+        const items = Array.isArray(value) ? value : [value];
+        if (items.length === 0) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-ability-cards" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                </h2>
+                <div class="section-content">
+                    <div class="ability-cards-grid">
+                        ${items.map(item => {
+                            if (typeof item === 'string') {
+                                // Parse "Name: Description" format
+                                const colonIndex = item.indexOf(':');
+                                if (colonIndex > 0) {
+                                    const name = item.substring(0, colonIndex).trim();
+                                    const description = item.substring(colonIndex + 1).trim();
+                                    return `
+                                        <div class="ability-card">
+                                            <h4 class="ability-name">${this.escapeHtml(name)}</h4>
+                                            <p class="ability-description">${this.escapeHtml(description)}</p>
+                                        </div>
+                                    `;
+                                }
+                                return `<div class="ability-card"><p class="ability-description">${this.escapeHtml(item)}</p></div>`;
+                            }
+                            const name = item.name || item.title || 'Ability';
+                            const description = item.description || item.effect || '';
+                            const level = item.level || item.power || '';
+                            return `
+                                <div class="ability-card">
+                                    <h4 class="ability-name">${this.escapeHtml(name)}</h4>
+                                    ${level ? `<span class="ability-level">${this.escapeHtml(level)}</span>` : ''}
+                                    ${description ? `<p class="ability-description">${this.escapeHtml(description)}</p>` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render a timeline of historical periods
+     */
+    renderTimelineField(config, value) {
+        const items = Array.isArray(value) ? value : [value];
+        if (items.length === 0) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-timeline" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                </h2>
+                <div class="section-content">
+                    <div class="timeline-container">
+                        ${items.map((item, index) => {
+                            const period = typeof item === 'string' ? item : (item.period || item.name || item.display);
+                            const date = typeof item === 'object' ? (item.date?.display || item.dateRange || '') : '';
+                            const description = typeof item === 'object' ? (item.description || item.significance || '') : '';
+                            return `
+                                <div class="timeline-item">
+                                    <div class="timeline-marker">${index + 1}</div>
+                                    <div class="timeline-content">
+                                        <h4 class="timeline-period">${this.escapeHtml(period)}</h4>
+                                        ${date ? `<span class="timeline-date">${this.escapeHtml(date)}</span>` : ''}
+                                        ${description ? `<p class="timeline-description">${this.escapeHtml(description)}</p>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render archaeological evidence list
+     */
+    renderEvidenceListField(config, value) {
+        const items = Array.isArray(value) ? value : [value];
+        if (items.length === 0) return '';
+
+        const collapsibleClass = config.collapsible ? 'collapsible-section' : '';
+        const sectionId = `section-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-evidence ${collapsibleClass}"
+                     id="${sectionId}" ${this.getAnimationStyle()}>
+                <h2 class="section-title ${config.collapsible ? 'collapsible-trigger' : ''}"
+                    ${config.collapsible ? `onclick="EntityDetailViewer.toggleSection('${sectionId}')"` : ''}>
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                    ${config.collapsible ? '<span class="collapse-indicator" aria-hidden="true">&#9660;</span>' : ''}
+                </h2>
+                <div class="section-content collapsible-content">
+                    <div class="evidence-list">
+                        ${items.map(item => {
+                            if (typeof item === 'string') {
+                                return `<div class="evidence-item"><p>${this.escapeHtml(item)}</p></div>`;
+                            }
+                            const name = item.name || item.title || item.artifact || 'Evidence';
+                            const location = item.location || item.site || '';
+                            const date = item.date?.display || item.period || '';
+                            const description = item.description || item.significance || '';
+                            return `
+                                <div class="evidence-item">
+                                    <h4 class="evidence-name">${this.escapeHtml(name)}</h4>
+                                    <div class="evidence-meta">
+                                        ${location ? `<span class="evidence-location">&#128205; ${this.escapeHtml(location)}</span>` : ''}
+                                        ${date ? `<span class="evidence-date">&#128197; ${this.escapeHtml(date)}</span>` : ''}
+                                    </div>
+                                    ${description ? `<p class="evidence-description">${this.escapeHtml(description)}</p>` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render a date range field
+     */
+    renderDateRangeField(config, value) {
+        if (!value) return '';
+
+        const display = value.display || '';
+        const start = value.start?.display || value.start || '';
+        const end = value.end?.display || value.end || '';
+        const dateStr = display || (start && end ? `${start} - ${end}` : start || end);
+
+        if (!dateStr) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-date-range" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                </h2>
+                <div class="section-content">
+                    <div class="date-range-display">
+                        <span class="date-range-value">${this.escapeHtml(dateStr)}</span>
+                        ${value.context ? `<span class="date-range-context">${this.escapeHtml(value.context)}</span>` : ''}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render modern legacy object (structured legacy data)
+     */
+    renderLegacyObjectField(config, value) {
+        if (!value) return '';
+
+        if (typeof value === 'string') {
+            return this.renderProseField(config, value);
+        }
+
+        const categories = ['literature', 'philosophy', 'education', 'art', 'popCulture', 'science', 'language'];
+        const hasData = categories.some(cat => value[cat]);
+        if (!hasData && !value.references?.length) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-legacy" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                </h2>
+                <div class="section-content">
+                    <div class="legacy-grid">
+                        ${categories.map(cat => {
+                            if (!value[cat]) return '';
+                            const catLabel = this.formatFieldLabel(cat);
+                            const catIcon = this.getLegacyCategoryIcon(cat);
+                            return `
+                                <div class="legacy-item">
+                                    <span class="legacy-icon">${catIcon}</span>
+                                    <dt class="legacy-label">${catLabel}</dt>
+                                    <dd class="legacy-value">${this.escapeHtml(value[cat])}</dd>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    ${value.references?.length > 0 ? `
+                        <div class="legacy-references">
+                            <h4>Notable References</h4>
+                            <ul>
+                                ${value.references.map(ref => `<li>${this.escapeHtml(ref)}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Get icon for legacy category
+     */
+    getLegacyCategoryIcon(category) {
+        const icons = {
+            'literature': '&#128218;',
+            'philosophy': '&#128161;',
+            'education': '&#127891;',
+            'art': '&#127912;',
+            'popCulture': '&#127916;',
+            'science': '&#128300;',
+            'language': '&#127759;'
+        };
+        return icons[category] || '&#128196;';
+    }
+
+    /**
+     * Render color tags (for sacred colors, etc.)
+     */
+    renderColorTagsField(config, value) {
+        const items = Array.isArray(value) ? value : [value];
+        if (items.length === 0) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-colors" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                </h2>
+                <div class="section-content">
+                    <div class="color-tags-container">
+                        ${items.map(item => {
+                            const colorName = typeof item === 'string' ? item : (item.name || item.color);
+                            const colorValue = typeof item === 'object' ? (item.hex || item.value || '') : '';
+                            const style = colorValue ? `background-color: ${colorValue}` : '';
+                            return `
+                                <span class="color-tag" ${style ? `style="${style}"` : ''}>
+                                    ${colorValue ? `<span class="color-swatch" style="background-color: ${colorValue}"></span>` : ''}
+                                    ${this.escapeHtml(colorName)}
+                                </span>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render media grid (images, videos, etc.)
+     */
+    renderMediaGridField(config, value) {
+        if (!value || typeof value !== 'object') return '';
+
+        const images = value.images || [];
+        const videos = value.videos || [];
+        const diagrams = value.diagrams || [];
+
+        const hasMedia = images.length > 0 || videos.length > 0 || diagrams.length > 0;
+        if (!hasMedia) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-media" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                </h2>
+                <div class="section-content">
+                    <div class="media-grid">
+                        ${images.map(img => `
+                            <div class="media-item media-image">
+                                <span class="media-placeholder">&#127912;</span>
+                                <span class="media-label">${this.escapeHtml(img.title || img.name || 'Image')}</span>
+                            </div>
+                        `).join('')}
+                        ${diagrams.map(diag => `
+                            <div class="media-item media-diagram">
+                                <span class="media-placeholder">&#128202;</span>
+                                <span class="media-label">${this.escapeHtml(diag.title || diag.name || 'Diagram')}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render reference list (literary references, etc.)
+     */
+    renderReferenceListField(config, value) {
+        const items = Array.isArray(value) ? value : [value];
+        if (items.length === 0) return '';
+
+        const collapsibleClass = config.collapsible ? 'collapsible-section' : '';
+        const sectionId = `section-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-references ${collapsibleClass}"
+                     id="${sectionId}" ${this.getAnimationStyle()}>
+                <h2 class="section-title ${config.collapsible ? 'collapsible-trigger' : ''}"
+                    ${config.collapsible ? `onclick="EntityDetailViewer.toggleSection('${sectionId}')"` : ''}>
+                    <span class="section-icon" aria-hidden="true">${config.icon}</span>
+                    ${this.escapeHtml(config.label)}
+                    ${config.collapsible ? '<span class="collapse-indicator" aria-hidden="true">&#9660;</span>' : ''}
+                </h2>
+                <div class="section-content collapsible-content">
+                    <ol class="reference-list">
+                        ${items.map(item => {
+                            if (typeof item === 'string') {
+                                return `<li class="reference-item">${this.escapeHtml(item)}</li>`;
+                            }
+                            const work = item.work || item.title || item.name || 'Unknown Work';
+                            const author = item.author || '';
+                            const date = item.date?.display || item.year || '';
+                            const significance = item.significance || item.description || '';
+                            return `
+                                <li class="reference-item reference-item-detailed">
+                                    <cite class="reference-work">${this.escapeHtml(work)}</cite>
+                                    ${author ? `<span class="reference-author"> by ${this.escapeHtml(author)}</span>` : ''}
+                                    ${date ? `<span class="reference-date"> (${this.escapeHtml(date)})</span>` : ''}
+                                    ${significance ? `<p class="reference-significance">${this.escapeHtml(significance)}</p>` : ''}
+                                </li>
+                            `;
+                        }).join('')}
+                    </ol>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Auto-detect and render a field based on its value
+     */
+    renderAutoDetectedField(config, value) {
+        const detectedType = this.detectFieldType(value);
+        const newConfig = { ...config, type: detectedType };
+
+        switch (detectedType) {
+            case 'tags': return this.renderTagsField(newConfig, value);
+            case 'list': return this.renderListField(newConfig, value);
+            case 'prose': return this.renderProseField(newConfig, value);
+            case 'object': return this.renderObjectField(newConfig, value);
+            case 'entity-links': return this.renderEntityLinksField(newConfig, value);
+            default: return this.renderProseField(newConfig, value);
+        }
+    }
+
+    /**
+     * Extract display text from a value (handles objects, strings, etc.)
+     */
+    extractDisplayText(value) {
+        if (typeof value === 'string') return value;
+        if (typeof value !== 'object' || value === null) return String(value);
+        return value.name || value.title || value.label || value.text || value.display || value.value || JSON.stringify(value);
+    }
+
+    /**
+     * Static method to toggle section collapse
+     */
+    static toggleSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.classList.toggle('collapsed');
+            const indicator = section.querySelector('.collapse-indicator');
+            if (indicator) {
+                indicator.innerHTML = section.classList.contains('collapsed') ? '&#9654;' : '&#9660;';
+            }
+        }
+    }
+
+    /**
+     * Render a metadata section dynamically based on field configuration
+     * @param {string} fieldName - The name of the metadata field
+     * @param {any} value - The value to render
+     * @param {object} config - Optional custom configuration override
+     * @returns {string} HTML string for the section
+     */
+    renderMetadataSection(fieldName, value, config = null) {
+        // Skip empty values
+        if (value === null || value === undefined) return '';
+        if (Array.isArray(value) && value.length === 0) return '';
+        if (typeof value === 'string' && value.trim() === '') return '';
+        if (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) return '';
+
+        // Get field configuration
+        const fieldConfigs = this.getMetadataFieldConfig();
+        const fieldConfig = config || fieldConfigs[fieldName];
+
+        if (!fieldConfig) {
+            // Unknown field - render as generic prose or tags
+            return this.renderGenericMetadataSection(fieldName, value);
+        }
+
+        const { icon, label, type } = fieldConfig;
+
+        switch (type) {
+            case 'prose':
+                return this.renderProseSection(label, value, icon);
+            case 'tags':
+                return this.renderTagsSection(label, value, icon);
+            case 'list':
+                return this.renderMetadataListSection(label, value, icon);
+            case 'numbered-list':
+                return this.renderNumberedListSection(label, value, icon);
+            default:
+                return this.renderGenericMetadataSection(fieldName, value);
+        }
+    }
+
+    /**
+     * Render a prose (text) section
+     */
+    renderProseSection(label, value, icon = '&#128220;') {
+        const content = typeof value === 'object' ? JSON.stringify(value) : String(value);
+        if (!content.trim()) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${icon}</span>
+                    ${this.escapeHtml(label)}
+                </h2>
+                <div class="entity-description prose">
+                    ${this.renderMarkdown(content)}
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render a tags section (array of items as inline tags)
+     */
+    renderTagsSection(label, value, icon = '&#10024;') {
+        const items = Array.isArray(value) ? value : [value];
+        if (items.length === 0) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-tags" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${icon}</span>
+                    ${this.escapeHtml(label)}
+                </h2>
+                <div class="metadata-tags-container" role="list" aria-label="${this.escapeAttr(label)}">
+                    ${items.map(item => {
+                        const displayText = typeof item === 'object' ? (item.name || item.title || JSON.stringify(item)) : String(item);
+                        return `<span class="metadata-tag" role="listitem">${this.escapeHtml(displayText)}</span>`;
+                    }).join('')}
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render a list section (bulleted list of items)
+     */
+    renderMetadataListSection(label, value, icon = '&#128221;') {
+        const items = Array.isArray(value) ? value : [value];
+        if (items.length === 0) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-list" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${icon}</span>
+                    ${this.escapeHtml(label)}
+                </h2>
+                <ul class="metadata-list" role="list">
+                    ${items.map(item => {
+                        const displayText = typeof item === 'object' ? (item.name || item.title || item.description || JSON.stringify(item)) : String(item);
+                        return `<li class="metadata-list-item" role="listitem">${this.escapeHtml(displayText)}</li>`;
+                    }).join('')}
+                </ul>
+            </section>
+        `;
+    }
+
+    /**
+     * Render a numbered list section (ordered list of items)
+     */
+    renderNumberedListSection(label, value, icon = '&#128221;') {
+        const items = Array.isArray(value) ? value : [value];
+        if (items.length === 0) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-numbered-list" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">${icon}</span>
+                    ${this.escapeHtml(label)}
+                </h2>
+                <ol class="metadata-numbered-list" role="list">
+                    ${items.map((item, index) => {
+                        const displayText = typeof item === 'object' ? (item.name || item.title || item.description || JSON.stringify(item)) : String(item);
+                        return `<li class="metadata-numbered-item" role="listitem" value="${index + 1}">${this.escapeHtml(displayText)}</li>`;
+                    }).join('')}
+                </ol>
+            </section>
+        `;
+    }
+
+    /**
+     * Render a generic metadata section for unknown fields
+     */
+    renderGenericMetadataSection(fieldName, value) {
+        // Convert camelCase to Title Case
+        const label = fieldName
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, str => str.toUpperCase())
+            .replace(/_/g, ' ');
+
+        if (Array.isArray(value)) {
+            return this.renderTagsSection(label, value, '&#128196;');
+        } else if (typeof value === 'object') {
+            // Render object as key-value pairs
+            return this.renderObjectSection(label, value);
+        } else {
+            return this.renderProseSection(label, value, '&#128196;');
+        }
+    }
+
+    /**
+     * Render an object as a key-value section
+     */
+    renderObjectSection(label, obj) {
+        if (!obj || Object.keys(obj).length === 0) return '';
+
+        const entries = Object.entries(obj).filter(([key, val]) => {
+            // Skip internal fields and empty values
+            if (key.startsWith('_')) return false;
+            if (val === null || val === undefined) return false;
+            if (Array.isArray(val) && val.length === 0) return false;
+            if (typeof val === 'string' && val.trim() === '') return false;
+            return true;
+        });
+
+        if (entries.length === 0) return '';
+
+        return `
+            <section class="entity-section entity-section-metadata entity-section-object" ${this.getAnimationStyle()}>
+                <h2 class="section-title">
+                    <span class="section-icon" aria-hidden="true">&#128196;</span>
+                    ${this.escapeHtml(label)}
+                </h2>
+                <dl class="metadata-object-grid">
+                    ${entries.map(([key, val]) => {
+                        const keyLabel = key
+                            .replace(/([A-Z])/g, ' $1')
+                            .replace(/^./, str => str.toUpperCase())
+                            .replace(/_/g, ' ');
+                        const displayVal = Array.isArray(val) ? val.join(', ') :
+                            typeof val === 'object' ? JSON.stringify(val) : String(val);
+                        return `
+                            <div class="metadata-object-item">
+                                <dt class="metadata-object-key">${this.escapeHtml(keyLabel)}</dt>
+                                <dd class="metadata-object-value">${this.escapeHtml(displayVal)}</dd>
+                            </div>
+                        `;
+                    }).join('')}
+                </dl>
+            </section>
+        `;
+    }
+
+    /**
+     * Render all available metadata fields for an entity
+     * This dynamically discovers and renders any fields that have data
+     * @param {object} entity - The entity data object
+     * @param {string} entityType - The type of entity
+     * @returns {string} HTML string with all metadata sections
+     */
+    renderAllMetadata(entity, entityType) {
+        if (!entity) return '';
+
+        // Fields to exclude from automatic rendering (handled elsewhere)
+        const excludedFields = new Set([
+            'id', 'name', 'title', 'displayName', 'sortName', 'slug',
+            'description', 'shortDescription', 'fullDescription', 'longDescription', 'summary',
+            'icon', 'iconType', 'color', 'colors',
+            'mythology', 'mythologies', 'primaryMythology',
+            'type', 'entityType', 'subType', 'subtype',
+            'metadata', 'search', 'corpusSearch', 'searchTerms',
+            'tableDisplay', 'listDisplay', 'gridDisplay', 'panelDisplay', 'rendering',
+            'relationships', 'relatedEntities', 'displayOptions',
+            'linguistic', 'geographical', 'temporal', 'cultural', 'culturalContext',
+            'metaphysicalProperties', 'archetypes', 'corpusQueries', 'sources',
+            'extendedContent', 'batch4_migration_status', 'batch4_migration_timestamp',
+            'batch5_migration', 'extracted_title', 'extracted_headings',
+            'createdAt', 'updatedAt', 'created_at', 'updated_at', 'lastUpdated', 'last_updated',
+            'authorId', 'createdBy', 'version', '_version', '_modified', '_created', '_enhanced',
+            '_uploadedAt', 'migrationDate', 'filename', 'importance', 'popularity', 'completeness',
+            'enhancedBy', 'categories', 'visibility', 'status'
+        ]);
+
+        // Get field configuration to know which fields we support
+        const fieldConfigs = this.getMetadataFieldConfig();
+        const supportedFields = Object.keys(fieldConfigs);
+
+        let html = '';
+
+        // First, render supported fields in a predictable order
+        for (const fieldName of supportedFields) {
+            if (excludedFields.has(fieldName)) continue;
+            const value = entity[fieldName];
+            if (value !== undefined) {
+                html += this.renderMetadataSection(fieldName, value);
+            }
+        }
+
+        // Then, render any remaining fields that are not in our config
+        for (const [fieldName, value] of Object.entries(entity)) {
+            if (excludedFields.has(fieldName)) continue;
+            if (supportedFields.includes(fieldName)) continue;
+            if (fieldName.startsWith('_')) continue;
+
+            // Only render if value is meaningful
+            if (value !== null && value !== undefined) {
+                html += this.renderGenericMetadataSection(fieldName, value);
+            }
+        }
+
+        return html;
     }
 
     /**
@@ -2158,6 +3364,32 @@ class EntityDetailViewer {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    /**
+     * Render an icon safely - handles inline SVG, URLs, and emoji/text icons
+     * SVGs are rendered directly (not escaped) wrapped in a span
+     * Other strings are escaped to prevent XSS
+     * @param {string} icon - Icon content (SVG string, URL, or emoji/text)
+     * @param {string} fallback - Fallback icon if icon is empty
+     * @returns {string} Safe HTML for the icon
+     */
+    renderIcon(icon, fallback = '&#9679;') {
+        if (!icon) {
+            return fallback;
+        }
+
+        if (typeof icon === 'string') {
+            const iconTrimmed = icon.trim();
+            // Check if it's inline SVG (starts with <svg)
+            if (iconTrimmed.toLowerCase().startsWith('<svg')) {
+                // Render inline SVG directly - SVG is safe markup, don't escape it
+                return `<span class="entity-icon-svg" aria-hidden="true">${icon}</span>`;
+            }
+        }
+
+        // For non-SVG strings (emoji, HTML entities, etc.), escape to prevent XSS
+        return this.escapeHtml(icon);
     }
 
     /**

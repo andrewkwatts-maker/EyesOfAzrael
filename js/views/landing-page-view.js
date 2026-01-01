@@ -772,6 +772,47 @@ class LandingPageView {
                         brightness(1.2);
                 }
 
+                /* Inline SVG Icon - Direct SVG rendering with color inheritance */
+                .entity-icon-svg {
+                    width: clamp(2rem, 3vw, 2.5rem);
+                    height: clamp(2rem, 3vw, 2.5rem);
+                    margin-bottom: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    opacity: 0.9;
+                    color: var(--card-color, var(--color-primary, #8b7fff));
+
+                    /* Inline SVGs inherit color, apply glow effects */
+                    filter:
+                        drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3))
+                        drop-shadow(0 0 12px var(--card-color));
+
+                    transition:
+                        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+                    will-change: transform;
+                }
+
+                /* Style inline SVG elements */
+                .entity-icon-svg svg {
+                    width: 100%;
+                    height: 100%;
+                    fill: currentColor;
+                    stroke: currentColor;
+                }
+
+                .landing-category-card:hover .entity-icon-svg {
+                    transform: scale(1.15) rotateZ(5deg);
+                    opacity: 1;
+                    filter:
+                        drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))
+                        drop-shadow(0 0 24px var(--card-color))
+                        brightness(1.2);
+                }
+
                 /* Emoji Fallback Icon - Shown when SVG fails to load */
                 .landing-category-icon-fallback {
                     width: clamp(2rem, 3vw, 2.5rem);
@@ -1277,28 +1318,79 @@ class LandingPageView {
     }
 
     /**
+     * Truncate text to a maximum length with ellipsis
+     * @param {string} text - The text to truncate
+     * @param {number} maxLength - Maximum character length (default 200)
+     * @returns {string} - Truncated text with ellipsis if needed
+     */
+    truncateText(text, maxLength = 200) {
+        if (!text || text.length <= maxLength) {
+            return text || '';
+        }
+        // Find last space before maxLength to avoid cutting words
+        const truncated = text.substring(0, maxLength);
+        const lastSpace = truncated.lastIndexOf(' ');
+        if (lastSpace > maxLength * 0.7) {
+            return truncated.substring(0, lastSpace) + '...';
+        }
+        return truncated + '...';
+    }
+
+    /**
+     * Render icon HTML with support for inline SVG, URL paths, and emoji fallbacks
+     * @param {string} icon - Icon source (inline SVG, URL path, or emoji)
+     * @param {string} fallbackId - Category ID for emoji fallback lookup
+     * @param {string} cssClass - CSS class for the icon element
+     * @returns {string} - HTML string for the icon
+     */
+    renderIconHTML(icon, fallbackId, cssClass = 'landing-category-icon') {
+        const emojiFallback = this.getEmojiFallbacks()[fallbackId] || '📄';
+
+        // Check if icon is inline SVG (starts with <svg)
+        if (icon && typeof icon === 'string' && icon.trim().startsWith('<svg')) {
+            return `
+                <span class="entity-icon-svg ${cssClass}" aria-hidden="true">${icon}</span>
+                <span class="landing-category-icon-fallback" style="display: none;" aria-hidden="true">${emojiFallback}</span>
+            `;
+        }
+
+        // Check if icon is an emoji (single character or emoji sequence)
+        if (icon && typeof icon === 'string' && !icon.includes('/') && !icon.includes('.')) {
+            // Likely an emoji or short text, render directly
+            return `
+                <span class="landing-category-icon-fallback" aria-hidden="true">${icon}</span>
+            `;
+        }
+
+        // Default: treat as URL path with img tag and fallback
+        return `
+            <img src="${icon}"
+                 alt=""
+                 class="${cssClass}"
+                 loading="lazy"
+                 decoding="async"
+                 aria-hidden="true"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+            <span class="landing-category-icon-fallback" style="display: none;" aria-hidden="true">${emojiFallback}</span>
+        `;
+    }
+
+    /**
      * Get asset type card HTML
      * Renders SVG icons with error handling and emoji fallbacks
      */
     getAssetTypeCardHTML(type) {
-        const emojiFallback = this.getEmojiFallbacks()[type.id] || '📄';
+        const truncatedDescription = this.truncateText(type.description, 200);
 
         return `
             <a href="${type.route}"
                class="landing-category-card"
                data-type="${type.id}"
                style="--card-color: ${type.color}"
-               aria-label="${type.name} - ${type.description}">
-                <img src="${type.icon}"
-                     alt=""
-                     class="landing-category-icon"
-                     loading="lazy"
-                     decoding="async"
-                     aria-hidden="true"
-                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                <span class="landing-category-icon-fallback" style="display: none;" aria-hidden="true">${emojiFallback}</span>
+               aria-label="${type.name} - ${truncatedDescription}">
+                ${this.renderIconHTML(type.icon, type.id, 'landing-category-icon')}
                 <h3 class="landing-category-name">${type.name}</h3>
-                <p class="landing-category-description">${type.description}</p>
+                <p class="landing-category-description">${truncatedDescription}</p>
             </a>
         `;
     }

@@ -99,6 +99,11 @@
             // Build preview content
             const previewContent = this.buildPreviewContent(result, queryInfo);
 
+            // Get icon - use result.icon if available, otherwise fall back to entity type icon
+            const iconHtml = result.icon
+                ? `<span class="corpus-icon" aria-hidden="true">${this.renderIcon(result.icon)}</span>`
+                : this.renderEntityIcon(entityType);
+
             return `
                 <span class="corpus-inline-link"
                       id="${id}"
@@ -107,7 +112,7 @@
                       tabindex="0"
                       aria-describedby="${id}-preview">
                     <a href="${url}" class="corpus-inline-name" tabindex="-1">
-                        ${this.renderEntityIcon(entityType)}
+                        ${iconHtml}
                         <span class="corpus-inline-text">${name}</span>
                         ${matchIndicator}
                     </a>
@@ -163,9 +168,14 @@
                 ? '<div class="preview-action-hint">Click to expand</div>'
                 : '';
 
+            // Get icon for preview - use result.icon if available
+            const previewIconHtml = result.icon
+                ? `<span class="corpus-icon" aria-hidden="true">${this.renderIcon(result.icon)}</span>`
+                : this.renderEntityIcon(entityType);
+
             return `
                 <div class="preview-header">
-                    ${this.renderEntityIcon(entityType)}
+                    ${previewIconHtml}
                     <span class="preview-name">${this.escapeHtml(result.name || result.title || '')}</span>
                 </div>
                 ${metadataHtml}
@@ -226,6 +236,11 @@
                 ? `<a href="${url}" class="corpus-quote-link" aria-label="View full source">View Source</a>`
                 : '';
 
+            // Get icon for quote - use result.icon if available
+            const quoteIconHtml = result.icon
+                ? `<span class="corpus-icon" aria-hidden="true">${this.renderIcon(result.icon)}</span>`
+                : this.renderEntityIcon(entityType);
+
             return `
                 <blockquote class="corpus-quote corpus-quote-${quoteOptions.style}"
                             id="${id}"
@@ -237,7 +252,7 @@
                     </div>
                     <footer class="corpus-quote-footer">
                         <cite class="corpus-quote-cite">
-                            ${this.renderEntityIcon(entityType)}
+                            ${quoteIconHtml}
                             ${citationHtml}
                         </cite>
                         ${viewLink}
@@ -257,10 +272,15 @@
             const entityType = result.entityType || result.type || 'entity';
             const url = this.getEntityUrl(result);
 
+            // Get icon - use result.icon if available
+            const refIconHtml = result.icon
+                ? `<span class="corpus-icon" aria-hidden="true">${this.renderIcon(result.icon)}</span>`
+                : this.renderEntityIcon(entityType);
+
             return `
                 <span class="corpus-compact-ref" id="${id}">
                     <a href="${url}" class="corpus-compact-link">
-                        ${this.renderEntityIcon(entityType)}${name}
+                        ${refIconHtml}${name}
                     </a>
                 </span>
             `;
@@ -385,6 +405,22 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        /**
+         * Render icon - detects SVG and renders appropriately
+         * @param {string} icon - Icon string (SVG or text/emoji)
+         * @returns {string} HTML for icon
+         */
+        renderIcon(icon) {
+            if (!icon) return '';
+            const trimmed = String(icon).trim();
+            // Check if it's an SVG
+            if (trimmed.toLowerCase().startsWith('<svg')) {
+                return trimmed; // Render SVG directly without escaping
+            }
+            // Otherwise escape and render as text/emoji
+            return this.escapeHtml(trimmed);
         }
 
         /**

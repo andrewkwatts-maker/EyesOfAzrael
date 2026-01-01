@@ -322,15 +322,21 @@ class CategoryLandingView {
      * Generate HTML
      */
     generateHTML(entityType, config, stats, featured, mythologies) {
+        // Render hero icon with SVG support
+        const heroIconHtml = this.renderIcon(config.icon, 'entity-icon-svg category-icon-svg');
+
+        // Truncate description for hero section (slightly longer limit)
+        const truncatedDescription = this.truncateText(config.description, 300);
+
         return `
             <div class="category-landing-view" data-entity-type="${entityType}">
                 <!-- Hero Section -->
                 <div class="category-hero" style="--category-gradient: ${config.gradient}">
                     <div class="category-hero-background"></div>
                     <div class="category-hero-content">
-                        <div class="category-icon-large">${config.icon}</div>
+                        <div class="category-icon-large">${heroIconHtml}</div>
                         <h1 class="category-title">${config.title}</h1>
-                        <p class="category-description">${config.description}</p>
+                        <p class="category-description">${truncatedDescription}</p>
 
                         <div class="category-features">
                             ${config.features.map(feature => `
@@ -410,13 +416,22 @@ class CategoryLandingView {
         const name = entity.name || 'Unknown';
         const mythology = entity.mythology || '';
         const subtitle = entity.title || entity.role || entity.domain || '';
+        const description = entity.description || entity.summary || '';
+
+        // Render icon with SVG support
+        const iconHtml = this.renderIcon(icon, 'entity-icon-svg');
+
+        // Truncate subtitle and description
+        const truncatedSubtitle = this.truncateText(subtitle, 100);
+        const truncatedDescription = this.truncateText(description, 200);
 
         return `
             <a href="#/mythology/${mythology}/${entityType}/${entity.id}" class="featured-card">
-                <div class="featured-card-icon">${icon}</div>
+                <div class="featured-card-icon">${iconHtml}</div>
                 <div class="featured-card-content">
                     <h3 class="featured-card-name">${this.escapeHtml(name)}</h3>
-                    ${subtitle ? `<p class="featured-card-subtitle">${this.escapeHtml(subtitle)}</p>` : ''}
+                    ${truncatedSubtitle ? `<p class="featured-card-subtitle">${this.escapeHtml(truncatedSubtitle)}</p>` : ''}
+                    ${truncatedDescription ? `<p class="featured-card-description">${this.escapeHtml(truncatedDescription)}</p>` : ''}
                     <div class="featured-card-mythology">${this.capitalize(mythology)}</div>
                 </div>
                 <div class="featured-card-arrow">→</div>
@@ -447,9 +462,12 @@ class CategoryLandingView {
      */
     renderMythologyChip(mythology, entityType) {
         const icon = this.getMythologyIcon(mythology.name);
+        // Render icon with SVG support
+        const iconHtml = this.renderIcon(icon, 'entity-icon-svg mythology-icon-svg');
+
         return `
             <a href="#/mythology/${mythology.name}/${this.pluralize(entityType)}" class="mythology-chip">
-                <span class="mythology-chip-icon">${icon}</span>
+                <span class="mythology-chip-icon">${iconHtml}</span>
                 <span class="mythology-chip-name">${this.capitalize(mythology.name)}</span>
                 <span class="mythology-chip-count">${mythology.count}</span>
             </a>
@@ -531,6 +549,49 @@ class CategoryLandingView {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    /**
+     * Check if string is an inline SVG
+     */
+    isInlineSvg(str) {
+        if (!str || typeof str !== 'string') return false;
+        return str.trim().startsWith('<svg');
+    }
+
+    /**
+     * Render icon - handles both emoji/text and inline SVG
+     */
+    renderIcon(icon, cssClass = '') {
+        if (this.isInlineSvg(icon)) {
+            // Wrap inline SVG with appropriate class
+            const svgClass = cssClass || 'entity-icon-svg';
+            return `<span class="${svgClass}">${icon}</span>`;
+        }
+        // Return emoji/text as-is (already escaped where needed)
+        return icon || '';
+    }
+
+    /**
+     * Truncate text to specified length with ellipsis
+     * @param {string} text - Text to truncate
+     * @param {number} maxLength - Maximum length (default 250)
+     * @returns {string} Truncated text with "..." if needed
+     */
+    truncateText(text, maxLength = 250) {
+        if (!text || typeof text !== 'string') return '';
+        if (text.length <= maxLength) return text;
+
+        // Find the last space before maxLength to avoid cutting words
+        const truncated = text.substring(0, maxLength);
+        const lastSpace = truncated.lastIndexOf(' ');
+
+        if (lastSpace > maxLength * 0.8) {
+            // If last space is reasonably close to the end, cut there
+            return truncated.substring(0, lastSpace) + '...';
+        }
+        // Otherwise just cut at maxLength
+        return truncated + '...';
     }
 }
 

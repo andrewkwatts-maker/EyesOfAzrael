@@ -174,7 +174,7 @@
                       data-entity-id="${this.escapeAttr(this.entityId)}"
                       data-entity-type="${this.escapeAttr(this.entityType)}">
                     <a href="${url}" class="entity-mini-link" title="${this.escapeAttr(this.data.shortDescription || this.data.name)}">
-                        ${this.data.icon ? `<span class="entity-icon">${this.escapeHtml(this.data.icon)}</span>` : ''}
+                        ${this.data.icon ? `<span class="entity-icon">${this.renderIconWithFallback(this.data.icon, this.data.name)}</span>` : ''}
                         <span class="entity-name">${this.escapeHtml(this.data.name)}</span>
                     </a>
                 </span>
@@ -327,7 +327,7 @@
 
                     <!-- Hero Section -->
                     <div class="entity-hero" style="background: linear-gradient(135deg, ${this.escapeAttr(primary)}, ${this.escapeAttr(secondary)});">
-                        ${this.data.icon ? `<div class="entity-icon-hero">${this.escapeHtml(this.data.icon)}</div>` : ''}
+                        ${this.data.icon ? `<div class="entity-icon-hero">${this.renderIconWithFallback(this.data.icon, this.data.name)}</div>` : ''}
                         <h1 class="entity-title">${this.escapeHtml(this.data.name)}</h1>
                         ${this.data.linguistic?.originalName ? `
                             <div class="entity-original-name">${this.escapeHtml(this.data.linguistic.originalName)}</div>
@@ -852,7 +852,7 @@
             const safeUrl = this.sanitizeUrl(entity.url) || '#';
             return `
                 <a href="${this.escapeAttr(safeUrl)}" class="entity-mini-card">
-                    ${entity.icon ? `<span class="entity-icon">${this.escapeHtml(entity.icon)}</span>` : ''}
+                    ${entity.icon ? `<span class="entity-icon">${this.renderIconWithFallback(entity.icon, entity.name)}</span>` : ''}
                     <span class="entity-name">${this.escapeHtml(entity.name)}</span>
                 </a>
             `;

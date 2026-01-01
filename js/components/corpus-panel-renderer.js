@@ -221,7 +221,9 @@ class CorpusPanelRenderer {
         const sourceIcon = document.createElement('span');
         sourceIcon.className = 'source-icon';
         sourceIcon.setAttribute('aria-hidden', 'true');
-        sourceIcon.textContent = this.getSourceIcon(result.source || result.corpus);
+        // Use result.icon if available, otherwise fall back to getSourceIcon
+        const iconContent = result.icon || this.getSourceIcon(result.source || result.corpus);
+        sourceIcon.innerHTML = this.renderIcon(iconContent);
         sourceInfo.appendChild(sourceIcon);
 
         const sourceText = document.createElement('span');
@@ -315,8 +317,9 @@ class CorpusPanelRenderer {
         // Group header
         const groupHeader = document.createElement('div');
         groupHeader.className = 'corpus-source-group-header';
+        const groupIcon = this.renderIcon(this.getSourceIcon(source));
         groupHeader.innerHTML = `
-            <span class="group-icon" aria-hidden="true">${this.getSourceIcon(source)}</span>
+            <span class="group-icon" aria-hidden="true">${groupIcon}</span>
             <span class="group-title">${this.escapeHtml(source)}</span>
             <span class="group-count">${results.length} result${results.length !== 1 ? 's' : ''}</span>
         `;
@@ -768,6 +771,19 @@ class CorpusPanelRenderer {
     }
 
     /**
+     * Truncate text with ellipsis
+     * @param {string} text - Text to truncate
+     * @param {number} maxLength - Maximum length
+     * @returns {string} Truncated text
+     */
+    truncateText(text, maxLength) {
+        if (!text || text.length <= maxLength) return text || '';
+        const truncated = text.substring(0, maxLength);
+        const lastSpace = truncated.lastIndexOf(' ');
+        return (lastSpace > maxLength * 0.7 ? truncated.substring(0, lastSpace) : truncated) + '...';
+    }
+
+    /**
      * Get preview text with context around search term
      * @param {string} text - Full text
      * @param {string} searchTerm - Search term
@@ -776,12 +792,12 @@ class CorpusPanelRenderer {
     getPreviewText(text, searchTerm) {
         if (!text) return '';
         if (!searchTerm || !this.options.showContext) {
-            return text.substring(0, 150) + (text.length > 150 ? '...' : '');
+            return this.truncateText(text, 150);
         }
 
         const termIndex = text.toLowerCase().indexOf(searchTerm.toLowerCase());
         if (termIndex === -1) {
-            return text.substring(0, 150) + (text.length > 150 ? '...' : '');
+            return this.truncateText(text, 150);
         }
 
         const words = text.split(/\s+/);
@@ -822,6 +838,22 @@ class CorpusPanelRenderer {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    /**
+     * Render icon - detects SVG and renders appropriately
+     * @param {string} icon - Icon string (SVG or text/emoji)
+     * @returns {string} HTML for icon
+     */
+    renderIcon(icon) {
+        if (!icon) return '';
+        const trimmed = String(icon).trim();
+        // Check if it's an SVG
+        if (trimmed.toLowerCase().startsWith('<svg')) {
+            return trimmed; // Render SVG directly without escaping
+        }
+        // Otherwise escape and render as text/emoji
+        return this.escapeHtml(trimmed);
     }
 
     /**
