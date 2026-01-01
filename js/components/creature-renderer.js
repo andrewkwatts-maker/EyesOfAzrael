@@ -97,6 +97,11 @@ class CreatureRenderer {
         // Header section
         html += this.renderHeader(creature);
 
+        // Image gallery
+        if (creature.images && creature.images.length > 0) {
+            html += this.renderImageGallery(creature.images);
+        }
+
         // Physical description
         if (creature.physicalDescription) {
             html += this.renderPhysicalDescription(creature.physicalDescription);
@@ -146,6 +151,58 @@ class CreatureRenderer {
     }
 
     /**
+     * Render image gallery
+     */
+    renderImageGallery(images) {
+        if (!images || images.length === 0) return '';
+
+        const galleries = this.groupImagesByCategory(images);
+        let html = `<section class="creature-gallery detail-section" ${this.getAnimationStyle()}>
+            <h2 class="section-title">
+                <span class="section-icon" aria-hidden="true">🖼️</span>
+                Gallery & Artwork
+            </h2>`;
+
+        for (const [category, categoryImages] of Object.entries(galleries)) {
+            if (categoryImages.length > 0) {
+                html += `<div class="gallery-category">`;
+                if (category !== 'default') {
+                    html += `<h3 class="gallery-category-title">${this.capitalize(category)}</h3>`;
+                }
+                html += `<div class="image-grid">`;
+                categoryImages.forEach((img, idx) => {
+                    html += `
+                        <figure class="gallery-item" style="--animation-delay: ${0.05 * idx}s">
+                            <img src="${this.escapeHtml(img.url)}"
+                                 alt="${img.alt ? this.escapeHtml(img.alt) : 'Creature artwork'}"
+                                 class="gallery-image"
+                                 loading="lazy">
+                            ${img.caption ? `<figcaption class="gallery-caption">${this.escapeHtml(img.caption)}</figcaption>` : ''}
+                        </figure>
+                    `;
+                });
+                html += `</div></div>`;
+            }
+        }
+
+        html += '</section>';
+        return html;
+    }
+
+    /**
+     * Group images by category
+     */
+    groupImagesByCategory(images) {
+        const groups = { default: [] };
+        images.forEach(img => {
+            const cat = img.category || 'default';
+            if (!groups[cat]) groups[cat] = [];
+            groups[cat].push(img);
+        });
+        return groups;
+    }
+
+    /**
      * Get animation style
      */
     getAnimationStyle() {
@@ -158,23 +215,56 @@ class CreatureRenderer {
      * Render header with title and description
      */
     renderHeader(creature) {
+        const mythologyIcon = this.getMythologyIcon(creature.mythology);
         return `
             <header class="creature-header detail-header" ${this.getAnimationStyle()}>
                 <div class="creature-icon-large" aria-hidden="true">
-                    <span class="icon-float">${creature.icon || '&#128009;'}</span>
+                    <span class="icon-float creature-icon-glow">${creature.icon || '&#128009;'}</span>
                 </div>
                 <div class="creature-header-content">
                     <h1 class="creature-title">${this.escapeHtml(creature.name)}</h1>
                     ${creature.subtitle ? `<p class="creature-subtitle">${this.escapeHtml(creature.subtitle)}</p>` : ''}
                     ${creature.shortDescription ? `<p class="creature-description">${this.escapeHtml(creature.shortDescription)}</p>` : ''}
                     <div class="creature-badges">
-                        ${creature.creatureType ? `<span class="creature-type-badge">${this.escapeHtml(creature.creatureType)}</span>` : ''}
-                        ${creature.classification ? `<span class="creature-classification-badge">${this.escapeHtml(creature.classification)}</span>` : ''}
-                        ${creature.mythology ? `<span class="mythology-badge">${this.capitalize(creature.mythology)}</span>` : ''}
+                        ${creature.creatureType ? `<span class="creature-type-badge">
+                            <span class="badge-icon" aria-hidden="true">🔱</span>
+                            ${this.escapeHtml(creature.creatureType)}
+                        </span>` : ''}
+                        ${creature.classification ? `<span class="creature-classification-badge">
+                            <span class="badge-icon" aria-hidden="true">📊</span>
+                            ${this.escapeHtml(creature.classification)}
+                        </span>` : ''}
+                        ${creature.mythology ? `<span class="mythology-badge mythology-origin" data-mythology="${this.escapeHtml(creature.mythology)}">
+                            <span class="badge-icon" aria-hidden="true">${mythologyIcon}</span>
+                            ${this.capitalize(creature.mythology)}
+                        </span>` : ''}
                     </div>
                 </div>
             </header>
         `;
+    }
+
+    /**
+     * Get mythology-specific icon
+     */
+    getMythologyIcon(mythology) {
+        const icons = {
+            'greek': '⚡',
+            'norse': '⚔️',
+            'egyptian': '🏛️',
+            'hindu': '🕉️',
+            'celtic': '🔥',
+            'chinese': '☯️',
+            'japanese': '⛩️',
+            'sumerian': '📜',
+            'babylonian': '👑',
+            'christian': '✝️',
+            'islamic': '☪️',
+            'persian': '🌙',
+            'mayan': '🌞',
+            'aztec': '🦅'
+        };
+        return icons[mythology?.toLowerCase()] || '🌍';
     }
 
     /**
@@ -245,7 +335,7 @@ class CreatureRenderer {
     renderAbilities(abilities) {
         let html = `<section class="creature-abilities detail-section" ${this.getAnimationStyle()}>
             <h2 class="section-title">
-                <span class="section-icon" aria-hidden="true">&#9889;</span>
+                <span class="section-icon" aria-hidden="true">⚡</span>
                 Abilities & Powers
             </h2>
             <div class="abilities-grid" role="list">`;
@@ -253,14 +343,17 @@ class CreatureRenderer {
         abilities.forEach((ability, index) => {
             if (typeof ability === 'string') {
                 html += `
-                    <div class="ability-card" role="listitem" style="--animation-delay: ${0.05 * index}s">
-                        <div class="ability-icon" aria-hidden="true">&#10024;</div>
+                    <div class="ability-card ability-card-simple" role="listitem" style="--animation-delay: ${0.05 * index}s">
+                        <div class="ability-icon ability-icon-glow" aria-hidden="true">✨</div>
                         <p class="ability-text">${this.escapeHtml(ability)}</p>
                     </div>`;
             } else if (ability.name) {
+                const displayIcon = ability.icon || this.getDefaultAbilityIcon(ability.name);
                 html += `
                     <div class="ability-card ability-card-detailed" role="listitem" style="--animation-delay: ${0.05 * index}s">
-                        <div class="ability-icon" aria-hidden="true">${ability.icon || '&#9889;'}</div>
+                        <div class="ability-icon-container">
+                            <div class="ability-icon ability-icon-glow" aria-hidden="true">${displayIcon}</div>
+                        </div>
                         <div class="ability-content">
                             <h3 class="ability-name">${this.escapeHtml(ability.name)}</h3>
                             ${ability.description ? `<p class="ability-description">${this.escapeHtml(ability.description)}</p>` : ''}
@@ -272,6 +365,29 @@ class CreatureRenderer {
 
         html += '</div></section>';
         return html;
+    }
+
+    /**
+     * Get default ability icon based on name
+     */
+    getDefaultAbilityIcon(name) {
+        const lower = name.toLowerCase();
+        if (lower.includes('breath')) return '💨';
+        if (lower.includes('fire') || lower.includes('flame')) return '🔥';
+        if (lower.includes('claw') || lower.includes('claw')) return '🪓';
+        if (lower.includes('poison') || lower.includes('venom')) return '☠️';
+        if (lower.includes('flight') || lower.includes('fly')) return '🪶';
+        if (lower.includes('strength')) return '💪';
+        if (lower.includes('speed') || lower.includes('swift')) return '💨';
+        if (lower.includes('regenerat') || lower.includes('heal')) return '❤️‍🩹';
+        if (lower.includes('magic') || lower.includes('spell')) return '✨';
+        if (lower.includes('invisible') || lower.includes('cloak')) return '👻';
+        if (lower.includes('water')) return '💧';
+        if (lower.includes('ice') || lower.includes('cold')) return '❄️';
+        if (lower.includes('earth') || lower.includes('stone')) return '⛰️';
+        if (lower.includes('darkness') || lower.includes('shadow')) return '🌑';
+        if (lower.includes('light') || lower.includes('glow')) return '💫';
+        return '⚡';
     }
 
     /**
@@ -346,33 +462,34 @@ class CreatureRenderer {
     renderEncounters(encounters) {
         let html = `<section class="creature-encounters detail-section" ${this.getAnimationStyle()}>
             <h2 class="section-title">
-                <span class="section-icon" aria-hidden="true">&#9876;</span>
+                <span class="section-icon" aria-hidden="true">⚔️</span>
                 Famous Encounters
             </h2>
-            <div class="encounters-timeline">`;
+            <div class="encounters-timeline encounters-timeline-enhanced">`;
 
         encounters.forEach((encounter, index) => {
             if (typeof encounter === 'string') {
                 html += `
-                    <div class="encounter-card" style="--animation-delay: ${0.1 * index}s">
-                        <div class="encounter-marker">${index + 1}</div>
+                    <div class="encounter-card encounter-card-simple" style="--animation-delay: ${0.1 * index}s">
+                        <div class="encounter-marker encounter-marker-glow">${index + 1}</div>
                         <div class="encounter-content">
                             <p class="encounter-text">${this.escapeHtml(encounter)}</p>
                         </div>
                     </div>`;
             } else if (encounter.hero) {
+                const outcomeClass = this.getOutcomeClass(encounter.outcome);
                 html += `
                     <div class="encounter-card encounter-card-detailed" style="--animation-delay: ${0.1 * index}s">
-                        <div class="encounter-marker">${index + 1}</div>
+                        <div class="encounter-marker encounter-marker-glow">${index + 1}</div>
                         <div class="encounter-content">
                             <h3 class="encounter-hero">
-                                <span class="hero-icon" aria-hidden="true">&#9876;</span>
+                                <span class="hero-icon" aria-hidden="true">⚔️</span>
                                 ${this.escapeHtml(encounter.hero)}
-                                ${encounter.title ? `<span class="encounter-title-divider">-</span> ${this.escapeHtml(encounter.title)}` : ''}
+                                ${encounter.title ? `<span class="encounter-title-divider">›</span> ${this.escapeHtml(encounter.title)}` : ''}
                             </h3>
                             ${encounter.description ? `<p class="encounter-description">${this.escapeHtml(encounter.description)}</p>` : ''}
                             ${encounter.outcome ? `
-                                <div class="encounter-outcome">
+                                <div class="encounter-outcome encounter-outcome-${outcomeClass}">
                                     <span class="outcome-label">Outcome:</span>
                                     <span class="outcome-value">${this.escapeHtml(encounter.outcome)}</span>
                                 </div>
@@ -385,6 +502,18 @@ class CreatureRenderer {
 
         html += '</div></section>';
         return html;
+    }
+
+    /**
+     * Get outcome class for styling
+     */
+    getOutcomeClass(outcome) {
+        if (!outcome) return 'neutral';
+        const lower = outcome.toLowerCase();
+        if (lower.includes('defeat') || lower.includes('slain') || lower.includes('death')) return 'defeat';
+        if (lower.includes('victory') || lower.includes('triumph') || lower.includes('won')) return 'victory';
+        if (lower.includes('draw') || lower.includes('tie') || lower.includes('stalemate')) return 'draw';
+        return 'neutral';
     }
 
     /**

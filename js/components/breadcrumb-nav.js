@@ -133,18 +133,18 @@ class BreadcrumbNav {
         if (isLast) {
             return `
                 <li class="breadcrumb-item breadcrumb-current">
-                    ${crumb.icon ? `<span class="breadcrumb-icon">${crumb.icon}</span>` : ''}
-                    <span class="breadcrumb-label">${this.escapeHtml(crumb.label)}</span>
+                    ${crumb.icon ? `<span class="breadcrumb-icon" aria-hidden="true">${crumb.icon}</span>` : ''}
+                    <span class="breadcrumb-label" aria-current="page">${this.escapeHtml(crumb.label)}</span>
                 </li>
             `;
         } else {
             return `
                 <li class="breadcrumb-item">
-                    <a href="${crumb.hash}" class="breadcrumb-link">
-                        ${crumb.icon ? `<span class="breadcrumb-icon">${crumb.icon}</span>` : ''}
+                    <a href="${crumb.hash}" class="breadcrumb-link" title="${this.escapeHtml(crumb.label)}">
+                        ${crumb.icon ? `<span class="breadcrumb-icon" aria-hidden="true">${crumb.icon}</span>` : ''}
                         <span class="breadcrumb-label">${this.escapeHtml(crumb.label)}</span>
                     </a>
-                    <span class="breadcrumb-separator">${this.separator}</span>
+                    <span class="breadcrumb-separator" aria-hidden="true">${this.separator}</span>
                 </li>
             `;
         }

@@ -167,7 +167,10 @@
    Applied via data-entity-type attribute
    ============================================================================ */
 
-.entity-card[data-entity-type="deity"] { --type-color: #FFD700; }
+.entity-card[data-entity-type="deity"] {
+    --type-color: #FFD700;
+    --type-color-rgb: 255, 215, 0;
+}
 .entity-card[data-entity-type="hero"] { --type-color: #FF6B6B; }
 .entity-card[data-entity-type="creature"] { --type-color: #4CAF50; }
 .entity-card[data-entity-type="item"] { --type-color: #2196F3; }
@@ -178,6 +181,47 @@
 .entity-card[data-entity-type="herb"] { --type-color: #8BC34A; }
 .entity-card[data-entity-type="symbol"] { --type-color: #FFC107; }
 .entity-card[data-entity-type="text"] { --type-color: #607D8B; }
+
+/* ============================================================================
+   DEITY CARD ENHANCEMENTS
+   ============================================================================ */
+
+.entity-card[data-entity-type="deity"],
+.entity-card[data-entity-type="deity"] .entity-icon,
+.entity-card[data-entity-type="deity"] .card-icon {
+    --entity-accent: #FFD700;
+    --entity-accent-rgb: 255, 215, 0;
+}
+
+.entity-card[data-entity-type="deity"]::before {
+    background: linear-gradient(90deg, #FFD700 0%, rgba(255, 215, 0, 0.4) 100%);
+}
+
+.entity-card[data-entity-type="deity"] .card-title a {
+    background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: filter var(--card-transition);
+}
+
+.entity-card[data-entity-type="deity"]:hover .card-title a {
+    filter: brightness(1.2);
+}
+
+.entity-card[data-entity-type="deity"] .card-icon {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 193, 7, 0.1));
+    border-radius: 50%;
+    padding: 0.25rem;
+}
+
+.entity-card[data-entity-type="deity"] .entity-type-badge {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 193, 7, 0.15));
+    border-color: rgba(255, 215, 0, 0.6);
+    color: #FFD700;
+    font-weight: 700;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
 
 /* ============================================================================
    UNIFIED GRID CONTAINER
@@ -355,6 +399,14 @@
         0 0 24px rgba(var(--entity-accent-rgb), 0.25);
 }
 
+.entity-card[data-entity-type="deity"]:hover {
+    border-color: #FFD700;
+    box-shadow:
+        0 16px 48px rgba(0, 0, 0, 0.4),
+        0 0 32px rgba(255, 215, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
 .entity-card:hover::before,
 .universal-grid-card:hover::before,
 .grid-card:hover::before {
@@ -467,9 +519,22 @@ img.entity-icon,
     max-height: var(--icon-size-lg);
     object-fit: contain;
     border-radius: 8px;
-    /* Prevent layout shift during load */
     aspect-ratio: 1 / 1;
     background: rgba(var(--entity-accent-rgb), 0.05);
+    transition: filter var(--card-transition), transform var(--card-transition);
+}
+
+.entity-card[data-entity-type="deity"] .entity-icon img,
+.entity-card[data-entity-type="deity"] .card-icon img,
+.entity-card[data-entity-type="deity"] .entity-icon-img {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 193, 7, 0.05));
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.15);
+}
+
+.entity-card[data-entity-type="deity"]:hover .entity-icon img,
+.entity-card[data-entity-type="deity"]:hover .card-icon img,
+.entity-card[data-entity-type="deity"]:hover .entity-icon-img {
+    filter: brightness(1.15) drop-shadow(0 0 8px rgba(255, 215, 0, 0.3));
 }
 
 /* Emoji/Text Icons */
@@ -500,6 +565,18 @@ img.entity-icon,
     color: rgba(var(--entity-accent-rgb), 0.7);
     font-weight: 600;
     text-transform: uppercase;
+    transition: all var(--card-transition);
+}
+
+.entity-card[data-entity-type="deity"] .icon-fallback {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.08));
+    border-color: rgba(255, 215, 0, 0.4);
+    color: #FFD700;
+}
+
+.entity-card[data-entity-type="deity"]:hover .icon-fallback {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.15));
+    border-color: rgba(255, 215, 0, 0.6);
 }
 
 /* Icon size modifiers */
@@ -656,6 +733,12 @@ img.entity-icon,
     transform: scale(1.05);
 }
 
+.entity-card[data-entity-type="deity"] .mythology-badge {
+    background: rgba(var(--entity-accent-rgb), 0.2);
+    border-color: rgba(255, 215, 0, 0.5);
+    color: #FFD700;
+}
+
 /* ============================================================================
    CARD TAGS
    ============================================================================ */
@@ -737,6 +820,20 @@ img.entity-icon,
 .universal-grid-card .btn-view-details:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(var(--entity-accent-rgb), 0.4);
+}
+
+.entity-card[data-entity-type="deity"] .btn-view-details {
+    background: linear-gradient(135deg, #FFD700, #FFC700);
+    color: #1a1f3a;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.entity-card[data-entity-type="deity"] .btn-view-details:hover {
+    background: linear-gradient(135deg, #FFED4E, #FFD700);
+    box-shadow:
+        0 4px 16px rgba(255, 215, 0, 0.5),
+        0 0 12px rgba(255, 215, 0, 0.3);
 }
 
 /* ============================================================================
@@ -1002,11 +1099,22 @@ img.entity-icon,
         font-weight: 700;
     }
 
+    .entity-card[data-entity-type="deity"] {
+        border-width: 3px;
+        border-color: #FFD700;
+    }
+
     .entity-card:focus,
     .universal-grid-card:focus,
     .grid-card:focus {
         outline-width: 4px;
         outline-offset: 4px;
+    }
+
+    .entity-card[data-entity-type="deity"]:focus-visible {
+        outline-width: 4px;
+        outline-offset: 4px;
+        outline-color: #FFD700;
     }
 }
 

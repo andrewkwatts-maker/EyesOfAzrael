@@ -1,16 +1,24 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.22.0
+ * Version: 2.23.0
  *
- * Changes in 2.21.0:
+ * Changes in 2.23.0:
+ * - FIX CRITICAL: White background issue when shader fails to load
+ * - Changed body.shader-active from transparent to semi-transparent dark (rgba(10, 14, 39, 0.85))
+ * - Added body.shader-active.shader-rendering for fully transparent when shader is confirmed rendering
+ * - Made ShaderThemeManager.activate() async and return Promise<boolean>
+ * - Added shader-rendering class management in shader-themes.js activate/deactivate
+ * - Updated shader-theme-picker.js to properly handle async activation and fallbacks
+ *
+ * Changes in 2.22.0:
  * - Enhance entity detail pages with more descriptive content panels
  * - Add extendedContent, symbolism, usage, significance sections
  * - Add item and place entity types to getPrimaryFields
  * - Add magic and concept entity types
  * - Add CSS for extended content sections
  *
- * Changes in 2.20.1:
+ * Changes in 2.21.0:
  * - Fix ES module export in content-filter.js (was breaking script execution)
  * - Remove `export { ContentFilter }` which caused syntax error in non-module context
  *
@@ -147,7 +155,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.22.0';
+const CACHE_VERSION = 'v2.23.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';
