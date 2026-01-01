@@ -191,16 +191,18 @@
             const primaryMythology = this.data.primaryMythology || (mythologies.length > 0 ? mythologies[0] : 'unknown');
             const mythologyLower = primaryMythology.toLowerCase();
             const iconContent = this.renderIconWithFallback(this.data.icon, this.data.name);
+            const sourceClass = this.getSourceClass();
+            const sourceLabel = this.getSourceLabel();
 
             return `
-                <div class="entity-card entity-card-compact glass-card"
+                <div class="entity-card entity-card-compact glass-card ${sourceClass}"
                      data-entity-id="${this.escapeAttr(this.entityId)}"
                      data-entity-type="${this.escapeAttr(this.entityType)}"
                      data-mythology="${this.escapeAttr(mythologyLower)}"
                      style="--entity-primary-color: ${this.escapeAttr(primaryColor)};"
                      tabindex="0"
                      role="article"
-                     aria-label="${this.escapeAttr(this.data.name)}">
+                     aria-label="${this.escapeAttr(this.data.name)} - ${sourceLabel}">
 
                     <div class="entity-card-header">
                         <div class="entity-icon-large card-icon" aria-hidden="true">${iconContent}</div>
@@ -208,9 +210,11 @@
                             <h2 class="card-title">
                                 <a href="${this.getEntityUrl()}">${this.escapeHtml(this.data.name)}</a>
                             </h2>
+                            ${this.renderAuthorBadge()}
                             <div class="card-meta" role="doc-subtitle">
                                 ${this.renderTypeBadge()}
                                 ${mythologies.length > 0 ? this.renderMythologyBadges(mythologies) : ''}
+                                ${this.renderPerspectivesIndicator()}
                             </div>
                         </div>
                     </div>
@@ -243,6 +247,15 @@
 
             if (!icon) {
                 return fallbackHtml;
+            }
+
+            // Check if it's inline SVG (starts with <svg)
+            if (typeof icon === 'string') {
+                const iconTrimmed = icon.trim();
+                if (iconTrimmed.toLowerCase().startsWith('<svg')) {
+                    // Render inline SVG directly (SVG is already safe markup)
+                    return `<span class="entity-icon-svg" aria-hidden="true">${icon}</span>`;
+                }
             }
 
             if (typeof icon === 'string' && (icon.includes('.svg') || icon.includes('.png') || icon.includes('.jpg') || icon.includes('.webp') || icon.startsWith('http'))) {

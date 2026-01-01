@@ -1,7 +1,23 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.23.0
+ * Version: 2.25.0
+ *
+ * Changes in 2.25.0:
+ * - FIX: Icon rendering bug where inline SVG icons were treated as URLs
+ * - Fix browse-category-view.js icon detection logic
+ * - Fix entity-card.js renderIconWithFallback to handle inline SVG
+ * - Add renderIcon method with proper SVG, URL, and emoji detection
+ *
+ * Changes in 2.24.0:
+ * - COMMUNITY PLATFORM: Add user perspectives system for personal entity overlays
+ * - Add perspective-service.js for CRUD on user perspectives
+ * - Add relationship-service.js for entity connection suggestions
+ * - Add reputation-service.js for user karma and badges (read-only, Cloud Functions)
+ * - Add community-section.css for entity page community tabs
+ * - Add content-distinction.css for official vs user-submitted styling
+ * - Add user-profile.css for user profile pages
+ * - Update firestore.rules with new collection security rules
  *
  * Changes in 2.23.0:
  * - FIX CRITICAL: White background issue when shader fails to load
@@ -155,7 +171,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.23.0';
+const CACHE_VERSION = 'v2.25.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';
