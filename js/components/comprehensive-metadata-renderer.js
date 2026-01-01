@@ -111,7 +111,7 @@
                 <header class="entity-hero-header">
                     <div class="entity-hero-background"></div>
                     <div class="entity-hero-content">
-                        ${entity.icon ? `<div class="entity-icon-display">${entity.icon}</div>` : ''}
+                        ${entity.icon ? `<div class="entity-icon-display ${this.isSvg(entity.icon) ? 'entity-icon-svg' : ''}">${this.renderIcon(entity.icon)}</div>` : ''}
 
                         <h1 class="entity-name-title">${this.escapeHtml(entity.name || entity.title || 'Unknown Entity')}</h1>
 
@@ -345,7 +345,7 @@
             return `
                 <div class="location-card">
                     ${location.name ? `<h3 class="location-name">${this.escapeHtml(location.name)}</h3>` : ''}
-                    ${location.description ? `<p class="location-description">${this.escapeHtml(location.description)}</p>` : ''}
+                    ${location.description ? `<p class="location-description">${this.escapeHtml(this.truncateText(location.description, 200))}</p>` : ''}
                     ${location.type ? `<span class="location-type-badge">${this.escapeHtml(location.type)}</span>` : ''}
                     ${location.significance ? `<p class="location-significance"><em>${this.escapeHtml(location.significance)}</em></p>` : ''}
                     ${hasCoords ? `
@@ -446,7 +446,7 @@
                     ${attestation.source ? `<p><strong>Source:</strong> ${this.escapeHtml(attestation.source)}</p>` : ''}
                     ${attestation.type ? `<span class="attestation-type badge">${this.escapeHtml(attestation.type)}</span>` : ''}
                     ${attestation.confidence ? `<span class="attestation-confidence badge confidence-${attestation.confidence}">${this.escapeHtml(attestation.confidence)}</span>` : ''}
-                    ${attestation.description ? `<p class="attestation-description">${this.escapeHtml(attestation.description)}</p>` : ''}
+                    ${attestation.description ? `<p class="attestation-description">${this.escapeHtml(this.truncateText(attestation.description, 200))}</p>` : ''}
                 </div>
             `;
         }
@@ -565,7 +565,7 @@
                                 <div class="festival-card">
                                     <strong>${this.escapeHtml(festival.name)}</strong>
                                     ${festival.date ? `<span class="festival-date">${this.escapeHtml(festival.date)}</span>` : ''}
-                                    ${festival.description ? `<p>${this.escapeHtml(festival.description)}</p>` : ''}
+                                    ${festival.description ? `<p>${this.escapeHtml(this.truncateText(festival.description, 150))}</p>` : ''}
                                 </div>
                             `;
                         }).join('')}
@@ -609,7 +609,7 @@
                             return `
                                 <div class="ritual-card">
                                     <strong>${this.escapeHtml(ritual.name)}</strong>
-                                    ${ritual.description ? `<p>${this.escapeHtml(ritual.description)}</p>` : ''}
+                                    ${ritual.description ? `<p>${this.escapeHtml(this.truncateText(ritual.description, 150))}</p>` : ''}
                                     ${ritual.url ? `<a href="${this.escapeHtml(ritual.url)}" class="ritual-link">Learn more</a>` : ''}
                                 </div>
                             `;
@@ -827,9 +827,9 @@
                                class="related-entity-card"
                                data-entity-id="${this.escapeHtml(entity.id)}"
                                data-entity-type="${type.replace(/s$/, '')}">
-                                ${entity.icon ? `<span class="related-icon">${entity.icon}</span>` : ''}
+                                ${entity.icon ? `<span class="related-icon ${this.isSvg(entity.icon) ? 'entity-icon-svg' : ''}">${this.renderIcon(entity.icon)}</span>` : ''}
                                 <span class="related-name">${this.escapeHtml(entity.name)}</span>
-                                ${entity.relationship ? `<span class="related-relationship">${this.escapeHtml(entity.relationship)}</span>` : ''}
+                                ${entity.relationship ? `<span class="related-relationship">${this.escapeHtml(this.truncateText(entity.relationship, 50))}</span>` : ''}
                             </a>
                         `).join('')}
                     </div>
@@ -854,7 +854,7 @@
                         ${queries.map(query => `
                             <div class="corpus-query-card" data-query-id="${this.escapeHtml(query.id)}">
                                 <h4 class="query-label">${this.escapeHtml(query.label)}</h4>
-                                ${query.description ? `<p class="query-description">${this.escapeHtml(query.description)}</p>` : ''}
+                                ${query.description ? `<p class="query-description">${this.escapeHtml(this.truncateText(query.description, 150))}</p>` : ''}
                                 ${query.category ? `<span class="query-category badge">${this.escapeHtml(query.category)}</span>` : ''}
                                 <button class="btn-run-query" onclick="window.runCorpusQuery && window.runCorpusQuery('${this.escapeHtml(query.id)}')">
                                     Run Search
@@ -927,8 +927,8 @@
                         <span class="source-title">${this.escapeHtml(source.text || source.title)}</span>
                         ${source.author ? `<span class="source-author">by ${this.escapeHtml(source.author)}</span>` : ''}
                     </div>
-                    ${source.passage ? `<div class="source-passage">${this.escapeHtml(source.passage)}</div>` : ''}
-                    ${source.description ? `<p class="source-description">${this.escapeHtml(source.description)}</p>` : ''}
+                    ${source.passage ? `<div class="source-passage">${this.escapeHtml(this.truncateText(source.passage, 300))}</div>` : ''}
+                    ${source.description ? `<p class="source-description">${this.escapeHtml(this.truncateText(source.description, 200))}</p>` : ''}
                     ${source.mythology ? `<span class="source-mythology badge">${this.capitalize(source.mythology)}</span>` : ''}
                     ${source.corpusUrl || source.url ? `
                         <a href="${this.escapeHtml(source.corpusUrl || source.url)}" class="source-link" target="_blank" rel="noopener">
@@ -1027,6 +1027,43 @@
         }
 
         // ==================== UTILITY METHODS ====================
+
+        /**
+         * Check if a string is an SVG
+         * @param {string} str - String to check
+         * @returns {boolean} True if the string starts with '<svg'
+         */
+        isSvg(str) {
+            if (!str || typeof str !== 'string') return false;
+            return str.trim().toLowerCase().startsWith('<svg');
+        }
+
+        /**
+         * Render an icon, handling both SVG and emoji/text icons
+         * @param {string} icon - The icon string (SVG or emoji/text)
+         * @returns {string} Rendered icon HTML
+         */
+        renderIcon(icon) {
+            if (!icon) return '';
+            // If it's an SVG, render directly without escaping
+            if (this.isSvg(icon)) {
+                return icon;
+            }
+            // Otherwise escape as text (emoji or other characters)
+            return this.escapeHtml(icon);
+        }
+
+        /**
+         * Truncate text to a maximum length
+         * @param {string} text - Text to truncate
+         * @param {number} maxLength - Maximum length (default 100)
+         * @returns {string} Truncated text with ellipsis if needed
+         */
+        truncateText(text, maxLength = 100) {
+            if (!text || typeof text !== 'string') return '';
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength).trim() + '...';
+        }
 
         /**
          * Format coordinates for display

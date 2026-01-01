@@ -132,7 +132,7 @@ class CompareView {
                         <div class="selected-entities-preview">
                             ${this.selectedEntities.map((entity, idx) => `
                                 <div class="selected-entity-chip" data-index="${idx}">
-                                    ${entity.icon ? `<span class="chip-icon">${entity.icon}</span>` : ''}
+                                    ${entity.icon ? this.renderIcon(entity.icon, 'chip-icon') : ''}
                                     <span class="chip-name">${entity.name || 'Unknown'}</span>
                                     <button class="chip-remove" data-index="${idx}" title="Remove">×</button>
                                 </div>
@@ -244,7 +244,7 @@ class CompareView {
                 ${this.selectedEntities.map((entity, idx) => `
                     <button class="mobile-tab ${idx === this.currentMobileEntity ? 'active' : ''}"
                             data-index="${idx}">
-                        ${entity.icon || '📜'} ${entity.name}
+                        ${entity.icon ? this.renderIcon(entity.icon, 'tab-icon') : '<span class="tab-icon">📜</span>'} ${entity.name}
                     </button>
                 `).join('')}
             </div>
@@ -437,7 +437,7 @@ class CompareView {
                             ${this.selectedEntities.map((entity, idx) => `
                                 <th class="entity-column entity-${idx}" data-mythology="${entity.mythology}">
                                     <div class="entity-header">
-                                        ${entity.icon ? `<div class="entity-icon">${entity.icon}</div>` : ''}
+                                        ${entity.icon ? `<div class="entity-icon">${this.renderIcon(entity.icon)}</div>` : ''}
                                         <div class="entity-info">
                                             <div class="entity-name">${entity.name || 'Unknown'}</div>
                                             <div class="entity-meta">
@@ -469,7 +469,7 @@ class CompareView {
         return `
             <div class="mobile-entity-card ${isActive ? 'active' : ''}" data-index="${index}">
                 <div class="mobile-card-header" data-mythology="${entity.mythology}">
-                    ${entity.icon ? `<div class="card-icon">${entity.icon}</div>` : ''}
+                    ${entity.icon ? `<div class="card-icon">${this.renderIcon(entity.icon)}</div>` : ''}
                     <div class="card-info">
                         <h3 class="card-name">${entity.name || 'Unknown'}</h3>
                         <div class="card-meta">
@@ -495,10 +495,15 @@ class CompareView {
                             }
                         }
 
+                        // Truncate long values (especially descriptions)
+                        const truncatedValue = typeof displayValue === 'string' && displayValue.length > 150
+                            ? this.truncate(displayValue, 150)
+                            : displayValue;
+
                         return `
                             <div class="mobile-attribute-row">
                                 <div class="mobile-attr-label">${attr.label}</div>
-                                <div class="mobile-attr-value">${displayValue}</div>
+                                <div class="mobile-attr-value">${truncatedValue}</div>
                             </div>
                         `;
                     }).join('')}
@@ -958,13 +963,18 @@ class CompareView {
      * Render search result card
      */
     renderSearchResult(entity) {
+        // Truncate description for display
+        const truncatedDescription = entity.description
+            ? this.truncate(entity.description, 120)
+            : '';
+
         return `
             <div class="search-result-card"
                  data-collection="${entity.collection}"
                  data-id="${entity.id}"
                  data-entity='${JSON.stringify(entity).replace(/'/g, "&apos;")}'>
                 <div class="result-header">
-                    ${entity.icon ? `<span class="result-icon">${entity.icon}</span>` : ''}
+                    ${entity.icon ? this.renderIcon(entity.icon, 'result-icon') : ''}
                     <div class="result-info">
                         <div class="result-name">${entity.name || 'Unknown'}</div>
                         <div class="result-meta">
@@ -973,8 +983,8 @@ class CompareView {
                         </div>
                     </div>
                 </div>
-                ${entity.title ? `<div class="result-title">${entity.title}</div>` : ''}
-                ${entity.description ? `<div class="result-description">${this.truncate(entity.description, 100)}</div>` : ''}
+                ${entity.title ? `<div class="result-title">${this.truncate(entity.title, 80)}</div>` : ''}
+                ${truncatedDescription ? `<div class="result-description">${truncatedDescription}</div>` : ''}
             </div>
         `;
     }
@@ -1161,6 +1171,29 @@ class CompareView {
         if (!str) return '';
         if (str.length <= length) return str;
         return str.substring(0, length) + '...';
+    }
+
+    /**
+     * Render entity icon with inline SVG support
+     * @param {string} icon - Icon value (emoji, URL, or inline SVG)
+     * @param {string} cssClass - Optional CSS class to add
+     * @returns {string} HTML for the icon
+     */
+    renderIcon(icon, cssClass = '') {
+        if (!icon) return '';
+
+        // Check if icon is inline SVG
+        if (typeof icon === 'string' && icon.trim().startsWith('<svg')) {
+            return `<span class="entity-icon-svg ${cssClass}">${icon}</span>`;
+        }
+
+        // Check if icon is a URL
+        if (typeof icon === 'string' && (icon.startsWith('http') || icon.startsWith('/'))) {
+            return `<img src="${icon}" alt="icon" class="entity-icon-img ${cssClass}" />`;
+        }
+
+        // Default: treat as emoji or text
+        return `<span class="${cssClass}">${icon}</span>`;
     }
 }
 

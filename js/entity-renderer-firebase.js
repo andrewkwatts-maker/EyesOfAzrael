@@ -516,7 +516,7 @@ class FirebaseEntityRenderer {
                         </h4>
                         ${cardStyle !== 'minimal' ? `
                             <p style="font-size: 0.85rem; margin: 0; color: var(--mythos-text-secondary, var(--color-text-secondary)); text-align: center; flex: 1;">
-                                ${this.escapeHtml(entity.relationship || entity.description || entity.type || '')}
+                                ${this.escapeHtml(this.truncateText(entity.relationship || entity.description || entity.type || '', 100))}
                             </p>
                         ` : ''}
                         ${cardStyle === 'detailed' && entity.mythology ? `
@@ -1374,8 +1374,8 @@ class FirebaseEntityRenderer {
 
     /**
      * Render icon with fallback support
-     * Handles emoji, SVG URLs, and image URLs with proper fallback
-     * @param {string} icon - Icon value (emoji or URL)
+     * Handles emoji, inline SVG, SVG URLs, and image URLs with proper fallback
+     * @param {string} icon - Icon value (emoji, inline SVG, or URL)
      * @param {string} type - Entity type for fallback icon
      * @param {string} name - Entity name for fallback generation
      * @returns {string} HTML for icon display
@@ -1389,6 +1389,11 @@ class FirebaseEntityRenderer {
                 return `<span class="icon-fallback">${this.escapeHtml(name.charAt(0).toUpperCase())}</span>`;
             }
             return fallbackIcon;
+        }
+
+        // Check if icon is inline SVG - render directly without escaping
+        if (typeof icon === 'string' && icon.trim().startsWith('<svg')) {
+            return `<span class="entity-icon-svg">${icon}</span>`;
         }
 
         // Check if icon is an image URL
@@ -1716,6 +1721,17 @@ class FirebaseEntityRenderer {
     capitalize(str) {
         if (!str) return '';
         return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    /**
+     * Truncate text to specified length with ellipsis
+     * @param {string} text - Text to truncate
+     * @param {number} maxLength - Maximum length (default 150)
+     * @returns {string} Truncated text
+     */
+    truncateText(text, maxLength = 150) {
+        if (!text || text.length <= maxLength) return text || '';
+        return text.substring(0, maxLength).trim() + '...';
     }
 }
 

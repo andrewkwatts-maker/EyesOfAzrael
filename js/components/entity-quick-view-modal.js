@@ -136,7 +136,7 @@ class EntityQuickViewModal {
 
         return `
             <div class="quick-view-header">
-                <div class="entity-icon-large">${this.escapeHtml(entity.icon || '📖')}</div>
+                <div class="entity-icon-large">${this.renderIcon(entity.icon)}</div>
                 <div class="entity-title-section">
                     <h2 class="entity-title">${this.escapeHtml(entity.name || entity.title || 'Untitled')}</h2>
                     <div class="entity-meta">
@@ -168,10 +168,10 @@ class EntityQuickViewModal {
             `;
         }
 
-        // Description (truncated)
+        // Description (truncated for modal view)
         const description = entity.fullDescription || entity.shortDescription || entity.description || '';
         if (description) {
-            const truncated = description.length > 500 ? description.substring(0, 500) + '...' : description;
+            const truncated = this.truncateText(description, 300);
             html += `
                 <div class="info-section">
                     <h3>Description</h3>
@@ -290,7 +290,7 @@ class EntityQuickViewModal {
                      role="button"
                      tabindex="0"
                      aria-label="View ${this.escapeHtml(e.name || e.title)}">
-                    <div class="related-icon">${this.escapeHtml(e.icon || '📖')}</div>
+                    <div class="related-icon">${this.renderIcon(e.icon)}</div>
                     <div class="related-name">${this.escapeHtml(e.name || e.title || 'Untitled')}</div>
                 </div>
             `).join('');
@@ -580,6 +580,51 @@ class EntityQuickViewModal {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    /**
+     * Render icon - handles inline SVG, URLs, and emoji/text icons
+     * @param {string} icon - The icon value
+     * @returns {string} HTML string for the icon
+     */
+    renderIcon(icon) {
+        if (!icon) {
+            return '<span class="entity-icon-fallback">📖</span>';
+        }
+
+        // Check if it's inline SVG (starts with <svg)
+        if (typeof icon === 'string') {
+            const iconTrimmed = icon.trim();
+            if (iconTrimmed.toLowerCase().startsWith('<svg')) {
+                // Render inline SVG directly (SVG is already safe markup)
+                return `<span class="entity-icon-svg">${icon}</span>`;
+            }
+
+            // Check if it's a URL (http, https, or relative path, or image extension)
+            const isUrl = iconTrimmed.startsWith('http://') ||
+                          iconTrimmed.startsWith('https://') ||
+                          iconTrimmed.startsWith('/') ||
+                          iconTrimmed.startsWith('./') ||
+                          /\.(svg|png|jpg|jpeg|webp|gif)$/i.test(iconTrimmed);
+
+            if (isUrl) {
+                return `<img src="${this.escapeHtml(iconTrimmed)}" alt="" class="entity-icon-img" loading="lazy" />`;
+            }
+        }
+
+        // Otherwise, treat as emoji or text (escaped)
+        return `<span class="entity-icon-text">${this.escapeHtml(icon)}</span>`;
+    }
+
+    /**
+     * Truncate text to a maximum length
+     * @param {string} text - Text to truncate
+     * @param {number} maxLength - Maximum length
+     * @returns {string} Truncated text
+     */
+    truncateText(text, maxLength = 300) {
+        if (!text || text.length <= maxLength) return text;
+        return text.substring(0, maxLength).trim() + '...';
     }
 }
 

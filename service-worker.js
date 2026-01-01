@@ -1,7 +1,19 @@
 /**
  * Eyes of Azrael - Service Worker
  * Provides offline support, caching strategy, and PWA functionality
- * Version: 2.25.0
+ * Version: 2.26.0
+ *
+ * Changes in 2.26.0:
+ * - POLISH: 12-agent comprehensive rendering fix sprint
+ * - Fix SVG icons showing as raw text across all renderers
+ * - Add renderIcon() method to 11 components for proper SVG detection
+ * - Add truncateDescription() to prevent text overflow in card grids
+ * - Character limits: compact=150, comfortable=250, detailed=400
+ * - Files fixed: entity-detail-viewer, browse-category-view, universal-display-renderer,
+ *   page-asset-renderer, entity-renderer-firebase, universal-entity-renderer,
+ *   landing-page-view, category-landing-view, compare-view, corpus-grid-renderer,
+ *   corpus-panel-renderer, corpus-inline-renderer, entity-quick-view-modal,
+ *   entity-card, comprehensive-metadata-renderer
  *
  * Changes in 2.25.0:
  * - FIX: Icon rendering bug where inline SVG icons were treated as URLs
@@ -171,7 +183,7 @@
  * - Added network timeout for faster offline fallback
  */
 
-const CACHE_VERSION = 'v2.25.0';
+const CACHE_VERSION = 'v2.26.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 const OFFLINE_PAGE = '/offline.html';
 const ERROR_PAGE = '/500.html';

@@ -207,7 +207,7 @@
                      role="listitem"
                      tabindex="0">
                     <a href="${url}" class="corpus-card-link">
-                        <span class="corpus-card-icon">${icon}</span>
+                        <span class="corpus-card-icon">${this.renderIcon(icon)}</span>
                         <span class="corpus-card-name">${name}</span>
                     </a>
                 </div>
@@ -241,7 +241,7 @@
                      role="listitem"
                      tabindex="0">
                     <div class="corpus-card-header">
-                        <span class="corpus-card-icon">${icon}</span>
+                        <span class="corpus-card-icon">${this.renderIcon(icon)}</span>
                         ${scoreBadge}
                     </div>
                     <div class="corpus-card-body">
@@ -311,7 +311,7 @@
                      tabindex="0">
                     <div class="corpus-card-header">
                         <div class="corpus-card-header-main">
-                            <span class="corpus-card-icon corpus-card-icon-large">${icon}</span>
+                            <span class="corpus-card-icon corpus-card-icon-large">${this.renderIcon(icon)}</span>
                             <div class="corpus-card-header-text">
                                 <h3 class="corpus-card-title">
                                     <a href="${url}">${name}</a>
@@ -746,6 +746,22 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        /**
+         * Render icon - detects SVG and renders appropriately
+         * @param {string} icon - Icon string (SVG or text/emoji)
+         * @returns {string} HTML for icon
+         */
+        renderIcon(icon) {
+            if (!icon) return '';
+            const trimmed = icon.trim();
+            // Check if it's an SVG
+            if (trimmed.toLowerCase().startsWith('<svg')) {
+                return trimmed; // Render SVG directly without escaping
+            }
+            // Otherwise escape and render as text/emoji
+            return this.escapeHtml(trimmed);
         }
 
         /**
