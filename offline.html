@@ -6,6 +6,8 @@
     <title>You're Offline - Eyes of Azrael</title>
     <meta name="description" content="You're currently offline. Some content may be available from cache.">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0a1a2e">
+    <link rel="icon" type="image/png" href="/icons/icon-32x32.png">
     <style>
         * {
             margin: 0;
@@ -13,237 +15,478 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --color-bg-primary: #0a0e27;
+            --color-bg-secondary: #121631;
+            --color-accent: #8b7fff;
+            --color-accent-secondary: #6a5acd;
+            --color-success: #4ade80;
+            --color-warning: #fbbf24;
+            --color-error: #f87171;
+            --color-text: #e0e0e0;
+            --color-text-muted: #a0a0a0;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #0a1a2e 0%, #1a2a3e 50%, #16213e 100%);
-            color: #e0e0e0;
+            background: linear-gradient(145deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 50%, #16213e 100%);
+            color: var(--color-text);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background elements */
+        .bg-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: float-orb 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .bg-orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--color-accent);
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .bg-orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--color-accent-secondary);
+            bottom: -50px;
+            left: -50px;
+            animation-delay: -10s;
+        }
+
+        @keyframes float-orb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.05); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(20px, 10px) scale(1.02); }
         }
 
         .container {
-            max-width: 800px;
+            max-width: 700px;
             width: 100%;
-            text-align: center;
+            position: relative;
+            z-index: 1;
         }
 
-        .offline-content {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(100, 149, 237, 0.3);
+        .offline-card {
+            background: rgba(18, 22, 49, 0.85);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(139, 127, 255, 0.2);
             border-radius: 24px;
-            padding: 3rem 2rem;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.8s ease-out;
+            padding: 2.5rem;
+            box-shadow:
+                0 25px 80px rgba(0, 0, 0, 0.4),
+                0 0 80px rgba(139, 127, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            animation: card-appear 0.6s ease-out;
         }
 
-        @keyframes fadeIn {
+        @keyframes card-appear {
             from {
                 opacity: 0;
-                transform: scale(0.95);
+                transform: translateY(30px) scale(0.95);
             }
             to {
                 opacity: 1;
-                transform: scale(1);
+                transform: translateY(0) scale(1);
             }
         }
 
-        .offline-icon {
-            font-size: 8rem;
-            margin-bottom: 1rem;
-            animation: float 3s ease-in-out infinite;
-            filter: drop-shadow(0 0 20px rgba(100, 149, 237, 0.6));
+        /* Icon Section */
+        .offline-icon-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+        .offline-icon {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(139, 127, 255, 0.15), rgba(106, 90, 205, 0.15));
+            border-radius: 24px;
+            position: relative;
+        }
+
+        .offline-icon svg {
+            width: 48px;
+            height: 48px;
+            stroke: var(--color-accent);
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        .offline-icon-pulse {
+            position: absolute;
+            inset: -8px;
+            border-radius: 28px;
+            border: 2px solid rgba(139, 127, 255, 0.3);
+            animation: pulse-ring 2.5s ease-out infinite;
+        }
+
+        .offline-icon-pulse:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+
+        /* Content */
+        .offline-content {
+            text-align: center;
+            margin-bottom: 2rem;
         }
 
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+            font-size: 2rem;
+            font-weight: 700;
             color: #ffffff;
-            font-weight: 600;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
         }
 
-        p {
-            font-size: 1.1rem;
-            color: #c0c0c0;
+        .offline-subtitle {
+            font-size: 1.05rem;
+            color: var(--color-text-muted);
             line-height: 1.6;
-            margin-bottom: 2rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+            max-width: 480px;
+            margin: 0 auto;
         }
 
+        /* Connection Status */
         .connection-status {
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
-            padding: 1rem 2rem;
-            background: rgba(255, 69, 0, 0.2);
-            border: 2px solid rgba(255, 69, 0, 0.4);
+            padding: 0.875rem 1.5rem;
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
             border-radius: 12px;
-            margin-bottom: 2rem;
+            margin: 1.5rem auto;
+            transition: all 0.3s ease;
         }
 
         .connection-status.online {
-            background: rgba(74, 222, 128, 0.2);
-            border-color: rgba(74, 222, 128, 0.4);
+            background: rgba(74, 222, 128, 0.1);
+            border-color: rgba(74, 222, 128, 0.3);
+        }
+
+        .status-indicator {
+            position: relative;
+            width: 12px;
+            height: 12px;
         }
 
         .status-dot {
-            width: 16px;
-            height: 16px;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            background: #ff4500;
-            animation: pulse 2s ease-in-out infinite;
+            background: var(--color-error);
+            transition: background 0.3s ease;
         }
 
-        .status-dot.online {
-            background: #4ade80;
+        .connection-status.online .status-dot {
+            background: var(--color-success);
         }
 
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.2);
-                opacity: 0.7;
-            }
+        .status-ping {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: var(--color-error);
+            animation: status-ping 1.5s ease-out infinite;
         }
 
-        .cached-content {
-            background: rgba(100, 149, 237, 0.1);
-            border: 2px solid rgba(100, 149, 237, 0.3);
-            border-radius: 12px;
-            padding: 2rem;
-            margin: 2rem 0;
+        .connection-status.online .status-ping {
+            background: var(--color-success);
         }
 
-        .cached-content h3 {
-            color: #6495ED;
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
+        @keyframes status-ping {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(2.5); opacity: 0; }
         }
 
-        .cached-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1.5rem;
+        .status-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--color-error);
+            transition: color 0.3s ease;
         }
 
-        .cached-item {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(100, 149, 237, 0.3);
-            border-radius: 8px;
-            padding: 1rem;
-            text-decoration: none;
-            color: #ffffff;
-            transition: all 0.3s ease;
+        .connection-status.online .status-text {
+            color: var(--color-success);
+        }
+
+        /* Cached Content Section */
+        .cached-section {
+            background: rgba(139, 127, 255, 0.08);
+            border: 1px solid rgba(139, 127, 255, 0.15);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .cached-header {
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .cached-header svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--color-accent);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .cached-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-accent);
+        }
+
+        .cached-description {
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .cached-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .cached-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(139, 127, 255, 0.15);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--color-text);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
         }
 
         .cached-item:hover {
-            background: rgba(100, 149, 237, 0.2);
-            border-color: #6495ED;
+            background: rgba(139, 127, 255, 0.15);
+            border-color: var(--color-accent);
             transform: translateY(-2px);
         }
 
-        .cached-icon {
-            font-size: 1.5rem;
+        .cached-item-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(139, 127, 255, 0.15);
+            border-radius: 8px;
+            font-size: 1rem;
         }
 
-        .actions {
+        .cached-loading {
+            text-align: center;
+            padding: 1rem;
+            color: var(--color-text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Cache Stats */
+        .cache-stats {
             display: flex;
             gap: 1rem;
             justify-content: center;
+            margin-top: 1rem;
             flex-wrap: wrap;
-            margin-top: 2rem;
+        }
+
+        .cache-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.875rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+        }
+
+        .cache-stat-value {
+            font-weight: 600;
+            color: var(--color-accent);
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
         }
 
         .btn {
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: none;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #6495ED, #4169E1);
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary));
             color: white;
-            box-shadow: 0 5px 20px rgba(100, 149, 237, 0.3);
+            box-shadow: 0 4px 20px rgba(139, 127, 255, 0.35);
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 40px rgba(100, 149, 237, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(139, 127, 255, 0.45);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--color-text);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
         }
 
+        /* Tips Section */
         .tips {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: rgba(0, 0, 0, 0.4);
+            margin-top: 1.5rem;
+            padding: 1.25rem;
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .tips h3 {
-            color: #9370DB;
+        .tips-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             margin-bottom: 0.75rem;
-            font-size: 1.2rem;
+        }
+
+        .tips-header svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--color-warning);
+            fill: none;
+        }
+
+        .tips-header h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--color-warning);
         }
 
         .tips ul {
-            text-align: left;
             list-style: none;
-            padding: 0;
+            display: grid;
+            gap: 0.5rem;
         }
 
         .tips li {
-            padding: 0.5rem 0;
-            color: #c0c0c0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            line-height: 1.5;
         }
 
-        .tips li:before {
-            content: "💡 ";
-            margin-right: 0.5rem;
+        .tips li::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--color-accent);
+            border-radius: 50%;
+            margin-top: 0.5rem;
+            flex-shrink: 0;
         }
 
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
+        /* Footer note */
+        .footer-note {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.825rem;
+            color: var(--color-text-muted);
+            opacity: 0.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
             }
 
-            p {
-                font-size: 1rem;
+            .offline-card {
+                padding: 1.75rem;
+                border-radius: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .offline-subtitle {
+                font-size: 0.95rem;
+            }
+
+            .offline-icon-wrapper {
+                width: 80px;
+                height: 80px;
+            }
+
+            .offline-icon svg {
+                width: 36px;
+                height: 36px;
             }
 
             .actions {
@@ -252,158 +495,314 @@
 
             .btn {
                 width: 100%;
-                justify-content: center;
             }
 
-            .cached-list {
+            .cached-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Background orbs -->
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+
     <div class="container">
-        <div class="offline-content">
-            <div class="offline-icon">📡</div>
-            <h1>You're Offline</h1>
-            <p>
-                It seems you've lost your connection to the digital realm. Don't worry—some
-                content may still be available from your device's cache. Check your internet
-                connection and try again.
-            </p>
-
-            <div class="connection-status" id="connectionStatus">
-                <div class="status-dot" id="statusDot"></div>
-                <span id="statusText">Disconnected</span>
-            </div>
-
-            <div class="cached-content">
-                <h3>📦 Available Offline Content</h3>
-                <p style="font-size: 0.95rem; color: #b0b0b0;">
-                    These pages have been cached and may be accessible offline:
-                </p>
-                <div class="cached-list" id="cachedList">
-                    <a href="/" class="cached-item">
-                        <span class="cached-icon">🏠</span>
-                        <span>Home Page</span>
-                    </a>
-                    <a href="/mythos/index.html" class="cached-item">
-                        <span class="cached-icon">📚</span>
-                        <span>Mythologies</span>
-                    </a>
-                    <a href="/about.html" class="cached-item">
-                        <span class="cached-icon">ℹ️</span>
-                        <span>About</span>
-                    </a>
+        <div class="offline-card">
+            <!-- Icon -->
+            <div class="offline-icon-wrapper">
+                <div class="offline-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M1 1l22 22"/>
+                        <path d="M16.72 11.06A10.94 10.94 0 0119 12.55"/>
+                        <path d="M5 12.55a10.94 10.94 0 015.17-2.39"/>
+                        <path d="M10.71 5.05A16 16 0 0122.58 9"/>
+                        <path d="M1.42 9a15.91 15.91 0 014.7-2.88"/>
+                        <path d="M8.53 16.11a6 6 0 016.95 0"/>
+                        <circle cx="12" cy="20" r="1"/>
+                    </svg>
+                    <div class="offline-icon-pulse"></div>
+                    <div class="offline-icon-pulse"></div>
                 </div>
             </div>
 
+            <!-- Content -->
+            <div class="offline-content">
+                <h1>You're Offline</h1>
+                <p class="offline-subtitle">
+                    The mystical connection to our realm has been interrupted.
+                    Some ancient knowledge may still be accessible from your device's cache.
+                </p>
+            </div>
+
+            <!-- Connection Status -->
+            <div style="text-align: center;">
+                <div class="connection-status" id="connectionStatus">
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <div class="status-ping"></div>
+                    </div>
+                    <span class="status-text" id="statusText">Disconnected</span>
+                </div>
+            </div>
+
+            <!-- Cached Content -->
+            <div class="cached-section">
+                <div class="cached-header">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2v11z"/>
+                    </svg>
+                    <h3>Available Offline</h3>
+                </div>
+                <p class="cached-description">These pages have been preserved and may be accessible:</p>
+                <div class="cached-grid" id="cachedGrid">
+                    <div class="cached-loading">Loading cached content...</div>
+                </div>
+                <div class="cache-stats" id="cacheStats"></div>
+            </div>
+
+            <!-- Actions -->
             <div class="actions">
-                <button class="btn btn-primary" onclick="location.reload()">
-                    🔄 Try Reconnecting
+                <button class="btn btn-primary" onclick="tryReconnect()" id="reconnectBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M23 4v6h-6M1 20v-6h6"/>
+                        <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
+                    </svg>
+                    <span>Try Reconnecting</span>
                 </button>
                 <a href="/" class="btn btn-secondary">
-                    🏠 Go to Home
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    <span>Go Home</span>
                 </a>
             </div>
 
+            <!-- Tips -->
             <div class="tips">
-                <h3>Connection Tips</h3>
+                <div class="tips-header">
+                    <svg viewBox="0 0 24 24" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 16v-4M12 8h.01"/>
+                    </svg>
+                    <h3>Connection Tips</h3>
+                </div>
                 <ul>
                     <li>Check your WiFi or mobile data connection</li>
-                    <li>Try turning airplane mode off and on</li>
-                    <li>Move to an area with better signal</li>
-                    <li>Restart your router or modem</li>
-                    <li>Browse cached content while waiting to reconnect</li>
+                    <li>Try toggling airplane mode on and off</li>
+                    <li>Move to an area with better signal strength</li>
+                    <li>Restart your router or device</li>
                 </ul>
             </div>
 
-            <p style="margin-top: 2rem; font-size: 0.9rem; color: #888;">
-                The page will automatically refresh when your connection is restored.
+            <!-- Footer -->
+            <p class="footer-note">
+                This page will automatically refresh when your connection is restored.
             </p>
         </div>
     </div>
 
     <script>
-        // Check connection status
+        // Icon mapping for cached items
+        const iconMap = {
+            'home': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>',
+            'mythologies': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10"/></svg>',
+            'deities': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+            'creatures': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
+            'default': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
+        };
+
+        // Determine icon for a path
+        function getIconForPath(path) {
+            if (path === '/' || path.includes('index')) return iconMap.home;
+            if (path.includes('mytholog')) return iconMap.mythologies;
+            if (path.includes('deit') || path.includes('god')) return iconMap.deities;
+            if (path.includes('creature')) return iconMap.creatures;
+            return iconMap.default;
+        }
+
+        // Format path for display
+        function formatPathName(path) {
+            if (path === '/') return 'Home';
+            if (path === '/index.html') return 'Home';
+
+            const name = path
+                .split('/')
+                .pop()
+                .replace('.html', '')
+                .replace(/-/g, ' ')
+                .replace(/_/g, ' ');
+
+            return name.charAt(0).toUpperCase() + name.slice(1);
+        }
+
+        // Load cached content list
+        async function loadCachedContent() {
+            const grid = document.getElementById('cachedGrid');
+            const statsContainer = document.getElementById('cacheStats');
+
+            if (!('caches' in window)) {
+                grid.innerHTML = '<div class="cached-loading">Cache API not available</div>';
+                return;
+            }
+
+            try {
+                const cacheNames = await caches.keys();
+                const allItems = [];
+                let totalSize = 0;
+
+                for (const cacheName of cacheNames) {
+                    const cache = await caches.open(cacheName);
+                    const requests = await cache.keys();
+
+                    for (const request of requests) {
+                        const url = new URL(request.url);
+                        // Only show HTML pages and root
+                        if (url.pathname === '/' || url.pathname.endsWith('.html')) {
+                            if (!allItems.find(item => item.path === url.pathname)) {
+                                allItems.push({
+                                    path: url.pathname,
+                                    name: formatPathName(url.pathname),
+                                    icon: getIconForPath(url.pathname)
+                                });
+                            }
+                        }
+                    }
+                    totalSize += requests.length;
+                }
+
+                // Sort and limit
+                const displayItems = allItems
+                    .sort((a, b) => {
+                        if (a.path === '/') return -1;
+                        if (b.path === '/') return 1;
+                        return a.name.localeCompare(b.name);
+                    })
+                    .slice(0, 8);
+
+                if (displayItems.length === 0) {
+                    grid.innerHTML = `
+                        <a href="/" class="cached-item">
+                            <div class="cached-item-icon">${iconMap.home}</div>
+                            <span>Home</span>
+                        </a>
+                    `;
+                } else {
+                    grid.innerHTML = displayItems.map(item => `
+                        <a href="${item.path}" class="cached-item">
+                            <div class="cached-item-icon">${item.icon}</div>
+                            <span>${item.name}</span>
+                        </a>
+                    `).join('');
+                }
+
+                // Show cache stats
+                statsContainer.innerHTML = `
+                    <div class="cache-stat">
+                        <span>Cached items:</span>
+                        <span class="cache-stat-value">${totalSize}</span>
+                    </div>
+                    <div class="cache-stat">
+                        <span>Caches:</span>
+                        <span class="cache-stat-value">${cacheNames.length}</span>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Failed to load cached content:', error);
+                grid.innerHTML = `
+                    <a href="/" class="cached-item">
+                        <div class="cached-item-icon">${iconMap.home}</div>
+                        <span>Home</span>
+                    </a>
+                `;
+            }
+        }
+
+        // Update connection status
         function updateConnectionStatus() {
-            const isOnline = navigator.onLine;
-            const statusElement = document.getElementById('connectionStatus');
-            const statusDot = document.getElementById('statusDot');
+            const statusEl = document.getElementById('connectionStatus');
             const statusText = document.getElementById('statusText');
+            const isOnline = navigator.onLine;
 
             if (isOnline) {
-                statusElement.classList.add('online');
-                statusDot.classList.add('online');
+                statusEl.classList.add('online');
                 statusText.textContent = 'Connection Restored!';
 
-                // Auto-reload after 2 seconds
+                // Auto-reload after brief delay
                 setTimeout(() => {
-                    location.reload();
-                }, 2000);
+                    window.location.reload();
+                }, 1500);
             } else {
-                statusElement.classList.remove('online');
-                statusDot.classList.remove('online');
+                statusEl.classList.remove('online');
                 statusText.textContent = 'Disconnected';
             }
         }
 
-        // Listen for online/offline events
+        // Try to reconnect
+        async function tryReconnect() {
+            const btn = document.getElementById('reconnectBtn');
+            const originalContent = btn.innerHTML;
+
+            btn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="animation: spin 1s linear infinite;">
+                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                    <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
+                </svg>
+                <span>Checking...</span>
+            `;
+            btn.disabled = true;
+
+            try {
+                // Try to fetch a small resource to verify connectivity
+                const response = await fetch('/manifest.json', {
+                    method: 'HEAD',
+                    cache: 'no-cache'
+                });
+
+                if (response.ok) {
+                    updateConnectionStatus();
+                    return;
+                }
+            } catch (error) {
+                // Still offline
+            }
+
+            // Reset button after delay
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }, 1000);
+        }
+
+        // Add spin animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Event listeners
         window.addEventListener('online', updateConnectionStatus);
         window.addEventListener('offline', updateConnectionStatus);
 
-        // Check on load
-        updateConnectionStatus();
+        // Initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCachedContent();
+            updateConnectionStatus();
+        });
 
-        // Try to load cached pages list from service worker
-        if ('caches' in window) {
-            caches.keys().then(cacheNames => {
-                if (cacheNames.length > 0) {
-                    caches.open(cacheNames[0]).then(cache => {
-                        cache.keys().then(requests => {
-                            const cachedList = document.getElementById('cachedList');
-                            const htmlPages = requests
-                                .filter(req => req.url.endsWith('.html') || req.url.endsWith('/'))
-                                .slice(0, 10); // Limit to 10 pages
-
-                            if (htmlPages.length > 3) {
-                                // Clear default items
-                                cachedList.innerHTML = '';
-
-                                htmlPages.forEach(req => {
-                                    const url = new URL(req.url);
-                                    const path = url.pathname;
-                                    const name = path === '/' ? 'Home' : path.split('/').pop().replace('.html', '');
-
-                                    const item = document.createElement('a');
-                                    item.href = path;
-                                    item.className = 'cached-item';
-                                    item.innerHTML = `
-                                        <span class="cached-icon">📄</span>
-                                        <span>${name}</span>
-                                    `;
-                                    cachedList.appendChild(item);
-                                });
-                            }
-                        });
-                    });
-                }
-            });
-        }
-
-        // Periodic connection check
+        // Periodic check every 10 seconds
         setInterval(() => {
             if (navigator.onLine) {
-                // Try to fetch a small resource to verify real connectivity
-                fetch('/manifest.json', { method: 'HEAD', cache: 'no-cache' })
-                    .then(() => {
-                        updateConnectionStatus();
-                    })
-                    .catch(() => {
-                        // Still offline despite navigator.onLine
-                    });
+                tryReconnect();
             }
-        }, 5000);
+        }, 10000);
     </script>
 </body>
 </html>

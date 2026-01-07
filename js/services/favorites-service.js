@@ -1,5 +1,6 @@
 /**
  * FavoritesService - User's Personal Pantheon Management
+ * Polished version with delightful animations, categories, and sharing
  *
  * SOLID Principles Applied:
  * - Single Responsibility: Only handles favorites CRUD operations
@@ -17,6 +18,18 @@
  * @property {string} name - Entity display name
  * @property {string} [icon] - Entity icon/emoji
  * @property {number} addedAt - Timestamp when favorited
+ * @property {string} [folderId] - Optional folder/category ID
+ * @property {string[]} [tags] - Optional user-defined tags
+ */
+
+/**
+ * @typedef {Object} FavoriteFolder
+ * @property {string} id - Folder unique ID
+ * @property {string} name - Folder display name
+ * @property {string} [icon] - Folder icon/emoji
+ * @property {string} [color] - Folder accent color
+ * @property {number} createdAt - Creation timestamp
+ * @property {number} [order] - Sort order
  */
 
 /**
@@ -62,18 +75,231 @@ class FavoritesService {
         // Track pending localStorage changes for conflict resolution
         this._pendingLocalChanges = new Map(); // userId -> { adds: [], removes: [] }
 
+        // Folders/categories cache
+        this._foldersCache = new Map(); // userId -> Map<folderId, FavoriteFolder>
+
+        // Optimistic UI state tracking
+        this._optimisticUpdates = new Map(); // compositeKey -> { action, timestamp }
+
         // Listen for online/offline status for sync
         if (typeof window !== 'undefined') {
             window.addEventListener('online', () => this._onOnline());
         }
 
-        // Collection name for favorites
+        // Collection names
         this.COLLECTION = 'user_favorites';
+        this.FOLDERS_COLLECTION = 'favorite_folders';
 
         // Restore pending changes from localStorage on initialization
         this._restorePendingChangesFromStorage();
 
-        console.log('[FavoritesService] Initialized');
+        // Initialize global event delegation for favorite buttons
+        this._initGlobalEventDelegation();
+
+        console.log('[FavoritesService] Initialized with enhanced features');
+    }
+
+    // ============================================
+    // GLOBAL EVENT DELEGATION - Optimistic UI
+    // ============================================
+
+    /**
+     * Initialize global event delegation for favorite buttons
+     * @private
+     */
+    _initGlobalEventDelegation() {
+        if (typeof document === 'undefined') return;
+
+        // Only initialize once
+        if (window._favoritesEventDelegationInitialized) return;
+        window._favoritesEventDelegationInitialized = true;
+
+        document.addEventListener('click', async (e) => {
+            const favoriteBtn = e.target.closest('.entity-favorite, .entity-card__action-btn--favorite');
+            if (!favoriteBtn) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Check authentication first
+            const authState = this._checkAuthState();
+            if (!authState.authenticated) {
+                this._emit('auth-required', { action: 'favorite' });
+                this._showToast('Please sign in to save favorites', 'warning');
+                return;
+            }
+
+            // Extract entity data from button
+            const entityId = favoriteBtn.dataset.entityId;
+            const entityType = favoriteBtn.dataset.entityType;
+            const entityName = favoriteBtn.dataset.entityName || 'Entity';
+            const entityMythology = favoriteBtn.dataset.entityMythology || 'unknown';
+            const entityIcon = favoriteBtn.dataset.entityIcon || null;
+
+            if (!entityId || !entityType) {
+                console.warn('[FavoritesService] Missing entity data on favorite button');
+                return;
+            }
+
+            // Get current state for optimistic UI
+            const compositeKey = this._generateCompositeKey(entityId, entityType);
+            const currentlyFavorited = favoriteBtn.classList.contains('favorited') ||
+                                       favoriteBtn.getAttribute('aria-pressed') === 'true';
+
+            // Apply optimistic UI immediately
+            this._applyOptimisticUI(favoriteBtn, !currentlyFavorited, entityName);
+
+            // Perform actual toggle
+            const entity = {
+                id: entityId,
+                type: entityType,
+                name: entityName,
+                mythology: entityMythology,
+                icon: entityIcon
+            };
+
+            const result = await this.toggleFavorite(entity);
+
+            // Revert if operation failed
+            if (!result.success) {
+                this._applyOptimisticUI(favoriteBtn, currentlyFavorited, entityName);
+                this._showToast(result.error || 'Failed to update favorite', 'error');
+            }
+        });
+    }
+
+    /**
+     * Apply optimistic UI update to favorite button
+     * @param {HTMLElement} button - The favorite button
+     * @param {boolean} isFavorited - New favorited state
+     * @param {string} entityName - Entity name for announcement
+     * @private
+     */
+    _applyOptimisticUI(button, isFavorited, entityName) {
+        // Add loading state briefly
+        button.classList.add('loading');
+
+        // Update visual state
+        if (isFavorited) {
+            button.classList.add('favorited');
+            button.setAttribute('aria-pressed', 'true');
+            button.setAttribute('aria-label', `Remove ${entityName} from favorites`);
+            button.title = 'Remove from favorites';
+
+            // Trigger heart fill animation
+            this._triggerHeartAnimation(button, 'add');
+        } else {
+            button.classList.remove('favorited');
+            button.setAttribute('aria-pressed', 'false');
+            button.setAttribute('aria-label', `Add ${entityName} to favorites`);
+            button.title = 'Add to favorites';
+
+            // Trigger heart unfill animation
+            this._triggerHeartAnimation(button, 'remove');
+        }
+
+        // Remove loading state after animation
+        setTimeout(() => {
+            button.classList.remove('loading');
+        }, 300);
+    }
+
+    /**
+     * Trigger delightful heart animation
+     * @param {HTMLElement} button - The favorite button
+     * @param {string} action - 'add' or 'remove'
+     * @private
+     */
+    _triggerHeartAnimation(button, action) {
+        // Remove any existing animation classes
+        button.classList.remove('heart-burst', 'heart-break');
+
+        if (action === 'add') {
+            // Heart burst animation with particles
+            button.classList.add('heart-burst');
+
+            // Create particle burst effect
+            this._createParticleBurst(button);
+
+            // Haptic feedback if available
+            if (navigator.vibrate) {
+                navigator.vibrate([15, 30, 15]);
+            }
+
+            setTimeout(() => button.classList.remove('heart-burst'), 600);
+        } else {
+            // Subtle break animation
+            button.classList.add('heart-break');
+            setTimeout(() => button.classList.remove('heart-break'), 400);
+        }
+    }
+
+    /**
+     * Create particle burst effect for favorite animation
+     * @param {HTMLElement} button - The favorite button
+     * @private
+     */
+    _createParticleBurst(button) {
+        const rect = button.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        // Create particles container
+        const particlesContainer = document.createElement('div');
+        particlesContainer.className = 'favorite-particles';
+        particlesContainer.style.cssText = `
+            position: fixed;
+            left: ${centerX}px;
+            top: ${centerY}px;
+            pointer-events: none;
+            z-index: 10000;
+        `;
+
+        // Create heart particles
+        const colors = ['#ff6b6b', '#ff8787', '#ffa8a8', '#ffd43b', '#fff'];
+        const particleCount = 8;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('span');
+            const angle = (i / particleCount) * Math.PI * 2;
+            const velocity = 30 + Math.random() * 20;
+            const size = 4 + Math.random() * 4;
+
+            particle.className = 'favorite-particle';
+            particle.innerHTML = i % 2 === 0 ? '&#10084;' : '&#10022;';
+            particle.style.cssText = `
+                position: absolute;
+                font-size: ${size}px;
+                color: ${colors[i % colors.length]};
+                transform: translate(-50%, -50%);
+                animation: favoriteParticle 0.6s ease-out forwards;
+                --particle-x: ${Math.cos(angle) * velocity}px;
+                --particle-y: ${Math.sin(angle) * velocity}px;
+            `;
+
+            particlesContainer.appendChild(particle);
+        }
+
+        document.body.appendChild(particlesContainer);
+
+        // Cleanup after animation
+        setTimeout(() => {
+            particlesContainer.remove();
+        }, 700);
+    }
+
+    /**
+     * Show toast notification
+     * @param {string} message - Toast message
+     * @param {string} type - Toast type (success, error, warning, info)
+     * @private
+     */
+    _showToast(message, type = 'info') {
+        if (window.toast) {
+            window.toast[type]?.(message) || window.toast.show?.(message, type);
+        } else if (window.ToastNotification) {
+            window.ToastNotification.show(message, type);
+        }
     }
 
     /**
@@ -114,10 +340,11 @@ class FavoritesService {
      * Get current user's favorites with explicit auth status
      * @param {Object} options - Options for fetching
      * @param {boolean} [options.returnResultObject=false] - Return FavoritesResult instead of array
+     * @param {string} [options.folderId] - Filter by folder ID
      * @returns {Promise<FavoriteEntity[]|FavoritesResult>}
      */
     async getFavorites(options = {}) {
-        const { returnResultObject = false } = options;
+        const { returnResultObject = false, folderId = null } = options;
 
         // Explicit auth check
         const authState = this._checkAuthState();
@@ -138,7 +365,13 @@ class FavoritesService {
 
         // Check cache first
         if (this._isCacheValid(user.uid)) {
-            const favorites = Array.from(this._cache.get(user.uid)?.values() || []);
+            let favorites = Array.from(this._cache.get(user.uid)?.values() || []);
+
+            // Filter by folder if specified
+            if (folderId) {
+                favorites = favorites.filter(f => f.folderId === folderId);
+            }
+
             if (returnResultObject) {
                 return {
                     success: true,
@@ -152,22 +385,7 @@ class FavoritesService {
         // Check if there's already a pending fetch for this user to prevent race conditions
         if (this._pendingFetches.has(user.uid)) {
             const result = await this._pendingFetches.get(user.uid);
-            if (returnResultObject) {
-                return {
-                    success: true,
-                    data: result,
-                    status: 'authenticated'
-                };
-            }
-            return result;
-        }
-
-        // Create the fetch promise
-        const fetchPromise = this._fetchFavoritesFromFirebase(user.uid);
-        this._pendingFetches.set(user.uid, fetchPromise);
-
-        try {
-            const favorites = await fetchPromise;
+            let favorites = folderId ? result.filter(f => f.folderId === folderId) : result;
 
             if (returnResultObject) {
                 return {
@@ -177,9 +395,28 @@ class FavoritesService {
                 };
             }
             return favorites;
+        }
+
+        // Create the fetch promise
+        const fetchPromise = this._fetchFavoritesFromFirebase(user.uid);
+        this._pendingFetches.set(user.uid, fetchPromise);
+
+        try {
+            const favorites = await fetchPromise;
+            const filtered = folderId ? favorites.filter(f => f.folderId === folderId) : favorites;
+
+            if (returnResultObject) {
+                return {
+                    success: true,
+                    data: filtered,
+                    status: 'authenticated'
+                };
+            }
+            return filtered;
         } catch (error) {
             console.error('[FavoritesService] Failed to get favorites:', error);
             const localFavorites = this._getFromLocalStorage(user.uid);
+            const filtered = folderId ? localFavorites.filter(f => f.folderId === folderId) : localFavorites;
 
             // Populate cache and lookup Set from localStorage fallback
             if (localFavorites.length > 0) {
@@ -189,12 +426,12 @@ class FavoritesService {
             if (returnResultObject) {
                 return {
                     success: localFavorites.length > 0,
-                    data: localFavorites,
+                    data: filtered,
                     error: error.message,
                     status: 'error'
                 };
             }
-            return localFavorites;
+            return filtered;
         } finally {
             // Clean up pending fetch
             this._pendingFetches.delete(user.uid);
@@ -323,6 +560,26 @@ class FavoritesService {
     }
 
     /**
+     * Synchronous check if entity is favorited (uses cached data only)
+     * @param {string} entityId
+     * @param {string} entityType
+     * @returns {boolean}
+     */
+    isFavoritedSync(entityId, entityType) {
+        const authState = this._checkAuthState();
+        if (!authState.authenticated) return false;
+
+        const userId = authState.user.uid;
+        const compositeKey = this._generateCompositeKey(entityId, entityType);
+
+        if (this._favoritedLookup.has(userId)) {
+            return this._favoritedLookup.get(userId).has(compositeKey);
+        }
+
+        return false;
+    }
+
+    /**
      * Generate composite key for O(1) lookup
      * @param {string} entityId
      * @param {string} entityType
@@ -336,9 +593,10 @@ class FavoritesService {
     /**
      * Add entity to favorites (Personal Pantheon)
      * @param {Object} entity - Entity to favorite
+     * @param {string} [folderId] - Optional folder to add to
      * @returns {Promise<{success: boolean, error?: string, data?: Object}>}
      */
-    async addFavorite(entity) {
+    async addFavorite(entity, folderId = null) {
         // Explicit auth check
         const authState = this._checkAuthState();
         if (!authState.authenticated) {
@@ -367,7 +625,9 @@ class FavoritesService {
             mythology: entity.mythology || entity.primaryMythology || 'unknown',
             name: entity.name,
             icon: entity.icon || null,
-            addedAt: Date.now()
+            addedAt: Date.now(),
+            folderId: folderId || null,
+            tags: entity.tags || []
         };
 
         const docId = this._generateDocId(favoriteData.entityId, favoriteData.entityType);
@@ -394,6 +654,9 @@ class FavoritesService {
 
                 // Emit event
                 this._emit('favorite-added', { ...favoriteData, id: docId });
+
+                // Show success toast
+                this._showToast(`Added ${favoriteData.name} to your Pantheon`, 'success');
 
                 console.log('[FavoritesService] Added favorite:', favoriteData.name);
                 return { success: true, data: favoriteData };
@@ -427,6 +690,9 @@ class FavoritesService {
 
             // Emit event
             this._emit('favorite-added', { ...favoriteData, id: docId, offline: true });
+
+            // Show offline toast
+            this._showToast(`Saved ${favoriteData.name} (will sync when online)`, 'info');
 
             console.log('[FavoritesService] Added favorite offline:', favoriteData.name);
             return {
@@ -475,6 +741,10 @@ class FavoritesService {
         const docId = this._generateDocId(entityId, entityType);
         const compositeKey = this._generateCompositeKey(entityId, entityType);
 
+        // Get entity name for toast
+        const favoriteData = this._cache.get(user.uid)?.get(docId);
+        const entityName = favoriteData?.name || 'Entity';
+
         // Check if Firebase is available
         const isOnline = this._isOnline();
 
@@ -497,17 +767,20 @@ class FavoritesService {
                 // Emit event
                 this._emit('favorite-removed', { entityId, entityType });
 
+                // Show toast
+                this._showToast(`Removed ${entityName} from your Pantheon`, 'info');
+
                 console.log('[FavoritesService] Removed favorite:', entityId);
                 return { success: true };
             } catch (error) {
                 console.error('[FavoritesService] Failed to remove favorite from Firebase:', error);
 
                 // Fallback to localStorage and track for sync
-                return this._removeFavoriteOffline(user.uid, docId, entityId, entityType, compositeKey);
+                return this._removeFavoriteOffline(user.uid, docId, entityId, entityType, compositeKey, entityName);
             }
         } else {
             // Offline mode
-            return this._removeFavoriteOffline(user.uid, docId, entityId, entityType, compositeKey);
+            return this._removeFavoriteOffline(user.uid, docId, entityId, entityType, compositeKey, entityName);
         }
     }
 
@@ -515,7 +788,7 @@ class FavoritesService {
      * Remove favorite in offline mode
      * @private
      */
-    _removeFavoriteOffline(userId, docId, entityId, entityType, compositeKey) {
+    _removeFavoriteOffline(userId, docId, entityId, entityType, compositeKey, entityName) {
         try {
             // Update cache and lookup Set
             this._removeFromCache(userId, docId);
@@ -529,6 +802,9 @@ class FavoritesService {
 
             // Emit event
             this._emit('favorite-removed', { entityId, entityType, offline: true });
+
+            // Show offline toast
+            this._showToast(`Removed ${entityName} (will sync when online)`, 'info');
 
             console.log('[FavoritesService] Removed favorite offline:', entityId);
             return {
@@ -638,6 +914,505 @@ class FavoritesService {
     }
 
     /**
+     * Get favorites by folder
+     * @param {string} folderId
+     * @returns {Promise<FavoriteEntity[]>}
+     */
+    async getByFolder(folderId) {
+        return this.getFavorites({ folderId });
+    }
+
+    // ============================================
+    // FOLDERS/CATEGORIES - Personal Pantheon Organization
+    // ============================================
+
+    /**
+     * Create a new folder/category
+     * @param {Object} folderData - Folder data
+     * @returns {Promise<{success: boolean, data?: FavoriteFolder, error?: string}>}
+     */
+    async createFolder(folderData) {
+        const authState = this._checkAuthState();
+        if (!authState.authenticated) {
+            return { success: false, error: 'Not authenticated' };
+        }
+
+        const user = authState.user;
+        const folderId = `folder_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        const folder = {
+            id: folderId,
+            name: folderData.name || 'New Collection',
+            icon: folderData.icon || null,
+            color: folderData.color || '#8b7fff',
+            createdAt: Date.now(),
+            order: folderData.order || 0
+        };
+
+        try {
+            if (this.db && this._isOnline()) {
+                await this.db
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection(this.FOLDERS_COLLECTION)
+                    .doc(folderId)
+                    .set(folder);
+            }
+
+            // Update cache
+            if (!this._foldersCache.has(user.uid)) {
+                this._foldersCache.set(user.uid, new Map());
+            }
+            this._foldersCache.get(user.uid).set(folderId, folder);
+
+            this._emit('folder-created', folder);
+            this._showToast(`Created collection: ${folder.name}`, 'success');
+
+            return { success: true, data: folder };
+        } catch (error) {
+            console.error('[FavoritesService] Failed to create folder:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Get all folders for current user
+     * @returns {Promise<FavoriteFolder[]>}
+     */
+    async getFolders() {
+        const authState = this._checkAuthState();
+        if (!authState.authenticated) return [];
+
+        const user = authState.user;
+
+        // Check cache
+        if (this._foldersCache.has(user.uid)) {
+            return Array.from(this._foldersCache.get(user.uid).values())
+                .sort((a, b) => (a.order || 0) - (b.order || 0));
+        }
+
+        try {
+            if (this.db) {
+                const snapshot = await this.db
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection(this.FOLDERS_COLLECTION)
+                    .orderBy('order', 'asc')
+                    .get();
+
+                const folders = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                // Cache folders
+                const folderMap = new Map();
+                folders.forEach(f => folderMap.set(f.id, f));
+                this._foldersCache.set(user.uid, folderMap);
+
+                return folders;
+            }
+        } catch (error) {
+            console.error('[FavoritesService] Failed to get folders:', error);
+        }
+
+        return [];
+    }
+
+    /**
+     * Update folder
+     * @param {string} folderId - Folder ID
+     * @param {Object} updates - Fields to update
+     * @returns {Promise<{success: boolean, error?: string}>}
+     */
+    async updateFolder(folderId, updates) {
+        const authState = this._checkAuthState();
+        if (!authState.authenticated) {
+            return { success: false, error: 'Not authenticated' };
+        }
+
+        const user = authState.user;
+
+        try {
+            if (this.db && this._isOnline()) {
+                await this.db
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection(this.FOLDERS_COLLECTION)
+                    .doc(folderId)
+                    .update(updates);
+            }
+
+            // Update cache
+            if (this._foldersCache.has(user.uid)) {
+                const folder = this._foldersCache.get(user.uid).get(folderId);
+                if (folder) {
+                    Object.assign(folder, updates);
+                }
+            }
+
+            this._emit('folder-updated', { folderId, updates });
+            return { success: true };
+        } catch (error) {
+            console.error('[FavoritesService] Failed to update folder:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Delete folder (does not delete favorites in it)
+     * @param {string} folderId - Folder ID
+     * @returns {Promise<{success: boolean, error?: string}>}
+     */
+    async deleteFolder(folderId) {
+        const authState = this._checkAuthState();
+        if (!authState.authenticated) {
+            return { success: false, error: 'Not authenticated' };
+        }
+
+        const user = authState.user;
+
+        try {
+            if (this.db && this._isOnline()) {
+                await this.db
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection(this.FOLDERS_COLLECTION)
+                    .doc(folderId)
+                    .delete();
+
+                // Move favorites in this folder to "uncategorized"
+                const favoritesInFolder = await this.getByFolder(folderId);
+                for (const fav of favoritesInFolder) {
+                    await this.moveFavoriteToFolder(fav.entityId, fav.entityType, null);
+                }
+            }
+
+            // Update cache
+            if (this._foldersCache.has(user.uid)) {
+                this._foldersCache.get(user.uid).delete(folderId);
+            }
+
+            this._emit('folder-deleted', { folderId });
+            this._showToast('Collection deleted', 'info');
+            return { success: true };
+        } catch (error) {
+            console.error('[FavoritesService] Failed to delete folder:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Move favorite to a folder
+     * @param {string} entityId - Entity ID
+     * @param {string} entityType - Entity type
+     * @param {string|null} folderId - Target folder ID (null for uncategorized)
+     * @returns {Promise<{success: boolean, error?: string}>}
+     */
+    async moveFavoriteToFolder(entityId, entityType, folderId) {
+        const authState = this._checkAuthState();
+        if (!authState.authenticated) {
+            return { success: false, error: 'Not authenticated' };
+        }
+
+        const user = authState.user;
+        const docId = this._generateDocId(entityId, entityType);
+
+        try {
+            if (this.db && this._isOnline()) {
+                await this.db
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection(this.COLLECTION)
+                    .doc(docId)
+                    .update({ folderId: folderId });
+            }
+
+            // Update cache
+            if (this._cache.has(user.uid)) {
+                const favorite = this._cache.get(user.uid).get(docId);
+                if (favorite) {
+                    favorite.folderId = folderId;
+                }
+            }
+
+            this._saveToLocalStorage(user.uid);
+            this._emit('favorite-moved', { entityId, entityType, folderId });
+            return { success: true };
+        } catch (error) {
+            console.error('[FavoritesService] Failed to move favorite:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // ============================================
+    // BULK OPERATIONS - Add All From Mythology
+    // ============================================
+
+    /**
+     * Add all entities from a specific mythology to favorites
+     * @param {string} mythology - Mythology name
+     * @param {string} entityType - Entity type to add
+     * @param {string} [folderId] - Optional folder to add to
+     * @returns {Promise<{success: boolean, added: number, skipped: number, error?: string}>}
+     */
+    async addAllFromMythology(mythology, entityType, folderId = null) {
+        const authState = this._checkAuthState();
+        if (!authState.authenticated) {
+            return { success: false, added: 0, skipped: 0, error: 'Not authenticated' };
+        }
+
+        // Ensure entityLoader is available
+        if (!window.entityLoader) {
+            return { success: false, added: 0, skipped: 0, error: 'Entity loader not available' };
+        }
+
+        try {
+            // Load entities from the mythology
+            const collectionName = entityType.endsWith('s') ? entityType : `${entityType}s`;
+            let entities = [];
+
+            try {
+                entities = await window.entityLoader.loadCollection(collectionName, {
+                    filters: { mythology: mythology.toLowerCase() }
+                });
+            } catch {
+                // Try alternative approach
+                entities = await window.entityLoader.searchEntities({
+                    mythology: mythology,
+                    type: entityType
+                });
+            }
+
+            if (!entities || entities.length === 0) {
+                return { success: true, added: 0, skipped: 0, message: 'No entities found' };
+            }
+
+            let added = 0;
+            let skipped = 0;
+
+            for (const entity of entities) {
+                const entityId = entity.id || entity.entityId;
+                const isAlreadyFavorited = await this.isFavorited(entityId, entityType);
+
+                if (isAlreadyFavorited) {
+                    skipped++;
+                    continue;
+                }
+
+                const result = await this.addFavorite({
+                    id: entityId,
+                    type: entityType,
+                    name: entity.name,
+                    mythology: mythology,
+                    icon: entity.icon
+                }, folderId);
+
+                if (result.success) {
+                    added++;
+                } else {
+                    skipped++;
+                }
+            }
+
+            this._showToast(`Added ${added} ${entityType}s from ${mythology}`, 'success');
+
+            return {
+                success: true,
+                added,
+                skipped,
+                total: entities.length
+            };
+        } catch (error) {
+            console.error('[FavoritesService] Failed to add all from mythology:', error);
+            return { success: false, added: 0, skipped: 0, error: error.message };
+        }
+    }
+
+    // ============================================
+    // EXPORT & SHARING
+    // ============================================
+
+    /**
+     * Export favorites to JSON format
+     * @param {Object} options - Export options
+     * @returns {Promise<{success: boolean, data?: string, error?: string}>}
+     */
+    async exportFavorites(options = {}) {
+        const authState = this._checkAuthState();
+        if (!authState.authenticated) {
+            return { success: false, error: 'Not authenticated' };
+        }
+
+        try {
+            const favorites = await this.getFavorites();
+            const folders = await this.getFolders();
+            const stats = await this.getStatistics();
+
+            const exportData = {
+                version: '1.0',
+                exportedAt: new Date().toISOString(),
+                userDisplayName: authState.user.displayName || 'Anonymous',
+                statistics: stats,
+                folders: folders,
+                favorites: favorites.map(f => ({
+                    entityId: f.entityId,
+                    entityType: f.entityType,
+                    name: f.name,
+                    mythology: f.mythology,
+                    icon: f.icon,
+                    folderId: f.folderId,
+                    addedAt: f.addedAt
+                }))
+            };
+
+            const jsonString = JSON.stringify(exportData, null, 2);
+
+            // Trigger download
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `personal-pantheon-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            this._showToast('Favorites exported successfully', 'success');
+
+            return { success: true, data: jsonString };
+        } catch (error) {
+            console.error('[FavoritesService] Failed to export favorites:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Import favorites from JSON
+     * @param {string} jsonData - JSON string to import
+     * @returns {Promise<{success: boolean, imported: number, error?: string}>}
+     */
+    async importFavorites(jsonData) {
+        const authState = this._checkAuthState();
+        if (!authState.authenticated) {
+            return { success: false, imported: 0, error: 'Not authenticated' };
+        }
+
+        try {
+            const data = JSON.parse(jsonData);
+
+            if (!data.favorites || !Array.isArray(data.favorites)) {
+                return { success: false, imported: 0, error: 'Invalid import format' };
+            }
+
+            let imported = 0;
+
+            // Import folders first
+            if (data.folders && Array.isArray(data.folders)) {
+                for (const folder of data.folders) {
+                    await this.createFolder(folder);
+                }
+            }
+
+            // Import favorites
+            for (const fav of data.favorites) {
+                const isAlreadyFavorited = await this.isFavorited(fav.entityId, fav.entityType);
+                if (!isAlreadyFavorited) {
+                    const result = await this.addFavorite({
+                        id: fav.entityId,
+                        type: fav.entityType,
+                        name: fav.name,
+                        mythology: fav.mythology,
+                        icon: fav.icon
+                    }, fav.folderId);
+
+                    if (result.success) imported++;
+                }
+            }
+
+            this._showToast(`Imported ${imported} favorites`, 'success');
+
+            return { success: true, imported };
+        } catch (error) {
+            console.error('[FavoritesService] Failed to import favorites:', error);
+            return { success: false, imported: 0, error: error.message };
+        }
+    }
+
+    /**
+     * Generate shareable link for favorites
+     * @param {Object} options - Sharing options
+     * @returns {Promise<{success: boolean, url?: string, error?: string}>}
+     */
+    async generateShareLink(options = {}) {
+        const authState = this._checkAuthState();
+        if (!authState.authenticated) {
+            return { success: false, error: 'Not authenticated' };
+        }
+
+        try {
+            const favorites = await this.getFavorites();
+
+            if (favorites.length === 0) {
+                return { success: false, error: 'No favorites to share' };
+            }
+
+            // Create compact shareable data
+            const shareData = favorites.slice(0, 50).map(f => ({
+                i: f.entityId,
+                t: f.entityType.charAt(0), // First letter for type
+                n: f.name
+            }));
+
+            // Encode to base64
+            const encoded = btoa(JSON.stringify(shareData));
+            const shareUrl = `${window.location.origin}/#/shared-pantheon?data=${encoded}`;
+
+            // Copy to clipboard
+            if (navigator.clipboard) {
+                await navigator.clipboard.writeText(shareUrl);
+                this._showToast('Share link copied to clipboard!', 'success');
+            }
+
+            return { success: true, url: shareUrl };
+        } catch (error) {
+            console.error('[FavoritesService] Failed to generate share link:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Load shared pantheon from URL data
+     * @param {string} encodedData - Base64 encoded share data
+     * @returns {{success: boolean, favorites?: Object[], error?: string}}
+     */
+    loadSharedPantheon(encodedData) {
+        try {
+            const decoded = JSON.parse(atob(encodedData));
+
+            const typeMap = {
+                d: 'deity',
+                h: 'hero',
+                c: 'creature',
+                i: 'item',
+                p: 'place'
+            };
+
+            const favorites = decoded.map(item => ({
+                entityId: item.i,
+                entityType: typeMap[item.t] || item.t,
+                name: item.n
+            }));
+
+            return { success: true, favorites };
+        } catch (error) {
+            console.error('[FavoritesService] Failed to load shared pantheon:', error);
+            return { success: false, error: 'Invalid share link' };
+        }
+    }
+
+    /**
      * Clear all favorites
      * @returns {Promise<{success: boolean}>}
      */
@@ -676,6 +1451,8 @@ class FavoritesService {
 
                 // Emit event
                 this._emit('favorites-cleared', { userId: user.uid });
+
+                this._showToast('Pantheon cleared', 'info');
 
                 console.log('[FavoritesService] Cleared all favorites');
                 return { success: true };
@@ -1148,6 +1925,10 @@ class FavoritesService {
         // Emit sync complete event
         this._emit('sync-complete', { synced, conflicts });
 
+        if (synced > 0) {
+            this._showToast(`Synced ${synced} favorites`, 'success');
+        }
+
         console.log(`[FavoritesService] Sync complete. Synced: ${synced}, Conflicts: ${conflicts}`);
         return { success: true, synced, conflicts };
     }
@@ -1238,9 +2019,11 @@ class FavoritesService {
      */
     async getStatistics() {
         const favorites = await this.getFavorites();
+        const folders = await this.getFolders();
 
         const byMythology = {};
         const byType = {};
+        const byFolder = {};
 
         favorites.forEach(f => {
             // Count by mythology
@@ -1250,15 +2033,60 @@ class FavoritesService {
             // Count by type
             const type = f.entityType || 'Unknown';
             byType[type] = (byType[type] || 0) + 1;
+
+            // Count by folder
+            const folder = f.folderId || 'uncategorized';
+            byFolder[folder] = (byFolder[folder] || 0) + 1;
         });
 
         return {
             total: favorites.length,
             byMythology,
             byType,
+            byFolder,
+            folderCount: folders.length,
             oldestFavorite: favorites[favorites.length - 1]?.addedAt || null,
-            newestFavorite: favorites[0]?.addedAt || null
+            newestFavorite: favorites[0]?.addedAt || null,
+            topMythology: Object.entries(byMythology).sort((a, b) => b[1] - a[1])[0]?.[0] || null,
+            topType: Object.entries(byType).sort((a, b) => b[1] - a[1])[0]?.[0] || null
         };
+    }
+
+    /**
+     * Update all favorite buttons on the page to reflect current state
+     * Call this after loading favorites to sync UI state
+     */
+    async updateAllFavoriteButtons() {
+        const authState = this._checkAuthState();
+        if (!authState.authenticated) return;
+
+        // Ensure cache is populated
+        await this.getFavorites();
+
+        // Find all favorite buttons on the page
+        const favoriteButtons = document.querySelectorAll('.entity-favorite, .entity-card__action-btn--favorite');
+
+        favoriteButtons.forEach(btn => {
+            const entityId = btn.dataset.entityId;
+            const entityType = btn.dataset.entityType;
+
+            if (entityId && entityType) {
+                const isFav = this.isFavoritedSync(entityId, entityType);
+                const entityName = btn.dataset.entityName || 'Entity';
+
+                if (isFav) {
+                    btn.classList.add('favorited');
+                    btn.setAttribute('aria-pressed', 'true');
+                    btn.setAttribute('aria-label', `Remove ${entityName} from favorites`);
+                    btn.title = 'Remove from favorites';
+                } else {
+                    btn.classList.remove('favorited');
+                    btn.setAttribute('aria-pressed', 'false');
+                    btn.setAttribute('aria-label', `Add ${entityName} to favorites`);
+                    btn.title = 'Add to favorites';
+                }
+            }
+        });
     }
 }
 
@@ -1274,12 +2102,26 @@ if (typeof window !== 'undefined') {
     document.addEventListener('firebase-ready', () => {
         if (!window.EyesOfAzrael) window.EyesOfAzrael = {};
         window.EyesOfAzrael.favorites = new FavoritesService();
+
+        // Update buttons after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            window.EyesOfAzrael.favorites.updateAllFavoriteButtons();
+        }, 500);
     });
 
     // Also initialize if Firebase is already ready
     if (window.EyesOfAzrael?.db) {
         window.EyesOfAzrael.favorites = new FavoritesService();
     }
+
+    // Listen for navigation changes to update favorite buttons
+    window.addEventListener('hashchange', () => {
+        setTimeout(() => {
+            if (window.EyesOfAzrael?.favorites) {
+                window.EyesOfAzrael.favorites.updateAllFavoriteButtons();
+            }
+        }, 300);
+    });
 }
 
 // Module export
@@ -1287,4 +2129,4 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = FavoritesService;
 }
 
-console.log('[FavoritesService] Module loaded');
+console.log('[FavoritesService] Enhanced module loaded with animations, categories, and sharing');

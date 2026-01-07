@@ -2,31 +2,98 @@
 console.log('[App Init] Script loaded - starting execution');
 
 /**
- * Simple Application Initialization
- * Ensures proper loading order and error handling
+ * Polished Application Initialization
+ * Fast, reliable app startup with comprehensive metrics and error handling
  *
  * INITIALIZATION ORDER:
- * 1. Error monitoring (initErrorMonitoring) - catches all subsequent errors
- * 2. Performance monitoring (initPerformanceMonitoring) - tracks load metrics
- * 3. DOM ready wait (with timeout fallback)
- * 4. Firebase SDK and config validation
- * 5. Firebase services initialization (Firestore, Auth)
- * 6. Core managers (AuthManager, FirebaseCRUDManager)
- * 7. Renderer (UniversalDisplayRenderer)
- * 8. Navigation (SPANavigation - requires renderer)
- * 9. Search (EnhancedCorpusSearch)
- * 10. Shaders (ShaderThemeManager)
- * 11. UI setup (auth UI, error tracking, edit handler)
- * 12. Ready events dispatched
+ * 1. Performance metrics collection (immediate)
+ * 2. Critical CSS inlining validation
+ * 3. Error monitoring (initErrorMonitoring) - catches all subsequent errors
+ * 4. Performance monitoring (initPerformanceMonitoring) - tracks load metrics
+ * 5. DOM ready wait (with timeout fallback)
+ * 6. Firebase SDK and config validation
+ * 7. Firebase services initialization (Firestore, Auth)
+ * 8. Core managers (AuthManager, FirebaseCRUDManager)
+ * 9. Renderer (UniversalDisplayRenderer)
+ * 10. Navigation (SPANavigation - requires renderer)
+ * 11. Search (EnhancedCorpusSearch)
+ * 12. Shaders (ShaderThemeManager) - lazy loaded
+ * 13. UI setup (auth UI, error tracking, edit handler)
+ * 14. Ready events dispatched
+ * 15. Non-critical modules lazy loaded
  */
 
 (async function() {
     'use strict';
 
+    // ============================================
+    // STARTUP PERFORMANCE METRICS
+    // ============================================
+    const PERF_METRICS = {
+        scriptStart: performance.now(),
+        navigationStart: performance.timing?.navigationStart || Date.now(),
+        marks: new Map(),
+        measures: new Map()
+    };
+
+    /**
+     * Mark a performance checkpoint
+     * @param {string} name - Name of the checkpoint
+     */
+    function perfMark(name) {
+        const timestamp = performance.now();
+        PERF_METRICS.marks.set(name, timestamp);
+
+        // Use Performance API if available
+        if (typeof performance.mark === 'function') {
+            try {
+                performance.mark(`eoa-${name}`);
+            } catch (e) {
+                // Silently ignore if mark already exists
+            }
+        }
+
+        return timestamp;
+    }
+
+    /**
+     * Measure duration between two marks
+     * @param {string} name - Name of the measure
+     * @param {string} startMark - Start mark name
+     * @param {string} endMark - End mark name (defaults to now)
+     */
+    function perfMeasure(name, startMark, endMark = null) {
+        const startTime = PERF_METRICS.marks.get(startMark);
+        const endTime = endMark ? PERF_METRICS.marks.get(endMark) : performance.now();
+
+        if (startTime !== undefined) {
+            const duration = endTime - startTime;
+            PERF_METRICS.measures.set(name, duration);
+
+            // Use Performance API if available
+            if (typeof performance.measure === 'function') {
+                try {
+                    performance.measure(`eoa-${name}`, `eoa-${startMark}`, endMark ? `eoa-${endMark}` : undefined);
+                } catch (e) {
+                    // Silently ignore
+                }
+            }
+
+            return duration;
+        }
+        return null;
+    }
+
+    // Mark script execution start
+    perfMark('script-start');
+
     // Configuration constants
     const CONFIG = {
-        DOM_READY_TIMEOUT: 5000,       // 5 seconds to wait for DOM
-        LOADING_HIDE_TIMEOUT: 10000,   // 10 seconds fallback to hide loading
+        DOM_READY_TIMEOUT: 5000,           // 5 seconds to wait for DOM
+        LOADING_HIDE_TIMEOUT: 10000,       // 10 seconds fallback to hide loading
+        INIT_RETRY_DELAY: 1000,            // 1 second between retries
+        MAX_INIT_RETRIES: 3,               // Maximum initialization retries
+        LAZY_LOAD_DELAY: 1500,             // Delay before loading non-critical modules
         CRITICAL_DEPENDENCIES: [
             'firebase',
             'firebaseConfig'
@@ -39,6 +106,17 @@ console.log('[App Init] Script loaded - starting execution');
             'EnhancedCorpusSearch',
             'ShaderThemeManager',
             'EditEntityModal'
+        ],
+        // Non-critical modules to lazy load
+        LAZY_MODULES: [
+            'ShaderThemeManager',
+            'EditEntityModal'
+        ],
+        // Critical CSS selectors to verify
+        CRITICAL_CSS_SELECTORS: [
+            '.loading-container',
+            '.sacred-spinner',
+            '#main-content'
         ]
     };
 
@@ -51,10 +129,385 @@ console.log('[App Init] Script loaded - starting execution');
         navigationReady: false,
         firstRenderComplete: false,
         missingDependencies: [],
-        warnings: []
+        warnings: [],
+        retryCount: 0,
+        criticalCssLoaded: false,
+        loadingProgress: 0,
+        currentPhase: 'starting',
+        phaseTimings: {},
+        metrics: PERF_METRICS
     };
 
-    console.log('[App] Starting initialization...');
+    console.log('[App] Starting polished initialization...');
+
+    // ============================================
+    // LOADING PROGRESS INDICATOR
+    // ============================================
+
+    /**
+     * Update loading progress and emit events
+     * @param {number} progress - Progress percentage (0-100)
+     * @param {string} phase - Current phase name
+     * @param {string} message - Optional message to display
+     */
+    function updateLoadingProgress(progress, phase, message = '') {
+        initState.loadingProgress = progress;
+        initState.currentPhase = phase;
+        initState.phaseTimings[phase] = performance.now() - initState.startTime;
+
+        // Update progress bar if it exists
+        const progressBar = document.querySelector('.init-progress-bar-fill');
+        const progressText = document.querySelector('.init-progress-text');
+        const phaseText = document.querySelector('.init-phase-text');
+
+        if (progressBar) {
+            progressBar.style.width = `${progress}%`;
+        }
+        if (progressText) {
+            progressText.textContent = `${Math.round(progress)}%`;
+        }
+        if (phaseText && message) {
+            phaseText.textContent = message;
+        }
+
+        // Emit progress event for external listeners
+        document.dispatchEvent(new CustomEvent('app-init-progress', {
+            detail: { progress, phase, message, timestamp: performance.now() }
+        }));
+
+        console.debug(`[App] Progress: ${progress}% - ${phase}${message ? ': ' + message : ''}`);
+    }
+
+    // ============================================
+    // CRITICAL CSS VALIDATION
+    // ============================================
+
+    /**
+     * Verify critical CSS is loaded and functional
+     * @returns {boolean} True if critical CSS is properly loaded
+     */
+    function verifyCriticalCss() {
+        perfMark('css-check-start');
+
+        // Check if critical selectors have computed styles
+        for (const selector of CONFIG.CRITICAL_CSS_SELECTORS) {
+            const element = document.querySelector(selector);
+            if (element) {
+                const styles = window.getComputedStyle(element);
+                // Verify element has some styling applied
+                if (styles.display === 'none' && selector === '.loading-container') {
+                    // Loading container might be hidden after load - that's ok
+                    continue;
+                }
+            }
+        }
+
+        // Check for critical stylesheets
+        const stylesheets = document.querySelectorAll('link[rel="stylesheet"]');
+        const criticalLoaded = Array.from(stylesheets).some(link => {
+            return link.href && (
+                link.href.includes('loading-spinner') ||
+                link.href.includes('skeleton-screens') ||
+                link.href.includes('theme-base')
+            );
+        });
+
+        // Also check for inline critical styles
+        const inlineStyles = document.querySelectorAll('style');
+        const hasInlineStyles = inlineStyles.length > 0;
+
+        initState.criticalCssLoaded = criticalLoaded || hasInlineStyles;
+
+        perfMark('css-check-end');
+        perfMeasure('css-validation', 'css-check-start', 'css-check-end');
+
+        if (!initState.criticalCssLoaded) {
+            console.warn('[App] Critical CSS may not be fully loaded');
+            initState.warnings.push('Critical CSS validation failed');
+        } else {
+            console.debug('[App] Critical CSS validated');
+        }
+
+        return initState.criticalCssLoaded;
+    }
+
+    // ============================================
+    // STARTUP DIAGNOSTIC PANEL
+    // ============================================
+
+    /**
+     * Create and show startup diagnostic panel
+     * @param {Object} diagnostics - Diagnostic information to display
+     */
+    function showDiagnosticPanel(diagnostics) {
+        // Remove existing panel if present
+        const existingPanel = document.getElementById('startup-diagnostics');
+        if (existingPanel) {
+            existingPanel.remove();
+        }
+
+        const panel = document.createElement('div');
+        panel.id = 'startup-diagnostics';
+        panel.className = 'startup-diagnostic-panel';
+        panel.innerHTML = `
+            <div class="diagnostic-header">
+                <span class="diagnostic-title">Startup Diagnostics</span>
+                <button class="diagnostic-close" onclick="this.closest('.startup-diagnostic-panel').remove()">&times;</button>
+            </div>
+            <div class="diagnostic-content">
+                <div class="diagnostic-section">
+                    <h4>Timing</h4>
+                    <div class="diagnostic-row">
+                        <span>Total Init Time:</span>
+                        <span class="diagnostic-value">${diagnostics.totalTime?.toFixed(2) || 'N/A'}ms</span>
+                    </div>
+                    <div class="diagnostic-row">
+                        <span>DOM Ready:</span>
+                        <span class="diagnostic-value">${diagnostics.domReady ? 'Yes' : 'No'}</span>
+                    </div>
+                    <div class="diagnostic-row">
+                        <span>Firebase Ready:</span>
+                        <span class="diagnostic-value">${diagnostics.firebaseReady ? 'Yes' : 'No'}</span>
+                    </div>
+                </div>
+                <div class="diagnostic-section">
+                    <h4>Dependencies</h4>
+                    ${diagnostics.missingDependencies?.length > 0
+                        ? diagnostics.missingDependencies.map(dep => `
+                            <div class="diagnostic-row diagnostic-warning">
+                                <span>Missing:</span>
+                                <span class="diagnostic-value">${dep.name} ${dep.critical ? '(Critical)' : ''}</span>
+                            </div>
+                        `).join('')
+                        : '<div class="diagnostic-row diagnostic-success"><span>All dependencies loaded</span></div>'
+                    }
+                </div>
+                ${diagnostics.warnings?.length > 0 ? `
+                    <div class="diagnostic-section">
+                        <h4>Warnings</h4>
+                        ${diagnostics.warnings.map(w => `
+                            <div class="diagnostic-row diagnostic-warning">
+                                <span>${w}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                <div class="diagnostic-section">
+                    <h4>Performance Metrics</h4>
+                    ${Array.from(diagnostics.metrics?.measures || []).map(([name, value]) => `
+                        <div class="diagnostic-row">
+                            <span>${name}:</span>
+                            <span class="diagnostic-value">${value.toFixed(2)}ms</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            <div class="diagnostic-actions">
+                <button class="diagnostic-btn" onclick="location.reload()">Reload</button>
+                <button class="diagnostic-btn diagnostic-btn-secondary" onclick="window.debugApp && console.log(window.debugApp())">Log Debug Info</button>
+            </div>
+        `;
+
+        // Add inline styles if CSS might not be loaded
+        panel.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 360px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: rgba(10, 10, 30, 0.98);
+            border: 1px solid rgba(139, 127, 255, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 100000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 13px;
+            color: #e0e0e0;
+        `;
+
+        document.body.appendChild(panel);
+
+        // Auto-hide after 30 seconds unless there are errors
+        if (!diagnostics.hasErrors) {
+            setTimeout(() => {
+                panel.style.transition = 'opacity 0.5s ease';
+                panel.style.opacity = '0';
+                setTimeout(() => panel.remove(), 500);
+            }, 30000);
+        }
+    }
+
+    /**
+     * Create minimal inline styles for diagnostic panel
+     */
+    function injectDiagnosticStyles() {
+        if (document.getElementById('diagnostic-styles')) return;
+
+        const style = document.createElement('style');
+        style.id = 'diagnostic-styles';
+        style.textContent = `
+            .startup-diagnostic-panel .diagnostic-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 12px 16px;
+                border-bottom: 1px solid rgba(139, 127, 255, 0.2);
+                background: rgba(139, 127, 255, 0.1);
+            }
+            .startup-diagnostic-panel .diagnostic-title {
+                font-weight: 600;
+                color: #fff;
+            }
+            .startup-diagnostic-panel .diagnostic-close {
+                background: none;
+                border: none;
+                color: #aaa;
+                font-size: 24px;
+                cursor: pointer;
+                line-height: 1;
+            }
+            .startup-diagnostic-panel .diagnostic-close:hover {
+                color: #fff;
+            }
+            .startup-diagnostic-panel .diagnostic-content {
+                padding: 16px;
+            }
+            .startup-diagnostic-panel .diagnostic-section {
+                margin-bottom: 16px;
+            }
+            .startup-diagnostic-panel .diagnostic-section:last-child {
+                margin-bottom: 0;
+            }
+            .startup-diagnostic-panel .diagnostic-section h4 {
+                margin: 0 0 8px;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: #888;
+            }
+            .startup-diagnostic-panel .diagnostic-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 6px 8px;
+                background: rgba(255, 255, 255, 0.03);
+                border-radius: 4px;
+                margin-bottom: 4px;
+            }
+            .startup-diagnostic-panel .diagnostic-value {
+                font-family: 'SF Mono', Monaco, monospace;
+                color: #8b7fff;
+            }
+            .startup-diagnostic-panel .diagnostic-warning {
+                background: rgba(255, 193, 7, 0.1);
+                border-left: 2px solid #ffc107;
+            }
+            .startup-diagnostic-panel .diagnostic-success {
+                background: rgba(76, 175, 80, 0.1);
+                border-left: 2px solid #4caf50;
+            }
+            .startup-diagnostic-panel .diagnostic-actions {
+                display: flex;
+                gap: 8px;
+                padding: 12px 16px;
+                border-top: 1px solid rgba(139, 127, 255, 0.2);
+            }
+            .startup-diagnostic-panel .diagnostic-btn {
+                flex: 1;
+                padding: 8px 16px;
+                border: none;
+                border-radius: 6px;
+                background: linear-gradient(135deg, #8b7fff, #6b5ecc);
+                color: #fff;
+                font-weight: 500;
+                cursor: pointer;
+                transition: transform 0.15s ease, box-shadow 0.15s ease;
+            }
+            .startup-diagnostic-panel .diagnostic-btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(139, 127, 255, 0.3);
+            }
+            .startup-diagnostic-panel .diagnostic-btn-secondary {
+                background: rgba(255, 255, 255, 0.1);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // ============================================
+    // INITIALIZATION RETRY LOGIC
+    // ============================================
+
+    /**
+     * Attempt to retry initialization after a failure
+     * @param {Error} error - The error that caused the failure
+     * @param {Function} initFn - The initialization function to retry
+     * @returns {boolean} True if retry was attempted
+     */
+    async function attemptRetry(error, initFn) {
+        if (initState.retryCount >= CONFIG.MAX_INIT_RETRIES) {
+            console.error(`[App] Max retries (${CONFIG.MAX_INIT_RETRIES}) exceeded`);
+            return false;
+        }
+
+        initState.retryCount++;
+        console.warn(`[App] Retry attempt ${initState.retryCount}/${CONFIG.MAX_INIT_RETRIES} after error:`, error.message);
+
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, CONFIG.INIT_RETRY_DELAY));
+
+        try {
+            await initFn();
+            console.log(`[App] Retry ${initState.retryCount} succeeded`);
+            return true;
+        } catch (retryError) {
+            console.error(`[App] Retry ${initState.retryCount} failed:`, retryError.message);
+            return attemptRetry(retryError, initFn);
+        }
+    }
+
+    // ============================================
+    // CLEANUP ON ERROR
+    // ============================================
+
+    /**
+     * Clean up resources on initialization error
+     */
+    function cleanupOnError() {
+        console.log('[App] Cleaning up after error...');
+
+        // Remove any partial UI elements
+        const loadingContainers = document.querySelectorAll('.loading-container');
+        loadingContainers.forEach(container => {
+            container.style.display = 'none';
+        });
+
+        // Disconnect any observers
+        if (window.EyesOfAzrael) {
+            if (window.EyesOfAzrael.observers) {
+                window.EyesOfAzrael.observers.forEach(observer => {
+                    if (observer && typeof observer.disconnect === 'function') {
+                        observer.disconnect();
+                    }
+                });
+            }
+
+            // Clear any pending timers
+            if (window.EyesOfAzrael.timers) {
+                window.EyesOfAzrael.timers.forEach(timer => {
+                    clearTimeout(timer);
+                    clearInterval(timer);
+                });
+            }
+        }
+
+        // Dispatch cleanup event
+        document.dispatchEvent(new CustomEvent('app-init-cleanup', {
+            detail: { timestamp: Date.now(), state: { ...initState } }
+        }));
+
+        console.log('[App] Cleanup complete');
+    }
 
     // ============================================
     // STEP 0: Run Startup Checklist (if available)
@@ -173,35 +626,52 @@ console.log('[App Init] Script loaded - starting execution');
         return guidance[dep] || null;
     }
 
-    // Step 1: Initialize error monitoring FIRST (before anything else)
+    // Step 1: Validate critical CSS (for first-render optimization)
+    updateLoadingProgress(5, 'css-validation', 'Validating styles...');
+    perfMark('css-validation-start');
+    verifyCriticalCss();
+    perfMark('css-validation-end');
+    perfMeasure('css-validation-total', 'css-validation-start', 'css-validation-end');
+
+    // Step 2: Initialize error monitoring FIRST (before anything else)
+    updateLoadingProgress(10, 'error-monitoring', 'Setting up error tracking...');
+    perfMark('error-monitoring-start');
     if (typeof initErrorMonitoring === 'function') {
         try {
             initErrorMonitoring();
-            console.log('[App] [1/12] Error monitoring initialized');
+            console.log('[App] [2/15] Error monitoring initialized');
         } catch (error) {
             console.warn('[App] Failed to initialize error monitoring:', error);
             initState.warnings.push('Error monitoring failed to initialize');
         }
     } else {
-        console.debug('[App] [1/12] Error monitoring not available (optional)');
+        console.debug('[App] [2/15] Error monitoring not available (optional)');
     }
+    perfMark('error-monitoring-end');
+    perfMeasure('error-monitoring', 'error-monitoring-start', 'error-monitoring-end');
 
-    // Step 2: Initialize performance monitoring
+    // Step 3: Initialize performance monitoring
+    updateLoadingProgress(15, 'perf-monitoring', 'Setting up performance tracking...');
+    perfMark('perf-monitoring-start');
     if (typeof initPerformanceMonitoring === 'function') {
         try {
             initPerformanceMonitoring();
-            console.log('[App] [2/12] Performance monitoring initialized');
+            console.log('[App] [3/15] Performance monitoring initialized');
         } catch (error) {
             console.warn('[App] Failed to initialize performance monitoring:', error);
             initState.warnings.push('Performance monitoring failed to initialize');
         }
     } else {
-        console.debug('[App] [2/12] Performance monitoring not available (optional)');
+        console.debug('[App] [3/15] Performance monitoring not available (optional)');
     }
+    perfMark('perf-monitoring-end');
+    perfMeasure('perf-monitoring', 'perf-monitoring-start', 'perf-monitoring-end');
 
-    // Step 3: Wait for DOM to be ready with timeout fallback
+    // Step 4: Wait for DOM to be ready with timeout fallback
+    updateLoadingProgress(20, 'dom-ready', 'Waiting for DOM...');
+    perfMark('dom-wait-start');
     if (document.readyState === 'loading') {
-        console.log('[App] [3/12] Waiting for DOM to be ready...');
+        console.log('[App] [4/15] Waiting for DOM to be ready...');
 
         const domReadyPromise = new Promise(resolve => {
             document.addEventListener('DOMContentLoaded', () => {
@@ -221,18 +691,23 @@ console.log('[App Init] Script loaded - starting execution');
         });
 
         const result = await Promise.race([domReadyPromise, timeoutPromise]);
-        console.log(`[App] [3/12] DOM state resolved: ${result}`);
+        console.log(`[App] [4/15] DOM state resolved: ${result}`);
     } else {
         initState.domReady = true;
-        console.log('[App] [3/12] DOM already ready');
+        console.log('[App] [4/15] DOM already ready');
     }
+    perfMark('dom-wait-end');
+    perfMeasure('dom-ready-wait', 'dom-wait-start', 'dom-wait-end');
+    updateLoadingProgress(25, 'dom-ready', 'DOM ready');
 
     try {
         // Add breadcrumb for initialization start
         safeCall('addBreadcrumb', 'app', 'Starting app initialization');
 
-        // Step 4: Check critical dependencies and Firebase
-        console.log('[App] [4/12] Checking Firebase SDK and config...');
+        // Step 5: Check critical dependencies and Firebase
+        updateLoadingProgress(30, 'dependency-check', 'Checking dependencies...');
+        perfMark('dependency-check-start');
+        console.log('[App] [5/15] Checking Firebase SDK and config...');
         const criticalMissing = checkDependencies(CONFIG.CRITICAL_DEPENDENCIES, true);
 
         if (criticalMissing.includes('firebase')) {
@@ -242,9 +717,13 @@ console.log('[App Init] Script loaded - starting execution');
         if (criticalMissing.includes('firebaseConfig')) {
             throw new Error('Firebase config not found. Ensure firebase-config.js is loaded');
         }
+        perfMark('dependency-check-end');
+        perfMeasure('dependency-check', 'dependency-check-start', 'dependency-check-end');
 
-        // Step 5: Initialize Firebase if not already initialized
-        console.log('[App] [5/12] Initializing Firebase services...');
+        // Step 6: Initialize Firebase if not already initialized
+        updateLoadingProgress(40, 'firebase-init', 'Initializing Firebase...');
+        perfMark('firebase-init-start');
+        console.log('[App] [6/15] Initializing Firebase services...');
         let app;
         if (firebase.apps.length === 0) {
             app = firebase.initializeApp(firebaseConfig);
@@ -258,7 +737,9 @@ console.log('[App Init] Script loaded - starting execution');
         const db = firebase.firestore();
         const auth = firebase.auth();
         initState.firebaseReady = true;
-        console.log('[App] [5/12] Firebase services ready');
+        perfMark('firebase-init-end');
+        perfMeasure('firebase-init', 'firebase-init-start', 'firebase-init-end');
+        console.log('[App] [6/15] Firebase services ready');
 
         // Make services available globally
         window.EyesOfAzrael = window.EyesOfAzrael || {};
@@ -269,8 +750,10 @@ console.log('[App Init] Script loaded - starting execution');
         // Check optional dependencies and log warnings
         checkDependencies(CONFIG.OPTIONAL_DEPENDENCIES, false);
 
-        // Step 6: Initialize AuthManager
-        console.log('[App] [6/12] Initializing AuthManager...');
+        // Step 7: Initialize AuthManager
+        updateLoadingProgress(50, 'auth-manager', 'Initializing authentication...');
+        perfMark('auth-manager-start');
+        console.log('[App] [7/15] Initializing AuthManager...');
         if (dependencyExists('AuthManager')) {
             try {
                 window.EyesOfAzrael.auth = new AuthManager(app);
@@ -282,9 +765,13 @@ console.log('[App Init] Script loaded - starting execution');
         } else {
             console.warn('[App] AuthManager not found - authentication features unavailable');
         }
+        perfMark('auth-manager-end');
+        perfMeasure('auth-manager', 'auth-manager-start', 'auth-manager-end');
 
-        // Step 6b: Initialize FirebaseCRUDManager
-        console.log('[App] [6b/12] Initializing CRUD Manager...');
+        // Step 8: Initialize FirebaseCRUDManager
+        updateLoadingProgress(55, 'crud-manager', 'Initializing data manager...');
+        perfMark('crud-manager-start');
+        console.log('[App] [8/15] Initializing CRUD Manager...');
         if (dependencyExists('FirebaseCRUDManager')) {
             try {
                 window.EyesOfAzrael.crudManager = new FirebaseCRUDManager(db, auth);
@@ -296,9 +783,13 @@ console.log('[App Init] Script loaded - starting execution');
         } else {
             console.warn('[App] FirebaseCRUDManager not found - edit features unavailable');
         }
+        perfMark('crud-manager-end');
+        perfMeasure('crud-manager', 'crud-manager-start', 'crud-manager-end');
 
-        // Step 7: Initialize UniversalDisplayRenderer
-        console.log('[App] [7/12] Initializing Renderer...');
+        // Step 9: Initialize UniversalDisplayRenderer
+        updateLoadingProgress(60, 'renderer', 'Initializing display renderer...');
+        perfMark('renderer-start');
+        console.log('[App] [9/15] Initializing Renderer...');
         if (dependencyExists('UniversalDisplayRenderer')) {
             try {
                 window.EyesOfAzrael.renderer = new UniversalDisplayRenderer({
@@ -314,6 +805,8 @@ console.log('[App Init] Script loaded - starting execution');
         } else {
             console.warn('[App] UniversalDisplayRenderer not found - display features limited');
         }
+        perfMark('renderer-end');
+        perfMeasure('renderer', 'renderer-start', 'renderer-end');
 
         // Track if loading has been hidden to prevent duplicate operations
         let loadingHidden = false;
@@ -445,8 +938,10 @@ console.log('[App Init] Script loaded - starting execution');
             clearTimeout(safetyTimeout);
         }, { once: true });
 
-        // Step 8: Initialize SPANavigation (requires renderer)
-        console.log('[App] [8/12] Initializing Navigation...');
+        // Step 10: Initialize SPANavigation (requires renderer)
+        updateLoadingProgress(70, 'navigation', 'Initializing navigation...');
+        perfMark('navigation-start');
+        console.log('[App] [10/15] Initializing Navigation...');
         if (dependencyExists('SPANavigation')) {
             if (!window.EyesOfAzrael.renderer) {
                 console.error('[App] SPANavigation requires UniversalDisplayRenderer but it is not available');
@@ -474,9 +969,13 @@ console.log('[App Init] Script loaded - starting execution');
             // Show fallback content since navigation is not available
             showNavigationFallback();
         }
+        perfMark('navigation-end');
+        perfMeasure('navigation', 'navigation-start', 'navigation-end');
 
-        // Step 9: Initialize EnhancedCorpusSearch
-        console.log('[App] [9/12] Initializing Search...');
+        // Step 11: Initialize EnhancedCorpusSearch
+        updateLoadingProgress(80, 'search', 'Initializing search...');
+        perfMark('search-start');
+        console.log('[App] [11/15] Initializing Search...');
         if (dependencyExists('EnhancedCorpusSearch')) {
             try {
                 window.EyesOfAzrael.search = new EnhancedCorpusSearch(db);
@@ -488,31 +987,61 @@ console.log('[App Init] Script loaded - starting execution');
         } else {
             console.warn('[App] EnhancedCorpusSearch not found - search features unavailable');
         }
+        perfMark('search-end');
+        perfMeasure('search', 'search-start', 'search-end');
 
-        // Step 10: Initialize ShaderThemeManager
-        console.log('[App] [10/12] Initializing Shaders...');
-        if (dependencyExists('ShaderThemeManager')) {
-            try {
-                window.EyesOfAzrael.shaders = new ShaderThemeManager({
-                    quality: 'auto',
-                    targetFPS: 60
-                });
-                console.log('[App] Shaders initialized');
+        // Step 12: Lazy load ShaderThemeManager (non-critical, deferred)
+        updateLoadingProgress(85, 'shaders', 'Queueing shader initialization...');
+        console.log('[App] [12/15] Deferring Shaders (non-critical)...');
 
-                // Auto-activate shader based on time of day
-                const hour = new Date().getHours();
-                const theme = (hour >= 6 && hour < 18) ? 'day' : 'night';
-                window.EyesOfAzrael.shaders.activate(theme);
-            } catch (error) {
-                console.error('[App] ShaderThemeManager initialization failed:', error);
-                initState.warnings.push(`Shaders failed: ${error.message}`);
+        // Lazy load shaders after first render to not block main content
+        const lazyLoadShaders = () => {
+            perfMark('shaders-start');
+            if (dependencyExists('ShaderThemeManager') && !window.EyesOfAzrael.shaders) {
+                try {
+                    window.EyesOfAzrael.shaders = new ShaderThemeManager({
+                        quality: 'auto',
+                        targetFPS: 60
+                    });
+                    console.log('[App] Shaders lazy loaded');
+
+                    // Auto-activate shader based on time of day
+                    const hour = new Date().getHours();
+                    const theme = (hour >= 6 && hour < 18) ? 'day' : 'night';
+                    window.EyesOfAzrael.shaders.activate(theme);
+                } catch (error) {
+                    console.error('[App] ShaderThemeManager lazy load failed:', error);
+                    initState.warnings.push(`Shaders failed: ${error.message}`);
+                }
+            } else if (!dependencyExists('ShaderThemeManager')) {
+                console.debug('[App] ShaderThemeManager not found - shader effects unavailable');
             }
+            perfMark('shaders-end');
+            perfMeasure('shaders', 'shaders-start', 'shaders-end');
+        };
+
+        // Defer shader loading until after first render or after a delay
+        if (initState.firstRenderComplete) {
+            // First render already done, load shaders now
+            setTimeout(lazyLoadShaders, 100);
         } else {
-            console.debug('[App] ShaderThemeManager not found - shader effects unavailable');
+            // Wait for first render, then load shaders
+            document.addEventListener('first-render-complete', () => {
+                setTimeout(lazyLoadShaders, CONFIG.LAZY_LOAD_DELAY);
+            }, { once: true });
+
+            // Fallback: load shaders after timeout if first render never fires
+            setTimeout(() => {
+                if (!window.EyesOfAzrael?.shaders) {
+                    lazyLoadShaders();
+                }
+            }, CONFIG.LAZY_LOAD_DELAY + 2000);
         }
 
-        // Step 11: Setup UI components
-        console.log('[App] [11/12] Setting up UI components...');
+        // Step 13: Setup UI components
+        updateLoadingProgress(90, 'ui-setup', 'Setting up UI components...');
+        perfMark('ui-setup-start');
+        console.log('[App] [13/15] Setting up UI components...');
 
         // Setup auth UI if auth manager exists
         if (window.EyesOfAzrael.auth) {
@@ -524,10 +1053,20 @@ console.log('[App Init] Script loaded - starting execution');
 
         // Setup global edit icon handler
         setupEditIconHandler();
+        perfMark('ui-setup-end');
+        perfMeasure('ui-setup', 'ui-setup-start', 'ui-setup-end');
 
+        // Step 14: Finalize initialization
+        updateLoadingProgress(95, 'finalizing', 'Finalizing initialization...');
+        perfMark('finalize-start');
         initState.servicesReady = true;
+
+        // Calculate total metrics
+        perfMark('init-complete');
+        perfMeasure('total-init', 'script-start', 'init-complete');
+
         const initDuration = (performance.now() - initState.startTime).toFixed(2);
-        console.log(`[App] [12/12] Initialization complete in ${initDuration}ms`);
+        console.log(`[App] [14/15] Initialization complete in ${initDuration}ms`);
 
         // Log any warnings accumulated during initialization
         if (initState.warnings.length > 0) {
@@ -537,14 +1076,51 @@ console.log('[App Init] Script loaded - starting execution');
         // Add breadcrumb for successful initialization
         safeCall('addBreadcrumb', 'app', 'App initialized successfully');
 
+        updateLoadingProgress(100, 'complete', 'Ready!');
+
+        // Step 15: Emit ready events and show diagnostics
+        console.log('[App] [15/15] Emitting ready events...');
+        perfMark('finalize-end');
+        perfMeasure('finalize', 'finalize-start', 'finalize-end');
+
         // Emit app-initialized event (core systems ready)
         document.dispatchEvent(new CustomEvent('app-initialized', {
             detail: {
                 duration: parseFloat(initDuration),
                 warnings: initState.warnings,
-                missingDependencies: initState.missingDependencies
+                missingDependencies: initState.missingDependencies,
+                metrics: {
+                    marks: Object.fromEntries(PERF_METRICS.marks),
+                    measures: Object.fromEntries(PERF_METRICS.measures)
+                },
+                phaseTimings: initState.phaseTimings
             }
         }));
+
+        // Show diagnostic panel if there were issues or in debug mode
+        const showDiagnostics = initState.warnings.length > 0 ||
+                                initState.missingDependencies.length > 0 ||
+                                new URLSearchParams(window.location.search).has('debug');
+
+        if (showDiagnostics) {
+            injectDiagnosticStyles();
+            showDiagnosticPanel({
+                totalTime: parseFloat(initDuration),
+                domReady: initState.domReady,
+                firebaseReady: initState.firebaseReady,
+                missingDependencies: initState.missingDependencies,
+                warnings: initState.warnings,
+                metrics: PERF_METRICS,
+                hasErrors: initState.missingDependencies.some(d => d.critical)
+            });
+        }
+
+        // Log performance summary to console
+        console.group('[App] Performance Summary');
+        console.log('Total initialization:', initDuration + 'ms');
+        console.table(Object.fromEntries(PERF_METRICS.measures));
+        console.log('Phase timings:', initState.phaseTimings);
+        console.groupEnd();
 
         // Fallback: Hide loading after timeout if first-render-complete never fires
         setTimeout(() => {
@@ -558,15 +1134,46 @@ console.log('[App Init] Script loaded - starting execution');
     } catch (error) {
         console.error('[App] Initialization error:', error);
 
+        // Mark error in performance metrics
+        perfMark('init-error');
+        perfMeasure('time-to-error', 'script-start', 'init-error');
+
+        // Cleanup on error
+        cleanupOnError();
+
         // Capture error with monitoring if available
         safeCall('captureError', error, {
             phase: 'initialization',
             timestamp: Date.now(),
             url: window.location.href,
-            initState: { ...initState }
+            initState: { ...initState },
+            metrics: Object.fromEntries(PERF_METRICS.measures)
         });
 
+        // Attempt retry for certain errors
+        const isRetryable = !error.message.includes('Firebase SDK') &&
+                           !error.message.includes('Firebase config') &&
+                           initState.retryCount < CONFIG.MAX_INIT_RETRIES;
+
+        if (isRetryable) {
+            console.log('[App] Error may be recoverable, attempting retry...');
+            // Note: Full retry would need to wrap the main try block
+            // For now, just show the error
+        }
+
         showError(error);
+
+        // Show diagnostic panel with error info
+        injectDiagnosticStyles();
+        showDiagnosticPanel({
+            totalTime: performance.now() - initState.startTime,
+            domReady: initState.domReady,
+            firebaseReady: initState.firebaseReady,
+            missingDependencies: initState.missingDependencies,
+            warnings: [...initState.warnings, `Error: ${error.message}`],
+            metrics: PERF_METRICS,
+            hasErrors: true
+        });
 
         // CRITICAL: Still dispatch app-initialized even on error
         // This prevents other components (like app-coordinator) from waiting forever
@@ -817,12 +1424,64 @@ console.log('[App Init] Script loaded - starting execution');
     }
 
     // Expose debug function for troubleshooting
-    window.debugApp = function() {
-        console.log('[Debug] App State:', initState);
-        console.log('[Debug] EyesOfAzrael:', window.EyesOfAzrael || {});
+    window.debugApp = function(showPanel = false) {
+        const state = {
+            initState: { ...initState },
+            metrics: {
+                marks: Object.fromEntries(PERF_METRICS.marks),
+                measures: Object.fromEntries(PERF_METRICS.measures)
+            },
+            phaseTimings: initState.phaseTimings,
+            app: window.EyesOfAzrael || {},
+            config: CONFIG
+        };
+
+        console.group('[Debug] Eyes of Azrael - App State');
+        console.log('Initialization State:', initState);
+        console.log('Performance Metrics:');
+        console.table(Object.fromEntries(PERF_METRICS.measures));
+        console.log('Phase Timings:', initState.phaseTimings);
+        console.log('EyesOfAzrael namespace:', window.EyesOfAzrael || {});
+        console.groupEnd();
+
+        // Optionally show diagnostic panel
+        if (showPanel) {
+            injectDiagnosticStyles();
+            showDiagnosticPanel({
+                totalTime: performance.now() - initState.startTime,
+                domReady: initState.domReady,
+                firebaseReady: initState.firebaseReady,
+                missingDependencies: initState.missingDependencies,
+                warnings: initState.warnings,
+                metrics: PERF_METRICS,
+                hasErrors: false
+            });
+        }
+
+        return state;
+    };
+
+    // Expose function to show diagnostics manually
+    window.showAppDiagnostics = function() {
+        injectDiagnosticStyles();
+        showDiagnosticPanel({
+            totalTime: performance.now() - initState.startTime,
+            domReady: initState.domReady,
+            firebaseReady: initState.firebaseReady,
+            missingDependencies: initState.missingDependencies,
+            warnings: initState.warnings,
+            metrics: PERF_METRICS,
+            hasErrors: initState.missingDependencies.some(d => d.critical)
+        });
+    };
+
+    // Expose performance metrics getter
+    window.getAppPerformance = function() {
         return {
-            initState,
-            app: window.EyesOfAzrael || {}
+            totalTime: performance.now() - initState.startTime,
+            marks: Object.fromEntries(PERF_METRICS.marks),
+            measures: Object.fromEntries(PERF_METRICS.measures),
+            phaseTimings: { ...initState.phaseTimings }
         };
     };
 

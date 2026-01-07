@@ -767,7 +767,7 @@ async function main() {
     if (specificConcept) {
       await enricher.enrichOne(specificConcept);
     } else {
-      await enrichAll();
+      await enricher.enrichAll();
     }
   } catch (err) {
     console.error('Fatal error:', err);

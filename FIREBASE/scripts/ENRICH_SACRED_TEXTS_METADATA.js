@@ -23,8 +23,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Configuration
-const FIREBASE_DATA_DIR = path.join(__dirname, '../data');
-const TEXTS_DIR = path.join(FIREBASE_DATA_DIR, 'texts');
+const TEXTS_DIR = path.join(__dirname, '../../firebase-assets-downloaded/texts');
 const DRY_RUN = process.argv.includes('--dry-run');
 const COLLECTION = process.argv.find(arg => arg.startsWith('--collection='))?.split('=')[1] || 'texts';
 
@@ -674,12 +673,19 @@ function processTextFile(filename) {
 
   try {
     const content = fs.readFileSync(filePath, 'utf8');
-    const texts = JSON.parse(content);
+    const data = JSON.parse(content);
 
-    if (!Array.isArray(texts)) {
+    let texts = [];
+
+    // Handle both array format and single object format
+    if (Array.isArray(data)) {
+      texts = data;
+    } else if (typeof data === 'object' && data.id) {
+      texts = [data];
+    } else {
       stats.errors.push({
         file: filename,
-        error: 'File does not contain an array of texts'
+        error: 'File does not contain valid text entity/entities'
       });
       return;
     }
@@ -708,7 +714,9 @@ function processTextFile(filename) {
 
     // Write back if modified and not in dry-run mode
     if (fileModified && !DRY_RUN) {
-      fs.writeFileSync(filePath, JSON.stringify(texts, null, 2));
+      // Write back in the same format
+      const outputData = Array.isArray(data) ? texts : texts[0];
+      fs.writeFileSync(filePath, JSON.stringify(outputData, null, 2));
       stats.filesModified++;
       console.log(`✓ Updated: ${filename} (${fileStats.enriched}/${fileStats.processed} texts enriched)`);
     } else if (fileModified && DRY_RUN) {

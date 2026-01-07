@@ -1,7 +1,7 @@
 /**
- * Application Coordinator - Enhanced Version
+ * Application Coordinator - Polished Version
  * Manages initialization order and ensures auth + navigation work together
- * With detailed state tracking and diagnostic logging
+ * With detailed state tracking, diagnostic logging, and navigation metrics integration
  *
  * INITIALIZATION FLOW:
  * 1. DOM ready (immediate or via DOMContentLoaded)
@@ -9,23 +9,34 @@
  * 3. Navigation trigger (handleRoute called)
  * 4. auth-ready event (optional, does not block public routes)
  *
+ * POLISHED FEATURES:
+ * - Navigation metrics tracking and performance monitoring
+ * - Prefetch cache management
+ * - Scroll position restoration coordination
+ * - Page transition coordination
+ * - Enhanced error recovery with retry hints
+ *
  * ERROR RECOVERY:
  * - Timeout fallback if app-initialized never fires (10 seconds)
  * - Timeout fallback if navigation not available (15 seconds)
  * - Error boundaries to prevent UI blocking
+ * - Retry mechanisms with exponential backoff
  */
 
 (function() {
     'use strict';
 
-    console.log('[App Coordinator] Starting enhanced coordinator...');
+    console.log('[App Coordinator] Starting polished coordinator...');
 
     // Configuration
     const CONFIG = {
         APP_INIT_TIMEOUT: 10000,      // 10 seconds to wait for app-initialized
         NAVIGATION_TIMEOUT: 15000,     // 15 seconds to wait for navigation
         HEALTH_CHECK_INTERVAL: 5000,   // 5 seconds between health checks
-        MAX_HEALTH_CHECKS: 12          // Stop after 1 minute
+        MAX_HEALTH_CHECKS: 12,         // Stop after 1 minute
+        ENABLE_METRICS: true,          // Enable navigation metrics tracking
+        ENABLE_PREFETCH: true,         // Enable link prefetching
+        ENABLE_TRANSITIONS: true       // Enable page transitions
     };
 
     // Track initialization state with timestamps
@@ -433,6 +444,93 @@
         console.log('[App Coordinator] Forcing route check...');
         checkAndInitialize();
     };
+
+    // Navigation metrics API
+    window.getNavigationMetrics = () => {
+        if (window.NavigationMetrics) {
+            return {
+                metrics: window.NavigationMetrics.getMetrics(),
+                averageTime: window.NavigationMetrics.getAverageTime(),
+                count: window.NavigationMetrics.getMetrics().length
+            };
+        }
+        return null;
+    };
+
+    // Navigation performance report
+    window.printNavigationReport = () => {
+        const metrics = window.getNavigationMetrics();
+        if (!metrics) {
+            console.log('[Navigation] Metrics not available');
+            return;
+        }
+
+        console.group('[Navigation] Performance Report');
+        console.log(`Total navigations: ${metrics.count}`);
+        console.log(`Average time: ${metrics.averageTime.toFixed(2)}ms`);
+
+        if (metrics.metrics.length > 0) {
+            const latest = metrics.metrics[metrics.metrics.length - 1];
+            console.log('Latest navigation:', {
+                route: latest.route,
+                totalTime: `${latest.totalTime.toFixed(2)}ms`,
+                phases: latest.phases
+            });
+
+            // Find slowest phase
+            if (latest.phases) {
+                const slowestPhase = Object.entries(latest.phases)
+                    .sort(([,a], [,b]) => b - a)[0];
+                if (slowestPhase) {
+                    console.log(`Slowest phase: ${slowestPhase[0]} (${slowestPhase[1].toFixed(2)}ms)`);
+                }
+            }
+        }
+        console.groupEnd();
+    };
+
+    // Clear navigation caches
+    window.clearNavigationCaches = () => {
+        if (window.RoutePreloader) {
+            window.RoutePreloader.clearCache();
+            console.log('[App Coordinator] Prefetch cache cleared');
+        }
+        if (window.ScrollManager) {
+            window.ScrollManager.clear();
+            console.log('[App Coordinator] Scroll positions cleared');
+        }
+        if (window.NavigationMetrics) {
+            window.NavigationMetrics.clear();
+            console.log('[App Coordinator] Navigation metrics cleared');
+        }
+    };
+
+    // Configure navigation features
+    window.configureNavigation = (options = {}) => {
+        const nav = window.EyesOfAzrael?.navigation;
+        if (!nav) {
+            console.warn('[App Coordinator] Navigation not available');
+            return;
+        }
+
+        if (typeof options.transitions === 'boolean') {
+            nav.setTransitionsEnabled(options.transitions);
+            console.log(`[App Coordinator] Transitions ${options.transitions ? 'enabled' : 'disabled'}`);
+        }
+
+        if (options.clearCache) {
+            window.clearNavigationCaches();
+        }
+    };
+
+    // Listen for navigation-complete events for logging
+    document.addEventListener('navigation-complete', (event) => {
+        if (CONFIG.ENABLE_METRICS) {
+            const metric = event.detail;
+            const elapsed = Math.round(performance.now() - startTime);
+            console.log(`[App Coordinator +${elapsed}ms] Navigation complete: ${metric.route} (${metric.totalTime.toFixed(0)}ms)`);
+        }
+    });
 
     // Periodic health check
     let healthCheckCount = 0;

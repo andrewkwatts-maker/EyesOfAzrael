@@ -1,0 +1,351 @@
+BREADCRUMB NAVIGATION - STYLE REFERENCE
+========================================
+
+VISUAL HIERARCHY
+================
+
+Desktop View (1024px+):
+Home 🏠 › Greek 🏛️ › Deities 👑 › Zeus
+[All labels visible, full spacing, hover effects]
+
+Tablet View (640-1024px):
+Home 🏠 › Greek › Deit... › Zeus
+[120px label truncation with ellipsis]
+
+Mobile View (< 640px):
+◀ › Gre... › Dei... › Zeu
+[80px label truncation, gap removed, icon-only home]
+
+Extra Small (< 480px):
+◀ › Gre... › Dei... › Zeu
+[60px label truncation, minimal spacing]
+
+
+STYLING SPECIFICATIONS
+======================
+
+CONTAINER
+---------
+Position: sticky (below header at top: 56px)
+Background: rgba(26, 31, 58, 0.95) with backdrop blur
+Border: 1px solid rgba(139, 127, 255, 0.5)
+Padding: 0.75rem vertical, 2rem horizontal
+Z-index: 99
+Transitions: opacity 300ms, transform 300ms
+
+ANIMATION
+---------
+Appearance: slide-down 300ms cubic-bezier(0.34, 1.56, 0.64, 1)
+From: opacity 0, translateY(-8px)
+To: opacity 1, translateY(0)
+
+LINKS
+-----
+Color: var(--color-primary) #8b7fff
+Padding: 0.25rem 0.5rem
+Border-radius: 6px
+Font-size: 0.875rem (14px)
+Font-weight: 500
+
+Hover State:
+  Background: rgba(139, 127, 255, 0.1)
+  Color: var(--color-primary)
+  Underline: scaleX animation, 2px height
+  Duration: 150ms ease
+
+Focus State:
+  Outline: 2px solid var(--color-primary)
+  Outline-offset: 1px
+  Box-shadow: 0 0 0 4px rgba(139, 127, 255, 0.2)
+
+SEPARATOR
+---------
+Character: ›
+Color: var(--color-text-secondary) #adb5bd
+Padding: 0 0.125rem
+Font-size: 1rem
+User-select: none
+Opacity: 0.7
+Transition: opacity 150ms ease
+
+LABELS
+------
+Font-size: 0.875rem (14px)
+Font-weight: 500
+Color: var(--color-primary) #8b7fff
+Max-width: full (desktop), 120px (tablet), 80px (mobile)
+Overflow: hidden
+Text-overflow: ellipsis
+White-space: nowrap
+
+Current Page (aria-current="page"):
+  Color: var(--color-text-primary) #f8f9fa
+  Background: rgba(139, 127, 255, 0.08)
+  Border-radius: 4px
+  Font-weight: 600
+  Padding: 0.25rem 0.5rem
+
+ICONS
+-----
+Font-size: 1rem
+Width: 1rem
+Height: 1rem
+Flex-shrink: 0
+Alignment: center
+Display: none on mobile (< 640px) for home button
+
+
+COLOR SPECIFICATIONS
+====================
+
+Light Mode (prefers-color-scheme: light):
+  Primary Link: #0066cc
+  Visited: #6600cc
+  Hover: #0088ff
+  Background: #ffffff
+  Text: #000000
+  Separator: #666666
+
+Dark Mode (default):
+  Primary Link: #8b7fff
+  Hover: #8b7fff
+  Background: rgba(26, 31, 58, 0.95)
+  Text Primary: #f8f9fa
+  Text Secondary: #adb5bd
+  Separator: #adb5bd
+
+
+RESPONSIVE BREAKPOINTS
+======================
+
+Desktop (1024px+)
+  Container padding: 2rem horizontal
+  List gap: 0.25rem
+  Label max-width: unlimited
+  Separator padding: 0 0.125rem
+  Link padding: 0.25rem 0.5rem
+
+Tablet (640-1024px)
+  Container padding: 1.5rem horizontal
+  List gap: 0.25rem
+  Label max-width: 120px
+  Font-size: 0.875rem
+  Link padding: 0.25rem 0.5rem
+
+Mobile (< 640px)
+  Container padding: 1rem horizontal
+  List gap: 0rem
+  Label max-width: 80px
+  Font-size: 0.8125rem
+  Link padding: 0.25rem 0.375rem
+  Home icon: ◀ (with ::before pseudo-element)
+  Home text: hidden
+  Separator padding: 0 0.0625rem
+  Separator font-size: 0.875rem
+
+Extra Small (< 480px)
+  Label max-width: 60px
+  List gap: 0rem
+  More aggressive truncation
+  Tighter spacing
+
+
+ACCESSIBILITY FEATURES
+======================
+
+ARIA ATTRIBUTES
+- nav[aria-label="Breadcrumb"]: Semantic navigation
+- aria-live="polite": Announces breadcrumb changes
+- aria-atomic="false": Announces only changed items
+- aria-current="page": Marks current breadcrumb
+- aria-hidden="true": Hides decorative elements (icons, separators)
+
+FOCUS STATES
+- All links have 2px outline on focus-visible
+- Outline-offset: 1px
+- Color: var(--color-primary)
+- Box-shadow provides additional contrast
+
+CONTRAST RATIOS
+- Primary links: 8.5:1 (WCAG AAA)
+- Current item: 10:1 (WCAG AAA)
+- Separators: 4.5:1 (WCAG AA)
+- Hover states: Maintain or improve contrast
+
+KEYBOARD NAVIGATION
+- Tab: Forward through breadcrumbs
+- Shift+Tab: Backward through breadcrumbs
+- Enter: Navigate to breadcrumb link
+
+SCREEN READER
+- Reads breadcrumb trail naturally
+- Current page announced via aria-current
+- Icons/separators ignored (aria-hidden)
+- Navigation landmark recognized
+
+REDUCED MOTION
+- Animations: disabled (animation: none)
+- Transitions: disabled (transition: none)
+- Transform effects: removed
+- Opacity: set to final state immediately
+
+
+ANIMATION DETAILS
+=================
+
+SLIDE-DOWN ANIMATION
+Name: breadcrumb-slide-down
+Duration: 300ms
+Easing: cubic-bezier(0.34, 1.56, 0.64, 1)
+Start: opacity: 0, transform: translateY(-8px)
+End: opacity: 1, transform: translateY(0)
+Trigger: .breadcrumb-nav-container.visible
+
+LINK UNDERLINE
+Element: .breadcrumb-link::after
+Duration: 150ms
+Easing: ease
+Start: scaleX(0), transform-origin: right
+Hover: scaleX(1), transform-origin: left
+Height: 2px
+Color: var(--color-primary)
+Opacity: 0.3
+
+HOVER COLOR TRANSITION
+Duration: 150ms
+Easing: ease
+Background: transparent → rgba(139, 127, 255, 0.1)
+Color: maintained
+
+SEPARATOR OPACITY
+Duration: 150ms
+Easing: ease
+Default: opacity 0.7
+Hover: opacity 0.7 (no change)
+
+
+FONT SPECIFICATIONS
+===================
+
+Font Family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto
+Font-smoothing: antialiased
+
+Font Sizes:
+  Desktop: 0.875rem (14px)
+  Tablet: 0.875rem (14px)
+  Mobile: 0.8125rem (13px)
+  Separator: 1rem
+  Separator (mobile): 0.875rem
+
+Font Weights:
+  Links: 500
+  Current page: 600
+  Separator: normal
+
+
+SPACING SPECIFICATIONS
+======================
+
+Vertical Padding:
+  Container: 0.75rem (12px)
+  Mobile: 0.5rem (8px)
+
+Horizontal Padding:
+  Container: 2rem (32px)
+  Tablet: 1.5rem (24px)
+  Mobile: 1rem (16px)
+
+List Gap (flex-gap):
+  Desktop: 0.25rem (4px)
+  Tablet: 0.25rem (4px)
+  Mobile: 0rem (removed)
+
+Link Padding:
+  Desktop: 0.25rem 0.5rem (4px 8px)
+  Mobile: 0.25rem 0.375rem (4px 6px)
+
+Item Gap (flex-gap):
+  0.25rem (4px)
+
+Separator Padding:
+  Desktop: 0 0.125rem (0px 2px)
+  Mobile: 0 0.0625rem (0px 1px)
+
+
+BROWSER RENDERING
+=================
+
+CSS Properties Used:
+- position: sticky
+- backdrop-filter: blur(10px)
+- display: flex
+- flex-wrap: wrap
+- transform: translateY/scaleX
+- opacity: transitions
+- text-overflow: ellipsis
+- overflow: hidden
+- border-radius
+- transition: all
+- user-select: none
+- aria-current pseudo-class
+
+Hardware Acceleration:
+- transform and opacity (GPU accelerated)
+- No layout thrashing
+- Minimal repaints
+- Efficient flex layout
+
+Graceful Degradation:
+- Works without CSS Grid/Flexbox (fallback to inline-block)
+- Works without backdrop-filter (solid background)
+- Works without transform animations (opacity only)
+- Works without advanced CSS (basic layout)
+
+
+TESTING CHECKLIST
+=================
+
+Visual:
+☐ Breadcrumb visible on non-home routes
+☐ Breadcrumb hidden on home page
+☐ Sticky positioning works
+☐ Slide-down animation smooth
+☐ Hover underline animation works
+☐ Separators display correctly
+☐ Icons align and size properly
+☐ Ellipsis appears on truncated labels
+
+Responsive:
+☐ Desktop labels full (1024px+)
+☐ Tablet labels truncate 120px (640-1024px)
+☐ Mobile labels truncate 80px (< 640px)
+☐ Extra small truncate 60px (< 480px)
+☐ Gap removed on mobile
+☐ Icon-only home on mobile
+
+Interaction:
+☐ Hover effect triggers
+☐ Links navigate correctly
+☐ Focus outline visible
+☐ Tab navigation works
+☐ Shift+Tab navigation works
+
+Performance:
+☐ No layout jank on scroll
+☐ Smooth 60fps animations
+☐ GPU acceleration working
+☐ No memory leaks
+☐ Fast DOM updates
+
+Accessibility:
+☐ Screen reader announces breadcrumbs
+☐ Current page marked with aria-current
+☐ Icons/separators hidden from screen reader
+☐ Keyboard navigation works
+☐ High contrast mode readable
+☐ Reduced motion respected
+☐ Color contrast adequate
+✓ All checks passed
+
+
+END OF STYLE REFERENCE

@@ -1,0 +1,627 @@
+/**
+ * User Profile CSS
+ * Styles for user profile pages with reputation, badges, and contribution history
+ */
+
+/* ==================== PROFILE PAGE LAYOUT ==================== */
+
+.user-profile-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* ==================== PROFILE HEADER ==================== */
+
+.profile-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 2rem;
+    padding: 2rem;
+    background: var(--color-surface, rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    border-radius: 16px;
+    margin-bottom: 2rem;
+}
+
+.profile-avatar-section {
+    position: relative;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid var(--color-primary, #6366f1);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+    object-fit: cover;
+}
+
+.profile-avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: white;
+    border: 4px solid var(--color-primary);
+}
+
+.reputation-level-badge {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.85rem;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+}
+
+.reputation-level-badge .level-icon {
+    font-size: 1rem;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.profile-name {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text-primary, #fff);
+    margin: 0 0 0.5rem;
+}
+
+.profile-bio {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+    max-width: 500px;
+}
+
+.profile-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--color-text-tertiary);
+}
+
+.profile-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.profile-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.profile-header-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-self: flex-start;
+}
+
+.btn-edit-profile,
+.btn-block-user,
+.btn-follow-user {
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-edit-profile {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-text-primary);
+}
+
+.btn-edit-profile:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-follow-user {
+    background: var(--color-primary, #6366f1);
+    border: none;
+    color: white;
+}
+
+.btn-follow-user:hover {
+    opacity: 0.9;
+}
+
+.btn-block-user {
+    background: transparent;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+.btn-block-user:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* ==================== REPUTATION SECTION ==================== */
+
+.reputation-section {
+    padding: 1.5rem 2rem;
+    background: var(--color-surface, rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    border-radius: 16px;
+    margin-bottom: 2rem;
+}
+
+.reputation-section .section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0 0 1.5rem;
+}
+
+.reputation-display {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.reputation-score-display {
+    text-align: center;
+    padding: 1rem 2rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+}
+
+.reputation-score-display .score-value {
+    display: block;
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.reputation-score-display .score-label {
+    font-size: 0.85rem;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.reputation-progress {
+    flex: 1;
+}
+
+.reputation-progress .progress-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.reputation-progress .current-level {
+    color: var(--color-text-primary);
+    font-weight: 500;
+}
+
+.reputation-progress .next-level {
+    color: var(--color-text-tertiary);
+}
+
+.reputation-progress .progress-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.reputation-progress .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.reputation-progress .progress-label {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    margin-top: 0.35rem;
+}
+
+.reputation-breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.breakdown-item {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+
+.breakdown-item .item-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.breakdown-item .item-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.breakdown-item .item-label {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ==================== STATS SECTION ==================== */
+
+.stats-section {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    padding: 1.5rem;
+    background: var(--color-surface, rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.stat-card .stat-label {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* ==================== BADGES SECTION ==================== */
+
+.badges-section {
+    padding: 1.5rem 2rem;
+    background: var(--color-surface, rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    border-radius: 16px;
+    margin-bottom: 2rem;
+}
+
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.badge-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.badge-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.badge-card.pinned {
+    border-color: var(--color-primary, #6366f1);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.badge-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 1.25rem;
+}
+
+.badge-icon-wrapper.bronze { background: rgba(205, 127, 50, 0.2); }
+.badge-icon-wrapper.silver { background: rgba(192, 192, 192, 0.2); }
+.badge-icon-wrapper.gold { background: rgba(255, 215, 0, 0.2); }
+.badge-icon-wrapper.platinum { background: rgba(229, 228, 226, 0.2); }
+.badge-icon-wrapper.legendary { background: rgba(155, 89, 182, 0.2); }
+
+.badge-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.badge-name {
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.badge-description {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    margin-top: 0.15rem;
+}
+
+.badge-pin-btn {
+    padding: 0.35rem;
+    background: transparent;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.badge-card:hover .badge-pin-btn {
+    opacity: 1;
+}
+
+.badge-card.pinned .badge-pin-btn {
+    opacity: 1;
+    color: var(--color-primary);
+}
+
+/* ==================== CONTRIBUTION TABS ==================== */
+
+.contribution-tabs {
+    margin-bottom: 2rem;
+}
+
+.contribution-tabs .tabs-nav {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.contribution-tabs .tab-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.contribution-tabs .tab-btn:hover {
+    color: var(--color-text-primary);
+}
+
+.contribution-tabs .tab-btn.active {
+    background: var(--color-primary, #6366f1);
+    color: white;
+}
+
+.contribution-tabs .tab-btn .tab-count {
+    margin-left: 0.35rem;
+    padding: 0.1rem 0.4rem;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    font-size: 0.75rem;
+}
+
+.contribution-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.contribution-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--color-surface, rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    border-radius: 12px;
+    transition: border-color 0.2s ease;
+}
+
+.contribution-item:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.contribution-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    font-size: 1.25rem;
+}
+
+.contribution-info {
+    flex: 1;
+}
+
+.contribution-title {
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.contribution-meta {
+    font-size: 0.8rem;
+    color: var(--color-text-tertiary);
+}
+
+.contribution-votes {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.contribution-votes.positive { color: #22c55e; }
+.contribution-votes.negative { color: #ef4444; }
+
+/* ==================== ACTIVITY HEATMAP ==================== */
+
+.activity-heatmap {
+    padding: 1.5rem;
+    background: var(--color-surface, rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    border-radius: 16px;
+}
+
+.heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(52, 1fr);
+    gap: 3px;
+}
+
+.heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.heatmap-cell.level-1 { background: rgba(99, 102, 241, 0.2); }
+.heatmap-cell.level-2 { background: rgba(99, 102, 241, 0.4); }
+.heatmap-cell.level-3 { background: rgba(99, 102, 241, 0.6); }
+.heatmap-cell.level-4 { background: rgba(99, 102, 241, 0.8); }
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 1024px) {
+    .stats-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .user-profile-page {
+        padding: 1rem;
+    }
+
+    .profile-header {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .profile-avatar-section {
+        display: flex;
+        justify-content: center;
+    }
+
+    .profile-info {
+        align-items: center;
+    }
+
+    .profile-meta {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .profile-badges {
+        justify-content: center;
+    }
+
+    .profile-header-actions {
+        flex-direction: row;
+        width: 100%;
+    }
+
+    .profile-header-actions button {
+        flex: 1;
+    }
+
+    .reputation-display {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .stats-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .contribution-tabs .tabs-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .contribution-tabs .tab-btn {
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+
+    .badges-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profile-avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        font-size: 2.5rem;
+    }
+
+    .profile-name {
+        font-size: 1.5rem;
+    }
+
+    .badges-grid {
+        grid-template-columns: 1fr;
+    }
+}

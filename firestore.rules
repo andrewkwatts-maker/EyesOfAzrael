@@ -711,6 +711,170 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ===== USER PERSPECTIVES COLLECTION =====
+    // Path: /user_perspectives/{perspectiveId}
+    // User-created overlays/interpretations of entities
+
+    match /user_perspectives/{perspectiveId} {
+      function isValidPerspective() {
+        return request.resource.data.keys().hasAll(['userId', 'entityId', 'entityType', 'entityCollection', 'visibility', 'status'])
+               && request.resource.data.userId == request.auth.uid
+               && request.resource.data.entityId is string
+               && request.resource.data.entityType is string
+               && request.resource.data.visibility in ['public', 'private']
+               && request.resource.data.status == 'active';
+      }
+
+      // Public perspectives visible to all, private only to owner
+      allow read: if resource.data.visibility == 'public'
+                  || isOwner(resource.data.userId)
+                  || isModerator();
+
+      // Authenticated users can create their own perspectives
+      allow create: if isAuthenticated()
+                    && isValidPerspective()
+                    && request.resource.data.upvoteCount == 0
+                    && request.resource.data.downvoteCount == 0
+                    && request.resource.data.netVotes == 0;
+
+      // Owner can update (cannot change userId, engagement counts)
+      allow update: if isOwner(resource.data.userId)
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.upvoteCount == resource.data.upvoteCount
+                    && request.resource.data.downvoteCount == resource.data.downvoteCount;
+
+      // Owner can delete, moderators can delete flagged content
+      allow delete: if isOwner(resource.data.userId) || isModerator();
+
+      // Votes subcollection
+      match /votes/{voteUserId} {
+        allow read: if true;
+        allow write: if isAuthenticated()
+                     && request.auth.uid == voteUserId
+                     && request.resource.data.value in [1, -1];
+      }
+    }
+
+    // ===== USER RELATIONSHIPS COLLECTION =====
+    // Path: /user_relationships/{relationshipId}
+    // User-suggested connections between entities
+
+    match /user_relationships/{relationshipId} {
+      function isValidRelationship() {
+        return request.resource.data.keys().hasAll(['fromEntityId', 'toEntityId', 'relationshipType', 'suggestedBy', 'title', 'description', 'status'])
+               && request.resource.data.suggestedBy == request.auth.uid
+               && request.resource.data.title is string
+               && request.resource.data.title.size() >= 5
+               && request.resource.data.title.size() <= 200
+               && request.resource.data.description is string
+               && request.resource.data.description.size() >= 20
+               && request.resource.data.description.size() <= 2000
+               && request.resource.data.relationshipType in ['parallel', 'derived', 'influenced', 'contrasts', 'similar', 'family', 'mythological', 'historical', 'thematic', 'symbolic'];
+      }
+
+      // Approved relationships visible to all, pending visible to owner
+      allow read: if resource.data.status == 'approved'
+                  || isOwner(resource.data.suggestedBy)
+                  || isModerator();
+
+      // Authenticated users can suggest relationships
+      allow create: if isAuthenticated()
+                    && isValidRelationship()
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.upvoteCount == 0
+                    && request.resource.data.downvoteCount == 0
+                    && request.resource.data.isOfficial == false;
+
+      // Owner can update pending/rejected relationships
+      allow update: if (isOwner(resource.data.suggestedBy)
+                       && resource.data.status in ['pending', 'rejected']
+                       && request.resource.data.suggestedBy == resource.data.suggestedBy)
+                    || (isAdminEmail() && request.resource.data.suggestedBy == resource.data.suggestedBy);
+
+      // Owner can delete pending, moderators can delete any
+      allow delete: if (isOwner(resource.data.suggestedBy) && resource.data.status == 'pending')
+                    || isModerator();
+
+      // Votes subcollection
+      match /votes/{voteUserId} {
+        allow read: if true;
+        allow write: if isAuthenticated()
+                     && request.auth.uid == voteUserId
+                     && request.resource.data.value in [1, -1];
+      }
+
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isAuthenticated()
+                      && request.resource.data.authorId == request.auth.uid
+                      && request.resource.data.content is string
+                      && request.resource.data.content.size() >= 3
+                      && request.resource.data.content.size() <= 2000;
+        allow update: if isOwner(resource.data.authorId)
+                      && request.resource.data.authorId == resource.data.authorId;
+        allow delete: if isOwner(resource.data.authorId) || isModerator();
+      }
+    }
+
+    // ===== USER REPUTATION COLLECTION =====
+    // Path: /user_reputation/{userId}
+    // READ-ONLY from client - Cloud Functions calculate reputation
+
+    match /user_reputation/{userId} {
+      // Anyone can read reputation (for profiles)
+      allow read: if true;
+
+      // ONLY Cloud Functions can write (prevent cheating)
+      allow create, update, delete: if false;
+    }
+
+    // ===== BADGES COLLECTION =====
+    // Path: /badges/{badgeId}
+    // Badge definitions (admin-managed)
+
+    match /badges/{badgeId} {
+      // Anyone can see badge definitions
+      allow read: if true;
+
+      // Only admin can manage badges
+      allow create, update, delete: if isAdminEmail();
+    }
+
+    // ===== BADGE AWARDS COLLECTION =====
+    // Path: /badge_awards/{awardId}
+    // READ-ONLY from client - Cloud Functions award badges
+
+    match /badge_awards/{awardId} {
+      // Anyone can read badge awards (for profiles)
+      allow read: if true;
+
+      // ONLY Cloud Functions can write (prevent cheating)
+      allow create, update, delete: if false;
+    }
+
+    // ===== COMMUNITY FLAGS COLLECTION =====
+    // Path: /community_flags/{flagId}
+    // User-initiated content reports
+
+    match /community_flags/{flagId} {
+      function isValidFlag() {
+        return request.resource.data.keys().hasAll(['contentType', 'contentId', 'flaggedBy', 'reason', 'status'])
+               && request.resource.data.flaggedBy == request.auth.uid
+               && request.resource.data.reason in ['spam', 'offensive', 'misleading', 'harassment', 'other']
+               && request.resource.data.status == 'pending';
+      }
+
+      // Only admin can read flags
+      allow read: if isAdminEmail();
+
+      // Authenticated users can flag content
+      allow create: if isAuthenticated() && isValidFlag();
+
+      // Only admin can update/delete flags
+      allow update, delete: if isAdminEmail();
+    }
+
     // ===== DEFAULT FALLBACK FOR UNDEFINED COLLECTIONS =====
     // Allow read access to any collection not explicitly defined above
     // This is useful for new collections during development

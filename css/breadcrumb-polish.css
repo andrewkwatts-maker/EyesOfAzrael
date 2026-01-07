@@ -1,0 +1,532 @@
+/**
+ * Breadcrumb Polish - UI/UX Enhancements
+ *
+ * Features:
+ * - Chevron icon separators (>)
+ * - Mobile collapse with ellipsis menu
+ * - Smooth animations
+ * - Truncate long names with ellipsis
+ * - Accessible focus states
+ */
+
+/* ============================================
+   BREADCRUMB ANIMATIONS
+   ============================================ */
+
+@keyframes breadcrumb-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes breadcrumb-menu-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ============================================
+   BREADCRUMB CONTAINER
+   ============================================ */
+
+.breadcrumb-nav-container {
+    display: none;
+    background: rgba(var(--color-bg-secondary-rgb, 21, 26, 53), 0.5);
+    border-bottom: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.3);
+}
+
+.breadcrumb-nav-container.visible {
+    display: block;
+    animation: breadcrumb-fade-in 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.breadcrumb-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.625rem 2rem;
+}
+
+.breadcrumb-container {
+    display: flex;
+    align-items: center;
+    min-height: 28px;
+}
+
+/* ============================================
+   BREADCRUMB LIST
+   ============================================ */
+
+.breadcrumb-list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.breadcrumb-list--collapsed {
+    flex-wrap: nowrap;
+}
+
+/* ============================================
+   BREADCRUMB ITEM
+   ============================================ */
+
+.breadcrumb-item {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.breadcrumb-item--current {
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+/* ============================================
+   BREADCRUMB LINK
+   ============================================ */
+
+.breadcrumb-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    color: var(--color-text-secondary, #adb5bd);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+    max-width: 200px;
+}
+
+.breadcrumb-link:hover {
+    color: var(--color-text-primary, #f8f9fa);
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+}
+
+.breadcrumb-link:focus-visible {
+    outline: 2px solid var(--color-primary, #8b7fff);
+    outline-offset: 2px;
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+}
+
+/* Underline animation on hover */
+.breadcrumb-link::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 0.5rem;
+    right: 0.5rem;
+    height: 1.5px;
+    background: var(--color-primary, #8b7fff);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.2s ease;
+    opacity: 0.6;
+    border-radius: 1px;
+}
+
+.breadcrumb-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+/* ============================================
+   BREADCRUMB CURRENT (Last item - not clickable)
+   ============================================ */
+
+.breadcrumb-current {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    color: var(--color-text-primary, #f8f9fa);
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.08);
+    max-width: 220px;
+}
+
+/* ============================================
+   BREADCRUMB ICON
+   ============================================ */
+
+.breadcrumb-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    color: inherit;
+    opacity: 0.85;
+}
+
+.breadcrumb-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.breadcrumb-home-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* ============================================
+   BREADCRUMB LABEL
+   ============================================ */
+
+.breadcrumb-label {
+    display: inline-block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ============================================
+   BREADCRUMB SEPARATOR (Chevron)
+   ============================================ */
+
+.breadcrumb-separator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0.25rem;
+    color: var(--color-text-muted, #6c757d);
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.breadcrumb-chevron {
+    width: 14px;
+    height: 14px;
+}
+
+/* ============================================
+   ELLIPSIS MENU (Mobile collapsed breadcrumbs)
+   ============================================ */
+
+.breadcrumb-item--ellipsis {
+    position: relative;
+}
+
+.breadcrumb-ellipsis-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.5rem;
+    border: none;
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+    border-radius: 6px;
+    color: var(--color-text-secondary, #adb5bd);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 32px;
+    height: 28px;
+}
+
+.breadcrumb-ellipsis-btn:hover {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+    color: var(--color-text-primary, #f8f9fa);
+}
+
+.breadcrumb-ellipsis-btn:focus-visible {
+    outline: 2px solid var(--color-primary, #8b7fff);
+    outline-offset: 2px;
+}
+
+.breadcrumb-ellipsis-dots {
+    letter-spacing: 0.1em;
+    line-height: 1;
+}
+
+/* Ellipsis Dropdown Menu */
+.breadcrumb-ellipsis-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 180px;
+    max-width: 260px;
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.98);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.8);
+    border-radius: 10px;
+    padding: 0.375rem;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(var(--color-primary-rgb, 139, 127, 255), 0.05);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.95);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.breadcrumb-ellipsis-menu.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    animation: breadcrumb-menu-in 0.2s ease forwards;
+}
+
+.breadcrumb-ellipsis-item {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    color: var(--color-text-secondary, #adb5bd);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.breadcrumb-ellipsis-item:hover,
+.breadcrumb-ellipsis-item:focus {
+    color: var(--color-text-primary, #f8f9fa);
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.12);
+    outline: none;
+}
+
+.breadcrumb-ellipsis-item:focus-visible {
+    outline: 2px solid var(--color-primary, #8b7fff);
+    outline-offset: -2px;
+}
+
+/* ============================================
+   RESPONSIVE - TABLET
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .breadcrumb-wrapper {
+        padding: 0.5rem 1.5rem;
+    }
+
+    .breadcrumb-link,
+    .breadcrumb-current {
+        font-size: 0.8125rem;
+        max-width: 160px;
+    }
+}
+
+/* ============================================
+   RESPONSIVE - MOBILE
+   ============================================ */
+
+@media (max-width: 640px) {
+    .breadcrumb-wrapper {
+        padding: 0.5rem 1rem;
+    }
+
+    .breadcrumb-link,
+    .breadcrumb-current {
+        font-size: 0.8125rem;
+        padding: 0.2rem 0.375rem;
+    }
+
+    .breadcrumb-separator {
+        margin: 0 0.125rem;
+    }
+
+    .breadcrumb-chevron {
+        width: 12px;
+        height: 12px;
+    }
+
+    /* Hide underline animation on mobile - use background instead */
+    .breadcrumb-link::after {
+        display: none;
+    }
+
+    .breadcrumb-link:hover {
+        background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.12);
+    }
+
+    .breadcrumb-label {
+        max-width: 80px;
+    }
+
+    .breadcrumb-current .breadcrumb-label {
+        max-width: 100px;
+    }
+
+    .breadcrumb-ellipsis-menu {
+        min-width: 160px;
+        left: -8px;
+    }
+}
+
+/* ============================================
+   RESPONSIVE - SMALL MOBILE
+   ============================================ */
+
+@media (max-width: 480px) {
+    .breadcrumb-wrapper {
+        padding: 0.4rem 0.75rem;
+    }
+
+    .breadcrumb-link,
+    .breadcrumb-current {
+        font-size: 0.75rem;
+        padding: 0.15rem 0.25rem;
+    }
+
+    .breadcrumb-label {
+        max-width: 60px;
+    }
+
+    .breadcrumb-current .breadcrumb-label {
+        max-width: 80px;
+    }
+
+    .breadcrumb-icon {
+        width: 0.875rem;
+        height: 0.875rem;
+    }
+
+    .breadcrumb-home-icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    .breadcrumb-ellipsis-btn {
+        padding: 0.2rem 0.375rem;
+        min-width: 28px;
+        height: 24px;
+        font-size: 0.8rem;
+    }
+
+    .breadcrumb-ellipsis-menu {
+        min-width: 140px;
+        max-width: 200px;
+    }
+
+    .breadcrumb-ellipsis-item {
+        font-size: 0.8125rem;
+        padding: 0.4rem 0.625rem;
+    }
+}
+
+/* ============================================
+   DARK THEME SUPPORT
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+    .breadcrumb-link {
+        color: var(--color-text-secondary, #adb5bd);
+    }
+
+    .breadcrumb-link:hover {
+        color: var(--color-text-primary, #f8f9fa);
+    }
+
+    .breadcrumb-current {
+        color: var(--color-text-primary, #f8f9fa);
+        background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+    }
+
+    .breadcrumb-separator {
+        color: var(--color-text-muted, #6c757d);
+    }
+}
+
+/* ============================================
+   HIGH CONTRAST MODE
+   ============================================ */
+
+@media (prefers-contrast: high) {
+    .breadcrumb-link,
+    .breadcrumb-current,
+    .breadcrumb-ellipsis-btn {
+        border: 1px solid transparent;
+    }
+
+    .breadcrumb-link:hover,
+    .breadcrumb-link:focus-visible,
+    .breadcrumb-ellipsis-btn:hover,
+    .breadcrumb-ellipsis-btn:focus-visible {
+        border-color: var(--color-primary, #8b7fff);
+    }
+
+    .breadcrumb-current {
+        border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.5);
+    }
+
+    .breadcrumb-ellipsis-menu {
+        border-width: 2px;
+    }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .breadcrumb-nav-container.visible {
+        animation: none;
+    }
+
+    .breadcrumb-link::after {
+        display: none;
+    }
+
+    .breadcrumb-link,
+    .breadcrumb-current,
+    .breadcrumb-ellipsis-btn,
+    .breadcrumb-ellipsis-menu,
+    .breadcrumb-ellipsis-item {
+        transition: none;
+    }
+
+    .breadcrumb-ellipsis-menu.visible {
+        animation: none;
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .breadcrumb-nav-container {
+        display: block !important;
+        background: none;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .breadcrumb-link,
+    .breadcrumb-current {
+        color: #333;
+        background: none;
+    }
+
+    .breadcrumb-separator {
+        color: #666;
+    }
+
+    .breadcrumb-item--ellipsis {
+        display: none;
+    }
+}

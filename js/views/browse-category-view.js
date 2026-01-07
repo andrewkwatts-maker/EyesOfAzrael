@@ -471,6 +471,18 @@ class BrowseCategoryView {
                     </div>
                 </div>
 
+                <!-- Loading Indicator for Infinite Scroll -->
+                <div class="load-more-container" id="loadMoreContainer" style="display: none;">
+                    <div class="load-more-spinner" id="loadMoreSpinner">
+                        <div class="spinner-ring"></div>
+                        <span>Loading more...</span>
+                    </div>
+                    <button class="load-more-btn" id="loadMoreBtn" style="display: none;">
+                        <span class="load-more-icon">&#x21bb;</span>
+                        Load More
+                    </button>
+                </div>
+
                 <!-- Pagination Controls -->
                 <div class="pagination-controls" id="paginationControls"></div>
             </div>
@@ -602,17 +614,21 @@ class BrowseCategoryView {
                     </div>
 
                     <!-- Sort -->
-                    <div class="filter-group">
+                    <div class="filter-group filter-group--sort">
                         <label for="sortOrder" class="filter-label">
-                            <span class="filter-icon">⚡</span>
+                            <span class="filter-icon">&#x2195;</span>
                             Sort By
                         </label>
-                        <select id="sortOrder" class="filter-select">
-                            <option value="name" ${this.sortBy === 'name' ? 'selected' : ''}>Name (A-Z)</option>
-                            <option value="mythology" ${this.sortBy === 'mythology' ? 'selected' : ''}>Mythology</option>
-                            <option value="popularity" ${this.sortBy === 'popularity' ? 'selected' : ''}>Popularity</option>
-                            <option value="dateAdded" ${this.sortBy === 'dateAdded' ? 'selected' : ''}>Recently Added</option>
-                        </select>
+                        <div class="sort-select-wrapper">
+                            <select id="sortOrder" class="filter-select filter-select--sort">
+                                <option value="name" ${this.sortBy === 'name' ? 'selected' : ''}>A-Z (Name)</option>
+                                <option value="name-desc" ${this.sortBy === 'name-desc' ? 'selected' : ''}>Z-A (Name)</option>
+                                <option value="dateAdded" ${this.sortBy === 'dateAdded' ? 'selected' : ''}>Recently Added</option>
+                                <option value="popularity" ${this.sortBy === 'popularity' ? 'selected' : ''}>Most Popular</option>
+                                <option value="mythology" ${this.sortBy === 'mythology' ? 'selected' : ''}>By Mythology</option>
+                            </select>
+                            <span class="sort-select-arrow">&#9662;</span>
+                        </div>
                     </div>
 
                     <!-- Results Info -->
@@ -736,9 +752,6 @@ class BrowseCategoryView {
         const maxChars = { compact: 150, comfortable: 250, detailed: 400 }[this.viewDensity] || 200;
         const description = this.truncateDescription(rawDescription, maxChars);
 
-        // CSS line-clamp as fallback
-        const maxLines = this.viewDensity === 'compact' ? 2 : (this.viewDensity === 'comfortable' ? 3 : 5);
-
         // Determine badge
         const badgeHTML = entity.isStandard
             ? '' // No badge for standard content
@@ -757,12 +770,12 @@ class BrowseCategoryView {
                 <div class="entity-card-header">
                     ${iconHTML}
                     <div class="entity-card-info">
-                        <h3 class="entity-card-title">${this.escapeHtml(entity.name)}</h3>
-                        <span class="entity-mythology">${this.capitalize(entity.mythology)}</span>
+                        <h3 class="entity-card__name">${this.escapeHtml(entity.name)}</h3>
+                        <span class="entity-card__mythology">${this.capitalize(entity.mythology)}</span>
                     </div>
                 </div>
 
-                <p class="entity-description" style="-webkit-line-clamp: ${maxLines};">
+                <p class="entity-card__description">
                     ${this.escapeHtml(description)}
                 </p>
 
@@ -811,23 +824,50 @@ class BrowseCategoryView {
         const hasActiveFilters = this.searchTerm || this.selectedMythologies.size > 0 ||
                                 this.selectedDomains.size > 0 || this.selectedTypes.size > 0;
 
+        // Build filter summary for suggestion
+        const activeFiltersList = [];
+        if (this.searchTerm) activeFiltersList.push(`search term "${this.searchTerm}"`);
+        if (this.selectedMythologies.size > 0) activeFiltersList.push(`${this.selectedMythologies.size} mythology filter${this.selectedMythologies.size > 1 ? 's' : ''}`);
+        if (this.selectedDomains.size > 0) activeFiltersList.push(`${this.selectedDomains.size} domain filter${this.selectedDomains.size > 1 ? 's' : ''}`);
+
         return `
             <div class="empty-state">
-                <div class="empty-icon">${categoryInfo.icon}</div>
-                <h3>No ${categoryInfo.name} Found</h3>
-                <p>
+                <div class="empty-state__icon">${categoryInfo.icon}</div>
+                <h3 class="empty-state__title">No ${categoryInfo.name} Found</h3>
+                <p class="empty-state__message">
                     ${hasActiveFilters
-                        ? `No ${this.category} match your current filters. Try adjusting your search or clearing filters.`
+                        ? `No ${this.category} match your current filters.`
                         : this.mythology
-                            ? `No ${this.category} found in ${this.capitalize(this.mythology)} mythology. Try selecting a different mythology or browse all.`
+                            ? `No ${this.category} found in ${this.capitalize(this.mythology)} mythology.`
                             : `No ${this.category} available at this time. Check back later for updates.`
                     }
                 </p>
                 ${hasActiveFilters ? `
-                    <button class="btn-primary" id="clearFiltersFromEmpty">
-                        Clear All Filters
-                    </button>
-                ` : ''}
+                    <div class="empty-state__suggestions">
+                        <p class="empty-state__suggestion-title">Suggestions:</p>
+                        <ul class="empty-state__suggestion-list">
+                            ${this.searchTerm ? `<li>Try a different search term or use fewer keywords</li>` : ''}
+                            ${this.selectedMythologies.size > 0 ? `<li>Select fewer mythology filters or try different mythologies</li>` : ''}
+                            ${this.selectedDomains.size > 0 ? `<li>Remove some domain filters to broaden results</li>` : ''}
+                            <li>Clear all filters to see all available ${this.category}</li>
+                        </ul>
+                    </div>
+                    <div class="empty-state__actions">
+                        <button class="btn-primary" id="clearFiltersFromEmpty">
+                            <span class="btn-icon">&#10006;</span>
+                            Clear All Filters
+                        </button>
+                        <a href="#/browse/${this.category}" class="btn-secondary">
+                            Browse All ${categoryInfo.name}
+                        </a>
+                    </div>
+                ` : `
+                    <div class="empty-state__actions">
+                        <a href="#/" class="btn-primary">
+                            Return to Home
+                        </a>
+                    </div>
+                `}
             </div>
         `;
     }
@@ -1182,6 +1222,9 @@ class BrowseCategoryView {
         // Apply sorting
         filtered.sort((a, b) => {
             switch (this.sortBy) {
+                case 'name-desc':
+                    return (b.name || '').localeCompare(a.name || '');
+
                 case 'mythology':
                     const mythA = a.mythology || '';
                     const mythB = b.mythology || '';
@@ -1216,12 +1259,15 @@ class BrowseCategoryView {
         if (!info) return;
 
         const total = this.entities.length;
-        const shown = this.filteredEntities.length;
+        const filtered = this.filteredEntities.length;
+        const displayed = Math.min(this.currentPage * this.itemsPerPage, filtered);
 
-        if (shown === total) {
+        if (filtered === total && displayed >= filtered) {
             info.innerHTML = `Showing <strong>${total}</strong> ${this.category}`;
+        } else if (displayed < filtered) {
+            info.innerHTML = `Showing <strong>${displayed}</strong> of <strong>${filtered}</strong> ${this.category}`;
         } else {
-            info.innerHTML = `Showing <strong>${shown}</strong> of <strong>${total}</strong> ${this.category}`;
+            info.innerHTML = `Showing <strong>${filtered}</strong> of <strong>${total}</strong> ${this.category}`;
         }
     }
 
@@ -1240,6 +1286,11 @@ class BrowseCategoryView {
             if (clearFromEmpty) {
                 clearFromEmpty.addEventListener('click', () => this.clearAllFilters());
             }
+
+            // Hide load more container when empty
+            const loadMoreContainer = document.getElementById('loadMoreContainer');
+            if (loadMoreContainer) loadMoreContainer.style.display = 'none';
+
             return;
         }
 
@@ -1260,6 +1311,80 @@ class BrowseCategoryView {
         grid.innerHTML = this.displayedEntities
             .map(entity => this.getEntityCardHTML(entity))
             .join('');
+
+        // Update load more button visibility
+        this.updateLoadMoreButton();
+    }
+
+    /**
+     * Update load more button visibility and state
+     */
+    updateLoadMoreButton() {
+        const loadMoreContainer = document.getElementById('loadMoreContainer');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const loadMoreSpinner = document.getElementById('loadMoreSpinner');
+
+        if (!loadMoreContainer || !loadMoreBtn) return;
+
+        const totalDisplayed = this.currentPage * this.itemsPerPage;
+        const hasMore = totalDisplayed < this.filteredEntities.length;
+
+        if (hasMore && this.filteredEntities.length <= 100) {
+            loadMoreContainer.style.display = 'flex';
+            loadMoreBtn.style.display = 'inline-flex';
+            loadMoreSpinner.style.display = 'none';
+
+            // Update button text
+            const remaining = this.filteredEntities.length - totalDisplayed;
+            loadMoreBtn.innerHTML = `
+                <span class="load-more-icon">&#x21bb;</span>
+                Load More (${remaining} remaining)
+            `;
+
+            // Attach click handler if not already attached
+            if (!loadMoreBtn.hasAttribute('data-handler-attached')) {
+                loadMoreBtn.setAttribute('data-handler-attached', 'true');
+                loadMoreBtn.addEventListener('click', () => this.loadMoreEntities());
+            }
+        } else {
+            loadMoreContainer.style.display = 'none';
+        }
+    }
+
+    /**
+     * Load more entities (for Load More button)
+     */
+    loadMoreEntities() {
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const loadMoreSpinner = document.getElementById('loadMoreSpinner');
+
+        // Show loading state
+        if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+        if (loadMoreSpinner) loadMoreSpinner.style.display = 'flex';
+
+        // Simulate loading delay for smooth UX
+        setTimeout(() => {
+            this.currentPage++;
+
+            const grid = document.getElementById('entityGrid');
+            if (!grid) return;
+
+            // Calculate new entities to add
+            const start = (this.currentPage - 1) * this.itemsPerPage;
+            const end = start + this.itemsPerPage;
+            const newEntities = this.filteredEntities.slice(start, end);
+
+            // Append new cards
+            const newCardsHTML = newEntities.map(entity => this.getEntityCardHTML(entity)).join('');
+            grid.insertAdjacentHTML('beforeend', newCardsHTML);
+
+            // Update displayed entities array
+            this.displayedEntities = this.filteredEntities.slice(0, end);
+
+            // Update load more button
+            this.updateLoadMoreButton();
+            this.updateResultsInfo();
+        }, 300);
     }
 
     /**
@@ -2063,6 +2188,76 @@ class BrowseCategoryView {
                     min-width: 0;
                 }
 
+                /* Entity Card Name - Max 2 lines with line-clamp */
+                .entity-card__name {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    font-size: var(--font-size-lg, 1.125rem);
+                    font-weight: var(--font-semibold, 600);
+                    color: var(--color-text-primary);
+                    margin: 0 0 var(--spacing-xs, 0.25rem) 0;
+                    line-height: var(--leading-tight, 1.25);
+                    word-break: break-word;
+                }
+
+                .density-compact .entity-card__name {
+                    font-size: var(--font-size-base, 1rem);
+                    -webkit-line-clamp: 1;
+                }
+
+                .density-detailed .entity-card__name {
+                    font-size: var(--font-size-xl, 1.25rem);
+                }
+
+                /* Entity Card Mythology Badge - Single line, truncate with ellipsis */
+                .entity-card__mythology {
+                    display: inline-block;
+                    max-width: 100%;
+                    font-size: var(--font-size-xs, 0.75rem);
+                    padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+                    background: rgba(var(--color-primary-rgb), 0.2);
+                    border: 1px solid rgba(var(--color-primary-rgb), 0.4);
+                    border-radius: var(--radius-full, 9999px);
+                    color: var(--color-primary);
+                    text-transform: uppercase;
+                    font-weight: var(--font-semibold, 600);
+                    letter-spacing: 0.05em;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                /* Entity Card Description - Max 2 lines */
+                .entity-card__description {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    color: var(--color-text-secondary);
+                    font-size: var(--font-size-sm, 0.875rem);
+                    line-height: var(--leading-relaxed, 1.75);
+                    margin: var(--spacing-md, 1rem) 0;
+                    flex: 1 1 auto;
+                    word-break: break-word;
+                }
+
+                .density-compact .entity-card__description {
+                    font-size: var(--font-size-xs, 0.75rem);
+                    margin: var(--spacing-sm, 0.5rem) 0;
+                    -webkit-line-clamp: 2;
+                }
+
+                .density-detailed .entity-card__description {
+                    font-size: var(--font-size-base, 1rem);
+                    margin: var(--spacing-lg, 1.5rem) 0;
+                    -webkit-line-clamp: 4;
+                }
+
+                /* Legacy support for old class names */
                 .entity-card-title {
                     font-size: var(--font-size-lg, 1.125rem);
                     font-weight: var(--font-semibold, 600);
@@ -2269,7 +2464,108 @@ class BrowseCategoryView {
                 }
 
                 /* ==========================================
-                   Empty State
+                   Load More Container
+                   ========================================== */
+                .load-more-container {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: var(--spacing-md, 1rem);
+                    padding: var(--spacing-xl, 2rem);
+                    margin-bottom: var(--spacing-lg, 1.5rem);
+                }
+
+                .load-more-spinner {
+                    display: flex;
+                    align-items: center;
+                    gap: var(--spacing-md, 1rem);
+                    color: var(--color-text-secondary);
+                    font-size: var(--font-size-sm, 0.875rem);
+                }
+
+                .spinner-ring {
+                    width: 24px;
+                    height: 24px;
+                    border: 3px solid rgba(var(--color-primary-rgb), 0.2);
+                    border-top-color: var(--color-primary);
+                    border-radius: 50%;
+                    animation: spin 0.8s linear infinite;
+                }
+
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+
+                .load-more-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: var(--spacing-sm, 0.5rem);
+                    padding: var(--spacing-md, 1rem) var(--spacing-xl, 2rem);
+                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.8);
+                    border: 2px solid rgba(var(--color-primary-rgb), 0.4);
+                    border-radius: var(--radius-lg, 0.75rem);
+                    color: var(--color-text-primary);
+                    font-size: var(--font-size-base, 1rem);
+                    font-weight: var(--font-semibold, 600);
+                    cursor: pointer;
+                    transition: all var(--transition-base, 0.3s ease);
+                    font-family: var(--font-primary);
+                }
+
+                .load-more-btn:hover {
+                    background: rgba(var(--color-primary-rgb), 0.15);
+                    border-color: var(--color-primary);
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.3);
+                }
+
+                .load-more-icon {
+                    font-size: 1.2rem;
+                    transition: transform 0.3s ease;
+                }
+
+                .load-more-btn:hover .load-more-icon {
+                    transform: rotate(180deg);
+                }
+
+                /* ==========================================
+                   Sort Dropdown Polish
+                   ========================================== */
+                .filter-group--sort {
+                    min-width: 200px;
+                }
+
+                .sort-select-wrapper {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .filter-select--sort {
+                    appearance: none;
+                    -webkit-appearance: none;
+                    -moz-appearance: none;
+                    padding-right: 2.5rem;
+                    background-image: none;
+                }
+
+                .sort-select-arrow {
+                    position: absolute;
+                    right: 1rem;
+                    font-size: 0.75rem;
+                    color: var(--color-text-secondary);
+                    pointer-events: none;
+                    transition: transform 0.2s ease;
+                }
+
+                .filter-select--sort:focus + .sort-select-arrow {
+                    transform: rotate(180deg);
+                    color: var(--color-primary);
+                }
+
+                /* ==========================================
+                   Empty State - Enhanced
                    ========================================== */
                 .empty-state {
                     grid-column: 1 / -1;
@@ -2280,6 +2576,118 @@ class BrowseCategoryView {
                     border-radius: var(--radius-2xl, 1.5rem);
                 }
 
+                .empty-state__icon {
+                    font-size: 4rem;
+                    margin-bottom: var(--spacing-lg, 1.5rem);
+                    opacity: 0.5;
+                    filter: grayscale(0.8);
+                    animation: float 3s ease-in-out infinite;
+                }
+
+                @keyframes float {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-8px); }
+                }
+
+                .empty-state__title {
+                    color: var(--color-text-primary);
+                    font-size: var(--font-size-2xl, 1.5rem);
+                    margin: 0 0 var(--spacing-md, 1rem) 0;
+                    font-family: var(--font-heading, Georgia, serif);
+                }
+
+                .empty-state__message {
+                    color: var(--color-text-secondary);
+                    font-size: var(--font-size-base, 1rem);
+                    margin: 0 0 var(--spacing-lg, 1.5rem) 0;
+                    max-width: 500px;
+                    margin-left: auto;
+                    margin-right: auto;
+                    line-height: 1.6;
+                }
+
+                .empty-state__suggestions {
+                    text-align: left;
+                    max-width: 400px;
+                    margin: 0 auto var(--spacing-xl, 2rem);
+                    padding: var(--spacing-lg, 1.5rem);
+                    background: rgba(var(--color-primary-rgb), 0.08);
+                    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+                    border-radius: var(--radius-lg, 0.75rem);
+                }
+
+                .empty-state__suggestion-title {
+                    color: var(--color-primary);
+                    font-weight: var(--font-semibold, 600);
+                    font-size: var(--font-size-sm, 0.875rem);
+                    margin: 0 0 var(--spacing-sm, 0.5rem) 0;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
+
+                .empty-state__suggestion-list {
+                    margin: 0;
+                    padding-left: var(--spacing-lg, 1.5rem);
+                    color: var(--color-text-secondary);
+                    font-size: var(--font-size-sm, 0.875rem);
+                    line-height: 1.8;
+                }
+
+                .empty-state__suggestion-list li {
+                    margin-bottom: var(--spacing-xs, 0.25rem);
+                }
+
+                .empty-state__actions {
+                    display: flex;
+                    gap: var(--spacing-md, 1rem);
+                    justify-content: center;
+                    flex-wrap: wrap;
+                }
+
+                .empty-state .btn-primary,
+                .empty-state .btn-secondary {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: var(--spacing-sm, 0.5rem);
+                    padding: var(--spacing-md, 1rem) var(--spacing-xl, 2rem);
+                    border-radius: var(--radius-lg, 0.75rem);
+                    font-size: var(--font-size-base, 1rem);
+                    font-weight: var(--font-semibold, 600);
+                    cursor: pointer;
+                    transition: all var(--transition-base, 0.3s ease);
+                    font-family: var(--font-primary);
+                    text-decoration: none;
+                }
+
+                .empty-state .btn-primary {
+                    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+                    border: none;
+                    color: white;
+                    box-shadow: var(--shadow-md);
+                }
+
+                .empty-state .btn-primary:hover {
+                    transform: translateY(-2px);
+                    box-shadow: var(--shadow-lg), 0 0 20px rgba(var(--color-primary-rgb), 0.3);
+                }
+
+                .empty-state .btn-secondary {
+                    background: transparent;
+                    border: 2px solid rgba(var(--color-border-rgb), 0.4);
+                    color: var(--color-text-secondary);
+                }
+
+                .empty-state .btn-secondary:hover {
+                    border-color: var(--color-primary);
+                    color: var(--color-primary);
+                    background: rgba(var(--color-primary-rgb), 0.08);
+                }
+
+                .empty-state .btn-icon {
+                    font-size: 0.9rem;
+                }
+
+                /* Legacy support */
                 .empty-icon {
                     font-size: 4rem;
                     margin-bottom: var(--spacing-lg, 1.5rem);
@@ -2300,25 +2708,6 @@ class BrowseCategoryView {
                     max-width: 500px;
                     margin-left: auto;
                     margin-right: auto;
-                }
-
-                .empty-state .btn-primary {
-                    padding: var(--spacing-md, 1rem) var(--spacing-xl, 2rem);
-                    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-                    border: none;
-                    border-radius: var(--radius-lg, 0.75rem);
-                    color: white;
-                    font-size: var(--font-size-base, 1rem);
-                    font-weight: var(--font-semibold, 600);
-                    cursor: pointer;
-                    transition: all var(--transition-base, 0.3s ease);
-                    font-family: var(--font-primary);
-                    box-shadow: var(--shadow-md);
-                }
-
-                .empty-state .btn-primary:hover {
-                    transform: translateY(-2px);
-                    box-shadow: var(--shadow-lg);
                 }
 
                 /* ==========================================

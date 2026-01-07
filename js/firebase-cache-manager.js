@@ -7,9 +7,12 @@
  * - SessionStorage cache (tab lifetime)
  * - LocalStorage cache (persistent)
  * - TTL-based expiration
- * - Cache invalidation
+ * - Smart cache invalidation with dependency tracking
  * - Performance metrics
  * - Automatic cache warming
+ * - Offline support with stale data fallback
+ * - CRUD integration for automatic invalidation
+ * - Cache versioning for schema changes
  *
  * Usage:
  *   const cache = new FirebaseCacheManager();
@@ -22,8 +25,17 @@ class FirebaseCacheManager {
     constructor(options = {}) {
         this.db = options.db || (typeof firebase !== 'undefined' && firebase.firestore());
 
+        // Cache version for schema migrations
+        this.CACHE_VERSION = '2.0.0';
+
         // Memory cache (fastest, cleared on page reload)
         this.memoryCache = new Map();
+
+        // Cache dependency tracking for smart invalidation
+        this.cacheDependencies = new Map();
+
+        // Invalidation listeners
+        this.invalidationListeners = new Set();
 
         // Default TTL values (milliseconds)
         this.defaultTTL = {
@@ -44,6 +56,8 @@ class FirebaseCacheManager {
             archetypes: 1800000,      // 30 minutes - archetype lists
             symbols: 1800000,         // 30 minutes - symbol lists
             magic: 1800000,           // 30 minutes - magic lists
+            concepts: 1800000,        // 30 minutes - concept lists
+            notes: 300000,            // 5 minutes - user notes
             temporary: 60000          // 1 minute - temporary data
         };
 
@@ -55,13 +69,79 @@ class FirebaseCacheManager {
             invalidations: 0,
             queries: 0,
             avgResponseTime: 0,
-            totalResponseTime: 0
+            totalResponseTime: 0,
+            staleFallbacks: 0,
+            cacheWarms: 0
         };
 
         // Load metrics from storage
         this.loadMetrics();
 
+        // Check and migrate cache version
+        this.checkCacheVersion();
+
+        // Setup CRUD event listeners for automatic invalidation
+        this.setupCRUDListeners();
+
         console.log('[CacheManager] Initialized with default TTLs:', this.defaultTTL);
+    }
+
+    /**
+     * Check cache version and clear if outdated
+     */
+    checkCacheVersion() {
+        try {
+            const storedVersion = localStorage.getItem('cache_version');
+            if (storedVersion !== this.CACHE_VERSION) {
+                console.log(`[CacheManager] Cache version mismatch (${storedVersion} -> ${this.CACHE_VERSION}), clearing cache`);
+                this.clearAll();
+                localStorage.setItem('cache_version', this.CACHE_VERSION);
+            }
+        } catch (error) {
+            console.warn('[CacheManager] Version check failed:', error);
+        }
+    }
+
+    /**
+     * Setup listeners for CRUD events to auto-invalidate cache
+     */
+    setupCRUDListeners() {
+        if (typeof window !== 'undefined') {
+            window.addEventListener('crud:success', (event) => {
+                const { type, collection, entityId } = event.detail;
+
+                // Auto-invalidate on CRUD operations
+                if (['create', 'update', 'delete'].includes(type)) {
+                    this.invalidate(collection, entityId);
+
+                    // Also invalidate related list caches
+                    this.invalidateListCaches(collection);
+                }
+            });
+
+            console.log('[CacheManager] CRUD listeners registered');
+        }
+    }
+
+    /**
+     * Invalidate all list caches for a collection
+     * @param {string} collection - Collection name
+     */
+    invalidateListCaches(collection) {
+        const listPrefix = `cache_list_${collection}_`;
+
+        // Clear from memory
+        for (const key of this.memoryCache.keys()) {
+            if (key.startsWith(listPrefix)) {
+                this.memoryCache.delete(key);
+            }
+        }
+
+        // Clear from storage
+        this.clearStorageByPrefix(sessionStorage, listPrefix);
+        this.clearStorageByPrefix(localStorage, listPrefix);
+
+        console.log(`[CacheManager] Invalidated list caches for: ${collection}`);
     }
 
     /**
@@ -167,18 +247,37 @@ class FirebaseCacheManager {
     }
 
     /**
-     * Invalidate cached data
+     * Invalidate cached data with dependency cascade
      * @param {string} collection - Collection name
      * @param {string} id - Document ID (optional, invalidates all if omitted)
+     * @param {Object} options - Invalidation options
+     * @returns {Array<string>} Invalidated cache keys
      */
-    invalidate(collection, id = null) {
+    invalidate(collection, id = null, options = {}) {
+        const invalidatedKeys = [];
+
         if (id) {
             // Invalidate specific document
             const cacheKey = this.generateKey(collection, id);
             this.memoryCache.delete(cacheKey);
             sessionStorage.removeItem(cacheKey);
             localStorage.removeItem(cacheKey);
-            console.log(`[CacheManager] =� Invalidated: ${cacheKey}`);
+            invalidatedKeys.push(cacheKey);
+            console.log(`[CacheManager] Invalidated: ${cacheKey}`);
+
+            // Invalidate dependent caches
+            if (options.cascade !== false) {
+                const dependents = this.cacheDependencies.get(cacheKey) || new Set();
+                for (const depKey of dependents) {
+                    this.memoryCache.delete(depKey);
+                    sessionStorage.removeItem(depKey);
+                    localStorage.removeItem(depKey);
+                    invalidatedKeys.push(depKey);
+                }
+                if (dependents.size > 0) {
+                    console.log(`[CacheManager] Cascade invalidated ${dependents.size} dependent caches`);
+                }
+            }
         } else {
             // Invalidate entire collection
             const prefix = `cache_${collection}_`;
@@ -187,6 +286,7 @@ class FirebaseCacheManager {
             for (const key of this.memoryCache.keys()) {
                 if (key.startsWith(prefix)) {
                     this.memoryCache.delete(key);
+                    invalidatedKeys.push(key);
                 }
             }
 
@@ -196,23 +296,190 @@ class FirebaseCacheManager {
             // Clear from localStorage
             this.clearStorageByPrefix(localStorage, prefix);
 
-            console.log(`[CacheManager] =� Invalidated collection: ${collection}`);
+            console.log(`[CacheManager] Invalidated collection: ${collection}`);
         }
 
         this.metrics.invalidations++;
+
+        // Notify invalidation listeners
+        this.notifyInvalidationListeners(collection, id, invalidatedKeys);
+
+        return invalidatedKeys;
     }
+
+    /**
+     * Add a cache dependency (when A changes, invalidate B)
+     * @param {string} sourceKey - Source cache key
+     * @param {string} dependentKey - Dependent cache key to invalidate
+     */
+    addDependency(sourceKey, dependentKey) {
+        if (!this.cacheDependencies.has(sourceKey)) {
+            this.cacheDependencies.set(sourceKey, new Set());
+        }
+        this.cacheDependencies.get(sourceKey).add(dependentKey);
+    }
+
+    /**
+     * Remove a cache dependency
+     * @param {string} sourceKey - Source cache key
+     * @param {string} dependentKey - Dependent cache key
+     */
+    removeDependency(sourceKey, dependentKey) {
+        const deps = this.cacheDependencies.get(sourceKey);
+        if (deps) {
+            deps.delete(dependentKey);
+            if (deps.size === 0) {
+                this.cacheDependencies.delete(sourceKey);
+            }
+        }
+    }
+
+    /**
+     * Subscribe to cache invalidation events
+     * @param {Function} callback - Callback function (collection, id, keys)
+     * @returns {Function} Unsubscribe function
+     */
+    onInvalidate(callback) {
+        this.invalidationListeners.add(callback);
+        return () => this.invalidationListeners.delete(callback);
+    }
+
+    /**
+     * Notify invalidation listeners
+     */
+    notifyInvalidationListeners(collection, id, keys) {
+        for (const callback of this.invalidationListeners) {
+            try {
+                callback({ collection, id, keys, timestamp: Date.now() });
+            } catch (error) {
+                console.error('[CacheManager] Invalidation listener error:', error);
+            }
+        }
+    }
+
+    /**
+     * Batch invalidate multiple items
+     * @param {Array<{collection: string, id?: string}>} items - Items to invalidate
+     * @returns {Array<string>} All invalidated keys
+     */
+    batchInvalidate(items) {
+        const allInvalidated = [];
+
+        for (const item of items) {
+            const keys = this.invalidate(item.collection, item.id, { cascade: false });
+            allInvalidated.push(...keys);
+        }
+
+        console.log(`[CacheManager] Batch invalidated ${allInvalidated.length} cache entries`);
+        return allInvalidated;
+    }
+
+    /**
+     * Invalidate caches matching a pattern
+     * @param {RegExp|string} pattern - Pattern to match cache keys
+     * @returns {number} Number of invalidated entries
+     */
+    invalidateByPattern(pattern) {
+        const regex = pattern instanceof RegExp ? pattern : new RegExp(pattern);
+        let count = 0;
+
+        // Clear from memory
+        for (const key of this.memoryCache.keys()) {
+            if (regex.test(key)) {
+                this.memoryCache.delete(key);
+                count++;
+            }
+        }
+
+        // Clear from sessionStorage
+        for (let i = sessionStorage.length - 1; i >= 0; i--) {
+            const key = sessionStorage.key(i);
+            if (key && regex.test(key)) {
+                sessionStorage.removeItem(key);
+                count++;
+            }
+        }
+
+        // Clear from localStorage
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key && regex.test(key)) {
+                localStorage.removeItem(key);
+                count++;
+            }
+        }
+
+        this.metrics.invalidations++;
+        console.log(`[CacheManager] Invalidated ${count} entries matching pattern: ${pattern}`);
+        return count;
+    }
+
+    /**
+     * Stale-while-revalidate pattern - return stale data while fetching fresh
+     * @param {string} collection - Collection name
+     * @param {string} id - Document ID
+     * @param {Object} options - Options including onFreshData callback
+     * @returns {Promise<Object|null>} Cached data (possibly stale)
+     */
+    async getWithRevalidate(collection, id, options = {}) {
+        const cacheKey = this.generateKey(collection, id);
+
+        // Get cached data (even if stale)
+        const cached = this.getFromMemory(cacheKey) ||
+                      this.getFromSessionStorage(cacheKey) ||
+                      this.getFromLocalStorage(cacheKey);
+
+        // If we have cached data, return it immediately
+        if (cached && cached.data) {
+            // Check if stale
+            const isStale = this.isExpired(cached, options.ttl || this.getDefaultTTL(collection));
+
+            if (isStale) {
+                // Revalidate in background
+                this.fetchFromFirebase(collection, id)
+                    .then(freshData => {
+                        if (freshData) {
+                            this.set(collection, id, freshData, options);
+                            if (options.onFreshData) {
+                                options.onFreshData(freshData);
+                            }
+                        }
+                    })
+                    .catch(err => console.warn('[CacheManager] Background revalidation failed:', err));
+
+                this.metrics.staleFallbacks++;
+            }
+
+            return cached.data;
+        }
+
+        // No cached data, fetch fresh
+        return this.get(collection, id, options);
+    }
+
 
     /**
      * Clear all caches
      */
     clearAll() {
         this.memoryCache.clear();
+        this.cacheDependencies.clear();
 
         // Clear cache entries from storage (keep metrics)
         this.clearStorageByPrefix(sessionStorage, 'cache_');
         this.clearStorageByPrefix(localStorage, 'cache_');
 
-        console.log('[CacheManager] =� All caches cleared');
+        console.log('[CacheManager] All caches cleared');
+    }
+
+    /**
+     * Destroy cache manager and cleanup
+     */
+    destroy() {
+        this.clearAll();
+        this.invalidationListeners.clear();
+        this.saveMetrics();
+        console.log('[CacheManager] Destroyed');
     }
 
     /**
