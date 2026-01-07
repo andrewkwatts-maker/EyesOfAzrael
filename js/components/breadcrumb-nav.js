@@ -1,18 +1,35 @@
 /**
  * Breadcrumb Navigation Component
- * Renders breadcrumb trail for navigation
+ * Renders breadcrumb trail for navigation with polished UI/UX
  *
  * Features:
  * - Auto-generated from route
- * - Sticky positioning
- * - Clickable segments
- * - Responsive design
+ * - Chevron separators (>)
+ * - Responsive design with mobile collapse
+ * - Truncate long names with ellipsis
+ * - Mobile: Show last 2 items with "..." menu for rest
+ * - Smooth animations
+ * - Keyboard accessible
  */
 
 class BreadcrumbNav {
     constructor(containerElement) {
         this.container = containerElement || document.getElementById('breadcrumb-nav');
-        this.separator = '›';
+        this.maxLabelLength = 25;
+        this.mobileMaxItems = 2;
+        this.isCollapsedMenuOpen = false;
+
+        // Chevron separator SVG
+        this.separatorSVG = `
+            <svg class="breadcrumb-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        `;
+
+        // Bind methods
+        this.handleOutsideClick = this.handleOutsideClick.bind(this);
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.handleResize = this.handleResize.bind(this);
 
         if (!this.container) {
             console.warn('[BreadcrumbNav] Container element not found');
@@ -30,6 +47,7 @@ class BreadcrumbNav {
         const html = this.renderBreadcrumbs(breadcrumbs);
 
         this.container.innerHTML = html;
+        this.attachEventListeners();
 
         // Show or hide container based on breadcrumbs
         if (breadcrumbs.length > 1) {
@@ -48,7 +66,7 @@ class BreadcrumbNav {
         const crumbs = [{
             label: 'Home',
             hash: '#/',
-            icon: '🏠'
+            icon: this.getHomeIcon()
         }];
 
         // Skip breadcrumbs if on home
@@ -56,12 +74,23 @@ class BreadcrumbNav {
             return crumbs;
         }
 
+        // Browse/Category routes
+        if (route.type === 'browse' || route.category) {
+            if (route.category) {
+                crumbs.push({
+                    label: this.capitalize(route.category),
+                    hash: `#/browse/${route.category}`,
+                    icon: null
+                });
+            }
+        }
+
         // Mythology overview
         if (route.mythology) {
             crumbs.push({
                 label: this.capitalize(route.mythology),
                 hash: `#/mythology/${route.mythology}`,
-                icon: this.getMythologyIcon(route.mythology)
+                icon: null
             });
         }
 
@@ -70,14 +99,14 @@ class BreadcrumbNav {
             crumbs.push({
                 label: this.capitalize(route.entityTypePlural),
                 hash: `#/mythology/${route.mythology}/${route.entityTypePlural}`,
-                icon: this.getEntityTypeIcon(route.entityType)
+                icon: null
             });
         }
 
         // Entity detail
         if (route.entityId) {
             crumbs.push({
-                label: this.capitalize(route.entityId.replace(/-/g, ' ')),
+                label: this.formatEntityName(route.entityId),
                 hash: route.hash,
                 icon: null
             });
@@ -88,7 +117,7 @@ class BreadcrumbNav {
             crumbs.push({
                 label: 'Search',
                 hash: '#/search',
-                icon: '🔍'
+                icon: null
             });
         }
 
@@ -96,7 +125,31 @@ class BreadcrumbNav {
             crumbs.push({
                 label: 'Compare',
                 hash: '#/compare',
-                icon: '⚖️'
+                icon: null
+            });
+        }
+
+        if (route.type === 'profile') {
+            crumbs.push({
+                label: 'Profile',
+                hash: '#/profile',
+                icon: null
+            });
+        }
+
+        if (route.type === 'dashboard') {
+            crumbs.push({
+                label: 'Dashboard',
+                hash: '#/dashboard',
+                icon: null
+            });
+        }
+
+        if (route.type === 'settings') {
+            crumbs.push({
+                label: 'Settings',
+                hash: '#/settings',
+                icon: null
             });
         }
 
@@ -111,15 +164,72 @@ class BreadcrumbNav {
     renderBreadcrumbs(breadcrumbs) {
         if (breadcrumbs.length === 0) return '';
 
+        const isMobile = window.innerWidth <= 640;
+
+        // On mobile with more than mobileMaxItems, collapse middle items
+        const shouldCollapse = isMobile && breadcrumbs.length > this.mobileMaxItems + 1;
+
+        if (shouldCollapse) {
+            return this.renderCollapsedBreadcrumbs(breadcrumbs);
+        }
+
         return `
-            <nav class="breadcrumb-container" aria-label="Breadcrumb">
-                <ol class="breadcrumb-list">
-                    ${breadcrumbs.map((crumb, index) => {
-                        const isLast = index === breadcrumbs.length - 1;
-                        return this.renderBreadcrumbItem(crumb, isLast);
-                    }).join('')}
-                </ol>
-            </nav>
+            <div class="breadcrumb-wrapper">
+                <nav class="breadcrumb-container" aria-label="Breadcrumb">
+                    <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
+                        ${breadcrumbs.map((crumb, index) => {
+                            const isLast = index === breadcrumbs.length - 1;
+                            return this.renderBreadcrumbItem(crumb, isLast, index + 1);
+                        }).join('')}
+                    </ol>
+                </nav>
+            </div>
+        `;
+    }
+
+    /**
+     * Render collapsed breadcrumbs for mobile
+     * @param {Array} breadcrumbs - Array of breadcrumb objects
+     * @returns {string} HTML string
+     */
+    renderCollapsedBreadcrumbs(breadcrumbs) {
+        const first = breadcrumbs[0];
+        const middle = breadcrumbs.slice(1, -1);
+        const last = breadcrumbs[breadcrumbs.length - 1];
+
+        return `
+            <div class="breadcrumb-wrapper">
+                <nav class="breadcrumb-container" aria-label="Breadcrumb">
+                    <ol class="breadcrumb-list breadcrumb-list--collapsed" itemscope itemtype="https://schema.org/BreadcrumbList">
+                        ${this.renderBreadcrumbItem(first, false, 1)}
+                        <li class="breadcrumb-item breadcrumb-item--ellipsis">
+                            <button
+                                class="breadcrumb-ellipsis-btn"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-label="Show ${middle.length} more navigation items"
+                                type="button"
+                            >
+                                <span class="breadcrumb-ellipsis-dots">...</span>
+                            </button>
+                            <div class="breadcrumb-ellipsis-menu" role="menu" aria-hidden="true">
+                                ${middle.map((crumb, idx) => `
+                                    <a
+                                        href="${crumb.hash}"
+                                        class="breadcrumb-ellipsis-item"
+                                        role="menuitem"
+                                        tabindex="-1"
+                                    >
+                                        ${this.escapeHtml(crumb.label)}
+                                    </a>
+                                `).join('')}
+                            </div>
+                            <span class="breadcrumb-separator" aria-hidden="true">${this.separatorSVG}</span>
+                        </li>
+                        ${this.renderBreadcrumbItem(last, true, breadcrumbs.length)}
+                    </ol>
+                </nav>
+            </div>
         `;
     }
 
@@ -127,76 +237,190 @@ class BreadcrumbNav {
      * Render individual breadcrumb item
      * @param {object} crumb - Breadcrumb object
      * @param {boolean} isLast - Whether this is the last item
+     * @param {number} position - Position for schema.org
      * @returns {string} HTML string
      */
-    renderBreadcrumbItem(crumb, isLast) {
+    renderBreadcrumbItem(crumb, isLast, position) {
+        const truncatedLabel = this.truncateLabel(crumb.label);
+        const needsTooltip = crumb.label.length > this.maxLabelLength;
+
         if (isLast) {
             return `
-                <li class="breadcrumb-item breadcrumb-current">
-                    ${crumb.icon ? `<span class="breadcrumb-icon" aria-hidden="true">${crumb.icon}</span>` : ''}
-                    <span class="breadcrumb-label" aria-current="page">${this.escapeHtml(crumb.label)}</span>
+                <li
+                    class="breadcrumb-item breadcrumb-item--current"
+                    itemprop="itemListElement"
+                    itemscope
+                    itemtype="https://schema.org/ListItem"
+                >
+                    <span
+                        class="breadcrumb-current"
+                        aria-current="page"
+                        itemprop="name"
+                        ${needsTooltip ? `title="${this.escapeHtml(crumb.label)}"` : ''}
+                    >
+                        ${crumb.icon ? `<span class="breadcrumb-icon" aria-hidden="true">${crumb.icon}</span>` : ''}
+                        <span class="breadcrumb-label">${this.escapeHtml(truncatedLabel)}</span>
+                    </span>
+                    <meta itemprop="position" content="${position}">
                 </li>
             `;
         } else {
             return `
-                <li class="breadcrumb-item">
-                    <a href="${crumb.hash}" class="breadcrumb-link" title="${this.escapeHtml(crumb.label)}">
+                <li
+                    class="breadcrumb-item"
+                    itemprop="itemListElement"
+                    itemscope
+                    itemtype="https://schema.org/ListItem"
+                >
+                    <a
+                        href="${crumb.hash}"
+                        class="breadcrumb-link"
+                        itemprop="item"
+                        ${needsTooltip ? `title="${this.escapeHtml(crumb.label)}"` : ''}
+                    >
                         ${crumb.icon ? `<span class="breadcrumb-icon" aria-hidden="true">${crumb.icon}</span>` : ''}
-                        <span class="breadcrumb-label">${this.escapeHtml(crumb.label)}</span>
+                        <span class="breadcrumb-label" itemprop="name">${this.escapeHtml(truncatedLabel)}</span>
                     </a>
-                    <span class="breadcrumb-separator" aria-hidden="true">${this.separator}</span>
+                    <meta itemprop="position" content="${position}">
+                    <span class="breadcrumb-separator" aria-hidden="true">${this.separatorSVG}</span>
                 </li>
             `;
         }
     }
 
     /**
-     * Get mythology icon
+     * Attach event listeners for collapsed menu
      */
-    getMythologyIcon(mythology) {
-        const icons = {
-            'greek': '🏛️',
-            'norse': '⚔️',
-            'egyptian': '🔺',
-            'roman': '🏛️',
-            'celtic': '☘️',
-            'hindu': '🕉️',
-            'chinese': '🐉',
-            'japanese': '⛩️',
-            'sumerian': '📿',
-            'babylonian': '🌟',
-            'persian': '🔥',
-            'mayan': '☀️',
-            'aztec': '🦅',
-            'yoruba': '👑',
-            'buddhist': '☸️',
-            'christian': '✝️',
-            'jewish': '✡️',
-            'islamic': '☪️'
-        };
+    attachEventListeners() {
+        const ellipsisBtn = this.container.querySelector('.breadcrumb-ellipsis-btn');
+        if (ellipsisBtn) {
+            ellipsisBtn.addEventListener('click', (e) => this.toggleEllipsisMenu(e));
+        }
 
-        return icons[mythology] || '📚';
+        // Global listeners for closing menu
+        document.addEventListener('click', this.handleOutsideClick);
+        document.addEventListener('keydown', this.handleKeyDown);
+        window.addEventListener('resize', this.handleResize);
     }
 
     /**
-     * Get entity type icon
+     * Toggle ellipsis dropdown menu
      */
-    getEntityTypeIcon(entityType) {
-        const icons = {
-            'deity': '👑',
-            'hero': '🦸',
-            'creature': '🐉',
-            'cosmology': '🌌',
-            'ritual': '🕯️',
-            'herb': '🌿',
-            'text': '📜',
-            'symbol': '⚡',
-            'item': '⚔️',
-            'place': '🏛️',
-            'magic': '✨'
-        };
+    toggleEllipsisMenu(e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-        return icons[entityType] || '📄';
+        const btn = this.container.querySelector('.breadcrumb-ellipsis-btn');
+        const menu = this.container.querySelector('.breadcrumb-ellipsis-menu');
+
+        if (!btn || !menu) return;
+
+        this.isCollapsedMenuOpen = !this.isCollapsedMenuOpen;
+
+        btn.setAttribute('aria-expanded', this.isCollapsedMenuOpen.toString());
+        menu.setAttribute('aria-hidden', (!this.isCollapsedMenuOpen).toString());
+        menu.classList.toggle('visible', this.isCollapsedMenuOpen);
+
+        if (this.isCollapsedMenuOpen) {
+            // Focus first menu item
+            const firstItem = menu.querySelector('.breadcrumb-ellipsis-item');
+            if (firstItem) {
+                requestAnimationFrame(() => firstItem.focus());
+            }
+        }
+    }
+
+    /**
+     * Close ellipsis menu
+     */
+    closeEllipsisMenu() {
+        const btn = this.container.querySelector('.breadcrumb-ellipsis-btn');
+        const menu = this.container.querySelector('.breadcrumb-ellipsis-menu');
+
+        if (btn && menu) {
+            this.isCollapsedMenuOpen = false;
+            btn.setAttribute('aria-expanded', 'false');
+            menu.setAttribute('aria-hidden', 'true');
+            menu.classList.remove('visible');
+        }
+    }
+
+    /**
+     * Handle click outside menu
+     */
+    handleOutsideClick(e) {
+        if (this.isCollapsedMenuOpen) {
+            const menu = this.container.querySelector('.breadcrumb-item--ellipsis');
+            if (menu && !menu.contains(e.target)) {
+                this.closeEllipsisMenu();
+            }
+        }
+    }
+
+    /**
+     * Handle keyboard events
+     */
+    handleKeyDown(e) {
+        if (e.key === 'Escape' && this.isCollapsedMenuOpen) {
+            this.closeEllipsisMenu();
+            const btn = this.container.querySelector('.breadcrumb-ellipsis-btn');
+            if (btn) btn.focus();
+        }
+    }
+
+    /**
+     * Handle window resize
+     */
+    handleResize() {
+        // Re-render breadcrumbs on resize to handle mobile/desktop switch
+        this.closeEllipsisMenu();
+    }
+
+    /**
+     * Get home icon SVG
+     */
+    getHomeIcon() {
+        return `
+            <svg class="breadcrumb-home-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M2.5 6.5L8 2l5.5 4.5V14a.5.5 0 01-.5.5H3a.5.5 0 01-.5-.5V6.5z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 14.5V9h4v5.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        `;
+    }
+
+    /**
+     * Format entity name from ID
+     */
+    formatEntityName(entityId) {
+        if (!entityId) return '';
+        return entityId
+            .replace(/-/g, ' ')
+            .replace(/_/g, ' ')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
+
+    /**
+     * Truncate label if needed
+     */
+    truncateLabel(label) {
+        if (!label) return '';
+        if (label.length <= this.maxLabelLength) return label;
+        return label.substring(0, this.maxLabelLength - 1) + '\u2026';
+    }
+
+    /**
+     * Capitalize string
+     */
+    capitalize(str) {
+        if (!str) return '';
+        return str
+            .replace(/-/g, ' ')
+            .replace(/_/g, ' ')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
     }
 
     /**
@@ -207,6 +431,7 @@ class BreadcrumbNav {
             this.container.innerHTML = '';
             this.container.classList.remove('visible');
         }
+        this.cleanup();
     }
 
     /**
@@ -228,11 +453,12 @@ class BreadcrumbNav {
     }
 
     /**
-     * Capitalize string
+     * Cleanup event listeners
      */
-    capitalize(str) {
-        if (!str) return '';
-        return str.charAt(0).toUpperCase() + str.slice(1);
+    cleanup() {
+        document.removeEventListener('click', this.handleOutsideClick);
+        document.removeEventListener('keydown', this.handleKeyDown);
+        window.removeEventListener('resize', this.handleResize);
     }
 
     /**
@@ -243,6 +469,14 @@ class BreadcrumbNav {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    /**
+     * Destroy component
+     */
+    destroy() {
+        this.clear();
+        this.cleanup();
     }
 }
 

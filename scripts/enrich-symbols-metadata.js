@@ -417,6 +417,55 @@ const SYMBOL_ENRICHMENT_DATA = {
       'Fire symbolism should honor its divine association',
       'Avoid disrespectful artistic or commercial use'
     ]
+  },
+
+  'greek_caduceus': {
+    meaning: 'Represents commerce, negotiation, eloquence, and divine authority; symbolizes balance and the intertwining of opposing forces; emblem of safe passage',
+    origins: 'Ancient Greek mythology; given by Apollo to Hermes (Mercury in Roman tradition); predates Greek culture with roots in Near Eastern traditions',
+    usage: 'Hermes\' sacred staff carried during divine missions; used in commerce and negotiation; modern symbol of medicine (often confused with Rod of Asclepius)',
+    variations: [
+      'Two serpents (Caduceus proper)',
+      'Two serpents with wings (winged caduceus)',
+      'With central rod of various designs',
+      'Golden or ornate versions',
+      'With additional symbols (ribbons, etc.)',
+      'Simplified modern adaptations'
+    ],
+    associations: {
+      symbols: ['Rod of Asclepius (medical symbol)', 'Caduceus variants'],
+      deities: ['Hermes/Mercury (messenger god)', 'Apollo (who granted it)', 'Asclepius (medical god)', 'Athena (wisdom and authority)'],
+      concepts: ['Commerce and trade', 'Eloquence and persuasion', 'Safe passage and protection', 'Balance of opposites', 'Divine authority']
+    },
+    prohibitions: [
+      'Not to be confused with the Rod of Asclepius in medical contexts (different symbol)',
+      'Should respect its association with deception (Hermes also god of thieves)',
+      'Avoid casual use without understanding mythological significance',
+      'Not appropriate for medical symbols (use Rod of Asclepius instead)'
+    ]
+  },
+
+  'greek_ouroboros': {
+    meaning: 'Represents eternity, cyclic time, self-renewal, and the infinite cycle of creation and destruction; symbolizes the universe consuming and regenerating itself',
+    origins: 'Ancient Egyptian origins; adopted by Greeks and later Hermeticists; extensive use in alchemy and esoteric traditions',
+    usage: 'Alchemical and esoteric meditation; represents eternal return and cycles; used in magical traditions and mystical philosophy',
+    variations: [
+      'Single serpent eating its tail',
+      'Two serpents intertwined (relating to caduceus)',
+      'With alchemical symbols',
+      'In circular mandalas',
+      'With eyes open or closed',
+      'With decorative elements'
+    ],
+    associations: {
+      symbols: ['Caduceus (intertwined serpents)', 'Yin-Yang (cyclical balance)', 'Eternal knot', 'Wheel of becoming'],
+      concepts: ['Eternal return', 'Ouroboric cycle', 'Self-consumption and renewal', 'Time and infinity', 'Alchemy and transmutation']
+    },
+    prohibitions: [
+      'Not to be misinterpreted as symbol of evil or darkness',
+      'Should respect its philosophical and esoteric significance',
+      'Avoid casual use in trivial contexts',
+      'In alchemy, maintain understanding of its transformative meaning'
+    ]
   }
 };
 
@@ -500,8 +549,14 @@ function readSymbolFiles() {
     try {
       const filePath = path.join(SYMBOLS_DIR, file);
       const content = fs.readFileSync(filePath, 'utf-8');
-      const symbol = JSON.parse(content);
-      symbols.push(symbol);
+      let parsed = JSON.parse(content);
+
+      // Handle array format (some files like persian.json)
+      if (Array.isArray(parsed)) {
+        symbols.push(...parsed);
+      } else {
+        symbols.push(parsed);
+      }
     } catch (err) {
       log(`❌ Error reading ${file}: ${err.message}`);
     }

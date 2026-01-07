@@ -1,23 +1,12 @@
 # Symbol Metadata Enrichment Report
 
-Generated: 2026-01-01T03:34:11.331Z
+Generated: 2026-01-01T03:38:42.009Z
 
 ## Summary
 
-- Total symbols processed: 15
-- Symbols with valid metadata: 14
-- Symbols needing enrichment: 1
-
-## Issues Found
-
-
-### undefined
-- Missing required field: meaning
-- Missing required field: origins
-- Missing required field: usage
-- Missing required field: variations
-- Missing required field: associations
-- Missing required field: prohibitions
+- Total symbols processed: 16
+- Symbols with valid metadata: 16
+- Symbols needing enrichment: 0
 
 ## Enriched Symbols
 
@@ -94,11 +83,17 @@ Generated: 2026-01-01T03:34:11.331Z
 - Variations: 6
 - Prohibitions: 5
 
-### undefined (undefined)
-- Mythology: undefined
-- Meaning: undefined...
-- Variations: 0
-- Prohibitions: 0
+### Faravahar (persian_faravahar)
+- Mythology: persian
+- Meaning: The most recognizable symbol of Zoroastrianism, depicting a winged figure representing the human sou...
+- Variations: 6
+- Prohibitions: 5
+
+### Sacred Fire (Atar) (persian_sacred-fire)
+- Mythology: persian
+- Meaning: Fire as the supreme symbol of divine wisdom, purity, and truth. Sacred fires burn continuously in Zo...
+- Variations: 6
+- Prohibitions: 5
 
 ### Faravahar (persian_faravahar)
 - Mythology: persian

@@ -1,68 +1,130 @@
 /**
  * Accessibility Enhancements
  * WCAG 2.1 AA Compliant Styles
+ * Eyes of Azrael - Polished Accessibility System
  */
 
-/* Skip to main content link */
+/* ============================================
+   SKIP TO MAIN CONTENT LINK
+   ============================================ */
 .skip-to-main {
     position: absolute;
     top: -100px;
-    left: 0;
-    background: var(--color-primary, #9370DB);
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--color-primary, #9370DB) 0%, var(--color-secondary, #ff7eb6) 100%);
     color: white;
     padding: 1rem 2rem;
     text-decoration: none;
     font-weight: 600;
-    z-index: 10000;
-    border-radius: 0 0 8px 0;
-    transition: top 0.3s ease;
+    font-size: 1rem;
+    z-index: 100000;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 4px 20px rgba(147, 112, 219, 0.4);
+    transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
 }
 
 .skip-to-main:focus {
     top: 0;
-    outline: 3px solid #DAA520;
-    outline-offset: 2px;
-}
-
-/* Focus indicators - highly visible */
-*:focus {
-    outline: 3px solid #9370DB;
-    outline-offset: 2px;
-}
-
-button:focus,
-a:focus,
-input:focus,
-select:focus,
-textarea:focus {
-    outline: 3px solid #9370DB;
-    outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(147, 112, 219, 0.2);
-}
-
-/* Focus visible (only keyboard, not mouse) */
-*:focus:not(:focus-visible) {
     outline: none;
-    box-shadow: none;
+    box-shadow:
+        0 4px 20px rgba(147, 112, 219, 0.4),
+        0 0 0 4px rgba(218, 165, 32, 0.5),
+        inset 0 0 0 2px #DAA520;
 }
 
+.skip-to-main:hover {
+    background: linear-gradient(135deg, var(--color-secondary, #ff7eb6) 0%, var(--color-primary, #9370DB) 100%);
+}
+
+/* ============================================
+   FOCUS INDICATORS - THEMED & VISIBLE
+   ============================================ */
+
+/* Base focus reset - use focus-visible for keyboard-only focus */
+*:focus {
+    outline: none;
+}
+
+/* Keyboard focus - highly visible themed indicators */
 *:focus-visible {
-    outline: 3px solid #9370DB;
-    outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(147, 112, 219, 0.2);
+    outline: 3px solid var(--color-primary, #9370DB);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px rgba(147, 112, 219, 0.25);
+    border-radius: 4px;
 }
 
-/* High contrast focus for buttons */
+/* Interactive elements - enhanced focus */
 button:focus-visible,
-.btn:focus-visible,
-[role="button"]:focus-visible {
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[role="link"]:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid var(--color-primary, #9370DB);
+    outline-offset: 3px;
+    box-shadow:
+        0 0 0 6px rgba(147, 112, 219, 0.25),
+        0 0 20px rgba(147, 112, 219, 0.15);
+    transition: box-shadow 0.2s ease;
+}
+
+/* Primary buttons - gold accent focus */
+.btn-primary:focus-visible,
+button.btn-primary:focus-visible,
+[role="button"].btn-primary:focus-visible {
     outline: 3px solid #DAA520;
     outline-offset: 3px;
-    box-shadow: 0 0 0 6px rgba(218, 165, 32, 0.3);
+    box-shadow:
+        0 0 0 6px rgba(218, 165, 32, 0.3),
+        0 0 25px rgba(218, 165, 32, 0.2);
 }
 
-/* Screen reader only content */
-.sr-only {
+/* Cards and tiles - subtle glow focus */
+.entity-card:focus-visible,
+.category-card:focus-visible,
+.landing-category-card:focus-visible,
+.mythology-card:focus-visible {
+    outline: 3px solid var(--color-primary, #9370DB);
+    outline-offset: 4px;
+    box-shadow:
+        0 0 0 6px rgba(147, 112, 219, 0.3),
+        0 8px 32px rgba(147, 112, 219, 0.2);
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+}
+
+/* Navigation links - themed focus */
+nav a:focus-visible,
+.nav-link:focus-visible,
+.header-actions a:focus-visible {
+    outline: 2px solid var(--color-primary, #9370DB);
+    outline-offset: 4px;
+    border-radius: 6px;
+}
+
+/* Form inputs - clear focus state */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--color-primary, #9370DB);
+    outline-offset: 0;
+    border-color: var(--color-primary, #9370DB);
+    box-shadow:
+        0 0 0 4px rgba(147, 112, 219, 0.15),
+        inset 0 0 0 1px var(--color-primary, #9370DB);
+}
+
+/* ============================================
+   SCREEN READER UTILITIES
+   ============================================ */
+
+/* Visually hidden but accessible to screen readers */
+.sr-only,
+.visually-hidden {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -70,89 +132,44 @@ button:focus-visible,
     margin: -1px;
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
     white-space: nowrap;
-    border-width: 0;
+    border: 0;
 }
 
-.sr-only-focusable:focus {
+/* Focusable screen reader only content */
+.sr-only-focusable:focus,
+.sr-only-focusable:focus-within,
+.visually-hidden-focusable:focus {
     position: static;
     width: auto;
     height: auto;
+    padding: inherit;
     margin: 0;
     overflow: visible;
     clip: auto;
+    clip-path: none;
     white-space: normal;
 }
 
-/* Ensure sufficient color contrast */
-:root {
-    --text-high-contrast: #ffffff;
-    --text-medium-contrast: #e0e0e0;
-    --text-low-contrast: #b0b0b0;
-    --bg-high-contrast: #000000;
-    --bg-medium-contrast: #1a1a2e;
-    --link-color: #88aaff;
-    --link-visited: #bb88ff;
-    --link-hover: #aaccff;
+/* ============================================
+   ARIA-LIVE REGIONS FOR DYNAMIC CONTENT
+   ============================================ */
+
+/* Screen reader announcement region - invisible */
+.sr-announcer,
+#sr-announcer,
+[role="status"].sr-announcer {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
 }
 
-/* Ensure links have good contrast and are distinguishable */
-a {
-    color: var(--link-color);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-}
-
-a:visited {
-    color: var(--link-visited);
-}
-
-a:hover,
-a:focus {
-    color: var(--link-hover);
-    text-decoration-thickness: 2px;
-}
-
-/* Button contrast */
-button,
-.btn {
-    min-height: 44px;
-    min-width: 44px;
-    cursor: pointer;
-}
-
-/* Disabled state with sufficient contrast */
-button:disabled,
-.btn:disabled,
-[aria-disabled="true"] {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background: #555;
-    color: #999;
-}
-
-/* Keyboard navigation indicators */
-[tabindex="-1"]:focus {
-    outline: none;
-}
-
-/* Make sure interactive elements are keyboard accessible */
-[role="button"]:not([tabindex]),
-[role="link"]:not([tabindex]),
-[onclick]:not([tabindex]):not(button):not(a) {
-    cursor: pointer;
-}
-
-[role="button"]:not([tabindex]):not(button):not(a),
-[role="link"]:not([tabindex]):not(a),
-[onclick]:not([tabindex]):not(button):not(a) {
-    -webkit-tap-highlight-color: rgba(147, 112, 219, 0.3);
-}
-
-/* Live region announcements - ONLY for dedicated announcement containers */
-/* Exclude structural elements (main, section, div with IDs) that use aria-live for dynamic updates */
-[aria-live="polite"]:not(main):not(section):not(#main-content):not(.view-container),
-[aria-live="assertive"]:not(main):not(section):not(#main-content):not(.view-container) {
+/* Route change announcer */
+#route-announcer {
     position: absolute;
     left: -10000px;
     width: 1px;
@@ -160,95 +177,147 @@ button:disabled,
     overflow: hidden;
 }
 
-/* Visible live regions */
-.live-region-visible {
-    position: static;
+/* Live regions for dynamic content updates */
+[aria-live="polite"]:not(main):not(section):not(#main-content):not(.view-container):not(.loading-container):not(.entity-grid):not(.results-container) {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+[aria-live="assertive"] {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* Visible live region for toast notifications */
+.toast-container[aria-live="polite"],
+.notification-area[aria-live="polite"] {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
     width: auto;
     height: auto;
     overflow: visible;
-    padding: 1rem;
-    background: rgba(147, 112, 219, 0.2);
-    border: 2px solid #9370DB;
-    border-radius: 8px;
-    margin: 1rem 0;
+    left: auto;
 }
 
-/* ARIA expanded/collapsed indicators */
-[aria-expanded="false"] .collapse-icon::before {
-    content: "▶";
-    display: inline-block;
-    margin-right: 0.5rem;
+/* Loading state announcements */
+.loading-container[role="status"] {
+    position: relative;
+    left: auto;
+    width: auto;
+    height: auto;
+    overflow: visible;
 }
 
-[aria-expanded="true"] .collapse-icon::before {
-    content: "▼";
-    display: inline-block;
-    margin-right: 0.5rem;
+/* ============================================
+   COLOR CONTRAST - WCAG AA COMPLIANCE
+   ============================================ */
+
+:root {
+    /* High contrast text colors - 4.5:1 minimum ratio */
+    --text-high-contrast: #ffffff;
+    --text-medium-contrast: #e0e0e0;
+    --text-low-contrast: #b0b0b0;
+
+    /* Background colors */
+    --bg-high-contrast: #000000;
+    --bg-medium-contrast: #1a1a2e;
+
+    /* Link colors - WCAG AA compliant (4.5:1 against dark bg) */
+    --link-color: #88aaff;
+    --link-visited: #bb88ff;
+    --link-hover: #aaccff;
+    --link-focus: #ffcc88;
+
+    /* Error/Success colors - high contrast */
+    --color-error: #ff6b6b;
+    --color-error-text: #ff8a8a;
+    --color-success: #51cf66;
+    --color-success-text: #69db7c;
+    --color-warning: #ffd43b;
+    --color-warning-text: #ffe066;
 }
 
-/* Form labels and inputs */
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: var(--text-high-contrast);
+/* Ensure body text has sufficient contrast */
+body {
+    color: var(--text-high-contrast, #ffffff);
 }
 
-input:required + label::after,
-label[for]:has(+ input:required)::after {
-    content: " *";
-    color: #ff6b6b;
-    font-weight: bold;
+/* Links must be distinguishable */
+a {
+    color: var(--link-color, #88aaff);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+}
+
+a:visited {
+    color: var(--link-visited, #bb88ff);
+}
+
+a:hover {
+    color: var(--link-hover, #aaccff);
+    text-decoration-thickness: 2px;
+}
+
+a:focus-visible {
+    color: var(--link-focus, #ffcc88);
+    text-decoration-thickness: 2px;
+}
+
+/* Ensure disabled states have sufficient contrast indication */
+button:disabled,
+.btn:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled,
+[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(30%);
+}
+
+/* Error states with high contrast */
+.error,
+.error-message,
+[aria-invalid="true"] {
+    color: var(--color-error-text, #ff8a8a);
 }
 
 input[aria-invalid="true"],
 select[aria-invalid="true"],
 textarea[aria-invalid="true"] {
-    border-color: #ff6b6b;
-    border-width: 2px;
+    border: 2px solid var(--color-error, #ff6b6b);
+    background: rgba(255, 107, 107, 0.05);
 }
 
 .error-message {
-    color: #ff6b6b;
-    font-size: 0.9rem;
-    margin-top: 0.25rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
 }
 
 .error-message::before {
-    content: "⚠";
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff6b6b'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E") center/contain no-repeat;
+    flex-shrink: 0;
 }
 
-/* Modal accessibility */
-.modal[aria-hidden="true"] {
-    display: none;
-}
+/* ============================================
+   REDUCED MOTION SUPPORT
+   ============================================ */
 
-.modal[aria-modal="true"] {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 9998;
-}
-
-/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -258,139 +327,460 @@ textarea[aria-invalid="true"] {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+
+    /* Disable parallax and floating effects */
+    .parallax,
+    .float-animation,
+    .pulse-animation {
+        animation: none !important;
+        transform: none !important;
+    }
+
+    /* Disable scroll-triggered animations */
+    .animate-on-scroll,
+    [data-animate] {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    /* Keep essential transitions short but visible */
+    .skip-to-main:focus {
+        transition-duration: 0.1ms !important;
+    }
+
+    /* Disable background shader animations */
+    .shader-bg,
+    .cosmic-bg,
+    [class*="shader-"] {
+        animation: none !important;
+    }
+
+    /* Simplify loading spinners */
+    .spinner-ring,
+    .spinner-container * {
+        animation: none !important;
+    }
+
+    .spinner-container::after {
+        content: "Loading...";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
 }
 
-/* High contrast mode support */
+/* ============================================
+   HIGH CONTRAST MODE SUPPORT
+   ============================================ */
+
 @media (prefers-contrast: high) {
-    * {
-        border-width: 2px;
+    :root {
+        --color-primary: #a388ff;
+        --color-secondary: #ff88b0;
+        --color-bg-primary: #000000;
+        --color-bg-secondary: #0a0a0a;
+        --color-bg-card: #111111;
+        --color-text-primary: #ffffff;
+        --color-text-secondary: #cccccc;
+        --color-border-primary: #666666;
+    }
+
+    /* Increase border visibility */
+    *,
+    *::before,
+    *::after {
+        border-color: currentColor !important;
+    }
+
+    button,
+    .btn,
+    input,
+    select,
+    textarea {
+        border: 2px solid currentColor !important;
+    }
+
+    /* Increase focus visibility */
+    *:focus-visible {
+        outline-width: 4px !important;
+        outline-offset: 4px !important;
+    }
+
+    /* High contrast cards */
+    .entity-card,
+    .category-card,
+    .landing-category-card {
+        border: 2px solid var(--color-text-secondary, #cccccc) !important;
+    }
+
+    .entity-card:hover,
+    .category-card:hover,
+    .landing-category-card:hover {
+        border-color: var(--color-primary, #a388ff) !important;
+    }
+
+    /* Ensure text is highly visible */
+    h1, h2, h3, h4, h5, h6 {
+        color: #ffffff !important;
+    }
+
+    p, span, div {
+        color: inherit;
+    }
+
+    /* Links must stand out */
+    a {
+        text-decoration: underline !important;
+        text-decoration-thickness: 2px !important;
+    }
+
+    /* High contrast buttons */
+    .btn-primary {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border: 2px solid #ffffff !important;
+    }
+
+    .btn-secondary {
+        background: transparent !important;
+        color: #ffffff !important;
+        border: 2px solid #ffffff !important;
+    }
+}
+
+/* Forced colors mode (Windows High Contrast) */
+@media (forced-colors: active) {
+    .skip-to-main {
+        border: 2px solid currentColor;
     }
 
     button,
     .btn,
     a {
-        outline-width: 3px;
+        forced-color-adjust: none;
+    }
+
+    *:focus-visible {
+        outline: 3px solid Highlight !important;
+        outline-offset: 2px;
+    }
+
+    /* Ensure icons remain visible */
+    svg {
+        fill: currentColor;
+        stroke: currentColor;
     }
 }
 
-/* Dark mode preference */
-@media (prefers-color-scheme: light) {
-    :root {
-        --text-high-contrast: #000000;
-        --text-medium-contrast: #333333;
-        --text-low-contrast: #666666;
-        --bg-high-contrast: #ffffff;
-        --bg-medium-contrast: #f5f5f5;
-        --link-color: #0066cc;
-        --link-visited: #6600cc;
-        --link-hover: #0088ff;
-    }
+/* ============================================
+   KEYBOARD SHORTCUTS HELP DIALOG
+   ============================================ */
+
+.keyboard-shortcuts-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--color-bg-card, #1a1f3a);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 100001;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
-/* Tooltip accessibility */
-[aria-describedby][role="tooltip"] {
-    position: relative;
-}
-
-.tooltip {
-    position: absolute;
-    background: #1a1a2e;
-    color: #fff;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    z-index: 1000;
-    pointer-events: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    border: 1px solid #9370DB;
-}
-
-.tooltip[aria-hidden="true"] {
+.keyboard-shortcuts-dialog[aria-hidden="true"] {
     display: none;
 }
 
-/* Custom checkbox and radio with accessibility */
-.custom-checkbox,
-.custom-radio {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    cursor: pointer;
-    min-height: 44px;
-}
-
-.custom-checkbox input[type="checkbox"],
-.custom-radio input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.custom-checkbox .checkmark,
-.custom-radio .checkmark {
-    width: 24px;
-    height: 24px;
-    border: 2px solid #9370DB;
-    border-radius: 4px;
-    background: transparent;
+.keyboard-shortcuts-dialog h2 {
+    margin: 0 0 1.5rem;
+    font-size: 1.5rem;
+    color: var(--color-text-primary, #f8f9fa);
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 0.75rem;
+}
+
+.keyboard-shortcuts-dialog h2::before {
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239370DB'%3E%3Cpath d='M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+.keyboard-shortcuts-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.keyboard-shortcuts-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(147, 112, 219, 0.15);
+}
+
+.keyboard-shortcuts-list li:last-child {
+    border-bottom: none;
+}
+
+.shortcut-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.shortcut-key kbd {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: rgba(147, 112, 219, 0.15);
+    border: 1px solid rgba(147, 112, 219, 0.3);
+    border-radius: 6px;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+    font-size: 0.85rem;
+    color: var(--color-primary, #9370DB);
+    min-width: 28px;
+    text-align: center;
+}
+
+.shortcut-key span {
+    color: var(--color-text-secondary, #adb5bd);
+    font-size: 0.9rem;
+}
+
+.shortcut-description {
+    color: var(--color-text-secondary, #adb5bd);
+    font-size: 0.9rem;
+}
+
+.keyboard-shortcuts-dialog .close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary, #adb5bd);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
     transition: all 0.2s ease;
 }
 
-.custom-radio .checkmark {
-    border-radius: 50%;
+.keyboard-shortcuts-dialog .close-btn:hover {
+    background: rgba(147, 112, 219, 0.1);
+    color: var(--color-text-primary, #f8f9fa);
 }
 
-.custom-checkbox input:checked + .checkmark,
-.custom-radio input:checked + .checkmark {
-    background: #9370DB;
-    border-color: #9370DB;
+.keyboard-shortcuts-dialog .close-btn:focus-visible {
+    outline: 2px solid var(--color-primary, #9370DB);
+    outline-offset: 2px;
 }
 
-.custom-checkbox input:checked + .checkmark::after {
-    content: "✓";
-    color: white;
+.keyboard-shortcuts-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 100000;
+}
+
+.keyboard-shortcuts-overlay[aria-hidden="true"] {
+    display: none;
+}
+
+/* ============================================
+   MODAL TAB ORDER & FOCUS TRAP
+   ============================================ */
+
+.modal[aria-modal="true"],
+.dialog[aria-modal="true"],
+[role="dialog"][aria-modal="true"] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal[aria-hidden="true"],
+.dialog[aria-hidden="true"],
+[role="dialog"][aria-hidden="true"] {
+    display: none;
+}
+
+/* Modal backdrop */
+.modal-backdrop,
+.dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: -1;
+}
+
+/* Modal content container */
+.modal-content,
+.dialog-content {
+    position: relative;
+    background: var(--color-bg-card, #1a1f3a);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* Focus trap indicator - first focusable element */
+.modal-content > *:first-child:focus-visible,
+.dialog-content > *:first-child:focus-visible {
+    outline: 3px solid var(--color-primary, #9370DB);
+    outline-offset: 3px;
+}
+
+/* Close button in modals - always accessible */
+.modal-close,
+.dialog-close,
+[aria-label="Close"],
+[aria-label="Close modal"],
+[aria-label="Close dialog"] {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover,
+.dialog-close:hover {
+    background: rgba(147, 112, 219, 0.1);
+    border-color: rgba(147, 112, 219, 0.3);
+}
+
+.modal-close:focus-visible,
+.dialog-close:focus-visible {
+    outline: 2px solid var(--color-primary, #9370DB);
+    outline-offset: 2px;
+    background: rgba(147, 112, 219, 0.1);
+}
+
+/* ============================================
+   TOUCH TARGET SIZING (44x44 minimum)
+   ============================================ */
+
+button,
+.btn,
+[role="button"],
+a:not(.inline-link),
+input[type="checkbox"],
+input[type="radio"],
+select {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Compact buttons for dense UI (requires explicit class) */
+.btn-compact,
+.btn-sm,
+.icon-btn {
+    min-height: 36px;
+    min-width: 36px;
+}
+
+/* Touch devices get larger targets */
+@media (pointer: coarse) {
+    button,
+    .btn,
+    [role="button"],
+    a:not(.inline-link),
+    input[type="checkbox"],
+    input[type="radio"],
+    select {
+        min-height: 48px;
+        min-width: 48px;
+    }
+
+    /* Increase spacing between touch targets */
+    .btn + .btn,
+    button + button {
+        margin-left: 0.5rem;
+    }
+}
+
+/* ============================================
+   FORM ACCESSIBILITY
+   ============================================ */
+
+/* Labels must be visible and associated */
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-high-contrast, #ffffff);
+}
+
+/* Required field indicator */
+label[data-required="true"]::after,
+.required-field label::after {
+    content: " *";
+    color: var(--color-error, #ff6b6b);
     font-weight: bold;
 }
 
-.custom-radio input:checked + .checkmark::after {
-    content: "";
-    width: 10px;
-    height: 10px;
-    background: white;
-    border-radius: 50%;
+/* Form group structure */
+.form-group {
+    margin-bottom: 1.5rem;
 }
 
-.custom-checkbox input:focus + .checkmark,
-.custom-radio input:focus + .checkmark {
-    outline: 3px solid #9370DB;
-    outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(147, 112, 219, 0.2);
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-/* Landmarks for screen readers */
-main {
-    display: block;
+/* Help text for form fields */
+.form-help,
+.field-description,
+[id$="-help"],
+[id$="-description"] {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary, #adb5bd);
+    margin-top: 0.25rem;
 }
 
-[role="navigation"],
-[role="main"],
-[role="complementary"],
-[role="contentinfo"] {
-    display: block;
-}
+/* ============================================
+   BREADCRUMB NAVIGATION
+   ============================================ */
 
-/* Breadcrumb navigation */
 nav[aria-label="Breadcrumb"] {
     position: sticky;
     top: 56px;
     z-index: 99;
-    background: rgba(var(--color-bg-card-rgb), 0.95);
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.95);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(var(--color-border-primary-rgb), 0.5);
+    border-bottom: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.5);
     padding: 0.75rem 0;
     margin: 0;
     opacity: 0;
@@ -431,12 +821,14 @@ nav[aria-label="Breadcrumb"] a {
     border-radius: 6px;
     font-size: 0.875rem;
     font-weight: 500;
+    text-decoration: none;
     transition: all 150ms ease;
 }
 
 nav[aria-label="Breadcrumb"] a:hover {
-    background: rgba(var(--color-primary-rgb), 0.1);
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
     color: var(--color-primary, #8b7fff);
+    text-decoration: none;
 }
 
 nav[aria-label="Breadcrumb"] a:focus-visible {
@@ -449,6 +841,7 @@ nav[aria-label="Breadcrumb"] .breadcrumb-separator {
     padding: 0 0.125rem;
     user-select: none;
     font-size: 1rem;
+    aria-hidden: true;
 }
 
 nav[aria-label="Breadcrumb"] [aria-current="page"] {
@@ -457,7 +850,7 @@ nav[aria-label="Breadcrumb"] [aria-current="page"] {
     font-weight: 600;
 }
 
-/* Breadcrumb truncation for long paths */
+/* Breadcrumb responsive */
 @media (max-width: 1024px) {
     nav[aria-label="Breadcrumb"] ol {
         padding: 0 1.5rem;
@@ -482,15 +875,6 @@ nav[aria-label="Breadcrumb"] [aria-current="page"] {
         gap: 0;
     }
 
-    nav[aria-label="Breadcrumb"] li:first-child a span {
-        display: none;
-    }
-
-    nav[aria-label="Breadcrumb"] li:first-child a::before {
-        content: "◀";
-        margin-right: 0.25rem;
-    }
-
     nav[aria-label="Breadcrumb"] a {
         padding: 0.25rem 0.375rem;
         font-size: 0.8125rem;
@@ -498,21 +882,24 @@ nav[aria-label="Breadcrumb"] [aria-current="page"] {
 
     nav[aria-label="Breadcrumb"] .breadcrumb-label {
         max-width: 80px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    nav[aria-label="Breadcrumb"] .breadcrumb-separator {
-        padding: 0 0.0625rem;
-        font-size: 0.875rem;
     }
 }
 
-/* Table accessibility */
+/* ============================================
+   TABLE ACCESSIBILITY
+   ============================================ */
+
 table {
     border-collapse: collapse;
     width: 100%;
+}
+
+caption {
+    padding: 1rem;
+    font-weight: 600;
+    font-size: 1.2rem;
+    text-align: left;
+    caption-side: top;
 }
 
 th {
@@ -522,60 +909,289 @@ th {
     padding: 1rem;
 }
 
+th[scope="col"] {
+    border-bottom: 2px solid var(--color-primary, #9370DB);
+}
+
+th[scope="row"] {
+    border-right: 2px solid var(--color-primary, #9370DB);
+}
+
 td {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid rgba(147, 112, 219, 0.2);
 }
 
-caption {
-    padding: 1rem;
-    font-weight: 600;
-    font-size: 1.2rem;
-    text-align: left;
+tr:focus-within {
+    background: rgba(147, 112, 219, 0.05);
 }
 
-/* Responsive text sizing */
+/* ============================================
+   TOOLTIP ACCESSIBILITY
+   ============================================ */
+
+[aria-describedby] {
+    position: relative;
+}
+
+.tooltip,
+[role="tooltip"] {
+    position: absolute;
+    background: var(--color-bg-card, #1a1a2e);
+    color: var(--color-text-primary, #ffffff);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    z-index: 10000;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--color-primary, #9370DB);
+    max-width: 300px;
+}
+
+.tooltip[aria-hidden="true"],
+[role="tooltip"][aria-hidden="true"] {
+    display: none;
+}
+
+/* ============================================
+   CUSTOM FORM CONTROLS
+   ============================================ */
+
+/* Accessible checkbox */
+.custom-checkbox,
+.accessible-checkbox {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    min-height: 44px;
+}
+
+.custom-checkbox input[type="checkbox"],
+.accessible-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+}
+
+.custom-checkbox .checkmark,
+.accessible-checkbox .checkmark {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--color-primary, #9370DB);
+    border-radius: 6px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.custom-checkbox input:checked + .checkmark,
+.accessible-checkbox input:checked + .checkmark {
+    background: var(--color-primary, #9370DB);
+    border-color: var(--color-primary, #9370DB);
+}
+
+.custom-checkbox input:checked + .checkmark::after,
+.accessible-checkbox input:checked + .checkmark::after {
+    content: "";
+    display: block;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-top: -2px;
+}
+
+.custom-checkbox input:focus-visible + .checkmark,
+.accessible-checkbox input:focus-visible + .checkmark {
+    outline: 3px solid var(--color-primary, #9370DB);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px rgba(147, 112, 219, 0.2);
+}
+
+/* Accessible radio button */
+.custom-radio,
+.accessible-radio {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    min-height: 44px;
+}
+
+.custom-radio input[type="radio"],
+.accessible-radio input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+}
+
+.custom-radio .checkmark,
+.accessible-radio .checkmark {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--color-primary, #9370DB);
+    border-radius: 50%;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.custom-radio input:checked + .checkmark,
+.accessible-radio input:checked + .checkmark {
+    border-color: var(--color-primary, #9370DB);
+}
+
+.custom-radio input:checked + .checkmark::after,
+.accessible-radio input:checked + .checkmark::after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background: var(--color-primary, #9370DB);
+    border-radius: 50%;
+}
+
+.custom-radio input:focus-visible + .checkmark,
+.accessible-radio input:focus-visible + .checkmark {
+    outline: 3px solid var(--color-primary, #9370DB);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px rgba(147, 112, 219, 0.2);
+}
+
+/* ============================================
+   LANDMARK ROLES
+   ============================================ */
+
+main,
+[role="main"] {
+    display: block;
+}
+
+[role="navigation"],
+[role="banner"],
+[role="contentinfo"],
+[role="complementary"],
+[role="search"] {
+    display: block;
+}
+
+/* ============================================
+   ARIA EXPANDED/COLLAPSED INDICATORS
+   ============================================ */
+
+[aria-expanded="false"] .expand-icon::before,
+[aria-expanded="false"] .collapse-icon::before {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 5px solid currentColor;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    margin-right: 0.5rem;
+    transition: transform 0.2s ease;
+}
+
+[aria-expanded="true"] .expand-icon::before,
+[aria-expanded="true"] .collapse-icon::before {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 5px solid currentColor;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    margin-right: 0.5rem;
+    transform: rotate(90deg);
+}
+
+/* ============================================
+   RESPONSIVE ACCESSIBILITY
+   ============================================ */
+
 @media (max-width: 768px) {
     body {
         font-size: 16px;
     }
 
+    /* Larger touch targets on mobile */
     button,
     .btn,
     input,
-    select {
+    select,
+    textarea {
         min-height: 48px;
         font-size: 16px;
     }
-}
 
-/* Touch target sizing */
-@media (pointer: coarse) {
-    button,
-    .btn,
-    a,
-    input[type="checkbox"],
-    input[type="radio"],
-    select {
-        min-height: 48px;
-        min-width: 48px;
+    /* Ensure readable line lengths */
+    p, li, td {
+        max-width: 65ch;
     }
 }
 
-/* Landing page category cards focus */
-.landing-category-card:focus,
-.landing-category-card:focus-visible {
-    outline: 3px solid #9370DB !important;
-    outline-offset: 4px !important;
-    box-shadow: 0 0 0 6px rgba(147, 112, 219, 0.3) !important;
+/* ============================================
+   PRINT ACCESSIBILITY
+   ============================================ */
+
+@media print {
+    /* Ensure links are visible in print */
+    a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.8em;
+        color: #666;
+    }
+
+    /* Don't print decorative elements */
+    .skip-to-main,
+    .keyboard-shortcuts-dialog,
+    .modal-backdrop,
+    [aria-hidden="true"] {
+        display: none !important;
+    }
+
+    /* Ensure sufficient contrast for print */
+    * {
+        color: #000 !important;
+        background: #fff !important;
+    }
 }
 
-/* Browse category cards focus */
-.category-card:focus,
-.category-card:focus-visible,
-.entity-card:focus,
-.entity-card:focus-visible {
-    outline: 3px solid #9370DB !important;
-    outline-offset: 3px !important;
-    box-shadow: 0 0 0 5px rgba(147, 112, 219, 0.3) !important;
+/* ============================================
+   DARK MODE TEXT ADJUSTMENTS
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text-high-contrast: #ffffff;
+        --text-medium-contrast: #e0e0e0;
+        --text-low-contrast: #b0b0b0;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --text-high-contrast: #000000;
+        --text-medium-contrast: #333333;
+        --text-low-contrast: #666666;
+        --bg-high-contrast: #ffffff;
+        --bg-medium-contrast: #f5f5f5;
+        --link-color: #0066cc;
+        --link-visited: #6600cc;
+        --link-hover: #0044aa;
+    }
 }

@@ -1,7 +1,36 @@
 /**
  * Mythology Ambiance - Atmospheric styling for the soul of Azrael
- * Whispers, sacred geometry, and numinous loading states
+ * Whispers, sacred geometry, numinous loading states, and mythology-specific theming
+ *
+ * Features:
+ * - Ephemeral quote animations
+ * - Sacred geometry loading states
+ * - Mythology-specific color palettes
+ * - Cross-cultural connection badges
+ * - Favorites system styling
+ * - Accessibility and reduced motion support
  */
+
+/* ==========================================
+   CSS VARIABLES FOR MYTHOLOGY AMBIANCE
+   ========================================== */
+
+:root {
+    /* Mythology glow defaults with fallbacks */
+    --mythology-glow: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+    --mythology-accent: var(--color-primary, #8b7fff);
+    --mythology-secondary: var(--color-secondary, #ff7eb6);
+
+    /* Animation timing */
+    --whisper-duration: 1.5s;
+    --sacred-spin-duration: 1.5s;
+    --summon-duration: 3s;
+
+    /* Mythology badge variables */
+    --mythology-badge-bg: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+    --mythology-badge-color: var(--color-primary, #8b7fff);
+    --mythology-badge-border: rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+}
 
 /* ==========================================
    WHISPERS - Ephemeral quotes that breathe
@@ -15,15 +44,15 @@
     font-style: italic;
     font-size: 0.95rem;
     line-height: 1.7;
-    color: var(--color-text-secondary, #a0a0a0);
-    border-left: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+    color: var(--color-text-secondary);
+    border-left: 2px solid rgba(var(--color-primary-rgb), 0.4);
     background: linear-gradient(
         90deg,
-        rgba(var(--color-primary-rgb, 139, 127, 255), 0.05) 0%,
+        rgba(var(--color-primary-rgb), 0.05) 0%,
         transparent 100%
     );
     opacity: 0;
-    animation: whisperReveal 1.5s ease-out 0.5s forwards;
+    animation: whisperReveal var(--whisper-duration) ease-out 0.5s forwards;
     will-change: opacity, transform;
 }
 
@@ -33,7 +62,7 @@
     top: -0.5rem;
     left: 0.5rem;
     font-size: 3rem;
-    color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+    color: rgba(var(--color-primary-rgb), 0.15);
     font-family: Georgia, serif;
     line-height: 1;
 }
@@ -48,7 +77,7 @@
     margin-top: 0.5rem;
     font-size: 0.8rem;
     font-style: normal;
-    color: var(--color-text-muted, #666);
+    color: var(--color-text-muted);
     text-align: right;
 }
 
@@ -69,7 +98,7 @@
 
 /* Hover effect for card whispers */
 .entity-card:hover .entity-whisper {
-    border-left-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.7);
+    border-left-color: rgba(var(--color-primary-rgb), 0.7);
 }
 
 /* ==========================================
@@ -88,9 +117,9 @@
     width: 100%;
     height: 100%;
     border: 2px solid transparent;
-    border-top-color: var(--color-primary, #8b7fff);
+    border-top-color: var(--color-primary);
     border-radius: 50%;
-    animation: sacredSpin 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+    animation: sacredSpin var(--sacred-spin-duration) cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
     will-change: transform;
 }
 
@@ -99,7 +128,7 @@
     height: 70%;
     top: 15%;
     left: 15%;
-    border-top-color: var(--color-secondary, #ff7fcc);
+    border-top-color: var(--color-secondary);
     animation-duration: 2s;
     animation-direction: reverse;
 }
@@ -109,7 +138,7 @@
     height: 40%;
     top: 30%;
     left: 30%;
-    border-top-color: var(--color-accent, #7fffcc);
+    border-top-color: var(--color-accent);
     animation-duration: 1s;
 }
 
@@ -120,7 +149,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: var(--color-primary, #8b7fff);
+    background: var(--color-primary);
     border-radius: 50%;
     animation: sacredPulse 1s ease-in-out infinite;
     will-change: transform, opacity;
@@ -142,7 +171,7 @@
     }
 }
 
-/* Sacred geometry patterns (background) */
+/* Sacred geometry background pattern */
 .sacred-geometry-bg {
     position: fixed;
     top: 0;
@@ -174,10 +203,10 @@
     background: conic-gradient(
         from 0deg,
         transparent 0deg,
-        rgba(var(--color-primary-rgb, 139, 127, 255), 0.1) 60deg,
+        rgba(var(--color-primary-rgb), 0.1) 60deg,
         transparent 120deg
     );
-    animation: summonRotate 3s linear infinite;
+    animation: summonRotate var(--summon-duration) linear infinite;
     opacity: 0;
     transition: opacity 0.3s ease;
     will-change: transform;
@@ -193,48 +222,243 @@
 }
 
 /* ==========================================
-   MYTHOLOGY ATMOSPHERE OVERLAYS
+   MYTHOLOGY-SPECIFIC COLOR THEMES
+   Applied via data-mythology attribute
    ========================================== */
 
-/* Subtle mythology-specific color washes */
+/* Greek - Azure & Gold (Mediterranean) */
+[data-mythology="greek"] {
+    --mythology-glow: rgba(59, 130, 246, 0.12);
+    --mythology-accent: #3b82f6;
+    --mythology-secondary: #fbbf24;
+    --mythology-border: rgba(59, 130, 246, 0.4);
+    --mythology-gradient: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(251, 191, 36, 0.08));
+}
+
 [data-mythology="greek"] .entity-card,
-[data-mythology="roman"] .entity-card {
-    --mythology-glow: rgba(100, 149, 237, 0.1); /* Cornflower blue */
+[data-mythology="greek"] .card {
+    border-color: var(--mythology-border);
 }
 
-[data-mythology="norse"] .entity-card {
-    --mythology-glow: rgba(70, 130, 180, 0.1); /* Steel blue - ice */
+[data-mythology="greek"] .entity-card:hover,
+[data-mythology="greek"] .card:hover {
+    box-shadow: 0 8px 32px var(--mythology-glow), var(--shadow-lg);
 }
 
-[data-mythology="egyptian"] .entity-card {
-    --mythology-glow: rgba(218, 165, 32, 0.1); /* Golden */
+/* Roman - Imperial Purple & Gold */
+[data-mythology="roman"] {
+    --mythology-glow: rgba(139, 92, 246, 0.12);
+    --mythology-accent: #8b5cf6;
+    --mythology-secondary: #f59e0b;
+    --mythology-border: rgba(139, 92, 246, 0.4);
+    --mythology-gradient: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(245, 158, 11, 0.08));
 }
 
-[data-mythology="hindu"] .entity-card {
-    --mythology-glow: rgba(255, 140, 0, 0.1); /* Deep orange - saffron */
+[data-mythology="roman"] .entity-card,
+[data-mythology="roman"] .card {
+    border-color: var(--mythology-border);
 }
 
-[data-mythology="japanese"] .entity-card {
-    --mythology-glow: rgba(255, 192, 203, 0.08); /* Cherry blossom */
+/* Norse - Ice Blue & Frost */
+[data-mythology="norse"] {
+    --mythology-glow: rgba(56, 189, 248, 0.12);
+    --mythology-accent: #38bdf8;
+    --mythology-secondary: #e2e8f0;
+    --mythology-border: rgba(56, 189, 248, 0.4);
+    --mythology-gradient: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(226, 232, 240, 0.08));
 }
 
-[data-mythology="celtic"] .entity-card {
-    --mythology-glow: rgba(34, 139, 34, 0.1); /* Forest green */
+[data-mythology="norse"] .entity-card,
+[data-mythology="norse"] .card {
+    border-color: var(--mythology-border);
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.03), transparent);
 }
 
-[data-mythology="chinese"] .entity-card {
-    --mythology-glow: rgba(220, 20, 60, 0.08); /* Crimson - luck */
+/* Egyptian - Gold & Lapis */
+[data-mythology="egyptian"] {
+    --mythology-glow: rgba(245, 158, 11, 0.15);
+    --mythology-accent: #f59e0b;
+    --mythology-secondary: #1e3a5f;
+    --mythology-border: rgba(245, 158, 11, 0.5);
+    --mythology-gradient: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(30, 58, 95, 0.08));
 }
 
-[data-mythology="mesopotamian"] .entity-card {
-    --mythology-glow: rgba(139, 90, 43, 0.1); /* Terracotta */
+[data-mythology="egyptian"] .entity-card,
+[data-mythology="egyptian"] .card {
+    border-color: var(--mythology-border);
 }
 
+[data-mythology="egyptian"] .entity-card:hover,
+[data-mythology="egyptian"] .card:hover {
+    box-shadow: 0 8px 32px var(--mythology-glow), 0 0 40px rgba(245, 158, 11, 0.2);
+}
+
+/* Hindu - Saffron & Vermillion */
+[data-mythology="hindu"] {
+    --mythology-glow: rgba(249, 115, 22, 0.12);
+    --mythology-accent: #f97316;
+    --mythology-secondary: #dc2626;
+    --mythology-border: rgba(249, 115, 22, 0.4);
+    --mythology-gradient: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(220, 38, 38, 0.08));
+}
+
+[data-mythology="hindu"] .entity-card,
+[data-mythology="hindu"] .card {
+    border-color: var(--mythology-border);
+}
+
+/* Buddhist - Saffron & Gold */
+[data-mythology="buddhist"] {
+    --mythology-glow: rgba(251, 191, 36, 0.12);
+    --mythology-accent: #fbbf24;
+    --mythology-secondary: #f97316;
+    --mythology-border: rgba(251, 191, 36, 0.4);
+    --mythology-gradient: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(249, 115, 22, 0.08));
+}
+
+/* Japanese - Cherry Blossom & Crimson */
+[data-mythology="japanese"] {
+    --mythology-glow: rgba(244, 114, 182, 0.1);
+    --mythology-accent: #f472b6;
+    --mythology-secondary: #dc2626;
+    --mythology-border: rgba(244, 114, 182, 0.35);
+    --mythology-gradient: linear-gradient(135deg, rgba(244, 114, 182, 0.08), rgba(220, 38, 38, 0.05));
+}
+
+[data-mythology="japanese"] .entity-card,
+[data-mythology="japanese"] .card {
+    border-color: var(--mythology-border);
+    background: linear-gradient(135deg, rgba(244, 114, 182, 0.02), transparent);
+}
+
+/* Chinese - Imperial Red & Gold */
+[data-mythology="chinese"] {
+    --mythology-glow: rgba(220, 38, 38, 0.1);
+    --mythology-accent: #dc2626;
+    --mythology-secondary: #fbbf24;
+    --mythology-border: rgba(220, 38, 38, 0.4);
+    --mythology-gradient: linear-gradient(135deg, rgba(220, 38, 38, 0.08), rgba(251, 191, 36, 0.06));
+}
+
+[data-mythology="chinese"] .entity-card,
+[data-mythology="chinese"] .card {
+    border-color: var(--mythology-border);
+}
+
+/* Celtic - Forest Green & Earth */
+[data-mythology="celtic"] {
+    --mythology-glow: rgba(34, 197, 94, 0.12);
+    --mythology-accent: #22c55e;
+    --mythology-secondary: #a3e635;
+    --mythology-border: rgba(34, 197, 94, 0.4);
+    --mythology-gradient: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(163, 230, 53, 0.08));
+}
+
+[data-mythology="celtic"] .entity-card,
+[data-mythology="celtic"] .card {
+    border-color: var(--mythology-border);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.03), transparent);
+}
+
+/* Mesopotamian - Terracotta & Lapis */
+[data-mythology="mesopotamian"],
+[data-mythology="sumerian"],
+[data-mythology="babylonian"],
+[data-mythology="assyrian"] {
+    --mythology-glow: rgba(180, 83, 9, 0.12);
+    --mythology-accent: #b45309;
+    --mythology-secondary: #1e40af;
+    --mythology-border: rgba(180, 83, 9, 0.4);
+    --mythology-gradient: linear-gradient(135deg, rgba(180, 83, 9, 0.1), rgba(30, 64, 175, 0.08));
+}
+
+/* Persian/Zoroastrian - Sacred Fire & Sky */
+[data-mythology="persian"],
+[data-mythology="zoroastrian"] {
+    --mythology-glow: rgba(239, 68, 68, 0.1);
+    --mythology-accent: #ef4444;
+    --mythology-secondary: #0ea5e9;
+    --mythology-border: rgba(239, 68, 68, 0.35);
+    --mythology-gradient: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(14, 165, 233, 0.06));
+}
+
+/* Aztec/Mayan - Obsidian & Jade */
+[data-mythology="aztec"],
+[data-mythology="mayan"],
+[data-mythology="mesoamerican"] {
+    --mythology-glow: rgba(16, 185, 129, 0.12);
+    --mythology-accent: #10b981;
+    --mythology-secondary: #0f172a;
+    --mythology-border: rgba(16, 185, 129, 0.4);
+    --mythology-gradient: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(15, 23, 42, 0.08));
+}
+
+/* African - Earth Tones & Sun */
+[data-mythology="african"],
+[data-mythology="yoruba"] {
+    --mythology-glow: rgba(217, 119, 6, 0.12);
+    --mythology-accent: #d97706;
+    --mythology-secondary: #78350f;
+    --mythology-border: rgba(217, 119, 6, 0.4);
+    --mythology-gradient: linear-gradient(135deg, rgba(217, 119, 6, 0.1), rgba(120, 53, 15, 0.08));
+}
+
+/* Native American - Earth & Sky */
+[data-mythology="native-american"],
+[data-mythology="native_american"] {
+    --mythology-glow: rgba(146, 64, 14, 0.12);
+    --mythology-accent: #92400e;
+    --mythology-secondary: #0284c7;
+    --mythology-border: rgba(146, 64, 14, 0.4);
+    --mythology-gradient: linear-gradient(135deg, rgba(146, 64, 14, 0.1), rgba(2, 132, 199, 0.08));
+}
+
+/* Christian - Divine Light & Gold */
+[data-mythology="christian"],
+[data-mythology="biblical"] {
+    --mythology-glow: rgba(250, 204, 21, 0.1);
+    --mythology-accent: #facc15;
+    --mythology-secondary: #ffffff;
+    --mythology-border: rgba(250, 204, 21, 0.35);
+    --mythology-gradient: linear-gradient(135deg, rgba(250, 204, 21, 0.08), rgba(255, 255, 255, 0.05));
+}
+
+/* Islamic - Emerald & Gold */
+[data-mythology="islamic"] {
+    --mythology-glow: rgba(16, 185, 129, 0.1);
+    --mythology-accent: #10b981;
+    --mythology-secondary: #fbbf24;
+    --mythology-border: rgba(16, 185, 129, 0.35);
+    --mythology-gradient: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(251, 191, 36, 0.06));
+}
+
+/* Jewish - Blue & White */
+[data-mythology="jewish"],
+[data-mythology="hebrew"] {
+    --mythology-glow: rgba(59, 130, 246, 0.1);
+    --mythology-accent: #3b82f6;
+    --mythology-secondary: #f8fafc;
+    --mythology-border: rgba(59, 130, 246, 0.35);
+    --mythology-gradient: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(248, 250, 252, 0.05));
+}
+
+/* Universal/Tarot - Mystical Purple */
+[data-mythology="tarot"],
+[data-mythology="universal"],
+[data-mythology="hermetic"] {
+    --mythology-glow: rgba(168, 85, 247, 0.12);
+    --mythology-accent: #a855f7;
+    --mythology-secondary: #fbbf24;
+    --mythology-border: rgba(168, 85, 247, 0.4);
+    --mythology-gradient: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(251, 191, 36, 0.08));
+}
+
+/* Generic mythology glow effect on cards */
 .entity-card::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--mythology-glow, transparent);
+    background: var(--mythology-glow);
     pointer-events: none;
     border-radius: inherit;
     opacity: 0;
@@ -254,10 +478,11 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.25rem 0.75rem;
-    background: rgba(var(--color-bg-card-rgb, 30, 30, 40), 0.8);
-    border-radius: 20px;
-    font-size: 0.75rem;
-    color: var(--color-text-muted, #666);
+    background: rgba(var(--color-surface-rgb), 0.8);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
 }
 
 .temporal-depth-icon {
@@ -279,13 +504,13 @@
     padding: 0.25rem 0.625rem;
     background: linear-gradient(
         135deg,
-        rgba(var(--color-primary-rgb, 139, 127, 255), 0.2),
-        rgba(var(--color-secondary-rgb, 255, 127, 204), 0.2)
+        rgba(var(--color-primary-rgb), 0.2),
+        rgba(var(--color-secondary-rgb), 0.2)
     );
-    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
-    border-radius: 16px;
-    font-size: 0.7rem;
-    color: var(--color-text-secondary, #a0a0a0);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -293,10 +518,16 @@
 .cross-cultural-badge:hover {
     background: linear-gradient(
         135deg,
-        rgba(var(--color-primary-rgb, 139, 127, 255), 0.3),
-        rgba(var(--color-secondary-rgb, 255, 127, 204), 0.3)
+        rgba(var(--color-primary-rgb), 0.3),
+        rgba(var(--color-secondary-rgb), 0.3)
     );
     transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.cross-cultural-badge:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .cross-cultural-badge-icon {
@@ -305,76 +536,254 @@
 
 /* ==========================================
    FAVORITE BUTTON - Personal Pantheon
+   Polished with heart fill animation and optimistic UI
    ========================================== */
 
-.entity-favorite {
+.entity-favorite,
+.entity-card__action-btn--favorite {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 40px;
     height: 40px;
     padding: 0;
-    background: rgba(var(--color-bg-secondary-rgb, 45, 45, 60), 0.4);
-    border: 1.5px solid rgba(var(--color-border-primary-rgb, 100, 100, 120), 0.6);
+    background: rgba(var(--color-surface-rgb, 30, 30, 46), 0.6);
+    border: 1.5px solid rgba(var(--color-border-primary-rgb, 139, 127, 255), 0.3);
     border-radius: 50%;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    color: var(--color-text-muted, #999);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    color: var(--color-text-muted, #a0a0a0);
     font-size: 1.35rem;
     line-height: 1;
     position: relative;
     overflow: visible;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
-.entity-favorite:hover {
-    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
-    border-color: var(--color-primary, #8b7fff);
-    color: var(--color-primary, #8b7fff);
-    transform: scale(1.15);
-    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb, 139, 127, 255), 0.25);
+/* Heart SVG inside the button */
+.entity-favorite svg,
+.entity-card__action-btn--favorite svg {
+    width: 20px;
+    height: 20px;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    fill: transparent;
+    stroke: currentColor;
+    stroke-width: 2;
 }
 
-.entity-favorite:focus {
+/* Hover state - warm glow */
+.entity-favorite:hover,
+.entity-card__action-btn--favorite:hover {
+    background: rgba(255, 107, 107, 0.15);
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+    transform: scale(1.12);
+    box-shadow:
+        0 4px 16px rgba(255, 107, 107, 0.3),
+        0 0 0 4px rgba(255, 107, 107, 0.1);
+}
+
+.entity-favorite:hover svg,
+.entity-card__action-btn--favorite:hover svg {
+    transform: scale(1.1);
+}
+
+/* Focus state */
+.entity-favorite:focus-visible,
+.entity-card__action-btn--favorite:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
-    border-color: var(--color-primary, #8b7fff);
+    box-shadow:
+        0 0 0 3px rgba(255, 107, 107, 0.4),
+        0 4px 16px rgba(255, 107, 107, 0.3);
 }
 
-.entity-favorite:focus-visible {
-    outline: 2px solid var(--color-primary, #8b7fff);
-    outline-offset: 3px;
+/* Active/pressed state */
+.entity-favorite:active,
+.entity-card__action-btn--favorite:active {
+    transform: scale(0.9);
+    transition-duration: 0.1s;
 }
 
-.entity-favorite:active {
-    transform: scale(0.92);
+/* Favorited state - filled heart with warm colors */
+.entity-favorite.favorited,
+.entity-card__action-btn--favorite.favorited {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.25), rgba(255, 154, 107, 0.2));
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+    box-shadow:
+        0 0 20px rgba(255, 107, 107, 0.4),
+        0 0 40px rgba(255, 107, 107, 0.2),
+        inset 0 0 15px rgba(255, 107, 107, 0.1);
 }
 
-.entity-favorite.favorited {
-    background: rgba(var(--color-accent-rgb, 255, 217, 61), 0.25);
-    border-color: var(--color-accent, #ffd93d);
-    color: var(--color-accent, #ffd93d);
-    box-shadow: 0 0 16px rgba(var(--color-accent-rgb, 255, 217, 61), 0.4);
+.entity-favorite.favorited svg,
+.entity-card__action-btn--favorite.favorited svg {
+    fill: #ff6b6b;
+    stroke: #ff6b6b;
+    filter: drop-shadow(0 0 6px rgba(255, 107, 107, 0.6));
 }
 
-.entity-favorite.favorited:hover {
-    background: rgba(var(--color-accent-rgb, 255, 217, 61), 0.35);
-    transform: scale(1.18);
-    box-shadow: 0 6px 20px rgba(var(--color-accent-rgb, 255, 217, 61), 0.5);
+.entity-favorite.favorited:hover,
+.entity-card__action-btn--favorite.favorited:hover {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.35), rgba(255, 154, 107, 0.3));
+    transform: scale(1.15);
+    box-shadow:
+        0 0 24px rgba(255, 107, 107, 0.5),
+        0 6px 24px rgba(255, 107, 107, 0.35),
+        inset 0 0 20px rgba(255, 107, 107, 0.15);
 }
 
+/* Heart burst animation - when adding to favorites */
+.entity-favorite.heart-burst svg,
+.entity-card__action-btn--favorite.heart-burst svg {
+    animation: heartBurst 0.6s cubic-bezier(0.17, 0.67, 0.21, 1.69);
+}
+
+@keyframes heartBurst {
+    0% {
+        transform: scale(0.3);
+        opacity: 0.5;
+    }
+    30% {
+        transform: scale(1.4);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(0.9);
+    }
+    70% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Heart break animation - when removing from favorites */
+.entity-favorite.heart-break svg,
+.entity-card__action-btn--favorite.heart-break svg {
+    animation: heartBreak 0.4s ease-out;
+}
+
+@keyframes heartBreak {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    30% {
+        transform: scale(1.1) rotate(5deg);
+    }
+    60% {
+        transform: scale(0.8) rotate(-3deg);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1) rotate(0);
+        opacity: 1;
+    }
+}
+
+/* Loading state - gentle pulse */
+.entity-favorite.loading,
+.entity-card__action-btn--favorite.loading {
+    pointer-events: none;
+}
+
+.entity-favorite.loading svg,
+.entity-card__action-btn--favorite.loading svg {
+    animation: heartPulseLoad 0.8s ease-in-out infinite;
+}
+
+@keyframes heartPulseLoad {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+}
+
+/* Disabled state */
+.entity-favorite:disabled,
+.entity-card__action-btn--favorite:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Favorite icon text fallback */
 .favorite-icon {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-family: inherit;
     font-size: 1.35rem;
     line-height: 1;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform-origin: center;
 }
 
 .entity-favorite.favorited .favorite-icon {
-    animation: starPulse 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: heartBurst 0.6s cubic-bezier(0.17, 0.67, 0.21, 1.69);
 }
 
+/* Particle animation for burst effect */
+@keyframes favoriteParticle {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(
+            calc(-50% + var(--particle-x)),
+            calc(-50% + var(--particle-y))
+        ) scale(0.3);
+    }
+}
+
+.favorite-particle {
+    pointer-events: none;
+    will-change: transform, opacity;
+}
+
+/* Ring ripple effect on favorite */
+.entity-favorite::after,
+.entity-card__action-btn--favorite::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.4s ease-out;
+    pointer-events: none;
+}
+
+.entity-favorite.heart-burst::after,
+.entity-card__action-btn--favorite.heart-burst::after {
+    border-color: rgba(255, 107, 107, 0.6);
+    opacity: 1;
+    transform: scale(1.5);
+    animation: ringRipple 0.6s ease-out forwards;
+}
+
+@keyframes ringRipple {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2);
+    }
+}
+
+/* Legacy starPulse for backwards compatibility */
 @keyframes starPulse {
     0% {
         transform: scale(0.6) rotate(-15deg);
@@ -387,80 +796,168 @@
     }
 }
 
-.entity-favorite:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.entity-favorite.loading .favorite-icon {
-    animation: starSpin 0.8s linear infinite;
-}
-
 @keyframes starSpin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
-/* Favorites list styling */
+/* ==========================================
+   FAVORITES LIST & EMPTY STATE
+   Personal Pantheon Collection View
+   ========================================== */
+
+/* Empty State - Mystical and inviting */
 .favorites-empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem 1.5rem;
+    padding: 4rem 2rem;
     text-align: center;
-    border-radius: 8px;
-    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.05);
-    border: 2px dashed rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
-    min-height: 300px;
+    border-radius: var(--radius-xl, 16px);
+    background:
+        radial-gradient(ellipse at center, rgba(139, 127, 255, 0.08) 0%, transparent 70%),
+        rgba(var(--color-surface-rgb, 30, 30, 46), 0.4);
+    border: 2px dashed rgba(139, 127, 255, 0.25);
+    min-height: 350px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative background pattern */
+.favorites-empty-state::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath fill='none' stroke='%238b7fff' stroke-width='0.3' opacity='0.15' d='M30 5 L55 30 L30 55 L5 30 Z'/%3E%3Ccircle fill='none' stroke='%238b7fff' stroke-width='0.3' opacity='0.1' cx='30' cy='30' r='20'/%3E%3C/svg%3E");
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .favorites-empty-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-    animation: emptyStateBreathe 3s ease-in-out infinite;
+    font-size: 5rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+    animation: emptyStateBreathe 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(139, 127, 255, 0.3));
+    position: relative;
+    z-index: 1;
+}
+
+/* SVG icon version */
+.favorites-empty-icon svg {
+    width: 80px;
+    height: 80px;
+    stroke: var(--color-primary, #8b7fff);
+    stroke-width: 1.5;
+    fill: none;
 }
 
 .favorites-empty-title {
-    font-size: 1.5rem;
+    font-size: var(--font-size-2xl, 1.75rem);
+    font-weight: var(--font-semibold, 600);
+    margin-bottom: 0.75rem;
+    color: var(--color-text, #fff);
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, var(--color-text, #fff) 0%, var(--color-primary, #8b7fff) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.favorites-empty-subtitle {
+    font-size: var(--font-size-lg, 1.125rem);
+    color: var(--color-text-secondary, #a0a0a0);
     margin-bottom: 0.5rem;
-    color: var(--color-text-primary, #fff);
+    position: relative;
+    z-index: 1;
 }
 
 .favorites-empty-text {
-    font-size: 1rem;
-    color: var(--color-text-secondary, #a0a0a0);
-    margin-bottom: 1.5rem;
-    max-width: 400px;
+    font-size: var(--font-size-base, 1rem);
+    color: var(--color-text-muted, #888);
+    margin-bottom: 2rem;
+    max-width: 450px;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
 }
 
 .favorites-explore-btn {
-    padding: 0.75rem 1.5rem;
-    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
-    border: 1px solid var(--color-primary, #8b7fff);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, rgba(139, 127, 255, 0.2), rgba(255, 126, 182, 0.15));
+    border: 1px solid rgba(139, 127, 255, 0.4);
     color: var(--color-primary, #8b7fff);
-    border-radius: 6px;
+    border-radius: var(--radius-lg, 12px);
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-weight: var(--font-medium, 500);
+    font-size: var(--font-size-base, 1rem);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.favorites-explore-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(139, 127, 255, 0.3), rgba(255, 126, 182, 0.2));
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .favorites-explore-btn:hover {
-    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow:
+        0 8px 24px rgba(139, 127, 255, 0.3),
+        0 0 0 1px rgba(139, 127, 255, 0.5);
+    border-color: var(--color-primary, #8b7fff);
+}
+
+.favorites-explore-btn:hover::before {
+    opacity: 1;
+}
+
+.favorites-explore-btn:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+.favorites-explore-btn:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 3px rgba(139, 127, 255, 0.4),
+        0 8px 24px rgba(139, 127, 255, 0.3);
+}
+
+.favorites-explore-btn svg {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
+}
+
+.favorites-explore-btn:hover svg {
+    transform: translateX(3px);
 }
 
 @keyframes emptyStateBreathe {
     0%, 100% {
-        opacity: 0.4;
-        transform: scale(1);
+        opacity: 0.5;
+        transform: scale(1) translateY(0);
     }
     50% {
-        opacity: 0.7;
-        transform: scale(1.05);
+        opacity: 0.8;
+        transform: scale(1.05) translateY(-5px);
     }
 }
+
+/* ==========================================
+   FAVORITES GRID - Personal Pantheon Cards
+   ========================================== */
 
 .favorites-grid {
     display: grid;
@@ -469,10 +966,33 @@
     padding: 1.5rem 0;
 }
 
+/* Staggered entry animation */
 .favorite-item {
-    animation: fadeInUp 0.4s ease-out;
+    animation: favoriteCardEntry 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
+.favorite-item:nth-child(1) { animation-delay: 0.05s; }
+.favorite-item:nth-child(2) { animation-delay: 0.1s; }
+.favorite-item:nth-child(3) { animation-delay: 0.15s; }
+.favorite-item:nth-child(4) { animation-delay: 0.2s; }
+.favorite-item:nth-child(5) { animation-delay: 0.25s; }
+.favorite-item:nth-child(6) { animation-delay: 0.3s; }
+.favorite-item:nth-child(7) { animation-delay: 0.35s; }
+.favorite-item:nth-child(8) { animation-delay: 0.4s; }
+.favorite-item:nth-child(n+9) { animation-delay: 0.45s; }
+
+@keyframes favoriteCardEntry {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Legacy fadeInUp for compatibility */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -484,18 +1004,499 @@
     }
 }
 
+/* ==========================================
+   FAVORITES COUNT BADGE
+   ========================================== */
+
 .favorites-count-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    background: var(--color-accent, #ffd93d);
-    color: #000;
-    border-radius: 50%;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    background: linear-gradient(135deg, #ff6b6b, #ff8787);
+    color: #fff;
+    border-radius: 999px;
     font-size: 0.75rem;
-    font-weight: bold;
+    font-weight: 700;
     margin-left: 0.5rem;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
+    animation: badgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.favorites-count-badge.updating {
+    animation: badgePulse 0.6s ease-in-out;
+}
+
+@keyframes badgePop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes badgePulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+/* Large count badge for headers */
+.favorites-count-badge--large {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 10px;
+    font-size: 0.875rem;
+}
+
+/* ==========================================
+   FAVORITE FOLDERS / CATEGORIES
+   Personal Pantheon Organization
+   ========================================== */
+
+.favorites-folders {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(139, 127, 255, 0.15);
+}
+
+.favorites-folder-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(var(--color-surface-rgb, 30, 30, 46), 0.6);
+    border: 1px solid rgba(139, 127, 255, 0.2);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: var(--color-text-secondary, #a0a0a0);
+    font-size: 0.875rem;
+}
+
+.favorites-folder-chip:hover {
+    background: rgba(139, 127, 255, 0.15);
+    border-color: rgba(139, 127, 255, 0.4);
+    color: var(--color-text, #fff);
+    transform: translateY(-2px);
+}
+
+.favorites-folder-chip.active {
+    background: linear-gradient(135deg, rgba(139, 127, 255, 0.25), rgba(255, 126, 182, 0.15));
+    border-color: var(--color-primary, #8b7fff);
+    color: var(--color-primary, #8b7fff);
+    box-shadow: 0 4px 12px rgba(139, 127, 255, 0.25);
+}
+
+.favorites-folder-chip__icon {
+    font-size: 1rem;
+}
+
+.favorites-folder-chip__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background: rgba(139, 127, 255, 0.2);
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.favorites-folder-chip.active .favorites-folder-chip__count {
+    background: var(--color-primary, #8b7fff);
+    color: #fff;
+}
+
+/* Add folder button */
+.favorites-add-folder-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    background: transparent;
+    border: 1px dashed rgba(139, 127, 255, 0.3);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: var(--color-text-muted, #888);
+    font-size: 0.875rem;
+}
+
+.favorites-add-folder-btn:hover {
+    background: rgba(139, 127, 255, 0.1);
+    border-color: rgba(139, 127, 255, 0.5);
+    color: var(--color-primary, #8b7fff);
+}
+
+.favorites-add-folder-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ==========================================
+   FAVORITES ACTIONS BAR
+   Export, Share, Bulk Actions
+   ========================================== */
+
+.favorites-actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(var(--color-surface-rgb, 30, 30, 46), 0.4);
+    border-radius: var(--radius-lg, 12px);
+    border: 1px solid rgba(139, 127, 255, 0.15);
+    margin-bottom: 1.5rem;
+}
+
+.favorites-actions-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.favorites-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.favorites-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(139, 127, 255, 0.1);
+    border: 1px solid rgba(139, 127, 255, 0.25);
+    border-radius: var(--radius-md, 8px);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: var(--color-text-secondary, #a0a0a0);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.favorites-action-btn:hover {
+    background: rgba(139, 127, 255, 0.2);
+    border-color: rgba(139, 127, 255, 0.4);
+    color: var(--color-primary, #8b7fff);
+    transform: translateY(-1px);
+}
+
+.favorites-action-btn:active {
+    transform: translateY(0);
+}
+
+.favorites-action-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Share button special styling */
+.favorites-action-btn--share {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(52, 211, 153, 0.1));
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.favorites-action-btn--share:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(52, 211, 153, 0.2));
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #10b981;
+}
+
+/* Export button special styling */
+.favorites-action-btn--export {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(96, 165, 250, 0.1));
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.favorites-action-btn--export:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(96, 165, 250, 0.2));
+    border-color: rgba(59, 130, 246, 0.5);
+    color: #3b82f6;
+}
+
+/* ==========================================
+   ADD ALL FROM MYTHOLOGY DROPDOWN
+   ========================================== */
+
+.favorites-bulk-add {
+    position: relative;
+}
+
+.favorites-bulk-add__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(251, 191, 36, 0.1));
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: var(--radius-md, 8px);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: #f59e0b;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.favorites-bulk-add__trigger:hover {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(251, 191, 36, 0.2));
+    border-color: rgba(245, 158, 11, 0.5);
+    transform: translateY(-1px);
+}
+
+.favorites-bulk-add__trigger svg {
+    width: 16px;
+    height: 16px;
+}
+
+.favorites-bulk-add__dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 220px;
+    background: var(--color-surface, #1e1e2e);
+    border: 1px solid rgba(139, 127, 255, 0.25);
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.25s ease;
+}
+
+.favorites-bulk-add.open .favorites-bulk-add__dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.favorites-bulk-add__option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--color-text-secondary, #a0a0a0);
+    font-size: 0.875rem;
+    text-align: left;
+}
+
+.favorites-bulk-add__option:first-child {
+    border-radius: var(--radius-lg, 12px) var(--radius-lg, 12px) 0 0;
+}
+
+.favorites-bulk-add__option:last-child {
+    border-radius: 0 0 var(--radius-lg, 12px) var(--radius-lg, 12px);
+}
+
+.favorites-bulk-add__option:hover {
+    background: rgba(139, 127, 255, 0.1);
+    color: var(--color-text, #fff);
+}
+
+.favorites-bulk-add__option-icon {
+    font-size: 1.25rem;
+}
+
+/* ==========================================
+   FAVORITES STATISTICS MINI DASHBOARD
+   ========================================== */
+
+.favorites-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    padding: 1.25rem;
+    background: rgba(var(--color-surface-rgb, 30, 30, 46), 0.4);
+    border-radius: var(--radius-lg, 12px);
+    border: 1px solid rgba(139, 127, 255, 0.15);
+    margin-bottom: 1.5rem;
+}
+
+.favorites-stat {
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.favorites-stat__value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--color-primary, #8b7fff), #ff7eb6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.25rem;
+}
+
+.favorites-stat__label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted, #888);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ==========================================
+   SYNC STATUS INDICATOR
+   ========================================== */
+
+.favorites-sync-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    background: rgba(var(--color-surface-rgb, 30, 30, 46), 0.6);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    color: var(--color-text-muted, #888);
+}
+
+.favorites-sync-status__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #888;
+}
+
+.favorites-sync-status.synced .favorites-sync-status__dot {
+    background: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.favorites-sync-status.syncing .favorites-sync-status__dot {
+    background: #f59e0b;
+    animation: syncPulse 1s ease-in-out infinite;
+}
+
+.favorites-sync-status.offline .favorites-sync-status__dot {
+    background: #ef4444;
+}
+
+.favorites-sync-status.pending .favorites-sync-status__dot {
+    background: #3b82f6;
+    animation: syncPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes syncPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(0.85);
+    }
+}
+
+/* ==========================================
+   MYTHOLOGY TRADITION BADGES
+   ========================================== */
+
+.tradition-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.tradition-badge.greek {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.tradition-badge.norse {
+    background: rgba(56, 189, 248, 0.2);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.tradition-badge.egyptian {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.tradition-badge.hindu {
+    background: rgba(249, 115, 22, 0.2);
+    color: #f97316;
+    border: 1px solid rgba(249, 115, 22, 0.3);
+}
+
+.tradition-badge.celtic {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.tradition-badge.roman {
+    background: rgba(139, 92, 246, 0.2);
+    color: #8b5cf6;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.tradition-badge.chinese {
+    background: rgba(220, 38, 38, 0.2);
+    color: #dc2626;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.tradition-badge.japanese {
+    background: rgba(244, 114, 182, 0.2);
+    color: #f472b6;
+    border: 1px solid rgba(244, 114, 182, 0.3);
+}
+
+.tradition-badge.mesopotamian {
+    background: rgba(180, 83, 9, 0.2);
+    color: #b45309;
+    border: 1px solid rgba(180, 83, 9, 0.3);
+}
+
+.tradition-badge.christian {
+    background: rgba(250, 204, 21, 0.2);
+    color: #facc15;
+    border: 1px solid rgba(250, 204, 21, 0.3);
+}
+
+.tradition-badge.islamic {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.tradition-badge.jewish {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 /* ==========================================
@@ -615,16 +1616,16 @@
 
     .sacred-loader-ring {
         animation: none;
-        border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
-        border-top-color: var(--color-primary, #8b7fff);
+        border-color: rgba(var(--color-primary-rgb), 0.3);
+        border-top-color: var(--color-primary);
     }
 
     .sacred-loader-ring:nth-child(2) {
-        border-top-color: var(--color-secondary, #ff7fcc);
+        border-top-color: var(--color-secondary);
     }
 
     .sacred-loader-ring:nth-child(3) {
-        border-top-color: var(--color-accent, #7fffcc);
+        border-top-color: var(--color-accent);
     }
 
     .sacred-loader-center {
@@ -663,18 +1664,221 @@
 }
 
 /* ==========================================
+   HIGH CONTRAST MODE
+   ========================================== */
+
+@media (forced-colors: active) {
+    .entity-favorite,
+    .cross-cultural-badge,
+    .tradition-badge,
+    .temporal-depth {
+        border: 2px solid currentColor;
+    }
+
+    .entity-card::after {
+        display: none;
+    }
+
+    .entity-whisper {
+        border-left-width: 4px;
+    }
+}
+
+/* ==========================================
    PRINT STYLES
    ========================================== */
 
 @media print {
     .sacred-loader,
     .sacred-geometry-bg,
-    .entity-summoning::before {
+    .entity-summoning::before,
+    .entity-favorite,
+    .favorites-explore-btn {
         display: none;
     }
 
     .entity-whisper {
         border-left-color: #333;
         background: none;
+        animation: none;
+        opacity: 1;
     }
+
+    .entity-card::after {
+        display: none;
+    }
+
+    .tradition-badge {
+        background: none;
+        border: 1px solid currentColor;
+    }
+}
+
+/* ==========================================
+   THEME-AWARE TRADITION BADGES
+   Automatically adapt to current theme
+   ========================================== */
+
+/* Light themes need darker badge colors for contrast */
+[data-theme="day"] .tradition-badge,
+[data-theme="air"] .tradition-badge,
+[data-theme="order"] .tradition-badge,
+[data-theme="light"] .tradition-badge {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="day"] .tradition-badge.greek,
+[data-theme="air"] .tradition-badge.greek,
+[data-theme="order"] .tradition-badge.greek,
+[data-theme="light"] .tradition-badge.greek {
+    background: rgba(37, 99, 235, 0.12);
+    color: #1e40af;
+}
+
+[data-theme="day"] .tradition-badge.norse,
+[data-theme="air"] .tradition-badge.norse,
+[data-theme="order"] .tradition-badge.norse,
+[data-theme="light"] .tradition-badge.norse {
+    background: rgba(14, 165, 233, 0.12);
+    color: #0369a1;
+}
+
+[data-theme="day"] .tradition-badge.egyptian,
+[data-theme="air"] .tradition-badge.egyptian,
+[data-theme="order"] .tradition-badge.egyptian,
+[data-theme="light"] .tradition-badge.egyptian {
+    background: rgba(217, 119, 6, 0.12);
+    color: #92400e;
+}
+
+[data-theme="day"] .tradition-badge.hindu,
+[data-theme="air"] .tradition-badge.hindu,
+[data-theme="order"] .tradition-badge.hindu,
+[data-theme="light"] .tradition-badge.hindu {
+    background: rgba(234, 88, 12, 0.12);
+    color: #c2410c;
+}
+
+[data-theme="day"] .tradition-badge.celtic,
+[data-theme="air"] .tradition-badge.celtic,
+[data-theme="order"] .tradition-badge.celtic,
+[data-theme="light"] .tradition-badge.celtic {
+    background: rgba(21, 128, 61, 0.12);
+    color: #166534;
+}
+
+[data-theme="day"] .tradition-badge.christian,
+[data-theme="air"] .tradition-badge.christian,
+[data-theme="order"] .tradition-badge.christian,
+[data-theme="light"] .tradition-badge.christian {
+    background: rgba(202, 138, 4, 0.12);
+    color: #a16207;
+}
+
+/* Fire theme - ember glow on badges */
+[data-theme="fire"] .tradition-badge {
+    box-shadow: 0 0 8px rgba(220, 38, 38, 0.2);
+}
+
+/* Water theme - subtle ripple effect */
+[data-theme="water"] .tradition-badge {
+    box-shadow: 0 0 8px rgba(8, 145, 178, 0.2);
+}
+
+/* Celestial theme - starlight shimmer */
+[data-theme="celestial"] .tradition-badge {
+    box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+}
+
+/* Cosmic theme - nebula glow */
+[data-theme="cosmic"] .tradition-badge {
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.25);
+}
+
+/* ==========================================
+   THEME-SPECIFIC MYTHOLOGY GLOW EFFECTS
+   ========================================== */
+
+/* Fire theme - warm mythology glow */
+[data-theme="fire"][data-mythology] .entity-card::after {
+    background: rgba(220, 38, 38, 0.08);
+}
+
+/* Water theme - cool mythology glow */
+[data-theme="water"][data-mythology] .entity-card::after {
+    background: rgba(8, 145, 178, 0.08);
+}
+
+/* Earth theme - natural mythology glow */
+[data-theme="earth"][data-mythology] .entity-card::after {
+    background: rgba(21, 128, 61, 0.08);
+}
+
+/* Celestial theme - cosmic mythology glow */
+[data-theme="celestial"][data-mythology] .entity-card::after {
+    background: rgba(124, 58, 237, 0.1);
+}
+
+/* ==========================================
+   CROSS-CULTURAL BADGE THEME AWARENESS
+   ========================================== */
+
+/* Light themes */
+[data-theme="day"] .cross-cultural-badge,
+[data-theme="air"] .cross-cultural-badge,
+[data-theme="order"] .cross-cultural-badge,
+[data-theme="light"] .cross-cultural-badge {
+    background: linear-gradient(
+        135deg,
+        rgba(var(--color-primary-rgb, 37, 99, 235), 0.1),
+        rgba(var(--color-secondary-rgb, 124, 58, 237), 0.1)
+    );
+    color: var(--color-text-secondary, #475569);
+}
+
+/* Dark themes - enhanced glow */
+[data-theme="night"] .cross-cultural-badge,
+[data-theme="celestial"] .cross-cultural-badge,
+[data-theme="cosmic"] .cross-cultural-badge {
+    box-shadow: 0 0 10px rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+}
+
+/* ==========================================
+   FAVORITE BUTTON THEME AWARENESS
+   ========================================== */
+
+/* Light themes need visible borders */
+[data-theme="day"] .entity-favorite,
+[data-theme="air"] .entity-favorite,
+[data-theme="order"] .entity-favorite,
+[data-theme="light"] .entity-favorite {
+    border-color: var(--color-border-primary, #e2e8f0);
+    color: var(--color-text-muted, #94a3b8);
+}
+
+[data-theme="day"] .entity-favorite.favorited,
+[data-theme="air"] .entity-favorite.favorited,
+[data-theme="order"] .entity-favorite.favorited,
+[data-theme="light"] .entity-favorite.favorited {
+    background: rgba(var(--color-accent-rgb, 245, 158, 11), 0.15);
+    border-color: var(--color-accent, #f59e0b);
+    color: #92400e;
+}
+
+/* Fire theme favorites - ember effect */
+[data-theme="fire"] .entity-favorite.favorited {
+    background: rgba(251, 191, 36, 0.2);
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.4), 0 0 4px rgba(220, 38, 38, 0.3);
+}
+
+/* Water theme favorites - cool glow */
+[data-theme="water"] .entity-favorite.favorited {
+    background: rgba(34, 211, 238, 0.2);
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.4);
+}
+
+/* Celestial theme favorites - starlight */
+[data-theme="celestial"] .entity-favorite.favorited {
+    background: rgba(253, 224, 71, 0.2);
+    box-shadow: 0 0 15px rgba(253, 224, 71, 0.5), 0 0 5px rgba(124, 58, 237, 0.3);
 }

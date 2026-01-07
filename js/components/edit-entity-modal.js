@@ -1,5 +1,6 @@
 /**
  * Edit Entity Modal Component
+ * Eyes of Azrael Project
  *
  * Provides modal interface for editing existing entities
  * Works with EntityForm for form rendering and FirebaseCRUDManager for updates
@@ -9,7 +10,12 @@
  * - Pre-fills form with current values
  * - Validates changes before saving
  * - Shows success/error feedback
- * - Closes on ESC/overlay click
+ * - Focus trap for accessibility
+ * - Unsaved changes warning
+ * - Loading overlay during save
+ * - Mobile responsive with full screen mode
+ * - Keyboard accessible (ESC to close)
+ * - Smooth animations
  *
  * Usage:
  *   const modal = new EditEntityModal(crudManager);
@@ -19,14 +25,32 @@
 class EditEntityModal {
     /**
      * @param {FirebaseCRUDManager} crudManager - CRUD manager instance
+     * @param {Object} options - Configuration options
      */
-    constructor(crudManager) {
+    constructor(crudManager, options = {}) {
         this.crudManager = crudManager;
         this.currentEntity = null;
         this.currentCollection = null;
         this.currentEntityId = null;
         this.modalElement = null;
         this.entityForm = null;
+        this.hasUnsavedChanges = false;
+        this.isSaving = false;
+        this.previousActiveElement = null;
+
+        // Configuration options
+        this.options = {
+            closeOnBackdropClick: options.closeOnBackdropClick !== false,
+            showUnsavedWarning: options.showUnsavedWarning !== false,
+            animationDuration: options.animationDuration || 300,
+            onClose: options.onClose || null,
+            onSave: options.onSave || null,
+            ...options
+        };
+
+        // Bound event handlers for cleanup
+        this.boundEscapeHandler = this.handleEscapeKey.bind(this);
+        this.boundBeforeUnload = this.handleBeforeUnload.bind(this);
     }
 
     /**
@@ -36,11 +60,17 @@ class EditEntityModal {
      */
     async open(entityId, collection) {
         try {
+            // Store the currently focused element
+            this.previousActiveElement = document.activeElement;
+
             this.currentEntityId = entityId;
             this.currentCollection = collection;
+            this.hasUnsavedChanges = false;
+
+            // Show loading modal
+            this.showLoadingModal();
 
             // Load entity data
-            this.showLoadingModal();
             this.currentEntity = await this.loadEntity(entityId, collection);
 
             if (!this.currentEntity) {
@@ -48,14 +78,17 @@ class EditEntityModal {
                 return;
             }
 
-            // Create modal
+            // Create the full modal
             this.createModal();
 
             // Render form inside modal
             await this.renderForm();
 
-            // Show modal
+            // Show modal with animation
             this.show();
+
+            // Setup event listeners
+            this.setupEventListeners();
 
         } catch (error) {
             console.error('[EditEntityModal] Error opening modal:', error);
@@ -88,19 +121,31 @@ class EditEntityModal {
 
         const modal = document.createElement('div');
         modal.id = 'edit-entity-modal';
-        modal.className = 'modal-overlay';
+        modal.className = 'edit-modal-overlay';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'edit-modal-title');
         modal.innerHTML = `
-            <div class="modal-content">
-                <div class="loading-spinner-container">
-                    <div class="loading-spinner">Loading entity...</div>
+            <div class="edit-modal-content edit-modal-loading">
+                <div class="edit-modal-loading-container">
+                    <div class="edit-modal-spinner">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <p class="edit-modal-loading-text">Loading entity...</p>
                 </div>
             </div>
         `;
 
         document.body.appendChild(modal);
+        document.body.classList.add('modal-open');
         this.modalElement = modal;
 
-        setTimeout(() => modal.classList.add('show'), 10);
+        // Animate in
+        requestAnimationFrame(() => {
+            modal.classList.add('show');
+        });
     }
 
     /**
@@ -111,42 +156,170 @@ class EditEntityModal {
         const existing = document.getElementById('edit-entity-modal');
         if (existing) existing.remove();
 
+        const entityTypeSingular = this.getSingularType(this.currentCollection);
+        const entityName = this.currentEntity?.name || this.currentEntity?.title || 'Entity';
+
         const modal = document.createElement('div');
         modal.id = 'edit-entity-modal';
-        modal.className = 'modal-overlay';
+        modal.className = 'edit-modal-overlay';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'edit-modal-title');
         modal.innerHTML = `
-            <div class="modal-content modal-large">
-                <div class="modal-header">
-                    <h2>Edit ${this.capitalizeFirst(this.currentCollection.slice(0, -1))}</h2>
-                    <button class="modal-close" aria-label="Close" title="Close (ESC)">×</button>
-                </div>
-                <div id="modal-form-container" class="modal-body">
+            <div class="edit-modal-content edit-modal-large" tabindex="-1">
+                <header class="edit-modal-header">
+                    <div class="edit-modal-title-section">
+                        <h2 id="edit-modal-title">Edit ${this.escapeHtml(entityTypeSingular)}</h2>
+                        <span class="edit-modal-subtitle">${this.escapeHtml(entityName)}</span>
+                    </div>
+                    <button class="edit-modal-close" aria-label="Close modal" title="Close (ESC)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+                <div id="edit-modal-form-container" class="edit-modal-body">
                     <!-- EntityForm renders here -->
+                </div>
+                <div class="edit-modal-save-overlay" id="edit-modal-save-overlay">
+                    <div class="edit-modal-save-spinner">
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <p>Saving changes...</p>
                 </div>
             </div>
         `;
 
         document.body.appendChild(modal);
+        document.body.classList.add('modal-open');
         this.modalElement = modal;
+    }
 
-        // Wire up close button
-        const closeBtn = modal.querySelector('.modal-close');
-        closeBtn.addEventListener('click', () => this.close());
+    /**
+     * Setup all event listeners
+     */
+    setupEventListeners() {
+        if (!this.modalElement) return;
 
-        // Close on overlay click
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                this.close();
-            }
-        });
+        const closeBtn = this.modalElement.querySelector('.edit-modal-close');
+        const content = this.modalElement.querySelector('.edit-modal-content');
 
-        // Close on ESC key
-        this.escapeHandler = (e) => {
-            if (e.key === 'Escape' && this.isOpen()) {
-                this.close();
+        // Close button
+        closeBtn?.addEventListener('click', () => this.attemptClose());
+
+        // Backdrop click
+        if (this.options.closeOnBackdropClick) {
+            this.modalElement.addEventListener('click', (e) => {
+                if (e.target === this.modalElement) {
+                    this.attemptClose();
+                }
+            });
+        }
+
+        // ESC key handler
+        document.addEventListener('keydown', this.boundEscapeHandler);
+
+        // Unsaved changes warning
+        if (this.options.showUnsavedWarning) {
+            window.addEventListener('beforeunload', this.boundBeforeUnload);
+        }
+
+        // Focus trap
+        this.setupFocusTrap();
+
+        // Track form changes
+        this.setupChangeTracking();
+
+        // Focus the modal content
+        content?.focus();
+    }
+
+    /**
+     * Handle ESC key press
+     * @param {KeyboardEvent} e
+     */
+    handleEscapeKey(e) {
+        if (e.key === 'Escape' && this.isOpen()) {
+            e.preventDefault();
+            this.attemptClose();
+        }
+    }
+
+    /**
+     * Handle beforeunload event for unsaved changes
+     * @param {BeforeUnloadEvent} e
+     */
+    handleBeforeUnload(e) {
+        if (this.hasUnsavedChanges) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+            return e.returnValue;
+        }
+    }
+
+    /**
+     * Setup focus trap within modal
+     */
+    setupFocusTrap() {
+        if (!this.modalElement) return;
+
+        const content = this.modalElement.querySelector('.edit-modal-content');
+
+        const getFocusableElements = () => {
+            const selector = [
+                'button:not([disabled])',
+                '[href]',
+                'input:not([disabled]):not([type="hidden"])',
+                'select:not([disabled])',
+                'textarea:not([disabled])',
+                '[tabindex]:not([tabindex="-1"])'
+            ].join(',');
+            return Array.from(content.querySelectorAll(selector)).filter(
+                el => el.offsetParent !== null
+            );
+        };
+
+        const handleTabKey = (e) => {
+            if (e.key !== 'Tab') return;
+
+            const focusableElements = getFocusableElements();
+            if (focusableElements.length === 0) return;
+
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (e.shiftKey) {
+                if (document.activeElement === firstElement) {
+                    e.preventDefault();
+                    lastElement.focus();
+                }
+            } else {
+                if (document.activeElement === lastElement) {
+                    e.preventDefault();
+                    firstElement.focus();
+                }
             }
         };
-        document.addEventListener('keydown', this.escapeHandler);
+
+        content.addEventListener('keydown', handleTabKey);
+        this.focusTrapHandler = handleTabKey;
+    }
+
+    /**
+     * Setup change tracking for unsaved changes warning
+     */
+    setupChangeTracking() {
+        const formContainer = this.modalElement?.querySelector('#edit-modal-form-container');
+        if (!formContainer) return;
+
+        const trackChange = () => {
+            this.hasUnsavedChanges = true;
+        };
+
+        // Use event delegation for form inputs
+        formContainer.addEventListener('input', trackChange);
+        formContainer.addEventListener('change', trackChange);
     }
 
     /**
@@ -158,7 +331,7 @@ class EditEntityModal {
             return;
         }
 
-        const formContainer = this.modalElement.querySelector('#modal-form-container');
+        const formContainer = this.modalElement.querySelector('#edit-modal-form-container');
 
         // Create EntityForm instance with validated callbacks
         this.entityForm = new EntityForm({
@@ -175,13 +348,17 @@ class EditEntityModal {
             },
             onCancel: () => {
                 try {
-                    this.close();
+                    this.attemptClose();
                 } catch (error) {
                     console.error('[EditModal] onCancel callback error:', error);
-                    // Fallback: try to remove modal directly
-                    const modal = document.getElementById('edit-entity-modal');
-                    if (modal) modal.remove();
+                    this.forceClose();
                 }
+            },
+            onSaveStart: () => {
+                this.showSaveOverlay();
+            },
+            onSaveEnd: () => {
+                this.hideSaveOverlay();
             }
         });
 
@@ -194,26 +371,126 @@ class EditEntityModal {
     }
 
     /**
-     * Show modal
+     * Show the saving overlay
      */
-    show() {
-        if (this.modalElement) {
-            setTimeout(() => this.modalElement.classList.add('show'), 10);
+    showSaveOverlay() {
+        this.isSaving = true;
+        const overlay = this.modalElement?.querySelector('#edit-modal-save-overlay');
+        if (overlay) {
+            overlay.classList.add('show');
         }
     }
 
     /**
-     * Close modal
+     * Hide the saving overlay
+     */
+    hideSaveOverlay() {
+        this.isSaving = false;
+        const overlay = this.modalElement?.querySelector('#edit-modal-save-overlay');
+        if (overlay) {
+            overlay.classList.remove('show');
+        }
+    }
+
+    /**
+     * Show modal with animation
+     */
+    show() {
+        if (this.modalElement) {
+            requestAnimationFrame(() => {
+                this.modalElement.classList.add('show');
+            });
+        }
+    }
+
+    /**
+     * Attempt to close modal (with unsaved changes check)
+     */
+    attemptClose() {
+        if (this.isSaving) {
+            return; // Don't close while saving
+        }
+
+        if (this.hasUnsavedChanges && this.options.showUnsavedWarning) {
+            this.showUnsavedWarningDialog();
+        } else {
+            this.close();
+        }
+    }
+
+    /**
+     * Show unsaved changes warning dialog
+     */
+    showUnsavedWarningDialog() {
+        const existingDialog = document.getElementById('unsaved-changes-dialog');
+        if (existingDialog) existingDialog.remove();
+
+        const dialog = document.createElement('div');
+        dialog.id = 'unsaved-changes-dialog';
+        dialog.className = 'edit-modal-confirm-overlay';
+        dialog.innerHTML = `
+            <div class="edit-modal-confirm-dialog">
+                <div class="edit-modal-confirm-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <h3>Unsaved Changes</h3>
+                <p>You have unsaved changes. Are you sure you want to close without saving?</p>
+                <div class="edit-modal-confirm-actions">
+                    <button class="edit-modal-btn edit-modal-btn-secondary" data-action="cancel">
+                        Keep Editing
+                    </button>
+                    <button class="edit-modal-btn edit-modal-btn-danger" data-action="discard">
+                        Discard Changes
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(dialog);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            dialog.classList.add('show');
+        });
+
+        // Wire up buttons
+        dialog.querySelector('[data-action="cancel"]')?.addEventListener('click', () => {
+            dialog.classList.remove('show');
+            setTimeout(() => dialog.remove(), 200);
+        });
+
+        dialog.querySelector('[data-action="discard"]')?.addEventListener('click', () => {
+            dialog.classList.remove('show');
+            setTimeout(() => {
+                dialog.remove();
+                this.close();
+            }, 200);
+        });
+
+        // Close on backdrop click
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                dialog.classList.remove('show');
+                setTimeout(() => dialog.remove(), 200);
+            }
+        });
+    }
+
+    /**
+     * Close modal with animation
      */
     close() {
         if (!this.modalElement) return;
 
-        // Remove ESC handler
-        if (this.escapeHandler) {
-            document.removeEventListener('keydown', this.escapeHandler);
-        }
+        // Cleanup event listeners
+        document.removeEventListener('keydown', this.boundEscapeHandler);
+        window.removeEventListener('beforeunload', this.boundBeforeUnload);
 
-        // Fade out
+        // Animate out
         this.modalElement.classList.remove('show');
 
         // Remove after animation
@@ -221,9 +498,36 @@ class EditEntityModal {
             if (this.modalElement && this.modalElement.parentNode) {
                 this.modalElement.remove();
             }
+            document.body.classList.remove('modal-open');
             this.modalElement = null;
             this.entityForm = null;
-        }, 300);
+            this.hasUnsavedChanges = false;
+
+            // Return focus to previous element
+            if (this.previousActiveElement && this.previousActiveElement.focus) {
+                this.previousActiveElement.focus();
+            }
+
+            // Call onClose callback
+            if (typeof this.options.onClose === 'function') {
+                this.options.onClose();
+            }
+        }, this.options.animationDuration);
+    }
+
+    /**
+     * Force close without animation (fallback)
+     */
+    forceClose() {
+        document.removeEventListener('keydown', this.boundEscapeHandler);
+        window.removeEventListener('beforeunload', this.boundBeforeUnload);
+
+        const modal = document.getElementById('edit-entity-modal');
+        if (modal) modal.remove();
+
+        document.body.classList.remove('modal-open');
+        this.modalElement = null;
+        this.entityForm = null;
     }
 
     /**
@@ -239,20 +543,26 @@ class EditEntityModal {
      * @param {Object} result - Save result from CRUD manager
      */
     handleSuccess(result) {
+        // Reset unsaved changes flag
+        this.hasUnsavedChanges = false;
+
         // Validate result parameter
         if (!result || typeof result !== 'object') {
             console.warn('[EditModal] handleSuccess called with invalid result:', result);
-            // Still show success since the save operation completed
         }
 
         this.showToast('Entity updated successfully!', 'success');
+
+        // Call onSave callback
+        if (typeof this.options.onSave === 'function') {
+            this.options.onSave(result);
+        }
 
         // Close modal after brief delay
         setTimeout(() => {
             this.close();
 
             // Reload page to show updated content
-            // In a more sophisticated app, we'd update the UI directly
             window.location.reload();
         }, 1000);
     }
@@ -262,15 +572,23 @@ class EditEntityModal {
      * @param {string} message - Error message
      */
     showError(message) {
-        const formContainer = this.modalElement?.querySelector('#modal-form-container');
+        const formContainer = this.modalElement?.querySelector('#edit-modal-form-container');
 
         if (formContainer) {
             formContainer.innerHTML = `
-                <div class="error-container" style="text-align: center; padding: 3rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                <div class="edit-modal-error">
+                    <div class="edit-modal-error-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
                     <h3>Error</h3>
-                    <p style="color: #ef4444; margin: 1rem 0;">${this.escapeHtml(message)}</p>
-                    <button class="btn-secondary" onclick="this.closest('.modal-overlay').remove()">Close</button>
+                    <p class="edit-modal-error-message">${this.escapeHtml(message)}</p>
+                    <button class="edit-modal-btn edit-modal-btn-secondary" onclick="this.closest('.edit-modal-overlay').remove(); document.body.classList.remove('modal-open');">
+                        Close
+                    </button>
                 </div>
             `;
         }
@@ -290,30 +608,60 @@ class EditEntityModal {
             return;
         }
 
-        // Fallback: Create simple toast
+        // Remove existing toast
+        const existingToast = document.querySelector('.edit-modal-toast');
+        if (existingToast) existingToast.remove();
+
+        // Create toast
         const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.textContent = message;
-        toast.style.cssText = `
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            z-index: 99999;
-            animation: slideIn 0.3s ease;
-            max-width: 400px;
+        toast.className = `edit-modal-toast edit-modal-toast-${type}`;
+
+        const icons = {
+            success: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+            error: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+            info: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
+        };
+
+        toast.innerHTML = `
+            <span class="edit-modal-toast-icon">${icons[type] || icons.info}</span>
+            <span class="edit-modal-toast-message">${this.escapeHtml(message)}</span>
         `;
 
         document.body.appendChild(toast);
 
+        // Animate in
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+
+        // Auto remove
         setTimeout(() => {
-            toast.style.animation = 'slideOut 0.3s ease';
+            toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        }, 4000);
+    }
+
+    /**
+     * Get singular form of collection type
+     * @param {string} collection - Collection name
+     * @returns {string}
+     */
+    getSingularType(collection) {
+        const singularMap = {
+            deities: 'Deity',
+            heroes: 'Hero',
+            creatures: 'Creature',
+            items: 'Item',
+            places: 'Place',
+            texts: 'Text',
+            rituals: 'Ritual',
+            herbs: 'Herb',
+            symbols: 'Symbol',
+            archetypes: 'Archetype',
+            mythologies: 'Mythology'
+        };
+
+        return singularMap[collection] || this.capitalizeFirst(collection.slice(0, -1));
     }
 
     /**
@@ -332,6 +680,7 @@ class EditEntityModal {
      * @returns {string}
      */
     escapeHtml(str) {
+        if (!str) return '';
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;

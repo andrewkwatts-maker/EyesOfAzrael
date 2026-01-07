@@ -1,16 +1,16 @@
 /**
- * Complete Search View Component
+ * Complete Search View Component - Polished Edition
  *
  * Full-featured search interface with:
- * - Real-time autocomplete
- * - Advanced filters
- * - Multiple display modes (grid/list/table)
- * - Search history
- * - Pagination
- * - Virtual scrolling for large result sets (>100 items)
- * - Performance optimized
+ * - Large, prominent search bar with clear button
+ * - Horizontally scrollable filter chips
+ * - Grid layout results with match highlighting
+ * - Text truncation (2 lines title, 3 lines description)
+ * - Skeleton loading with minimum 300ms display
+ * - Results count with pagination info
+ * - Full keyboard navigation support
+ * - Virtual scrolling for large result sets
  */
-
 
 class SearchViewComplete {
     constructor(firestoreInstance) {
@@ -38,22 +38,26 @@ class SearchViewComplete {
             results: [],
             totalResults: 0,
             currentPage: 1,
-            resultsPerPage: 24,
-            displayMode: 'grid', // grid, list, table
+            resultsPerPage: 20,
+            displayMode: 'grid',
             sortBy: 'relevance',
             filters: {
                 mythology: '',
-                entityTypes: [],
+                entityTypes: ['deities', 'heroes', 'creatures', 'items', 'places', 'texts'],
                 importance: [1, 5],
                 hasImage: null
             },
+            activeFilters: [],
             isLoading: false,
-            error: null
+            error: null,
+            focusedResultIndex: -1,
+            searchStartTime: null
         };
 
         // Debounce timer for autocomplete
         this.autocompleteTimer = null;
         this.autocompleteDelay = 300;
+        this.minLoadingTime = 300; // Minimum loading display time
 
         // Search history
         this.searchHistory = this.loadSearchHistory();
@@ -62,7 +66,20 @@ class SearchViewComplete {
         // Available mythologies (will be loaded from Firebase)
         this.mythologies = [];
 
-        // Event listener cleanup tracking (memory leak prevention)
+        // Entity type filter chips
+        this.entityTypeChips = [
+            { id: 'all', label: 'All', icon: null },
+            { id: 'deities', label: 'Deities', icon: null },
+            { id: 'heroes', label: 'Heroes', icon: null },
+            { id: 'creatures', label: 'Creatures', icon: null },
+            { id: 'items', label: 'Items', icon: null },
+            { id: 'places', label: 'Places', icon: null },
+            { id: 'texts', label: 'Texts', icon: null },
+            { id: 'symbols', label: 'Symbols', icon: null },
+            { id: 'rituals', label: 'Rituals', icon: null }
+        ];
+
+        // Event listener cleanup tracking
         this.boundHandlers = {};
         this.activeTimers = [];
         this.elements = {};
@@ -85,14 +102,17 @@ class SearchViewComplete {
             // Initialize components
             await this.init();
 
-            console.log('[SearchView] ✅ Search interface rendered successfully');
+            console.log('[SearchView] Search interface rendered successfully');
         } catch (error) {
-            console.error('[SearchView] ❌ Render failed:', error);
+            console.error('[SearchView] Render failed:', error);
             container.innerHTML = `
-                <div class="search-error">
-                    <div class="error-icon">⚠️</div>
-                    <h2>Failed to load search</h2>
-                    <p>${error.message}</p>
+                <div class="search-error-container">
+                    <div class="search-error">
+                        <div class="error-icon">!</div>
+                        <h2>Failed to load search</h2>
+                        <p>${error.message}</p>
+                        <button class="btn-primary" onclick="location.reload()">Retry</button>
+                    </div>
                 </div>
             `;
         }
@@ -114,7 +134,6 @@ class SearchViewComplete {
             this.mythologies.sort((a, b) => a.name.localeCompare(b.name));
         } catch (error) {
             console.warn('[SearchView] Could not load mythologies:', error);
-            // Fallback to common mythologies
             this.mythologies = [
                 { id: 'greek', name: 'Greek' },
                 { id: 'norse', name: 'Norse' },
@@ -123,7 +142,10 @@ class SearchViewComplete {
                 { id: 'buddhist', name: 'Buddhist' },
                 { id: 'christian', name: 'Christian' },
                 { id: 'babylonian', name: 'Babylonian' },
-                { id: 'sumerian', name: 'Sumerian' }
+                { id: 'sumerian', name: 'Sumerian' },
+                { id: 'celtic', name: 'Celtic' },
+                { id: 'japanese', name: 'Japanese' },
+                { id: 'chinese', name: 'Chinese' }
             ];
         }
     }
@@ -139,599 +161,133 @@ class SearchViewComplete {
      */
     getHTML() {
         return `
-            <div class="search-view" style="max-width: 1600px; margin: 0 auto; padding: 1rem;">
-                <div class="search-header" style="margin-bottom: 2rem;">
-                    <div class="search-hero" style="
-                        text-align: center;
-                        padding: 3rem 2rem;
-                        background: linear-gradient(135deg,
-                            rgba(var(--color-primary-rgb), 0.15),
-                            rgba(var(--color-secondary-rgb), 0.15));
-                        backdrop-filter: blur(10px);
-                        border: 2px solid rgba(var(--color-primary-rgb), 0.3);
-                        border-radius: var(--radius-xl, 24px);
-                        margin-bottom: 2rem;
-                        box-shadow: var(--shadow-xl);
-                    ">
-                        <h1 style="
-                            font-size: clamp(2rem, 5vw, 3rem);
-                            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-                            -webkit-background-clip: text;
-                            -webkit-text-fill-color: transparent;
-                            background-clip: text;
-                            margin: 0 0 1rem 0;
-                        ">🔍 Search Mythological Entities</h1>
-                        <p class="search-description" style="
-                            font-size: 1.2rem;
-                            color: var(--color-text-secondary);
-                            margin: 0;
-                        ">Explore deities, heroes, creatures, and more across world mythologies</p>
+            <div class="search-view">
+                <!-- Search Header with Hero -->
+                <header class="search-header">
+                    <div class="search-hero">
+                        <h1 class="search-title">Search Mythology</h1>
+                        <p class="search-subtitle">Explore deities, heroes, creatures, and more across world mythologies</p>
                     </div>
 
-                    <div class="search-input-wrapper" style="
-                        display: flex;
-                        gap: 0.75rem;
-                        position: relative;
-                        margin-bottom: 1rem;
-                    ">
-                        <div style="position: relative; flex: 1;">
-                            <span class="search-icon" style="
-                                position: absolute;
-                                left: 1rem;
-                                top: 50%;
-                                transform: translateY(-50%);
-                                font-size: 1.2rem;
-                                opacity: 0.6;
-                            ">🔍</span>
+                    <!-- Prominent Search Bar -->
+                    <div class="search-bar-container">
+                        <div class="search-input-wrapper" role="search">
+                            <span class="search-icon" aria-hidden="true">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <path d="M21 21l-4.35-4.35"></path>
+                                </svg>
+                            </span>
                             <input
                                 type="text"
                                 id="search-input"
                                 class="search-input"
-                                placeholder="Search deities, heroes, creatures, and more..."
+                                placeholder="Search mythology..."
                                 autocomplete="off"
-                                value="${this.state.query}"
-                                style="
-                                    width: 100%;
-                                    min-height: 48px;
-                                    padding: 0.75rem 3rem 0.75rem 3rem;
-                                    font-size: 1.1rem;
-                                    background: rgba(var(--color-surface-rgb), 0.6);
-                                    backdrop-filter: blur(10px);
-                                    border: 2px solid rgba(var(--color-primary-rgb), 0.2);
-                                    border-radius: var(--radius-md, 12px);
-                                    color: var(--color-text-primary);
-                                    transition: all var(--transition-base);
-                                "
+                                aria-label="Search mythology"
+                                value="${this.escapeHtml(this.state.query)}"
                             >
-                            <button id="clear-search" class="clear-btn" style="
-                                display: none;
-                                position: absolute;
-                                right: 1rem;
-                                top: 50%;
-                                transform: translateY(-50%);
-                                background: transparent;
-                                border: none;
-                                color: var(--color-text-secondary);
-                                font-size: 1.5rem;
-                                cursor: pointer;
-                                padding: 0.25rem;
-                                opacity: 0.6;
-                                transition: opacity 0.2s;
-                            ">✕</button>
+                            <button id="clear-search" class="clear-btn" aria-label="Clear search" style="display: none;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                            <button id="search-btn" class="search-submit-btn" aria-label="Search">
+                                Search
+                            </button>
                         </div>
-                        <button id="search-btn" class="search-submit-btn" style="
-                            min-height: 48px;
-                            padding: 0.75rem 2rem;
-                            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-                            color: white;
-                            border: none;
-                            border-radius: var(--radius-md, 12px);
-                            font-size: 1.1rem;
-                            font-weight: 600;
-                            cursor: pointer;
-                            transition: all var(--transition-base);
-                            white-space: nowrap;
-                        ">Search</button>
+                        <div id="autocomplete-results" class="search-suggestions" role="listbox" aria-label="Search suggestions"></div>
                     </div>
+                </header>
 
-                    <div id="autocomplete-results" class="search-suggestions" style="
-                        display: none;
-                        position: absolute;
-                        top: 100%;
-                        left: 0;
-                        right: 0;
-                        margin-top: 0.5rem;
-                        background: rgba(var(--color-surface-rgb), 0.95);
-                        backdrop-filter: blur(10px);
-                        border: 2px solid rgba(var(--color-primary-rgb), 0.2);
-                        border-radius: var(--radius-md, 12px);
-                        overflow: hidden;
-                        z-index: 1000;
-                        max-height: 300px;
-                        overflow-y: auto;
-                        box-shadow: var(--shadow-lg);
-                    "></div>
+                <!-- Filter Chips - Horizontally Scrollable -->
+                <div class="filter-chips-container">
+                    <div class="filter-chips-scroll" role="tablist" aria-label="Filter by category">
+                        ${this.getFilterChipsHTML()}
+                    </div>
+                    <div class="filter-chips-fade filter-chips-fade-left"></div>
+                    <div class="filter-chips-fade filter-chips-fade-right"></div>
                 </div>
 
-                <div class="search-content" style="
-                    display: grid;
-                    grid-template-columns: 320px 1fr;
-                    gap: 2rem;
-                    align-items: start;
-                ">
-                    <aside class="search-filters" style="
-                        position: sticky;
-                        top: 1rem;
-                        background: rgba(var(--color-surface-rgb), 0.6);
-                        backdrop-filter: blur(10px);
-                        border: 2px solid rgba(var(--color-primary-rgb), 0.2);
-                        border-radius: var(--radius-lg, 16px);
-                        padding: 1.5rem;
-                        max-height: calc(100vh - 2rem);
-                        overflow-y: auto;
-                    ">
-                        <button id="filter-toggle-btn" class="filter-toggle-btn" style="
-                            width: 100%;
-                            min-height: 44px;
-                            padding: 0.75rem 1rem;
-                            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-                            color: white;
-                            border: none;
-                            border-radius: var(--radius-md, 8px);
-                            font-size: 1rem;
-                            font-weight: 600;
-                            cursor: pointer;
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-between;
-                            gap: 0.5rem;
-                            margin-bottom: 1rem;
-                            transition: all var(--transition-base);
-                        ">
-                            <span>🎛️ Filters</span>
-                            <span id="filter-count" class="filter-count" style="
-                                display: none;
-                                background: white;
-                                color: var(--color-primary);
-                                border-radius: var(--radius-full, 20px);
-                                padding: 0.25rem 0.75rem;
-                                font-size: 0.85rem;
-                                font-weight: 700;
-                            ">0</span>
+                <!-- Mythology Sub-filters -->
+                <div class="mythology-filters-container">
+                    <div class="mythology-filters-scroll">
+                        <button class="mythology-chip active" data-mythology="" role="tab" aria-selected="true">
+                            All Mythologies
                         </button>
+                        ${this.mythologies.map(m => `
+                            <button class="mythology-chip" data-mythology="${m.id}" role="tab" aria-selected="false">
+                                ${m.name}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
 
-                        <div id="filter-panel" class="filter-panel" style="display: none;">
-                            ${this.getFiltersHTML()}
+                <!-- Main Content Area -->
+                <main class="search-main">
+                    <!-- Results Header -->
+                    <div id="results-header" class="results-header" style="display: none;">
+                        <div class="results-count-info">
+                            <span id="results-count" class="results-count"></span>
+                            <span id="pagination-info" class="pagination-info"></span>
                         </div>
-
-                        ${this.getSearchHistoryHTML()}
-                    </aside>
-
-                    <main class="search-results-main" style="min-height: 600px;">
-                        <div class="results-controls" style="
-                            display: none;
-                            flex-wrap: wrap;
-                            gap: 1rem;
-                            align-items: center;
-                            justify-content: space-between;
-                            padding: 1rem;
-                            background: rgba(var(--color-surface-rgb), 0.4);
-                            border-radius: var(--radius-md, 8px);
-                            margin-bottom: 1.5rem;
-                        ">
-                            <div class="results-info">
-                                <span id="results-count" style="
-                                    font-size: 1.1rem;
-                                    font-weight: 600;
-                                    color: var(--color-text-primary);
-                                ">0 results</span>
+                        <div class="results-controls">
+                            <div class="display-mode-switcher" role="group" aria-label="Display mode">
+                                <button class="display-mode-btn active" data-mode="grid" title="Grid view" aria-pressed="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                        <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                                        <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                                        <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                                        <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                                    </svg>
+                                </button>
+                                <button class="display-mode-btn" data-mode="list" title="List view" aria-pressed="false">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                        <rect x="3" y="4" width="18" height="4" rx="1"></rect>
+                                        <rect x="3" y="10" width="18" height="4" rx="1"></rect>
+                                        <rect x="3" y="16" width="18" height="4" rx="1"></rect>
+                                    </svg>
+                                </button>
                             </div>
-
-                            <div class="display-mode-switcher" style="
-                                display: flex;
-                                gap: 0.5rem;
-                                background: rgba(var(--color-surface-rgb), 0.6);
-                                padding: 0.25rem;
-                                border-radius: var(--radius-md, 8px);
-                                border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-                            ">
-                                <button class="display-mode-btn active" data-mode="grid" title="Grid view" style="
-                                    min-height: 40px;
-                                    min-width: 40px;
-                                    padding: 0.5rem;
-                                    background: var(--color-primary);
-                                    border: none;
-                                    border-radius: var(--radius-sm, 6px);
-                                    color: white;
-                                    cursor: pointer;
-                                    font-size: 1.2rem;
-                                    transition: all var(--transition-base);
-                                ">▦</button>
-                                <button class="display-mode-btn" data-mode="list" title="List view" style="
-                                    min-height: 40px;
-                                    min-width: 40px;
-                                    padding: 0.5rem;
-                                    background: transparent;
-                                    border: none;
-                                    border-radius: var(--radius-sm, 6px);
-                                    color: var(--color-text-secondary);
-                                    cursor: pointer;
-                                    font-size: 1.2rem;
-                                    transition: all var(--transition-base);
-                                ">☰</button>
-                                <button class="display-mode-btn" data-mode="table" title="Table view" style="
-                                    min-height: 40px;
-                                    min-width: 40px;
-                                    padding: 0.5rem;
-                                    background: transparent;
-                                    border: none;
-                                    border-radius: var(--radius-sm, 6px);
-                                    color: var(--color-text-secondary);
-                                    cursor: pointer;
-                                    font-size: 1.2rem;
-                                    transition: all var(--transition-base);
-                                ">▤</button>
-                            </div>
-
-                            <div class="sort-controls" style="display: flex; align-items: center; gap: 0.5rem;">
-                                <label for="sort-select" style="
-                                    font-size: 0.95rem;
-                                    color: var(--color-text-secondary);
-                                    font-weight: 500;
-                                ">Sort:</label>
-                                <select id="sort-select" class="sort-select" style="
-                                    min-height: 40px;
-                                    padding: 0.5rem 1rem;
-                                    background: rgba(var(--color-surface-rgb), 0.6);
-                                    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-                                    border-radius: var(--radius-sm, 6px);
-                                    color: var(--color-text-primary);
-                                    cursor: pointer;
-                                    font-size: 0.95rem;
-                                ">
+                            <div class="sort-controls">
+                                <label for="sort-select">Sort:</label>
+                                <select id="sort-select" class="sort-select">
                                     <option value="relevance">Relevance</option>
                                     <option value="name">Name (A-Z)</option>
                                     <option value="importance">Importance</option>
-                                    <option value="popularity">Popularity</option>
                                 </select>
                             </div>
                         </div>
+                    </div>
 
-                        <div id="results-container" class="search-results">
-                            ${this.getEmptyStateHTML()}
-                        </div>
+                    <!-- Results Container -->
+                    <div id="results-container" class="search-results" role="main" aria-live="polite">
+                        ${this.getEmptyStateHTML()}
+                    </div>
 
-                        <div id="pagination" class="pagination" style="
-                            display: none;
-                            flex-wrap: wrap;
-                            justify-content: center;
-                            align-items: center;
-                            gap: 0.5rem;
-                            padding: 2rem 0;
-                        "></div>
-                    </main>
-                </div>
+                    <!-- Pagination -->
+                    <nav id="pagination" class="pagination" aria-label="Search results pagination" style="display: none;"></nav>
+                </main>
             </div>
         `;
     }
 
     /**
-     * Generate filters HTML
+     * Generate filter chips HTML
      */
-    getFiltersHTML() {
-        return `
-            <div class="filter-group" style="margin-bottom: 1.5rem;">
-                <label for="mythology-filter" style="
-                    display: block;
-                    font-size: 0.95rem;
-                    font-weight: 600;
-                    color: var(--color-text-primary);
-                    margin-bottom: 0.5rem;
-                ">🌍 Mythology</label>
-                <select id="mythology-filter" style="
-                    width: 100%;
-                    min-height: 44px;
-                    padding: 0.5rem 1rem;
-                    background: rgba(var(--color-surface-rgb), 0.6);
-                    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-                    border-radius: var(--radius-sm, 6px);
-                    color: var(--color-text-primary);
-                    cursor: pointer;
-                    font-size: 0.95rem;
-                ">
-                    <option value="">All Mythologies</option>
-                    ${this.mythologies.map(m =>
-                        `<option value="${m.id}">${m.name}</option>`
-                    ).join('')}
-                </select>
-            </div>
-
-            <div class="filter-group" style="margin-bottom: 1.5rem;">
-                <label style="
-                    display: block;
-                    font-size: 0.95rem;
-                    font-weight: 600;
-                    color: var(--color-text-primary);
-                    margin-bottom: 0.5rem;
-                ">📚 Entity Type</label>
-                <div class="checkbox-group" style="
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.5rem;
-                ">
-                    <label style="
-                        display: flex;
-                        align-items: center;
-                        gap: 0.5rem;
-                        padding: 0.5rem;
-                        border-radius: var(--radius-sm, 6px);
-                        cursor: pointer;
-                        transition: background 0.2s;
-                        color: var(--color-text-secondary);
-                    "><input type="checkbox" value="deities" checked style="
-                        width: 18px;
-                        height: 18px;
-                        cursor: pointer;
-                        accent-color: var(--color-primary);
-                    "> Deities</label>
-                    <label style="
-                        display: flex;
-                        align-items: center;
-                        gap: 0.5rem;
-                        padding: 0.5rem;
-                        border-radius: var(--radius-sm, 6px);
-                        cursor: pointer;
-                        transition: background 0.2s;
-                        color: var(--color-text-secondary);
-                    "><input type="checkbox" value="heroes" checked style="
-                        width: 18px;
-                        height: 18px;
-                        cursor: pointer;
-                        accent-color: var(--color-primary);
-                    "> Heroes</label>
-                    <label style="
-                        display: flex;
-                        align-items: center;
-                        gap: 0.5rem;
-                        padding: 0.5rem;
-                        border-radius: var(--radius-sm, 6px);
-                        cursor: pointer;
-                        transition: background 0.2s;
-                        color: var(--color-text-secondary);
-                    "><input type="checkbox" value="creatures" checked style="
-                        width: 18px;
-                        height: 18px;
-                        cursor: pointer;
-                        accent-color: var(--color-primary);
-                    "> Creatures</label>
-                    <label style="
-                        display: flex;
-                        align-items: center;
-                        gap: 0.5rem;
-                        padding: 0.5rem;
-                        border-radius: var(--radius-sm, 6px);
-                        cursor: pointer;
-                        transition: background 0.2s;
-                        color: var(--color-text-secondary);
-                    "><input type="checkbox" value="cosmology" checked style="
-                        width: 18px;
-                        height: 18px;
-                        cursor: pointer;
-                        accent-color: var(--color-primary);
-                    "> Cosmology</label>
-                    <label style="
-                        display: flex;
-                        align-items: center;
-                        gap: 0.5rem;
-                        padding: 0.5rem;
-                        border-radius: var(--radius-sm, 6px);
-                        cursor: pointer;
-                        transition: background 0.2s;
-                        color: var(--color-text-secondary);
-                    "><input type="checkbox" value="rituals" checked style="
-                        width: 18px;
-                        height: 18px;
-                        cursor: pointer;
-                        accent-color: var(--color-primary);
-                    "> Rituals</label>
-                    <label style="
-                        display: flex;
-                        align-items: center;
-                        gap: 0.5rem;
-                        padding: 0.5rem;
-                        border-radius: var(--radius-sm, 6px);
-                        cursor: pointer;
-                        transition: background 0.2s;
-                        color: var(--color-text-secondary);
-                    "><input type="checkbox" value="texts" checked style="
-                        width: 18px;
-                        height: 18px;
-                        cursor: pointer;
-                        accent-color: var(--color-primary);
-                    "> Texts</label>
-                </div>
-            </div>
-
-            <div class="filter-group" style="margin-bottom: 1.5rem;">
-                <label for="importance-filter" style="
-                    display: block;
-                    font-size: 0.95rem;
-                    font-weight: 600;
-                    color: var(--color-text-primary);
-                    margin-bottom: 0.5rem;
-                ">
-                    ⭐ Minimum Importance: <span id="importance-value" style="
-                        color: var(--color-secondary);
-                        font-weight: 700;
-                    ">1</span>
-                </label>
-                <input
-                    type="range"
-                    id="importance-filter"
-                    min="1"
-                    max="5"
-                    value="1"
-                    step="1"
-                    style="
-                        width: 100%;
-                        height: 8px;
-                        cursor: pointer;
-                        accent-color: var(--color-primary);
-                    "
-                >
-                <div style="
-                    display: flex;
-                    justify-content: space-between;
-                    margin-top: 0.25rem;
-                    font-size: 0.75rem;
-                    color: var(--color-text-secondary);
-                ">
-                    <span>1</span>
-                    <span>2</span>
-                    <span>3</span>
-                    <span>4</span>
-                    <span>5</span>
-                </div>
-            </div>
-
-            <div class="filter-group" style="margin-bottom: 1.5rem;">
-                <label for="image-filter" style="
-                    display: block;
-                    font-size: 0.95rem;
-                    font-weight: 600;
-                    color: var(--color-text-primary);
-                    margin-bottom: 0.5rem;
-                ">🖼️ Has Image</label>
-                <select id="image-filter" style="
-                    width: 100%;
-                    min-height: 44px;
-                    padding: 0.5rem 1rem;
-                    background: rgba(var(--color-surface-rgb), 0.6);
-                    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-                    border-radius: var(--radius-sm, 6px);
-                    color: var(--color-text-primary);
-                    cursor: pointer;
-                    font-size: 0.95rem;
-                ">
-                    <option value="">Any</option>
-                    <option value="true">Yes</option>
-                    <option value="false">No</option>
-                </select>
-            </div>
-
-            <div class="filter-actions" style="
-                display: flex;
-                flex-direction: column;
-                gap: 0.5rem;
-                margin-top: 1.5rem;
-                padding-top: 1.5rem;
-                border-top: 1px solid rgba(var(--color-primary-rgb), 0.2);
-            ">
-                <button id="apply-filters" class="btn-primary" style="
-                    width: 100%;
-                    min-height: 44px;
-                    padding: 0.75rem 1rem;
-                    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-                    color: white;
-                    border: none;
-                    border-radius: var(--radius-md, 8px);
-                    font-size: 1rem;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all var(--transition-base);
-                ">Apply Filters</button>
-                <button id="clear-filters" class="btn-secondary" style="
-                    width: 100%;
-                    min-height: 44px;
-                    padding: 0.75rem 1rem;
-                    background: transparent;
-                    color: var(--color-text-secondary);
-                    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-                    border-radius: var(--radius-md, 8px);
-                    font-size: 1rem;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all var(--transition-base);
-                ">Clear All</button>
-            </div>
-        `;
-    }
-
-    /**
-     * Generate search history HTML
-     */
-    getSearchHistoryHTML() {
-        if (this.searchHistory.length === 0) {
-            return '';
-        }
-
-        return `
-            <div class="search-history" style="margin-top: 1.5rem;">
-                <div class="history-header" style="
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 0.75rem;
-                ">
-                    <h4 style="
-                        font-size: 0.95rem;
-                        font-weight: 600;
-                        color: var(--color-text-primary);
-                        margin: 0;
-                    ">🕒 Recent Searches</h4>
-                    <button id="clear-history" class="btn-text" style="
-                        background: transparent;
-                        border: none;
-                        color: var(--color-text-secondary);
-                        font-size: 0.85rem;
-                        cursor: pointer;
-                        padding: 0.25rem 0.5rem;
-                        transition: color 0.2s;
-                    ">Clear</button>
-                </div>
-                <ul class="history-list" style="
-                    list-style: none;
-                    padding: 0;
-                    margin: 0;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.5rem;
-                ">
-                    ${this.searchHistory.slice(0, 5).map(entry => `
-                        <li class="history-item" data-query="${this.escapeHtml(entry.query)}" style="
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            padding: 0.75rem;
-                            background: rgba(var(--color-primary-rgb), 0.1);
-                            border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-                            border-radius: var(--radius-sm, 6px);
-                            cursor: pointer;
-                            transition: all 0.2s;
-                        ">
-                            <span class="history-query" style="
-                                color: var(--color-text-primary);
-                                font-size: 0.9rem;
-                                flex: 1;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                                white-space: nowrap;
-                            ">${this.escapeHtml(entry.query)}</span>
-                            <span class="history-count" style="
-                                background: rgba(var(--color-primary-rgb), 0.3);
-                                color: var(--color-primary);
-                                padding: 0.25rem 0.5rem;
-                                border-radius: var(--radius-full, 20px);
-                                font-size: 0.75rem;
-                                font-weight: 700;
-                                min-width: 30px;
-                                text-align: center;
-                            ">${entry.resultCount || 0}</span>
-                        </li>
-                    `).join('')}
-                </ul>
-            </div>
-        `;
+    getFilterChipsHTML() {
+        return this.entityTypeChips.map((chip, index) => `
+            <button
+                class="filter-chip ${chip.id === 'all' ? 'active' : ''}"
+                data-type="${chip.id}"
+                role="tab"
+                aria-selected="${chip.id === 'all' ? 'true' : 'false'}"
+                tabindex="${index === 0 ? '0' : '-1'}"
+            >
+                ${chip.label}
+            </button>
+        `).join('');
     }
 
     /**
@@ -739,110 +295,23 @@ class SearchViewComplete {
      */
     getEmptyStateHTML() {
         return `
-            <div class="search-placeholder" style="
-                text-align: center;
-                padding: 4rem 2rem;
-                background: rgba(var(--color-surface-rgb), 0.3);
-                border-radius: var(--radius-lg, 16px);
-                border: 2px dashed rgba(var(--color-primary-rgb), 0.3);
-            ">
-                <div class="placeholder-icon" style="
-                    font-size: 4rem;
-                    margin-bottom: 1.5rem;
-                    opacity: 0.6;
-                ">🔍</div>
-                <p style="
-                    font-size: 1.2rem;
-                    color: var(--color-text-secondary);
-                    margin-bottom: 2rem;
-                ">Enter a search term to find entities across world mythologies</p>
+            <div class="search-placeholder">
+                <div class="placeholder-visual">
+                    <svg class="placeholder-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="M21 21l-4.35-4.35"></path>
+                    </svg>
+                </div>
+                <p class="placeholder-text">Enter a search term to discover mythological entities</p>
                 <div class="search-examples">
-                    <p style="
-                        font-size: 1rem;
-                        font-weight: 600;
-                        color: var(--color-text-primary);
-                        margin-bottom: 1rem;
-                    ">Try searching for:</p>
-                    <div style="
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 0.75rem;
-                        justify-content: center;
-                        max-width: 600px;
-                        margin: 0 auto;
-                    ">
-                        <button class="example-query" data-query="zeus" style="
-                            min-height: 44px;
-                            padding: 0.75rem 1.5rem;
-                            background: rgba(var(--color-primary-rgb), 0.2);
-                            border: 2px solid var(--color-primary);
-                            border-radius: var(--radius-full, 20px);
-                            color: var(--color-primary);
-                            cursor: pointer;
-                            font-size: 0.95rem;
-                            font-weight: 600;
-                            transition: all var(--transition-base);
-                        ">Zeus</button>
-                        <button class="example-query" data-query="odin" style="
-                            min-height: 44px;
-                            padding: 0.75rem 1.5rem;
-                            background: rgba(var(--color-primary-rgb), 0.2);
-                            border: 2px solid var(--color-primary);
-                            border-radius: var(--radius-full, 20px);
-                            color: var(--color-primary);
-                            cursor: pointer;
-                            font-size: 0.95rem;
-                            font-weight: 600;
-                            transition: all var(--transition-base);
-                        ">Odin</button>
-                        <button class="example-query" data-query="ra" style="
-                            min-height: 44px;
-                            padding: 0.75rem 1.5rem;
-                            background: rgba(var(--color-primary-rgb), 0.2);
-                            border: 2px solid var(--color-primary);
-                            border-radius: var(--radius-full, 20px);
-                            color: var(--color-primary);
-                            cursor: pointer;
-                            font-size: 0.95rem;
-                            font-weight: 600;
-                            transition: all var(--transition-base);
-                        ">Ra</button>
-                        <button class="example-query" data-query="shiva" style="
-                            min-height: 44px;
-                            padding: 0.75rem 1.5rem;
-                            background: rgba(var(--color-primary-rgb), 0.2);
-                            border: 2px solid var(--color-primary);
-                            border-radius: var(--radius-full, 20px);
-                            color: var(--color-primary);
-                            cursor: pointer;
-                            font-size: 0.95rem;
-                            font-weight: 600;
-                            transition: all var(--transition-base);
-                        ">Shiva</button>
-                        <button class="example-query" data-query="thunder" style="
-                            min-height: 44px;
-                            padding: 0.75rem 1.5rem;
-                            background: rgba(var(--color-primary-rgb), 0.2);
-                            border: 2px solid var(--color-primary);
-                            border-radius: var(--radius-full, 20px);
-                            color: var(--color-primary);
-                            cursor: pointer;
-                            font-size: 0.95rem;
-                            font-weight: 600;
-                            transition: all var(--transition-base);
-                        ">Thunder</button>
-                        <button class="example-query" data-query="underworld" style="
-                            min-height: 44px;
-                            padding: 0.75rem 1.5rem;
-                            background: rgba(var(--color-primary-rgb), 0.2);
-                            border: 2px solid var(--color-primary);
-                            border-radius: var(--radius-full, 20px);
-                            color: var(--color-primary);
-                            cursor: pointer;
-                            font-size: 0.95rem;
-                            font-weight: 600;
-                            transition: all var(--transition-base);
-                        ">Underworld</button>
+                    <p class="examples-label">Try searching for:</p>
+                    <div class="example-queries">
+                        <button class="example-query" data-query="zeus">Zeus</button>
+                        <button class="example-query" data-query="odin">Odin</button>
+                        <button class="example-query" data-query="ra">Ra</button>
+                        <button class="example-query" data-query="shiva">Shiva</button>
+                        <button class="example-query" data-query="dragon">Dragon</button>
+                        <button class="example-query" data-query="underworld">Underworld</button>
                     </div>
                 </div>
             </div>
@@ -853,81 +322,74 @@ class SearchViewComplete {
      * Generate no results HTML
      */
     getNoResultsHTML() {
+        const suggestions = this.getSuggestions();
         return `
-            <div class="no-results" style="
-                text-align: center;
-                padding: 4rem 2rem;
-                background: linear-gradient(135deg, rgba(255, 107, 107, 0.08), rgba(255, 152, 0, 0.08));
-                border: 2px dashed rgba(255, 107, 107, 0.3);
-                border-radius: var(--radius-lg, 16px);
-            ">
-                <div class="no-results-icon" style="
-                    font-size: 4rem;
-                    margin-bottom: 1.5rem;
-                    animation: bounce 1s ease-in-out infinite;
-                ">🔍</div>
-                <p style="
-                    font-size: 1.3rem;
-                    color: var(--color-text-primary);
-                    font-weight: 600;
-                    margin-bottom: 0.5rem;
-                ">No results for "${this.escapeHtml(this.state.query)}"</p>
-                <p class="no-results-hint" style="
-                    font-size: 1rem;
-                    color: var(--color-text-secondary);
-                    margin-bottom: 2rem;
-                ">Try different keywords, refine your search, or adjust filters</p>
-                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                    <button id="clear-all-filters-btn" class="btn-secondary" style="
-                        min-height: 44px;
-                        padding: 0.75rem 1.5rem;
-                        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-                        color: white;
-                        border: none;
-                        border-radius: var(--radius-md, 8px);
-                        font-size: 1rem;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: all var(--transition-base);
-                    ">Reset Filters</button>
-                    <button onclick="document.getElementById('search-input').focus()" class="btn-secondary" style="
-                        min-height: 44px;
-                        padding: 0.75rem 1.5rem;
-                        background: transparent;
-                        color: var(--color-primary);
-                        border: 2px solid var(--color-primary);
-                        border-radius: var(--radius-md, 8px);
-                        font-size: 1rem;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: all var(--transition-base);
-                    ">Try Again</button>
+            <div class="no-results">
+                <div class="no-results-visual">
+                    <svg class="no-results-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="M21 21l-4.35-4.35"></path>
+                        <path d="M8 8l6 6M14 8l-6 6" stroke-width="2"></path>
+                    </svg>
                 </div>
+                <h3 class="no-results-title">No results found for "${this.escapeHtml(this.state.query)}"</h3>
+                <p class="no-results-hint">Try different keywords or clear filters</p>
+                <div class="no-results-actions">
+                    <button id="clear-all-filters-btn" class="btn-primary">
+                        Clear Filters
+                    </button>
+                    <button id="try-again-btn" class="btn-secondary">
+                        Modify Search
+                    </button>
+                </div>
+                ${suggestions.length > 0 ? `
+                    <div class="related-suggestions">
+                        <p class="suggestions-label">You might like:</p>
+                        <div class="suggestion-chips">
+                            ${suggestions.map(s => `
+                                <button class="suggestion-chip" data-query="${this.escapeHtml(s)}">${this.escapeHtml(s)}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
             </div>
         `;
     }
 
     /**
-     * Generate loading HTML
+     * Get search suggestions based on current query
+     */
+    getSuggestions() {
+        const common = ['zeus', 'odin', 'thor', 'ra', 'anubis', 'athena', 'poseidon', 'hades'];
+        const query = this.state.query.toLowerCase();
+        return common.filter(s => !s.includes(query)).slice(0, 4);
+    }
+
+    /**
+     * Generate skeleton loading HTML
      */
     getLoadingHTML() {
+        const skeletonCount = 8;
+        const skeletons = Array(skeletonCount).fill(0).map(() => `
+            <div class="skeleton-card">
+                <div class="skeleton-badge"></div>
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-title"></div>
+                <div class="skeleton-subtitle"></div>
+                <div class="skeleton-subtitle short"></div>
+                <div class="skeleton-meta">
+                    <div class="skeleton-meta-item"></div>
+                    <div class="skeleton-meta-item"></div>
+                </div>
+            </div>
+        `).join('');
+
         return `
-            <div class="search-loading" style="
-                text-align: center;
-                padding: 4rem 2rem;
-            ">
-                <div class="spinner"></div>
-                <p style="
-                    font-size: 1.1rem;
-                    color: var(--color-text-secondary);
-                    margin-top: 1rem;
-                    font-weight: 500;
-                ">Searching across mythologies...</p>
-                <p style="
-                    font-size: 0.9rem;
-                    color: var(--color-text-tertiary);
-                    margin-top: 0.5rem;
-                ">This may take a moment</p>
+            <div class="search-loading">
+                <div class="skeleton-grid">
+                    ${skeletons}
+                </div>
+                <p class="loading-text">Searching across mythologies...</p>
             </div>
         `;
     }
@@ -939,131 +401,281 @@ class SearchViewComplete {
         const searchInput = document.getElementById('search-input');
         const searchBtn = document.getElementById('search-btn');
         const clearBtn = document.getElementById('clear-search');
-        const filterToggleBtn = document.getElementById('filter-toggle-btn');
-        const applyFiltersBtn = document.getElementById('apply-filters');
-        const clearFiltersBtn = document.getElementById('clear-filters');
         const sortSelect = document.getElementById('sort-select');
 
-        // Search input with debounced autocomplete
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.trim();
+        // Store element references
+        this.elements = { searchInput, searchBtn, clearBtn, sortSelect };
 
-            // Show/hide clear button
-            clearBtn.style.display = query ? 'inline-block' : 'none';
+        // Search input handlers
+        this.boundHandlers.onInput = this.handleSearchInput.bind(this);
+        this.boundHandlers.onKeydown = this.handleKeydown.bind(this);
+        this.boundHandlers.onSearch = () => this.performSearch(searchInput.value);
+        this.boundHandlers.onClear = this.handleClear.bind(this);
+        this.boundHandlers.onSort = this.handleSort.bind(this);
+        this.boundHandlers.onDocClick = this.handleDocumentClick.bind(this);
 
-            // Debounced autocomplete
-            clearTimeout(this.autocompleteTimer);
-            if (query.length >= 2) {
-                this.autocompleteTimer = setTimeout(() => {
-                    this.showAutocomplete(query);
-                }, this.autocompleteDelay);
-            } else {
-                this.hideAutocomplete();
-            }
-        });
+        searchInput.addEventListener('input', this.boundHandlers.onInput);
+        searchInput.addEventListener('keydown', this.boundHandlers.onKeydown);
+        searchBtn.addEventListener('click', this.boundHandlers.onSearch);
+        clearBtn.addEventListener('click', this.boundHandlers.onClear);
+        sortSelect.addEventListener('change', this.boundHandlers.onSort);
+        document.addEventListener('click', this.boundHandlers.onDocClick);
 
-        // Search on Enter key
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.performSearch(searchInput.value);
-            }
-        });
+        // Filter chip handlers
+        this.initFilterChips();
 
-        // Search button click
-        searchBtn.addEventListener('click', () => {
-            this.performSearch(searchInput.value);
-        });
+        // Mythology filter handlers
+        this.initMythologyFilters();
 
-        // Clear search button
-        clearBtn.addEventListener('click', () => {
-            searchInput.value = '';
-            searchInput.focus();
-            clearBtn.style.display = 'none';
+        // Display mode handlers
+        this.initDisplayModes();
+
+        // Example query handlers
+        this.initExampleQueries();
+
+        // Set global instance for pagination
+        window.searchViewInstance = this;
+        console.log('[SearchView] Initialization complete');
+    }
+
+    /**
+     * Handle search input changes
+     */
+    handleSearchInput(e) {
+        const query = e.target.value.trim();
+        const clearBtn = this.elements.clearBtn;
+
+        // Show/hide clear button
+        clearBtn.style.display = query ? 'flex' : 'none';
+
+        // Debounced autocomplete
+        clearTimeout(this.autocompleteTimer);
+        if (query.length >= 2) {
+            this.autocompleteTimer = setTimeout(() => {
+                this.showAutocomplete(query);
+            }, this.autocompleteDelay);
+        } else {
             this.hideAutocomplete();
-            this.showEmptyState();
-        });
+        }
+    }
 
-        // Filter toggle
-        filterToggleBtn.addEventListener('click', () => {
-            const panel = document.getElementById('filter-panel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        });
+    /**
+     * Handle keyboard navigation
+     */
+    handleKeydown(e) {
+        const autocomplete = document.getElementById('autocomplete-results');
+        const suggestions = autocomplete?.querySelectorAll('.suggestion-item') || [];
+        const resultsContainer = document.getElementById('results-container');
+        const resultCards = resultsContainer?.querySelectorAll('.entity-card, .entity-list-item') || [];
 
-        // Apply filters
-        applyFiltersBtn.addEventListener('click', () => {
-            this.updateFilters();
-            if (this.state.query) {
-                this.performSearch(this.state.query);
-            }
-        });
+        switch (e.key) {
+            case 'Enter':
+                e.preventDefault();
+                if (this.state.focusedResultIndex >= 0 && suggestions.length > 0) {
+                    // Select focused autocomplete suggestion
+                    const focusedSuggestion = suggestions[this.state.focusedResultIndex];
+                    if (focusedSuggestion) {
+                        const query = focusedSuggestion.dataset.query;
+                        this.elements.searchInput.value = query;
+                        this.performSearch(query);
+                        this.hideAutocomplete();
+                    }
+                } else {
+                    // Perform search
+                    this.performSearch(this.elements.searchInput.value);
+                }
+                break;
 
-        // Clear filters
-        clearFiltersBtn.addEventListener('click', () => {
-            this.clearFilters();
-        });
+            case 'Escape':
+                e.preventDefault();
+                if (autocomplete?.style.display !== 'none') {
+                    this.hideAutocomplete();
+                } else if (this.elements.searchInput.value) {
+                    this.handleClear();
+                }
+                this.state.focusedResultIndex = -1;
+                break;
 
-        // Sort change
-        sortSelect.addEventListener('change', (e) => {
-            this.state.sortBy = e.target.value;
+            case 'ArrowDown':
+                e.preventDefault();
+                if (suggestions.length > 0) {
+                    this.state.focusedResultIndex = Math.min(
+                        this.state.focusedResultIndex + 1,
+                        suggestions.length - 1
+                    );
+                    this.updateFocusedSuggestion(suggestions);
+                } else if (resultCards.length > 0) {
+                    this.focusNextResult(resultCards, 1);
+                }
+                break;
+
+            case 'ArrowUp':
+                e.preventDefault();
+                if (suggestions.length > 0) {
+                    this.state.focusedResultIndex = Math.max(
+                        this.state.focusedResultIndex - 1,
+                        0
+                    );
+                    this.updateFocusedSuggestion(suggestions);
+                } else if (resultCards.length > 0) {
+                    this.focusNextResult(resultCards, -1);
+                }
+                break;
+        }
+    }
+
+    /**
+     * Update focused suggestion styling
+     */
+    updateFocusedSuggestion(suggestions) {
+        suggestions.forEach((s, i) => {
+            s.classList.toggle('focused', i === this.state.focusedResultIndex);
+        });
+    }
+
+    /**
+     * Focus next/previous result card
+     */
+    focusNextResult(cards, direction) {
+        const currentFocus = document.activeElement;
+        const currentIndex = Array.from(cards).indexOf(currentFocus);
+        const nextIndex = currentIndex + direction;
+
+        if (nextIndex >= 0 && nextIndex < cards.length) {
+            cards[nextIndex].focus();
+        }
+    }
+
+    /**
+     * Handle clear button click
+     */
+    handleClear() {
+        this.elements.searchInput.value = '';
+        this.elements.searchInput.focus();
+        this.elements.clearBtn.style.display = 'none';
+        this.hideAutocomplete();
+        this.state.query = '';
+        this.showEmptyState();
+    }
+
+    /**
+     * Handle sort change
+     */
+    handleSort(e) {
+        this.state.sortBy = e.target.value;
+        if (this.state.results.length > 0) {
             this.renderResults();
-        });
+        }
+    }
 
-        // Display mode switcher
-        document.querySelectorAll('.display-mode-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.display-mode-btn').forEach(b =>
-                    b.classList.remove('active')
-                );
+    /**
+     * Handle document click (close autocomplete)
+     */
+    handleDocumentClick(e) {
+        const autocomplete = document.getElementById('autocomplete-results');
+        const searchInput = this.elements.searchInput;
+        if (autocomplete && searchInput && !searchInput.contains(e.target) && !autocomplete.contains(e.target)) {
+            this.hideAutocomplete();
+        }
+    }
+
+    /**
+     * Initialize filter chips
+     */
+    initFilterChips() {
+        const chips = document.querySelectorAll('.filter-chip');
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                const type = chip.dataset.type;
+
+                if (type === 'all') {
+                    // Select all types
+                    this.state.filters.entityTypes = ['deities', 'heroes', 'creatures', 'items', 'places', 'texts', 'symbols', 'rituals'];
+                    chips.forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                } else {
+                    // Toggle individual type
+                    const allChip = document.querySelector('.filter-chip[data-type="all"]');
+                    allChip?.classList.remove('active');
+
+                    if (chip.classList.contains('active')) {
+                        chip.classList.remove('active');
+                        this.state.filters.entityTypes = this.state.filters.entityTypes.filter(t => t !== type);
+                    } else {
+                        chip.classList.add('active');
+                        if (!this.state.filters.entityTypes.includes(type)) {
+                            this.state.filters.entityTypes.push(type);
+                        }
+                    }
+
+                    // If all types selected, activate "All" chip
+                    if (this.state.filters.entityTypes.length >= 8) {
+                        chips.forEach(c => c.classList.remove('active'));
+                        allChip?.classList.add('active');
+                    }
+                }
+
+                // Re-search if there's a query
+                if (this.state.query) {
+                    this.performSearch(this.state.query);
+                }
+            });
+        });
+    }
+
+    /**
+     * Initialize mythology filters
+     */
+    initMythologyFilters() {
+        const chips = document.querySelectorAll('.mythology-chip');
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                chips.forEach(c => {
+                    c.classList.remove('active');
+                    c.setAttribute('aria-selected', 'false');
+                });
+                chip.classList.add('active');
+                chip.setAttribute('aria-selected', 'true');
+
+                this.state.filters.mythology = chip.dataset.mythology;
+
+                if (this.state.query) {
+                    this.performSearch(this.state.query);
+                }
+            });
+        });
+    }
+
+    /**
+     * Initialize display mode buttons
+     */
+    initDisplayModes() {
+        const buttons = document.querySelectorAll('.display-mode-btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-pressed', 'false');
+                });
                 btn.classList.add('active');
+                btn.setAttribute('aria-pressed', 'true');
                 this.state.displayMode = btn.dataset.mode;
                 this.renderResults();
             });
         });
+    }
 
-        // Importance slider
-        const importanceFilter = document.getElementById('importance-filter');
-        const importanceValue = document.getElementById('importance-value');
-        importanceFilter.addEventListener('input', (e) => {
-            importanceValue.textContent = e.target.value;
-        });
-
-        // Example queries
+    /**
+     * Initialize example query buttons
+     */
+    initExampleQueries() {
         document.querySelectorAll('.example-query').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const query = e.target.dataset.query;
-                searchInput.value = query;
+                this.elements.searchInput.value = query;
                 this.performSearch(query);
             });
         });
-
-        // Search history items
-        document.querySelectorAll('.history-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                const query = e.currentTarget.dataset.query;
-                searchInput.value = query;
-                this.performSearch(query);
-            });
-        });
-
-        // Clear history
-        const clearHistoryBtn = document.getElementById('clear-history');
-        if (clearHistoryBtn) {
-            clearHistoryBtn.addEventListener('click', () => {
-                this.clearSearchHistory();
-            });
-        }
-
-        // Click outside to close autocomplete
-        document.addEventListener('click', (e) => {
-            const autocomplete = document.getElementById('autocomplete-results');
-            if (!searchInput.contains(e.target) && !autocomplete.contains(e.target)) {
-                this.hideAutocomplete();
-            }
-        });
-
-        // Set global instance for pagination callbacks
-        window.searchViewInstance = this;
-        console.log('[SearchView] Global instance set for pagination callbacks');
     }
 
     /**
@@ -1074,41 +686,33 @@ class SearchViewComplete {
             const suggestions = await this.searchEngine.getSuggestions(query, 8);
             const container = document.getElementById('autocomplete-results');
 
-            if (!container) {
-                console.warn('[SearchView] Element not found in showAutocomplete: autocomplete-results');
-                return;
-            }
+            if (!container) return;
 
             if (!suggestions || suggestions.length === 0) {
                 this.hideAutocomplete();
                 return;
             }
 
+            this.state.focusedResultIndex = -1;
+
             container.innerHTML = suggestions.map((term, idx) => `
-                <div class="suggestion-item" data-query="${this.escapeHtml(term)}" style="
-                    padding: 0.75rem 1rem;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.1);
-                    color: var(--color-text-primary);
-                    position: relative;
-                    animation: fadeIn 0.3s ease-out ${idx * 0.05}s both;
-                ">
-                    <span style="display: inline-block; margin-right: 0.5rem; opacity: 0.6; font-size: 0.9rem;">🔍</span>
-                    <strong>${this.highlightMatch(term, query)}</strong>
+                <div class="suggestion-item" data-query="${this.escapeHtml(term)}" role="option" tabindex="-1">
+                    <span class="suggestion-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="M21 21l-4.35-4.35"></path>
+                        </svg>
+                    </span>
+                    <span class="suggestion-text">${this.highlightMatch(term, query)}</span>
                 </div>
             `).join('');
 
-            // Add click handlers
             container.querySelectorAll('.suggestion-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    const query = e.currentTarget.dataset.query;
-                    const searchInput = document.getElementById('search-input');
-                    if (searchInput) {
-                        searchInput.value = query;
-                        this.performSearch(query);
-                        this.hideAutocomplete();
-                    }
+                item.addEventListener('click', () => {
+                    const q = item.dataset.query;
+                    this.elements.searchInput.value = q;
+                    this.performSearch(q);
+                    this.hideAutocomplete();
                 });
             });
 
@@ -1123,11 +727,10 @@ class SearchViewComplete {
      */
     hideAutocomplete() {
         const container = document.getElementById('autocomplete-results');
-        if (!container) {
-            console.warn('[SearchView] Element not found in hideAutocomplete');
-            return;
+        if (container) {
+            container.style.display = 'none';
         }
-        container.style.display = 'none';
+        this.state.focusedResultIndex = -1;
     }
 
     /**
@@ -1146,35 +749,45 @@ class SearchViewComplete {
         this.state.currentPage = 1;
         this.state.isLoading = true;
         this.state.error = null;
+        this.state.searchStartTime = Date.now();
 
         // Show loading state
         const resultsContainer = document.getElementById('results-container');
+        const resultsHeader = document.getElementById('results-header');
+        const pagination = document.getElementById('pagination');
+
         if (resultsContainer) {
             resultsContainer.innerHTML = this.getLoadingHTML();
         }
-
-        const resultsControls = document.querySelector('.results-controls');
-        if (resultsControls) {
-            resultsControls.style.display = 'none';
+        if (resultsHeader) {
+            resultsHeader.style.display = 'none';
+        }
+        if (pagination) {
+            pagination.style.display = 'none';
         }
 
         try {
             console.log('[SearchView] Searching for:', query);
 
-            // Perform search with current filters
             const searchOptions = {
                 mode: 'generic',
                 mythology: this.state.filters.mythology || null,
-                limit: 1000 // Get all results, we'll paginate client-side
+                limit: 1000
             };
 
             const result = await this.searchEngine.search(query, searchOptions);
 
-            // Apply additional filters
+            // Apply client-side filters
             this.state.results = this.applyClientFilters(result.items || []);
             this.state.totalResults = this.state.results.length;
 
             console.log('[SearchView] Found', this.state.totalResults, 'results');
+
+            // Ensure minimum loading time for smooth UX
+            const elapsed = Date.now() - this.state.searchStartTime;
+            if (elapsed < this.minLoadingTime) {
+                await new Promise(resolve => setTimeout(resolve, this.minLoadingTime - elapsed));
+            }
 
             // Track search event
             if (window.AnalyticsManager) {
@@ -1206,7 +819,7 @@ class SearchViewComplete {
     applyClientFilters(results) {
         return results.filter(entity => {
             // Entity type filter
-            if (this.state.filters.entityTypes.length > 0) {
+            if (this.state.filters.entityTypes.length > 0 && this.state.filters.entityTypes.length < 8) {
                 const entityType = entity.type || entity.collection;
                 if (!this.state.filters.entityTypes.includes(entityType)) {
                     return false;
@@ -1215,7 +828,7 @@ class SearchViewComplete {
 
             // Importance filter
             const importance = entity.importance || 50;
-            const minImportance = this.state.filters.importance[0] * 20; // Convert 1-5 to 20-100
+            const minImportance = this.state.filters.importance[0] * 20;
             if (importance < minImportance) {
                 return false;
             }
@@ -1233,202 +846,77 @@ class SearchViewComplete {
     }
 
     /**
-     * Update filters from form
-     */
-    updateFilters() {
-        // Mythology filter
-        const mythologyFilter = document.getElementById('mythology-filter');
-        if (mythologyFilter) {
-            this.state.filters.mythology = mythologyFilter.value;
-        }
-
-        // Entity types
-        const checkedTypes = Array.from(
-            document.querySelectorAll('.checkbox-group input[type="checkbox"]:checked')
-        ).map(cb => cb.value);
-        this.state.filters.entityTypes = checkedTypes;
-
-        // Importance filter
-        const importanceFilterEl = document.getElementById('importance-filter');
-        if (importanceFilterEl) {
-            const importanceValue = parseInt(importanceFilterEl.value);
-            this.state.filters.importance = [importanceValue, 5];
-        }
-
-        // Image filter
-        const imageFilterEl = document.getElementById('image-filter');
-        if (imageFilterEl) {
-            const imageFilter = imageFilterEl.value;
-            this.state.filters.hasImage = imageFilter === '' ? null : imageFilter === 'true';
-        }
-
-        // Update filter count badge
-        let filterCount = 0;
-        if (this.state.filters.mythology) filterCount++;
-        if (this.state.filters.entityTypes.length < 6) filterCount++;
-        if (this.state.filters.importance[0] > 1) filterCount++;
-        if (this.state.filters.hasImage !== null) filterCount++;
-
-        const filterCountBadge = document.getElementById('filter-count');
-        if (filterCountBadge) {
-            if (filterCount > 0) {
-                filterCountBadge.textContent = filterCount;
-                filterCountBadge.style.display = 'inline-block';
-            } else {
-                filterCountBadge.style.display = 'none';
-            }
-        }
-    }
-
-    /**
-     * Clear all filters
-     */
-    clearFilters() {
-        const mythologyFilter = document.getElementById('mythology-filter');
-        if (mythologyFilter) {
-            mythologyFilter.value = '';
-        }
-
-        document.querySelectorAll('.checkbox-group input[type="checkbox"]').forEach(cb => {
-            cb.checked = true;
-        });
-
-        const importanceFilter = document.getElementById('importance-filter');
-        if (importanceFilter) {
-            importanceFilter.value = 1;
-        }
-
-        const importanceValue = document.getElementById('importance-value');
-        if (importanceValue) {
-            importanceValue.textContent = '1';
-        }
-
-        const imageFilter = document.getElementById('image-filter');
-        if (imageFilter) {
-            imageFilter.value = '';
-        }
-
-        this.state.filters = {
-            mythology: '',
-            entityTypes: [],
-            importance: [1, 5],
-            hasImage: null
-        };
-
-        const filterCount = document.getElementById('filter-count');
-        if (filterCount) {
-            filterCount.style.display = 'none';
-        }
-
-        // Re-run search if there's a query
-        if (this.state.query) {
-            this.performSearch(this.state.query);
-        }
-    }
-
-    /**
-     * Render search results with virtual scrolling for large lists
+     * Render search results
      */
     renderResults() {
         const resultsContainer = document.getElementById('results-container');
-        if (!resultsContainer) {
-            console.warn('[SearchView] Element not found in renderResults: results-container');
-            return;
-        }
+        const resultsHeader = document.getElementById('results-header');
+        const pagination = document.getElementById('pagination');
 
-        const resultsControls = document.querySelector('.results-controls');
-        if (!resultsControls) {
-            console.warn('[SearchView] Element not found in renderResults: results-controls');
-            return;
-        }
-
-        const paginationContainer = document.getElementById('pagination');
-        if (!paginationContainer) {
-            console.warn('[SearchView] Element not found in renderResults: pagination');
-            return;
-        }
+        if (!resultsContainer || !resultsHeader || !pagination) return;
 
         if (this.state.totalResults === 0) {
             resultsContainer.innerHTML = this.getNoResultsHTML();
-            resultsControls.style.display = 'none';
-            paginationContainer.style.display = 'none';
+            resultsHeader.style.display = 'none';
+            pagination.style.display = 'none';
+            this.initNoResultsHandlers();
             this.destroyVirtualScroller();
             return;
         }
 
-        // Show controls
-        resultsControls.style.display = 'flex';
+        // Show header
+        resultsHeader.style.display = 'flex';
 
-        // Update results count
-        const resultsCount = document.getElementById('results-count');
-        if (resultsCount) {
-            resultsCount.textContent =
-                `${this.state.totalResults} result${this.state.totalResults !== 1 ? 's' : ''}`;
-        }
+        // Update results count and pagination info
+        const startIdx = (this.state.currentPage - 1) * this.state.resultsPerPage + 1;
+        const endIdx = Math.min(this.state.currentPage * this.state.resultsPerPage, this.state.totalResults);
+
+        document.getElementById('results-count').innerHTML = `
+            Found <strong>${this.state.totalResults}</strong> result${this.state.totalResults !== 1 ? 's' : ''} for "<em>${this.escapeHtml(this.state.query)}</em>"
+        `;
+        document.getElementById('pagination-info').textContent = `Showing ${startIdx}-${endIdx} of ${this.state.totalResults}`;
 
         // Sort results
         const sortedResults = this.sortResults([...this.state.results]);
 
-        // Use virtual scrolling for large result sets (>100 items)
+        // Use virtual scrolling for large result sets
         const useVirtualScrolling = sortedResults.length > 100;
 
         if (useVirtualScrolling) {
-            console.log(`[SearchView] Using virtual scrolling for ${sortedResults.length} items`);
-
-            // Hide pagination for virtual scrolling
-            paginationContainer.style.display = 'none';
-
-            // Destroy existing virtual scroller if present
+            pagination.style.display = 'none';
             this.destroyVirtualScroller();
 
-            // Prepare container for virtual scrolling
             resultsContainer.innerHTML = '';
-            resultsContainer.style.height = '600px'; // Fixed height for scrolling
+            resultsContainer.style.height = '600px';
 
-            // Determine item height based on display mode
             const itemHeight = this.getItemHeight(this.state.displayMode);
 
-            // Create virtual scroller
             this.virtualScroller = new VirtualScroller(resultsContainer, {
                 itemHeight: itemHeight,
                 bufferSize: 10,
-                renderItem: (entity, index) => {
-                    return this.renderVirtualItem(entity, index, this.state.displayMode);
-                }
+                renderItem: (entity, index) => this.renderVirtualItem(entity, index, this.state.displayMode)
             });
 
             this.virtualScroller.setItems(sortedResults);
-
-            // Track analytics
-            if (window.AnalyticsManager) {
-                window.AnalyticsManager.trackEvent('virtual_scroll_enabled', {
-                    itemCount: sortedResults.length,
-                    displayMode: this.state.displayMode
-                });
-            }
-
         } else {
-            // Regular rendering with pagination for small lists (<= 100 items)
             this.destroyVirtualScroller();
-            resultsContainer.style.height = ''; // Reset height
+            resultsContainer.style.height = '';
 
             // Paginate
-            const startIdx = (this.state.currentPage - 1) * this.state.resultsPerPage;
-            const endIdx = startIdx + this.state.resultsPerPage;
-            const pageResults = sortedResults.slice(startIdx, endIdx);
+            const pageResults = sortedResults.slice(
+                (this.state.currentPage - 1) * this.state.resultsPerPage,
+                this.state.currentPage * this.state.resultsPerPage
+            );
 
             // Render based on display mode
-            switch (this.state.displayMode) {
-                case 'grid':
-                    resultsContainer.innerHTML = this.renderGridView(pageResults);
-                    break;
-                case 'list':
-                    resultsContainer.innerHTML = this.renderListView(pageResults);
-                    break;
-                case 'table':
-                    resultsContainer.innerHTML = this.renderTableView(pageResults);
-                    break;
+            if (this.state.displayMode === 'grid') {
+                resultsContainer.innerHTML = this.renderGridView(pageResults);
+            } else {
+                resultsContainer.innerHTML = this.renderListView(pageResults);
             }
+
+            // Add keyboard navigation to cards
+            this.initCardKeyboardNav();
 
             // Render pagination
             this.renderPagination();
@@ -1436,39 +924,59 @@ class SearchViewComplete {
     }
 
     /**
-     * Get item height for virtual scrolling based on display mode
+     * Initialize no results handlers
+     */
+    initNoResultsHandlers() {
+        document.getElementById('clear-all-filters-btn')?.addEventListener('click', () => {
+            this.clearFilters();
+        });
+
+        document.getElementById('try-again-btn')?.addEventListener('click', () => {
+            this.elements.searchInput.focus();
+            this.elements.searchInput.select();
+        });
+
+        document.querySelectorAll('.suggestion-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const query = chip.dataset.query;
+                this.elements.searchInput.value = query;
+                this.performSearch(query);
+            });
+        });
+    }
+
+    /**
+     * Initialize keyboard navigation for result cards
+     */
+    initCardKeyboardNav() {
+        const cards = document.querySelectorAll('.entity-card, .entity-list-item');
+        cards.forEach((card, index) => {
+            card.setAttribute('tabindex', '0');
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    card.click();
+                }
+            });
+        });
+    }
+
+    /**
+     * Get item height for virtual scrolling
      */
     getItemHeight(displayMode) {
-        switch (displayMode) {
-            case 'grid':
-                return 320; // Grid cards are taller
-            case 'list':
-                return 120; // List items are medium height
-            case 'table':
-                return 60;  // Table rows are compact
-            default:
-                return 120;
-        }
+        return displayMode === 'grid' ? 320 : 120;
     }
 
     /**
-     * Render a single item for virtual scrolling
+     * Render virtual item
      */
     renderVirtualItem(entity, index, displayMode) {
-        switch (displayMode) {
-            case 'grid':
-                return this.renderEntityCard(entity);
-            case 'list':
-                return this.renderListItem(entity);
-            case 'table':
-                return this.renderTableRow(entity);
-            default:
-                return this.renderEntityCard(entity);
-        }
+        return displayMode === 'grid' ? this.renderEntityCard(entity) : this.renderListItem(entity);
     }
 
     /**
-     * Destroy virtual scroller instance
+     * Destroy virtual scroller
      */
     destroyVirtualScroller() {
         if (this.virtualScroller) {
@@ -1482,115 +990,43 @@ class SearchViewComplete {
      */
     renderGridView(results) {
         return `
-            <div class="entity-grid universal-grid" style="
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                gap: 1.5rem;
-            ">
+            <div class="entity-grid universal-grid" role="list">
                 ${results.map(entity => this.renderEntityCard(entity)).join('')}
             </div>
         `;
     }
 
     /**
-     * Render entity card
+     * Render entity card with text truncation and highlighting
      */
     renderEntityCard(entity) {
         const mythology = entity.mythology || 'unknown';
         const entityType = entity.type || entity.collection || 'entity';
         const entityId = entity.id || entity.name?.toLowerCase().replace(/\s+/g, '-');
-        const icon = entity.icon || entity.gridDisplay?.icon || '📖';
+        const icon = entity.icon || entity.gridDisplay?.icon || this.getDefaultIcon(entityType);
         const name = entity.name || 'Unknown';
-        const subtitle = entity.subtitle || entity.description?.substring(0, 60) || '';
+        const description = entity.description || entity.subtitle || '';
         const importance = entity.importance || 50;
-        const stars = Math.round(importance / 20); // Convert to 1-5 stars
-
-        // Highlight search term in name
-        const highlightedName = this.highlightMatch(name, this.state.query);
+        const stars = Math.round(importance / 20);
+        const path = `${this.formatMythologyName(mythology)} / ${this.formatEntityType(entityType)}`;
 
         return `
-            <a href="#/mythology/${mythology}/${entityType}/${entityId}" style="
-                display: block;
-                background: rgba(var(--color-surface-rgb), 0.6);
-                backdrop-filter: blur(10px);
-                border: 2px solid rgba(var(--color-primary-rgb), 0.2);
-                border-radius: var(--radius-lg, 12px);
-                padding: 1.5rem;
-                cursor: pointer;
-                transition: all var(--transition-base);
-                position: relative;
-                overflow: hidden;
-                text-decoration: none;
-                color: inherit;
-            " class="entity-card grid-card">
-                <div style="
-                    position: absolute;
-                    top: 0.75rem;
-                    right: 0.75rem;
-                    background: rgba(var(--color-primary-rgb), 0.2);
-                    padding: 0.25rem 0.75rem;
-                    border-radius: var(--radius-full, 20px);
-                    font-size: 0.75rem;
-                    font-weight: 600;
-                    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
-                    color: var(--color-primary);
-                ">${this.formatMythologyName(mythology)}</div>
-                <div style="
-                    font-size: 3rem;
-                    text-align: center;
-                    margin: 1rem 0;
-                ">${icon}</div>
-                <div style="
-                    font-size: 1.2rem;
-                    font-weight: 600;
-                    color: var(--color-primary);
-                    margin-bottom: 0.5rem;
-                    text-align: center;
-                ">${highlightedName}</div>
-                <div style="
-                    font-size: 0.9rem;
-                    color: var(--color-text-secondary);
-                    line-height: 1.5;
-                    margin-bottom: 1rem;
-                    text-align: center;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    display: -webkit-box;
-                    -webkit-line-clamp: 2;
-                    -webkit-box-orient: vertical;
-                ">${this.escapeHtml(subtitle)}</div>
-                <div style="
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding-top: 1rem;
-                    border-top: 1px solid rgba(var(--color-primary-rgb), 0.2);
-                    gap: 0.5rem;
-                ">
-                    <div style="flex: 1; text-align: center;">
-                        <span style="
-                            display: block;
-                            font-size: 0.75rem;
-                            color: var(--color-text-secondary);
-                            margin-bottom: 0.25rem;
-                        ">Type</span>
-                        <span style="
-                            font-size: 0.85rem;
-                            font-weight: 600;
-                            color: var(--color-text-primary);
-                        ">${this.formatEntityType(entityType)}</span>
-                    </div>
-                    <div style="flex: 1; text-align: center;">
-                        <span style="
-                            display: block;
-                            font-size: 0.75rem;
-                            color: var(--color-text-secondary);
-                            margin-bottom: 0.25rem;
-                        ">Importance</span>
-                        <span style="
-                            font-size: 1rem;
-                        ">${'⭐'.repeat(stars)}</span>
-                    </div>
+            <a href="#/mythology/${mythology}/${entityType}/${entityId}"
+               class="entity-card grid-card"
+               role="listitem"
+               tabindex="0">
+                <span class="card-badge">${this.formatMythologyName(mythology)}</span>
+                <div class="card-icon">${icon}</div>
+                <h3 class="card-title">${this.highlightMatch(name, this.state.query)}</h3>
+                <p class="card-description">${this.highlightMatchInDescription(description, this.state.query)}</p>
+                <div class="card-path" title="${this.escapeHtml(path)}">${this.truncatePath(path)}</div>
+                <div class="card-footer">
+                    <span class="card-type">${this.formatEntityType(entityType)}</span>
+                    <span class="card-importance" aria-label="${stars} out of 5 stars">
+                        ${Array(5).fill(0).map((_, i) =>
+                            `<span class="star ${i < stars ? 'filled' : ''}">${i < stars ? '\u2605' : '\u2606'}</span>`
+                        ).join('')}
+                    </span>
                 </div>
             </a>
         `;
@@ -1601,7 +1037,7 @@ class SearchViewComplete {
      */
     renderListView(results) {
         return `
-            <ul class="entity-list universal-list">
+            <ul class="entity-list universal-list" role="list">
                 ${results.map(entity => this.renderListItem(entity)).join('')}
             </ul>
         `;
@@ -1614,69 +1050,112 @@ class SearchViewComplete {
         const mythology = entity.mythology || 'unknown';
         const entityType = entity.type || entity.collection || 'entity';
         const entityId = entity.id || entity.name?.toLowerCase().replace(/\s+/g, '-');
-        const icon = entity.icon || entity.gridDisplay?.icon || '📖';
+        const icon = entity.icon || entity.gridDisplay?.icon || this.getDefaultIcon(entityType);
         const name = entity.name || 'Unknown';
         const description = entity.description || '';
+        const path = `${this.formatMythologyName(mythology)} / ${this.formatEntityType(entityType)}`;
 
         return `
-            <li class="entity-list-item">
-                <a href="#/mythology/${mythology}/${entityType}/${entityId}" class="list-item-main">
-                    <div class="list-icon">${icon}</div>
+            <li class="entity-list-item" role="listitem">
+                <a href="#/mythology/${mythology}/${entityType}/${entityId}" class="list-item-link" tabindex="0">
+                    <span class="list-icon">${icon}</span>
                     <div class="list-content">
-                        <div class="list-primary">${this.escapeHtml(name)}</div>
-                        <div class="list-secondary">${this.escapeHtml(description.substring(0, 120))}${description.length > 120 ? '...' : ''}</div>
-                        <div class="list-meta">${this.formatMythologyName(mythology)} • ${this.formatEntityType(entityType)}</div>
+                        <h3 class="list-title">${this.highlightMatch(name, this.state.query)}</h3>
+                        <p class="list-description">${this.highlightMatchInDescription(description, this.state.query)}</p>
+                        <span class="list-path">${this.truncatePath(path)}</span>
                     </div>
+                    <span class="list-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </span>
                 </a>
             </li>
         `;
     }
 
     /**
-     * Render table view
+     * Get default icon for entity type
      */
-    renderTableView(results) {
-        return `
-            <div class="entity-table-container">
-                <table class="entity-table">
-                    <thead>
-                        <tr>
-                            <th>Icon</th>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Mythology</th>
-                            <th>Importance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${results.map(entity => this.renderTableRow(entity)).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
+    getDefaultIcon(type) {
+        const icons = {
+            deities: '\u2728',
+            heroes: '\u2694\uFE0F',
+            creatures: '\u{1F432}',
+            items: '\u2728',
+            places: '\u{1F3DB}\uFE0F',
+            texts: '\u{1F4DC}',
+            symbols: '\u2638\uFE0F',
+            rituals: '\u{1F52E}'
+        };
+        return icons[type] || '\u{1F4D6}';
     }
 
     /**
-     * Render table row
+     * Highlight match in text (max 2 lines for title)
      */
-    renderTableRow(entity) {
-        const mythology = entity.mythology || 'unknown';
-        const entityType = entity.type || entity.collection || 'entity';
-        const entityId = entity.id || entity.name?.toLowerCase().replace(/\s+/g, '-');
-        const icon = entity.icon || entity.gridDisplay?.icon || '📖';
-        const name = entity.name || 'Unknown';
-        const importance = entity.importance || 50;
-        const stars = Math.round(importance / 20);
+    highlightMatch(text, query) {
+        if (!query || !text) return this.escapeHtml(text);
 
-        return `
-            <tr onclick="window.location.hash='#/mythology/${mythology}/${entityType}/${entityId}'" style="cursor: pointer;">
-                <td style="font-size: 24px;">${icon}</td>
-                <td><strong>${this.escapeHtml(name)}</strong></td>
-                <td>${this.formatEntityType(entityType)}</td>
-                <td>${this.formatMythologyName(mythology)}</td>
-                <td>${'⭐'.repeat(stars)}</td>
-            </tr>
-        `;
+        const escapedText = this.escapeHtml(text);
+        const escapedQuery = this.escapeHtml(query);
+        const regex = new RegExp(`(${this.escapeRegex(escapedQuery)})`, 'gi');
+
+        return escapedText.replace(regex, '<mark class="search-highlight">$1</mark>');
+    }
+
+    /**
+     * Highlight match in description (shows context around match, max 3 lines)
+     */
+    highlightMatchInDescription(text, query) {
+        if (!text) return '';
+
+        const maxLength = 150;
+        let displayText = text;
+
+        if (query && text.toLowerCase().includes(query.toLowerCase())) {
+            // Find the match position and show context around it
+            const lowerText = text.toLowerCase();
+            const matchIndex = lowerText.indexOf(query.toLowerCase());
+
+            if (matchIndex > 30) {
+                // Start a bit before the match
+                const startIndex = Math.max(0, matchIndex - 30);
+                displayText = '...' + text.substring(startIndex);
+            }
+        }
+
+        if (displayText.length > maxLength) {
+            displayText = displayText.substring(0, maxLength) + '...';
+        }
+
+        return this.highlightMatch(displayText, query);
+    }
+
+    /**
+     * Truncate path (middle ellipsis if too long)
+     */
+    truncatePath(path) {
+        const maxLength = 35;
+        if (path.length <= maxLength) return this.escapeHtml(path);
+
+        const parts = path.split(' / ');
+        if (parts.length === 2) {
+            const [mythology, type] = parts;
+            const availableForMythology = maxLength - type.length - 5;
+            if (mythology.length > availableForMythology) {
+                return `${this.escapeHtml(mythology.substring(0, availableForMythology))}... / ${this.escapeHtml(type)}`;
+            }
+        }
+
+        return this.escapeHtml(path.substring(0, maxLength - 3)) + '...';
+    }
+
+    /**
+     * Escape regex special characters
+     */
+    escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     /**
@@ -1684,10 +1163,7 @@ class SearchViewComplete {
      */
     renderPagination() {
         const paginationContainer = document.getElementById('pagination');
-        if (!paginationContainer) {
-            console.warn('[SearchView] Element not found in renderPagination: pagination');
-            return;
-        }
+        if (!paginationContainer) return;
 
         const totalPages = Math.ceil(this.state.totalResults / this.state.resultsPerPage);
 
@@ -1697,35 +1173,24 @@ class SearchViewComplete {
         }
 
         paginationContainer.style.display = 'flex';
-        paginationContainer.style.justifyContent = 'center';
-        paginationContainer.style.gap = '8px';
-        paginationContainer.style.padding = '20px';
 
         let html = '';
 
         // Previous button
         html += `
-            <button class="btn-secondary" ${this.state.currentPage === 1 ? 'disabled' : ''}
+            <button class="pagination-btn ${this.state.currentPage === 1 ? 'disabled' : ''}"
+                    ${this.state.currentPage === 1 ? 'disabled' : ''}
                     onclick="searchViewInstance.goToPage(${this.state.currentPage - 1})"
-                    style="
-                        min-height: 44px;
-                        padding: 0.75rem 1.5rem;
-                        background: rgba(var(--color-surface-rgb), 0.6);
-                        border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-                        border-radius: var(--radius-md, 8px);
-                        color: var(--color-text-primary);
-                        cursor: pointer;
-                        font-size: 0.95rem;
-                        font-weight: 600;
-                        transition: all var(--transition-base);
-                        ${this.state.currentPage === 1 ? 'opacity: 0.5; cursor: not-allowed;' : ''}
-                    ">
-                ← Previous
+                    aria-label="Previous page">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Previous
             </button>
         `;
 
-        // Page numbers (show max 7 pages)
-        const maxVisible = 7;
+        // Page numbers
+        const maxVisible = 5;
         let startPage = Math.max(1, this.state.currentPage - Math.floor(maxVisible / 2));
         let endPage = Math.min(totalPages, startPage + maxVisible - 1);
 
@@ -1734,80 +1199,35 @@ class SearchViewComplete {
         }
 
         if (startPage > 1) {
-            html += `<button class="btn-secondary" onclick="searchViewInstance.goToPage(1)" style="
-                min-height: 44px;
-                min-width: 44px;
-                padding: 0.75rem;
-                background: rgba(var(--color-surface-rgb), 0.6);
-                border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-                border-radius: var(--radius-md, 8px);
-                color: var(--color-text-primary);
-                cursor: pointer;
-                font-size: 0.95rem;
-                font-weight: 600;
-                transition: all var(--transition-base);
-            ">1</button>`;
-            if (startPage > 2) html += '<span style="color: var(--color-text-secondary); padding: 0 0.5rem;">...</span>';
+            html += `<button class="pagination-btn" onclick="searchViewInstance.goToPage(1)">1</button>`;
+            if (startPage > 2) html += '<span class="pagination-ellipsis">...</span>';
         }
 
         for (let i = startPage; i <= endPage; i++) {
-            const isActive = i === this.state.currentPage;
             html += `
-                <button class="btn-${isActive ? 'primary' : 'secondary'}"
+                <button class="pagination-btn ${i === this.state.currentPage ? 'active' : ''}"
                         onclick="searchViewInstance.goToPage(${i})"
-                        style="
-                            min-height: 44px;
-                            min-width: 44px;
-                            padding: 0.75rem;
-                            background: ${isActive ? 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))' : 'rgba(var(--color-surface-rgb), 0.6)'};
-                            border: 1px solid ${isActive ? 'var(--color-primary)' : 'rgba(var(--color-primary-rgb), 0.2)'};
-                            border-radius: var(--radius-md, 8px);
-                            color: ${isActive ? 'white' : 'var(--color-text-primary)'};
-                            cursor: pointer;
-                            font-size: 0.95rem;
-                            font-weight: ${isActive ? '700' : '600'};
-                            transition: all var(--transition-base);
-                        ">
+                        ${i === this.state.currentPage ? 'aria-current="page"' : ''}>
                     ${i}
                 </button>
             `;
         }
 
         if (endPage < totalPages) {
-            if (endPage < totalPages - 1) html += '<span style="color: var(--color-text-secondary); padding: 0 0.5rem;">...</span>';
-            html += `<button class="btn-secondary" onclick="searchViewInstance.goToPage(${totalPages})" style="
-                min-height: 44px;
-                min-width: 44px;
-                padding: 0.75rem;
-                background: rgba(var(--color-surface-rgb), 0.6);
-                border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-                border-radius: var(--radius-md, 8px);
-                color: var(--color-text-primary);
-                cursor: pointer;
-                font-size: 0.95rem;
-                font-weight: 600;
-                transition: all var(--transition-base);
-            ">${totalPages}</button>`;
+            if (endPage < totalPages - 1) html += '<span class="pagination-ellipsis">...</span>';
+            html += `<button class="pagination-btn" onclick="searchViewInstance.goToPage(${totalPages})">${totalPages}</button>`;
         }
 
         // Next button
         html += `
-            <button class="btn-secondary" ${this.state.currentPage === totalPages ? 'disabled' : ''}
+            <button class="pagination-btn ${this.state.currentPage === totalPages ? 'disabled' : ''}"
+                    ${this.state.currentPage === totalPages ? 'disabled' : ''}
                     onclick="searchViewInstance.goToPage(${this.state.currentPage + 1})"
-                    style="
-                        min-height: 44px;
-                        padding: 0.75rem 1.5rem;
-                        background: rgba(var(--color-surface-rgb), 0.6);
-                        border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-                        border-radius: var(--radius-md, 8px);
-                        color: var(--color-text-primary);
-                        cursor: pointer;
-                        font-size: 0.95rem;
-                        font-weight: 600;
-                        transition: all var(--transition-base);
-                        ${this.state.currentPage === totalPages ? 'opacity: 0.5; cursor: not-allowed;' : ''}
-                    ">
-                Next →
+                    aria-label="Next page">
+                Next
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
             </button>
         `;
 
@@ -1825,10 +1245,7 @@ class SearchViewComplete {
         this.renderResults();
 
         // Scroll to top of results
-        const resultsMain = document.querySelector('.search-results-main');
-        if (resultsMain) {
-            resultsMain.scrollIntoView({ behavior: 'smooth' });
-        }
+        document.querySelector('.search-main')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     /**
@@ -1842,10 +1259,34 @@ class SearchViewComplete {
                 return results.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
             case 'importance':
                 return results.sort((a, b) => (b.importance || 50) - (a.importance || 50));
-            case 'popularity':
-                return results.sort((a, b) => (b.popularity || 50) - (a.popularity || 50));
             default:
                 return results;
+        }
+    }
+
+    /**
+     * Clear all filters
+     */
+    clearFilters() {
+        // Reset filter chips
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.classList.toggle('active', chip.dataset.type === 'all');
+        });
+
+        // Reset mythology filters
+        document.querySelectorAll('.mythology-chip').forEach(chip => {
+            chip.classList.toggle('active', chip.dataset.mythology === '');
+        });
+
+        this.state.filters = {
+            mythology: '',
+            entityTypes: ['deities', 'heroes', 'creatures', 'items', 'places', 'texts', 'symbols', 'rituals'],
+            importance: [1, 5],
+            hasImage: null
+        };
+
+        if (this.state.query) {
+            this.performSearch(this.state.query);
         }
     }
 
@@ -1854,33 +1295,20 @@ class SearchViewComplete {
      */
     showEmptyState() {
         const resultsContainer = document.getElementById('results-container');
-        if (!resultsContainer) {
-            console.warn('[SearchView] Element not found in showEmptyState: results-container');
-            return;
-        }
-        resultsContainer.innerHTML = this.getEmptyStateHTML();
-
-        const resultsControls = document.querySelector('.results-controls');
-        if (resultsControls) {
-            resultsControls.style.display = 'none';
-        }
-
+        const resultsHeader = document.getElementById('results-header');
         const pagination = document.getElementById('pagination');
+
+        if (resultsContainer) {
+            resultsContainer.innerHTML = this.getEmptyStateHTML();
+        }
+        if (resultsHeader) {
+            resultsHeader.style.display = 'none';
+        }
         if (pagination) {
             pagination.style.display = 'none';
         }
 
-        // Re-attach event listeners to example queries
-        document.querySelectorAll('.example-query').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const query = e.target.dataset.query;
-                const searchInput = document.getElementById('search-input');
-                if (searchInput) {
-                    searchInput.value = query;
-                    this.performSearch(query);
-                }
-            });
-        });
+        this.initExampleQueries();
     }
 
     /**
@@ -1888,15 +1316,19 @@ class SearchViewComplete {
      */
     renderError() {
         const resultsContainer = document.getElementById('results-container');
-        if (!resultsContainer) {
-            console.warn('[SearchView] Element not found in renderError: results-container');
-            return;
-        }
+        if (!resultsContainer) return;
+
         resultsContainer.innerHTML = `
             <div class="search-error">
-                <div class="error-icon">⚠️</div>
-                <h3>Search Error</h3>
-                <p>${this.escapeHtml(this.state.error)}</p>
+                <div class="error-visual">
+                    <svg class="error-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <h3 class="error-title">Search Error</h3>
+                <p class="error-message">${this.escapeHtml(this.state.error)}</p>
                 <button class="btn-primary" onclick="searchViewInstance.performSearch('${this.escapeHtml(this.state.query)}')">
                     Try Again
                 </button>
@@ -1926,53 +1358,22 @@ class SearchViewComplete {
     }
 
     addToSearchHistory(query, resultCount) {
-        // Remove duplicates
         this.searchHistory = this.searchHistory.filter(h => h.query !== query);
-
-        // Add to front
-        this.searchHistory.unshift({
-            query,
-            resultCount,
-            timestamp: Date.now()
-        });
-
-        // Trim to max size
+        this.searchHistory.unshift({ query, resultCount, timestamp: Date.now() });
         if (this.searchHistory.length > this.maxHistorySize) {
             this.searchHistory = this.searchHistory.slice(0, this.maxHistorySize);
         }
-
         this.saveSearchHistory();
-    }
-
-    clearSearchHistory() {
-        this.searchHistory = [];
-        this.saveSearchHistory();
-
-        // Re-render to hide history section
-        const historySection = document.querySelector('.search-history');
-        if (historySection) {
-            historySection.remove();
-        }
     }
 
     /**
      * Utility methods
      */
     escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-    }
-
-    highlightMatch(text, query) {
-        const index = text.toLowerCase().indexOf(query.toLowerCase());
-        if (index === -1) return this.escapeHtml(text);
-
-        const before = text.substring(0, index);
-        const match = text.substring(index, index + query.length);
-        const after = text.substring(index + query.length);
-
-        return `${this.escapeHtml(before)}<strong>${this.escapeHtml(match)}</strong>${this.escapeHtml(after)}`;
     }
 
     formatEntityType(type) {
@@ -1980,32 +1381,43 @@ class SearchViewComplete {
     }
 
     /**
-     * Cleanup method - removes global instance and clears resources
+     * Cleanup method
      */
     destroy() {
         console.log('[SearchView] Destroying instance');
 
-        // Destroy virtual scroller
         this.destroyVirtualScroller();
 
-        // Clear global instance reference if it's this instance
         if (window.searchViewInstance === this) {
             window.searchViewInstance = null;
-            console.log('[SearchView] Global instance cleared');
         }
 
-        // Clear timers
         if (this.autocompleteTimer) {
             clearTimeout(this.autocompleteTimer);
             this.autocompleteTimer = null;
         }
 
-        // Mark as destroyed
+        // Remove event listeners
+        if (this.elements.searchInput) {
+            this.elements.searchInput.removeEventListener('input', this.boundHandlers.onInput);
+            this.elements.searchInput.removeEventListener('keydown', this.boundHandlers.onKeydown);
+        }
+        if (this.elements.searchBtn) {
+            this.elements.searchBtn.removeEventListener('click', this.boundHandlers.onSearch);
+        }
+        if (this.elements.clearBtn) {
+            this.elements.clearBtn.removeEventListener('click', this.boundHandlers.onClear);
+        }
+        if (this.elements.sortSelect) {
+            this.elements.sortSelect.removeEventListener('change', this.boundHandlers.onSort);
+        }
+        document.removeEventListener('click', this.boundHandlers.onDocClick);
+
         this.isDestroyed = true;
     }
 }
 
-// Global export for non-module script loading
+// Global export
 if (typeof window !== 'undefined') {
     window.SearchViewComplete = SearchViewComplete;
 }

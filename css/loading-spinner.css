@@ -1,215 +1,280 @@
 /**
  * Loading Spinner Styles
- * Provides consistent loading states across all Firebase data fetches
+ * Sacred geometry inspired loading states with smooth transitions
+ * Supports: Eye-themed spinners, overlays, progress bars, step indicators, error states
  */
 
-/* Spinner Wrapper */
+/* ============================================
+   CSS CUSTOM PROPERTIES
+   ============================================ */
+
+:root {
+    --spinner-color-primary: var(--color-primary, #8b7fff);
+    --spinner-color-secondary: var(--color-secondary, #ff7fcc);
+    --spinner-color-accent: var(--color-accent, #7fffcc);
+    --spinner-color-bg: var(--color-bg-primary, #0a0a0a);
+    --spinner-color-text: var(--color-text-secondary, #adb5bd);
+    --spinner-color-error: #ff6b6b;
+    --spinner-transition-fast: 150ms;
+    --spinner-transition-normal: 300ms;
+    --spinner-transition-slow: 450ms;
+}
+
+/* ============================================
+   SPINNER WRAPPER
+   ============================================ */
+
 .loading-spinner-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    min-height: 100px;
+    min-height: 120px;
+    gap: 1rem;
 }
 
 .loading-spinner-inline {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     margin: 0.5rem 0;
 }
 
-/* Spinner Container */
-.loading-spinner {
-    display: inline-block;
-    position: relative;
-}
-
-/* Spinner Icon */
-.spinner-icon {
-    border: 3px solid rgba(147, 112, 219, 0.15);
-    border-top-color: var(--color-primary, #9370DB);
-    border-right-color: rgba(147, 112, 219, 0.6);
-    border-radius: 50%;
-    animation: spin 0.75s linear infinite;
-    box-shadow: 0 0 12px rgba(147, 112, 219, 0.4);
-}
-
-/* Spinner Sizes */
-.spinner-small .spinner-icon {
-    width: 20px;
-    height: 20px;
-    border-width: 2px;
-}
-
-.spinner-medium .spinner-icon {
-    width: 40px;
-    height: 40px;
-    border-width: 3px;
-}
-
-.spinner-large .spinner-icon {
-    width: 60px;
-    height: 60px;
-    border-width: 4px;
-}
-
-/* Spinner Message */
-.spinner-message {
-    margin-top: 1rem;
-    color: var(--color-text-secondary, #adb5bd);
-    font-size: 0.9rem;
-    text-align: center;
-    animation: pulse-text 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    letter-spacing: 0.2px;
-}
-
-/* Animations */
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes pulse-text {
-    0%, 100% {
-        opacity: 0.6;
-    }
-    40%, 60% {
-        opacity: 1;
-    }
-}
-
-/* Inline Spinner Specific Styles */
-.loading-spinner-inline .loading-spinner {
-    margin: 0;
+.loading-spinner-inline .loading-spinner-wrapper {
+    padding: 0;
+    min-height: auto;
+    flex-direction: row;
 }
 
 .loading-spinner-inline .spinner-message {
-    margin-top: 0;
-    margin-left: 0.5rem;
-    font-size: 0.85rem;
+    margin: 0;
+    font-size: 0.875rem;
 }
 
-/* Grid Loading State */
-.grid-loading {
-    grid-column: 1 / -1; /* Span all columns */
+/* ============================================
+   SACRED GEOMETRY SPINNER (Eye Theme)
+   ============================================ */
+
+.sacred-spinner {
+    position: relative;
     display: flex;
-    justify-content: center;
     align-items: center;
-    min-height: 200px;
+    justify-content: center;
+    color: var(--spinner-color-primary);
 }
 
-/* Panel Card Loading Skeleton */
-.panel-card-skeleton {
-    background: var(--color-bg-secondary, rgba(255, 255, 255, 0.04));
-    border: 1px solid var(--color-border, rgba(147, 112, 219, 0.15));
-    border-radius: 12px;
-    padding: 1.5rem;
-    animation: skeleton-pulse 2.4s ease-in-out infinite;
-    overflow: hidden;
+.sacred-spinner-svg {
+    display: block;
+    filter: drop-shadow(0 0 8px rgba(139, 127, 255, 0.4));
 }
 
-.panel-card-skeleton .skeleton-image {
-    width: 100%;
-    height: 150px;
-    background: linear-gradient(
-        90deg,
-        rgba(147, 112, 219, 0.1) 0%,
-        rgba(147, 112, 219, 0.2) 50%,
-        rgba(147, 112, 219, 0.1) 100%
-    );
-    background-size: 200% 100%;
-    animation: skeleton-shimmer 2s ease-in-out infinite;
-    border-radius: 8px;
-    margin-bottom: 1rem;
+/* Spinner Sizes */
+.sacred-spinner.spinner-sm {
+    width: 16px;
+    height: 16px;
 }
 
-.panel-card-skeleton .skeleton-title {
-    width: 70%;
-    height: 1.5rem;
-    background: linear-gradient(
-        90deg,
-        rgba(147, 112, 219, 0.1) 0%,
-        rgba(147, 112, 219, 0.2) 50%,
-        rgba(147, 112, 219, 0.1) 100%
-    );
-    background-size: 200% 100%;
-    animation: skeleton-shimmer 2s ease-in-out infinite;
-    border-radius: 4px;
-    margin-bottom: 0.75rem;
+.sacred-spinner.spinner-md {
+    width: 32px;
+    height: 32px;
 }
 
-.panel-card-skeleton .skeleton-text {
-    width: 100%;
-    height: 1rem;
-    background: linear-gradient(
-        90deg,
-        rgba(147, 112, 219, 0.1) 0%,
-        rgba(147, 112, 219, 0.2) 50%,
-        rgba(147, 112, 219, 0.1) 100%
-    );
-    background-size: 200% 100%;
-    animation: skeleton-shimmer 2s ease-in-out infinite;
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
+.sacred-spinner.spinner-lg {
+    width: 48px;
+    height: 48px;
 }
 
-.panel-card-skeleton .skeleton-text:last-child {
-    width: 80%;
-    margin-bottom: 0;
+/* Ring Animations */
+.sacred-ring {
+    stroke-dasharray: 80 200;
+    stroke-dashoffset: 0;
+    transform-origin: center;
 }
 
-@keyframes skeleton-pulse {
+.sacred-ring-outer {
+    stroke: var(--spinner-color-primary);
+    animation: sacredSpinOuter 2s cubic-bezier(0.68, -0.2, 0.27, 1.2) infinite;
+}
+
+.sacred-ring-middle {
+    stroke: var(--spinner-color-secondary);
+    stroke-dasharray: 60 200;
+    animation: sacredSpinMiddle 2.5s cubic-bezier(0.68, -0.2, 0.27, 1.2) infinite reverse;
+}
+
+.sacred-ring-inner {
+    stroke: var(--spinner-color-accent);
+    stroke-dasharray: 40 200;
+    animation: sacredSpinInner 1.5s cubic-bezier(0.68, -0.2, 0.27, 1.2) infinite;
+}
+
+/* Eye Center (The All-Seeing Eye) */
+.sacred-eye-center {
+    fill: var(--spinner-color-primary);
+    animation: sacredPulse 1.2s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px var(--spinner-color-primary));
+}
+
+/* Sacred Lines */
+.sacred-line {
+    opacity: 0.3;
+    animation: sacredLinePulse 2s ease-in-out infinite;
+}
+
+@keyframes sacredSpinOuter {
+    0% {
+        transform: rotate(0deg);
+        stroke-dasharray: 80 200;
+    }
+    50% {
+        stroke-dasharray: 100 200;
+    }
+    100% {
+        transform: rotate(360deg);
+        stroke-dasharray: 80 200;
+    }
+}
+
+@keyframes sacredSpinMiddle {
+    0% {
+        transform: rotate(0deg);
+        stroke-dasharray: 60 200;
+    }
+    50% {
+        stroke-dasharray: 80 200;
+    }
+    100% {
+        transform: rotate(360deg);
+        stroke-dasharray: 60 200;
+    }
+}
+
+@keyframes sacredSpinInner {
+    0% {
+        transform: rotate(0deg);
+        stroke-dasharray: 40 200;
+    }
+    50% {
+        stroke-dasharray: 55 200;
+    }
+    100% {
+        transform: rotate(360deg);
+        stroke-dasharray: 40 200;
+    }
+}
+
+@keyframes sacredPulse {
     0%, 100% {
+        transform: scale(1);
         opacity: 1;
     }
     50% {
+        transform: scale(1.3);
         opacity: 0.7;
     }
 }
 
-@keyframes skeleton-shimmer {
-    0% {
-        background-position: -200% 0;
+@keyframes sacredLinePulse {
+    0%, 100% {
+        opacity: 0.2;
     }
     50% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: 200% 0;
+        opacity: 0.5;
     }
 }
 
-/* Loading Overlay (for full page loading) */
+/* ============================================
+   SPINNER MESSAGE
+   ============================================ */
+
+.spinner-message {
+    color: var(--spinner-color-text);
+    font-size: 0.9375rem;
+    text-align: center;
+    letter-spacing: 0.3px;
+    animation: messageBreath 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    transition: opacity var(--spinner-transition-fast) ease,
+                transform var(--spinner-transition-fast) ease;
+    max-width: 300px;
+    line-height: 1.5;
+}
+
+.spinner-message.message-updating {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+
+@keyframes messageBreath {
+    0%, 100% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   LOADING OVERLAY (Full Page)
+   ============================================ */
+
 .loading-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10000;
-    animation: fadeIn 0.3s ease-out;
+    animation: overlayFadeIn var(--spinner-transition-normal) ease-out;
 }
 
-.loading-overlay .loading-spinner-wrapper {
-    background: var(--color-bg-primary, #0a0a0a);
-    border: 2px solid var(--color-primary, #9370DB);
-    border-radius: 16px;
-    padding: 3rem;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+.loading-overlay.overlay-fade-out {
+    animation: overlayFadeOut var(--spinner-transition-normal) ease-out forwards;
 }
 
-@keyframes fadeIn {
+.loading-overlay-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 3rem 4rem;
+    background: linear-gradient(
+        135deg,
+        rgba(26, 31, 58, 0.95) 0%,
+        rgba(10, 10, 30, 0.98) 100%
+    );
+    border: 1px solid rgba(139, 127, 255, 0.3);
+    border-radius: 20px;
+    box-shadow:
+        0 0 40px rgba(139, 127, 255, 0.2),
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    max-width: 90vw;
+}
+
+.loading-overlay-message {
+    color: var(--spinner-color-text);
+    font-size: 1.125rem;
+    text-align: center;
+    letter-spacing: 0.5px;
+    animation: messageBreath 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    transition: opacity var(--spinner-transition-fast) ease,
+                transform var(--spinner-transition-fast) ease;
+}
+
+.loading-overlay-message.message-updating {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+
+body.loading-overlay-active {
+    overflow: hidden;
+}
+
+@keyframes overlayFadeIn {
     from {
         opacity: 0;
     }
@@ -218,60 +283,307 @@
     }
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .loading-spinner-wrapper {
-        padding: 1.5rem;
+@keyframes overlayFadeOut {
+    from {
+        opacity: 1;
     }
-
-    .spinner-large .spinner-icon {
-        width: 50px;
-        height: 50px;
-        border-width: 3px;
-    }
-
-    .spinner-medium .spinner-icon {
-        width: 35px;
-        height: 35px;
-    }
-
-    .spinner-message {
-        font-size: 0.85rem;
-    }
-}
-
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-    .spinner-icon {
-        border-color: rgba(147, 112, 219, 0.3);
-        border-top-color: #DAA520;
-    }
-
-    .panel-card-skeleton {
-        background: rgba(0, 0, 0, 0.3);
+    to {
+        opacity: 0;
     }
 }
 
 /* ============================================
-   LOADING STATE TRANSITIONS
-   Smooth fade-out/fade-in for content replacement
+   PROGRESS BAR
    ============================================ */
 
-/* Loading spinner fade-out animation */
-.loading-spinner-wrapper.fade-out {
-    opacity: 0;
-    transition: opacity 0.3s ease-out;
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 280px;
 }
 
-/* Content fade-in after loading */
+.progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(139, 127, 255, 0.15);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(139, 127, 255, 0.1) 50%,
+        transparent 100%
+    );
+    animation: progressShimmer 2s ease-in-out infinite;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(
+        90deg,
+        var(--spinner-color-primary) 0%,
+        var(--spinner-color-secondary) 100%
+    );
+    border-radius: 3px;
+    transition: width var(--spinner-transition-normal) cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 100%
+    );
+    animation: progressGlow 1.5s ease-in-out infinite;
+}
+
+.progress-text {
+    font-size: 0.8125rem;
+    color: var(--spinner-color-text);
+    min-width: 3em;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+@keyframes progressShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes progressGlow {
+    0%, 100% {
+        opacity: 0.5;
+        transform: translateX(-100%);
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Indeterminate Progress */
+.progress-bar.indeterminate .progress-bar-fill {
+    width: 30%;
+    animation: indeterminateProgress 1.5s ease-in-out infinite;
+}
+
+@keyframes indeterminateProgress {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(400%);
+    }
+}
+
+/* ============================================
+   STEP INDICATOR
+   ============================================ */
+
+.step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 1rem;
+}
+
+.step-indicator-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.4;
+    transition: opacity var(--spinner-transition-normal) ease;
+}
+
+.step-indicator-item.active {
+    opacity: 1;
+}
+
+.step-indicator-item.completed {
+    opacity: 0.7;
+}
+
+.step-indicator-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: rgba(139, 127, 255, 0.15);
+    border: 2px solid rgba(139, 127, 255, 0.3);
+    color: var(--spinner-color-text);
+    transition: all var(--spinner-transition-normal) ease;
+}
+
+.step-indicator-item.active .step-indicator-number {
+    background: var(--spinner-color-primary);
+    border-color: var(--spinner-color-primary);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(139, 127, 255, 0.5);
+}
+
+.step-indicator-item.completed .step-indicator-number {
+    background: var(--spinner-color-accent);
+    border-color: var(--spinner-color-accent);
+    color: #000;
+}
+
+.step-indicator-item.completed .step-indicator-number::after {
+    content: '\2713';
+}
+
+.step-indicator-label {
+    font-size: 0.75rem;
+    color: var(--spinner-color-text);
+    white-space: nowrap;
+}
+
+.step-indicator-connector {
+    width: 40px;
+    height: 2px;
+    background: rgba(139, 127, 255, 0.2);
+    margin: 0 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* ============================================
+   ERROR STATE
+   ============================================ */
+
+.loading-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+    animation: errorFadeIn var(--spinner-transition-slow) ease-out;
+}
+
+.loading-error-icon {
+    color: var(--spinner-color-error);
+    margin-bottom: 1.5rem;
+    animation: errorShake 0.5s ease-in-out;
+}
+
+.loading-error-icon svg {
+    filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.4));
+}
+
+.loading-error-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #fff);
+    margin: 0 0 0.75rem;
+}
+
+.loading-error-message {
+    font-size: 0.9375rem;
+    color: var(--spinner-color-text);
+    margin: 0 0 1.5rem;
+    max-width: 400px;
+    line-height: 1.5;
+}
+
+.loading-error-retry {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--spinner-color-primary) 0%, #6b5ecc 100%);
+    color: #fff;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all var(--spinner-transition-fast) ease;
+    box-shadow: 0 4px 15px rgba(139, 127, 255, 0.3);
+}
+
+.loading-error-retry:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 127, 255, 0.4);
+}
+
+.loading-error-retry:active {
+    transform: translateY(0);
+}
+
+@keyframes errorFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes errorShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-4px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(4px);
+    }
+}
+
+/* Content Error Transition */
+.content-error {
+    animation: errorFadeIn var(--spinner-transition-slow) ease-out;
+}
+
+/* ============================================
+   FADE TRANSITIONS
+   ============================================ */
+
+.spinner-fade-out {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity var(--spinner-transition-normal) ease-out,
+                transform var(--spinner-transition-normal) ease-out;
+}
+
 .content-loaded {
-    animation: contentFadeIn 0.4s ease-out forwards;
+    animation: contentFadeIn var(--spinner-transition-slow) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 @keyframes contentFadeIn {
     from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
@@ -279,47 +591,947 @@
     }
 }
 
-/* Loading container fade-out */
-.loading-container.fade-out {
-    opacity: 0 !important;
-    transition: opacity 0.3s ease-out !important;
-    pointer-events: none;
-}
-
-/* Skeleton to content transition */
-.skeleton-fade-out {
-    opacity: 0;
-    transition: opacity 0.3s ease-out;
-    pointer-events: none;
-}
-
-/* Prevent layout shift during transitions */
+/* Prevent layout shift */
 .loading-transition-active {
     overflow: hidden;
     min-height: inherit;
 }
 
-/* Initial loading spinner (from index.html) specific styles */
-#main-content > .loading-container {
+/* ============================================
+   GRID LOADING STATE
+   ============================================ */
+
+.grid-loading {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+/* ============================================
+   LEGACY SPINNER SUPPORT
+   ============================================ */
+
+.loading-spinner {
+    display: inline-block;
     position: relative;
-    z-index: 10;
 }
 
-/* Ensure smooth transition when SPA replaces initial content */
-#main-content.transitioning > * {
-    transition: opacity 0.3s ease-out;
+.spinner-icon {
+    border: 3px solid rgba(139, 127, 255, 0.15);
+    border-top-color: var(--spinner-color-primary);
+    border-right-color: rgba(139, 127, 255, 0.6);
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+    box-shadow: 0 0 12px rgba(139, 127, 255, 0.4);
 }
 
-/* Reduced motion support for transitions */
+.spinner-small .spinner-icon {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+}
+
+.spinner-medium .spinner-icon {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
+}
+
+.spinner-large .spinner-icon {
+    width: 48px;
+    height: 48px;
+    border-width: 4px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+    .loading-spinner-wrapper {
+        padding: 1.5rem;
+    }
+
+    .loading-overlay-content {
+        padding: 2rem;
+        margin: 1rem;
+    }
+
+    .loading-overlay-message {
+        font-size: 1rem;
+    }
+
+    .step-indicator {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .step-indicator-connector {
+        display: none;
+    }
+
+    .step-indicator-item {
+        flex: 0 0 auto;
+        margin: 0.5rem;
+    }
+
+    .progress-container {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .loading-overlay-content {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+
+    .spinner-message {
+        font-size: 0.875rem;
+    }
+
+    .step-indicator-number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8125rem;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY: REDUCED MOTION
+   ============================================ */
+
 @media (prefers-reduced-motion: reduce) {
-    .loading-spinner-wrapper.fade-out,
+    .sacred-ring,
+    .sacred-ring-outer,
+    .sacred-ring-middle,
+    .sacred-ring-inner,
+    .sacred-eye-center,
+    .sacred-line,
+    .spinner-icon,
+    .spinner-message,
+    .loading-overlay-message,
+    .progress-bar::before,
+    .progress-bar-fill::after,
+    .progress-bar.indeterminate .progress-bar-fill {
+        animation: none !important;
+    }
+
+    .loading-overlay,
+    .loading-overlay.overlay-fade-out,
     .content-loaded,
-    .loading-container.fade-out,
-    .skeleton-fade-out,
-    #main-content.transitioning > * {
+    .content-error,
+    .loading-error,
+    .spinner-fade-out {
         animation: none !important;
         transition: none !important;
         opacity: 1 !important;
         transform: none !important;
+    }
+
+    .spinner-message.message-updating,
+    .loading-overlay-message.message-updating {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    /* Show static spinner for reduced motion */
+    .sacred-ring-outer {
+        stroke-dasharray: 138;
+        stroke-dashoffset: 35;
+    }
+
+    .sacred-ring-middle {
+        stroke-dasharray: 100;
+        stroke-dashoffset: 25;
+    }
+
+    .sacred-ring-inner {
+        stroke-dasharray: 63;
+        stroke-dashoffset: 15;
+    }
+}
+
+/* ============================================
+   HIGH CONTRAST MODE
+   ============================================ */
+
+@media (prefers-contrast: high) {
+    .sacred-spinner-svg {
+        filter: none;
+    }
+
+    .sacred-ring {
+        stroke-width: 3;
+    }
+
+    .loading-error-icon svg {
+        filter: none;
+    }
+
+    .loading-overlay-content {
+        border-width: 2px;
+    }
+
+    .progress-bar {
+        border: 1px solid var(--spinner-color-text);
+    }
+
+    .step-indicator-number {
+        border-width: 3px;
+    }
+}
+
+/* ============================================
+   DARK MODE ENHANCEMENTS
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+    .sacred-spinner-svg {
+        filter: drop-shadow(0 0 12px rgba(139, 127, 255, 0.5));
+    }
+
+    .loading-overlay {
+        background: rgba(0, 0, 0, 0.9);
+    }
+
+    .loading-overlay-content {
+        background: linear-gradient(
+            135deg,
+            rgba(20, 25, 50, 0.98) 0%,
+            rgba(5, 5, 20, 0.99) 100%
+        );
+        border-color: rgba(139, 127, 255, 0.4);
+        box-shadow:
+            0 0 60px rgba(139, 127, 255, 0.25),
+            0 30px 80px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+}
+
+/* ============================================
+   THEME COLOR INHERITANCE
+   ============================================ */
+
+[data-theme="cosmic"] .sacred-ring-outer { stroke: #00d4ff; }
+[data-theme="cosmic"] .sacred-ring-middle { stroke: #ff00d4; }
+[data-theme="cosmic"] .sacred-ring-inner { stroke: #d4ff00; }
+[data-theme="cosmic"] .sacred-eye-center { fill: #00d4ff; }
+[data-theme="cosmic"] .sacred-spinner-svg { filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.5)); }
+
+[data-theme="sacred"] .sacred-ring-outer { stroke: #ffd700; }
+[data-theme="sacred"] .sacred-ring-middle { stroke: #ff6b35; }
+[data-theme="sacred"] .sacred-ring-inner { stroke: #c9b037; }
+[data-theme="sacred"] .sacred-eye-center { fill: #ffd700; }
+[data-theme="sacred"] .sacred-spinner-svg { filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.5)); }
+
+[data-theme="golden"] .sacred-ring-outer { stroke: #daa520; }
+[data-theme="golden"] .sacred-ring-middle { stroke: #b8860b; }
+[data-theme="golden"] .sacred-ring-inner { stroke: #ffd700; }
+[data-theme="golden"] .sacred-eye-center { fill: #daa520; }
+[data-theme="golden"] .sacred-spinner-svg { filter: drop-shadow(0 0 12px rgba(218, 165, 32, 0.5)); }
+
+[data-theme="ocean"] .sacred-ring-outer { stroke: #00bcd4; }
+[data-theme="ocean"] .sacred-ring-middle { stroke: #26c6da; }
+[data-theme="ocean"] .sacred-ring-inner { stroke: #80deea; }
+[data-theme="ocean"] .sacred-eye-center { fill: #00bcd4; }
+[data-theme="ocean"] .sacred-spinner-svg { filter: drop-shadow(0 0 12px rgba(0, 188, 212, 0.5)); }
+
+[data-theme="fire"] .sacred-ring-outer { stroke: #ff5722; }
+[data-theme="fire"] .sacred-ring-middle { stroke: #ff9800; }
+[data-theme="fire"] .sacred-ring-inner { stroke: #ffeb3b; }
+[data-theme="fire"] .sacred-eye-center { fill: #ff5722; }
+[data-theme="fire"] .sacred-spinner-svg { filter: drop-shadow(0 0 12px rgba(255, 87, 34, 0.5)); }
+
+/* ============================================
+   MODAL SAVE OVERLAY
+   ============================================ */
+
+.modal-save-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    border-radius: inherit;
+    animation: modalOverlayFadeIn var(--spinner-transition-normal) ease-out;
+}
+
+.modal-save-overlay-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    text-align: center;
+}
+
+.modal-save-message {
+    color: var(--spinner-color-text);
+    font-size: 1rem;
+    letter-spacing: 0.3px;
+    animation: messageBreath 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    transition: opacity var(--spinner-transition-fast) ease,
+                transform var(--spinner-transition-fast) ease;
+}
+
+.modal-save-message.message-updating {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+
+.modal-overlay-fade-out {
+    animation: modalOverlayFadeOut var(--spinner-transition-normal) ease-out forwards;
+}
+
+@keyframes modalOverlayFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalOverlayFadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   MULTI-STEP PROGRESS INDICATOR
+   ============================================ */
+
+.multi-step-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: linear-gradient(
+        135deg,
+        rgba(26, 31, 58, 0.9) 0%,
+        rgba(10, 10, 30, 0.95) 100%
+    );
+    border: 1px solid rgba(139, 127, 255, 0.25);
+    border-radius: 16px;
+    transition: opacity var(--spinner-transition-normal) ease,
+                transform var(--spinner-transition-normal) ease;
+}
+
+.multi-step-progress.progress-complete {
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.multi-step-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.multi-step-message {
+    color: var(--spinner-color-text);
+    font-size: 1rem;
+    text-align: center;
+    letter-spacing: 0.3px;
+    animation: messageBreath 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    transition: opacity var(--spinner-transition-fast) ease,
+                transform var(--spinner-transition-fast) ease;
+}
+
+.multi-step-message.message-updating {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+
+.multi-step-message.error-message {
+    color: var(--spinner-color-error);
+    animation: none;
+}
+
+.multi-step-percentage {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 320px;
+}
+
+.multi-step-progress-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(139, 127, 255, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.multi-step-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(
+        90deg,
+        var(--spinner-color-primary) 0%,
+        var(--spinner-color-secondary) 50%,
+        var(--spinner-color-accent) 100%
+    );
+    border-radius: 4px;
+    transition: width var(--spinner-transition-normal) cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.multi-step-progress-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: progressGlow 1.5s ease-in-out infinite;
+}
+
+.multi-step-percent-text {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--spinner-color-primary);
+    min-width: 3.5em;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.multi-step-steps {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.multi-step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.4;
+    transition: opacity var(--spinner-transition-normal) ease,
+                transform var(--spinner-transition-normal) ease;
+}
+
+.multi-step-item.active {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.multi-step-item.completed {
+    opacity: 0.85;
+}
+
+.multi-step-item.error {
+    opacity: 1;
+}
+
+.multi-step-indicator {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(139, 127, 255, 0.1);
+    border: 2px solid rgba(139, 127, 255, 0.3);
+    transition: all var(--spinner-transition-normal) ease;
+    position: relative;
+}
+
+.multi-step-number {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--spinner-color-text);
+    transition: opacity var(--spinner-transition-fast) ease;
+}
+
+.multi-step-check {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all var(--spinner-transition-normal) cubic-bezier(0.34, 1.56, 0.64, 1);
+    color: #fff;
+}
+
+.multi-step-item.active .multi-step-indicator {
+    background: var(--spinner-color-primary);
+    border-color: var(--spinner-color-primary);
+    box-shadow: 0 0 20px rgba(139, 127, 255, 0.5),
+                0 0 40px rgba(139, 127, 255, 0.2);
+}
+
+.multi-step-item.active .multi-step-number {
+    color: #fff;
+}
+
+.multi-step-item.completed .multi-step-indicator {
+    background: var(--spinner-color-accent);
+    border-color: var(--spinner-color-accent);
+}
+
+.multi-step-item.completed .multi-step-number {
+    opacity: 0;
+}
+
+.multi-step-item.completed .multi-step-check {
+    opacity: 1;
+    transform: scale(1);
+    color: #000;
+}
+
+.multi-step-item.error .multi-step-indicator {
+    background: var(--spinner-color-error);
+    border-color: var(--spinner-color-error);
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+}
+
+.multi-step-item.error .multi-step-number::after {
+    content: '!';
+}
+
+.multi-step-item.error .multi-step-number {
+    color: #fff;
+}
+
+.multi-step-label {
+    font-size: 0.75rem;
+    color: var(--spinner-color-text);
+    white-space: nowrap;
+    max-width: 100px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.multi-step-connector {
+    width: 50px;
+    height: 2px;
+    background: rgba(139, 127, 255, 0.2);
+    margin: 20px 0.75rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.multi-step-connector::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--spinner-color-accent);
+    transform: translateX(-100%);
+    transition: transform var(--spinner-transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.multi-step-connector.filled::after {
+    transform: translateX(0);
+}
+
+/* ============================================
+   INLINE LOADING
+   ============================================ */
+
+.inline-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    vertical-align: middle;
+}
+
+.inline-loading-text {
+    color: var(--spinner-color-text);
+    font-size: inherit;
+    animation: messageBreath 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ============================================
+   BUTTON LOADING STATE
+   ============================================ */
+
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.85;
+}
+
+.btn-loading .btn-spinner {
+    display: inline-flex;
+    margin-right: 0.5rem;
+}
+
+.btn-loading .btn-loading-text {
+    opacity: 0.9;
+}
+
+/* ============================================
+   ENHANCED SACRED SPINNER VARIATIONS
+   ============================================ */
+
+/* Pulsing outer glow effect */
+.sacred-spinner.glow-pulse .sacred-spinner-svg {
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 8px rgba(139, 127, 255, 0.4));
+    }
+    50% {
+        filter: drop-shadow(0 0 20px rgba(139, 127, 255, 0.7));
+    }
+}
+
+/* Ethereal floating effect */
+.sacred-spinner.floating {
+    animation: floatingSpinner 3s ease-in-out infinite;
+}
+
+@keyframes floatingSpinner {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+/* Sacred geometry enhancement */
+.sacred-spinner.geometry-enhanced .sacred-line {
+    stroke-dasharray: 5 10;
+    animation: sacredLineFlow 1.5s linear infinite;
+}
+
+@keyframes sacredLineFlow {
+    0% {
+        stroke-dashoffset: 0;
+    }
+    100% {
+        stroke-dashoffset: 15;
+    }
+}
+
+/* ============================================
+   RESPONSIVE MULTI-STEP
+   ============================================ */
+
+@media (max-width: 768px) {
+    .multi-step-progress {
+        padding: 1.5rem;
+    }
+
+    .multi-step-steps {
+        gap: 0.5rem;
+    }
+
+    .multi-step-connector {
+        width: 30px;
+        margin: 20px 0.5rem 0;
+    }
+
+    .multi-step-indicator {
+        width: 36px;
+        height: 36px;
+    }
+
+    .multi-step-label {
+        font-size: 0.6875rem;
+        max-width: 70px;
+    }
+}
+
+@media (max-width: 480px) {
+    .multi-step-steps {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .multi-step-item {
+        flex-direction: row;
+        gap: 1rem;
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .multi-step-connector {
+        display: none;
+    }
+
+    .multi-step-label {
+        max-width: none;
+        text-align: left;
+    }
+}
+
+/* ============================================
+   REDUCED MOTION: MULTI-STEP
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .multi-step-progress,
+    .multi-step-item,
+    .multi-step-indicator,
+    .multi-step-check,
+    .multi-step-connector::after,
+    .multi-step-progress-fill {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .modal-save-overlay,
+    .modal-overlay-fade-out,
+    .modal-save-message {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .inline-loading-text {
+        animation: none !important;
+    }
+}
+
+/* ============================================
+   SPA PAGE TRANSITIONS
+   Smooth transitions between routes
+   ============================================ */
+
+/* Exit transition - content fading out */
+.spa-transition-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.spa-transition-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
+}
+
+/* Enter transition - content fading in */
+.spa-transition-enter {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.spa-transition-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms cubic-bezier(0.34, 1.56, 0.64, 1),
+                transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* SPA Loading container with progress bar */
+.spa-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    padding: 3rem 1rem;
+}
+
+.spa-loading .loading-message {
+    color: var(--spinner-color-text, #adb5bd);
+    font-size: 1rem;
+    margin-top: 1.5rem;
+    text-align: center;
+    letter-spacing: 0.3px;
+    animation: messageBreath 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.spa-loading .loading-progress {
+    margin-top: 1.5rem;
+}
+
+.spa-loading .loading-progress-bar {
+    animation: loadingProgress 2s ease-in-out infinite;
+}
+
+@keyframes loadingProgress {
+    0% {
+        width: 0%;
+        transform: translateX(0);
+    }
+    50% {
+        width: 70%;
+    }
+    100% {
+        width: 100%;
+        transform: translateX(0);
+    }
+}
+
+/* SPA Error Recovery styling */
+.spa-error-recovery {
+    animation: errorFadeIn var(--spinner-transition-slow, 450ms) ease-out;
+}
+
+.spa-error-recovery .error-icon {
+    color: var(--color-primary, #8b7fff);
+    opacity: 0.8;
+}
+
+.spa-error-recovery h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.spa-error-recovery code {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+    font-size: 0.8rem;
+}
+
+#spa-retry-btn {
+    transition: all 200ms ease;
+}
+
+#spa-retry-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+#spa-retry-btn:active {
+    transform: translateY(0);
+}
+
+/* Screen reader only class for a11y announcements */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Navigation loading indicator in header */
+.nav-loading-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--spinner-color-primary, #8b7fff) 50%,
+        transparent 100%
+    );
+    z-index: 10001;
+    opacity: 0;
+    transform: translateX(-100%);
+    transition: opacity 150ms ease;
+    pointer-events: none;
+}
+
+.nav-loading-indicator.active {
+    opacity: 1;
+    animation: navLoadingSlide 1.5s ease-in-out infinite;
+}
+
+@keyframes navLoadingSlide {
+    0% {
+        transform: translateX(-100%);
+    }
+    50% {
+        transform: translateX(0%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Page content wrapper for transitions */
+#main-content {
+    position: relative;
+    min-height: calc(100vh - var(--header-height, 60px));
+}
+
+#main-content.transitioning {
+    overflow: hidden;
+}
+
+/* Prefetch link indicator (subtle) */
+a[data-prefetching]::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        var(--spinner-color-primary, #8b7fff) 0%,
+        var(--spinner-color-secondary, #ff7fcc) 100%
+    );
+    opacity: 0.5;
+    animation: prefetchPulse 1s ease-in-out infinite;
+}
+
+@keyframes prefetchPulse {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Reduced motion for SPA transitions */
+@media (prefers-reduced-motion: reduce) {
+    .spa-transition-exit,
+    .spa-transition-exit-active,
+    .spa-transition-enter,
+    .spa-transition-enter-active {
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    .nav-loading-indicator.active {
+        animation: none !important;
+        opacity: 1;
+        transform: none;
+        background: var(--spinner-color-primary, #8b7fff);
+    }
+
+    .spa-loading .loading-progress-bar {
+        animation: none !important;
+        width: 50%;
+    }
+
+    a[data-prefetching]::after {
+        animation: none !important;
+        opacity: 0.5;
     }
 }

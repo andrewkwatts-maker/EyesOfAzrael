@@ -3,19 +3,47 @@
  * Eyes of Azrael Project
  *
  * Features:
- * - Quick preview of entity data
+ * - Quick preview of entity data without leaving the page
  * - Shows key attributes and information
  * - Related entities navigation
  * - Smooth animations and transitions
+ * - Focus trap for accessibility
  * - Keyboard accessible (ESC to close)
- * - Mobile responsive
+ * - Mobile responsive with bottom sheet option
+ * - Swipe down to close on mobile
  */
 
 class EntityQuickViewModal {
-    constructor(firestore) {
+    /**
+     * @param {Object} firestore - Firestore instance
+     * @param {Object} options - Configuration options
+     */
+    constructor(firestore, options = {}) {
         this.db = firestore;
         this.currentEntity = null;
         this.overlay = null;
+        this.previousActiveElement = null;
+
+        // Configuration options
+        this.options = {
+            closeOnBackdropClick: options.closeOnBackdropClick !== false,
+            enableSwipeToClose: options.enableSwipeToClose !== false,
+            animationDuration: options.animationDuration || 300,
+            onClose: options.onClose || null,
+            onNavigate: options.onNavigate || null,
+            ...options
+        };
+
+        // Touch handling for swipe to close
+        this.touchStartY = 0;
+        this.touchCurrentY = 0;
+        this.isDragging = false;
+
+        // Bound handlers for cleanup
+        this.boundEscHandler = this.handleEscapeKey.bind(this);
+        this.boundTouchStart = this.handleTouchStart.bind(this);
+        this.boundTouchMove = this.handleTouchMove.bind(this);
+        this.boundTouchEnd = this.handleTouchEnd.bind(this);
     }
 
     /**
@@ -27,7 +55,10 @@ class EntityQuickViewModal {
     async open(entityId, collection, mythology) {
         console.log('[QuickView] Opening modal for:', { entityId, collection, mythology });
 
-        // Create modal structure first to ensure error handling works
+        // Store focused element for focus restoration
+        this.previousActiveElement = document.activeElement;
+
+        // Create modal structure first
         this.createModal();
 
         try {
@@ -37,9 +68,11 @@ class EntityQuickViewModal {
             // Render content
             this.renderContent();
 
+            // Setup all event handlers
+            this.setupEventListeners();
+
         } catch (error) {
             console.error('[QuickView] Error loading entity:', error);
-            // showError() is now safe to call since modal exists
             this.showError(error.message);
         }
     }
@@ -77,18 +110,33 @@ class EntityQuickViewModal {
         const existing = document.getElementById('quick-view-modal');
         if (existing) existing.remove();
 
+        // Detect mobile for bottom sheet behavior
+        const isMobile = window.innerWidth < 640;
+
         // Create modal overlay
         const overlay = document.createElement('div');
         overlay.id = 'quick-view-modal';
-        overlay.className = 'quick-view-overlay';
+        overlay.className = `quick-view-overlay${isMobile ? ' quick-view-mobile' : ''}`;
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-labelledby', 'quick-view-title');
+
         overlay.innerHTML = `
-            <div class="quick-view-content">
-                <button class="quick-view-close" aria-label="Close quick view">×</button>
+            <div class="quick-view-content" tabindex="-1">
+                ${isMobile ? '<div class="quick-view-drag-handle"><span></span></div>' : ''}
+                <button class="quick-view-close" aria-label="Close quick view" title="Close (ESC)">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
                 <div id="quick-view-body" class="quick-view-body">
-                    <div class="loading-content">
-                        <div class="spinner-ring"></div>
-                        <div class="spinner-ring"></div>
-                        <div class="spinner-ring"></div>
+                    <div class="quick-view-loading">
+                        <div class="quick-view-spinner">
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring"></div>
+                        </div>
                         <p>Loading entity...</p>
                     </div>
                 </div>
@@ -96,15 +144,188 @@ class EntityQuickViewModal {
         `;
 
         document.body.appendChild(overlay);
+        document.body.classList.add('modal-open');
         this.overlay = overlay;
-
-        // Wire up close handlers
-        this.attachCloseHandlers(overlay);
 
         // Animate in
         requestAnimationFrame(() => {
             overlay.classList.add('show');
         });
+    }
+
+    /**
+     * Setup all event listeners
+     */
+    setupEventListeners() {
+        if (!this.overlay) return;
+
+        const content = this.overlay.querySelector('.quick-view-content');
+        const closeBtn = this.overlay.querySelector('.quick-view-close');
+
+        // Close button
+        closeBtn?.addEventListener('click', () => this.close());
+
+        // Backdrop click
+        if (this.options.closeOnBackdropClick) {
+            this.overlay.addEventListener('click', (e) => {
+                if (e.target === this.overlay) {
+                    this.close();
+                }
+            });
+        }
+
+        // ESC key handler
+        document.addEventListener('keydown', this.boundEscHandler);
+
+        // Focus trap
+        this.setupFocusTrap();
+
+        // Swipe to close on mobile
+        if (this.options.enableSwipeToClose && this.overlay.classList.contains('quick-view-mobile')) {
+            this.setupSwipeToClose();
+        }
+
+        // Focus content
+        content?.focus();
+    }
+
+    /**
+     * Handle ESC key press
+     * @param {KeyboardEvent} e
+     */
+    handleEscapeKey(e) {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            this.close();
+        }
+    }
+
+    /**
+     * Setup focus trap for modal
+     */
+    setupFocusTrap() {
+        if (!this.overlay) return;
+
+        const content = this.overlay.querySelector('.quick-view-content');
+
+        const getFocusableElements = () => {
+            const selector = [
+                'button:not([disabled])',
+                '[href]',
+                'input:not([disabled]):not([type="hidden"])',
+                'select:not([disabled])',
+                'textarea:not([disabled])',
+                '[tabindex]:not([tabindex="-1"])',
+                '[role="button"]'
+            ].join(',');
+            return Array.from(content.querySelectorAll(selector)).filter(
+                el => el.offsetParent !== null
+            );
+        };
+
+        const handleTabKey = (e) => {
+            if (e.key !== 'Tab') return;
+
+            const focusableElements = getFocusableElements();
+            if (focusableElements.length === 0) return;
+
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (e.shiftKey) {
+                if (document.activeElement === firstElement) {
+                    e.preventDefault();
+                    lastElement.focus();
+                }
+            } else {
+                if (document.activeElement === lastElement) {
+                    e.preventDefault();
+                    firstElement.focus();
+                }
+            }
+        };
+
+        content.addEventListener('keydown', handleTabKey);
+        this.focusTrapHandler = handleTabKey;
+
+        // Focus first focusable element
+        const focusableElements = getFocusableElements();
+        if (focusableElements.length > 0) {
+            focusableElements[0].focus();
+        }
+    }
+
+    /**
+     * Setup swipe to close for mobile
+     */
+    setupSwipeToClose() {
+        const content = this.overlay.querySelector('.quick-view-content');
+        const dragHandle = this.overlay.querySelector('.quick-view-drag-handle');
+
+        if (!content || !dragHandle) return;
+
+        dragHandle.addEventListener('touchstart', this.boundTouchStart, { passive: true });
+        dragHandle.addEventListener('touchmove', this.boundTouchMove, { passive: false });
+        dragHandle.addEventListener('touchend', this.boundTouchEnd);
+    }
+
+    /**
+     * Handle touch start
+     * @param {TouchEvent} e
+     */
+    handleTouchStart(e) {
+        this.touchStartY = e.touches[0].clientY;
+        this.isDragging = true;
+
+        const content = this.overlay.querySelector('.quick-view-content');
+        if (content) {
+            content.style.transition = 'none';
+        }
+    }
+
+    /**
+     * Handle touch move
+     * @param {TouchEvent} e
+     */
+    handleTouchMove(e) {
+        if (!this.isDragging) return;
+
+        this.touchCurrentY = e.touches[0].clientY;
+        const deltaY = this.touchCurrentY - this.touchStartY;
+
+        // Only allow dragging down
+        if (deltaY > 0) {
+            e.preventDefault();
+            const content = this.overlay.querySelector('.quick-view-content');
+            if (content) {
+                content.style.transform = `translateY(${deltaY}px)`;
+                // Fade backdrop as user drags
+                this.overlay.style.backgroundColor = `rgba(0, 0, 0, ${0.6 * (1 - deltaY / 300)})`;
+            }
+        }
+    }
+
+    /**
+     * Handle touch end
+     */
+    handleTouchEnd() {
+        if (!this.isDragging) return;
+
+        const deltaY = this.touchCurrentY - this.touchStartY;
+        const content = this.overlay.querySelector('.quick-view-content');
+
+        if (content) {
+            content.style.transition = '';
+            content.style.transform = '';
+        }
+
+        this.overlay.style.backgroundColor = '';
+        this.isDragging = false;
+
+        // If dragged more than 100px, close the modal
+        if (deltaY > 100) {
+            this.close();
+        }
     }
 
     /**
@@ -123,6 +344,9 @@ class EntityQuickViewModal {
             ${this.renderActions(entity)}
         `;
 
+        // Wire up action button handlers
+        this.wireUpActionButtons();
+
         // Load related entities if they exist
         this.loadRelatedEntitiesAsync(entity);
     }
@@ -132,24 +356,39 @@ class EntityQuickViewModal {
      */
     renderHeader(entity) {
         const importance = entity.importance || 0;
-        const stars = importance > 0 ? '⭐'.repeat(Math.min(5, importance)) : '';
+        const stars = importance > 0 ? this.renderStars(Math.min(5, importance)) : '';
 
         return `
             <div class="quick-view-header">
-                <div class="entity-icon-large">${this.renderIcon(entity.icon)}</div>
-                <div class="entity-title-section">
-                    <h2 class="entity-title">${this.escapeHtml(entity.name || entity.title || 'Untitled')}</h2>
-                    <div class="entity-meta">
-                        <span class="meta-badge mythology">${this.escapeHtml(this.capitalize(entity.mythology))}</span>
-                        <span class="meta-badge type">${this.escapeHtml(this.getTypeLabel(entity.collection))}</span>
-                        ${stars ? `<span class="meta-badge importance">${stars}</span>` : ''}
+                <div class="quick-view-icon-container">
+                    ${this.renderIcon(entity.icon)}
+                </div>
+                <div class="quick-view-title-section">
+                    <h2 id="quick-view-title" class="quick-view-title">${this.escapeHtml(entity.name || entity.title || 'Untitled')}</h2>
+                    <div class="quick-view-meta">
+                        <span class="quick-view-badge quick-view-badge-mythology">${this.escapeHtml(this.capitalize(entity.mythology))}</span>
+                        <span class="quick-view-badge quick-view-badge-type">${this.escapeHtml(this.getTypeLabel(entity.collection))}</span>
+                        ${stars ? `<span class="quick-view-badge quick-view-badge-importance">${stars}</span>` : ''}
                     </div>
                     ${entity.linguistic?.originalName ? `
-                        <div class="entity-subtitle">${this.escapeHtml(entity.linguistic.originalName)}</div>
+                        <div class="quick-view-subtitle">${this.escapeHtml(entity.linguistic.originalName)}</div>
                     ` : ''}
                 </div>
             </div>
         `;
+    }
+
+    /**
+     * Render star icons for importance
+     * @param {number} count - Number of stars
+     * @returns {string} HTML string
+     */
+    renderStars(count) {
+        let stars = '';
+        for (let i = 0; i < count; i++) {
+            stars += '<svg class="star-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+        }
+        return stars;
     }
 
     /**
@@ -161,9 +400,9 @@ class EntityQuickViewModal {
         // Alternate names
         if (entity.alternateNames && entity.alternateNames.length > 0) {
             html += `
-                <div class="info-section">
+                <div class="quick-view-info-section">
                     <h3>Also Known As</h3>
-                    <p class="alternate-names">${entity.alternateNames.map(n => this.escapeHtml(n)).join(', ')}</p>
+                    <p class="quick-view-alt-names">${entity.alternateNames.map(n => this.escapeHtml(n)).join(', ')}</p>
                 </div>
             `;
         }
@@ -173,9 +412,9 @@ class EntityQuickViewModal {
         if (description) {
             const truncated = this.truncateText(description, 300);
             html += `
-                <div class="info-section">
+                <div class="quick-view-info-section">
                     <h3>Description</h3>
-                    <p class="description">${this.escapeHtml(truncated)}</p>
+                    <p class="quick-view-description">${this.escapeHtml(truncated)}</p>
                 </div>
             `;
         }
@@ -183,10 +422,10 @@ class EntityQuickViewModal {
         // Domains
         if (entity.domains && entity.domains.length > 0) {
             html += `
-                <div class="info-section">
+                <div class="quick-view-info-section">
                     <h3>Domains</h3>
-                    <div class="tag-list">
-                        ${entity.domains.map(d => `<span class="tag">${this.escapeHtml(d)}</span>`).join('')}
+                    <div class="quick-view-tags">
+                        ${entity.domains.map(d => `<span class="quick-view-tag">${this.escapeHtml(d)}</span>`).join('')}
                     </div>
                 </div>
             `;
@@ -195,10 +434,10 @@ class EntityQuickViewModal {
         // Symbols
         if (entity.symbols && entity.symbols.length > 0) {
             html += `
-                <div class="info-section">
+                <div class="quick-view-info-section">
                     <h3>Symbols</h3>
-                    <div class="tag-list">
-                        ${entity.symbols.map(s => `<span class="tag">${this.escapeHtml(s)}</span>`).join('')}
+                    <div class="quick-view-tags">
+                        ${entity.symbols.map(s => `<span class="quick-view-tag">${this.escapeHtml(s)}</span>`).join('')}
                     </div>
                 </div>
             `;
@@ -207,9 +446,9 @@ class EntityQuickViewModal {
         // Element (for deities)
         if (entity.element) {
             html += `
-                <div class="info-section">
+                <div class="quick-view-info-section quick-view-info-inline">
                     <h3>Element</h3>
-                    <p class="element">${this.escapeHtml(entity.element)}</p>
+                    <span class="quick-view-tag quick-view-tag-element">${this.escapeHtml(entity.element)}</span>
                 </div>
             `;
         }
@@ -217,9 +456,9 @@ class EntityQuickViewModal {
         // Gender (for deities)
         if (entity.gender) {
             html += `
-                <div class="info-section">
+                <div class="quick-view-info-section quick-view-info-inline">
                     <h3>Gender</h3>
-                    <p class="gender">${this.escapeHtml(entity.gender)}</p>
+                    <span class="quick-view-value">${this.escapeHtml(entity.gender)}</span>
                 </div>
             `;
         }
@@ -228,12 +467,12 @@ class EntityQuickViewModal {
         const relatedIds = this.getRelatedIds(entity);
         if (relatedIds.length > 0) {
             html += `
-                <div class="info-section">
+                <div class="quick-view-info-section">
                     <h3>Related Entities</h3>
-                    <div id="related-entities" class="related-grid">
-                        <div class="loading-small">
-                            <div class="spinner-ring"></div>
-                            <p>Loading related entities...</p>
+                    <div id="quick-view-related" class="quick-view-related-grid">
+                        <div class="quick-view-related-loading">
+                            <div class="spinner-ring spinner-ring-small"></div>
+                            <span>Loading...</span>
                         </div>
                     </div>
                 </div>
@@ -251,22 +490,43 @@ class EntityQuickViewModal {
         const fullPageUrl = this.getFullPageUrl(entity);
 
         return `
-            <div class="quick-view-actions">
-                <a href="${fullPageUrl}" class="btn-primary">
-                    View Full Page →
+            <footer class="quick-view-footer">
+                <a href="${fullPageUrl}" class="quick-view-btn quick-view-btn-primary" data-action="view-full">
+                    <span>View Full Page</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
                 </a>
-                <button class="btn-secondary" data-action="close">
+                <button class="quick-view-btn quick-view-btn-secondary" data-action="close">
                     Close
                 </button>
-            </div>
+            </footer>
         `;
+    }
+
+    /**
+     * Wire up action button handlers
+     */
+    wireUpActionButtons() {
+        const closeBtn = this.overlay?.querySelector('[data-action="close"]');
+        const viewFullBtn = this.overlay?.querySelector('[data-action="view-full"]');
+
+        closeBtn?.addEventListener('click', () => this.close());
+
+        viewFullBtn?.addEventListener('click', (e) => {
+            if (typeof this.options.onNavigate === 'function') {
+                e.preventDefault();
+                this.options.onNavigate(this.currentEntity);
+                this.close();
+            }
+        });
     }
 
     /**
      * Load related entities asynchronously
      */
     async loadRelatedEntitiesAsync(entity) {
-        const container = document.getElementById('related-entities');
+        const container = document.getElementById('quick-view-related');
         if (!container) return;
 
         const relatedIds = this.getRelatedIds(entity);
@@ -277,22 +537,20 @@ class EntityQuickViewModal {
             const entities = await this.loadMultipleEntities(relatedIds.slice(0, 6));
 
             if (entities.length === 0) {
-                container.innerHTML = '<p class="no-data">No related entities found</p>';
+                container.innerHTML = '<p class="quick-view-no-data">No related entities found</p>';
                 return;
             }
 
             // Render related entity cards
             container.innerHTML = entities.map(e => `
-                <div class="related-card"
+                <button class="quick-view-related-card"
                      data-entity-id="${e.id}"
                      data-collection="${e.collection}"
                      data-mythology="${e.mythology}"
-                     role="button"
-                     tabindex="0"
                      aria-label="View ${this.escapeHtml(e.name || e.title)}">
-                    <div class="related-icon">${this.renderIcon(e.icon)}</div>
-                    <div class="related-name">${this.escapeHtml(e.name || e.title || 'Untitled')}</div>
-                </div>
+                    <div class="quick-view-related-icon">${this.renderIcon(e.icon)}</div>
+                    <div class="quick-view-related-name">${this.escapeHtml(e.name || e.title || 'Untitled')}</div>
+                </button>
             `).join('');
 
             // Add click handlers to related cards
@@ -300,7 +558,7 @@ class EntityQuickViewModal {
 
         } catch (error) {
             console.error('[QuickView] Error loading related entities:', error);
-            container.innerHTML = '<p class="error-text">Error loading related entities</p>';
+            container.innerHTML = '<p class="quick-view-error-text">Error loading related entities</p>';
         }
     }
 
@@ -309,7 +567,7 @@ class EntityQuickViewModal {
      */
     async loadMultipleEntities(relatedIds) {
         const entities = [];
-        const collections = ['deities', 'heroes', 'creatures', 'cosmology', 'rituals', 'herbs', 'texts', 'symbols'];
+        const collections = ['deities', 'heroes', 'creatures', 'cosmology', 'rituals', 'herbs', 'texts', 'symbols', 'items', 'places'];
 
         for (const relatedId of relatedIds) {
             // Try to find entity across collections
@@ -327,7 +585,7 @@ class EntityQuickViewModal {
                         break;
                     }
                 } catch (error) {
-                    console.error(`[QuickView] Error loading from ${col}:`, error);
+                    // Continue to next collection
                 }
             }
         }
@@ -339,15 +597,13 @@ class EntityQuickViewModal {
      * Attach handlers to related entity cards
      */
     attachRelatedCardHandlers(container) {
-        const cards = container.querySelectorAll('.related-card');
+        const cards = container.querySelectorAll('.quick-view-related-card');
 
         cards.forEach(card => {
-            // Click handler
             card.addEventListener('click', () => {
                 this.openRelatedEntity(card);
             });
 
-            // Keyboard handler
             card.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
@@ -370,86 +626,7 @@ class EntityQuickViewModal {
             this.close();
             setTimeout(() => {
                 this.open(entityId, collection, mythology);
-            }, 100);
-        }
-    }
-
-    /**
-     * Attach close handlers
-     */
-    attachCloseHandlers(overlay) {
-        const closeBtn = overlay.querySelector('.quick-view-close');
-        closeBtn.addEventListener('click', () => this.close());
-
-        const actionBtn = overlay.querySelector('[data-action="close"]');
-        if (actionBtn) {
-            actionBtn.addEventListener('click', () => this.close());
-        }
-
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                this.close();
-            }
-        });
-
-        const escHandler = (e) => {
-            if (e.key === 'Escape') {
-                this.close();
-            }
-        };
-        document.addEventListener('keydown', escHandler);
-        overlay._escHandler = escHandler;
-
-        this.setupFocusTrap(overlay);
-    }
-
-    /**
-     * Setup focus trap for modal
-     */
-    setupFocusTrap(overlay) {
-        const getFocusableElements = () => {
-            const selector = [
-                'button',
-                '[href]',
-                'input',
-                'select',
-                'textarea',
-                '[tabindex]:not([tabindex="-1"])',
-                '[role="button"]'
-            ].join(',');
-            return Array.from(overlay.querySelectorAll(selector)).filter(
-                el => !el.hasAttribute('disabled') && el.offsetParent !== null
-            );
-        };
-
-        const handleTabKey = (e) => {
-            const focusableElements = getFocusableElements();
-            if (focusableElements.length === 0) return;
-
-            const firstElement = focusableElements[0];
-            const lastElement = focusableElements[focusableElements.length - 1];
-
-            if (e.key === 'Tab') {
-                if (e.shiftKey) {
-                    if (document.activeElement === firstElement) {
-                        e.preventDefault();
-                        lastElement.focus();
-                    }
-                } else {
-                    if (document.activeElement === lastElement) {
-                        e.preventDefault();
-                        firstElement.focus();
-                    }
-                }
-            }
-        };
-
-        overlay.addEventListener('keydown', handleTabKey);
-        overlay._focusTrapHandler = handleTabKey;
-
-        const focusableElements = getFocusableElements();
-        if (focusableElements.length > 0) {
-            focusableElements[0].focus();
+            }, this.options.animationDuration + 50);
         }
     }
 
@@ -460,47 +637,60 @@ class EntityQuickViewModal {
         const modal = document.getElementById('quick-view-modal');
         if (!modal) return;
 
-        if (modal._escHandler) {
-            document.removeEventListener('keydown', modal._escHandler);
+        // Cleanup event listeners
+        document.removeEventListener('keydown', this.boundEscHandler);
+
+        // Cleanup touch listeners if mobile
+        const dragHandle = modal.querySelector('.quick-view-drag-handle');
+        if (dragHandle) {
+            dragHandle.removeEventListener('touchstart', this.boundTouchStart);
+            dragHandle.removeEventListener('touchmove', this.boundTouchMove);
+            dragHandle.removeEventListener('touchend', this.boundTouchEnd);
         }
 
-        if (modal._focusTrapHandler) {
-            modal.removeEventListener('keydown', modal._focusTrapHandler);
-        }
-
+        // Animate out
         modal.classList.remove('show');
+
         setTimeout(() => {
             modal.remove();
+            document.body.classList.remove('modal-open');
             this.overlay = null;
-        }, 300);
+            this.currentEntity = null;
+
+            // Return focus to previous element
+            if (this.previousActiveElement && this.previousActiveElement.focus) {
+                this.previousActiveElement.focus();
+            }
+
+            // Call onClose callback
+            if (typeof this.options.onClose === 'function') {
+                this.options.onClose();
+            }
+        }, this.options.animationDuration);
     }
 
     /**
      * Show error state
      */
     showError(message) {
-        const modal = document.getElementById('quick-view-modal');
-        if (!modal) {
-            console.error('[QuickView] Cannot show error - modal not found:', message);
-            // Create modal if it doesn't exist (defensive programming)
-            this.createModal();
-            // Try again after creating modal
-            setTimeout(() => this.showError(message), 50);
-            return;
-        }
-
-        const body = modal.querySelector('.quick-view-body');
+        const body = document.getElementById('quick-view-body');
         if (!body) {
             console.error('[QuickView] Cannot show error - modal body not found:', message);
             return;
         }
 
         body.innerHTML = `
-            <div class="error-state">
-                <div class="error-icon">⚠️</div>
+            <div class="quick-view-error">
+                <div class="quick-view-error-icon">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
                 <h2>Error</h2>
-                <p class="error-message">${this.escapeHtml(message)}</p>
-                <button class="btn-primary" onclick="this.closest('.quick-view-overlay').remove()">
+                <p class="quick-view-error-message">${this.escapeHtml(message)}</p>
+                <button class="quick-view-btn quick-view-btn-primary" onclick="document.getElementById('quick-view-modal').remove(); document.body.classList.remove('modal-open');">
                     Close
                 </button>
             </div>
@@ -558,7 +748,10 @@ class EntityQuickViewModal {
             rituals: 'Ritual',
             herbs: 'Herb',
             texts: 'Text',
-            symbols: 'Symbol'
+            symbols: 'Symbol',
+            items: 'Item',
+            places: 'Place',
+            archetypes: 'Archetype'
         };
 
         return labels[collection] || this.capitalize(collection);
@@ -589,18 +782,18 @@ class EntityQuickViewModal {
      */
     renderIcon(icon) {
         if (!icon) {
-            return '<span class="entity-icon-fallback">📖</span>';
+            return '<span class="quick-view-icon-fallback"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span>';
         }
 
         // Check if it's inline SVG (starts with <svg)
         if (typeof icon === 'string') {
             const iconTrimmed = icon.trim();
             if (iconTrimmed.toLowerCase().startsWith('<svg')) {
-                // Render inline SVG directly (SVG is already safe markup)
-                return `<span class="entity-icon-svg">${icon}</span>`;
+                // Render inline SVG directly
+                return `<span class="quick-view-icon-svg">${icon}</span>`;
             }
 
-            // Check if it's a URL (http, https, or relative path, or image extension)
+            // Check if it's a URL
             const isUrl = iconTrimmed.startsWith('http://') ||
                           iconTrimmed.startsWith('https://') ||
                           iconTrimmed.startsWith('/') ||
@@ -608,12 +801,12 @@ class EntityQuickViewModal {
                           /\.(svg|png|jpg|jpeg|webp|gif)$/i.test(iconTrimmed);
 
             if (isUrl) {
-                return `<img src="${this.escapeHtml(iconTrimmed)}" alt="" class="entity-icon-img" loading="lazy" />`;
+                return `<img src="${this.escapeHtml(iconTrimmed)}" alt="" class="quick-view-icon-img" loading="lazy" />`;
             }
         }
 
         // Otherwise, treat as emoji or text (escaped)
-        return `<span class="entity-icon-text">${this.escapeHtml(icon)}</span>`;
+        return `<span class="quick-view-icon-text">${this.escapeHtml(icon)}</span>`;
     }
 
     /**
@@ -630,3 +823,8 @@ class EntityQuickViewModal {
 
 // Make globally available
 window.EntityQuickViewModal = EntityQuickViewModal;
+
+// Export for modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = EntityQuickViewModal;
+}

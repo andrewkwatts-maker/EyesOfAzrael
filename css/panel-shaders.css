@@ -1,28 +1,232 @@
 /**
- * Panel-Specific Shader Integration
- * Applies shader themes to entity panels, content areas, and interactive elements
+ * Panel Shader Integration CSS
+ * Mythology-specific gradient backgrounds, animated border glows, and glass effects
+ *
+ * Features:
+ * - Enhanced glassmorphism with layered effects
+ * - Subtle gradient backgrounds per mythology
+ * - Animated border glow on hover with pulse options
+ * - Deep backdrop blur for glass effect
+ * - Theme-aware color integration
+ * - Sacred geometry patterns and overlays
+ * - Smooth state transitions with easing
+ * - Side-by-side panel shader support
+ * - Enhanced loading and state indicators
+ *
+ * Last updated: 2026-01-07
  */
 
-/* Entity panels with shader-aware styling */
+/* ============================================
+   CSS CUSTOM PROPERTIES - Shader Design Tokens
+   ============================================ */
+
+:root {
+    /* Shader Animation Speeds */
+    --shader-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --shader-transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --shader-glow-speed: 2s;
+    --shader-pulse-speed: 3s;
+    --shader-shimmer-speed: 2.5s;
+
+    /* Glow Intensities */
+    --glow-subtle: 0.15;
+    --glow-medium: 0.3;
+    --glow-strong: 0.5;
+    --glow-intense: 0.7;
+
+    /* Backdrop Blur Levels */
+    --blur-sm: 8px;
+    --blur-md: 12px;
+    --blur-lg: 20px;
+    --blur-xl: 30px;
+    --blur-2xl: 40px;
+
+    /* Glass Saturation */
+    --glass-saturation: 180%;
+    --glass-saturation-high: 200%;
+}
+
+/* ============================================
+   MYTHOLOGY COLOR DEFINITIONS
+   ============================================ */
+
+:root {
+    /* Greek - Golden/Amber */
+    --mythos-greek-primary: #FFD700;
+    --mythos-greek-secondary: #DAA520;
+    --mythos-greek-accent: #FFA500;
+    --mythos-greek-glow: rgba(255, 215, 0, var(--glow-medium));
+    --mythos-greek-gradient: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(218, 165, 32, 0.05));
+
+    /* Norse - Ice Blue */
+    --mythos-norse-primary: #6495ED;
+    --mythos-norse-secondary: #4169E1;
+    --mythos-norse-accent: #87CEEB;
+    --mythos-norse-glow: rgba(100, 149, 237, var(--glow-medium));
+    --mythos-norse-gradient: linear-gradient(135deg, rgba(100, 149, 237, 0.1), rgba(65, 105, 225, 0.05));
+
+    /* Egyptian - Desert Gold/Bronze */
+    --mythos-egyptian-primary: #CD853F;
+    --mythos-egyptian-secondary: #B8860B;
+    --mythos-egyptian-accent: #DAA520;
+    --mythos-egyptian-glow: rgba(205, 133, 63, var(--glow-medium));
+    --mythos-egyptian-gradient: linear-gradient(135deg, rgba(205, 133, 63, 0.1), rgba(184, 134, 11, 0.05));
+
+    /* Hindu - Saffron/Orange */
+    --mythos-hindu-primary: #FF7F50;
+    --mythos-hindu-secondary: #FF6347;
+    --mythos-hindu-accent: #FF4500;
+    --mythos-hindu-glow: rgba(255, 127, 80, var(--glow-medium));
+    --mythos-hindu-gradient: linear-gradient(135deg, rgba(255, 127, 80, 0.1), rgba(255, 99, 71, 0.05));
+
+    /* Buddhist - Pure White/Silver */
+    --mythos-buddhist-primary: #F5F5F5;
+    --mythos-buddhist-secondary: #C0C0C0;
+    --mythos-buddhist-accent: #E8E8E8;
+    --mythos-buddhist-glow: rgba(245, 245, 245, var(--glow-medium));
+    --mythos-buddhist-gradient: linear-gradient(135deg, rgba(245, 245, 245, 0.08), rgba(192, 192, 192, 0.04));
+
+    /* Christian - Divine Gold/Light */
+    --mythos-christian-primary: #FFFACD;
+    --mythos-christian-secondary: #FFD700;
+    --mythos-christian-accent: #FFF8DC;
+    --mythos-christian-glow: rgba(255, 250, 205, var(--glow-medium));
+    --mythos-christian-gradient: linear-gradient(135deg, rgba(255, 250, 205, 0.08), rgba(255, 215, 0, 0.04));
+
+    /* Celtic - Forest Green */
+    --mythos-celtic-primary: #228B22;
+    --mythos-celtic-secondary: #006400;
+    --mythos-celtic-accent: #32CD32;
+    --mythos-celtic-glow: rgba(34, 139, 34, var(--glow-medium));
+    --mythos-celtic-gradient: linear-gradient(135deg, rgba(34, 139, 34, 0.1), rgba(0, 100, 0, 0.05));
+
+    /* Roman - Imperial Crimson */
+    --mythos-roman-primary: #DC143C;
+    --mythos-roman-secondary: #8B0000;
+    --mythos-roman-accent: #B22222;
+    --mythos-roman-glow: rgba(220, 20, 60, var(--glow-medium));
+    --mythos-roman-gradient: linear-gradient(135deg, rgba(220, 20, 60, 0.1), rgba(139, 0, 0, 0.05));
+
+    /* Aztec - Sun Orange */
+    --mythos-aztec-primary: #FF8C00;
+    --mythos-aztec-secondary: #D2691E;
+    --mythos-aztec-accent: #FF7F00;
+    --mythos-aztec-glow: rgba(255, 140, 0, var(--glow-medium));
+    --mythos-aztec-gradient: linear-gradient(135deg, rgba(255, 140, 0, 0.1), rgba(210, 105, 30, 0.05));
+
+    /* Chinese - Imperial Red */
+    --mythos-chinese-primary: #FF0000;
+    --mythos-chinese-secondary: #DC143C;
+    --mythos-chinese-accent: #CC0000;
+    --mythos-chinese-glow: rgba(255, 0, 0, var(--glow-medium));
+    --mythos-chinese-gradient: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(220, 20, 60, 0.05));
+
+    /* Japanese - Cherry Blossom */
+    --mythos-japanese-primary: #FFB7C5;
+    --mythos-japanese-secondary: #FF69B4;
+    --mythos-japanese-accent: #FFC0CB;
+    --mythos-japanese-glow: rgba(255, 183, 197, var(--glow-medium));
+    --mythos-japanese-gradient: linear-gradient(135deg, rgba(255, 183, 197, 0.1), rgba(255, 105, 180, 0.05));
+
+    /* Persian - Royal Purple */
+    --mythos-persian-primary: #800080;
+    --mythos-persian-secondary: #4B0082;
+    --mythos-persian-accent: #9932CC;
+    --mythos-persian-glow: rgba(128, 0, 128, var(--glow-medium));
+    --mythos-persian-gradient: linear-gradient(135deg, rgba(128, 0, 128, 0.1), rgba(75, 0, 130, 0.05));
+
+    /* Sumerian - Ancient Bronze */
+    --mythos-sumerian-primary: #CD7F32;
+    --mythos-sumerian-secondary: #8B4513;
+    --mythos-sumerian-accent: #B87333;
+    --mythos-sumerian-glow: rgba(205, 127, 50, var(--glow-medium));
+    --mythos-sumerian-gradient: linear-gradient(135deg, rgba(205, 127, 50, 0.1), rgba(139, 69, 19, 0.05));
+
+    /* Mayan - Jade Green */
+    --mythos-mayan-primary: #00A86B;
+    --mythos-mayan-secondary: #008080;
+    --mythos-mayan-accent: #20B2AA;
+    --mythos-mayan-glow: rgba(0, 168, 107, var(--glow-medium));
+    --mythos-mayan-gradient: linear-gradient(135deg, rgba(0, 168, 107, 0.1), rgba(0, 128, 128, 0.05));
+
+    /* Jewish - Deep Blue */
+    --mythos-jewish-primary: #003399;
+    --mythos-jewish-secondary: #000080;
+    --mythos-jewish-accent: #0047AB;
+    --mythos-jewish-glow: rgba(0, 51, 153, var(--glow-medium));
+    --mythos-jewish-gradient: linear-gradient(135deg, rgba(0, 51, 153, 0.1), rgba(0, 0, 128, 0.05));
+
+    /* Islamic - Emerald Green */
+    --mythos-islamic-primary: #50C878;
+    --mythos-islamic-secondary: #2E8B57;
+    --mythos-islamic-accent: #3CB371;
+    --mythos-islamic-glow: rgba(80, 200, 120, var(--glow-medium));
+    --mythos-islamic-gradient: linear-gradient(135deg, rgba(80, 200, 120, 0.1), rgba(46, 139, 87, 0.05));
+
+    /* Tarot - Mystic Purple */
+    --mythos-tarot-primary: #9370DB;
+    --mythos-tarot-secondary: #8A2BE2;
+    --mythos-tarot-accent: #BA55D3;
+    --mythos-tarot-glow: rgba(147, 112, 219, var(--glow-medium));
+    --mythos-tarot-gradient: linear-gradient(135deg, rgba(147, 112, 219, 0.1), rgba(138, 43, 226, 0.05));
+}
+
+/* ============================================
+   BASE SHADER PANEL STYLES - Enhanced Glass
+   ============================================ */
+
 .entity-panel,
 .detail-panel,
 .mythology-card,
-.search-result-item {
+.search-result-item,
+.shader-panel {
     position: relative;
-    background: rgba(26, 31, 58, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(139, 127, 255, 0.3);
+
+    /* Enhanced Glassmorphism */
+    background: rgba(26, 31, 58, 0.8);
+    backdrop-filter: blur(var(--blur-lg)) saturate(var(--glass-saturation));
+    -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(var(--glass-saturation));
+
+    /* Layered border effect */
+    border: 1px solid rgba(139, 127, 255, 0.25);
     border-radius: var(--radius-xl, 1rem);
     padding: var(--spacing-lg, 1.5rem);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Multi-layer shadow for depth */
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+
+    transition: all var(--shader-transition);
     overflow: hidden;
 }
 
-/* Subtle shader-aware gradient overlay */
+/* Inner highlight line at top */
 .entity-panel::before,
-.detail-panel::before {
+.detail-panel::before,
+.shader-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.12) 25%,
+        rgba(255, 255, 255, 0.12) 75%,
+        transparent 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Subtle Gradient Overlay */
+.entity-panel::after,
+.detail-panel::after,
+.shader-panel::after {
     content: '';
     position: absolute;
     top: 0;
@@ -31,106 +235,592 @@
     bottom: 0;
     background: linear-gradient(
         135deg,
-        rgba(102, 126, 234, 0.05) 0%,
-        rgba(118, 75, 162, 0.05) 100%
+        rgba(102, 126, 234, 0.04) 0%,
+        rgba(118, 75, 162, 0.04) 100%
     );
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--shader-transition);
     z-index: 0;
 }
 
-.entity-panel:hover::before,
-.detail-panel:hover::before {
+.entity-panel:hover::after,
+.detail-panel:hover::after,
+.shader-panel:hover::after {
     opacity: 1;
 }
 
-/* Panel content should be above overlay */
-.entity-panel > *,
-.detail-panel > * {
+/* Content Z-Index */
+.entity-panel > *:not(::before):not(::after),
+.detail-panel > *:not(::before):not(::after),
+.shader-panel > *:not(::before):not(::after) {
     position: relative;
     z-index: 1;
 }
 
-/* Hover effects that complement shaders */
+/* ============================================
+   ANIMATED BORDER GLOW ON HOVER
+   ============================================ */
+
 .entity-panel:hover,
-.mythology-card:hover {
-    background: rgba(26, 31, 58, 0.92);
-    border-color: rgba(139, 127, 255, 0.6);
+.mythology-card:hover,
+.shader-panel:hover {
+    background: rgba(26, 31, 58, 0.88);
+    border-color: rgba(139, 127, 255, 0.5);
     box-shadow:
-        0 12px 48px rgba(102, 126, 234, 0.3),
-        0 0 0 1px rgba(139, 127, 255, 0.2);
+        0 16px 48px rgba(102, 126, 234, 0.2),
+        0 0 0 1px rgba(139, 127, 255, 0.15),
+        0 0 40px rgba(102, 126, 234, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
     transform: translateY(-4px);
 }
 
-/* Active/Selected state */
+/* Active/Selected State */
 .entity-panel.active,
-.mythology-card.active {
-    background: rgba(26, 31, 58, 0.95);
+.mythology-card.active,
+.shader-panel.active {
+    background: rgba(26, 31, 58, 0.92);
     border-color: var(--color-primary, #667eea);
     box-shadow:
         0 0 0 2px var(--color-primary, #667eea),
-        0 16px 64px rgba(102, 126, 234, 0.5);
+        0 20px 60px rgba(102, 126, 234, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Theme-specific mythology cards */
-.mythology-card[data-mythology="greek"] {
-    border-left: 4px solid rgba(255, 215, 0, 0.7);
+/* Focus State for Accessibility */
+.entity-panel:focus-visible,
+.shader-panel:focus-visible {
+    outline: none;
+    border-color: var(--color-primary, #667eea);
+    box-shadow:
+        0 0 0 3px rgba(102, 126, 234, 0.4),
+        0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
-.mythology-card[data-mythology="norse"] {
-    border-left: 4px solid rgba(100, 149, 237, 0.7);
+/* ============================================
+   MYTHOLOGY-SPECIFIC PANEL STYLING
+   ============================================ */
+
+/* Greek Mythology */
+.mythology-card[data-mythology="greek"],
+.entity-panel[data-mythology="greek"],
+.shader-panel[data-mythology="greek"] {
+    --entity-color: var(--mythos-greek-primary);
+    --entity-glow: var(--mythos-greek-glow);
+    border-left: 4px solid var(--mythos-greek-primary);
 }
 
-.mythology-card[data-mythology="egyptian"] {
-    border-left: 4px solid rgba(218, 165, 32, 0.7);
+.mythology-card[data-mythology="greek"]::after,
+.entity-panel[data-mythology="greek"]::after {
+    background: var(--mythos-greek-gradient);
 }
 
-.mythology-card[data-mythology="hindu"] {
-    border-left: 4px solid rgba(255, 99, 71, 0.7);
+.mythology-card[data-mythology="greek"]:hover,
+.entity-panel[data-mythology="greek"]:hover {
+    border-color: var(--mythos-greek-primary);
+    box-shadow:
+        0 16px 48px rgba(255, 215, 0, 0.15),
+        0 0 40px var(--mythos-greek-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-.mythology-card[data-mythology="buddhist"] {
-    border-left: 4px solid rgba(255, 255, 255, 0.7);
+/* Norse Mythology */
+.mythology-card[data-mythology="norse"],
+.entity-panel[data-mythology="norse"],
+.shader-panel[data-mythology="norse"] {
+    --entity-color: var(--mythos-norse-primary);
+    --entity-glow: var(--mythos-norse-glow);
+    border-left: 4px solid var(--mythos-norse-primary);
 }
 
-.mythology-card[data-mythology="christian"] {
-    border-left: 4px solid rgba(255, 255, 224, 0.7);
+.mythology-card[data-mythology="norse"]::after,
+.entity-panel[data-mythology="norse"]::after {
+    background: var(--mythos-norse-gradient);
 }
 
-.mythology-card[data-mythology="celtic"] {
-    border-left: 4px solid rgba(34, 139, 34, 0.7);
+.mythology-card[data-mythology="norse"]:hover,
+.entity-panel[data-mythology="norse"]:hover {
+    border-color: var(--mythos-norse-primary);
+    box-shadow:
+        0 16px 48px rgba(100, 149, 237, 0.15),
+        0 0 40px var(--mythos-norse-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-.mythology-card[data-mythology="roman"] {
-    border-left: 4px solid rgba(220, 20, 60, 0.7);
+/* Egyptian Mythology */
+.mythology-card[data-mythology="egyptian"],
+.entity-panel[data-mythology="egyptian"],
+.shader-panel[data-mythology="egyptian"] {
+    --entity-color: var(--mythos-egyptian-primary);
+    --entity-glow: var(--mythos-egyptian-glow);
+    border-left: 4px solid var(--mythos-egyptian-primary);
 }
 
-.mythology-card[data-mythology="aztec"] {
-    border-left: 4px solid rgba(255, 140, 0, 0.7);
+.mythology-card[data-mythology="egyptian"]::after,
+.entity-panel[data-mythology="egyptian"]::after {
+    background: var(--mythos-egyptian-gradient);
 }
 
-.mythology-card[data-mythology="chinese"] {
-    border-left: 4px solid rgba(255, 0, 0, 0.7);
+.mythology-card[data-mythology="egyptian"]:hover,
+.entity-panel[data-mythology="egyptian"]:hover {
+    border-color: var(--mythos-egyptian-primary);
+    box-shadow:
+        0 16px 48px rgba(205, 133, 63, 0.15),
+        0 0 40px var(--mythos-egyptian-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-.mythology-card[data-mythology="persian"] {
-    border-left: 4px solid rgba(128, 0, 128, 0.7);
+/* Hindu Mythology */
+.mythology-card[data-mythology="hindu"],
+.entity-panel[data-mythology="hindu"],
+.shader-panel[data-mythology="hindu"] {
+    --entity-color: var(--mythos-hindu-primary);
+    --entity-glow: var(--mythos-hindu-glow);
+    border-left: 4px solid var(--mythos-hindu-primary);
 }
 
-/* Panel headers with shader complementary styling */
+.mythology-card[data-mythology="hindu"]::after,
+.entity-panel[data-mythology="hindu"]::after {
+    background: var(--mythos-hindu-gradient);
+}
+
+.mythology-card[data-mythology="hindu"]:hover,
+.entity-panel[data-mythology="hindu"]:hover {
+    border-color: var(--mythos-hindu-primary);
+    box-shadow:
+        0 16px 48px rgba(255, 127, 80, 0.15),
+        0 0 40px var(--mythos-hindu-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Buddhist */
+.mythology-card[data-mythology="buddhist"],
+.entity-panel[data-mythology="buddhist"],
+.shader-panel[data-mythology="buddhist"] {
+    --entity-color: var(--mythos-buddhist-primary);
+    --entity-glow: var(--mythos-buddhist-glow);
+    border-left: 4px solid var(--mythos-buddhist-secondary);
+}
+
+.mythology-card[data-mythology="buddhist"]::after,
+.entity-panel[data-mythology="buddhist"]::after {
+    background: var(--mythos-buddhist-gradient);
+}
+
+.mythology-card[data-mythology="buddhist"]:hover,
+.entity-panel[data-mythology="buddhist"]:hover {
+    border-color: var(--mythos-buddhist-secondary);
+    box-shadow:
+        0 16px 48px rgba(245, 245, 245, 0.1),
+        0 0 40px var(--mythos-buddhist-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Christian */
+.mythology-card[data-mythology="christian"],
+.entity-panel[data-mythology="christian"],
+.shader-panel[data-mythology="christian"] {
+    --entity-color: var(--mythos-christian-primary);
+    --entity-glow: var(--mythos-christian-glow);
+    border-left: 4px solid var(--mythos-christian-secondary);
+}
+
+.mythology-card[data-mythology="christian"]::after,
+.entity-panel[data-mythology="christian"]::after {
+    background: var(--mythos-christian-gradient);
+}
+
+.mythology-card[data-mythology="christian"]:hover,
+.entity-panel[data-mythology="christian"]:hover {
+    border-color: var(--mythos-christian-secondary);
+    box-shadow:
+        0 16px 48px rgba(255, 250, 205, 0.1),
+        0 0 40px var(--mythos-christian-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Celtic Mythology */
+.mythology-card[data-mythology="celtic"],
+.entity-panel[data-mythology="celtic"],
+.shader-panel[data-mythology="celtic"] {
+    --entity-color: var(--mythos-celtic-primary);
+    --entity-glow: var(--mythos-celtic-glow);
+    border-left: 4px solid var(--mythos-celtic-primary);
+}
+
+.mythology-card[data-mythology="celtic"]::after,
+.entity-panel[data-mythology="celtic"]::after {
+    background: var(--mythos-celtic-gradient);
+}
+
+.mythology-card[data-mythology="celtic"]:hover,
+.entity-panel[data-mythology="celtic"]:hover {
+    border-color: var(--mythos-celtic-primary);
+    box-shadow:
+        0 16px 48px rgba(34, 139, 34, 0.15),
+        0 0 40px var(--mythos-celtic-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Roman Mythology */
+.mythology-card[data-mythology="roman"],
+.entity-panel[data-mythology="roman"],
+.shader-panel[data-mythology="roman"] {
+    --entity-color: var(--mythos-roman-primary);
+    --entity-glow: var(--mythos-roman-glow);
+    border-left: 4px solid var(--mythos-roman-primary);
+}
+
+.mythology-card[data-mythology="roman"]::after,
+.entity-panel[data-mythology="roman"]::after {
+    background: var(--mythos-roman-gradient);
+}
+
+.mythology-card[data-mythology="roman"]:hover,
+.entity-panel[data-mythology="roman"]:hover {
+    border-color: var(--mythos-roman-primary);
+    box-shadow:
+        0 16px 48px rgba(220, 20, 60, 0.15),
+        0 0 40px var(--mythos-roman-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Aztec Mythology */
+.mythology-card[data-mythology="aztec"],
+.entity-panel[data-mythology="aztec"],
+.shader-panel[data-mythology="aztec"] {
+    --entity-color: var(--mythos-aztec-primary);
+    --entity-glow: var(--mythos-aztec-glow);
+    border-left: 4px solid var(--mythos-aztec-primary);
+}
+
+.mythology-card[data-mythology="aztec"]::after,
+.entity-panel[data-mythology="aztec"]::after {
+    background: var(--mythos-aztec-gradient);
+}
+
+.mythology-card[data-mythology="aztec"]:hover,
+.entity-panel[data-mythology="aztec"]:hover {
+    border-color: var(--mythos-aztec-primary);
+    box-shadow:
+        0 16px 48px rgba(255, 140, 0, 0.15),
+        0 0 40px var(--mythos-aztec-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Chinese Mythology */
+.mythology-card[data-mythology="chinese"],
+.entity-panel[data-mythology="chinese"],
+.shader-panel[data-mythology="chinese"] {
+    --entity-color: var(--mythos-chinese-primary);
+    --entity-glow: var(--mythos-chinese-glow);
+    border-left: 4px solid var(--mythos-chinese-primary);
+}
+
+.mythology-card[data-mythology="chinese"]::after,
+.entity-panel[data-mythology="chinese"]::after {
+    background: var(--mythos-chinese-gradient);
+}
+
+.mythology-card[data-mythology="chinese"]:hover,
+.entity-panel[data-mythology="chinese"]:hover {
+    border-color: var(--mythos-chinese-primary);
+    box-shadow:
+        0 16px 48px rgba(255, 0, 0, 0.15),
+        0 0 40px var(--mythos-chinese-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Japanese Mythology */
+.mythology-card[data-mythology="japanese"],
+.entity-panel[data-mythology="japanese"],
+.shader-panel[data-mythology="japanese"] {
+    --entity-color: var(--mythos-japanese-primary);
+    --entity-glow: var(--mythos-japanese-glow);
+    border-left: 4px solid var(--mythos-japanese-primary);
+}
+
+.mythology-card[data-mythology="japanese"]::after,
+.entity-panel[data-mythology="japanese"]::after {
+    background: var(--mythos-japanese-gradient);
+}
+
+.mythology-card[data-mythology="japanese"]:hover,
+.entity-panel[data-mythology="japanese"]:hover {
+    border-color: var(--mythos-japanese-primary);
+    box-shadow:
+        0 16px 48px rgba(255, 183, 197, 0.15),
+        0 0 40px var(--mythos-japanese-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Persian Mythology */
+.mythology-card[data-mythology="persian"],
+.entity-panel[data-mythology="persian"],
+.shader-panel[data-mythology="persian"] {
+    --entity-color: var(--mythos-persian-primary);
+    --entity-glow: var(--mythos-persian-glow);
+    border-left: 4px solid var(--mythos-persian-primary);
+}
+
+.mythology-card[data-mythology="persian"]::after,
+.entity-panel[data-mythology="persian"]::after {
+    background: var(--mythos-persian-gradient);
+}
+
+.mythology-card[data-mythology="persian"]:hover,
+.entity-panel[data-mythology="persian"]:hover {
+    border-color: var(--mythos-persian-primary);
+    box-shadow:
+        0 16px 48px rgba(128, 0, 128, 0.15),
+        0 0 40px var(--mythos-persian-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Sumerian Mythology */
+.mythology-card[data-mythology="sumerian"],
+.entity-panel[data-mythology="sumerian"],
+.shader-panel[data-mythology="sumerian"] {
+    --entity-color: var(--mythos-sumerian-primary);
+    --entity-glow: var(--mythos-sumerian-glow);
+    border-left: 4px solid var(--mythos-sumerian-primary);
+}
+
+.mythology-card[data-mythology="sumerian"]::after,
+.entity-panel[data-mythology="sumerian"]::after {
+    background: var(--mythos-sumerian-gradient);
+}
+
+.mythology-card[data-mythology="sumerian"]:hover,
+.entity-panel[data-mythology="sumerian"]:hover {
+    border-color: var(--mythos-sumerian-primary);
+    box-shadow:
+        0 16px 48px rgba(205, 127, 50, 0.15),
+        0 0 40px var(--mythos-sumerian-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Mayan Mythology */
+.mythology-card[data-mythology="mayan"],
+.entity-panel[data-mythology="mayan"],
+.shader-panel[data-mythology="mayan"] {
+    --entity-color: var(--mythos-mayan-primary);
+    --entity-glow: var(--mythos-mayan-glow);
+    border-left: 4px solid var(--mythos-mayan-primary);
+}
+
+.mythology-card[data-mythology="mayan"]::after,
+.entity-panel[data-mythology="mayan"]::after {
+    background: var(--mythos-mayan-gradient);
+}
+
+.mythology-card[data-mythology="mayan"]:hover,
+.entity-panel[data-mythology="mayan"]:hover {
+    border-color: var(--mythos-mayan-primary);
+    box-shadow:
+        0 16px 48px rgba(0, 168, 107, 0.15),
+        0 0 40px var(--mythos-mayan-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Jewish */
+.mythology-card[data-mythology="jewish"],
+.entity-panel[data-mythology="jewish"],
+.shader-panel[data-mythology="jewish"] {
+    --entity-color: var(--mythos-jewish-primary);
+    --entity-glow: var(--mythos-jewish-glow);
+    border-left: 4px solid var(--mythos-jewish-primary);
+}
+
+.mythology-card[data-mythology="jewish"]::after,
+.entity-panel[data-mythology="jewish"]::after {
+    background: var(--mythos-jewish-gradient);
+}
+
+.mythology-card[data-mythology="jewish"]:hover,
+.entity-panel[data-mythology="jewish"]:hover {
+    border-color: var(--mythos-jewish-primary);
+    box-shadow:
+        0 16px 48px rgba(0, 51, 153, 0.15),
+        0 0 40px var(--mythos-jewish-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Islamic */
+.mythology-card[data-mythology="islamic"],
+.entity-panel[data-mythology="islamic"],
+.shader-panel[data-mythology="islamic"] {
+    --entity-color: var(--mythos-islamic-primary);
+    --entity-glow: var(--mythos-islamic-glow);
+    border-left: 4px solid var(--mythos-islamic-primary);
+}
+
+.mythology-card[data-mythology="islamic"]::after,
+.entity-panel[data-mythology="islamic"]::after {
+    background: var(--mythos-islamic-gradient);
+}
+
+.mythology-card[data-mythology="islamic"]:hover,
+.entity-panel[data-mythology="islamic"]:hover {
+    border-color: var(--mythos-islamic-primary);
+    box-shadow:
+        0 16px 48px rgba(80, 200, 120, 0.15),
+        0 0 40px var(--mythos-islamic-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Tarot */
+.mythology-card[data-mythology="tarot"],
+.entity-panel[data-mythology="tarot"],
+.shader-panel[data-mythology="tarot"] {
+    --entity-color: var(--mythos-tarot-primary);
+    --entity-glow: var(--mythos-tarot-glow);
+    border-left: 4px solid var(--mythos-tarot-primary);
+}
+
+.mythology-card[data-mythology="tarot"]::after,
+.entity-panel[data-mythology="tarot"]::after {
+    background: var(--mythos-tarot-gradient);
+}
+
+.mythology-card[data-mythology="tarot"]:hover,
+.entity-panel[data-mythology="tarot"]:hover {
+    border-color: var(--mythos-tarot-primary);
+    box-shadow:
+        0 16px 48px rgba(147, 112, 219, 0.15),
+        0 0 40px var(--mythos-tarot-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* ============================================
+   ANIMATED GLOW BORDER EFFECT
+   ============================================ */
+
+@keyframes glowPulse {
+    0%, 100% {
+        box-shadow:
+            0 0 20px rgba(var(--color-primary-rgb, 102, 126, 234), 0.25),
+            0 8px 32px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    50% {
+        box-shadow:
+            0 0 40px rgba(var(--color-primary-rgb, 102, 126, 234), 0.45),
+            0 8px 32px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+}
+
+.shader-panel--glow-animated,
+.entity-panel.glow-animated {
+    animation: glowPulse var(--shader-pulse-speed) ease-in-out infinite;
+}
+
+/* Mythology-specific glow pulse */
+@keyframes mythologyGlowPulse {
+    0%, 100% {
+        box-shadow:
+            0 0 20px var(--entity-glow, rgba(102, 126, 234, 0.25)),
+            0 8px 32px rgba(0, 0, 0, 0.35);
+    }
+    50% {
+        box-shadow:
+            0 0 50px var(--entity-glow, rgba(102, 126, 234, 0.45)),
+            0 8px 32px rgba(0, 0, 0, 0.35);
+    }
+}
+
+.entity-panel[data-mythology].glow-animated {
+    animation: mythologyGlowPulse var(--shader-pulse-speed) ease-in-out infinite;
+}
+
+/* ============================================
+   DEEP GLASS PANEL EFFECT
+   ============================================ */
+
+.shader-panel--glass,
+.entity-panel.glass-effect {
+    background: rgba(26, 31, 58, 0.35);
+    backdrop-filter: blur(var(--blur-xl)) saturate(var(--glass-saturation-high));
+    -webkit-backdrop-filter: blur(var(--blur-xl)) saturate(var(--glass-saturation-high));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.shader-panel--glass:hover,
+.entity-panel.glass-effect:hover {
+    background: rgba(26, 31, 58, 0.45);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow:
+        0 16px 48px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+        0 0 50px rgba(var(--color-primary-rgb, 102, 126, 234), 0.1);
+}
+
+/* Ultra Glass - Maximum transparency */
+.shader-panel--ultra-glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(var(--blur-2xl)) saturate(var(--glass-saturation-high));
+    -webkit-backdrop-filter: blur(var(--blur-2xl)) saturate(var(--glass-saturation-high));
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.shader-panel--ultra-glass:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================
+   PANEL HEADERS WITH SHADER STYLING
+   ============================================ */
+
 .entity-panel-header,
-.panel-title {
+.shader-panel-header {
     display: flex;
     align-items: center;
     gap: var(--spacing-md, 1rem);
     padding-bottom: var(--spacing-md, 1rem);
-    border-bottom: 1px solid rgba(139, 127, 255, 0.2);
     margin-bottom: var(--spacing-lg, 1.5rem);
+    position: relative;
 }
 
-.panel-title h2,
-.panel-title h3 {
+/* Gradient border line under header */
+.entity-panel-header::after,
+.shader-panel-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(139, 127, 255, 0.4) 20%,
+        rgba(139, 127, 255, 0.4) 80%,
+        transparent
+    );
+}
+
+/* Mythology-aware header border */
+.entity-panel[data-mythology] .entity-panel-header::after {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--entity-color, rgba(139, 127, 255, 0.4)) 20%,
+        var(--entity-color, rgba(139, 127, 255, 0.4)) 80%,
+        transparent
+    );
+    opacity: 0.5;
+}
+
+.shader-panel-header h2,
+.shader-panel-header h3 {
     margin: 0;
     background: linear-gradient(135deg, #667eea, #764ba2);
     -webkit-background-clip: text;
@@ -139,7 +829,37 @@
     text-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
 }
 
-/* Entity detail panels */
+/* Header icon with glow */
+.shader-panel-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.15),
+        rgba(118, 75, 162, 0.15)
+    );
+    border-radius: 12px;
+    font-size: 1.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    transition: all var(--shader-transition);
+}
+
+.shader-panel-header-icon:hover {
+    transform: scale(1.05) rotate(5deg);
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.25),
+        rgba(118, 75, 162, 0.25)
+    );
+}
+
+/* ============================================
+   DETAIL PANEL STYLING
+   ============================================ */
+
 .detail-panel {
     max-width: 900px;
     margin: 0 auto;
@@ -150,7 +870,7 @@
     line-height: 1;
     text-align: center;
     margin-bottom: var(--spacing-lg, 1.5rem);
-    filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.5));
+    filter: drop-shadow(0 0 25px rgba(var(--color-primary-rgb, 102, 126, 234), 0.5));
 }
 
 .detail-panel .entity-name {
@@ -171,16 +891,25 @@
     margin-bottom: var(--spacing-xl, 2rem);
 }
 
-/* Section dividers with shader theme */
-.panel-section {
+/* ============================================
+   SHADER PANEL SECTIONS
+   ============================================ */
+
+.shader-panel-section {
     margin: var(--spacing-xl, 2rem) 0;
     padding: var(--spacing-lg, 1.5rem);
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.18);
     border-radius: var(--radius-lg, 0.75rem);
-    border: 1px solid rgba(139, 127, 255, 0.1);
+    border: 1px solid rgba(139, 127, 255, 0.08);
+    transition: all var(--shader-transition);
 }
 
-.panel-section-title {
+.shader-panel-section:hover {
+    border-color: rgba(139, 127, 255, 0.15);
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.shader-panel-section-title {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: var(--spacing-md, 1rem);
@@ -190,7 +919,7 @@
     gap: var(--spacing-sm, 0.5rem);
 }
 
-.panel-section-title::before {
+.shader-panel-section-title::before {
     content: '';
     width: 4px;
     height: 1.5rem;
@@ -198,15 +927,18 @@
     border-radius: 2px;
 }
 
-/* Tags and badges in panels */
+/* ============================================
+   TAGS AND BADGES
+   ============================================ */
+
 .entity-tag,
-.panel-badge {
+.shader-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
     padding: 0.25rem 0.75rem;
-    background: rgba(102, 126, 234, 0.2);
-    border: 1px solid rgba(102, 126, 234, 0.4);
+    background: rgba(102, 126, 234, 0.15);
+    border: 1px solid rgba(102, 126, 234, 0.35);
     border-radius: var(--radius-full, 9999px);
     font-size: 0.875rem;
     color: var(--color-text-primary, #e5e7eb);
@@ -214,35 +946,24 @@
 }
 
 .entity-tag:hover,
-.panel-badge:hover {
-    background: rgba(102, 126, 234, 0.3);
+.shader-badge:hover {
+    background: rgba(102, 126, 234, 0.25);
     border-color: var(--color-primary, #667eea);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
-/* Lists in panels */
-.panel-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+/* Mythology-colored tags */
+.entity-tag[data-mythology],
+.shader-badge[data-mythology] {
+    background: rgba(var(--entity-color), 0.15);
+    border-color: rgba(var(--entity-color), 0.35);
 }
 
-.panel-list-item {
-    padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
-    margin-bottom: var(--spacing-sm, 0.5rem);
-    background: rgba(0, 0, 0, 0.2);
-    border-left: 3px solid transparent;
-    border-radius: var(--radius-md, 0.5rem);
-    transition: all 0.2s ease;
-}
+/* ============================================
+   ENTITY GRID (Shader-Aware)
+   ============================================ */
 
-.panel-list-item:hover {
-    background: rgba(102, 126, 234, 0.1);
-    border-left-color: var(--color-primary, #667eea);
-    transform: translateX(4px);
-}
-
-/* Grid layouts for entity collections */
 .entity-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -256,60 +977,64 @@
     }
 }
 
-/* Loading states for panels */
-.entity-panel.loading,
-.detail-panel.loading {
-    position: relative;
-    pointer-events: none;
+/* ============================================
+   PANEL LIST ITEMS
+   ============================================ */
+
+.panel-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.entity-panel.loading::after,
-.detail-panel.loading::after {
+.panel-list-item {
+    padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+    margin-bottom: var(--spacing-sm, 0.5rem);
+    background: rgba(0, 0, 0, 0.15);
+    border-left: 3px solid transparent;
+    border-radius: var(--radius-md, 0.5rem);
+    transition: all 0.2s ease;
+}
+
+.panel-list-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-left-color: var(--color-primary, #667eea);
+    transform: translateX(4px);
+}
+
+/* ============================================
+   PANEL ACTION BUTTONS
+   ============================================ */
+
+.shader-panel-actions {
+    display: flex;
+    gap: var(--spacing-sm, 0.5rem);
+    margin-top: var(--spacing-lg, 1.5rem);
+    padding-top: var(--spacing-lg, 1.5rem);
+    position: relative;
+}
+
+.shader-panel-actions::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background: rgba(26, 31, 58, 0.8);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(139, 127, 255, 0.3) 20%,
+        rgba(139, 127, 255, 0.3) 80%,
+        transparent
+    );
 }
 
-/* Error states */
-.entity-panel.error {
-    border-color: rgba(239, 68, 68, 0.6);
-    background: rgba(239, 68, 68, 0.05);
-}
-
-/* Success states (for saved/created entities) */
-.entity-panel.success {
-    border-color: rgba(34, 197, 94, 0.6);
-    animation: successPulse 0.6s ease;
-}
-
-@keyframes successPulse {
-    0%, 100% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); }
-    50% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.3), 0 8px 32px rgba(34, 197, 94, 0.4); }
-}
-
-/* Panel actions (edit, delete buttons) */
-.panel-actions {
-    display: flex;
-    gap: var(--spacing-sm, 0.5rem);
-    margin-top: var(--spacing-lg, 1.5rem);
-    padding-top: var(--spacing-lg, 1.5rem);
-    border-top: 1px solid rgba(139, 127, 255, 0.2);
-}
-
-.panel-action-btn {
+.shader-btn {
     flex: 1;
     padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
     background: rgba(102, 126, 234, 0.1);
-    border: 1px solid rgba(102, 126, 234, 0.3);
+    border: 1px solid rgba(102, 126, 234, 0.25);
     border-radius: var(--radius-md, 0.5rem);
     color: var(--color-text-primary, #e5e7eb);
     font-weight: 500;
@@ -317,46 +1042,223 @@
     transition: all 0.2s ease;
 }
 
-.panel-action-btn:hover {
+.shader-btn:hover {
     background: var(--color-primary, #667eea);
     border-color: var(--color-primary, #667eea);
     color: white;
     transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35);
 }
 
-.panel-action-btn.danger {
+.shader-btn.primary {
+    background: linear-gradient(135deg, var(--color-primary, #667eea), var(--color-secondary, #764ba2));
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.shader-btn.primary:hover {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.45);
+}
+
+.shader-btn.danger {
     background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.25);
 }
 
-.panel-action-btn.danger:hover {
+.shader-btn.danger:hover {
     background: #ef4444;
     border-color: #ef4444;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);
 }
 
-/* Ownership indicator */
+/* ============================================
+   STATE INDICATORS
+   ============================================ */
+
+/* Loading State */
+.entity-panel.loading,
+.detail-panel.loading,
+.shader-panel.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.entity-panel.loading::after,
+.detail-panel.loading::after,
+.shader-panel.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(26, 31, 58, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 10;
+}
+
+/* Shimmer loading effect */
+.shader-panel.loading-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.shader-panel.loading-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.04),
+        transparent
+    );
+    animation: shimmerWave var(--shader-shimmer-speed) infinite;
+    z-index: 5;
+}
+
+@keyframes shimmerWave {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Error State */
+.entity-panel.error,
+.shader-panel.error {
+    border-color: rgba(239, 68, 68, 0.5);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.entity-panel.error::after,
+.shader-panel.error::after {
+    background: linear-gradient(
+        135deg,
+        rgba(239, 68, 68, 0.08) 0%,
+        rgba(239, 68, 68, 0.03) 100%
+    );
+    opacity: 1;
+}
+
+/* Success State */
+.entity-panel.success,
+.shader-panel.success {
+    border-color: rgba(34, 197, 94, 0.5);
+    animation: successPulse 0.6s ease;
+}
+
+@keyframes successPulse {
+    0%, 100% {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    }
+    50% {
+        box-shadow:
+            0 0 0 4px rgba(34, 197, 94, 0.25),
+            0 8px 32px rgba(34, 197, 94, 0.35);
+    }
+}
+
+/* Warning State */
+.entity-panel.warning,
+.shader-panel.warning {
+    border-color: rgba(245, 158, 11, 0.5);
+}
+
+.entity-panel.warning::after,
+.shader-panel.warning::after {
+    background: linear-gradient(
+        135deg,
+        rgba(245, 158, 11, 0.08) 0%,
+        rgba(245, 158, 11, 0.03) 100%
+    );
+    opacity: 1;
+}
+
+/* Ownership Indicator */
 .panel-owner-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
     background: rgba(34, 197, 94, 0.1);
-    border: 1px solid rgba(34, 197, 94, 0.3);
+    border: 1px solid rgba(34, 197, 94, 0.25);
     border-radius: var(--radius-full, 9999px);
     font-size: 0.875rem;
     color: #22c55e;
     margin-bottom: var(--spacing-md, 1rem);
 }
 
-.panel-owner-badge::before {
-    content: '👤';
+/* ============================================
+   SIDE-BY-SIDE PANEL SUPPORT
+   ============================================ */
+
+.shader-panel-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg, 1.5rem);
 }
 
-/* Responsive adjustments */
+.shader-panel-split > .shader-panel {
+    margin: 0;
+}
+
+/* Primary/Secondary split */
+.shader-panel-split--weighted {
+    grid-template-columns: 2fr 1fr;
+}
+
+.shader-panel-split--weighted-reverse {
+    grid-template-columns: 1fr 2fr;
+}
+
+@media (max-width: 1024px) {
+    .shader-panel-split,
+    .shader-panel-split--weighted,
+    .shader-panel-split--weighted-reverse {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   SACRED GEOMETRY PATTERNS
+   ============================================ */
+
+.shader-panel--sacred-pattern {
+    position: relative;
+}
+
+.shader-panel--sacred-pattern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Hexagon pattern */
+.shader-panel--hexagon-pattern::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
 @media (max-width: 768px) {
     .entity-panel,
-    .detail-panel {
+    .detail-panel,
+    .shader-panel {
         padding: var(--spacing-md, 1rem);
+        border-radius: var(--radius-lg, 0.75rem);
     }
 
     .detail-panel .entity-icon {
@@ -367,22 +1269,116 @@
         font-size: 2rem;
     }
 
-    .panel-actions {
+    .shader-panel-actions {
         flex-direction: column;
+    }
+
+    .shader-panel-header-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
     }
 }
 
-/* Print styles */
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .entity-panel,
+    .detail-panel,
+    .mythology-card,
+    .shader-panel,
+    .entity-tag,
+    .shader-badge,
+    .panel-list-item,
+    .shader-btn,
+    .shader-panel-section,
+    .shader-panel-header-icon {
+        transition: none;
+    }
+
+    .shader-panel--glow-animated,
+    .entity-panel.glow-animated,
+    .entity-panel[data-mythology].glow-animated {
+        animation: none;
+    }
+
+    .entity-panel.success,
+    .shader-panel.success {
+        animation: none;
+    }
+
+    .entity-panel:hover,
+    .mythology-card:hover,
+    .shader-panel:hover {
+        transform: none;
+    }
+
+    .shader-panel.loading-shimmer::before {
+        animation: none;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .entity-panel,
+    .detail-panel,
+    .mythology-card,
+    .shader-panel {
+        border-width: 3px;
+        border-color: currentColor;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(0, 0, 0, 0.9);
+    }
+
+    .mythology-card[data-mythology],
+    .entity-panel[data-mythology] {
+        border-left-width: 6px;
+    }
+
+    .entity-tag,
+    .shader-badge {
+        border-width: 2px;
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
 @media print {
     .entity-panel,
-    .detail-panel {
+    .detail-panel,
+    .shader-panel {
         background: white !important;
         border: 1px solid #ddd !important;
         box-shadow: none !important;
         page-break-inside: avoid;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
 
-    .panel-actions {
+    .shader-panel-actions {
+        display: none !important;
+    }
+
+    .mythology-card[data-mythology],
+    .entity-panel[data-mythology] {
+        border-left-width: 4px;
+    }
+
+    .shader-panel--glow-animated,
+    .entity-panel.glow-animated {
+        animation: none !important;
+    }
+
+    .shader-panel::before,
+    .shader-panel::after,
+    .entity-panel::before,
+    .entity-panel::after {
         display: none !important;
     }
 }

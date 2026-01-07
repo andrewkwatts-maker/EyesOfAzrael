@@ -9,6 +9,14 @@
  * - 'list': Vertical list with optional expansion
  * - 'panel': Detailed cards with multiple sections
  * - 'inline': Mini badges for inline text usage
+ *
+ * Key Features:
+ * - Consistent entity rendering across all types
+ * - Text truncation with "Show more" toggle
+ * - Array/list rendering as pills with overflow handling
+ * - Responsive metadata grid
+ * - Related entity links
+ * - Empty state handling
  */
 
 class UniversalDisplayRenderer {
@@ -18,6 +26,45 @@ class UniversalDisplayRenderer {
      */
     static SUPPORTED_MODES = ['grid', 'table', 'list', 'panel', 'inline'];
 
+    /**
+     * Entity type icons mapping
+     * @type {Object}
+     */
+    static ENTITY_TYPE_ICONS = {
+        deity: '👑',
+        hero: '🦸',
+        creature: '🐉',
+        item: '⚔️',
+        place: '🏛️',
+        concept: '💭',
+        magic: '✨',
+        ritual: '🕯️',
+        herb: '🌿',
+        symbol: '⚡',
+        text: '📜',
+        archetype: '🎭',
+        mythology: '🌍',
+        cosmology: '🌌'
+    };
+
+    /**
+     * Default maximum visible items for arrays/pills
+     * @type {number}
+     */
+    static DEFAULT_MAX_VISIBLE_PILLS = 5;
+
+    /**
+     * Default maximum characters for truncation
+     * @type {number}
+     */
+    static DEFAULT_MAX_CHARS = 150;
+
+    /**
+     * Default maximum lines for CSS line-clamp
+     * @type {number}
+     */
+    static DEFAULT_MAX_LINES = 3;
+
     constructor(options = {}) {
         this.options = {
             defaultDisplayMode: 'grid',
@@ -25,8 +72,14 @@ class UniversalDisplayRenderer {
             enableExpand: true,
             enableCorpusLinks: true,
             theme: 'auto',
+            maxVisiblePills: UniversalDisplayRenderer.DEFAULT_MAX_VISIBLE_PILLS,
+            maxTruncateChars: UniversalDisplayRenderer.DEFAULT_MAX_CHARS,
+            maxTruncateLines: UniversalDisplayRenderer.DEFAULT_MAX_LINES,
             ...options
         };
+
+        // Track expanded states for "show more" functionality
+        this._expandedStates = new Map();
     }
 
     /**
@@ -69,7 +122,7 @@ class UniversalDisplayRenderer {
      */
     renderEmptyState(displayMode) {
         return `
-            <div class="entity-empty-state" data-display-mode="${this.escapeHtml(displayMode)}">
+            <div class="entity-empty-state" data-display-mode="${this.escapeAttr(displayMode)}">
                 <div class="empty-state-icon">🔍</div>
                 <p class="empty-state-message">No results found</p>
                 <p class="empty-state-hint">Try adjusting your search or filters</p>
@@ -151,6 +204,292 @@ class UniversalDisplayRenderer {
         }
     }
 
+    // =========================================================================
+    // HELPER FUNCTIONS (Required by specification)
+    // =========================================================================
+
+    /**
+     * Truncate HTML content safely, preserving structure
+     * @param {string} html - HTML content to truncate
+     * @param {number} maxChars - Maximum characters to keep
+     * @returns {string} Truncated HTML with ellipsis if needed
+     */
+    _truncateHTML(html, maxChars = this.options.maxTruncateChars) {
+        if (!html || typeof html !== 'string') return '';
+
+        // Strip HTML tags for length calculation
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const textContent = tempDiv.textContent || tempDiv.innerText || '';
+
+        if (textContent.length <= maxChars) {
+            return html;
+        }
+
+        // Truncate the plain text and return
+        const truncated = textContent.substring(0, maxChars).replace(/&[^;]*$/, '');
+        return this.escapeHtml(truncated) + '...';
+    }
+
+    /**
+     * Render array items as pills with overflow handling
+     * @param {Array} items - Array of items to render
+     * @param {number} maxVisible - Maximum visible pills before showing "+N more"
+     * @param {string} pillClass - Optional additional CSS class for pills
+     * @returns {string} HTML string with pills
+     */
+    _renderArrayAsPills(items, maxVisible = this.options.maxVisiblePills, pillClass = '') {
+        if (!Array.isArray(items) || items.length === 0) {
+            return this._renderEmptyFieldState('No items available');
+        }
+
+        const uniqueId = `pills-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const visibleItems = items.slice(0, maxVisible);
+        const hiddenItems = items.slice(maxVisible);
+        const hasOverflow = hiddenItems.length > 0;
+
+        let html = `<div class="pills-container ${pillClass}" data-pills-id="${uniqueId}">`;
+
+        // Render visible pills
+        html += `<div class="pills-visible">`;
+        visibleItems.forEach(item => {
+            html += `<span class="pill">${this.escapeHtml(String(item))}</span>`;
+        });
+
+        // Add "+N more" button if overflow
+        if (hasOverflow) {
+            html += `
+                <button class="pill pill-more"
+                        data-action="expand-pills"
+                        data-target="${uniqueId}"
+                        aria-expanded="false"
+                        aria-label="Show ${hiddenItems.length} more items">
+                    +${hiddenItems.length} more
+                </button>
+            `;
+        }
+        html += `</div>`;
+
+        // Render hidden pills (collapsed by default)
+        if (hasOverflow) {
+            html += `<div class="pills-hidden" data-pills-hidden="${uniqueId}" aria-hidden="true">`;
+            hiddenItems.forEach(item => {
+                html += `<span class="pill">${this.escapeHtml(String(item))}</span>`;
+            });
+            html += `
+                <button class="pill pill-less"
+                        data-action="collapse-pills"
+                        data-target="${uniqueId}"
+                        aria-label="Show fewer items">
+                    Show less
+                </button>
+            `;
+            html += `</div>`;
+        }
+
+        html += `</div>`;
+        return html;
+    }
+
+    /**
+     * Render key-value data as a responsive grid
+     * @param {Object} data - Object with key-value pairs
+     * @param {Object} options - Rendering options
+     * @returns {string} HTML string with metadata grid
+     */
+    _renderKeyValueGrid(data, options = {}) {
+        if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+            return this._renderEmptyFieldState('No metadata available');
+        }
+
+        const {
+            columns = 2,
+            showLabels = true,
+            labelPosition = 'top' // 'top', 'left', 'inline'
+        } = options;
+
+        let html = `<div class="metadata-grid" data-columns="${columns}" data-label-position="${labelPosition}">`;
+
+        Object.entries(data).forEach(([key, value]) => {
+            // Skip null/undefined values
+            if (value == null) return;
+
+            // Format the label
+            const label = this.formatLabel(key);
+
+            // Format the value based on type
+            let formattedValue;
+            if (Array.isArray(value)) {
+                formattedValue = this._renderArrayAsPills(value, 3, 'inline-pills');
+            } else if (typeof value === 'object') {
+                formattedValue = this.escapeHtml(JSON.stringify(value));
+            } else if (typeof value === 'boolean') {
+                formattedValue = value ? 'Yes' : 'No';
+            } else {
+                formattedValue = this.escapeHtml(String(value));
+            }
+
+            html += `
+                <div class="metadata-item" data-field="${this.escapeAttr(key)}">
+                    ${showLabels ? `<span class="metadata-label">${this.escapeHtml(label)}</span>` : ''}
+                    <span class="metadata-value">${formattedValue}</span>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        return html;
+    }
+
+    /**
+     * Render a related entity as a clickable link/mini card
+     * @param {Object|string} entityRef - Entity reference or ID
+     * @param {Object} options - Rendering options
+     * @returns {string} HTML string for entity link
+     */
+    _renderRelatedEntityLink(entityRef, options = {}) {
+        const {
+            format = 'mini-card', // 'mini-card', 'link', 'badge'
+            showIcon = true,
+            showType = true
+        } = options;
+
+        // Handle string ID reference
+        if (typeof entityRef === 'string') {
+            const parts = entityRef.split('_');
+            const name = parts.length > 1 ? parts.slice(1).join(' ') : entityRef;
+            const formattedName = this.formatLabel(name);
+
+            return `
+                <a href="#/${this.escapeAttr(entityRef)}"
+                   class="related-entity-link format-${format}"
+                   data-entity-ref="${this.escapeAttr(entityRef)}">
+                    ${showIcon ? '<span class="link-icon">🔗</span>' : ''}
+                    <span class="link-name">${this.escapeHtml(formattedName)}</span>
+                </a>
+            `;
+        }
+
+        // Handle object reference
+        if (typeof entityRef === 'object' && entityRef !== null) {
+            const {
+                id = '',
+                name = '',
+                entityType = '',
+                mythology = '',
+                icon = ''
+            } = entityRef;
+
+            const href = mythology && entityType && id
+                ? `#/mythology/${this.escapeAttr(mythology)}/${this.escapeAttr(entityType)}/${this.escapeAttr(id)}`
+                : `#/${this.escapeAttr(id)}`;
+
+            const typeIcon = showIcon ? this.getEntityTypeIcon(entityType) : '';
+            const displayName = name || this.formatLabel(id);
+
+            if (format === 'mini-card') {
+                return `
+                    <a href="${href}"
+                       class="related-entity-card"
+                       data-entity-id="${this.escapeAttr(id)}"
+                       data-entity-type="${this.escapeAttr(entityType)}">
+                        <span class="mini-card-icon">${icon ? this.renderIconWithFallback(icon) : typeIcon}</span>
+                        <span class="mini-card-content">
+                            <span class="mini-card-name">${this.escapeHtml(displayName)}</span>
+                            ${showType && entityType ? `<span class="mini-card-type">${this.escapeHtml(this.formatLabel(entityType))}</span>` : ''}
+                        </span>
+                    </a>
+                `;
+            }
+
+            if (format === 'badge') {
+                return `
+                    <a href="${href}"
+                       class="related-entity-badge"
+                       data-entity-id="${this.escapeAttr(id)}">
+                        ${typeIcon} ${this.escapeHtml(displayName)}
+                    </a>
+                `;
+            }
+
+            // Default: link format
+            return `
+                <a href="${href}"
+                   class="related-entity-link"
+                   data-entity-id="${this.escapeAttr(id)}">
+                    ${typeIcon} ${this.escapeHtml(displayName)}
+                </a>
+            `;
+        }
+
+        return '';
+    }
+
+    /**
+     * Render external link with new tab indicator
+     * @param {string} url - External URL
+     * @param {string} text - Link text
+     * @returns {string} HTML string for external link
+     */
+    _renderExternalLink(url, text) {
+        if (!url) return '';
+
+        const sanitizedUrl = this.sanitizeUrl(url);
+        if (!sanitizedUrl) return '';
+
+        return `
+            <a href="${this.escapeAttr(sanitizedUrl)}"
+               class="external-link"
+               target="_blank"
+               rel="noopener noreferrer">
+                ${this.escapeHtml(text || url)}
+                <span class="external-link-icon" aria-hidden="true">↗</span>
+                <span class="sr-only">(opens in new tab)</span>
+            </a>
+        `;
+    }
+
+    /**
+     * Render empty state for a field/section
+     * @param {string} message - Optional custom message
+     * @returns {string} HTML for empty field state
+     */
+    _renderEmptyFieldState(message = 'No information available') {
+        return `<span class="field-empty-state">${this.escapeHtml(message)}</span>`;
+    }
+
+    /**
+     * Create truncated text with "Show more" toggle
+     * @param {string} text - Text to truncate
+     * @param {number} maxLines - Maximum lines to show
+     * @param {string} uniqueId - Unique identifier for toggle
+     * @returns {string} HTML with truncatable text
+     */
+    _renderTruncatableText(text, maxLines = this.options.maxTruncateLines, uniqueId = null) {
+        if (!text || typeof text !== 'string') return '';
+
+        const id = uniqueId || `truncate-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        return `
+            <div class="truncatable-text" data-truncate-id="${id}" data-max-lines="${maxLines}">
+                <div class="truncatable-content" style="--max-lines: ${maxLines};">
+                    ${this.escapeHtml(text)}
+                </div>
+                <button class="truncate-toggle"
+                        data-action="toggle-truncate"
+                        data-target="${id}"
+                        aria-expanded="false">
+                    <span class="toggle-more">Show more</span>
+                    <span class="toggle-less">Show less</span>
+                </button>
+            </div>
+        `;
+    }
+
+    // =========================================================================
+    // GRID DISPLAY
+    // =========================================================================
+
     /**
      * Render Grid Display (2-wide mobile, 4-wide desktop)
      */
@@ -215,107 +554,9 @@ class UniversalDisplayRenderer {
         `;
     }
 
-    /**
-     * Render icon with fallback
-     * @param {string} icon - Icon URL, inline SVG, or emoji
-     * @returns {string} Safe HTML for icon
-     */
-    renderIconWithFallback(icon) {
-        if (!icon) return '&#10024;'; // Sparkle emoji as HTML entity
-
-        if (typeof icon === 'string') {
-            const trimmedIcon = icon.trim();
-
-            // Check if icon is inline SVG - render directly
-            if (trimmedIcon.startsWith('<svg')) {
-                return `<span class="entity-icon-svg">${icon}</span>`;
-            }
-
-            // Check if icon is an image URL
-            if (trimmedIcon.includes('.svg') || trimmedIcon.includes('.png') || trimmedIcon.includes('.jpg') || trimmedIcon.includes('.webp') || trimmedIcon.startsWith('http') || trimmedIcon.startsWith('/')) {
-                const sanitizedUrl = this.sanitizeUrl(trimmedIcon);
-                if (!sanitizedUrl) return '&#10024;';
-                return `<img src="${this.escapeAttr(sanitizedUrl)}" alt="" class="entity-icon-img" loading="lazy" onerror="this.parentElement.textContent='&#10024;'">`;
-            }
-        }
-
-        // For emoji or text icons, escape HTML
-        return this.escapeHtml(icon);
-    }
-
-    /**
-     * Get icon for entity type
-     */
-    getEntityTypeIcon(entityType) {
-        const icons = {
-            deity: '👑',
-            hero: '🦸',
-            creature: '🐉',
-            item: '⚔️',
-            place: '🏛️',
-            concept: '💭',
-            magic: '✨',
-            ritual: '🕯️',
-            herb: '🌿',
-            symbol: '⚡',
-            text: '📜',
-            archetype: '🎭',
-            mythology: '🌍',
-            cosmology: '🌌'
-        };
-        return icons[entityType] || '📌';
-    }
-
-    renderStats(stats) {
-        if (!Array.isArray(stats)) return '';
-        return `
-            <div class="card-stats">
-                ${stats.map(stat => `
-                    <div class="stat-item">
-                        <span class="stat-label">${this.escapeHtml(String(stat.label || ''))}:</span>
-                        <span class="stat-value">${this.escapeHtml(String(stat.value ?? ''))}</span>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
-
-    renderHoverInfo(entity) {
-        const hover = entity.gridDisplay?.hoverInfo || entity.hoverInfo;
-        if (!hover) return '';
-
-        return `
-            <div class="hover-info">
-                ${hover.quick ? `<p class="hover-quick">${this.escapeHtml(hover.quick)}</p>` : ''}
-                ${hover.domains && Array.isArray(hover.domains) ? `
-                    <div class="hover-domains">
-                        ${hover.domains.map(d => this.renderHoverableTerm(d, 'domain', entity)).join(' ')}
-                    </div>
-                ` : ''}
-            </div>
-        `;
-    }
-
-    renderHoverableTerm(term, type, entity) {
-        const escapedTerm = this.escapeHtml(term);
-        const escapedType = this.escapeAttr(type);
-
-        if (!this.options.enableCorpusLinks) {
-            return `<span class="term-badge">${escapedTerm}</span>`;
-        }
-
-        const corpusLink = `/search?term=${encodeURIComponent(term)}&mythology=${encodeURIComponent(entity.mythology || '')}`;
-
-        return `
-            <a href="${this.escapeAttr(corpusLink)}"
-               class="hoverable-term ${escapedType}-term"
-               data-term="${this.escapeAttr(term)}"
-               data-type="${escapedType}"
-               title="Search corpus for '${this.escapeAttr(term)}'">
-                ${escapedTerm}
-            </a>
-        `;
-    }
+    // =========================================================================
+    // TABLE DISPLAY
+    // =========================================================================
 
     /**
      * Render Table Display (sortable, filterable)
@@ -389,6 +630,10 @@ class UniversalDisplayRenderer {
         return this.escapeHtml(value) || '—';
     }
 
+    // =========================================================================
+    // LIST DISPLAY
+    // =========================================================================
+
     /**
      * Render List Display (vertical, expandable)
      */
@@ -433,6 +678,10 @@ class UniversalDisplayRenderer {
         `;
     }
 
+    // =========================================================================
+    // PANEL DISPLAY
+    // =========================================================================
+
     /**
      * Render Panel Display (detailed cards with sections)
      */
@@ -451,42 +700,76 @@ class UniversalDisplayRenderer {
         const display = entity.panelDisplay || this.generatePanelDisplay(entity);
         const layout = this.escapeAttr(display.layout || 'standard');
 
-        const sections = (display.sections || []).map(section =>
+        // Filter out empty sections
+        const validSections = (display.sections || []).filter(section => {
+            if (!section) return false;
+            if (section.type === 'text' && !section.content) return false;
+            if (section.type === 'list' && (!section.items || section.items.length === 0)) return false;
+            if (section.type === 'attributes' && (!section.data || Object.keys(section.data).length === 0)) return false;
+            if (section.type === 'grid' && (!section.items || section.items.length === 0)) return false;
+            return true;
+        });
+
+        const sections = validSections.map(section =>
             this.renderPanelSection(section, entity)
         ).join('');
 
         // Use renderIconWithFallback for consistency
         const iconContent = this.renderIconWithFallback(entity.icon);
 
+        // Render related entities if present
+        const relatedEntities = this._renderRelatedEntities(entity);
+
         return `
             <article class="entity-panel panel-${layout}"
                      data-entity-id="${this.escapeAttr(entity.id)}"
+                     data-entity-type="${this.escapeAttr(entity.entityType)}"
                      data-mythology="${this.escapeAttr(entity.mythology)}">
 
                 <header class="panel-header">
                     <div class="panel-icon">${iconContent}</div>
-                    <h2 class="panel-title">${this.escapeHtml(entity.name)}</h2>
-                    ${entity.subtitle ? `<p class="panel-subtitle">${this.escapeHtml(entity.subtitle)}</p>` : ''}
+                    <div class="panel-header-content">
+                        <h2 class="panel-title">${this.escapeHtml(entity.name)}</h2>
+                        ${entity.subtitle ? `<p class="panel-subtitle">${this.escapeHtml(entity.subtitle)}</p>` : ''}
+                        <div class="panel-meta">
+                            <span class="entity-type-badge">${this.getEntityTypeIcon(entity.entityType)} ${this.escapeHtml(this.formatLabel(entity.entityType))}</span>
+                            ${entity.mythology ? `<span class="mythology-badge">${this.escapeHtml(this.formatLabel(entity.mythology))}</span>` : ''}
+                        </div>
+                    </div>
                 </header>
 
                 <div class="panel-body">
-                    ${sections}
+                    ${sections || this._renderEmptyFieldState('No content available for this entity.')}
                 </div>
 
-                ${entity.relatedIds?.length > 0 ? `
-                    <footer class="panel-footer">
-                        <h4>Related</h4>
-                        <div class="related-entities">
-                            ${entity.relatedIds.slice(0, 5).map(id => {
-                                const idStr = String(id || '');
-                                const escapedId = this.escapeAttr(idStr);
-                                const displayName = this.escapeHtml(idStr.split('_')[1] || idStr);
-                                return `<a href="#/${escapedId}" class="related-link">${displayName}</a>`;
-                            }).join('')}
-                        </div>
-                    </footer>
-                ` : ''}
+                ${relatedEntities}
             </article>
+        `;
+    }
+
+    /**
+     * Render related entities footer
+     * @param {Object} entity - Entity with related data
+     * @returns {string} HTML for related entities section
+     */
+    _renderRelatedEntities(entity) {
+        const relatedIds = entity.relatedIds || entity.related || [];
+        if (!relatedIds || relatedIds.length === 0) return '';
+
+        const maxVisible = 5;
+        const visibleRelated = relatedIds.slice(0, maxVisible);
+        const hasMore = relatedIds.length > maxVisible;
+
+        const links = visibleRelated.map(ref => this._renderRelatedEntityLink(ref, { format: 'mini-card' })).join('');
+
+        return `
+            <footer class="panel-footer">
+                <h4 class="panel-footer-title">Related</h4>
+                <div class="related-entities">
+                    ${links}
+                    ${hasMore ? `<span class="related-more">+${relatedIds.length - maxVisible} more</span>` : ''}
+                </div>
+            </footer>
         `;
     }
 
@@ -495,7 +778,8 @@ class UniversalDisplayRenderer {
             'attributes': this.renderAttributesSection.bind(this),
             'text': this.renderTextSection.bind(this),
             'list': this.renderListSection.bind(this),
-            'grid': this.renderGridSection.bind(this)
+            'grid': this.renderGridSection.bind(this),
+            'pills': this.renderPillsSection.bind(this)
         };
 
         const renderer = renderers[section.type] || renderers.text;
@@ -503,60 +787,86 @@ class UniversalDisplayRenderer {
     }
 
     renderAttributesSection(section, entity) {
+        const data = section.data || {};
+        const nonEmptyData = {};
+
+        // Filter out empty/null values
+        Object.entries(data).forEach(([key, value]) => {
+            if (value != null && value !== '' && (!Array.isArray(value) || value.length > 0)) {
+                nonEmptyData[key] = value;
+            }
+        });
+
+        if (Object.keys(nonEmptyData).length === 0) return '';
+
         return `
             <section class="panel-section attributes-section">
                 <h3 class="section-title">${this.escapeHtml(section.title)}</h3>
-                <div class="attributes-grid">
-                    ${Object.entries(section.data || {}).map(([key, value]) => `
-                        <div class="attribute-item">
-                            <span class="attribute-label">${this.escapeHtml(this.formatLabel(key))}:</span>
-                            <span class="attribute-value">
-                                ${Array.isArray(value) ?
-                                    value.map(v => this.renderHoverableTerm(v, key, entity)).join(', ') :
-                                    this.escapeHtml(value)
-                                }
-                            </span>
-                        </div>
-                    `).join('')}
-                </div>
+                ${this._renderKeyValueGrid(nonEmptyData)}
             </section>
         `;
     }
 
     renderTextSection(section, entity) {
+        if (!section.content) return '';
+
+        const uniqueId = `text-${entity.id}-${section.title}`.replace(/\s+/g, '-').toLowerCase();
+
         return `
             <section class="panel-section text-section">
                 <h3 class="section-title">${this.escapeHtml(section.title)}</h3>
                 <div class="section-content">
-                    ${this.escapeHtml(section.content)}
+                    ${this._renderTruncatableText(section.content, 5, uniqueId)}
                 </div>
             </section>
         `;
     }
 
     renderListSection(section, entity) {
+        if (!section.items || section.items.length === 0) return '';
+
         return `
             <section class="panel-section list-section">
                 <h3 class="section-title">${this.escapeHtml(section.title)}</h3>
                 <ul class="section-list">
-                    ${(section.items || []).map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}
+                    ${section.items.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}
                 </ul>
             </section>
         `;
     }
 
     renderGridSection(section, entity) {
+        if (!section.items || section.items.length === 0) return '';
+
         return `
             <section class="panel-section grid-section">
                 <h3 class="section-title">${this.escapeHtml(section.title)}</h3>
                 <div class="section-grid">
-                    ${(section.items || []).map(item => `
+                    ${section.items.map(item => `
                         <div class="grid-item">${this.escapeHtml(item)}</div>
                     `).join('')}
                 </div>
             </section>
         `;
     }
+
+    /**
+     * Render a section with pills (for domains, symbols, powers, etc.)
+     */
+    renderPillsSection(section, entity) {
+        if (!section.items || section.items.length === 0) return '';
+
+        return `
+            <section class="panel-section pills-section">
+                <h3 class="section-title">${this.escapeHtml(section.title)}</h3>
+                ${this._renderArrayAsPills(section.items, this.options.maxVisiblePills)}
+            </section>
+        `;
+    }
+
+    // =========================================================================
+    // INLINE DISPLAY
+    // =========================================================================
 
     /**
      * Render Inline Display (mini badges, used in text)
@@ -576,6 +886,10 @@ class UniversalDisplayRenderer {
             `;
         }).join(' ');
     }
+
+    // =========================================================================
+    // DISPLAY GENERATION (Fallbacks)
+    // =========================================================================
 
     /**
      * Generate display metadata if not present
@@ -626,24 +940,154 @@ class UniversalDisplayRenderer {
     }
 
     generatePanelDisplay(entity) {
+        const sections = [];
+
+        // Add description section if present
+        if (entity.description || entity.longDescription) {
+            sections.push({
+                type: 'text',
+                title: 'Description',
+                content: entity.longDescription || entity.description
+            });
+        }
+
+        // Add domains as pills if present
+        if (entity.domains && entity.domains.length > 0) {
+            sections.push({
+                type: 'pills',
+                title: 'Domains',
+                items: entity.domains
+            });
+        }
+
+        // Add symbols as pills if present
+        if (entity.symbols && entity.symbols.length > 0) {
+            sections.push({
+                type: 'pills',
+                title: 'Symbols',
+                items: entity.symbols
+            });
+        }
+
+        // Add powers as pills if present
+        if (entity.powers && entity.powers.length > 0) {
+            sections.push({
+                type: 'pills',
+                title: 'Powers',
+                items: entity.powers
+            });
+        }
+
+        // Add attributes section if there are other properties
+        const attributes = {};
+        ['origin', 'era', 'region', 'importance', 'gender', 'status'].forEach(key => {
+            if (entity[key] != null) {
+                attributes[key] = entity[key];
+            }
+        });
+
+        if (Object.keys(attributes).length > 0) {
+            sections.push({
+                type: 'attributes',
+                title: 'Attributes',
+                data: attributes
+            });
+        }
+
         return {
             layout: 'standard',
-            sections: [
-                {
-                    type: 'text',
-                    title: 'Description',
-                    content: entity.description || entity.longDescription
-                },
-                entity.domains || entity.symbols ? {
-                    type: 'attributes',
-                    title: 'Attributes',
-                    data: {
-                        domains: entity.domains,
-                        symbols: entity.symbols
-                    }
-                } : null
-            ].filter(Boolean)
+            sections: sections
         };
+    }
+
+    // =========================================================================
+    // SHARED RENDERING HELPERS
+    // =========================================================================
+
+    /**
+     * Render icon with fallback
+     * @param {string} icon - Icon URL, inline SVG, or emoji
+     * @returns {string} Safe HTML for icon
+     */
+    renderIconWithFallback(icon) {
+        if (!icon) return '&#10024;'; // Sparkle emoji as HTML entity
+
+        if (typeof icon === 'string') {
+            const trimmedIcon = icon.trim();
+
+            // Check if icon is inline SVG - render directly
+            if (trimmedIcon.startsWith('<svg')) {
+                return `<span class="entity-icon-svg">${icon}</span>`;
+            }
+
+            // Check if icon is an image URL
+            if (trimmedIcon.includes('.svg') || trimmedIcon.includes('.png') || trimmedIcon.includes('.jpg') || trimmedIcon.includes('.webp') || trimmedIcon.startsWith('http') || trimmedIcon.startsWith('/')) {
+                const sanitizedUrl = this.sanitizeUrl(trimmedIcon);
+                if (!sanitizedUrl) return '&#10024;';
+                return `<img src="${this.escapeAttr(sanitizedUrl)}" alt="" class="entity-icon-img" loading="lazy" onerror="this.parentElement.textContent='&#10024;'">`;
+            }
+        }
+
+        // For emoji or text icons, escape HTML
+        return this.escapeHtml(icon);
+    }
+
+    /**
+     * Get icon for entity type
+     */
+    getEntityTypeIcon(entityType) {
+        return UniversalDisplayRenderer.ENTITY_TYPE_ICONS[entityType] || '📌';
+    }
+
+    renderStats(stats) {
+        if (!Array.isArray(stats)) return '';
+        return `
+            <div class="card-stats">
+                ${stats.map(stat => `
+                    <div class="stat-item">
+                        <span class="stat-label">${this.escapeHtml(String(stat.label || ''))}:</span>
+                        <span class="stat-value">${this.escapeHtml(String(stat.value ?? ''))}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    renderHoverInfo(entity) {
+        const hover = entity.gridDisplay?.hoverInfo || entity.hoverInfo;
+        if (!hover) return '';
+
+        return `
+            <div class="hover-info">
+                ${hover.quick ? `<p class="hover-quick">${this.escapeHtml(hover.quick)}</p>` : ''}
+                ${hover.domains && Array.isArray(hover.domains) && hover.domains.length > 0 ? `
+                    <div class="hover-domains">
+                        ${hover.domains.map(d => this.renderHoverableTerm(d, 'domain', entity)).join(' ')}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    renderHoverableTerm(term, type, entity) {
+        const escapedTerm = this.escapeHtml(term);
+        const escapedType = this.escapeAttr(type);
+
+        if (!this.options.enableCorpusLinks) {
+            return `<span class="term-badge">${escapedTerm}</span>`;
+        }
+
+        const corpusLink = `/search?term=${encodeURIComponent(term)}&mythology=${encodeURIComponent(entity.mythology || '')}`;
+
+        return `
+            <a href="${this.escapeAttr(corpusLink)}"
+               class="hoverable-term ${escapedType}-term"
+               data-term="${this.escapeAttr(term)}"
+               data-type="${escapedType}"
+               title="Search corpus for '${this.escapeAttr(term)}'">
+                ${escapedTerm}
+            </a>
+        `;
     }
 
     /**
@@ -706,9 +1150,9 @@ class UniversalDisplayRenderer {
         return map[entityType] || entityType + 's';
     }
 
-    /**
-     * Utility methods
-     */
+    // =========================================================================
+    // UTILITY METHODS
+    // =========================================================================
 
     /**
      * Truncate text to specified length, avoiding cutting HTML entities
@@ -731,8 +1175,9 @@ class UniversalDisplayRenderer {
         if (!str) return '';
         return str.replace(/([A-Z])/g, ' $1')
                   .replace(/_/g, ' ')
+                  .replace(/-/g, ' ')
                   .split(' ')
-                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
                   .join(' ')
                   .trim();
     }
@@ -799,11 +1244,43 @@ class UniversalDisplayRenderer {
 
         // Handle expandable list items via event delegation
         containerEl.addEventListener('click', (e) => {
+            // Expandable list items
             const listItemMain = e.target.closest('.list-item-main[data-expandable="true"]');
             if (listItemMain) {
                 const listItem = listItemMain.closest('.entity-list-item');
                 if (listItem) {
                     listItem.classList.toggle('expanded');
+                }
+            }
+
+            // Pills expand/collapse
+            const pillsButton = e.target.closest('[data-action="expand-pills"], [data-action="collapse-pills"]');
+            if (pillsButton) {
+                e.preventDefault();
+                const targetId = pillsButton.dataset.target;
+                const container = containerEl.querySelector(`[data-pills-id="${targetId}"]`);
+                if (container) {
+                    const isExpanding = pillsButton.dataset.action === 'expand-pills';
+                    container.classList.toggle('pills-expanded', isExpanding);
+                    pillsButton.setAttribute('aria-expanded', isExpanding);
+
+                    // Toggle hidden pills visibility
+                    const hiddenPills = container.querySelector(`[data-pills-hidden="${targetId}"]`);
+                    if (hiddenPills) {
+                        hiddenPills.setAttribute('aria-hidden', !isExpanding);
+                    }
+                }
+            }
+
+            // Text truncate toggle
+            const truncateButton = e.target.closest('[data-action="toggle-truncate"]');
+            if (truncateButton) {
+                e.preventDefault();
+                const targetId = truncateButton.dataset.target;
+                const container = containerEl.querySelector(`[data-truncate-id="${targetId}"]`);
+                if (container) {
+                    const isExpanded = container.classList.toggle('truncate-expanded');
+                    truncateButton.setAttribute('aria-expanded', isExpanded);
                 }
             }
         });

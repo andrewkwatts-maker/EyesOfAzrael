@@ -32,8 +32,7 @@ const COLLECTION = process.argv.find(arg => arg.startsWith('--collection='))?.sp
 const MYTHOLOGY_FILTER = process.argv.find(arg => arg.startsWith('--mythology='))?.split('=')[1] || null;
 
 // Directory configuration
-const FIREBASE_DATA_DIR = path.join(__dirname, '../data');
-const TEXTS_DIR = path.join(FIREBASE_DATA_DIR, 'texts');
+const TEXTS_DIR = path.join(__dirname, '../../firebase-assets-downloaded/texts');
 
 // Statistics
 const stats = {
@@ -108,10 +107,17 @@ function loadTextsFromFile(filename) {
 
   try {
     const content = fs.readFileSync(filePath, 'utf8');
-    const texts = JSON.parse(content);
+    const data = JSON.parse(content);
 
-    if (!Array.isArray(texts)) {
-      throw new Error('File does not contain an array of texts');
+    let texts = [];
+
+    // Handle both array format and single object format
+    if (Array.isArray(data)) {
+      texts = data;
+    } else if (typeof data === 'object' && data.id) {
+      texts = [data];
+    } else {
+      throw new Error('File does not contain valid text entity/entities');
     }
 
     return texts;

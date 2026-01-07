@@ -1,17 +1,19 @@
 /**
- * Entity Card & Grid Polish System
- * Unified, consistent styling for all entity display components
+ * Entity Card Polish CSS
+ * Unified, polished styling for the EntityCard component
  *
  * Features:
- * - Consistent card sizing and spacing
- * - Mythology-specific color accents
- * - Icon rendering with fallbacks
- * - Text truncation with ellipsis
- * - Smooth hover/focus/active states
- * - WCAG AA accessibility compliance
- * - Responsive breakpoints
+ * - Multiple aspect ratio options (16:9, 4:3, 1:1, 3:4, golden ratio)
+ * - CSS line-clamp text truncation (title: 2 lines, desc: 3 lines)
+ * - Beautiful hover states with lift and glow effects
+ * - Enhanced focus states for accessibility
+ * - Mythology-colored badge pills with gradients
+ * - Quick action buttons (favorite, quick view)
+ * - Polished loading skeleton states
+ * - Responsive design with density options
+ * - Consistent card heights and alignment
  *
- * Last updated: 2025-12-29
+ * Updated: 2026-01-07
  */
 
 /* ============================================================================
@@ -19,967 +21,377 @@
    ============================================================================ */
 
 :root {
-    /* Card Dimensions */
-    --card-min-height: 220px;
-    --card-min-height-compact: 160px;
-    --card-min-height-detailed: 280px;
+    /* Card Dimensions - Multiple sizes */
+    --ec-min-height: 340px;
+    --ec-min-height-xs: 200px;
+    --ec-min-height-sm: 260px;
+    --ec-min-height-md: 300px;
+    --ec-min-height-compact: 280px;
+    --ec-min-height-lg: 380px;
+    --ec-min-height-xl: 460px;
+    --ec-min-height-full: auto;
 
-    /* Card Padding */
-    --card-padding: 1.25rem;
-    --card-padding-compact: 0.875rem;
-    --card-padding-detailed: 1.75rem;
+    /* Card Padding - Responsive */
+    --ec-padding: 0;
+    --ec-content-padding: 1rem;
+    --ec-content-padding-sm: 0.75rem;
+    --ec-content-padding-lg: 1.25rem;
+    --ec-footer-padding: 0.75rem 1rem;
 
-    /* Card Border */
-    --card-border-width: 2px;
-    --card-border-radius: 1rem;
-    --card-accent-height: 4px;
+    /* Card Border & Radius */
+    --ec-border-width: 1px;
+    --ec-border-radius: 0.875rem;
+    --ec-border-radius-inner: 0.5rem;
+
+    /* Image Aspect Ratios */
+    --ec-image-aspect: 56.25%;          /* 16:9 */
+    --ec-image-aspect-wide: 42.86%;     /* 21:9 */
+    --ec-image-aspect-standard: 75%;    /* 4:3 */
+    --ec-image-aspect-square: 100%;     /* 1:1 */
+    --ec-image-aspect-portrait: 133.33%; /* 3:4 */
+    --ec-image-aspect-golden: 61.8%;    /* Golden ratio */
 
     /* Icon Sizes */
-    --icon-size-sm: 2rem;
-    --icon-size-md: 2.75rem;
-    --icon-size-lg: 3.5rem;
-    --icon-size-xl: 5rem;
-
-    /* Grid Gaps */
-    --grid-gap-compact: 0.75rem;
-    --grid-gap-default: 1.25rem;
-    --grid-gap-detailed: 1.5rem;
+    --ec-icon-size: 2.5rem;
+    --ec-icon-size-xs: 1.5rem;
+    --ec-icon-size-sm: 1.75rem;
+    --ec-icon-size-md: 2.25rem;
+    --ec-icon-size-lg: 3.5rem;
+    --ec-icon-size-xl: 4.5rem;
 
     /* Text Line Clamps */
-    --description-lines: 3;
-    --description-lines-compact: 2;
-    --description-lines-detailed: 4;
+    --ec-title-lines: 2;
+    --ec-desc-lines: 3;
+    --ec-desc-lines-compact: 2;
 
-    /* Transition Timing */
-    --card-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    --hover-lift: -6px;
-    --hover-scale: 1.02;
+    /* Polished Transitions */
+    --ec-transition: 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+    --ec-transition-fast: 0.15s cubic-bezier(0.23, 1, 0.32, 1);
+    --ec-transition-slow: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 
-    /* Default Entity Color */
-    --entity-accent: var(--color-primary, #8b7fff);
-    --entity-accent-rgb: var(--color-primary-rgb, 139, 127, 255);
+    /* Enhanced Hover Effects */
+    --ec-hover-lift: -6px;
+    --ec-hover-lift-subtle: -3px;
+    --ec-hover-scale: 1.02;
+    --ec-hover-scale-subtle: 1.01;
+    --ec-hover-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.1),
+        0 12px 28px rgba(0, 0, 0, 0.15),
+        0 20px 48px rgba(0, 0, 0, 0.1);
+    --ec-hover-glow: 0 0 40px rgba(var(--ec-accent-rgb), 0.15);
+    --ec-image-hover-scale: 1.08;
+
+    /* Entity Accent (overridden per mythology) */
+    --ec-accent: var(--color-primary, #8b7fff);
+    --ec-accent-rgb: var(--color-primary-rgb, 139, 127, 255);
+
+    /* Quick Action Button */
+    --ec-action-size: 2.25rem;
+    --ec-action-size-touch: 2.75rem;
+    --ec-action-offset: 0.5rem;
 }
 
 /* ============================================================================
    MYTHOLOGY COLOR ACCENTS
-   Applied via data-mythology attribute or --mythos-* variables
    ============================================================================ */
 
-/* Greek - Golden */
-.entity-card[data-mythology="greek"],
-[data-mythology="greek"] .entity-card {
-    --entity-accent: #DAA520;
-    --entity-accent-rgb: 218, 165, 32;
-}
-
-/* Norse - Ice Blue */
-.entity-card[data-mythology="norse"],
-[data-mythology="norse"] .entity-card {
-    --entity-accent: #4682B4;
-    --entity-accent-rgb: 70, 130, 180;
-}
-
-/* Egyptian - Desert Gold */
-.entity-card[data-mythology="egyptian"],
-[data-mythology="egyptian"] .entity-card {
-    --entity-accent: #CD853F;
-    --entity-accent-rgb: 205, 133, 63;
-}
-
-/* Hindu - Saffron */
-.entity-card[data-mythology="hindu"],
-[data-mythology="hindu"] .entity-card {
-    --entity-accent: #FF6347;
-    --entity-accent-rgb: 255, 99, 71;
-}
-
-/* Buddhist - Enlightenment Gold */
-.entity-card[data-mythology="buddhist"],
-[data-mythology="buddhist"] .entity-card {
-    --entity-accent: #FFD700;
-    --entity-accent-rgb: 255, 215, 0;
-}
-
-/* Chinese - Imperial Red */
-.entity-card[data-mythology="chinese"],
-[data-mythology="chinese"] .entity-card {
-    --entity-accent: #DC143C;
-    --entity-accent-rgb: 220, 20, 60;
-}
-
-/* Japanese - Sacred Red */
-.entity-card[data-mythology="japanese"],
-[data-mythology="japanese"] .entity-card {
-    --entity-accent: #C41E3A;
-    --entity-accent-rgb: 196, 30, 58;
-}
-
-/* Celtic - Forest Green */
-.entity-card[data-mythology="celtic"],
-[data-mythology="celtic"] .entity-card {
-    --entity-accent: #228B22;
-    --entity-accent-rgb: 34, 139, 34;
-}
-
-/* Roman - Imperial Purple */
-.entity-card[data-mythology="roman"],
-[data-mythology="roman"] .entity-card {
-    --entity-accent: #800080;
-    --entity-accent-rgb: 128, 0, 128;
-}
-
-/* Sumerian/Babylonian - Clay Terracotta */
+.entity-card[data-mythology="greek"] { --ec-accent: #DAA520; --ec-accent-rgb: 218, 165, 32; }
+.entity-card[data-mythology="norse"] { --ec-accent: #4682B4; --ec-accent-rgb: 70, 130, 180; }
+.entity-card[data-mythology="egyptian"] { --ec-accent: #CD853F; --ec-accent-rgb: 205, 133, 63; }
+.entity-card[data-mythology="hindu"] { --ec-accent: #FF6347; --ec-accent-rgb: 255, 99, 71; }
+.entity-card[data-mythology="buddhist"] { --ec-accent: #FFD700; --ec-accent-rgb: 255, 215, 0; }
+.entity-card[data-mythology="chinese"] { --ec-accent: #DC143C; --ec-accent-rgb: 220, 20, 60; }
+.entity-card[data-mythology="japanese"] { --ec-accent: #C41E3A; --ec-accent-rgb: 196, 30, 58; }
+.entity-card[data-mythology="celtic"] { --ec-accent: #228B22; --ec-accent-rgb: 34, 139, 34; }
+.entity-card[data-mythology="roman"] { --ec-accent: #800080; --ec-accent-rgb: 128, 0, 128; }
 .entity-card[data-mythology="sumerian"],
-.entity-card[data-mythology="babylonian"],
-[data-mythology="sumerian"] .entity-card,
-[data-mythology="babylonian"] .entity-card {
-    --entity-accent: #CD853F;
-    --entity-accent-rgb: 205, 133, 63;
-}
-
-/* Aztec/Mayan - Turquoise */
+.entity-card[data-mythology="babylonian"] { --ec-accent: #CD853F; --ec-accent-rgb: 205, 133, 63; }
 .entity-card[data-mythology="aztec"],
-.entity-card[data-mythology="mayan"],
-[data-mythology="aztec"] .entity-card,
-[data-mythology="mayan"] .entity-card {
-    --entity-accent: #40E0D0;
-    --entity-accent-rgb: 64, 224, 208;
-}
-
-/* African - Savanna Gold */
+.entity-card[data-mythology="mayan"] { --ec-accent: #40E0D0; --ec-accent-rgb: 64, 224, 208; }
 .entity-card[data-mythology="african"],
-.entity-card[data-mythology="yoruba"],
-[data-mythology="african"] .entity-card,
-[data-mythology="yoruba"] .entity-card {
-    --entity-accent: #DAA520;
-    --entity-accent-rgb: 218, 165, 32;
-}
-
-/* Slavic - Deep Forest */
-.entity-card[data-mythology="slavic"],
-[data-mythology="slavic"] .entity-card {
-    --entity-accent: #2F4F2F;
-    --entity-accent-rgb: 47, 79, 47;
-}
+.entity-card[data-mythology="yoruba"] { --ec-accent: #DAA520; --ec-accent-rgb: 218, 165, 32; }
+.entity-card[data-mythology="slavic"] { --ec-accent: #2F4F2F; --ec-accent-rgb: 47, 79, 47; }
+.entity-card[data-mythology="persian"] { --ec-accent: #9932CC; --ec-accent-rgb: 153, 50, 204; }
 
 /* ============================================================================
-   ENTITY TYPE COLOR ACCENTS
-   Applied via data-entity-type attribute
+   ENTITY TYPE COLORS
    ============================================================================ */
 
-.entity-card[data-entity-type="deity"] {
-    --type-color: #FFD700;
-    --type-color-rgb: 255, 215, 0;
-}
-.entity-card[data-entity-type="hero"] { --type-color: #FF6B6B; }
-.entity-card[data-entity-type="creature"] { --type-color: #4CAF50; }
-.entity-card[data-entity-type="item"] { --type-color: #2196F3; }
-.entity-card[data-entity-type="place"] { --type-color: #9C27B0; }
-.entity-card[data-entity-type="concept"] { --type-color: #00BCD4; }
-.entity-card[data-entity-type="magic"] { --type-color: #E91E63; }
-.entity-card[data-entity-type="ritual"] { --type-color: #795548; }
-.entity-card[data-entity-type="herb"] { --type-color: #8BC34A; }
-.entity-card[data-entity-type="symbol"] { --type-color: #FFC107; }
-.entity-card[data-entity-type="text"] { --type-color: #607D8B; }
+.entity-card[data-entity-type="deity"] { --ec-type-color: #FFD700; }
+.entity-card[data-entity-type="hero"] { --ec-type-color: #FF6B6B; }
+.entity-card[data-entity-type="creature"] { --ec-type-color: #4CAF50; }
+.entity-card[data-entity-type="item"] { --ec-type-color: #2196F3; }
+.entity-card[data-entity-type="place"] { --ec-type-color: #9C27B0; }
+.entity-card[data-entity-type="concept"] { --ec-type-color: #00BCD4; }
+.entity-card[data-entity-type="magic"] { --ec-type-color: #E91E63; }
+.entity-card[data-entity-type="ritual"] { --ec-type-color: #795548; }
+.entity-card[data-entity-type="herb"] { --ec-type-color: #8BC34A; }
+.entity-card[data-entity-type="symbol"] { --ec-type-color: #FFC107; }
+.entity-card[data-entity-type="text"] { --ec-type-color: #607D8B; }
+.entity-card[data-entity-type="archetype"] { --ec-type-color: #9575CD; }
+.entity-card[data-entity-type="cosmology"] { --ec-type-color: #26C6DA; }
 
 /* ============================================================================
-   DEITY CARD ENHANCEMENTS
+   BASE ENTITY CARD STYLES
    ============================================================================ */
 
-.entity-card[data-entity-type="deity"],
-.entity-card[data-entity-type="deity"] .entity-icon,
-.entity-card[data-entity-type="deity"] .card-icon {
-    --entity-accent: #FFD700;
-    --entity-accent-rgb: 255, 215, 0;
-}
-
-.entity-card[data-entity-type="deity"]::before {
-    background: linear-gradient(90deg, #FFD700 0%, rgba(255, 215, 0, 0.4) 100%);
-}
-
-.entity-card[data-entity-type="deity"] .card-title a {
-    background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    transition: filter var(--card-transition);
-}
-
-.entity-card[data-entity-type="deity"]:hover .card-title a {
-    filter: brightness(1.2);
-}
-
-.entity-card[data-entity-type="deity"] .card-icon {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 193, 7, 0.1));
-    border-radius: 50%;
-    padding: 0.25rem;
-}
-
-.entity-card[data-entity-type="deity"] .entity-type-badge {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 193, 7, 0.15));
-    border-color: rgba(255, 215, 0, 0.6);
-    color: #FFD700;
-    font-weight: 700;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-/* ============================================================================
-   UNIFIED GRID CONTAINER
-   ============================================================================ */
-
-.entity-grid,
-.universal-grid,
-.pantheon-grid,
-.deities-grid,
-.heroes-grid,
-.creatures-grid,
-.items-grid,
-.places-grid {
-    display: grid;
-    gap: var(--grid-gap-default);
-    width: 100%;
-    padding: var(--spacing-md, 1rem);
-
-    /* Default: 4 columns on large screens */
-    grid-template-columns: repeat(4, 1fr);
-}
-
-/* Tablet: 3 columns */
-@media (max-width: 1200px) {
-    .entity-grid,
-    .universal-grid,
-    .pantheon-grid,
-    .deities-grid,
-    .heroes-grid,
-    .creatures-grid,
-    .items-grid,
-    .places-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-/* Mobile Landscape / Small Tablet: 2 columns */
-@media (max-width: 900px) {
-    .entity-grid,
-    .universal-grid,
-    .pantheon-grid,
-    .deities-grid,
-    .heroes-grid,
-    .creatures-grid,
-    .items-grid,
-    .places-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--grid-gap-compact);
-    }
-}
-
-/* Mobile Portrait: 2 columns (compact) */
-@media (max-width: 600px) {
-    .entity-grid,
-    .universal-grid,
-    .pantheon-grid,
-    .deities-grid,
-    .heroes-grid,
-    .creatures-grid,
-    .items-grid,
-    .places-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.5rem;
-        padding: 0.5rem;
-    }
-}
-
-/* Very Small: 1 column */
-@media (max-width: 400px) {
-    .entity-grid,
-    .universal-grid,
-    .pantheon-grid,
-    .deities-grid,
-    .heroes-grid,
-    .creatures-grid,
-    .items-grid,
-    .places-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Grid density modifiers */
-.entity-grid.compact,
-.universal-grid.compact {
-    gap: var(--grid-gap-compact);
-}
-
-.entity-grid.detailed,
-.universal-grid.detailed {
-    gap: var(--grid-gap-detailed);
-    grid-template-columns: repeat(3, 1fr);
-}
-
-@media (max-width: 1200px) {
-    .entity-grid.detailed,
-    .universal-grid.detailed {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .entity-grid.detailed,
-    .universal-grid.detailed {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ============================================================================
-   UNIFIED ENTITY CARD - Base Styles
-   ============================================================================ */
-
-.entity-card,
-.universal-grid-card,
-.grid-card {
-    /* Layout */
+.entity-card {
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: var(--card-min-height);
-    padding: var(--card-padding);
+    min-height: var(--ec-min-height);
+    padding: var(--ec-padding);
     overflow: hidden;
 
-    /* Visual */
-    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.7);
+    /* Glass morphism background */
+    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: var(--card-border-width) solid rgba(var(--entity-accent-rgb), 0.25);
-    border-radius: var(--card-border-radius);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 
-    /* Behavior */
+    /* Border */
+    border: var(--ec-border-width) solid rgba(var(--ec-accent-rgb), 0.2);
+    border-radius: var(--ec-border-radius);
+
+    /* Shadow */
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08),
+        0 4px 16px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    /* Interaction */
     cursor: pointer;
     text-decoration: none;
     color: inherit;
 
-    /* Animation */
+    /* Transitions */
     transition:
-        transform var(--card-transition),
-        border-color var(--card-transition),
-        box-shadow var(--card-transition);
+        transform var(--ec-transition),
+        box-shadow var(--ec-transition),
+        border-color var(--ec-transition);
+
     will-change: transform;
 }
 
-/* Top accent bar (hidden by default) */
-.entity-card::before,
-.universal-grid-card::before,
-.grid-card::before {
+/* ============================================================================
+   CARD SIZE VARIANTS - Density Options
+   ============================================================================ */
+
+.entity-card--xs {
+    min-height: var(--ec-min-height-xs);
+    --ec-icon-size: var(--ec-icon-size-xs);
+    --ec-content-padding: var(--ec-content-padding-sm);
+}
+
+.entity-card--sm,
+.entity-card--compact {
+    min-height: var(--ec-min-height-compact);
+    --ec-icon-size: var(--ec-icon-size-sm);
+    --ec-content-padding: var(--ec-content-padding-sm);
+}
+
+.entity-card--md {
+    min-height: var(--ec-min-height-md);
+    --ec-icon-size: var(--ec-icon-size-md);
+}
+
+.entity-card--lg {
+    min-height: var(--ec-min-height-lg);
+    --ec-icon-size: var(--ec-icon-size-lg);
+    --ec-content-padding: var(--ec-content-padding-lg);
+}
+
+.entity-card--xl {
+    min-height: var(--ec-min-height-xl);
+    --ec-icon-size: var(--ec-icon-size-xl);
+    --ec-content-padding: var(--ec-content-padding-lg);
+}
+
+.entity-card--full {
+    min-height: var(--ec-min-height-full);
+    cursor: default;
+}
+
+.entity-card--mini {
+    display: inline-flex;
+    min-height: auto;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    background: rgba(var(--ec-accent-rgb), 0.15);
+    border-color: rgba(var(--ec-accent-rgb), 0.3);
+}
+
+/* Grid density integration */
+.entity-grid[data-density="compact"] .entity-card,
+.entity-grid--compact .entity-card {
+    min-height: var(--ec-min-height-sm);
+    --ec-icon-size: var(--ec-icon-size-sm);
+    --ec-content-padding: var(--ec-content-padding-sm);
+    --ec-desc-lines: var(--ec-desc-lines-compact);
+}
+
+.entity-grid[data-density="detailed"] .entity-card,
+.entity-grid--detailed .entity-card {
+    min-height: var(--ec-min-height-lg);
+    --ec-icon-size: var(--ec-icon-size-lg);
+    --ec-content-padding: var(--ec-content-padding-lg);
+}
+
+/* ============================================================================
+   POLISHED CARD HOVER STATE - Beautiful Lift Effect
+   ============================================================================ */
+
+.entity-card:hover {
+    /* Beautiful lift with scale */
+    transform: translateY(var(--ec-hover-lift)) scale(var(--ec-hover-scale));
+
+    /* Enhanced shadow with glow */
+    box-shadow:
+        var(--ec-hover-shadow),
+        var(--ec-hover-glow);
+
+    /* Accent border glow */
+    border-color: rgba(var(--ec-accent-rgb), 0.5);
+}
+
+.entity-card:hover .entity-card__image {
+    transform: scale(var(--ec-image-hover-scale));
+}
+
+.entity-card:hover .entity-card__quick-actions {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.entity-card:hover .entity-card__title-link {
+    color: var(--ec-accent);
+}
+
+/* Add accent bar animation on hover */
+.entity-card::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: var(--card-accent-height);
+    height: 3px;
     background: linear-gradient(
         90deg,
-        var(--entity-accent),
-        rgba(var(--entity-accent-rgb), 0.6)
+        var(--ec-accent) 0%,
+        rgba(var(--ec-accent-rgb), 0.6) 50%,
+        var(--ec-accent) 100%
     );
+    background-size: 200% 100%;
     opacity: 0;
-    transition: opacity var(--card-transition);
-    z-index: 1;
+    transition: opacity var(--ec-transition-fast);
+    z-index: 5;
 }
 
-/* ============================================================================
-   CARD HOVER STATES
-   ============================================================================ */
-
-.entity-card:hover,
-.universal-grid-card:hover,
-.grid-card:hover {
-    transform: translateY(var(--hover-lift)) scale(var(--hover-scale));
-    border-color: var(--entity-accent);
-    box-shadow:
-        0 16px 40px rgba(0, 0, 0, 0.35),
-        0 0 24px rgba(var(--entity-accent-rgb), 0.25);
-}
-
-.entity-card[data-entity-type="deity"]:hover {
-    border-color: #FFD700;
-    box-shadow:
-        0 16px 48px rgba(0, 0, 0, 0.4),
-        0 0 32px rgba(255, 215, 0, 0.35),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.entity-card:hover::before,
-.universal-grid-card:hover::before,
-.grid-card:hover::before {
+.entity-card:hover::before {
     opacity: 1;
+    animation: accentShift 2s ease-in-out infinite;
 }
 
-/* Hover glow effect */
-.entity-card::after,
-.universal-grid-card::after,
-.grid-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    opacity: 0;
-    pointer-events: none;
-    background: radial-gradient(
-        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-        rgba(var(--entity-accent-rgb), 0.12) 0%,
-        transparent 60%
-    );
-    transition: opacity var(--card-transition);
+@keyframes accentShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
 }
 
-.entity-card:hover::after,
-.universal-grid-card:hover::after,
-.grid-card:hover::after {
-    opacity: 1;
+/* Subtle hover for compact grids */
+.entity-grid--compact .entity-card:hover,
+.entity-grid--ultra-compact .entity-card:hover {
+    transform: translateY(var(--ec-hover-lift-subtle)) scale(var(--ec-hover-scale-subtle));
 }
 
-/* ============================================================================
-   CARD FOCUS STATES (Accessibility)
-   ============================================================================ */
-
-.entity-card:focus,
-.entity-card:focus-visible,
-.universal-grid-card:focus,
-.universal-grid-card:focus-visible,
-.grid-card:focus,
-.grid-card:focus-visible {
-    outline: 3px solid var(--entity-accent);
-    outline-offset: 3px;
-    box-shadow:
-        0 0 0 6px rgba(var(--entity-accent-rgb), 0.2),
-        0 12px 32px rgba(0, 0, 0, 0.3);
-}
-
-.entity-card:focus:not(:focus-visible),
-.universal-grid-card:focus:not(:focus-visible),
-.grid-card:focus:not(:focus-visible) {
-    outline: none;
-}
-
-/* ============================================================================
-   CARD ACTIVE STATES
-   ============================================================================ */
-
-.entity-card:active,
-.universal-grid-card:active,
-.grid-card:active {
-    transform: translateY(-3px) scale(1.01);
+/* Active/pressed state */
+.entity-card:active {
+    transform: translateY(-2px) scale(1.005);
     transition-duration: 0.1s;
 }
 
 /* ============================================================================
-   CARD ICON CONTAINER
+   CARD FOCUS STATE (Accessibility)
    ============================================================================ */
 
-.entity-card .entity-icon,
-.entity-card .card-icon,
-.entity-card .grid-card-icon,
-.universal-grid-card .grid-card-icon,
-.grid-card .card-icon {
-    /* Layout */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--icon-size-lg);
-    height: var(--icon-size-lg);
-    margin: 0 auto 0.75rem auto;
-
-    /* Text (for emoji icons) */
-    font-size: calc(var(--icon-size-lg) * 0.7);
-    line-height: 1;
-
-    /* Animation */
-    transition: transform var(--card-transition), filter var(--card-transition);
-    filter: drop-shadow(0 2px 6px rgba(var(--entity-accent-rgb), 0.3));
+.entity-card:focus,
+.entity-card:focus-visible {
+    outline: 3px solid var(--ec-accent);
+    outline-offset: 2px;
 }
 
-/* Icon hover effect */
-.entity-card:hover .entity-icon,
-.entity-card:hover .card-icon,
-.entity-card:hover .grid-card-icon,
-.universal-grid-card:hover .grid-card-icon,
-.grid-card:hover .card-icon {
-    transform: scale(1.1) rotate(3deg);
-    filter: drop-shadow(0 4px 12px rgba(var(--entity-accent-rgb), 0.5));
+.entity-card:focus:not(:focus-visible) {
+    outline: none;
 }
 
-/* SVG/Image Icons */
-.entity-card .entity-icon img,
-.entity-card .card-icon img,
-.universal-grid-card .grid-card-icon img,
-img.entity-icon,
-.entity-icon-img {
+/* ============================================================================
+   IMAGE SECTION (Multiple Aspect Ratios)
+   ============================================================================ */
+
+.entity-card__image-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: var(--ec-image-aspect);
+    overflow: hidden;
+    background: linear-gradient(
+        135deg,
+        rgba(var(--ec-accent-rgb), 0.1) 0%,
+        rgba(var(--ec-accent-rgb), 0.05) 100%
+    );
+}
+
+/* Aspect ratio variants */
+.entity-card__image-wrapper--wide {
+    padding-top: var(--ec-image-aspect-wide);
+}
+
+.entity-card__image-wrapper--standard {
+    padding-top: var(--ec-image-aspect-standard);
+}
+
+.entity-card__image-wrapper--square {
+    padding-top: var(--ec-image-aspect-square);
+}
+
+.entity-card__image-wrapper--portrait {
+    padding-top: var(--ec-image-aspect-portrait);
+}
+
+.entity-card__image-wrapper--golden {
+    padding-top: var(--ec-image-aspect-golden);
+}
+
+.entity-card__image {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    max-width: var(--icon-size-lg);
-    max-height: var(--icon-size-lg);
-    object-fit: contain;
-    border-radius: 8px;
-    aspect-ratio: 1 / 1;
-    background: rgba(var(--entity-accent-rgb), 0.05);
-    transition: filter var(--card-transition), transform var(--card-transition);
+    object-fit: cover;
+    transition: transform var(--ec-transition), opacity var(--ec-transition);
+    opacity: 0;
 }
 
-.entity-card[data-entity-type="deity"] .entity-icon img,
-.entity-card[data-entity-type="deity"] .card-icon img,
-.entity-card[data-entity-type="deity"] .entity-icon-img {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 193, 7, 0.05));
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.15);
+.entity-card__image--loaded {
+    opacity: 1;
 }
 
-.entity-card[data-entity-type="deity"]:hover .entity-icon img,
-.entity-card[data-entity-type="deity"]:hover .card-icon img,
-.entity-card[data-entity-type="deity"]:hover .entity-icon-img {
-    filter: brightness(1.15) drop-shadow(0 0 8px rgba(255, 215, 0, 0.3));
-}
-
-/* Emoji/Text Icons */
-.entity-icon-text {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(var(--icon-size-lg) * 0.6);
-    line-height: 1;
-}
-
-/* Icon Fallback */
-.entity-icon-fallback,
-.icon-fallback {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--icon-size-lg);
-    height: var(--icon-size-lg);
+.entity-card__image-overlay {
+    position: absolute;
+    inset: 0;
     background: linear-gradient(
-        135deg,
-        rgba(var(--entity-accent-rgb), 0.2),
-        rgba(var(--entity-accent-rgb), 0.1)
+        to bottom,
+        transparent 60%,
+        rgba(0, 0, 0, 0.3) 100%
     );
-    border: 2px dashed rgba(var(--entity-accent-rgb), 0.3);
-    border-radius: 12px;
-    font-size: calc(var(--icon-size-lg) * 0.5);
-    color: rgba(var(--entity-accent-rgb), 0.7);
-    font-weight: 600;
-    text-transform: uppercase;
-    transition: all var(--card-transition);
-}
-
-.entity-card[data-entity-type="deity"] .icon-fallback {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.08));
-    border-color: rgba(255, 215, 0, 0.4);
-    color: #FFD700;
-}
-
-.entity-card[data-entity-type="deity"]:hover .icon-fallback {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.15));
-    border-color: rgba(255, 215, 0, 0.6);
-}
-
-/* Icon size modifiers */
-.entity-icon.small,
-.card-icon.small {
-    width: var(--icon-size-sm);
-    height: var(--icon-size-sm);
-    font-size: calc(var(--icon-size-sm) * 0.7);
-}
-
-.entity-icon.medium,
-.card-icon.medium {
-    width: var(--icon-size-md);
-    height: var(--icon-size-md);
-    font-size: calc(var(--icon-size-md) * 0.7);
-}
-
-.entity-icon.large,
-.card-icon.large {
-    width: var(--icon-size-xl);
-    height: var(--icon-size-xl);
-    font-size: calc(var(--icon-size-xl) * 0.7);
-}
-
-/* ============================================================================
-   CARD TITLE
-   ============================================================================ */
-
-.entity-card .entity-name,
-.entity-card .card-title,
-.entity-card .grid-card-title,
-.universal-grid-card .grid-card-title,
-.grid-card .card-title {
-    /* Typography */
-    font-family: 'Cinzel', Georgia, serif;
-    font-size: 1.1rem;
-    font-weight: 600;
-    line-height: 1.3;
-    text-align: center;
-    color: var(--color-text-primary, #e5e7eb);
-
-    /* Truncation */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    /* Spacing */
-    margin: 0 0 0.5rem 0;
-    padding: 0;
-}
-
-.entity-card .entity-name a,
-.entity-card .card-title a,
-.entity-card .grid-card-title a,
-.universal-grid-card .grid-card-title a {
-    color: inherit;
-    text-decoration: none;
-    transition: color var(--card-transition);
-}
-
-.entity-card:hover .entity-name,
-.entity-card:hover .card-title,
-.entity-card:hover .grid-card-title,
-.universal-grid-card:hover .grid-card-title {
-    color: var(--entity-accent);
-}
-
-/* ============================================================================
-   CARD SHORT DESCRIPTION
-   ============================================================================ */
-
-.entity-card .entity-subtitle,
-.entity-card .card-description,
-.entity-card .grid-card-description,
-.entity-card .entity-short-desc,
-.universal-grid-card .grid-card-description,
-.grid-card .card-description {
-    /* Typography */
-    font-size: 0.85rem;
-    font-weight: 400;
-    line-height: 1.5;
-    text-align: center;
-    color: var(--color-text-secondary, #9ca3af);
-
-    /* Truncation with ellipsis */
-    display: -webkit-box;
-    -webkit-line-clamp: var(--description-lines);
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    /* Spacing */
-    margin: 0 0 0.75rem 0;
-    flex: 1;
-}
-
-/* ============================================================================
-   CARD BADGES (Mythology & Entity Type)
-   ============================================================================ */
-
-.entity-card .card-meta,
-.entity-card .grid-card-meta,
-.entity-card .entity-badges,
-.universal-grid-card .grid-card-meta {
-    display: flex;
-    gap: 0.375rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 0.75rem;
-}
-
-.entity-type-badge,
-.mythology-badge,
-.card-badge {
-    /* Layout */
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.625rem;
-
-    /* Visual */
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    border-radius: 9999px;
-    white-space: nowrap;
-
-    /* Animation */
-    transition:
-        transform var(--card-transition),
-        background-color var(--card-transition);
-}
-
-/* Entity Type Badge */
-.entity-type-badge {
-    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
-    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
-    color: var(--color-primary, #8b7fff);
-}
-
-/* Mythology Badge */
-.mythology-badge {
-    background: rgba(var(--entity-accent-rgb), 0.2);
-    border: 1px solid rgba(var(--entity-accent-rgb), 0.4);
-    color: var(--entity-accent);
-}
-
-/* Badge hover */
-.entity-type-badge:hover,
-.mythology-badge:hover {
-    transform: scale(1.05);
-}
-
-.entity-card[data-entity-type="deity"] .mythology-badge {
-    background: rgba(var(--entity-accent-rgb), 0.2);
-    border-color: rgba(255, 215, 0, 0.5);
-    color: #FFD700;
-}
-
-/* ============================================================================
-   CARD TAGS
-   ============================================================================ */
-
-.entity-card .entity-tags,
-.entity-card .card-tags,
-.entity-card .grid-card-fields,
-.universal-grid-card .grid-card-fields {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
-    justify-content: center;
-    margin-top: auto;
-    padding-top: 0.5rem;
-}
-
-.entity-card .tag,
-.entity-card .field-item,
-.universal-grid-card .field-item {
-    padding: 0.2rem 0.5rem;
-    background: rgba(var(--color-secondary-rgb, 236, 72, 153), 0.15);
-    border: 1px solid rgba(var(--color-secondary-rgb, 236, 72, 153), 0.3);
-    border-radius: 0.375rem;
-    font-size: 0.7rem;
-    color: var(--color-text-secondary, #9ca3af);
-
-    /* Truncation for long tags */
-    max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.entity-card .tag .field-label,
-.entity-card .field-item .field-label {
-    font-weight: 600;
-    color: var(--color-text-primary, #e5e7eb);
-}
-
-/* ============================================================================
-   CARD FOOTER / ACTION BUTTON
-   ============================================================================ */
-
-.entity-card .card-footer,
-.entity-card .grid-card-footer,
-.universal-grid-card .grid-card-footer {
-    margin-top: auto;
-    padding-top: 0.75rem;
-    border-top: 1px solid rgba(var(--entity-accent-rgb), 0.2);
-    display: flex;
-    justify-content: center;
-}
-
-.entity-card .btn-view-details,
-.universal-grid-card .btn-view-details {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.5rem 1.25rem;
-
-    background: linear-gradient(
-        135deg,
-        var(--entity-accent),
-        rgba(var(--entity-accent-rgb), 0.8)
-    );
-    color: white;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-decoration: none;
-    border: none;
-    border-radius: 0.625rem;
-
-    transition:
-        transform var(--card-transition),
-        box-shadow var(--card-transition);
-}
-
-.entity-card .btn-view-details:hover,
-.universal-grid-card .btn-view-details:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(var(--entity-accent-rgb), 0.4);
-}
-
-.entity-card[data-entity-type="deity"] .btn-view-details {
-    background: linear-gradient(135deg, #FFD700, #FFC700);
-    color: #1a1f3a;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.entity-card[data-entity-type="deity"] .btn-view-details:hover {
-    background: linear-gradient(135deg, #FFED4E, #FFD700);
-    box-shadow:
-        0 4px 16px rgba(255, 215, 0, 0.5),
-        0 0 12px rgba(255, 215, 0, 0.3);
-}
-
-/* ============================================================================
-   COMPACT CARD VARIANT
-   ============================================================================ */
-
-.entity-card.compact,
-.universal-grid-card.compact,
-.density-compact .entity-card,
-.density-compact .universal-grid-card {
-    min-height: var(--card-min-height-compact);
-    padding: var(--card-padding-compact);
-}
-
-.density-compact .entity-icon,
-.density-compact .card-icon,
-.density-compact .grid-card-icon {
-    width: var(--icon-size-md);
-    height: var(--icon-size-md);
-    font-size: calc(var(--icon-size-md) * 0.7);
-    margin-bottom: 0.5rem;
-}
-
-.density-compact .entity-name,
-.density-compact .card-title,
-.density-compact .grid-card-title {
-    font-size: 0.95rem;
-    -webkit-line-clamp: 1;
-}
-
-.density-compact .entity-subtitle,
-.density-compact .card-description,
-.density-compact .grid-card-description {
-    font-size: 0.75rem;
-    -webkit-line-clamp: var(--description-lines-compact);
-}
-
-.density-compact .entity-type-badge,
-.density-compact .mythology-badge {
-    font-size: 0.6rem;
-    padding: 0.15rem 0.5rem;
-}
-
-/* ============================================================================
-   DETAILED CARD VARIANT
-   ============================================================================ */
-
-.entity-card.detailed,
-.universal-grid-card.detailed,
-.density-detailed .entity-card,
-.density-detailed .universal-grid-card {
-    min-height: var(--card-min-height-detailed);
-    padding: var(--card-padding-detailed);
-}
-
-.density-detailed .entity-icon,
-.density-detailed .card-icon,
-.density-detailed .grid-card-icon {
-    width: var(--icon-size-xl);
-    height: var(--icon-size-xl);
-    font-size: calc(var(--icon-size-xl) * 0.7);
-    margin-bottom: 1rem;
-}
-
-.density-detailed .entity-name,
-.density-detailed .card-title,
-.density-detailed .grid-card-title {
-    font-size: 1.3rem;
-}
-
-.density-detailed .entity-subtitle,
-.density-detailed .card-description,
-.density-detailed .grid-card-description {
-    font-size: 0.95rem;
-    -webkit-line-clamp: var(--description-lines-detailed);
-}
-
-/* ============================================================================
-   LIST VIEW CARD STYLES
-   ============================================================================ */
-
-.entity-grid.list-view .entity-card,
-.entity-grid.list-view .universal-grid-card,
-.universal-list .universal-list-item {
-    flex-direction: row;
-    align-items: center;
-    min-height: auto;
-    padding: 1rem 1.25rem;
-    gap: 1rem;
-}
-
-.entity-grid.list-view .entity-icon,
-.entity-grid.list-view .card-icon,
-.entity-grid.list-view .grid-card-icon {
-    margin: 0;
-    flex-shrink: 0;
-}
-
-.entity-grid.list-view .card-content,
-.entity-grid.list-view .grid-card-body {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-}
-
-.entity-grid.list-view .entity-name,
-.entity-grid.list-view .card-title,
-.entity-grid.list-view .grid-card-title {
-    text-align: left;
-    margin-bottom: 0.25rem;
-}
-
-.entity-grid.list-view .entity-subtitle,
-.entity-grid.list-view .card-description,
-.entity-grid.list-view .grid-card-description {
-    text-align: left;
-    margin-bottom: 0;
-}
-
-.entity-grid.list-view .card-meta,
-.entity-grid.list-view .grid-card-meta {
-    justify-content: flex-start;
-}
-
-/* ============================================================================
-   LOADING STATE SKELETON
-   ============================================================================ */
-
-.entity-card.loading,
-.entity-card.skeleton,
-.entity-card-loading,
-.universal-grid-card.loading {
     pointer-events: none;
 }
 
-.entity-card.loading .entity-icon,
-.entity-card.loading .card-title,
-.entity-card.loading .card-description,
-.entity-card.skeleton .entity-icon,
-.entity-card.skeleton .card-title,
-.entity-card.skeleton .card-description,
-.entity-card-loading .skeleton-icon,
-.entity-card-loading .skeleton-text,
-.entity-card-loading .skeleton-button {
+/* Image Skeleton (Loading) */
+.entity-card__image-skeleton {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: linear-gradient(
         90deg,
         rgba(var(--color-border-rgb, 42, 47, 74), 0.3) 0%,
@@ -987,98 +399,893 @@ img.entity-icon,
         rgba(var(--color-border-rgb, 42, 47, 74), 0.3) 100%
     );
     background-size: 200% 100%;
-    animation: shimmer 1.5s ease-in-out infinite;
-    color: transparent;
-    border-radius: 0.5rem;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
 }
 
-/* Skeleton icon placeholder */
-.entity-card-loading .skeleton-icon {
-    width: var(--icon-size-lg);
-    height: var(--icon-size-lg);
-    border-radius: 12px;
-}
-
-/* Skeleton text placeholders */
-.entity-card-loading .skeleton-text {
-    height: 1.2em;
+/* Image Fallback */
+.entity-card__image-fallback {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    margin-bottom: 0.5rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(
+        135deg,
+        rgba(var(--ec-accent-rgb), 0.2) 0%,
+        rgba(var(--ec-accent-rgb), 0.1) 100%
+    );
 }
 
-.entity-card-loading .skeleton-text-sm {
-    height: 0.9em;
-    width: 60%;
+.entity-card__image-fallback-letter {
+    font-family: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--ec-accent);
+    opacity: 0.6;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Skeleton button placeholder */
-.entity-card-loading .skeleton-button {
-    display: inline-block;
-    width: 100px;
-    height: 2rem;
-    border-radius: 0.625rem;
+.entity-card__image-fallback-pattern {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    color: var(--ec-accent);
+    opacity: 0.3;
 }
 
-@keyframes shimmer {
+/* ============================================================================
+   CARD CONTENT SECTION
+   ============================================================================ */
+
+.entity-card__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--ec-content-padding);
+    gap: 0.5rem;
+}
+
+/* Header (Icon + Title) */
+.entity-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+/* Icon */
+.entity-card__icon {
+    flex-shrink: 0;
+    width: var(--ec-icon-size);
+    height: var(--ec-icon-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(var(--ec-icon-size) * 0.6);
+    line-height: 1;
+    transition: transform var(--ec-transition);
+}
+
+.entity-card:hover .entity-card__icon {
+    transform: scale(1.1);
+}
+
+.entity-card__icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: var(--ec-border-radius-inner);
+    transition: opacity var(--ec-transition);
+}
+
+.entity-card__icon-img--loaded {
+    opacity: 1 !important;
+}
+
+.entity-card__icon-svg {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.entity-card__icon-svg svg {
+    width: 100%;
+    height: 100%;
+}
+
+.entity-card__icon-text {
+    font-size: calc(var(--ec-icon-size) * 0.65);
+}
+
+.entity-card__icon-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(var(--ec-accent-rgb), 0.2) 0%,
+        rgba(var(--ec-accent-rgb), 0.1) 100%
+    );
+    border: 2px dashed rgba(var(--ec-accent-rgb), 0.3);
+    border-radius: var(--ec-border-radius-inner);
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ec-accent);
+}
+
+/* ============================================================================
+   TITLE (Max 2 lines with CSS line-clamp)
+   ============================================================================ */
+
+.entity-card__title {
+    flex: 1;
+    margin: 0;
+    font-family: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+
+    /* CSS line-clamp for 2 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: var(--ec-title-lines);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    /* Text rendering */
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+.entity-card__title-link {
+    color: var(--color-text-primary, #e5e7eb);
+    text-decoration: none;
+    transition: color var(--ec-transition);
+}
+
+.entity-card__title-link:hover {
+    color: var(--ec-accent);
+}
+
+/* ============================================================================
+   DESCRIPTION (Max 3 lines with CSS line-clamp)
+   ============================================================================ */
+
+.entity-card__description {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--color-text-secondary, #9ca3af);
+
+    /* CSS line-clamp for 3 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: var(--ec-desc-lines);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    /* Text rendering */
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================================
+   METADATA PILLS (Mythology & Type Badges)
+   ============================================================================ */
+
+.entity-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: auto;
+}
+
+.entity-card__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: 9999px;
+    white-space: nowrap;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: transform var(--ec-transition-fast);
+}
+
+.entity-card__pill:hover {
+    transform: scale(1.05);
+}
+
+/* Mythology Badge */
+.entity-card__pill--mythology {
+    background: rgba(var(--ec-accent-rgb), 0.15);
+    border: 1px solid rgba(var(--ec-accent-rgb), 0.35);
+    color: var(--ec-accent);
+}
+
+/* Type Badge */
+.entity-card__pill--type {
+    background: rgba(var(--ec-type-color, var(--color-primary)), 0.15);
+    border: 1px solid rgba(var(--ec-type-color, var(--color-primary)), 0.35);
+    color: var(--ec-type-color, var(--color-primary));
+}
+
+.entity-card__pill .pill-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+    flex-shrink: 0;
+}
+
+.entity-card__pill .pill-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ============================================================================
+   QUICK ACTION BUTTONS (Show on Hover)
+   ============================================================================ */
+
+.entity-card__quick-actions {
+    position: absolute;
+    top: var(--ec-action-offset);
+    right: var(--ec-action-offset);
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    opacity: 0;
+    transform: translateX(0.5rem);
+    transition:
+        opacity var(--ec-transition),
+        transform var(--ec-transition);
+    z-index: 10;
+}
+
+.entity-card__action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ec-action-size);
+    height: var(--ec-action-size);
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    cursor: pointer;
+    transition:
+        background-color var(--ec-transition-fast),
+        transform var(--ec-transition-fast),
+        color var(--ec-transition-fast);
+}
+
+.entity-card__action-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: scale(1.1);
+}
+
+.entity-card__action-btn:focus-visible {
+    outline: 2px solid var(--ec-accent);
+    outline-offset: 2px;
+}
+
+.entity-card__action-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Favorite Button States */
+.entity-card__action-btn--favorite:hover {
+    color: #ff6b6b;
+}
+
+.entity-card__action-btn--favorited {
+    background: #ff6b6b;
+    color: #fff;
+}
+
+.entity-card__action-btn--favorited .entity-card__action-icon {
+    fill: currentColor;
+}
+
+.entity-card__action-btn--favorited:hover {
+    background: #ff5252;
+}
+
+/* Quick View Button */
+.entity-card__action-btn--quickview:hover {
+    color: var(--ec-accent);
+}
+
+/* Compare Button */
+.entity-card__action-btn--compare {
+    order: -1; /* Show first */
+}
+
+.entity-card__action-btn--compare:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.entity-card__action-btn--in-compare {
+    background: rgba(34, 197, 94, 0.2) !important;
+    color: #22c55e !important;
+    cursor: default;
+}
+
+.entity-card__action-btn--in-compare:hover {
+    background: rgba(34, 197, 94, 0.3) !important;
+}
+
+.entity-card__action-btn--in-compare .entity-card__action-icon {
+    fill: currentColor;
+}
+
+/* Loading State */
+.entity-card__action-btn--loading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.entity-card__action-btn--loading .entity-card__action-icon {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   CARD FOOTER
+   ============================================================================ */
+
+.entity-card__footer {
+    display: flex;
+    gap: 0.5rem;
+    padding: var(--ec-footer-padding);
+    border-top: 1px solid rgba(var(--ec-accent-rgb), 0.15);
+    margin-top: auto;
+}
+
+.entity-card__btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    border-radius: var(--ec-border-radius-inner);
+    cursor: pointer;
+    transition:
+        background-color var(--ec-transition-fast),
+        transform var(--ec-transition-fast),
+        box-shadow var(--ec-transition-fast);
+}
+
+.entity-card__btn--primary {
+    background: linear-gradient(135deg, var(--ec-accent), rgba(var(--ec-accent-rgb), 0.8));
+    color: #fff;
+}
+
+.entity-card__btn--primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(var(--ec-accent-rgb), 0.35);
+}
+
+.entity-card__btn--secondary {
+    background: rgba(var(--ec-accent-rgb), 0.1);
+    color: var(--ec-accent);
+    border: 1px solid rgba(var(--ec-accent-rgb), 0.25);
+}
+
+.entity-card__btn--secondary:hover {
+    background: rgba(var(--ec-accent-rgb), 0.2);
+}
+
+.entity-card__btn:focus-visible {
+    outline: 2px solid var(--ec-accent);
+    outline-offset: 2px;
+}
+
+/* ============================================================================
+   LOADING SKELETON STATE
+   ============================================================================ */
+
+.entity-card--loading {
+    pointer-events: none;
+}
+
+.skeleton-shimmer {
+    background: linear-gradient(
+        90deg,
+        rgba(var(--color-border-rgb, 42, 47, 74), 0.3) 0%,
+        rgba(var(--color-border-rgb, 42, 47, 74), 0.5) 50%,
+        rgba(var(--color-border-rgb, 42, 47, 74), 0.3) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--ec-border-radius-inner);
+}
+
+@keyframes skeleton-shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
 }
 
+.entity-card--loading .entity-card__icon {
+    width: var(--ec-icon-size);
+    height: var(--ec-icon-size);
+}
+
+.entity-card__title-skeleton {
+    height: 1.3rem;
+    width: 70%;
+    margin-top: 0.25rem;
+}
+
+.entity-card__desc-skeleton {
+    height: 0.875rem;
+    width: 100%;
+}
+
+.entity-card__desc-skeleton--short {
+    width: 60%;
+}
+
+.entity-card__badge-skeleton {
+    height: 1.25rem;
+    width: 4rem;
+    border-radius: 9999px;
+}
+
 /* ============================================================================
-   EMPTY STATE
+   WHISPER (Atmospheric Quote)
    ============================================================================ */
 
-.entity-grid-empty,
-.universal-grid-empty,
-.empty-state {
-    grid-column: 1 / -1;
+.entity-card__whisper {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(var(--ec-accent-rgb), 0.05);
+    border-left: 2px solid rgba(var(--ec-accent-rgb), 0.3);
+    border-radius: 0 var(--ec-border-radius-inner) var(--ec-border-radius-inner) 0;
+}
+
+.entity-card__whisper-text {
+    display: block;
+    font-style: italic;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary, #9ca3af);
+    line-height: 1.5;
+}
+
+.entity-card__whisper-source {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.65rem;
+    color: rgba(var(--ec-accent-rgb), 0.7);
+}
+
+/* ============================================================================
+   METADATA SECTION
+   ============================================================================ */
+
+.entity-card__metadata {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary, #9ca3af);
+}
+
+.entity-card__metadata-item {
+    padding: 0.25rem 0.5rem;
+    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.5);
+    border-radius: var(--ec-border-radius-inner);
+}
+
+.entity-card__metadata-item strong {
+    color: var(--color-text-primary, #e5e7eb);
+}
+
+/* ============================================================================
+   AUTHOR BADGE
+   ============================================================================ */
+
+.entity-card__author {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+    color: var(--color-text-tertiary, #6b7280);
+}
+
+.entity-card__author-label {
+    opacity: 0.7;
+}
+
+.entity-card__author-name {
+    color: var(--ec-accent);
+}
+
+/* ============================================================================
+   MINI CARD VARIANT
+   ============================================================================ */
+
+.entity-card--mini .entity-card__mini-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--ec-transition-fast);
+}
+
+.entity-card--mini .entity-card__mini-link:hover {
+    color: var(--ec-accent);
+}
+
+.entity-card--mini .entity-card__mini-icon {
+    display: flex;
     align-items: center;
     justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 0.875rem;
+}
+
+.entity-card--mini .entity-card__mini-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* ============================================================================
+   FULL CARD VARIANT
+   ============================================================================ */
+
+.entity-card--full {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.entity-card__hero {
+    padding: 2rem;
     text-align: center;
-    padding: 4rem 2rem;
-
-    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.4);
-    border: 2px dashed rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
-    border-radius: var(--card-border-radius);
+    color: #fff;
 }
 
-.empty-state .empty-icon {
-    font-size: 4rem;
+.entity-card__hero-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ec-icon-size-lg);
+    height: var(--ec-icon-size-lg);
+    margin-bottom: 1rem;
+    font-size: 2.5rem;
+}
+
+.entity-card__hero-title {
+    margin: 0 0 0.5rem;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.entity-card__hero-original {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.entity-card__hero-subtitle {
+    margin: 0;
+    font-size: 1rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.entity-card__body {
+    padding: 1.5rem;
+}
+
+.entity-card__section {
     margin-bottom: 1.5rem;
-    opacity: 0.5;
-    filter: grayscale(0.5);
 }
 
-.empty-state .empty-title {
-    font-size: 1.5rem;
+.entity-card__section:last-child {
+    margin-bottom: 0;
+}
+
+.entity-card__section-title {
+    margin: 0 0 0.75rem;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ec-accent);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(var(--ec-accent-rgb), 0.2);
+}
+
+.entity-card__section-content {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--color-text-secondary, #9ca3af);
+}
+
+.entity-card__section-content p {
+    margin: 0 0 1rem;
+}
+
+.entity-card__section-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Property Grid */
+.entity-card__property-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.entity-card__property {
+    padding: 0.75rem;
+    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.5);
+    border-radius: var(--ec-border-radius-inner);
+    border-left: 3px solid var(--ec-accent);
+}
+
+.entity-card__property-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-tertiary, #6b7280);
+    margin-bottom: 0.25rem;
+}
+
+.entity-card__property-value {
+    font-size: 0.9rem;
+    color: var(--color-text-primary, #e5e7eb);
+}
+
+/* Tags */
+.entity-card__tags-section {
+    margin-top: 1rem;
+}
+
+.entity-card__tags-title {
+    margin: 0 0 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-secondary, #9ca3af);
+}
+
+.entity-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.entity-card__tag {
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+    background: rgba(var(--ec-accent-rgb), 0.1);
+    border: 1px solid rgba(var(--ec-accent-rgb), 0.25);
+    border-radius: 9999px;
+    color: var(--ec-accent);
+}
+
+/* Related Entities */
+.entity-card__related-category {
+    margin-bottom: 1rem;
+}
+
+.entity-card__related-title {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-secondary, #9ca3af);
+}
+
+.entity-card__related-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.entity-card__mini-entity {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.5);
+    border: 1px solid rgba(var(--ec-accent-rgb), 0.2);
+    border-radius: var(--ec-border-radius-inner);
+    text-decoration: none;
+    color: var(--color-text-primary, #e5e7eb);
+    font-size: 0.8rem;
+    transition: border-color var(--ec-transition-fast), background var(--ec-transition-fast);
+}
+
+.entity-card__mini-entity:hover {
+    border-color: var(--ec-accent);
+    background: rgba(var(--ec-accent-rgb), 0.1);
+}
+
+.entity-card__mini-entity-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 0.875rem;
+}
+
+/* Sources */
+.entity-card__sources-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.entity-card__source {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(var(--color-border-rgb, 42, 47, 74), 0.3);
+    font-size: 0.85rem;
+    color: var(--color-text-secondary, #9ca3af);
+}
+
+.entity-card__source:last-child {
+    border-bottom: none;
+}
+
+.entity-card__source-link {
+    margin-left: 0.5rem;
+    color: var(--ec-accent);
+    text-decoration: none;
+}
+
+.entity-card__source-link:hover {
+    text-decoration: underline;
+}
+
+/* Archetypes */
+.entity-card__archetypes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.entity-card__archetype {
+    padding: 1rem;
+    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.5);
+    border-radius: var(--ec-border-radius-inner);
+}
+
+.entity-card__archetype-name {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--color-text-primary, #e5e7eb);
-    margin-bottom: 0.75rem;
 }
 
-.empty-state .empty-message {
-    font-size: 1rem;
+.entity-card__archetype-score {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.entity-card__score-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(var(--color-border-rgb, 42, 47, 74), 0.5);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.entity-card__score-fill {
+    height: 100%;
+    background: var(--ec-accent);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.entity-card__score-value {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ec-accent);
+    min-width: 2.5rem;
+    text-align: right;
+}
+
+.entity-card__archetype-context {
+    margin: 0;
+    font-size: 0.8rem;
     color: var(--color-text-secondary, #9ca3af);
-    max-width: 400px;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 /* ============================================================================
    ERROR STATE
    ============================================================================ */
 
-.entity-card.error,
-.entity-card-error {
-    border-color: rgba(239, 68, 68, 0.4);
+.entity-card--error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    border-color: rgba(239, 68, 68, 0.3);
     background: rgba(239, 68, 68, 0.05);
 }
 
-.entity-card.error::before,
-.entity-card-error::before {
-    background: #ef4444;
-    opacity: 1;
+.entity-card__error-icon {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+    color: #ef4444;
+}
+
+.entity-card__error-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.entity-card__error-title {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #e5e7eb);
+}
+
+.entity-card__error-id {
+    margin: 0 0 0.25rem;
+    font-size: 0.8rem;
+    font-family: monospace;
+    color: var(--color-text-secondary, #9ca3af);
+}
+
+.entity-card__error-detail {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #ef4444;
+}
+
+/* ============================================================================
+   PERSPECTIVES INDICATOR
+   ============================================================================ */
+
+.entity-card__perspectives {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+    color: var(--color-text-tertiary, #6b7280);
+}
+
+.entity-card__perspectives .perspectives-icon {
+    width: 1rem;
+    height: 1rem;
 }
 
 /* ============================================================================
@@ -1086,35 +1293,24 @@ img.entity-icon,
    ============================================================================ */
 
 @media (prefers-contrast: high) {
-    .entity-card,
-    .universal-grid-card,
-    .grid-card {
-        border-width: 3px;
-        border-color: var(--entity-accent);
+    .entity-card {
+        border-width: 2px;
+        border-color: var(--ec-accent);
     }
 
-    .entity-type-badge,
-    .mythology-badge {
+    .entity-card__pill {
         border-width: 2px;
         font-weight: 700;
     }
 
-    .entity-card[data-entity-type="deity"] {
-        border-width: 3px;
-        border-color: #FFD700;
-    }
-
     .entity-card:focus,
-    .universal-grid-card:focus,
-    .grid-card:focus {
+    .entity-card:focus-visible {
         outline-width: 4px;
         outline-offset: 4px;
     }
 
-    .entity-card[data-entity-type="deity"]:focus-visible {
-        outline-width: 4px;
-        outline-offset: 4px;
-        outline-color: #FFD700;
+    .entity-card__action-btn:focus-visible {
+        outline-width: 3px;
     }
 }
 
@@ -1124,112 +1320,138 @@ img.entity-icon,
 
 @media (prefers-reduced-motion: reduce) {
     .entity-card,
-    .universal-grid-card,
-    .grid-card,
-    .entity-icon,
-    .card-icon,
-    .grid-card-icon,
-    .entity-type-badge,
-    .mythology-badge,
-    .btn-view-details {
+    .entity-card__image,
+    .entity-card__icon,
+    .entity-card__quick-actions,
+    .entity-card__action-btn,
+    .entity-card__pill,
+    .entity-card__btn,
+    .entity-card__title-link {
         transition: none !important;
-        animation: none !important;
     }
 
-    .entity-card:hover,
-    .universal-grid-card:hover,
-    .grid-card:hover {
+    .entity-card:hover {
         transform: none;
     }
 
-    .entity-card:hover .entity-icon,
-    .entity-card:hover .card-icon,
-    .universal-grid-card:hover .grid-card-icon {
+    .entity-card:hover .entity-card__image {
         transform: none;
     }
 
-    .entity-card.loading .entity-icon,
-    .entity-card.loading .card-title,
-    .entity-card.loading .card-description,
-    .entity-card.skeleton .entity-icon,
-    .entity-card.skeleton .card-title,
-    .entity-card.skeleton .card-description {
+    .skeleton-shimmer,
+    .entity-card__image-skeleton {
         animation: none;
-        opacity: 0.6;
+        opacity: 0.5;
+    }
+
+    .entity-card__action-btn--loading .entity-card__action-icon {
+        animation: none;
     }
 }
 
 /* ============================================================================
-   RESPONSIVE - MOBILE OPTIMIZATIONS
+   RESPONSIVE - TABLET
    ============================================================================ */
 
-@media (max-width: 600px) {
-    .entity-card,
-    .universal-grid-card,
-    .grid-card {
-        min-height: 180px;
-        padding: 0.875rem;
+@media (max-width: 900px) {
+    :root {
+        --ec-min-height: 300px;
+        --ec-icon-size: 2.25rem;
+        --ec-action-size: 2rem;
     }
 
-    .entity-icon,
-    .card-icon,
-    .grid-card-icon {
-        width: var(--icon-size-md);
-        height: var(--icon-size-md);
-        font-size: calc(var(--icon-size-md) * 0.7);
-        margin-bottom: 0.5rem;
+    .entity-card__title {
+        font-size: 1rem;
     }
 
-    .entity-name,
-    .card-title,
-    .grid-card-title {
-        font-size: 0.95rem;
-    }
-
-    .entity-subtitle,
-    .card-description,
-    .grid-card-description {
+    .entity-card__description {
         font-size: 0.8rem;
         -webkit-line-clamp: 2;
     }
+}
 
-    .entity-type-badge,
-    .mythology-badge {
-        font-size: 0.6rem;
-        padding: 0.15rem 0.5rem;
+/* ============================================================================
+   RESPONSIVE - MOBILE
+   ============================================================================ */
+
+@media (max-width: 600px) {
+    :root {
+        --ec-min-height: 260px;
+        --ec-content-padding: 0.75rem;
+        --ec-icon-size: 2rem;
+        --ec-title-lines: 2;
+        --ec-desc-lines: 2;
     }
 
-    .btn-view-details {
+    .entity-card__title {
+        font-size: 0.95rem;
+    }
+
+    .entity-card__description {
+        font-size: 0.8rem;
+    }
+
+    .entity-card__pill {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.4rem;
+    }
+
+    .entity-card__btn {
         font-size: 0.75rem;
-        padding: 0.375rem 0.875rem;
+        padding: 0.4rem 0.75rem;
+    }
+
+    /* Always show quick actions on mobile (no hover) */
+    .entity-card__quick-actions {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Full card adjustments */
+    .entity-card__hero {
+        padding: 1.5rem 1rem;
+    }
+
+    .entity-card__hero-title {
+        font-size: 1.4rem;
+    }
+
+    .entity-card__body {
+        padding: 1rem;
+    }
+
+    .entity-card__property-grid {
+        grid-template-columns: 1fr;
     }
 }
 
-/* Touch device optimizations */
+/* ============================================================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ============================================================================ */
+
 @media (hover: none) and (pointer: coarse) {
-    .entity-card:hover,
-    .universal-grid-card:hover,
-    .grid-card:hover {
+    .entity-card:hover {
         transform: none;
     }
 
-    .entity-card:active,
-    .universal-grid-card:active,
-    .grid-card:active {
+    .entity-card:hover .entity-card__image {
+        transform: none;
+    }
+
+    .entity-card:active {
         transform: scale(0.98);
-        opacity: 0.9;
+        opacity: 0.95;
     }
 
-    .entity-card:hover::before,
-    .universal-grid-card:hover::before,
-    .grid-card:hover::before {
-        opacity: 0;
-    }
-
-    .entity-card:active::before,
-    .universal-grid-card:active::before,
-    .grid-card:active::before {
+    /* Always show quick actions on touch devices */
+    .entity-card__quick-actions {
         opacity: 1;
+        transform: translateX(0);
+    }
+
+    .entity-card__action-btn {
+        width: 2.5rem;
+        height: 2.5rem;
     }
 }
 
@@ -1238,29 +1460,33 @@ img.entity-icon,
    ============================================================================ */
 
 @media print {
-    .entity-card,
-    .universal-grid-card,
-    .grid-card {
+    .entity-card {
         break-inside: avoid;
         page-break-inside: avoid;
         border: 1px solid #ccc;
-        background: white;
-        color: black;
+        background: #fff;
+        color: #000;
         box-shadow: none;
         backdrop-filter: none;
     }
 
-    .entity-card::before,
-    .entity-card::after,
-    .universal-grid-card::before,
-    .universal-grid-card::after {
+    .entity-card__quick-actions,
+    .entity-card__footer {
         display: none;
     }
 
-    .btn-view-details,
-    .card-footer,
-    .grid-card-footer {
-        display: none;
+    .entity-card__image-wrapper {
+        background: #f0f0f0;
+    }
+
+    .entity-card__title-link {
+        color: #000;
+    }
+
+    .entity-card__pill {
+        border-color: #ccc;
+        background: #f5f5f5;
+        color: #333;
     }
 }
 
@@ -1271,7 +1497,7 @@ img.entity-icon,
 @keyframes cardFadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(16px);
     }
     to {
         opacity: 1;
@@ -1279,38 +1505,137 @@ img.entity-icon,
     }
 }
 
-.entity-grid > .entity-card,
-.entity-grid > .universal-grid-card,
-.universal-grid > .universal-grid-card {
-    animation: cardFadeIn 0.4s ease-out backwards;
+.entity-grid > .entity-card {
+    animation: cardFadeIn 0.35s ease-out backwards;
 }
 
-.entity-grid > :nth-child(1),
-.universal-grid > :nth-child(1) { animation-delay: 0.05s; }
-.entity-grid > :nth-child(2),
-.universal-grid > :nth-child(2) { animation-delay: 0.1s; }
-.entity-grid > :nth-child(3),
-.universal-grid > :nth-child(3) { animation-delay: 0.15s; }
-.entity-grid > :nth-child(4),
-.universal-grid > :nth-child(4) { animation-delay: 0.2s; }
-.entity-grid > :nth-child(5),
-.universal-grid > :nth-child(5) { animation-delay: 0.25s; }
-.entity-grid > :nth-child(6),
-.universal-grid > :nth-child(6) { animation-delay: 0.3s; }
-.entity-grid > :nth-child(7),
-.universal-grid > :nth-child(7) { animation-delay: 0.35s; }
-.entity-grid > :nth-child(8),
-.universal-grid > :nth-child(8) { animation-delay: 0.4s; }
-.entity-grid > :nth-child(n+9),
-.universal-grid > :nth-child(n+9) { animation-delay: 0.45s; }
+.entity-grid > .entity-card:nth-child(1) { animation-delay: 0.05s; }
+.entity-grid > .entity-card:nth-child(2) { animation-delay: 0.1s; }
+.entity-grid > .entity-card:nth-child(3) { animation-delay: 0.15s; }
+.entity-grid > .entity-card:nth-child(4) { animation-delay: 0.2s; }
+.entity-grid > .entity-card:nth-child(5) { animation-delay: 0.25s; }
+.entity-grid > .entity-card:nth-child(6) { animation-delay: 0.3s; }
+.entity-grid > .entity-card:nth-child(7) { animation-delay: 0.35s; }
+.entity-grid > .entity-card:nth-child(8) { animation-delay: 0.4s; }
+.entity-grid > .entity-card:nth-child(n+9) { animation-delay: 0.45s; }
 
 /* Disable stagger on mobile for performance */
 @media (max-width: 768px) {
-    .entity-grid > .entity-card,
-    .entity-grid > .universal-grid-card,
-    .universal-grid > .universal-grid-card {
+    .entity-grid > .entity-card {
         animation-delay: 0s !important;
     }
+}
+
+/* ============================================================================
+   LEGACY CLASS COMPATIBILITY
+   Maintains backward compatibility with older class names
+   ============================================================================ */
+
+/* Map old classes to new BEM structure */
+.entity-card .entity-icon-large,
+.entity-card .card-icon {
+    width: var(--ec-icon-size);
+    height: var(--ec-icon-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.entity-card .card-title {
+    font-family: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: var(--ec-title-lines);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.entity-card .card-description,
+.entity-card .entity-short-desc {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary, #9ca3af);
+    display: -webkit-box;
+    -webkit-line-clamp: var(--ec-desc-lines);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.entity-card .entity-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: 9999px;
+    background: rgba(var(--ec-type-color, var(--color-primary)), 0.15);
+    border: 1px solid rgba(var(--ec-type-color, var(--color-primary)), 0.35);
+    color: var(--ec-type-color, var(--color-primary));
+}
+
+.entity-card .mythology-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: 9999px;
+    background: rgba(var(--ec-accent-rgb), 0.15);
+    border: 1px solid rgba(var(--ec-accent-rgb), 0.35);
+    color: var(--ec-accent);
+}
+
+.entity-card .btn-view-details {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    border-radius: var(--ec-border-radius-inner);
+    background: linear-gradient(135deg, var(--ec-accent), rgba(var(--ec-accent-rgb), 0.8));
+    color: #fff;
+    cursor: pointer;
+    transition: transform var(--ec-transition-fast), box-shadow var(--ec-transition-fast);
+}
+
+.entity-card .btn-view-details:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(var(--ec-accent-rgb), 0.35);
+}
+
+.entity-card .entity-favorite {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(var(--ec-accent-rgb), 0.1);
+    color: var(--ec-accent);
+    cursor: pointer;
+    transition: background-color var(--ec-transition-fast), transform var(--ec-transition-fast);
+}
+
+.entity-card .entity-favorite:hover {
+    background: rgba(var(--ec-accent-rgb), 0.2);
+    transform: scale(1.1);
+}
+
+.entity-card .entity-favorite.favorited {
+    background: #ff6b6b;
+    color: #fff;
 }
 
 /* ============================================================================

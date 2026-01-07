@@ -1,0 +1,1375 @@
+/**
+ * Diagram Builder Styles
+ * Modern, interactive styles for the mythology diagram builder
+ *
+ * Features:
+ * - Dark theme with glass morphism effects
+ * - Responsive layout with collapsible panels
+ * - Smooth animations and transitions
+ * - Accessible focus states
+ * - Touch-friendly interactions
+ */
+
+/* ============================================
+   VARIABLES
+   ============================================ */
+.diagram-builder {
+    --db-bg-primary: var(--color-bg, #0a0f1e);
+    --db-bg-secondary: var(--color-bg-card, #1a1f3a);
+    --db-bg-tertiary: var(--color-bg-hover, #252a45);
+    --db-border: var(--color-border, #2a2f4a);
+    --db-border-active: var(--color-primary, #8b7fff);
+    --db-text-primary: var(--color-text-primary, #f8f9fa);
+    --db-text-secondary: var(--color-text-secondary, #a8adb3);
+    --db-accent: var(--color-primary, #8b7fff);
+    --db-accent-glow: rgba(139, 127, 255, 0.3);
+    --db-success: #2ecc71;
+    --db-warning: #f39c12;
+    --db-danger: #e74c3c;
+    --db-radius-sm: 4px;
+    --db-radius-md: 8px;
+    --db-radius-lg: 12px;
+    --db-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --db-transition: 0.2s ease;
+}
+
+/* ============================================
+   MAIN LAYOUT
+   ============================================ */
+.diagram-builder {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    background: var(--db-bg-primary);
+    color: var(--db-text-primary);
+    overflow: hidden;
+    font-family: var(--font-body, 'Inter', sans-serif);
+}
+
+/* ============================================
+   TOOLBAR
+   ============================================ */
+.diagram-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--db-bg-secondary);
+    border-bottom: 1px solid var(--db-border);
+    flex-shrink: 0;
+    gap: 1rem;
+    z-index: 100;
+}
+
+.toolbar-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.toolbar-left,
+.toolbar-right {
+    flex: 1;
+}
+
+.toolbar-left {
+    justify-content: flex-start;
+}
+
+.toolbar-center {
+    flex: 2;
+    justify-content: center;
+}
+
+.toolbar-right {
+    justify-content: flex-end;
+}
+
+.toolbar-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-md);
+    color: var(--db-text-primary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--db-transition);
+    white-space: nowrap;
+}
+
+.toolbar-btn:hover:not(:disabled) {
+    background: var(--db-bg-tertiary);
+    border-color: var(--db-accent);
+}
+
+.toolbar-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.toolbar-btn .btn-icon {
+    font-size: 1rem;
+}
+
+.toolbar-btn .btn-label {
+    display: inline;
+}
+
+@media (max-width: 768px) {
+    .toolbar-btn .btn-label {
+        display: none;
+    }
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--db-border);
+    margin: 0 0.25rem;
+}
+
+.toolbar-select {
+    padding: 0.5rem 0.75rem;
+    background: var(--db-bg-tertiary);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-md);
+    color: var(--db-text-primary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+.toolbar-select:focus {
+    outline: none;
+    border-color: var(--db-accent);
+}
+
+.diagram-title-input {
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--db-radius-md);
+    color: var(--db-text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 200px;
+    max-width: 300px;
+    transition: all var(--db-transition);
+}
+
+.diagram-title-input:hover {
+    background: var(--db-bg-tertiary);
+    border-color: var(--db-border);
+}
+
+.diagram-title-input:focus {
+    outline: none;
+    background: var(--db-bg-tertiary);
+    border-color: var(--db-accent);
+}
+
+.diagram-title-input::placeholder {
+    color: var(--db-text-secondary);
+    font-style: italic;
+}
+
+/* ============================================
+   MAIN CONTENT AREA
+   ============================================ */
+.diagram-main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* ============================================
+   PANELS (LEFT & RIGHT)
+   ============================================ */
+.diagram-panel {
+    width: 280px;
+    background: var(--db-bg-secondary);
+    border-color: var(--db-border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width var(--db-transition), transform var(--db-transition);
+}
+
+.panel-left {
+    border-right: 1px solid var(--db-border);
+}
+
+.panel-right {
+    border-left: 1px solid var(--db-border);
+}
+
+.diagram-panel.collapsed {
+    width: 48px;
+}
+
+.diagram-panel.collapsed .panel-content {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.diagram-panel.collapsed .panel-header h3 {
+    display: none;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--db-border);
+    flex-shrink: 0;
+}
+
+.panel-header h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.panel-toggle {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-sm);
+    color: var(--db-text-secondary);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all var(--db-transition);
+}
+
+.panel-toggle:hover {
+    background: var(--db-bg-tertiary);
+    color: var(--db-text-primary);
+}
+
+.panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: opacity var(--db-transition), visibility var(--db-transition);
+}
+
+/* ============================================
+   ENTITY SEARCH & PALETTE
+   ============================================ */
+.entity-search {
+    position: relative;
+}
+
+.entity-search input {
+    width: 100%;
+    padding: 0.6rem 0.75rem 0.6rem 2.2rem;
+    background: var(--db-bg-tertiary);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-md);
+    color: var(--db-text-primary);
+    font-size: 0.85rem;
+}
+
+.entity-search input:focus {
+    outline: none;
+    border-color: var(--db-accent);
+    box-shadow: 0 0 0 3px var(--db-accent-glow);
+}
+
+.entity-search .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+    opacity: 0.6;
+}
+
+.entity-filters {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-select {
+    flex: 1;
+    padding: 0.5rem;
+    background: var(--db-bg-tertiary);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-md);
+    color: var(--db-text-primary);
+    font-size: 0.75rem;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--db-accent);
+}
+
+.entity-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 200px;
+}
+
+.entity-list-placeholder,
+.entity-list-loading,
+.entity-list-error {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--db-text-secondary);
+    font-size: 0.85rem;
+}
+
+.entity-list-error {
+    color: var(--db-danger);
+}
+
+/* Entity Cards in Palette */
+.entity-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem;
+    background: var(--db-bg-tertiary);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-md);
+    cursor: grab;
+    transition: all var(--db-transition);
+}
+
+.entity-card:hover {
+    background: var(--db-bg-secondary);
+    border-color: var(--db-accent);
+    transform: translateX(4px);
+}
+
+.entity-card:active {
+    cursor: grabbing;
+}
+
+.entity-card-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--db-bg-primary);
+    border-radius: var(--db-radius-sm);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.entity-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.entity-card-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.entity-card-meta {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    color: var(--db-text-secondary);
+}
+
+.entity-type,
+.entity-mythology {
+    text-transform: capitalize;
+}
+
+/* Recently Used Section */
+.recently-used {
+    border-top: 1px solid var(--db-border);
+    padding-top: 1rem;
+}
+
+.recently-used h4 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--db-text-secondary);
+    margin: 0 0 0.75rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.recent-entities-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* ============================================
+   CANVAS AREA
+   ============================================ */
+.diagram-canvas-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: var(--db-bg-primary);
+}
+
+.canvas-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 50% 50%, rgba(139, 127, 255, 0.03) 0%, transparent 50%),
+        linear-gradient(135deg, rgba(10, 15, 30, 0.95) 0%, rgba(26, 31, 58, 0.9) 100%);
+    pointer-events: none;
+}
+
+.diagram-canvas {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.diagram-svg {
+    display: block;
+    cursor: default;
+}
+
+.diagram-svg:focus {
+    outline: none;
+}
+
+.canvas-grid {
+    opacity: 0.3;
+}
+
+/* Canvas Controls Overlay */
+.canvas-controls {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 50;
+}
+
+.zoom-indicator {
+    padding: 0.4rem 0.75rem;
+    background: var(--db-bg-secondary);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-md);
+    font-size: 0.8rem;
+    color: var(--db-text-secondary);
+}
+
+/* Canvas Help Overlay */
+.canvas-help {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 60;
+    max-width: 400px;
+}
+
+.canvas-help.hidden {
+    display: none;
+}
+
+.canvas-help .help-content {
+    background: var(--db-bg-secondary);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--db-shadow);
+}
+
+.canvas-help p {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.9rem;
+}
+
+.canvas-help ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    font-size: 0.85rem;
+    color: var(--db-text-secondary);
+}
+
+.canvas-help li {
+    margin-bottom: 0.4rem;
+}
+
+.dismiss-help {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.6rem;
+    background: var(--db-accent);
+    border: none;
+    border-radius: var(--db-radius-md);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--db-transition);
+}
+
+.dismiss-help:hover {
+    filter: brightness(1.1);
+}
+
+/* ============================================
+   SVG DIAGRAM ELEMENTS
+   ============================================ */
+.links-layer .link-group {
+    cursor: pointer;
+}
+
+.links-layer .link-line {
+    fill: none;
+    stroke: #95a5a6;
+    stroke-width: 2;
+    transition: stroke-width var(--db-transition);
+}
+
+.links-layer .link-group:hover .link-line {
+    stroke-width: 4;
+}
+
+.links-layer .link-label {
+    fill: var(--db-text-secondary);
+    font-size: 11px;
+    pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.temp-connection {
+    stroke: var(--db-accent);
+    stroke-width: 2;
+    stroke-dasharray: 8, 4;
+    opacity: 0.7;
+}
+
+.nodes-layer .node-group {
+    cursor: grab;
+}
+
+.nodes-layer .node-group:active {
+    cursor: grabbing;
+}
+
+.nodes-layer .node-bg {
+    fill: var(--db-bg-secondary);
+    stroke: var(--db-border);
+    stroke-width: 1;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+    transition: all var(--db-transition);
+}
+
+.nodes-layer .node-group:hover .node-bg {
+    fill: var(--db-bg-tertiary);
+    stroke: var(--db-accent);
+}
+
+.nodes-layer .node-icon {
+    pointer-events: none;
+    dominant-baseline: middle;
+}
+
+.nodes-layer .node-name {
+    fill: var(--db-text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.nodes-layer .node-mythology {
+    fill: var(--db-text-secondary);
+    pointer-events: none;
+    text-transform: capitalize;
+}
+
+/* ============================================
+   PROPERTIES PANEL
+   ============================================ */
+.properties-placeholder {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--db-text-secondary);
+    font-size: 0.85rem;
+}
+
+.properties-section {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--db-border);
+    margin-bottom: 1rem;
+}
+
+.properties-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.properties-section h4 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--db-text-secondary);
+    margin: 0 0 0.75rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.property-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+}
+
+.property-row label {
+    width: 70px;
+    font-size: 0.8rem;
+    color: var(--db-text-secondary);
+    flex-shrink: 0;
+}
+
+.property-row input,
+.property-row select {
+    flex: 1;
+    padding: 0.5rem;
+    background: var(--db-bg-tertiary);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-sm);
+    color: var(--db-text-primary);
+    font-size: 0.85rem;
+}
+
+.property-row input:focus,
+.property-row select:focus {
+    outline: none;
+    border-color: var(--db-accent);
+}
+
+.property-value {
+    flex: 1;
+    font-size: 0.85rem;
+    color: var(--db-text-primary);
+}
+
+.connections-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.connection-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    background: var(--db-bg-tertiary);
+    border-radius: var(--db-radius-sm);
+    font-size: 0.8rem;
+}
+
+.connection-icon {
+    font-size: 0.9rem;
+}
+
+.no-connections {
+    font-size: 0.8rem;
+    color: var(--db-text-secondary);
+    font-style: italic;
+}
+
+.properties-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.btn-action {
+    padding: 0.6rem;
+    background: var(--db-bg-tertiary);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-md);
+    color: var(--db-text-primary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--db-transition);
+}
+
+.btn-action:hover {
+    background: var(--db-bg-secondary);
+    border-color: var(--db-accent);
+}
+
+.btn-action.btn-danger {
+    color: var(--db-danger);
+}
+
+.btn-action.btn-danger:hover {
+    background: rgba(231, 76, 60, 0.1);
+    border-color: var(--db-danger);
+}
+
+/* ============================================
+   STATUS BAR
+   ============================================ */
+.diagram-statusbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 1rem;
+    background: var(--db-bg-secondary);
+    border-top: 1px solid var(--db-border);
+    font-size: 0.75rem;
+    color: var(--db-text-secondary);
+    flex-shrink: 0;
+}
+
+.status-divider {
+    margin: 0 0.5rem;
+    opacity: 0.5;
+}
+
+.status-center {
+    color: var(--db-success);
+}
+
+/* ============================================
+   MODALS
+   ============================================ */
+.diagram-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.diagram-modal {
+    background: var(--db-bg-secondary);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-lg);
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--db-border);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--db-text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    border-radius: var(--db-radius-sm);
+    transition: all var(--db-transition);
+}
+
+.modal-close:hover {
+    background: var(--db-bg-tertiary);
+    color: var(--db-text-primary);
+}
+
+.modal-body {
+    padding: 1.25rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--db-border);
+}
+
+.btn-cancel,
+.btn-confirm {
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--db-radius-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--db-transition);
+}
+
+.btn-cancel {
+    background: transparent;
+    border: 1px solid var(--db-border);
+    color: var(--db-text-primary);
+}
+
+.btn-cancel:hover {
+    background: var(--db-bg-tertiary);
+}
+
+.btn-confirm {
+    background: var(--db-accent);
+    border: none;
+    color: white;
+}
+
+.btn-confirm:hover {
+    filter: brightness(1.1);
+}
+
+/* Connection Summary */
+.connection-summary {
+    text-align: center;
+    padding: 1rem;
+    background: var(--db-bg-tertiary);
+    border-radius: var(--db-radius-md);
+    margin-bottom: 1rem;
+}
+
+.connection-arrow {
+    display: inline-block;
+    margin: 0 0.75rem;
+    color: var(--db-accent);
+    font-size: 1.2rem;
+}
+
+/* Relationship Type Grid */
+.relationship-type-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.relationship-type-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.75rem;
+    background: var(--db-bg-tertiary);
+    border: 2px solid var(--db-border);
+    border-radius: var(--db-radius-md);
+    color: var(--db-text-primary);
+    cursor: pointer;
+    transition: all var(--db-transition);
+}
+
+.relationship-type-btn:hover {
+    background: var(--db-bg-secondary);
+    border-color: var(--db-accent);
+}
+
+.relationship-type-btn.selected {
+    background: rgba(139, 127, 255, 0.15);
+    border-color: var(--db-accent);
+}
+
+.relationship-type-btn .type-icon {
+    font-size: 1.3rem;
+}
+
+.relationship-type-btn .type-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Custom Label Input */
+.custom-label-input {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--db-border);
+}
+
+.custom-label-input label {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.custom-label-input input {
+    width: 100%;
+    padding: 0.6rem;
+    background: var(--db-bg-tertiary);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-md);
+    color: var(--db-text-primary);
+}
+
+.custom-label-input input:focus {
+    outline: none;
+    border-color: var(--db-accent);
+}
+
+/* Export Modal */
+.export-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.export-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--db-bg-tertiary);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-md);
+    color: var(--db-text-primary);
+    cursor: pointer;
+    transition: all var(--db-transition);
+    text-align: left;
+}
+
+.export-option:hover {
+    background: var(--db-bg-secondary);
+    border-color: var(--db-accent);
+}
+
+.export-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    text-align: center;
+}
+
+.export-label {
+    font-weight: 600;
+    display: block;
+}
+
+.export-desc {
+    font-size: 0.8rem;
+    color: var(--db-text-secondary);
+}
+
+/* Load Modal */
+.load-modal {
+    max-width: 600px;
+}
+
+.diagrams-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.diagram-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--db-bg-tertiary);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-md);
+    transition: all var(--db-transition);
+}
+
+.diagram-list-item:hover {
+    border-color: var(--db-accent);
+}
+
+.diagram-item-title {
+    font-weight: 600;
+}
+
+.diagram-item-meta {
+    font-size: 0.8rem;
+    color: var(--db-text-secondary);
+    margin-top: 0.25rem;
+}
+
+.meta-divider {
+    margin: 0 0.5rem;
+    opacity: 0.5;
+}
+
+.btn-load-diagram {
+    padding: 0.4rem 1rem;
+    background: var(--db-accent);
+    border: none;
+    border-radius: var(--db-radius-md);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--db-transition);
+}
+
+.btn-load-diagram:hover {
+    filter: brightness(1.1);
+}
+
+.diagrams-loading,
+.no-diagrams,
+.error {
+    text-align: center;
+    padding: 2rem;
+    color: var(--db-text-secondary);
+}
+
+.error {
+    color: var(--db-danger);
+}
+
+/* ============================================
+   CONTEXT MENU
+   ============================================ */
+.context-menu {
+    position: fixed;
+    background: var(--db-bg-secondary);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-md);
+    padding: 0.4rem 0;
+    min-width: 160px;
+    box-shadow: var(--db-shadow);
+    z-index: 1100;
+    animation: fadeIn 0.15s ease;
+}
+
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background var(--db-transition);
+}
+
+.context-menu-item:hover {
+    background: var(--db-bg-tertiary);
+}
+
+.context-menu-item.danger {
+    color: var(--db-danger);
+}
+
+.context-menu-item.danger:hover {
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.menu-icon {
+    width: 20px;
+    text-align: center;
+}
+
+.context-menu-divider {
+    height: 1px;
+    background: var(--db-border);
+    margin: 0.4rem 0;
+}
+
+/* ============================================
+   SUGGESTION POPUP
+   ============================================ */
+.suggestion-popup {
+    position: fixed;
+    background: var(--db-bg-secondary);
+    border: 1px solid var(--db-accent);
+    border-radius: var(--db-radius-md);
+    box-shadow: var(--db-shadow);
+    z-index: 200;
+    max-width: 300px;
+    animation: slideIn 0.2s ease;
+}
+
+.suggestion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.75rem;
+    background: rgba(139, 127, 255, 0.1);
+    border-bottom: 1px solid var(--db-border);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.suggestion-close {
+    background: none;
+    border: none;
+    color: var(--db-text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.suggestion-close:hover {
+    color: var(--db-text-primary);
+}
+
+.suggestion-list {
+    padding: 0.5rem;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: var(--db-radius-sm);
+    margin-bottom: 0.25rem;
+    background: var(--db-bg-tertiary);
+}
+
+.suggestion-icon {
+    font-size: 1rem;
+}
+
+.suggestion-text {
+    flex: 1;
+    font-size: 0.8rem;
+}
+
+.suggestion-apply {
+    padding: 0.3rem 0.6rem;
+    background: var(--db-accent);
+    border: none;
+    border-radius: var(--db-radius-sm);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.suggestion-apply:hover {
+    filter: brightness(1.1);
+}
+
+/* ============================================
+   ERROR STATE
+   ============================================ */
+.diagram-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2rem;
+    text-align: center;
+}
+
+.diagram-error .error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.diagram-error h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+}
+
+.diagram-error p {
+    color: var(--db-text-secondary);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 1024px) {
+    .diagram-panel {
+        width: 240px;
+    }
+}
+
+@media (max-width: 768px) {
+    .diagram-main {
+        flex-direction: column;
+    }
+
+    .diagram-panel {
+        width: 100%;
+        height: auto;
+        max-height: 40vh;
+        border-left: none;
+        border-right: none;
+    }
+
+    .panel-left {
+        border-bottom: 1px solid var(--db-border);
+        order: -1;
+    }
+
+    .panel-right {
+        border-top: 1px solid var(--db-border);
+        order: 1;
+    }
+
+    .diagram-panel.collapsed {
+        max-height: 40px;
+        width: 100%;
+    }
+
+    .diagram-canvas-container {
+        min-height: 50vh;
+    }
+
+    .toolbar-center {
+        flex: 1;
+    }
+
+    .diagram-title-input {
+        min-width: 120px;
+    }
+
+    .relationship-type-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .toolbar-section {
+        gap: 0.25rem;
+    }
+
+    .toolbar-btn {
+        padding: 0.4rem;
+    }
+
+    .diagram-title-input {
+        font-size: 0.9rem;
+    }
+
+    .relationship-type-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ============================================
+   TOUCH DEVICE ENHANCEMENTS
+   ============================================ */
+@media (hover: none) and (pointer: coarse) {
+    .entity-card,
+    .toolbar-btn,
+    .context-menu-item,
+    .relationship-type-btn {
+        min-height: 44px; /* iOS recommended touch target */
+    }
+
+    .entity-card {
+        cursor: pointer;
+    }
+
+    .nodes-layer .node-group {
+        cursor: pointer;
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+@media print {
+    .diagram-toolbar,
+    .diagram-panel,
+    .diagram-statusbar,
+    .canvas-controls,
+    .canvas-help {
+        display: none !important;
+    }
+
+    .diagram-canvas-container {
+        width: 100%;
+        height: auto;
+    }
+
+    .diagram-svg {
+        width: 100%;
+        height: auto;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+.diagram-builder *:focus-visible {
+    outline: 2px solid var(--db-accent);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .diagram-builder *,
+    .diagram-builder *::before,
+    .diagram-builder *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

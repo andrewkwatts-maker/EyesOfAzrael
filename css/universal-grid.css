@@ -1,153 +1,593 @@
 /**
  * Universal Grid CSS
- * Responsive grid system for entity rendering
+ * Polished responsive grid system for entity rendering
+ *
+ * Features:
+ * - Consistent responsive breakpoints (1/2/3/4/5 columns)
+ * - Multiple grid variants (default, compact, comfortable, detailed)
+ * - Card height consistency with CSS Grid and subgrid
+ * - Masonry-style layout option for mixed content
+ * - Image container standardization with aspect ratios
+ * - Proper alignment and gap scaling
+ * - Last row handling to prevent stretching
+ * - Sacred geometry inspired proportions (golden ratio)
+ * - Infinite scroll container support
+ * - Polished loading skeleton states
+ * - Beautiful hover lift effects
  *
  * Breakpoints:
- * - Mobile Portrait: 2 columns (< 576px)
- * - Mobile Landscape: 4 columns (576px - 768px)
- * - Tablet: 3 columns (768px - 1024px)
- * - Desktop: 4 columns (> 1024px)
+ * - Mobile Portrait: 1-2 columns (< 480px)
+ * - Mobile Landscape: 2 columns (480px - 640px)
+ * - Tablet Portrait: 2-3 columns (640px - 900px)
+ * - Tablet Landscape: 3-4 columns (900px - 1200px)
+ * - Desktop: 4 columns (1200px - 1600px)
+ * - Large Desktop: 5-6 columns (> 1600px)
+ *
+ * Last updated: 2026-01-07
  */
 
 /* ============================================
-   UNIVERSAL GRID CONTAINER
+   CSS CUSTOM PROPERTIES - Grid Design Tokens
+   ============================================ */
+
+:root {
+    /* Grid Gaps - Responsive scaling with golden ratio */
+    --grid-gap: 1.5rem;           /* 24px - Desktop default */
+    --grid-gap-lg: 2rem;          /* 32px - Large/detailed */
+    --grid-gap-md: 1.25rem;       /* 20px - Tablet */
+    --grid-gap-sm: 1rem;          /* 16px - Mobile */
+    --grid-gap-xs: 0.75rem;       /* 12px - Compact */
+    --grid-gap-xxs: 0.5rem;       /* 8px - Ultra compact */
+
+    /* Grid Container Padding - Consistent insets */
+    --grid-padding: 1.5rem;
+    --grid-padding-lg: 2rem;
+    --grid-padding-md: 1.25rem;
+    --grid-padding-sm: 1rem;
+    --grid-padding-xs: 0.75rem;
+
+    /* Card Sizing - Responsive min-widths */
+    --card-min-width: 280px;
+    --card-min-width-xs: 160px;   /* Ultra compact */
+    --card-min-width-sm: 200px;   /* Compact */
+    --card-min-width-md: 260px;   /* Comfortable */
+    --card-min-width-lg: 320px;   /* Detailed/Large */
+    --card-min-width-xl: 400px;   /* Featured */
+
+    /* Card Heights - Consistent sizing */
+    --card-min-height: 300px;
+    --card-min-height-xs: 180px;
+    --card-min-height-sm: 220px;
+    --card-min-height-md: 280px;
+    --card-min-height-lg: 360px;
+    --card-min-height-xl: 440px;
+
+    /* Image Aspect Ratios */
+    --image-aspect-ratio: 16 / 9;
+    --image-aspect-ratio-wide: 21 / 9;
+    --image-aspect-ratio-standard: 4 / 3;
+    --image-aspect-ratio-square: 1 / 1;
+    --image-aspect-ratio-portrait: 3 / 4;
+    --image-aspect-ratio-golden: 1.618 / 1;
+
+    /* Grid Max Width */
+    --grid-max-width: 1800px;
+    --grid-max-width-narrow: 1200px;
+    --grid-max-width-wide: 2200px;
+
+    /* Hover/Lift Effects */
+    --grid-card-lift: -6px;
+    --grid-card-lift-subtle: -3px;
+    --grid-card-scale: 1.02;
+    --grid-card-scale-subtle: 1.01;
+
+    /* Animation Timing */
+    --grid-transition-fast: 0.15s ease-out;
+    --grid-transition-normal: 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+    --grid-transition-slow: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ============================================
+   ENTITY GRID - Primary Grid System
+   ============================================ */
+
+.entity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
+    gap: var(--grid-gap);
+    width: 100%;
+    max-width: var(--grid-max-width);
+    margin: 0 auto;
+    padding: var(--grid-padding);
+
+    /* Prevent last row items from stretching */
+    align-content: start;
+    justify-content: center;
+
+    /* Smooth container for scroll behavior */
+    scroll-behavior: smooth;
+}
+
+/* ============================================
+   GRID DENSITY VARIANTS
+   ============================================ */
+
+/* Compact: Tighter spacing, smaller cards */
+.entity-grid--compact,
+.entity-grid[data-density="compact"] {
+    --card-min-width: var(--card-min-width-sm);
+    --card-min-height: var(--card-min-height-sm);
+    gap: var(--grid-gap-xs);
+    padding: var(--grid-padding-sm);
+}
+
+/* Comfortable: Default balanced spacing (explicit) */
+.entity-grid--comfortable,
+.entity-grid[data-density="comfortable"] {
+    --card-min-width: var(--card-min-width-md);
+    --card-min-height: var(--card-min-height-md);
+    gap: var(--grid-gap);
+    padding: var(--grid-padding);
+}
+
+/* Detailed: More space, larger cards, richer content */
+.entity-grid--detailed,
+.entity-grid[data-density="detailed"] {
+    --card-min-width: var(--card-min-width-lg);
+    --card-min-height: var(--card-min-height-lg);
+    gap: var(--grid-gap-lg);
+    padding: var(--grid-padding-lg);
+}
+
+/* Large: Featured content with extra breathing room */
+.entity-grid--large,
+.entity-grid[data-density="large"] {
+    --card-min-width: var(--card-min-width-xl);
+    --card-min-height: var(--card-min-height-xl);
+    gap: var(--grid-gap-lg);
+    padding: var(--grid-padding-lg);
+}
+
+/* Ultra-compact: Maximum density for overview/browse */
+.entity-grid--ultra-compact,
+.entity-grid[data-density="ultra-compact"] {
+    --card-min-width: var(--card-min-width-xs);
+    --card-min-height: var(--card-min-height-xs);
+    gap: var(--grid-gap-xxs);
+    padding: var(--grid-padding-xs);
+}
+
+/* ============================================
+   FIXED COLUMN VARIANTS
+   ============================================ */
+
+.entity-grid--1-col {
+    grid-template-columns: 1fr;
+    max-width: var(--grid-max-width-narrow);
+}
+
+.entity-grid--2-col {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.entity-grid--3-col {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.entity-grid--4-col {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.entity-grid--5-col {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.entity-grid--6-col {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+/* Auto-fit variants (shrink columns to fit) */
+.entity-grid--auto-fit {
+    grid-template-columns: repeat(auto-fit, minmax(var(--card-min-width), 1fr));
+}
+
+/* Center last row items (prevents stretching odd items) */
+.entity-grid--center-last {
+    justify-content: center;
+}
+
+/* ============================================
+   MASONRY-STYLE GRID (CSS Grid version)
+   For mixed content heights - uses grid-auto-rows
+   ============================================ */
+
+.entity-grid--masonry {
+    grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
+    grid-auto-rows: 10px;
+    align-items: start;
+}
+
+.entity-grid--masonry > * {
+    /* Cards determine their own row span based on content */
+    grid-row: span var(--masonry-span, 25);
+}
+
+/* Masonry height variants for cards */
+.entity-grid--masonry .grid-card--short { --masonry-span: 20; }
+.entity-grid--masonry .grid-card--medium { --masonry-span: 28; }
+.entity-grid--masonry .grid-card--tall { --masonry-span: 36; }
+.entity-grid--masonry .grid-card--extra-tall { --masonry-span: 44; }
+
+/* ============================================
+   UNIVERSAL GRID - Legacy Compatibility
    ============================================ */
 
 .universal-grid {
     display: grid;
-    /* Desktop: Fixed 4 columns - not auto-fill */
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--spacing-lg, 1.5rem);
+    gap: var(--grid-gap);
     width: 100%;
-    max-width: 1600px;
+    max-width: var(--grid-max-width);
     margin: 0 auto;
-    padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
-}
-
-/* Tablet: 3 columns */
-@media (max-width: 1024px) {
-    .universal-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-/* Mobile Landscape: 4 columns (extended range for all landscape phones) */
-@media (max-width: 896px) and (orientation: landscape) {
-    .universal-grid {
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: var(--spacing-sm, 0.75rem);
-        padding: var(--spacing-sm, 0.5rem);
-    }
-
-    /* Compact cards in landscape */
-    .universal-grid-card {
-        padding: var(--spacing-sm, 0.75rem);
-    }
-
-    .grid-card-icon {
-        font-size: var(--font-size-3xl, 1.75rem);
-        margin-bottom: var(--spacing-xs, 0.25rem);
-    }
-
-    .grid-card-title {
-        font-size: var(--font-size-sm, 0.875rem);
-    }
-
-    .grid-card-description {
-        -webkit-line-clamp: 2;
-        font-size: var(--font-size-xs, 0.75rem);
-    }
-
-    .grid-card-meta {
-        display: none;
-    }
-
-    .grid-card-footer {
-        display: none;
-    }
-}
-
-/* Tablet Portrait: 2 columns */
-@media (max-width: 768px) and (orientation: portrait) {
-    .universal-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--spacing-md, 1rem);
-    }
-}
-
-/* Mobile Portrait: 2 columns */
-@media (max-width: 576px) {
-    .universal-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--spacing-sm, 0.5rem);
-        padding: var(--spacing-sm, 0.5rem);
-    }
-}
-
-/* Very small screens: still 2 columns but tighter spacing */
-@media (max-width: 400px) {
-    .universal-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--spacing-xs, 0.25rem);
-        padding: var(--spacing-xs, 0.25rem);
-    }
-
-    .universal-grid-card {
-        padding: var(--spacing-sm, 0.5rem);
-    }
-
-    .grid-card-icon {
-        font-size: var(--font-size-2xl, 1.5rem);
-    }
-
-    .grid-card-title {
-        font-size: var(--font-size-xs, 0.75rem);
-    }
+    padding: var(--grid-padding);
+    align-content: start;
+    justify-content: center;
 }
 
 /* ============================================
-   GRID CARD COMPONENT
+   INFINITE SCROLL CONTAINER SUPPORT
    ============================================ */
 
+.entity-grid--infinite-scroll,
+.infinite-scroll-container {
+    /* Remove bottom padding for seamless loading */
+    padding-bottom: 0;
+    /* Ensure smooth scrolling */
+    overflow-anchor: auto;
+}
+
+.entity-grid--infinite-scroll::after,
+.infinite-scroll-container::after {
+    content: '';
+    display: block;
+    grid-column: 1 / -1;
+    height: 1px;
+    /* Intersection Observer trigger point */
+}
+
+/* Infinite scroll loading indicator */
+.infinite-scroll-loader {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    min-height: 100px;
+}
+
+.infinite-scroll-loader--hidden {
+    display: none;
+}
+
+/* Infinite scroll end message */
+.infinite-scroll-end {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--color-text-secondary, #9ca3af);
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.infinite-scroll-end::before {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-border, rgba(139, 127, 255, 0.3)), transparent);
+    margin: 0 auto 1rem;
+}
+
+/* ============================================
+   GRID CARD - Unified Card Component
+   ============================================ */
+
+.entity-grid-card,
 .universal-grid-card {
-    background: var(--color-surface, rgba(26, 31, 58, 0.8));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px solid var(--color-border, rgba(139, 127, 255, 0.3));
-    border-radius: var(--radius-xl, 1rem);
-    padding: var(--spacing-lg, 1.5rem);
-    transition: all var(--transition-base, 0.3s ease);
-    cursor: pointer;
+    /* Card Structure */
     display: flex;
     flex-direction: column;
     position: relative;
     overflow: hidden;
+    cursor: pointer;
+
+    /* Consistent Height */
+    min-height: var(--card-min-height);
+
+    /* Visual Styling */
+    background: var(--color-surface, rgba(26, 31, 58, 0.85));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 2px solid var(--color-border, rgba(139, 127, 255, 0.3));
+    border-radius: var(--radius-xl, 1rem);
+    padding: var(--spacing-lg, 1.5rem);
+
+    /* Transitions - Polished easing */
+    transition:
+        transform var(--grid-transition-normal),
+        border-color var(--grid-transition-fast),
+        box-shadow var(--grid-transition-normal),
+        background-color var(--grid-transition-fast);
+
+    /* Hardware acceleration for smooth animations */
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
+/* Density-specific card sizing */
+.entity-grid--compact .entity-grid-card,
+.entity-grid--compact .universal-grid-card,
+.entity-grid[data-density="compact"] .entity-grid-card,
+.entity-grid[data-density="compact"] .universal-grid-card {
+    min-height: var(--card-min-height-sm);
+    padding: var(--spacing-sm, 0.75rem);
+}
+
+.entity-grid--comfortable .entity-grid-card,
+.entity-grid--comfortable .universal-grid-card,
+.entity-grid[data-density="comfortable"] .entity-grid-card,
+.entity-grid[data-density="comfortable"] .universal-grid-card {
+    min-height: var(--card-min-height-md);
+    padding: var(--spacing-md, 1rem);
+}
+
+.entity-grid--detailed .entity-grid-card,
+.entity-grid--detailed .universal-grid-card,
+.entity-grid[data-density="detailed"] .entity-grid-card,
+.entity-grid[data-density="detailed"] .universal-grid-card {
+    min-height: var(--card-min-height-lg);
+    padding: var(--spacing-lg, 1.5rem);
+}
+
+.entity-grid--large .entity-grid-card,
+.entity-grid--large .universal-grid-card,
+.entity-grid[data-density="large"] .entity-grid-card,
+.entity-grid[data-density="large"] .universal-grid-card {
+    min-height: var(--card-min-height-xl);
+    padding: var(--spacing-xl, 2rem);
+}
+
+.entity-grid--ultra-compact .entity-grid-card,
+.entity-grid--ultra-compact .universal-grid-card,
+.entity-grid[data-density="ultra-compact"] .entity-grid-card,
+.entity-grid[data-density="ultra-compact"] .universal-grid-card {
+    min-height: var(--card-min-height-xs);
+    padding: var(--spacing-xs, 0.5rem);
+}
+
+/* Top Accent Bar - Enhanced gradient */
+.entity-grid-card::before,
 .universal-grid-card::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
-    background: var(--entity-color, var(--color-primary, #667eea));
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        var(--entity-color, var(--color-primary, #667eea)) 0%,
+        var(--color-secondary, #764ba2) 50%,
+        var(--entity-color, var(--color-primary, #667eea)) 100%
+    );
+    background-size: 200% 100%;
     opacity: 0;
-    transition: opacity var(--transition-fast, 0.15s ease);
+    transition: opacity var(--grid-transition-fast);
 }
 
+/* Hover Spotlight Effect - Enhanced glow */
+.entity-grid-card::after,
+.universal-grid-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity var(--grid-transition-normal);
+    pointer-events: none;
+    background: radial-gradient(
+        800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(var(--color-primary-rgb, 102, 126, 234), 0.1),
+        transparent 50%
+    );
+}
+
+/* ============================================
+   POLISHED CARD HOVER STATE - Lift Effect
+   ============================================ */
+
+.entity-grid-card:hover,
 .universal-grid-card:hover {
-    transform: translateY(-4px);
+    /* Beautiful lift effect */
+    transform: translateY(var(--grid-card-lift)) scale(var(--grid-card-scale));
+
+    /* Enhanced border glow */
     border-color: var(--entity-color, var(--color-primary, #667eea));
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
-                0 0 20px var(--entity-color, var(--color-primary, #667eea));
+
+    /* Layered shadow for depth */
+    box-shadow:
+        /* Ambient shadow */
+        0 4px 8px rgba(0, 0, 0, 0.1),
+        /* Depth shadow */
+        0 12px 28px rgba(0, 0, 0, 0.18),
+        /* Lift shadow */
+        0 20px 48px rgba(0, 0, 0, 0.12),
+        /* Glow effect */
+        0 0 40px rgba(var(--color-primary-rgb, 102, 126, 234), 0.12),
+        /* Inner highlight */
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
+.entity-grid-card:hover::before,
 .universal-grid-card:hover::before {
+    opacity: 1;
+    /* Animate the gradient */
+    animation: gradientShift 2s ease-in-out infinite;
+}
+
+.entity-grid-card:hover::after,
+.universal-grid-card:hover::after {
     opacity: 1;
 }
 
-/* Card Header */
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Subtle hover variant (for compact/dense grids) */
+.entity-grid--compact .entity-grid-card:hover,
+.entity-grid--compact .universal-grid-card:hover,
+.entity-grid--ultra-compact .entity-grid-card:hover,
+.entity-grid--ultra-compact .universal-grid-card:hover {
+    transform: translateY(var(--grid-card-lift-subtle)) scale(var(--grid-card-scale-subtle));
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        0 8px 24px rgba(0, 0, 0, 0.1),
+        0 0 20px rgba(var(--color-primary-rgb, 102, 126, 234), 0.08);
+}
+
+/* Active/pressed state */
+.entity-grid-card:active,
+.universal-grid-card:active {
+    transform: translateY(-2px) scale(1.005);
+    transition-duration: 0.1s;
+}
+
+/* ============================================
+   CARD IMAGE CONTAINER - Polished Aspect Ratios
+   ============================================ */
+
+.grid-card-image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--image-aspect-ratio);
+    overflow: hidden;
+    border-radius: var(--radius-lg, 0.75rem);
+    margin-bottom: var(--spacing-md, 1rem);
+    background: linear-gradient(
+        135deg,
+        rgba(var(--color-primary-rgb, 102, 126, 234), 0.1) 0%,
+        rgba(var(--color-surface-rgb, 26, 31, 58), 0.8) 100%
+    );
+}
+
+.grid-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform var(--grid-transition-slow), opacity var(--grid-transition-normal);
+    opacity: 0;
+}
+
+.grid-card-image img.loaded,
+.grid-card-image img[src]:not([src=""]) {
+    opacity: 1;
+}
+
+.entity-grid-card:hover .grid-card-image img,
+.universal-grid-card:hover .grid-card-image img {
+    transform: scale(1.08);
+}
+
+/* Image Overlay Gradient - Enhanced */
+.grid-card-image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(0, 0, 0, 0.3) 50%,
+        transparent 100%
+    );
+    pointer-events: none;
+    transition: opacity var(--grid-transition-normal);
+}
+
+.entity-grid-card:hover .grid-card-image::after,
+.universal-grid-card:hover .grid-card-image::after {
+    opacity: 0.8;
+}
+
+/* ============================================
+   IMAGE ASPECT RATIO VARIANTS
+   ============================================ */
+
+/* Wide/Cinematic (21:9) */
+.grid-card-image--wide {
+    aspect-ratio: var(--image-aspect-ratio-wide);
+}
+
+/* Standard (4:3) */
+.grid-card-image--standard {
+    aspect-ratio: var(--image-aspect-ratio-standard);
+}
+
+/* Square (1:1) */
+.grid-card-image--square {
+    aspect-ratio: var(--image-aspect-ratio-square);
+}
+
+/* Portrait (3:4) */
+.grid-card-image--portrait {
+    aspect-ratio: var(--image-aspect-ratio-portrait);
+}
+
+/* Golden Ratio (1.618:1) */
+.grid-card-image--golden {
+    aspect-ratio: var(--image-aspect-ratio-golden);
+}
+
+/* Responsive aspect ratio adjustments */
+@media (max-width: 768px) {
+    .grid-card-image--wide {
+        aspect-ratio: var(--image-aspect-ratio);
+    }
+}
+
+/* Image placeholder skeleton */
+.grid-card-image--loading {
+    position: relative;
+}
+
+.grid-card-image--loading::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(var(--color-border-rgb, 42, 47, 74), 0.3) 0%,
+        rgba(var(--color-border-rgb, 42, 47, 74), 0.5) 50%,
+        rgba(var(--color-border-rgb, 42, 47, 74), 0.3) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    z-index: 1;
+}
+
+/* ============================================
+   CARD HEADER SECTION
+   ============================================ */
+
 .grid-card-header {
     text-align: center;
     margin-bottom: var(--spacing-md, 1rem);
@@ -155,16 +595,55 @@
 
 .grid-card-icon {
     font-size: var(--font-size-5xl, 3rem);
-    margin-bottom: var(--spacing-sm, 0.5rem);
     line-height: 1;
+    margin-bottom: var(--spacing-sm, 0.5rem);
+    filter: drop-shadow(0 2px 8px rgba(var(--color-primary-rgb, 102, 126, 234), 0.3));
+
+    /* Icon image handling */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Card Body */
+.grid-card-icon img,
+.grid-card-icon svg {
+    width: 3rem;
+    height: 3rem;
+    object-fit: contain;
+}
+
+/* Compact Icon Size */
+.entity-grid--compact .grid-card-icon {
+    font-size: var(--font-size-3xl, 1.875rem);
+}
+
+.entity-grid--compact .grid-card-icon img,
+.entity-grid--compact .grid-card-icon svg {
+    width: 2rem;
+    height: 2rem;
+}
+
+/* Large Icon Size */
+.entity-grid--large .grid-card-icon {
+    font-size: var(--font-size-6xl, 4rem);
+}
+
+.entity-grid--large .grid-card-icon img,
+.entity-grid--large .grid-card-icon svg {
+    width: 4rem;
+    height: 4rem;
+}
+
+/* ============================================
+   CARD BODY SECTION
+   ============================================ */
+
 .grid-card-body {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm, 0.5rem);
+    min-height: 0; /* Allow flex shrinking */
 }
 
 .grid-card-title {
@@ -173,19 +652,29 @@
     color: var(--color-text-primary, #e5e7eb);
     margin: 0 0 var(--spacing-xs, 0.25rem) 0;
     text-align: center;
+
+    /* Text overflow handling */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .grid-card-title a {
     color: inherit;
     text-decoration: none;
-    transition: color var(--transition-fast, 0.15s ease);
+    transition: color 0.15s ease;
 }
 
 .grid-card-title a:hover {
     color: var(--entity-color, var(--color-primary, #667eea));
 }
 
-/* Card Meta */
+/* ============================================
+   CARD META SECTION - Badges
+   ============================================ */
+
 .grid-card-meta {
     display: flex;
     gap: var(--spacing-xs, 0.25rem);
@@ -197,31 +686,38 @@
 .entity-type-badge,
 .mythology-badge {
     font-size: var(--font-size-xs, 0.75rem);
-    padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+    padding: 0.2rem 0.5rem;
     border-radius: var(--radius-full, 9999px);
     font-weight: var(--font-medium, 500);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    white-space: nowrap;
 }
 
 .entity-type-badge {
-    background: rgba(var(--color-primary-rgb, 102, 126, 234), 0.3);
+    background: rgba(var(--color-primary-rgb, 102, 126, 234), 0.2);
     color: var(--color-primary, #667eea);
-    border: 1px solid var(--color-primary, #667eea);
+    border: 1px solid rgba(var(--color-primary-rgb, 102, 126, 234), 0.4);
 }
 
 .mythology-badge {
-    background: rgba(var(--color-secondary-rgb, 118, 75, 162), 0.3);
+    background: rgba(var(--color-secondary-rgb, 118, 75, 162), 0.2);
     color: var(--color-secondary, #764ba2);
-    border: 1px solid var(--color-secondary, #764ba2);
+    border: 1px solid rgba(var(--color-secondary-rgb, 118, 75, 162), 0.4);
 }
 
-/* Card Description */
+/* ============================================
+   CARD DESCRIPTION
+   ============================================ */
+
 .grid-card-description {
     font-size: var(--font-size-sm, 0.875rem);
     color: var(--color-text-secondary, #9ca3af);
-    line-height: var(--leading-normal, 1.5);
+    line-height: 1.6;
     margin: var(--spacing-sm, 0.5rem) 0;
+    text-align: center;
+
+    /* Multi-line truncation */
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
@@ -229,17 +725,34 @@
     text-overflow: ellipsis;
 }
 
-/* Card Fields */
+.entity-grid--compact .grid-card-description {
+    -webkit-line-clamp: 2;
+    font-size: var(--font-size-xs, 0.75rem);
+}
+
+.entity-grid--large .grid-card-description {
+    -webkit-line-clamp: 4;
+    font-size: var(--font-size-base, 1rem);
+}
+
+/* ============================================
+   CARD FIELDS
+   ============================================ */
+
 .grid-card-fields {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs, 0.25rem);
-    margin-top: var(--spacing-sm, 0.5rem);
+    margin-top: auto;
+    padding-top: var(--spacing-sm, 0.5rem);
 }
 
 .field-item {
     font-size: var(--font-size-sm, 0.875rem);
     color: var(--color-text-secondary, #9ca3af);
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
 }
 
 .field-label {
@@ -251,44 +764,126 @@
     color: var(--color-text-secondary, #9ca3af);
 }
 
-/* Card Footer */
+/* ============================================
+   CARD FOOTER
+   ============================================ */
+
 .grid-card-footer {
-    margin-top: var(--spacing-md, 1rem);
+    margin-top: auto;
     padding-top: var(--spacing-md, 1rem);
-    border-top: 1px solid var(--color-border, rgba(139, 127, 255, 0.3));
+    border-top: 1px solid var(--color-border, rgba(139, 127, 255, 0.2));
     display: flex;
     justify-content: center;
 }
 
 .btn-view-details {
-    display: inline-block;
-    padding: var(--spacing-sm, 0.5rem) var(--spacing-lg, 1.5rem);
-    background: linear-gradient(135deg, var(--entity-color, var(--color-primary, #667eea)), var(--color-secondary, #764ba2));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    background: linear-gradient(
+        135deg,
+        var(--entity-color, var(--color-primary, #667eea)),
+        var(--color-secondary, #764ba2)
+    );
     color: white;
     text-decoration: none;
     border-radius: var(--radius-lg, 0.75rem);
     font-size: var(--font-size-sm, 0.875rem);
     font-weight: var(--font-semibold, 600);
-    transition: all var(--transition-fast, 0.15s ease);
+    border: none;
+    cursor: pointer;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
 }
 
 .btn-view-details:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb, 102, 126, 234), 0.4);
+    box-shadow: 0 4px 16px rgba(var(--color-primary-rgb, 102, 126, 234), 0.4);
 }
 
 /* ============================================
-   RESPONSIVE ADJUSTMENTS
+   RESPONSIVE BREAKPOINTS - Polished & Consistent
    ============================================ */
 
-/* Reduce padding on mobile */
-@media (max-width: 576px) {
+/* Extra Large Desktop: 6 columns */
+@media (min-width: 1800px) {
+    .universal-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .entity-grid--5-col,
+    .entity-grid--6-col {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* Large Desktop: 5 columns */
+@media (min-width: 1600px) and (max-width: 1799px) {
+    .universal-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* Desktop: 4 columns */
+@media (min-width: 1200px) and (max-width: 1599px) {
+    .universal-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .entity-grid--5-col,
+    .entity-grid--6-col {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Tablet Landscape: 3-4 columns */
+@media (min-width: 900px) and (max-width: 1199px) {
+    .entity-grid,
+    .universal-grid {
+        gap: var(--grid-gap-md);
+        padding: var(--grid-padding-md);
+    }
+
+    .universal-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .entity-grid--4-col,
+    .entity-grid--5-col,
+    .entity-grid--6-col {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Tablet Portrait: 2-3 columns */
+@media (min-width: 640px) and (max-width: 899px) {
+    .entity-grid,
+    .universal-grid {
+        gap: var(--grid-gap-md);
+        padding: var(--grid-padding-md);
+    }
+
+    .universal-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .entity-grid--3-col,
+    .entity-grid--4-col,
+    .entity-grid--5-col,
+    .entity-grid--6-col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .entity-grid-card,
     .universal-grid-card {
         padding: var(--spacing-md, 1rem);
     }
 
     .grid-card-icon {
-        font-size: var(--font-size-4xl, 2.25rem);
+        font-size: var(--font-size-3xl, 1.875rem);
     }
 
     .grid-card-title {
@@ -300,20 +895,336 @@
     }
 }
 
-/* ============================================
-   LOADING STATE
-   ============================================ */
+/* Mobile Landscape: 3 columns (compact auto) */
+@media (min-width: 480px) and (max-width: 900px) and (orientation: landscape) {
+    .entity-grid,
+    .universal-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--grid-gap-xs);
+        padding: var(--grid-padding-xs);
+    }
 
-.universal-grid.loading .universal-grid-card {
-    animation: pulse 1.5s ease-in-out infinite;
+    .entity-grid-card,
+    .universal-grid-card {
+        padding: var(--spacing-sm, 0.75rem);
+        min-height: var(--card-min-height-xs);
+    }
+
+    .grid-card-icon {
+        font-size: var(--font-size-2xl, 1.5rem);
+        margin-bottom: var(--spacing-xs, 0.25rem);
+    }
+
+    .grid-card-title {
+        font-size: var(--font-size-sm, 0.875rem);
+    }
+
+    .grid-card-description {
+        -webkit-line-clamp: 1;
+        font-size: var(--font-size-xs, 0.75rem);
+    }
+
+    .grid-card-meta {
+        display: none;
+    }
+
+    /* Hide footer on landscape mobile for space */
+    .grid-card-footer {
+        padding: var(--spacing-xs, 0.5rem);
+    }
+
+    .btn-view-details {
+        padding: 0.375rem 0.75rem;
+        font-size: var(--font-size-xs, 0.75rem);
+    }
 }
 
-@keyframes pulse {
+/* Mobile Portrait: 2 columns */
+@media (min-width: 480px) and (max-width: 639px) {
+    .entity-grid,
+    .universal-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--grid-gap-sm);
+        padding: var(--grid-padding-sm);
+    }
+
+    .entity-grid--2-col,
+    .entity-grid--3-col,
+    .entity-grid--4-col,
+    .entity-grid--5-col,
+    .entity-grid--6-col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .entity-grid-card,
+    .universal-grid-card {
+        padding: var(--spacing-sm, 0.75rem);
+        min-height: var(--card-min-height-sm);
+    }
+
+    .grid-card-icon {
+        font-size: var(--font-size-2xl, 1.5rem);
+    }
+
+    .grid-card-title {
+        font-size: var(--font-size-sm, 0.875rem);
+    }
+
+    .grid-card-description {
+        -webkit-line-clamp: 2;
+        font-size: var(--font-size-xs, 0.75rem);
+    }
+}
+
+/* Small Mobile: 2 columns tight */
+@media (max-width: 479px) {
+    .entity-grid,
+    .universal-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--grid-gap-xs);
+        padding: var(--grid-padding-xs);
+    }
+
+    .entity-grid--1-col {
+        grid-template-columns: 1fr;
+    }
+
+    .entity-grid-card,
+    .universal-grid-card {
+        padding: var(--spacing-xs, 0.5rem);
+        min-height: var(--card-min-height-xs);
+    }
+
+    .grid-card-icon {
+        font-size: var(--font-size-xl, 1.25rem);
+    }
+
+    .grid-card-icon img,
+    .grid-card-icon svg {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    .grid-card-title {
+        font-size: var(--font-size-xs, 0.75rem);
+    }
+
+    .grid-card-description {
+        -webkit-line-clamp: 2;
+        font-size: 0.7rem;
+    }
+
+    .grid-card-meta {
+        display: none;
+    }
+
+    .grid-card-footer {
+        padding: var(--spacing-xs, 0.5rem);
+    }
+
+    .btn-view-details {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.7rem;
+    }
+}
+
+/* Very Small Screens: 1 column option */
+@media (max-width: 360px) {
+    /* Option for single column on very small screens */
+    .entity-grid--single-mobile,
+    .entity-grid--large,
+    .entity-grid--detailed {
+        grid-template-columns: 1fr;
+    }
+
+    .entity-grid,
+    .universal-grid {
+        gap: var(--grid-gap-xxs);
+        padding: var(--grid-padding-xs);
+    }
+
+    .entity-grid-card,
+    .universal-grid-card {
+        padding: var(--spacing-sm, 0.5rem);
+    }
+}
+
+/* ============================================
+   POLISHED LOADING STATE & SKELETON SCREENS
+   ============================================ */
+
+/* Grid loading state */
+.entity-grid.loading,
+.universal-grid.loading {
+    pointer-events: none;
+}
+
+.entity-grid.loading .entity-grid-card,
+.entity-grid.loading .universal-grid-card,
+.universal-grid.loading .universal-grid-card {
+    animation: gridCardPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes gridCardPulse {
     0%, 100% {
         opacity: 1;
+        transform: scale(1);
     }
     50% {
-        opacity: 0.5;
+        opacity: 0.6;
+        transform: scale(0.995);
+    }
+}
+
+/* ============================================
+   SKELETON LOADING CARDS - Polished
+   ============================================ */
+
+.entity-grid-card--skeleton,
+.universal-grid-card--skeleton,
+.grid-card-skeleton {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-surface, rgba(26, 31, 58, 0.85));
+    border: 2px solid rgba(var(--color-border-rgb, 42, 47, 74), 0.3);
+    pointer-events: none;
+}
+
+/* Skeleton shimmer overlay */
+.entity-grid-card--skeleton::before,
+.universal-grid-card--skeleton::before,
+.grid-card-skeleton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.04) 20%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.04) 80%,
+        transparent 100%
+    );
+    animation: skeletonShimmer 1.8s ease-in-out infinite;
+    z-index: 10;
+}
+
+@keyframes skeletonShimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Skeleton internal elements */
+.skeleton-image {
+    width: 100%;
+    aspect-ratio: var(--image-aspect-ratio);
+    background: linear-gradient(
+        135deg,
+        rgba(var(--color-primary-rgb, 102, 126, 234), 0.08) 0%,
+        rgba(var(--color-surface-rgb, 26, 31, 58), 0.6) 100%
+    );
+    border-radius: var(--radius-lg, 0.75rem);
+    margin-bottom: var(--spacing-md, 1rem);
+}
+
+.skeleton-icon {
+    width: 3rem;
+    height: 3rem;
+    background: rgba(var(--color-border-rgb, 42, 47, 74), 0.4);
+    border-radius: 50%;
+    margin: 0 auto var(--spacing-sm, 0.5rem);
+}
+
+.skeleton-title {
+    height: 1.25rem;
+    width: 75%;
+    background: rgba(var(--color-border-rgb, 42, 47, 74), 0.4);
+    border-radius: var(--radius-md, 0.5rem);
+    margin: 0 auto var(--spacing-xs, 0.25rem);
+}
+
+.skeleton-title--short {
+    width: 50%;
+}
+
+.skeleton-text {
+    height: 0.875rem;
+    width: 100%;
+    background: rgba(var(--color-border-rgb, 42, 47, 74), 0.3);
+    border-radius: var(--radius-sm, 0.25rem);
+    margin-bottom: var(--spacing-xs, 0.25rem);
+}
+
+.skeleton-text--medium {
+    width: 85%;
+}
+
+.skeleton-text--short {
+    width: 60%;
+}
+
+.skeleton-badge {
+    display: inline-block;
+    height: 1.25rem;
+    width: 4rem;
+    background: rgba(var(--color-border-rgb, 42, 47, 74), 0.3);
+    border-radius: 9999px;
+    margin-right: var(--spacing-xs, 0.25rem);
+}
+
+.skeleton-button {
+    height: 2.25rem;
+    width: 100%;
+    background: rgba(var(--color-primary-rgb, 102, 126, 234), 0.15);
+    border-radius: var(--radius-lg, 0.75rem);
+    margin-top: auto;
+}
+
+/* Skeleton card structure */
+.grid-card-skeleton .skeleton-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm, 0.5rem);
+    flex: 1;
+}
+
+.grid-card-skeleton .skeleton-meta {
+    display: flex;
+    gap: var(--spacing-xs, 0.25rem);
+    justify-content: center;
+    margin-top: var(--spacing-sm, 0.5rem);
+}
+
+/* Staggered skeleton animation */
+.entity-grid > .grid-card-skeleton:nth-child(1) { animation-delay: 0s; }
+.entity-grid > .grid-card-skeleton:nth-child(2) { animation-delay: 0.1s; }
+.entity-grid > .grid-card-skeleton:nth-child(3) { animation-delay: 0.2s; }
+.entity-grid > .grid-card-skeleton:nth-child(4) { animation-delay: 0.3s; }
+.entity-grid > .grid-card-skeleton:nth-child(5) { animation-delay: 0.4s; }
+.entity-grid > .grid-card-skeleton:nth-child(6) { animation-delay: 0.5s; }
+.entity-grid > .grid-card-skeleton:nth-child(7) { animation-delay: 0.6s; }
+.entity-grid > .grid-card-skeleton:nth-child(8) { animation-delay: 0.7s; }
+.entity-grid > .grid-card-skeleton:nth-child(n+9) { animation-delay: 0.8s; }
+
+/* Fade-in when content loads */
+.grid-card-skeleton.loaded {
+    animation: skeletonFadeOut 0.3s ease-out forwards;
+}
+
+@keyframes skeletonFadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        pointer-events: none;
     }
 }
 
@@ -321,6 +1232,7 @@
    EMPTY STATE
    ============================================ */
 
+.entity-grid-empty,
 .universal-grid-empty {
     grid-column: 1 / -1;
     text-align: center;
@@ -328,64 +1240,245 @@
     color: var(--color-text-secondary, #9ca3af);
 }
 
+.entity-grid-empty .empty-icon,
 .universal-grid-empty .empty-icon {
     font-size: 4rem;
     margin-bottom: var(--spacing-lg, 1.5rem);
+    opacity: 0.5;
+}
+
+.entity-grid-empty .empty-message,
+.universal-grid-empty .empty-message {
+    font-size: var(--font-size-lg, 1.125rem);
+    margin-bottom: var(--spacing-md, 1rem);
 }
 
 /* ============================================
-   HOVER EFFECTS
-   Note: .universal-grid-card position: relative is set in main definition
+   PROPER CARD ALIGNMENT - Consistent Layout
    ============================================ */
 
-.universal-grid-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: var(--radius-xl, 1rem);
-    opacity: 0;
-    transition: opacity var(--transition-base, 0.3s ease);
-    pointer-events: none;
-    background: radial-gradient(
-        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-        rgba(var(--color-primary-rgb, 102, 126, 234), 0.1) 0%,
-        transparent 50%
-    );
+/* Ensure cards align properly in grid */
+.entity-grid,
+.universal-grid {
+    /* Align items to stretch (full height) by default */
+    align-items: stretch;
 }
 
-.universal-grid-card:hover::after {
-    opacity: 1;
+/* Start alignment for masonry-like behavior */
+.entity-grid--align-start,
+.universal-grid--align-start {
+    align-items: start;
 }
+
+/* Center alignment for cards */
+.entity-grid--align-center,
+.universal-grid--align-center {
+    align-items: center;
+}
+
+/* End alignment (bottom-aligned cards) */
+.entity-grid--align-end,
+.universal-grid--align-end {
+    align-items: end;
+}
+
+/* Card content alignment */
+.entity-grid-card,
+.universal-grid-card {
+    /* Flex column with proper alignment */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+/* Center-aligned card content */
+.entity-grid-card--center,
+.universal-grid-card--center {
+    align-items: center;
+    text-align: center;
+}
+
+/* Left-aligned card content */
+.entity-grid-card--left,
+.universal-grid-card--left {
+    align-items: flex-start;
+    text-align: left;
+}
+
+/* Card body fills remaining space */
+.grid-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Push footer to bottom */
+.grid-card-footer {
+    margin-top: auto;
+}
+
+/* Equal height cards using subgrid (modern browsers) */
+@supports (grid-template-rows: subgrid) {
+    .entity-grid--equal-height,
+    .universal-grid--equal-height {
+        grid-auto-rows: 1fr;
+    }
+
+    .entity-grid--equal-height > .entity-grid-card,
+    .entity-grid--equal-height > .universal-grid-card,
+    .universal-grid--equal-height > .universal-grid-card {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        align-content: stretch;
+    }
+}
+
+/* Fallback for browsers without subgrid */
+.entity-grid--equal-height > .entity-grid-card,
+.entity-grid--equal-height > .universal-grid-card,
+.universal-grid--equal-height > .universal-grid-card {
+    height: 100%;
+}
+
+/* ============================================
+   STAGGERED ENTRY ANIMATION
+   ============================================ */
+
+@keyframes cardFadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.entity-grid > .entity-grid-card,
+.entity-grid > .universal-grid-card,
+.universal-grid > .universal-grid-card {
+    animation: cardFadeSlideIn 0.4s ease-out backwards;
+}
+
+/* Stagger delays for first 12 cards */
+.entity-grid > :nth-child(1),
+.universal-grid > :nth-child(1) { animation-delay: 0.03s; }
+.entity-grid > :nth-child(2),
+.universal-grid > :nth-child(2) { animation-delay: 0.06s; }
+.entity-grid > :nth-child(3),
+.universal-grid > :nth-child(3) { animation-delay: 0.09s; }
+.entity-grid > :nth-child(4),
+.universal-grid > :nth-child(4) { animation-delay: 0.12s; }
+.entity-grid > :nth-child(5),
+.universal-grid > :nth-child(5) { animation-delay: 0.15s; }
+.entity-grid > :nth-child(6),
+.universal-grid > :nth-child(6) { animation-delay: 0.18s; }
+.entity-grid > :nth-child(7),
+.universal-grid > :nth-child(7) { animation-delay: 0.21s; }
+.entity-grid > :nth-child(8),
+.universal-grid > :nth-child(8) { animation-delay: 0.24s; }
+.entity-grid > :nth-child(9),
+.universal-grid > :nth-child(9) { animation-delay: 0.27s; }
+.entity-grid > :nth-child(10),
+.universal-grid > :nth-child(10) { animation-delay: 0.3s; }
+.entity-grid > :nth-child(11),
+.universal-grid > :nth-child(11) { animation-delay: 0.33s; }
+.entity-grid > :nth-child(12),
+.universal-grid > :nth-child(12) { animation-delay: 0.36s; }
+.entity-grid > :nth-child(n+13),
+.universal-grid > :nth-child(n+13) { animation-delay: 0.4s; }
 
 /* ============================================
    ACCESSIBILITY
    ============================================ */
 
-.universal-grid-card:focus-within {
+/* Focus Visible State */
+.entity-grid-card:focus-visible,
+.universal-grid-card:focus-visible {
     outline: 3px solid var(--color-primary, #667eea);
+    outline-offset: 3px;
+}
+
+/* Focus Within (for linked cards) */
+.entity-grid-card:focus-within,
+.universal-grid-card:focus-within {
+    outline: 2px solid var(--color-primary, #667eea);
     outline-offset: 2px;
 }
 
-/* High contrast mode support */
+/* High Contrast Mode */
 @media (prefers-contrast: high) {
+    .entity-grid-card,
     .universal-grid-card {
         border-width: 3px;
+        border-color: currentColor;
+    }
+
+    .entity-type-badge,
+    .mythology-badge {
+        border-width: 2px;
     }
 }
 
-/* Reduced motion support */
+/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
+    .entity-grid-card,
     .universal-grid-card,
-    .btn-view-details,
+    .entity-grid-card::before,
+    .entity-grid-card::after,
     .universal-grid-card::before,
-    .universal-grid-card::after {
+    .universal-grid-card::after,
+    .btn-view-details,
+    .grid-card-image img {
         transition: none;
+        animation: none;
     }
 
+    .entity-grid-card:hover,
     .universal-grid-card:hover {
         transform: none;
+    }
+
+    .entity-grid > .entity-grid-card,
+    .entity-grid > .universal-grid-card,
+    .universal-grid > .universal-grid-card {
+        animation: none;
+    }
+
+    .entity-grid-card--skeleton,
+    .universal-grid-card--skeleton {
+        animation: none;
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .entity-grid,
+    .universal-grid {
+        display: block;
+    }
+
+    .entity-grid-card,
+    .universal-grid-card {
+        page-break-inside: avoid;
+        margin-bottom: 1rem;
+        border: 1px solid #ddd;
+        box-shadow: none;
+        background: white;
+    }
+
+    .grid-card-footer {
+        display: none;
+    }
+
+    .entity-grid-card::before,
+    .entity-grid-card::after,
+    .universal-grid-card::before,
+    .universal-grid-card::after {
+        display: none;
     }
 }

@@ -134,6 +134,102 @@ const PLACES_KNOWLEDGE_BASE = {
     geography: 'Described as an immense mountain with four sides (each facing different directions); golden peaks reaching beyond the highest heavens; surrounded by rings of mountains and oceans; at the center of the disc-shaped universe (Chakravala)',
     relatedEvents: ['The churning of the cosmic ocean with Mount Mandara as churning staff', 'Brahma\'s cosmic creation', 'Devas and asuras fighting on its slopes', 'Gods\' descent and ascent along the mountain', 'Indra\'s palace atop the mountain'],
     accessibility: 'mythical - Accessible only to celestial beings and enlightened beings; represents the goal of spiritual practice in Buddhist traditions; symbolically climbed through meditation'
+  },
+  'borobudur': {
+    inhabitants: ['Buddhist monks and pilgrims', 'Celestial Buddhas', 'Bodhisattvas', 'Devas and protective deities'],
+    guardians: ['Vairocana Buddha (supreme)', 'The Five Celestial Buddhas', 'Buddhist protective deities'],
+    significance: 'One of the largest Buddhist monuments in the world; UNESCO World Heritage Site; represents the structure of the Buddhist universe; the pilgrimage route through the temple embodies the path to enlightenment',
+    geography: 'Located in Central Java, Indonesia (Magelang Regency). Covers approximately 2.5 hectares. Built in the 8th century. Nine-tiered structure (five square bases and four circular terraces); 506 Buddha statues and 2,672 relief panels; mandala-shaped when viewed from above',
+    relatedEvents: ['Construction under Sailendra dynasty (8th century)', 'Gradual abandonment due to volcanic eruptions', 'Rediscovery and restoration in modern times', 'UNESCO World Heritage designation', 'Annual pilgrimages and Vesak (Buddha\'s Birthday) celebrations'],
+    accessibility: 'physical - Accessible via car or bus from Yogyakarta; accessible to all visitors; circumambulation (pilgrimage walk) is encouraged; accessible for pilgrims with varying physical abilities'
+  },
+  'glastonbury-tor': {
+    inhabitants: ['Arthur and the Once and Future King (legend)', 'Tor residents and hermits', 'Local pilgrims', 'Mythological Avalonian beings'],
+    guardians: ['St. Michael (Christian tradition)', 'Avalonian spirits (pagan tradition)', 'The Goddess'],
+    significance: 'Sacred to both Christian and pagan traditions; identified by some as the Isle of Avalon from Arthurian legend; represents the thin place between worlds; associated with the Holy Grail quest; pilgrimage destination',
+    geography: 'Located in Somerset, England. A distinctive conical hill rising 158.5 meters (520 feet) above the Somerset Levels. Archaeological evidence of Iron Age settlement. St. Michael\'s Tower (14th century church) crowns the summit. Former marshland surroundings support Avalon identification',
+    relatedEvents: ['Arthur\'s legendary connection to Avalon', 'Early Christian settlement and hermitage', 'Discovery of supposed Arthur and Guinevere burial site (1191)', 'St. Michael\'s Church construction', 'Ongoing pilgrimage and spiritual seeking'],
+    accessibility: 'physical - Located near Glastonbury town in Somerset; accessible via footpath; requires modest hill climb to reach summit; popular pilgrimage site with visitor facilities'
+  },
+  'jerusalem-city-of-peace-city-of-conflict': {
+    inhabitants: ['Religious communities (Jewish, Christian, Muslim)', 'Historical inhabitants across millennia', 'Pilgrims from all traditions'],
+    guardians: ['God/Allah (spiritual)', 'Modern political authorities'],
+    significance: 'Holiest city in Judaism, Christianity, and Islam; center of three major world religions; represents the connection between earthly and divine; site of redemption and divine judgment; sacred history spanning 3000+ years',
+    geography: 'Located in the West Bank, Eastern Mediterranean, approximately 750m elevation. Old City contains Western Wall, Church of the Holy Sepulchre, and Dome of the Rock. Built on hills with ancient water systems. Strategic position on trade routes',
+    relatedEvents: ['King David\'s establishment as capital', 'Solomon\'s Temple construction and destruction', 'Jesus\' life, death, and resurrection', 'Islamic conquest and establishment of sanctuaries', 'Crusades', 'Multiple destructions and rebuildings', 'Modern religious and political significance'],
+    accessibility: 'physical - Accessible to visitors of all faiths; pilgrimage to key sites for each religion; some areas have restricted access based on faith and time'
+  },
+  'the-oracle-of-delphi': {
+    inhabitants: ['The Pythia (priestess oracle)', 'Apollo (the god)', 'Priests and temple attendants', 'Pilgrims seeking prophecy'],
+    guardians: ['Apollo (primary guardian)', 'The priestesses and priests serving Apollo'],
+    significance: 'Most important oracle in ancient Greece; center of Greek religious and political authority; consulted before major decisions; Apollo\'s primary shrine; repository of Greek wisdom and prophecy',
+    geography: 'Located at Delphi on slopes of Mount Parnassus in central Greece. Elevation ~580m. Dramatic cliff-side location. Features Castalian Spring (sacred water source). Olympic sanctuary with stadium and treasury buildings. Theatre overlooking plain',
+    relatedEvents: ['Pythia\'s famous prophecies', 'Foundation of colonies on Oracle\'s advice', 'Consultation before Trojan War', 'Apollo\'s slaying of the Python', 'Socrates deemed wisest man in Greece', 'Multiple sacred wars over control'],
+    accessibility: 'physical - Archaeological site open to visitors; ruins of temple, stadium, and treasury visible; accessible via scenic location on Mount Parnassus slopes; guided tours available'
+  },
+  'the-parthenon': {
+    inhabitants: ['Athena (primary deity)', 'Priests and priestesses', 'Pilgrims and devotees', 'Historical residents and visitors'],
+    guardians: ['Athena (goddess of wisdom and war)', 'The priesthood of Athena'],
+    significance: 'Most important temple of Athena in ancient Greece; symbol of ancient Greek civilization and democracy; represents the height of Classical Greek architecture and artistic achievement; cultural beacon of Western civilization',
+    geography: 'Located on the Acropolis in Athens, Greece. Elevation ~156m above sea level. Doric temple with 46 columns. Built 447-432 BCE. Overlooks the city with commanding view. Sacred precinct with smaller shrines and monuments',
+    relatedEvents: ['Pericles\' commissioning of the temple', 'Phidias\' creation of the gold and ivory Athena Parthenos', 'Use as Christian church in Byzantine period', 'Use as mosque during Ottoman occupation', 'Modern restoration and UNESCO World Heritage status', 'Symbol of Greek cultural identity'],
+    accessibility: 'physical - Located on accessible Acropolis; requires modest climb; archaeological site open to tourists; crowded during peak seasons; museum nearby contains famous sculptures'
+  },
+  'the-oracle-of-dodona': {
+    inhabitants: ['Priests interpreting divine signs', 'Zeus (primary deity)', 'Priestesses of Dione', 'Pilgrims seeking guidance'],
+    guardians: ['Zeus (god of sky and justice)', 'The priests and priestesses of Dodona'],
+    significance: 'Oldest oracle in Greece; center of Zeus worship; unique method of divination through sacred oak tree and dove priestesses; represents connection between divine will and human understanding',
+    geography: 'Located in Epirus in northwest Greece. Features a sacred oak grove (nearly destroyed but still present). Sanctuary with temple to Zeus and nearby temple to Dione. Surrounded by mountains and natural springs',
+    relatedEvents: ['Jason and the Argonauts consulting the oracle', 'Ancient divination through oak rustling and dove calls', 'Priestesses interpreting divine messages', 'Continuous religious use from Bronze Age through Roman period'],
+    accessibility: 'physical - Archaeological site accessible by car; modest infrastructure; less crowded than Delphi; requires some hiking to see sacred oak grove'
+  },
+  'the-tao-te-ching-location-mount-kunlun': {
+    inhabitants: ['Immortal beings and Taoist sages', 'Xi Wangmu (Queen Mother of the West)', 'Celestial deities', 'Spiritual adepts'],
+    guardians: ['Xi Wangmu (primary guardian)', 'Taoist celestial bureaucracy', 'Divine protectors'],
+    significance: 'Legendary sacred mountain of Chinese mythology; axis mundi connecting heaven and earth; source of immortality elixir; paradise on earth; represents the harmony of Taoism and cosmic order',
+    geography: 'Mythological location in western China (possibly Mount Muztagh or the Kunlun mountain range). Described as surrounded by mountains, with nine gates, jade buildings, and crystal palaces. Contains the Peaches of Immortality.',
+    relatedEvents: ['Xi Wangmu\'s reign over immortals', 'Seekers of immortality journeying there', 'Taoist pilgrimages and spiritual quests', 'Integration with Daoist philosophy', 'Appearances in classical Chinese literature'],
+    accessibility: 'mythical - Accessible through spiritual cultivation and meditation in Daoist practice; physical location disputed; legendary pilgrims undertake journey seeking immortality'
+  },
+  'temple-of-heaven': {
+    inhabitants: ['Emperors performing rituals', 'Priests and ceremonial attendants', 'Pilgrims', 'Celestial deities (spiritual)'],
+    guardians: ['Heaven itself (spiritual concept)', 'Imperial authorities (historical)'],
+    significance: 'Most sacred temple in imperial China; center of imperial religious practice; connection between heaven and earth; represents cosmic harmony and emperor\'s role as intermediary between heaven and humanity',
+    geography: 'Located in Beijing, China. Covers 273 hectares (675 acres). Contains the Circular Mound Altar (Hall of Heaven) and Hall of Prayer for Good Harvests. Built in Ming Dynasty (1406). Designed based on cosmological principles with circular (heaven) and square (earth) forms',
+    relatedEvents: ['Winter solstice sacrifices by emperors', 'Prayers for good harvests and blessing', 'Imperial ceremonies and rituals', 'Preservation as UNESCO World Heritage Site', 'Modern pilgrimages and ritual practices'],
+    accessibility: 'physical - Open to public as museum/heritage site; large grounds allow walking paths; accessible from Beijing city center; visitor facilities available'
+  },
+  'mecca-and-the-kaaba': {
+    inhabitants: ['Prophet Muhammad (birthplace)', 'Muslim pilgrims during Hajj', 'Guardians of the Kaaba', 'Resident Muslim community'],
+    guardians: ['The Mutawwif (Hajj guides)', 'The Haram security', 'The spiritual protection of Allah'],
+    significance: 'The holiest city in Islam; birthplace of Prophet Muhammad; center of Islamic faith and practice; destination of the Hajj pilgrimage (one of Five Pillars); the Kaaba is the qibla (direction of prayer) for all Muslims worldwide',
+    geography: 'Located in Hejaz region of western Saudi Arabia, approximately 70 kilometers inland from Red Sea port of Jeddah. Center: the Masjid al-Haram (Sacred Mosque) containing the Kaaba - a cubic structure draped in black silk. City at elevation ~330m; surrounded by mountains',
+    relatedEvents: ['Prophet Muhammad\'s birth', 'Migration (Hijra) from Mecca', 'Conquest of Mecca', 'First Hajj led by Prophet Muhammad', 'Revelation of the Quran (began in Mecca)', 'Annual Hajj pilgrimage for 1400+ years'],
+    accessibility: 'physical/spiritual - Physically accessible; Hajj pilgrimage required for all able-bodied Muslims; Umrah (minor pilgrimage) open year-round; requires ritual purification and specific dress'
+  },
+  'fatima': {
+    inhabitants: ['Pilgrims', 'Marian apparition witnesses', 'Priests and religious community', 'The Virgin Mary (spiritual)'],
+    guardians: ['The Virgin Mary (spiritual protector)', 'The Catholic Church (institutional)', 'Divine protection'],
+    significance: 'One of Catholicism\'s most important pilgrimage sites; location of Marian apparitions to three shepherd children; represents hope, peace, and divine intervention; focus of Marian devotion and prayer',
+    geography: 'Located in central Portugal, approximately 120 kilometers north of Lisbon. Shrine of Our Lady of Fátima (Santuário de Nossa Senhora de Fátima). Open plaza surrounded by basilicas. Natural spring water believed to have healing properties.',
+    relatedEvents: ['Marian apparitions on May 13, 1917', 'Three secrets revealed to the children', 'Miracle of the dancing sun (October 1917)', 'Beatification and canonization of the shepherd children', 'Annual pilgrimage on May 12-13', 'Papal visits confirming significance'],
+    accessibility: 'physical - Accessible by car, bus, or train from Lisbon; visitor facilities including hotels and restaurants; open year-round; wheelchair accessible in basilica'
+  },
+  'lourdes': {
+    inhabitants: ['Bernadette Soubirous (visionary)', 'Pilgrims seeking healing', 'Priests and religious community', 'The Virgin Mary (spiritual)'],
+    guardians: ['The Virgin Mary (spiritual protector)', 'The Catholic Church', 'Divine healing power'],
+    significance: 'One of Catholicism\'s most visited pilgrimage sites; location of Marian apparitions in 1858; associated with healing miracles; represents faith, healing, and divine compassion; center of international pilgrimage',
+    geography: 'Located in southern France near Pyrenees Mountains. Sanctuary built around the Grotto of Our Lady. Natural spring water believed to have miraculous healing properties. Candlelit ceremonies in cave sanctuary.',
+    relatedEvents: ['Marian apparitions to Bernadette (1858)', 'Discovery of healing spring water', 'Canonization of Bernadette Soubirous', 'Recognition of medical miracles by Church', 'Annual International Pilgrimages and processions', 'Night vigils with thousands of candles'],
+    accessibility: 'physical - Accessible by train or car from major European cities; extensive facilities for pilgrims; organized tours available; accessible for disabled visitors'
+  },
+  'mount-fuji': {
+    inhabitants: ['Pilgrims', 'Buddhist and Shinto practitioners', 'Celestial beings (spiritual)', 'Sengen Sama (mountain goddess)'],
+    guardians: ['Sengen Sama (goddess of Mount Fuji)', 'Buddhist and Shinto deities', 'The mountain itself'],
+    significance: 'Japan\'s highest and most sacred mountain; symbol of Japanese culture and identity; sacred to Shinto and Buddhism; site of spiritual transformation and pilgrimage; represents the interface between physical and spiritual worlds',
+    geography: 'Located on Honshu Island, Japan (Yamanashi Prefecture). Height: 3,776 meters (12,388 feet). Stratovolcano with distinctive symmetric cone shape. Last eruption 1707-1708. Visible from Tokyo on clear days. Surrounded by five lakes sacred in Japanese tradition.',
+    relatedEvents: ['Ancient Shinto worship and shrine practices', 'Buddhist integration of mountain pilgrimage', 'Traditional climbing route with mountain huts', 'Artistic representations in ukiyo-e and literature', 'Modern outdoor recreation and pilgrimage', 'UNESCO World Heritage designation'],
+    accessibility: 'physical - Climbing season: July-September; multiple ascent trails with varying difficulty; mountain huts provide accommodation; requires physical fitness'
   }
 };
 

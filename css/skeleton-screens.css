@@ -2,7 +2,30 @@
  * SKELETON SCREENS CSS
  * Placeholder loading states for progressive enhancement
  * Creates smooth perceived performance during data loading
+ *
+ * Features:
+ * - Shimmer animation effects
+ * - Card, list, detail, and grid skeletons
+ * - Smooth content replacement transitions
+ * - Staggered animations for grids
+ * - Full accessibility support
  */
+
+/* ============================================
+   CSS CUSTOM PROPERTIES
+   ============================================ */
+
+:root {
+    --skeleton-bg: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.75);
+    --skeleton-highlight: rgba(var(--color-primary-rgb, 139, 127, 255), 0.18);
+    --skeleton-highlight-bright: rgba(var(--color-primary-rgb, 139, 127, 255), 0.35);
+    --skeleton-shimmer-speed: 1.8s;
+    --skeleton-pulse-speed: 2s;
+    --skeleton-border-radius: 8px;
+    --skeleton-border-radius-lg: 12px;
+    --skeleton-border-color: rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.8);
+    --skeleton-stagger-delay: 0.06s;
+}
 
 /* ============================================
    SHIMMER ANIMATION (Core Loading Effect)
@@ -12,19 +35,25 @@
     0% {
         background-position: -1000px 0;
     }
-    50% {
-        background-position: 1000px 0;
-    }
     100% {
         background-position: 1000px 0;
     }
 }
 
+@keyframes shimmerSmooth {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
 @keyframes pulse {
     0%, 100% {
-        opacity: 0.7;
+        opacity: 0.6;
     }
-    40%, 60% {
+    50% {
         opacity: 1;
     }
 }
@@ -40,39 +69,355 @@
     }
 }
 
+@keyframes fadeInStagger {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 /* ============================================
-   BASE SKELETON ELEMENTS
+   BASE SKELETON ELEMENT
    ============================================ */
 
 .skeleton {
     background: linear-gradient(
         90deg,
-        rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.75) 0%,
-        rgba(var(--color-primary-rgb, 139, 127, 255), 0.18) 50%,
-        rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.75) 100%
+        var(--skeleton-bg) 0%,
+        var(--skeleton-highlight) 50%,
+        var(--skeleton-bg) 100%
     );
     background-size: 1000px 100%;
-    animation: shimmer 2.4s infinite linear;
-    border-radius: 8px;
+    animation: shimmer var(--skeleton-shimmer-speed) infinite linear;
+    border-radius: var(--skeleton-border-radius);
     position: relative;
     overflow: hidden;
-    box-shadow: inset 0 1px 2px rgba(147, 112, 219, 0.1);
 }
 
+/* Enhanced shimmer overlay */
 .skeleton::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: linear-gradient(
         90deg,
         transparent 0%,
-        rgba(var(--color-primary-rgb, 139, 127, 255), 0.12) 50%,
+        rgba(var(--color-primary-rgb, 139, 127, 255), 0.08) 50%,
         transparent 100%
     );
-    animation: shimmer 2.4s infinite linear;
+    animation: shimmerSmooth var(--skeleton-shimmer-speed) infinite linear;
+}
+
+/* Enhanced shimmer variant (brighter, more visible) */
+.shimmer-enhanced {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer-enhanced::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--skeleton-highlight-bright) 50%,
+        transparent 100%
+    );
+    animation: shimmerSmooth var(--skeleton-shimmer-speed) infinite linear;
+    z-index: 1;
+}
+
+/* Shimmer container (for wrapping multiple elements) */
+.shimmer-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        105deg,
+        transparent 20%,
+        rgba(var(--color-primary-rgb, 139, 127, 255), 0.12) 40%,
+        rgba(var(--color-primary-rgb, 139, 127, 255), 0.2) 50%,
+        rgba(var(--color-primary-rgb, 139, 127, 255), 0.12) 60%,
+        transparent 80%
+    );
+    animation: shimmerWave 2.5s infinite ease-in-out;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@keyframes shimmerWave {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* ============================================
+   SKELETON CARD (Entity Cards)
+   ============================================ */
+
+.skeleton-card {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--skeleton-border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
+}
+
+.skeleton-card-image {
+    width: 100%;
+    height: 160px;
+    border-radius: 0;
+}
+
+.skeleton-card-body {
+    padding: 1.25rem;
+}
+
+.skeleton-card-title {
+    width: 75%;
+    height: 24px;
+    margin-bottom: 0.75rem;
+}
+
+.skeleton-card-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.skeleton-badge {
+    width: 64px;
+    height: 22px;
+    border-radius: 20px;
+}
+
+.skeleton-badge-sm {
+    width: 48px;
+}
+
+.skeleton-card-text {
+    height: 14px;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-card-text:last-child {
+    margin-bottom: 0;
+}
+
+/* ============================================
+   SKELETON LIST
+   ============================================ */
+
+.skeleton-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.skeleton-list-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+    border: 1px solid var(--skeleton-border-color);
+    border-radius: 12px;
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
+    animation-delay: calc(var(--item-index, 0) * 0.08s);
+}
+
+.skeleton-list-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.skeleton-list-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skeleton-list-title {
+    width: 60%;
+    height: 18px;
+}
+
+.skeleton-list-subtitle {
+    width: 40%;
+    height: 14px;
+}
+
+.skeleton-list-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   SKELETON DETAIL PAGE
+   ============================================ */
+
+.skeleton-detail {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.skeleton-detail-hero {
+    text-align: center;
+    padding: 3rem 2rem;
+    margin-bottom: 2rem;
+    background: linear-gradient(
+        180deg,
+        rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.4) 0%,
+        transparent 100%
+    );
+    border-radius: 20px;
+}
+
+.skeleton-detail-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+}
+
+.skeleton-detail-title {
+    width: 300px;
+    height: 40px;
+    margin: 0 auto 1rem;
+    max-width: 80%;
+}
+
+.skeleton-detail-subtitle {
+    width: 200px;
+    height: 24px;
+    margin: 0 auto 1.5rem;
+    max-width: 60%;
+}
+
+.skeleton-detail-meta {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.skeleton-detail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.skeleton-detail-section {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.4);
+    border: 1px solid var(--skeleton-border-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.skeleton-section-title {
+    width: 180px;
+    height: 28px;
+    margin-bottom: 1.25rem;
+}
+
+.skeleton-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.skeleton-detail-grid-item {
+    height: 100px;
+    border-radius: 12px;
+}
+
+/* ============================================
+   SKELETON GRID
+   ============================================ */
+
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.skeleton-grid > * {
+    animation: fadeInStagger 0.4s ease-out forwards;
+    animation-delay: calc(var(--item-index, 0) * 0.06s);
+    opacity: 0;
+}
+
+/* ============================================
+   SKELETON TABLE
+   ============================================ */
+
+.skeleton-table {
+    width: 100%;
+    border: 1px solid var(--skeleton-border-color);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.skeleton-table-header-row {
+    display: flex;
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
+    border-bottom: 1px solid var(--skeleton-border-color);
+}
+
+.skeleton-table-th {
+    flex: 1;
+    padding: 1rem;
+}
+
+.skeleton-table-header {
+    width: 80%;
+    height: 16px;
+}
+
+.skeleton-table-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.skeleton-table-row {
+    display: flex;
+    border-bottom: 1px solid var(--skeleton-border-color);
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
+    animation-delay: calc(var(--item-index, 0) * 0.1s);
+}
+
+.skeleton-table-row:last-child {
+    border-bottom: none;
+}
+
+.skeleton-table-td {
+    flex: 1;
+    padding: 1rem;
+}
+
+.skeleton-table-cell {
+    height: 14px;
 }
 
 /* ============================================
@@ -82,7 +427,8 @@
 .skeleton-header {
     background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.95);
     backdrop-filter: blur(30px);
-    border-bottom: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.8);
+    -webkit-backdrop-filter: blur(30px);
+    border-bottom: 1px solid var(--skeleton-border-color);
     padding: 0.75rem 2rem;
 }
 
@@ -96,7 +442,7 @@
 }
 
 .skeleton-logo {
-    width: 200px;
+    width: 180px;
     height: 36px;
 }
 
@@ -211,7 +557,7 @@
 }
 
 /* ============================================
-   SKELETON MYTHOLOGY GRID
+   SKELETON MYTHOLOGY GRID (Landing Page)
    ============================================ */
 
 .skeleton-mythology-grid {
@@ -226,12 +572,6 @@
     margin: 0 auto 3rem;
 }
 
-.skeleton-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
-
 /* ============================================
    SKELETON MYTHOLOGY CARD
    ============================================ */
@@ -239,10 +579,11 @@
 .skeleton-mythology-card {
     background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.8);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--skeleton-border-color);
     border-radius: 16px;
     padding: 2rem;
-    animation: pulse 2s ease-in-out infinite;
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
 }
 
 .skeleton-card-icon {
@@ -277,16 +618,17 @@
 }
 
 /* ============================================
-   SKELETON GRID CARD (For Entity Lists)
+   SKELETON GRID CARD (Entity Lists)
    ============================================ */
 
 .skeleton-grid-card {
     background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
     backdrop-filter: blur(10px);
-    border: 2px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.8);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid var(--skeleton-border-color);
     border-radius: 16px;
     padding: 1.5rem;
-    animation: pulse 2s ease-in-out infinite;
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
 }
 
 .skeleton-grid-card-icon {
@@ -307,12 +649,6 @@
     gap: 0.5rem;
     justify-content: center;
     margin-bottom: 1rem;
-}
-
-.skeleton-badge {
-    width: 60px;
-    height: 22px;
-    border-radius: 20px;
 }
 
 .skeleton-grid-card-description {
@@ -346,11 +682,11 @@
 
 .skeleton-feature-card {
     background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.4);
-    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.6);
+    border: 1px solid var(--skeleton-border-color);
     border-radius: 16px;
     padding: 2rem;
     text-align: center;
-    animation: pulse 2s ease-in-out infinite;
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
 }
 
 .skeleton-feature-icon {
@@ -379,169 +715,7 @@
 }
 
 /* ============================================
-   LOADING TRANSITIONS (Smooth Replacement)
-   ============================================ */
-
-.content-loading {
-    opacity: 0;
-    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-.content-loaded {
-    animation: fadeIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-/* Skeleton fade-out before content appears */
-.skeleton-container.fade-out,
-.skeleton-loading.fade-out,
-.skeleton-mythology-grid.fade-out {
-    opacity: 0;
-    transform: scale(0.99);
-    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
-    pointer-events: none;
-}
-
-/* Content replacing skeleton */
-.content-replacing-skeleton {
-    opacity: 0;
-    animation: fadeInUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s forwards;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(16px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Stagger animation for grid items */
-.skeleton-grid > * {
-    animation-delay: calc(var(--item-index, 0) * 0.04s);
-}
-
-.skeleton-grid.animating > * {
-    opacity: 0;
-    animation: fadeIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    animation-delay: calc(var(--item-index, 0) * 0.04s);
-}
-
-/* ============================================
-   RESPONSIVE SKELETON SCREENS
-   ============================================ */
-
-@media (max-width: 768px) {
-    .skeleton-header-container {
-        flex-wrap: wrap;
-        padding: 0.75rem 1rem;
-    }
-
-    .skeleton-nav {
-        order: 3;
-        width: 100%;
-        justify-content: flex-start;
-    }
-
-    .skeleton-hero {
-        padding: 2rem 1rem 3rem;
-    }
-
-    .skeleton-hero-title {
-        width: 300px;
-        height: 48px;
-    }
-
-    .skeleton-mythology-grid {
-        padding: 0 1rem 2rem;
-    }
-
-    .skeleton-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .skeleton-features-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 480px) {
-    .skeleton-hero-title {
-        width: 250px;
-        height: 40px;
-    }
-
-    .skeleton-hero-subtitle {
-        width: 200px;
-        height: 32px;
-    }
-
-    .skeleton-hero-actions {
-        flex-direction: column;
-    }
-
-    .skeleton-btn {
-        width: 100%;
-    }
-}
-
-/* ============================================
-   ACCESSIBILITY
-   ============================================ */
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-    .skeleton,
-    .skeleton::after,
-    .skeleton-mythology-card,
-    .skeleton-grid-card,
-    .skeleton-feature-card {
-        animation: none;
-    }
-
-    .content-loading,
-    .content-loaded {
-        animation: none;
-        opacity: 1;
-    }
-}
-
-/* High contrast mode */
-@media (prefers-contrast: high) {
-    .skeleton {
-        border: 2px solid var(--color-border-primary);
-    }
-}
-
-/* ============================================
-   SKELETON UTILITIES
-   ============================================ */
-
-/* Hide real content while showing skeleton */
-.loading-skeleton .real-content {
-    display: none;
-}
-
-/* Show skeleton only during loading */
-.loaded .skeleton-screen {
-    display: none;
-}
-
-/* Prevent layout shift */
-.skeleton-preserve-space {
-    min-height: inherit;
-}
-
-/* Loading states */
-[data-loading="true"] {
-    pointer-events: none;
-    user-select: none;
-}
-
-/* ============================================
-   SKELETON TEXT LINES (Generic)
+   SKELETON TEXT UTILITIES
    ============================================ */
 
 .skeleton-text {
@@ -571,4 +745,990 @@
 
 .skeleton-text.three-quarter {
     width: 75%;
+}
+
+/* ============================================
+   LOADING TRANSITIONS (Smooth Replacement)
+   ============================================ */
+
+.content-loading {
+    opacity: 0;
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.content-loaded {
+    animation: fadeIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Skeleton fade-out before content appears */
+.skeleton-container.fade-out,
+.skeleton-loading.fade-out,
+.skeleton-mythology-grid.fade-out,
+.skeleton-grid.fade-out {
+    opacity: 0;
+    transform: scale(0.98);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    pointer-events: none;
+}
+
+/* Content replacing skeleton */
+.content-replacing-skeleton {
+    opacity: 0;
+    animation: fadeInUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger animation for grid items */
+.skeleton-grid.animating > * {
+    opacity: 0;
+    animation: fadeInStagger 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: calc(var(--item-index, 0) * 0.05s);
+}
+
+/* ============================================
+   SKELETON UTILITIES
+   ============================================ */
+
+/* Hide real content while showing skeleton */
+.loading-skeleton .real-content {
+    display: none;
+}
+
+/* Show skeleton only during loading */
+.loaded .skeleton-screen {
+    display: none;
+}
+
+/* Prevent layout shift */
+.skeleton-preserve-space {
+    min-height: inherit;
+}
+
+/* Loading states */
+[data-loading="true"] {
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Container for skeleton screens */
+.skeleton-container {
+    position: relative;
+}
+
+/* ============================================
+   ENTITY-SPECIFIC SKELETON CARDS
+   ============================================ */
+
+/* Entity Card Skeleton (Generic) */
+.skeleton-entity-card {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid var(--skeleton-border-color);
+    border-radius: var(--skeleton-border-radius-lg);
+    padding: 1.5rem;
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
+}
+
+.skeleton-entity-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.skeleton-entity-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--skeleton-border-radius);
+    flex-shrink: 0;
+}
+
+.skeleton-entity-title {
+    flex: 1;
+    height: 24px;
+    max-width: 200px;
+}
+
+.skeleton-entity-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.skeleton-mythology-badge {
+    width: 80px;
+    height: 22px;
+    border-radius: 20px;
+}
+
+.skeleton-type-badge {
+    width: 60px;
+    height: 22px;
+    border-radius: 20px;
+}
+
+.skeleton-entity-description {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.skeleton-entity-footer {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 1rem;
+    border-top: 1px solid var(--skeleton-border-color);
+}
+
+.skeleton-entity-stat {
+    width: 60px;
+    height: 16px;
+}
+
+/* Deity Card Skeleton */
+.skeleton-deity-card {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 2px solid var(--skeleton-border-color);
+    border-radius: var(--skeleton-border-radius-lg);
+    padding: 1.75rem;
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
+}
+
+.skeleton-deity-portrait {
+    width: 100%;
+    height: 180px;
+    border-radius: var(--skeleton-border-radius);
+    margin-bottom: 1.25rem;
+}
+
+.skeleton-deity-info {
+    text-align: center;
+}
+
+.skeleton-deity-name {
+    width: 70%;
+    height: 28px;
+    margin: 0 auto 0.75rem;
+}
+
+.skeleton-deity-domain {
+    width: 50%;
+    height: 20px;
+    margin: 0 auto 1rem;
+}
+
+.skeleton-deity-attributes {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.skeleton-attribute {
+    width: 50px;
+    height: 24px;
+    border-radius: 20px;
+}
+
+/* Creature Card Skeleton */
+.skeleton-creature-card {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid var(--skeleton-border-color);
+    border-radius: var(--skeleton-border-radius-lg);
+    padding: 1.5rem;
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
+}
+
+.skeleton-creature-silhouette {
+    width: 100%;
+    height: 150px;
+    border-radius: var(--skeleton-border-radius);
+    margin-bottom: 1rem;
+}
+
+.skeleton-creature-info {
+    text-align: center;
+}
+
+.skeleton-creature-name {
+    width: 60%;
+    height: 24px;
+    margin: 0 auto 0.5rem;
+}
+
+.skeleton-creature-type {
+    width: 40%;
+    height: 18px;
+    margin: 0 auto 0.5rem;
+}
+
+.skeleton-creature-origin {
+    width: 50%;
+    height: 16px;
+    margin: 0 auto;
+}
+
+/* Hero Card Skeleton */
+.skeleton-hero-card {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid var(--skeleton-border-color);
+    border-radius: var(--skeleton-border-radius-lg);
+    padding: 1.5rem;
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
+}
+
+.skeleton-hero-emblem {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+}
+
+.skeleton-hero-info {
+    text-align: center;
+}
+
+.skeleton-hero-name {
+    width: 65%;
+    height: 26px;
+    margin: 0 auto 0.5rem;
+}
+
+.skeleton-hero-title {
+    width: 45%;
+    height: 18px;
+    margin: 0 auto 1rem;
+}
+
+.skeleton-hero-feats {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.skeleton-feat {
+    width: 70px;
+    height: 22px;
+    border-radius: 20px;
+}
+
+/* Place Card Skeleton */
+.skeleton-place-card {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
+    border: 2px solid var(--skeleton-border-color);
+    border-radius: var(--skeleton-border-radius-lg);
+    overflow: hidden;
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
+    position: relative;
+}
+
+.skeleton-place-image {
+    width: 100%;
+    height: 200px;
+}
+
+.skeleton-place-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.5rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+}
+
+.skeleton-place-name {
+    width: 70%;
+    height: 24px;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-place-region {
+    width: 50%;
+    height: 18px;
+}
+
+/* Item Card Skeleton */
+.skeleton-item-card {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid var(--skeleton-border-color);
+    border-radius: var(--skeleton-border-radius-lg);
+    padding: 1.5rem;
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
+}
+
+.skeleton-item-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--skeleton-border-radius);
+    margin: 0 auto 1rem;
+}
+
+.skeleton-item-info {
+    text-align: center;
+}
+
+.skeleton-item-name {
+    width: 70%;
+    height: 22px;
+    margin: 0 auto 0.5rem;
+}
+
+.skeleton-item-power {
+    width: 55%;
+    height: 18px;
+    margin: 0 auto 0.5rem;
+}
+
+.skeleton-item-owner {
+    width: 45%;
+    height: 16px;
+    margin: 0 auto;
+}
+
+/* Compact Card Skeleton */
+.skeleton-compact-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1rem;
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+    border: 1px solid var(--skeleton-border-color);
+    border-radius: var(--skeleton-border-radius);
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
+}
+
+.skeleton-compact-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--skeleton-border-radius);
+    flex-shrink: 0;
+}
+
+.skeleton-compact-content {
+    flex: 1;
+}
+
+.skeleton-compact-title {
+    width: 60%;
+    height: 18px;
+    margin-bottom: 0.375rem;
+}
+
+.skeleton-compact-meta {
+    width: 40%;
+    height: 14px;
+}
+
+.skeleton-compact-arrow {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   SEARCH & BROWSE SKELETON SCREENS
+   ============================================ */
+
+/* Search Results Skeleton */
+.skeleton-search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.skeleton-search-header {
+    width: 200px;
+    height: 24px;
+    margin-bottom: 1rem;
+}
+
+.skeleton-search-result {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+    border: 1px solid var(--skeleton-border-color);
+    border-radius: var(--skeleton-border-radius-lg);
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
+    animation-delay: calc(var(--item-index, 0) * var(--skeleton-stagger-delay));
+}
+
+.skeleton-search-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--skeleton-border-radius);
+    flex-shrink: 0;
+}
+
+.skeleton-search-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skeleton-search-title {
+    width: 70%;
+    height: 20px;
+}
+
+.skeleton-search-type {
+    width: 25%;
+    height: 16px;
+}
+
+.skeleton-search-excerpt {
+    width: 90%;
+    height: 14px;
+}
+
+.skeleton-search-score {
+    width: 40px;
+    height: 24px;
+    border-radius: 20px;
+    flex-shrink: 0;
+}
+
+/* Browse Category Skeleton */
+.skeleton-browse-category {
+    padding: 2rem 0;
+}
+
+.skeleton-category-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.skeleton-category-title {
+    width: 280px;
+    height: 36px;
+    margin: 0 auto 0.75rem;
+}
+
+.skeleton-category-subtitle {
+    width: 400px;
+    height: 20px;
+    margin: 0 auto;
+    max-width: 90%;
+}
+
+.skeleton-category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.skeleton-category-item {
+    animation: fadeInStagger 0.4s ease-out forwards;
+    animation-delay: calc(var(--item-index, 0) * var(--skeleton-stagger-delay));
+    opacity: 0;
+}
+
+/* Quick View Skeleton */
+.skeleton-quick-view {
+    padding: 1.5rem;
+}
+
+.skeleton-quick-view-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.skeleton-qv-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.skeleton-qv-titles {
+    flex: 1;
+}
+
+.skeleton-qv-title {
+    width: 180px;
+    height: 24px;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-qv-subtitle {
+    width: 120px;
+    height: 18px;
+}
+
+.skeleton-qv-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.skeleton-qv-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.skeleton-qv-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--skeleton-border-color);
+}
+
+.skeleton-qv-btn {
+    flex: 1;
+    height: 40px;
+    border-radius: var(--skeleton-border-radius);
+}
+
+/* Compare View Skeleton */
+.skeleton-compare-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.skeleton-compare-column {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+    border: 1px solid var(--skeleton-border-color);
+    border-radius: var(--skeleton-border-radius-lg);
+    padding: 1.5rem;
+    animation: pulse var(--skeleton-pulse-speed) ease-in-out infinite;
+    animation-delay: calc(var(--item-index, 0) * 0.15s);
+}
+
+.skeleton-compare-header {
+    width: 100%;
+    height: 32px;
+    margin-bottom: 1.5rem;
+}
+
+.skeleton-compare-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+}
+
+.skeleton-compare-title {
+    width: 70%;
+    height: 24px;
+    margin: 0 auto 1.5rem;
+}
+
+.skeleton-compare-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.skeleton-compare-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skeleton-compare-label {
+    width: 30%;
+    height: 14px;
+}
+
+.skeleton-compare-value {
+    width: 80%;
+    height: 18px;
+}
+
+/* Grid Item Wrapper */
+.skeleton-grid-item {
+    animation: fadeInStagger 0.4s ease-out forwards;
+    animation-delay: calc(var(--item-index, 0) * var(--skeleton-stagger-delay));
+    opacity: 0;
+}
+
+/* Card Actions */
+.skeleton-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--skeleton-border-color);
+}
+
+.skeleton-btn-sm {
+    flex: 1;
+    height: 32px;
+    border-radius: var(--skeleton-border-radius);
+}
+
+/* Card Variants */
+.skeleton-card--compact {
+    padding: 1rem;
+}
+
+.skeleton-card--compact .skeleton-card-image {
+    height: 100px;
+}
+
+.skeleton-card--featured {
+    padding: 2rem;
+}
+
+.skeleton-card--featured .skeleton-card-image {
+    height: 200px;
+}
+
+.skeleton-card--featured .skeleton-card-title {
+    height: 28px;
+}
+
+.skeleton-card--minimal {
+    padding: 1rem;
+    background: transparent;
+    border-color: transparent;
+}
+
+/* ============================================
+   RESPONSIVE SKELETON SCREENS
+   ============================================ */
+
+@media (max-width: 768px) {
+    .skeleton-header-container {
+        flex-wrap: wrap;
+        padding: 0.75rem 1rem;
+    }
+
+    .skeleton-nav {
+        order: 3;
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+
+    .skeleton-hero {
+        padding: 2rem 1rem 3rem;
+    }
+
+    .skeleton-hero-title {
+        width: 300px;
+        height: 48px;
+    }
+
+    .skeleton-mythology-grid {
+        padding: 0 1rem 2rem;
+    }
+
+    .skeleton-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .skeleton-features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .skeleton-detail {
+        padding: 1rem;
+    }
+
+    .skeleton-detail-hero {
+        padding: 2rem 1rem;
+    }
+
+    .skeleton-detail-icon {
+        width: 64px;
+        height: 64px;
+    }
+
+    .skeleton-detail-title {
+        width: 250px;
+        height: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    .skeleton-hero-title {
+        width: 250px;
+        height: 40px;
+    }
+
+    .skeleton-hero-subtitle {
+        width: 200px;
+        height: 32px;
+    }
+
+    .skeleton-hero-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .skeleton-btn {
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .skeleton-list-item {
+        flex-wrap: wrap;
+    }
+
+    .skeleton-list-content {
+        width: 100%;
+    }
+
+    .skeleton-detail-meta {
+        gap: 0.5rem;
+    }
+
+    .skeleton-badge {
+        width: 50px;
+        height: 20px;
+    }
+
+    /* Entity-specific skeleton responsive */
+    .skeleton-entity-card {
+        padding: 1rem;
+    }
+
+    .skeleton-entity-card-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .skeleton-entity-icon {
+        margin: 0 auto;
+    }
+
+    .skeleton-entity-badges {
+        justify-content: center;
+    }
+
+    .skeleton-deity-card,
+    .skeleton-creature-card,
+    .skeleton-hero-card,
+    .skeleton-item-card {
+        padding: 1rem;
+    }
+
+    .skeleton-deity-portrait,
+    .skeleton-creature-silhouette {
+        height: 120px;
+    }
+
+    .skeleton-place-image {
+        height: 150px;
+    }
+
+    .skeleton-search-result {
+        flex-wrap: wrap;
+    }
+
+    .skeleton-search-content {
+        width: 100%;
+        order: 2;
+    }
+
+    .skeleton-search-score {
+        order: 3;
+    }
+
+    .skeleton-compare-view {
+        grid-template-columns: 1fr;
+    }
+
+    .skeleton-quick-view-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .skeleton-qv-titles {
+        text-align: center;
+    }
+
+    .skeleton-qv-title,
+    .skeleton-qv-subtitle {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .skeleton,
+    .skeleton::after,
+    .shimmer-enhanced::before,
+    .shimmer-container::after {
+        animation: none !important;
+    }
+
+    .skeleton-mythology-card,
+    .skeleton-grid-card,
+    .skeleton-feature-card,
+    .skeleton-card,
+    .skeleton-list-item,
+    .skeleton-table-row,
+    .skeleton-entity-card,
+    .skeleton-deity-card,
+    .skeleton-creature-card,
+    .skeleton-hero-card,
+    .skeleton-place-card,
+    .skeleton-item-card,
+    .skeleton-compact-card,
+    .skeleton-search-result,
+    .skeleton-compare-column {
+        animation: none !important;
+    }
+
+    .content-loading,
+    .content-loaded,
+    .content-replacing-skeleton,
+    .skeleton-grid > *,
+    .skeleton-grid.animating > *,
+    .skeleton-grid-item,
+    .skeleton-category-item {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    .skeleton-container.fade-out,
+    .skeleton-loading.fade-out,
+    .skeleton-mythology-grid.fade-out,
+    .skeleton-grid.fade-out {
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    /* Static skeleton appearance for reduced motion */
+    .skeleton {
+        background: var(--skeleton-bg);
+    }
+
+    .shimmer-enhanced::before,
+    .shimmer-container::after {
+        display: none;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .skeleton {
+        border: 2px solid var(--color-border-primary, #555);
+    }
+
+    .skeleton-card,
+    .skeleton-list-item,
+    .skeleton-mythology-card,
+    .skeleton-grid-card,
+    .skeleton-feature-card,
+    .skeleton-detail-section,
+    .skeleton-entity-card,
+    .skeleton-deity-card,
+    .skeleton-creature-card,
+    .skeleton-hero-card,
+    .skeleton-place-card,
+    .skeleton-item-card,
+    .skeleton-compact-card,
+    .skeleton-search-result,
+    .skeleton-compare-column {
+        border-width: 2px;
+    }
+}
+
+/* ============================================
+   THEME COLOR INHERITANCE FOR SKELETONS
+   ============================================ */
+
+[data-theme="cosmic"] {
+    --skeleton-highlight: rgba(0, 212, 255, 0.18);
+    --skeleton-highlight-bright: rgba(0, 212, 255, 0.35);
+}
+
+[data-theme="sacred"] {
+    --skeleton-highlight: rgba(255, 215, 0, 0.18);
+    --skeleton-highlight-bright: rgba(255, 215, 0, 0.35);
+}
+
+[data-theme="golden"] {
+    --skeleton-highlight: rgba(218, 165, 32, 0.18);
+    --skeleton-highlight-bright: rgba(218, 165, 32, 0.35);
+}
+
+[data-theme="ocean"] {
+    --skeleton-highlight: rgba(0, 188, 212, 0.18);
+    --skeleton-highlight-bright: rgba(0, 188, 212, 0.35);
+}
+
+[data-theme="fire"] {
+    --skeleton-highlight: rgba(255, 87, 34, 0.18);
+    --skeleton-highlight-bright: rgba(255, 87, 34, 0.35);
+}
+
+/* ============================================
+   DARK MODE ENHANCEMENTS
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+    .skeleton {
+        background: linear-gradient(
+            90deg,
+            rgba(20, 25, 50, 0.9) 0%,
+            rgba(139, 127, 255, 0.15) 50%,
+            rgba(20, 25, 50, 0.9) 100%
+        );
+    }
+
+    .skeleton-card,
+    .skeleton-mythology-card,
+    .skeleton-grid-card {
+        background: rgba(10, 15, 35, 0.9);
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .skeleton,
+    .skeleton-card,
+    .skeleton-list,
+    .skeleton-detail,
+    .skeleton-grid,
+    .skeleton-table,
+    .skeleton-header,
+    .skeleton-hero,
+    .skeleton-mythology-grid,
+    .skeleton-features-grid,
+    .skeleton-container {
+        display: none !important;
+    }
 }

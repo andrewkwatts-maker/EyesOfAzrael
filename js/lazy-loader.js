@@ -1,5 +1,5 @@
 /**
- * PROGRESSIVE LAZY LOADER
+ * PROGRESSIVE LAZY LOADER (Polished)
  * Orchestrates progressive loading for optimal perceived performance
  *
  * Loading Phases:
@@ -8,59 +8,256 @@
  * 3. Main content structure (200ms) - Show skeleton screens (if app not ready)
  * 4. Firebase data (300-500ms) - Wait for app initialization
  * 5. Shaders + Enhancements (1s+) - Nice-to-have features
+ * 6. Non-critical modules (2s+) - Background loading
  *
  * IMPORTANT: This loader coordinates with app-init-simple.js and spa-navigation.js
  * to avoid race conditions. It will NOT override content if the app has already
  * started rendering.
+ *
+ * Performance Features:
+ * - Detailed timing metrics for each phase
+ * - Priority-based module loading
+ * - Retry logic for failed loads
+ * - Memory-efficient observer management
+ * - Proper cleanup on unmount
  */
 
 class ProgressiveLazyLoader {
-    constructor() {
+    constructor(options = {}) {
         this.loadStartTime = performance.now();
+        this.options = {
+            enableMetrics: true,
+            retryAttempts: 3,
+            retryDelay: 1000,
+            skeletonTimeout: 5000,
+            lazyLoadDelay: 1500,
+            ...options
+        };
+
         this.phases = {
             critical: false,      // HTML + Critical CSS
             auth: false,          // Auth check + User UI
             structure: false,     // Main content skeleton
             data: false,          // Firebase data loaded
-            enhanced: false       // Shaders + extras
+            enhanced: false,      // Shaders + extras
+            nonCritical: false    // Background modules
         };
-        this.metrics = {};
+
+        this.metrics = {
+            phases: {},
+            resources: [],
+            errors: []
+        };
+
         this.observers = new Map();
+        this.pendingLoads = new Map();
+        this.loadedModules = new Set();
 
         // Track coordination state with other components
         this._appInitialized = false;
         this._firstRenderComplete = false;
         this._skeletonActive = false;
+        this._destroyed = false;
 
-        console.log('[Lazy Loader] Initialized');
+        // Performance marks
+        this._perfMark('loader-init');
+
+        console.log('[Lazy Loader] Initialized with options:', this.options);
+    }
+
+    /**
+     * Performance mark helper
+     * @param {string} name - Mark name
+     */
+    _perfMark(name) {
+        if (!this.options.enableMetrics) return;
+
+        const timestamp = performance.now();
+        this.metrics.phases[name] = timestamp - this.loadStartTime;
+
+        if (typeof performance.mark === 'function') {
+            try {
+                performance.mark(`lazy-${name}`);
+            } catch (e) {
+                // Ignore duplicate marks
+            }
+        }
+    }
+
+    /**
+     * Log a resource load timing
+     * @param {string} resource - Resource identifier
+     * @param {number} duration - Load duration in ms
+     * @param {boolean} success - Whether load succeeded
+     */
+    _logResourceLoad(resource, duration, success = true) {
+        if (!this.options.enableMetrics) return;
+
+        this.metrics.resources.push({
+            resource,
+            duration: Math.round(duration),
+            success,
+            timestamp: performance.now() - this.loadStartTime
+        });
+    }
+
+    /**
+     * Log an error during loading
+     * @param {string} phase - Phase where error occurred
+     * @param {Error} error - The error
+     */
+    _logError(phase, error) {
+        this.metrics.errors.push({
+            phase,
+            message: error.message,
+            timestamp: performance.now() - this.loadStartTime
+        });
+        console.error(`[Lazy Loader] Error in ${phase}:`, error);
     }
 
     /**
      * Start progressive loading sequence
      */
     async start() {
+        if (this._destroyed) {
+            console.warn('[Lazy Loader] Cannot start - loader has been destroyed');
+            return;
+        }
+
         console.log('[Lazy Loader] Starting progressive loading...');
+        this._perfMark('start');
 
         // Setup event listeners for coordination with other components
         this._setupEventListeners();
 
-        // Phase 1: Critical (already done by server/HTML)
-        this.markPhaseComplete('critical');
+        try {
+            // Phase 1: Critical (already done by server/HTML)
+            this.markPhaseComplete('critical');
 
-        // Phase 2: Auth Check (100ms target)
-        await this.loadAuthUI();
+            // Phase 2: Auth Check (100ms target)
+            await this._executeWithRetry(() => this.loadAuthUI(), 'auth');
 
-        // Phase 3: Structure (200ms target) - only if app hasn't started rendering
-        await this.loadStructure();
+            // Phase 3: Structure (200ms target) - only if app hasn't started rendering
+            await this._executeWithRetry(() => this.loadStructure(), 'structure');
 
-        // Phase 4: Data (300-500ms target) - coordinate with app initialization
-        await this.loadData();
+            // Phase 4: Data (300-500ms target) - coordinate with app initialization
+            await this._executeWithRetry(() => this.loadData(), 'data');
 
-        // Phase 5: Enhancements (1s+ - non-blocking)
-        this.loadEnhancements();
+            // Phase 5: Enhancements (1s+ - non-blocking)
+            this.loadEnhancements();
 
-        // Report metrics
-        this.reportMetrics();
+            // Phase 6: Non-critical modules (2s+ - background)
+            this._scheduleNonCriticalModules();
+
+            // Report metrics
+            this._perfMark('complete');
+            this.reportMetrics();
+
+        } catch (error) {
+            this._logError('start', error);
+            // Still report metrics even on error
+            this.reportMetrics();
+        }
+    }
+
+    /**
+     * Execute a phase with retry logic
+     * @param {Function} fn - Function to execute
+     * @param {string} phase - Phase name for error logging
+     * @returns {Promise<any>}
+     */
+    async _executeWithRetry(fn, phase) {
+        let lastError;
+
+        for (let attempt = 1; attempt <= this.options.retryAttempts; attempt++) {
+            try {
+                return await fn();
+            } catch (error) {
+                lastError = error;
+                console.warn(`[Lazy Loader] ${phase} attempt ${attempt} failed:`, error.message);
+
+                if (attempt < this.options.retryAttempts) {
+                    await new Promise(resolve =>
+                        setTimeout(resolve, this.options.retryDelay * attempt)
+                    );
+                }
+            }
+        }
+
+        this._logError(phase, lastError);
+        throw lastError;
+    }
+
+    /**
+     * Schedule loading of non-critical modules
+     */
+    _scheduleNonCriticalModules() {
+        // Wait for first render before loading non-critical modules
+        const loadNonCritical = () => {
+            if (this._destroyed) return;
+
+            this._perfMark('non-critical-start');
+            console.log('[Lazy Loader] Loading non-critical modules...');
+
+            // Load any deferred scripts
+            this.loadDeferredScripts();
+
+            // Prefetch likely next pages
+            this.prefetchLikelyPages();
+
+            this.markPhaseComplete('nonCritical');
+            this._perfMark('non-critical-end');
+        };
+
+        if (this._firstRenderComplete) {
+            setTimeout(loadNonCritical, 500);
+        } else {
+            document.addEventListener('first-render-complete', () => {
+                setTimeout(loadNonCritical, this.options.lazyLoadDelay);
+            }, { once: true });
+        }
+    }
+
+    /**
+     * Load deferred scripts that aren't immediately needed
+     */
+    loadDeferredScripts() {
+        // Find scripts with data-defer attribute
+        const deferredScripts = document.querySelectorAll('script[data-defer="true"]');
+        deferredScripts.forEach(script => {
+            if (!script.src || this.loadedModules.has(script.src)) return;
+
+            const newScript = document.createElement('script');
+            newScript.src = script.src;
+            newScript.async = true;
+            document.body.appendChild(newScript);
+            this.loadedModules.add(script.src);
+        });
+    }
+
+    /**
+     * Prefetch resources for likely next navigation
+     */
+    prefetchLikelyPages() {
+        // Check current route and prefetch related resources
+        const hash = window.location.hash;
+
+        // Common prefetch targets based on current page
+        const prefetchMap = {
+            '#/': ['mythologies', 'deities'],
+            '#/mythologies': ['greek', 'norse', 'egyptian'],
+            '#/browse': ['deities', 'creatures', 'heroes']
+        };
+
+        const targets = prefetchMap[hash] || [];
+        targets.forEach(target => {
+            // Use link prefetch for navigation hints
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = `#/${target}`;
+            link.as = 'document';
+            document.head.appendChild(link);
+        });
     }
 
     /**
@@ -619,11 +816,30 @@ class ProgressiveLazyLoader {
      */
     reportMetrics() {
         const totalTime = performance.now() - this.loadStartTime;
+        const metrics = this.getMetrics();
 
         console.group('[Lazy Loader] Performance Metrics');
         console.log('Total Load Time:', Math.round(totalTime), 'ms');
-        console.table(this.metrics);
-        console.log('Phases:', this.phases);
+
+        // Phase timings
+        if (Object.keys(this.metrics.phases).length > 0) {
+            console.log('Phase Timings:');
+            console.table(this.metrics.phases);
+        }
+
+        // Resource loads
+        if (this.metrics.resources.length > 0) {
+            console.log('Resource Loads:');
+            console.table(this.metrics.resources);
+        }
+
+        // Errors
+        if (this.metrics.errors.length > 0) {
+            console.warn('Errors:');
+            console.table(this.metrics.errors);
+        }
+
+        console.log('Phase Status:', this.phases);
         console.groupEnd();
 
         // Emit metrics event for analytics
@@ -631,25 +847,66 @@ class ProgressiveLazyLoader {
             detail: {
                 totalTime: Math.round(totalTime),
                 phases: this.phases,
-                metrics: this.metrics
+                metrics: metrics,
+                hasErrors: this.metrics.errors.length > 0
             }
         }));
+
+        // Also send to app performance if available
+        if (window.getAppPerformance) {
+            const appPerf = window.getAppPerformance();
+            console.debug('[Lazy Loader] App performance:', appPerf);
+        }
     }
 
     /**
      * Cleanup observers and reset state
      */
     destroy() {
+        if (this._destroyed) {
+            console.debug('[Lazy Loader] Already destroyed');
+            return;
+        }
+
         console.log('[Lazy Loader] Cleaning up...');
+        this._destroyed = true;
+        this._perfMark('destroy');
 
         // Disconnect all observers
-        this.observers.forEach(observer => observer.disconnect());
+        this.observers.forEach((observer, key) => {
+            try {
+                observer.disconnect();
+                console.debug(`[Lazy Loader] Disconnected observer: ${key}`);
+            } catch (e) {
+                console.warn(`[Lazy Loader] Error disconnecting observer ${key}:`, e);
+            }
+        });
         this.observers.clear();
+
+        // Cancel any pending loads
+        this.pendingLoads.forEach((controller, key) => {
+            try {
+                if (controller && typeof controller.abort === 'function') {
+                    controller.abort();
+                }
+            } catch (e) {
+                // Ignore abort errors
+            }
+        });
+        this.pendingLoads.clear();
+
+        // Clear loaded modules tracking
+        this.loadedModules.clear();
 
         // Reset state
         this._appInitialized = false;
         this._firstRenderComplete = false;
         this._skeletonActive = false;
+
+        // Emit cleanup event
+        document.dispatchEvent(new CustomEvent('lazy-loader-destroyed', {
+            detail: { metrics: this.getMetrics() }
+        }));
 
         console.log('[Lazy Loader] Cleanup complete');
     }
@@ -660,13 +917,35 @@ class ProgressiveLazyLoader {
     getState() {
         return {
             phases: { ...this.phases },
-            metrics: { ...this.metrics },
+            options: { ...this.options },
             appInitialized: this._appInitialized,
             firstRenderComplete: this._firstRenderComplete,
             skeletonActive: this._skeletonActive,
+            destroyed: this._destroyed,
             observerCount: this.observers.size,
+            pendingLoadsCount: this.pendingLoads.size,
+            loadedModulesCount: this.loadedModules.size,
             elapsedTime: Math.round(performance.now() - this.loadStartTime)
         };
+    }
+
+    /**
+     * Get detailed metrics
+     */
+    getMetrics() {
+        return {
+            ...this.metrics,
+            totalTime: Math.round(performance.now() - this.loadStartTime),
+            phases: { ...this.phases },
+            phaseTiming: { ...this.metrics.phases }
+        };
+    }
+
+    /**
+     * Check if loader is still active
+     */
+    isActive() {
+        return !this._destroyed;
     }
 }
 
@@ -682,9 +961,39 @@ if (document.readyState === 'loading') {
 }
 
 // Expose for debugging
-window.debugLazyLoader = () => {
+window.debugLazyLoader = (verbose = false) => {
     if (window.lazyLoader) {
-        return window.lazyLoader.getState();
+        const state = window.lazyLoader.getState();
+        const metrics = window.lazyLoader.getMetrics();
+
+        if (verbose) {
+            console.group('[Lazy Loader Debug]');
+            console.log('State:', state);
+            console.log('Metrics:', metrics);
+            console.groupEnd();
+        }
+
+        return {
+            state,
+            metrics,
+            isActive: window.lazyLoader.isActive()
+        };
+    }
+    return null;
+};
+
+// Expose function to manually trigger cleanup
+window.destroyLazyLoader = () => {
+    if (window.lazyLoader) {
+        window.lazyLoader.destroy();
+        console.log('[Lazy Loader] Manually destroyed');
+    }
+};
+
+// Expose function to get loader metrics
+window.getLazyLoaderMetrics = () => {
+    if (window.lazyLoader) {
+        return window.lazyLoader.getMetrics();
     }
     return null;
 };

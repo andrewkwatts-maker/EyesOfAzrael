@@ -1,0 +1,1444 @@
+/**
+ * Enhanced Entity Form Styles
+ * Comprehensive styling for all metadata types and form components
+ */
+
+/* ===================================
+   CSS Variables
+   =================================== */
+.entity-form-enhanced {
+    --ef-bg-primary: rgba(26, 31, 58, 0.98);
+    --ef-bg-secondary: rgba(0, 0, 0, 0.3);
+    --ef-bg-tertiary: rgba(255, 255, 255, 0.05);
+    --ef-border-color: rgba(139, 127, 255, 0.25);
+    --ef-border-focus: rgba(102, 126, 234, 0.8);
+    --ef-text-primary: #e5e7eb;
+    --ef-text-secondary: #9ca3af;
+    --ef-text-muted: #6b7280;
+    --ef-accent: #667eea;
+    --ef-accent-hover: #764ba2;
+    --ef-success: #10b981;
+    --ef-error: #ef4444;
+    --ef-warning: #f59e0b;
+    --ef-radius-sm: 0.375rem;
+    --ef-radius-md: 0.5rem;
+    --ef-radius-lg: 0.75rem;
+    --ef-radius-xl: 1rem;
+    --ef-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --ef-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* ===================================
+   Container
+   =================================== */
+.entity-form-enhanced {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--ef-bg-primary);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--ef-border-color);
+    border-radius: var(--ef-radius-xl);
+    box-shadow: var(--ef-shadow);
+    overflow: hidden;
+    position: relative;
+}
+
+/* ===================================
+   Header
+   =================================== */
+.ef-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border-bottom: 1px solid var(--ef-border-color);
+}
+
+.ef-header-content {
+    flex: 1;
+}
+
+.ef-title {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--ef-accent), var(--ef-accent-hover));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ef-subtitle {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ef-text-secondary);
+}
+
+.ef-close-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: var(--ef-bg-tertiary);
+    border-radius: 50%;
+    color: var(--ef-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--ef-transition);
+    flex-shrink: 0;
+}
+
+.ef-close-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--ef-error);
+    transform: rotate(90deg);
+}
+
+/* ===================================
+   Progress Indicator
+   =================================== */
+.ef-progress {
+    display: flex;
+    padding: 0 1rem;
+    background: var(--ef-bg-secondary);
+    border-bottom: 1px solid var(--ef-border-color);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.ef-progress::-webkit-scrollbar {
+    display: none;
+}
+
+.ef-progress-step {
+    flex: 1;
+    min-width: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 1rem 0.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--ef-text-muted);
+    cursor: pointer;
+    transition: all var(--ef-transition);
+    position: relative;
+}
+
+.ef-progress-step:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.ef-progress-step.current {
+    color: var(--ef-accent);
+    border-bottom-color: var(--ef-accent);
+}
+
+.ef-progress-step.completed {
+    color: var(--ef-success);
+    border-bottom-color: var(--ef-success);
+}
+
+.ef-progress-step.completed:not(:disabled):hover {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.ef-step-number {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--ef-bg-tertiary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all var(--ef-transition);
+}
+
+.ef-progress-step.current .ef-step-number {
+    background: var(--ef-accent);
+    color: white;
+}
+
+.ef-progress-step.completed .ef-step-number {
+    background: var(--ef-success);
+    color: white;
+}
+
+.ef-step-title {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* ===================================
+   Form Body
+   =================================== */
+.ef-form {
+    padding: 0;
+}
+
+.ef-steps-container {
+    padding: 2rem;
+    min-height: 400px;
+}
+
+.ef-step {
+    display: none;
+    animation: efStepIn 0.3s ease;
+}
+
+.ef-step.active {
+    display: block;
+}
+
+@keyframes efStepIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.ef-step-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0 1.5rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--ef-border-color);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--ef-accent);
+}
+
+.ef-step-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ef-step-icon svg {
+    stroke: var(--ef-accent);
+}
+
+/* ===================================
+   Fields Grid
+   =================================== */
+.ef-fields-grid {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.ef-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ef-field.required .ef-label::after {
+    content: '';
+}
+
+/* ===================================
+   Labels
+   =================================== */
+.ef-label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ef-text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ef-required {
+    color: var(--ef-error);
+    font-weight: 700;
+}
+
+.ef-help-text {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--ef-text-secondary);
+    font-style: italic;
+}
+
+.ef-error-text {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--ef-error);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.ef-error-text::before {
+    content: '!';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--ef-error);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+.ef-warning-text {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--ef-warning);
+}
+
+/* ===================================
+   Input Styles
+   =================================== */
+.ef-input,
+.ef-textarea,
+.ef-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--ef-bg-secondary);
+    border: 2px solid var(--ef-border-color);
+    border-radius: var(--ef-radius-md);
+    color: var(--ef-text-primary);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all var(--ef-transition);
+}
+
+.ef-input:focus,
+.ef-textarea:focus,
+.ef-select:focus {
+    outline: none;
+    border-color: var(--ef-border-focus);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.ef-input::placeholder,
+.ef-textarea::placeholder {
+    color: var(--ef-text-muted);
+}
+
+.ef-field.has-error .ef-input,
+.ef-field.has-error .ef-textarea,
+.ef-field.has-error .ef-select {
+    border-color: var(--ef-error);
+}
+
+.ef-textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+
+.ef-select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e5e7eb' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+}
+
+.ef-char-count {
+    font-size: 0.75rem;
+    color: var(--ef-text-muted);
+    text-align: right;
+}
+
+/* ===================================
+   Number Input
+   =================================== */
+.ef-number-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.ef-number-btn {
+    width: 40px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ef-bg-tertiary);
+    border: 2px solid var(--ef-border-color);
+    color: var(--ef-text-primary);
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all var(--ef-transition);
+}
+
+.ef-number-minus {
+    border-radius: var(--ef-radius-md) 0 0 var(--ef-radius-md);
+    border-right: none;
+}
+
+.ef-number-plus {
+    border-radius: 0 var(--ef-radius-md) var(--ef-radius-md) 0;
+    border-left: none;
+}
+
+.ef-number-btn:hover {
+    background: var(--ef-accent);
+    border-color: var(--ef-accent);
+    color: white;
+}
+
+.ef-number-input {
+    border-radius: 0;
+    text-align: center;
+    -moz-appearance: textfield;
+}
+
+.ef-number-input::-webkit-outer-spin-button,
+.ef-number-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* ===================================
+   Checkbox
+   =================================== */
+.ef-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    padding: 0.5rem 0;
+}
+
+.ef-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--ef-accent);
+    cursor: pointer;
+}
+
+.ef-checkbox-label {
+    font-size: 0.9rem;
+    color: var(--ef-text-primary);
+}
+
+/* ===================================
+   Tags Input
+   =================================== */
+.ef-tags-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ef-tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-height: 36px;
+}
+
+.ef-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem 0.375rem 0.75rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+    border: 1px solid rgba(102, 126, 234, 0.4);
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    color: var(--ef-text-primary);
+    animation: efTagIn 0.2s ease;
+}
+
+@keyframes efTagIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.ef-tag-text {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ef-tag-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all var(--ef-transition);
+}
+
+.ef-tag-remove:hover {
+    background: var(--ef-error);
+    transform: scale(1.1);
+}
+
+.ef-tag-input-wrapper {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.ef-tag-input {
+    flex: 1;
+}
+
+.ef-tag-add-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: var(--ef-accent);
+    border: none;
+    border-radius: var(--ef-radius-md);
+    color: white;
+    cursor: pointer;
+    transition: all var(--ef-transition);
+}
+
+.ef-tag-add-btn:hover {
+    background: var(--ef-accent-hover);
+    transform: scale(1.05);
+}
+
+/* ===================================
+   Ordered List
+   =================================== */
+.ef-ordered-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.ef-ordered-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: ordered-items;
+}
+
+.ef-ordered-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--ef-bg-secondary);
+    border-radius: var(--ef-radius-md);
+    margin-bottom: 0.5rem;
+    counter-increment: ordered-items;
+}
+
+.ef-ordered-item::before {
+    content: counter(ordered-items);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--ef-accent);
+    border-radius: 50%;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.ef-item-handle {
+    cursor: grab;
+    color: var(--ef-text-muted);
+    padding: 0 0.25rem;
+}
+
+.ef-ordered-input {
+    flex: 1;
+}
+
+.ef-item-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--ef-text-muted);
+    cursor: pointer;
+    border-radius: var(--ef-radius-sm);
+    transition: all var(--ef-transition);
+}
+
+.ef-item-remove:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--ef-error);
+}
+
+.ef-ordered-add {
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+}
+
+/* ===================================
+   Key-Value Editor
+   =================================== */
+.ef-key-value-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ef-key-value-row {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.ef-key-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ef-text-secondary);
+    text-transform: capitalize;
+}
+
+.ef-key-value-add {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--ef-border-color);
+    margin-top: 0.5rem;
+}
+
+.ef-kv-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--ef-text-muted);
+    cursor: pointer;
+    border-radius: var(--ef-radius-sm);
+    transition: all var(--ef-transition);
+}
+
+.ef-kv-remove:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--ef-error);
+}
+
+/* ===================================
+   Entity References
+   =================================== */
+.ef-entity-refs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.ef-entity-refs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ef-entity-ref {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--ef-bg-secondary);
+    border: 1px solid var(--ef-border-color);
+    border-radius: var(--ef-radius-md);
+    transition: all var(--ef-transition);
+}
+
+.ef-entity-ref:hover {
+    border-color: var(--ef-accent);
+}
+
+.ef-entity-ref-icon {
+    font-size: 1.25rem;
+}
+
+.ef-entity-ref-name {
+    flex: 1;
+    font-weight: 500;
+    color: var(--ef-text-primary);
+}
+
+.ef-entity-ref-type {
+    font-size: 0.8rem;
+    color: var(--ef-text-muted);
+    text-transform: capitalize;
+}
+
+.ef-entity-ref-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--ef-text-muted);
+    cursor: pointer;
+    border-radius: var(--ef-radius-sm);
+    transition: all var(--ef-transition);
+}
+
+.ef-entity-ref-remove:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--ef-error);
+}
+
+.ef-entity-search-wrapper {
+    position: relative;
+}
+
+.ef-autocomplete-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    background: var(--ef-bg-primary);
+    border: 1px solid var(--ef-border-color);
+    border-top: none;
+    border-radius: 0 0 var(--ef-radius-md) var(--ef-radius-md);
+    z-index: 100;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.ef-autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background var(--ef-transition);
+}
+
+.ef-autocomplete-item:hover {
+    background: var(--ef-bg-tertiary);
+}
+
+.ef-autocomplete-icon {
+    font-size: 1.25rem;
+}
+
+.ef-autocomplete-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.ef-autocomplete-meta {
+    font-size: 0.8rem;
+    color: var(--ef-text-muted);
+}
+
+.ef-autocomplete-empty {
+    padding: 1rem;
+    text-align: center;
+    color: var(--ef-text-muted);
+    font-style: italic;
+}
+
+/* ===================================
+   Parallel Entities
+   =================================== */
+.ef-parallel-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.ef-parallel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ef-parallel-item {
+    display: grid;
+    grid-template-columns: 1fr 150px auto;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.ef-parallel-tradition {
+    width: 100%;
+}
+
+.ef-parallel-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--ef-text-muted);
+    cursor: pointer;
+    border-radius: var(--ef-radius-sm);
+    transition: all var(--ef-transition);
+}
+
+.ef-parallel-remove:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--ef-error);
+}
+
+.ef-add-parallel {
+    align-self: flex-start;
+}
+
+/* ===================================
+   Sources
+   =================================== */
+.ef-sources-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.ef-sources-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ef-source-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.ef-source-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--ef-text-muted);
+    cursor: pointer;
+    border-radius: var(--ef-radius-sm);
+    transition: all var(--ef-transition);
+}
+
+.ef-source-remove:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--ef-error);
+}
+
+.ef-add-source {
+    align-self: flex-start;
+}
+
+/* ===================================
+   Rich Text Editor
+   =================================== */
+.ef-richtext-editor {
+    border: 2px solid var(--ef-border-color);
+    border-radius: var(--ef-radius-md);
+    overflow: hidden;
+    background: var(--ef-bg-secondary);
+}
+
+.ef-richtext-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--ef-border-color);
+    flex-wrap: wrap;
+}
+
+.ef-toolbar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: var(--ef-bg-tertiary);
+    border: 1px solid var(--ef-border-color);
+    border-radius: var(--ef-radius-sm);
+    color: var(--ef-text-primary);
+    cursor: pointer;
+    transition: all var(--ef-transition);
+    font-size: 0.9rem;
+}
+
+.ef-toolbar-btn:hover {
+    background: var(--ef-accent);
+    border-color: var(--ef-accent);
+    color: white;
+}
+
+.ef-toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--ef-border-color);
+    margin: 0 0.25rem;
+}
+
+.ef-richtext-content {
+    min-height: 150px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 1rem;
+    line-height: 1.6;
+    color: var(--ef-text-primary);
+}
+
+.ef-richtext-content:focus {
+    outline: none;
+}
+
+.ef-richtext-content.empty::before {
+    content: attr(data-placeholder);
+    color: var(--ef-text-muted);
+    font-style: italic;
+}
+
+.ef-richtext-content:focus.empty::before {
+    content: '';
+}
+
+.ef-richtext-content h1,
+.ef-richtext-content h2,
+.ef-richtext-content h3 {
+    margin: 1rem 0 0.5rem 0;
+    color: var(--ef-accent);
+}
+
+.ef-richtext-content p {
+    margin: 0.5rem 0;
+}
+
+.ef-richtext-content ul,
+.ef-richtext-content ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+/* ===================================
+   Image Upload
+   =================================== */
+.ef-image-upload {
+    position: relative;
+}
+
+.ef-image-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.ef-image-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 2rem;
+    border: 2px dashed var(--ef-border-color);
+    border-radius: var(--ef-radius-md);
+    background: var(--ef-bg-secondary);
+    cursor: pointer;
+    transition: all var(--ef-transition);
+}
+
+.ef-image-label:hover {
+    border-color: var(--ef-accent);
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.ef-image-label.has-image {
+    display: none;
+}
+
+.ef-image-label svg {
+    stroke: var(--ef-text-muted);
+}
+
+.ef-image-label-text {
+    font-weight: 500;
+    color: var(--ef-text-primary);
+}
+
+.ef-image-label-hint {
+    font-size: 0.8rem;
+    color: var(--ef-text-muted);
+}
+
+.ef-image-preview {
+    position: relative;
+    border-radius: var(--ef-radius-md);
+    overflow: hidden;
+}
+
+.ef-image-preview img {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: cover;
+    display: block;
+}
+
+.ef-image-remove {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(239, 68, 68, 0.9);
+    border: none;
+    border-radius: var(--ef-radius-sm);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--ef-transition);
+}
+
+.ef-image-remove:hover {
+    background: var(--ef-error);
+    transform: scale(1.05);
+}
+
+/* ===================================
+   Emoji Picker
+   =================================== */
+.ef-emoji-picker-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.ef-emoji-trigger {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ef-bg-secondary);
+    border: 2px solid var(--ef-border-color);
+    border-radius: var(--ef-radius-md);
+    cursor: pointer;
+    transition: all var(--ef-transition);
+}
+
+.ef-emoji-trigger:hover {
+    border-color: var(--ef-accent);
+}
+
+.ef-emoji-value {
+    font-size: 2rem;
+}
+
+.ef-emoji-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 100;
+    padding: 0.75rem;
+    background: var(--ef-bg-primary);
+    border: 1px solid var(--ef-border-color);
+    border-radius: var(--ef-radius-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    min-width: 250px;
+}
+
+.ef-emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.ef-emoji-option {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    border-radius: var(--ef-radius-sm);
+    transition: background var(--ef-transition);
+}
+
+.ef-emoji-option:hover {
+    background: var(--ef-bg-tertiary);
+}
+
+.ef-emoji-custom {
+    width: 100%;
+    padding: 0.5rem;
+    background: var(--ef-bg-secondary);
+    border: 1px solid var(--ef-border-color);
+    border-radius: var(--ef-radius-sm);
+    color: var(--ef-text-primary);
+    text-align: center;
+    font-size: 1.25rem;
+}
+
+/* ===================================
+   Date Input
+   =================================== */
+.ef-date-input {
+    color-scheme: dark;
+}
+
+/* ===================================
+   Coordinates
+   =================================== */
+.ef-coords-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.ef-coord-input {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.ef-coord-input label {
+    font-size: 0.8rem;
+    color: var(--ef-text-secondary);
+}
+
+/* ===================================
+   Form Actions
+   =================================== */
+.ef-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    background: var(--ef-bg-secondary);
+    border-top: 1px solid var(--ef-border-color);
+}
+
+.ef-actions-left,
+.ef-actions-right {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.ef-actions-center {
+    flex: 1;
+    text-align: center;
+}
+
+.ef-step-indicator {
+    font-size: 0.85rem;
+    color: var(--ef-text-muted);
+}
+
+/* Buttons */
+.ef-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: var(--ef-radius-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--ef-transition);
+    white-space: nowrap;
+}
+
+.ef-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.ef-btn-ghost {
+    background: transparent;
+    color: var(--ef-text-secondary);
+}
+
+.ef-btn-ghost:hover:not(:disabled) {
+    background: var(--ef-bg-tertiary);
+    color: var(--ef-text-primary);
+}
+
+.ef-btn-secondary {
+    background: var(--ef-bg-tertiary);
+    color: var(--ef-text-primary);
+    border: 1px solid var(--ef-border-color);
+}
+
+.ef-btn-secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.ef-btn-primary {
+    background: var(--ef-accent);
+    color: white;
+}
+
+.ef-btn-primary:hover:not(:disabled) {
+    background: var(--ef-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+.ef-btn-success {
+    background: var(--ef-success);
+    color: white;
+}
+
+.ef-btn-success:hover:not(:disabled) {
+    background: #0ea572;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+}
+
+.ef-btn-small {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+/* ===================================
+   Status Messages
+   =================================== */
+.ef-status {
+    display: none;
+    margin: 1rem 2rem;
+    padding: 1rem;
+    border-radius: var(--ef-radius-md);
+    text-align: center;
+    font-weight: 500;
+}
+
+.ef-status-loading {
+    display: block;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #3b82f6;
+}
+
+.ef-status-success {
+    display: block;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--ef-success);
+    animation: efSuccessPulse 0.5s ease;
+}
+
+@keyframes efSuccessPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.ef-status-error {
+    display: block;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: var(--ef-error);
+}
+
+/* ===================================
+   Draft Indicator
+   =================================== */
+.ef-draft-indicator {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--ef-success);
+    border-radius: var(--ef-radius-md);
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all var(--ef-transition);
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.ef-draft-indicator.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===================================
+   Responsive
+   =================================== */
+@media (max-width: 768px) {
+    .entity-form-enhanced {
+        border-radius: 0;
+        max-width: 100%;
+    }
+
+    .ef-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .ef-title {
+        font-size: 1.25rem;
+    }
+
+    .ef-progress-step {
+        min-width: 80px;
+        padding: 0.75rem 0.25rem;
+    }
+
+    .ef-step-title {
+        font-size: 0.65rem;
+    }
+
+    .ef-steps-container {
+        padding: 1.25rem;
+    }
+
+    .ef-actions {
+        flex-direction: column;
+        padding: 1rem 1.25rem;
+    }
+
+    .ef-actions-left,
+    .ef-actions-center,
+    .ef-actions-right {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .ef-actions-center {
+        order: -1;
+    }
+
+    .ef-btn {
+        flex: 1;
+    }
+
+    .ef-parallel-item,
+    .ef-source-item,
+    .ef-key-value-row,
+    .ef-key-value-add {
+        grid-template-columns: 1fr;
+    }
+
+    .ef-coords-container {
+        grid-template-columns: 1fr;
+    }
+
+    .ef-emoji-panel {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
+/* ===================================
+   Accessibility
+   =================================== */
+@media (prefers-reduced-motion: reduce) {
+    .entity-form-enhanced,
+    .entity-form-enhanced * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+.ef-btn:focus-visible,
+.ef-input:focus-visible,
+.ef-textarea:focus-visible,
+.ef-select:focus-visible,
+.ef-checkbox:focus-visible,
+.ef-progress-step:focus-visible {
+    outline: 2px solid var(--ef-accent);
+    outline-offset: 2px;
+}
+
+/* Screen reader only */
+.ef-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ===================================
+   Print
+   =================================== */
+@media print {
+    .ef-actions,
+    .ef-close-btn,
+    .ef-draft-indicator,
+    .ef-progress {
+        display: none !important;
+    }
+
+    .entity-form-enhanced {
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+}

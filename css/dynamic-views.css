@@ -8,6 +8,9 @@
  * - Breadcrumb navigation
  * - Component-specific styles
  * - Responsive layouts
+ * - Visual polish enhancements
+ * - Glassmorphism effects
+ * - Parallax integration
  */
 
 /* ============================================
@@ -997,5 +1000,789 @@
     .stat-card,
     .entity-type-card {
         border-width: 3px;
+    }
+}
+
+/* ============================================
+   ENHANCED VISUAL POLISH FOR DYNAMIC VIEWS
+   ============================================ */
+
+/* View container with subtle background texture */
+.view-container {
+    position: relative;
+}
+
+.view-container::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(
+            ellipse at 20% 10%,
+            rgba(var(--color-primary-rgb, 139, 127, 255), 0.08) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            ellipse at 80% 90%,
+            rgba(var(--color-secondary-rgb, 255, 126, 182), 0.06) 0%,
+            transparent 50%
+        );
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Enhanced view transitions with blur */
+.view-transition-out {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.99);
+    filter: blur(2px);
+    transition:
+        opacity 200ms ease-out,
+        transform 200ms ease-out,
+        filter 200ms ease-out;
+}
+
+.view-transition-in {
+    animation: viewTransitionIn 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes viewTransitionIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+        filter: blur(4px);
+    }
+    60% {
+        filter: blur(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+/* ============================================
+   ENHANCED LOADING STATES
+   ============================================ */
+
+/* Premium loading container */
+.view-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    position: relative;
+}
+
+.view-loading::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        circle at center,
+        rgba(var(--color-primary-rgb, 139, 127, 255), 0.1) 0%,
+        transparent 60%
+    );
+    animation: loadingPulse 2s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+    0%, 100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+/* Enhanced loading container */
+.loading-container {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* Shimmer loading message */
+.loading-message {
+    margin-top: var(--spacing-lg, 1.5rem);
+    color: var(--color-text-secondary, #9ca3af);
+    font-size: var(--font-size-lg, 1.125rem);
+    background: linear-gradient(
+        90deg,
+        var(--color-text-secondary, #9ca3af) 0%,
+        var(--color-text-primary, #e5e7eb) 50%,
+        var(--color-text-secondary, #9ca3af) 100%
+    );
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: textShimmer 2s ease-in-out infinite;
+}
+
+@keyframes textShimmer {
+    0% {
+        background-position: -200% center;
+    }
+    100% {
+        background-position: 200% center;
+    }
+}
+
+/* ============================================
+   ENHANCED ERROR STATES
+   ============================================ */
+
+.view-error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.error-container {
+    text-align: center;
+    max-width: 600px;
+    padding: var(--spacing-xl, 2rem);
+    background: rgba(var(--color-error-rgb, 239, 68, 68), 0.05);
+    border: 1px solid rgba(var(--color-error-rgb, 239, 68, 68), 0.2);
+    border-radius: var(--radius-xl, 1rem);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: errorShake 0.5s ease-out;
+}
+
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.error-icon {
+    font-size: 4rem;
+    margin-bottom: var(--spacing-lg, 1.5rem);
+    animation: iconBounce 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+@keyframes iconBounce {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================
+   ENHANCED BREADCRUMB NAVIGATION
+   ============================================ */
+
+#breadcrumb-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(26, 31, 58, 0.85);
+    backdrop-filter: blur(12px) saturate(1.2);
+    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    border-bottom: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+    padding: var(--spacing-md, 1rem) 0;
+    margin-bottom: var(--spacing-lg, 1.5rem);
+    opacity: 0;
+    transform: translateY(-100%);
+    transition:
+        opacity 300ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#breadcrumb-nav.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Glass shine effect on breadcrumb */
+#breadcrumb-nav::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 100%
+    );
+}
+
+.breadcrumb-link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs, 0.25rem);
+    color: var(--color-primary, #667eea);
+    text-decoration: none;
+    padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+    border-radius: var(--radius-md, 8px);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.breadcrumb-link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(var(--color-primary-rgb, 102, 126, 234), 0.15) 0%,
+        transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 200ms ease;
+}
+
+.breadcrumb-link:hover {
+    color: var(--color-primary-light, #818cf8);
+    transform: translateY(-1px);
+}
+
+.breadcrumb-link:hover::before {
+    opacity: 1;
+}
+
+.breadcrumb-separator {
+    color: var(--color-text-muted, #6c757d);
+    margin: 0 var(--spacing-xs, 0.25rem);
+    user-select: none;
+    opacity: 0.6;
+}
+
+/* ============================================
+   ENHANCED MYTHOLOGY HERO
+   ============================================ */
+
+.mythology-hero,
+.entity-hero {
+    position: relative;
+    padding: var(--spacing-4xl, 4rem) var(--spacing-xl, 2rem);
+    margin-bottom: var(--spacing-2xl, 3rem);
+    text-align: center;
+    overflow: hidden;
+}
+
+/* Parallax background effect */
+.mythology-hero-background,
+.entity-hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        var(--primary-color, #667eea) 0%,
+        var(--secondary-color, #764ba2) 100%
+    );
+    opacity: 0.15;
+    z-index: -1;
+    transform: translateY(calc(var(--scroll-y, 0) * -0.15));
+    will-change: transform;
+}
+
+/* Animated gradient orbs */
+.mythology-hero::before,
+.entity-hero::before {
+    content: '';
+    position: absolute;
+    width: 150%;
+    height: 150%;
+    top: -25%;
+    left: -25%;
+    background:
+        radial-gradient(
+            circle at 30% 20%,
+            rgba(var(--color-primary-rgb, 139, 127, 255), 0.2) 0%,
+            transparent 40%
+        ),
+        radial-gradient(
+            circle at 70% 80%,
+            rgba(var(--color-secondary-rgb, 255, 126, 182), 0.15) 0%,
+            transparent 40%
+        );
+    animation: orbFloat 20s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes orbFloat {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+        transform: translate(2%, 3%) rotate(2deg);
+    }
+    50% {
+        transform: translate(-1%, 5%) rotate(-1deg);
+    }
+    75% {
+        transform: translate(3%, 1%) rotate(1deg);
+    }
+}
+
+/* Hero content with glass effect */
+.mythology-hero-content,
+.entity-hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Icon with glow effect */
+.mythology-icon-large,
+.entity-icon-large {
+    font-size: 5rem;
+    margin-bottom: var(--spacing-lg, 1.5rem);
+    line-height: 1;
+    filter: drop-shadow(0 0 20px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4));
+    animation: iconGlow 3s ease-in-out infinite;
+}
+
+@keyframes iconGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 20px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4));
+    }
+    50% {
+        filter: drop-shadow(0 0 30px rgba(var(--color-primary-rgb, 139, 127, 255), 0.6));
+    }
+}
+
+/* Title with gradient text */
+.mythology-title,
+.entity-title {
+    font-size: var(--font-size-4xl, 2.5rem);
+    background: linear-gradient(
+        135deg,
+        #fff 0%,
+        rgba(255, 255, 255, 0.95) 50%,
+        rgba(var(--color-primary-rgb, 139, 127, 255), 0.9) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--spacing-md, 1rem);
+    text-shadow: 0 0 40px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+}
+
+/* ============================================
+   ENHANCED STAT CARDS
+   ============================================ */
+
+.stat-card {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(12px) saturate(1.2);
+    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    padding: var(--spacing-lg, 1.5rem);
+    border-radius: var(--radius-lg, 0.75rem);
+    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+    text-align: center;
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shine effect on hover */
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.stat-card:hover::before {
+    left: 100%;
+}
+
+.stat-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    border-color: var(--color-primary, #667eea);
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+}
+
+.stat-card .stat-number {
+    display: block;
+    font-size: var(--font-size-3xl, 2rem);
+    font-weight: var(--font-bold, 700);
+    background: linear-gradient(
+        135deg,
+        var(--color-primary, #667eea) 0%,
+        var(--color-secondary, #764ba2) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--spacing-xs, 0.25rem);
+}
+
+/* ============================================
+   ENHANCED ENTITY TYPE CARDS
+   ============================================ */
+
+.entity-type-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md, 1rem);
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: var(--spacing-lg, 1.5rem);
+    border-radius: var(--radius-lg, 0.75rem);
+    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+    text-decoration: none;
+    color: var(--color-text-primary, #e5e7eb);
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Gradient border on hover */
+.entity-type-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(
+        135deg,
+        var(--color-primary, #667eea),
+        var(--color-secondary, #764ba2)
+    );
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 300ms ease;
+}
+
+.entity-type-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: -1;
+}
+
+.entity-type-card:hover {
+    transform: translateX(8px);
+    border-color: transparent;
+}
+
+.entity-type-card:hover::before {
+    opacity: 1;
+}
+
+.entity-type-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.entity-type-card:hover .entity-type-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.entity-type-arrow {
+    font-size: var(--font-size-xl, 1.25rem);
+    color: var(--color-primary, #667eea);
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.entity-type-card:hover .entity-type-arrow {
+    transform: translateX(6px);
+}
+
+/* ============================================
+   ENHANCED RELATED ENTITY CARDS
+   ============================================ */
+
+.related-entity-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm, 0.5rem);
+    padding: var(--spacing-md, 1rem);
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-md, 8px);
+    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+    text-decoration: none;
+    color: var(--color-text-primary, #e5e7eb);
+    transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.related-entity-card:hover {
+    border-color: var(--color-primary, #667eea);
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+    transform: translateX(4px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.related-entity-icon {
+    font-size: 1.5rem;
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.related-entity-card:hover .related-entity-icon {
+    transform: scale(1.15);
+}
+
+/* ============================================
+   ENHANCED ENTITY SECTIONS
+   ============================================ */
+
+.entity-section {
+    margin-bottom: var(--spacing-2xl, 3rem);
+    padding: var(--spacing-xl, 2rem);
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: var(--radius-xl, 1rem);
+    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle gradient accent at top */
+.entity-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--color-primary, #667eea) 20%,
+        var(--color-secondary, #764ba2) 80%,
+        transparent 100%
+    );
+    opacity: 0.6;
+}
+
+.section-title {
+    font-size: var(--font-size-2xl, 1.5rem);
+    color: var(--color-primary, #667eea);
+    margin-bottom: var(--spacing-lg, 1.5rem);
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        var(--color-primary, #667eea) 0%,
+        transparent 100%
+    );
+}
+
+/* ============================================
+   ENHANCED ENTITY ATTRIBUTES
+   ============================================ */
+
+.entity-attribute {
+    padding: var(--spacing-md, 1rem);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md, 8px);
+    border: 1px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.1);
+    transition: all 200ms ease;
+}
+
+.entity-attribute:hover {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+}
+
+.attribute-label {
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-text-muted, #6c757d);
+    margin-bottom: var(--spacing-xs, 0.25rem);
+    font-weight: var(--font-medium, 500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.attribute-value {
+    font-size: var(--font-size-base, 1rem);
+    color: var(--color-text-primary, #e5e7eb);
+}
+
+.attribute-tag {
+    display: inline-block;
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+    color: var(--color-primary, #667eea);
+    padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+    border-radius: var(--radius-md, 8px);
+    margin-right: var(--spacing-xs, 0.25rem);
+    margin-bottom: var(--spacing-xs, 0.25rem);
+    font-size: var(--font-size-sm, 0.875rem);
+    transition: all 200ms ease;
+}
+
+.attribute-tag:hover {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.25);
+    transform: translateY(-1px);
+}
+
+/* ============================================
+   STAGGERED GRID ANIMATION FOR DYNAMIC VIEWS
+   ============================================ */
+
+.mythology-grid,
+.entity-types-grid,
+.stats-grid,
+.related-entities-list {
+    display: grid;
+    gap: var(--spacing-lg, 1.5rem);
+}
+
+.mythology-grid > *,
+.entity-types-grid > *,
+.stats-grid > *,
+.related-entities-list > * {
+    opacity: 0;
+    animation: gridItemEnter 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes gridItemEnter {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.mythology-grid > *:nth-child(1),
+.entity-types-grid > *:nth-child(1),
+.stats-grid > *:nth-child(1),
+.related-entities-list > *:nth-child(1) { animation-delay: 0.05s; }
+
+.mythology-grid > *:nth-child(2),
+.entity-types-grid > *:nth-child(2),
+.stats-grid > *:nth-child(2),
+.related-entities-list > *:nth-child(2) { animation-delay: 0.1s; }
+
+.mythology-grid > *:nth-child(3),
+.entity-types-grid > *:nth-child(3),
+.stats-grid > *:nth-child(3),
+.related-entities-list > *:nth-child(3) { animation-delay: 0.15s; }
+
+.mythology-grid > *:nth-child(4),
+.entity-types-grid > *:nth-child(4),
+.stats-grid > *:nth-child(4),
+.related-entities-list > *:nth-child(4) { animation-delay: 0.2s; }
+
+.mythology-grid > *:nth-child(5),
+.entity-types-grid > *:nth-child(5),
+.stats-grid > *:nth-child(5),
+.related-entities-list > *:nth-child(5) { animation-delay: 0.25s; }
+
+.mythology-grid > *:nth-child(6),
+.entity-types-grid > *:nth-child(6),
+.stats-grid > *:nth-child(6),
+.related-entities-list > *:nth-child(6) { animation-delay: 0.3s; }
+
+.mythology-grid > *:nth-child(n+7),
+.entity-types-grid > *:nth-child(n+7),
+.stats-grid > *:nth-child(n+7),
+.related-entities-list > *:nth-child(n+7) { animation-delay: 0.35s; }
+
+/* ============================================
+   RESPONSIVE ENHANCEMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Reduce animation complexity */
+    .mythology-grid > *,
+    .entity-types-grid > *,
+    .stats-grid > *,
+    .related-entities-list > * {
+        animation-delay: 0s !important;
+    }
+
+    /* Simplify parallax */
+    .mythology-hero::before,
+    .entity-hero::before {
+        animation: none;
+    }
+
+    .mythology-hero-background,
+    .entity-hero-background {
+        transform: none;
+    }
+
+    /* Simplify icon animations */
+    .mythology-icon-large,
+    .entity-icon-large {
+        animation: none;
+    }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .view-transition-out,
+    .view-transition-in {
+        transition: none;
+        animation: none;
+        opacity: 1;
+        transform: none;
+        filter: none;
+    }
+
+    .view-loading::before,
+    .loading-message,
+    .mythology-hero::before,
+    .entity-hero::before,
+    .mythology-icon-large,
+    .entity-icon-large,
+    .stat-card::before,
+    .error-container {
+        animation: none;
+    }
+
+    .mythology-grid > *,
+    .entity-types-grid > *,
+    .stats-grid > *,
+    .related-entities-list > * {
+        opacity: 1;
+        transform: none;
+        animation: none;
+    }
+
+    .entity-type-card:hover,
+    .stat-card:hover,
+    .related-entity-card:hover {
+        transform: none;
     }
 }

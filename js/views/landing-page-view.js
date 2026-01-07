@@ -1,5 +1,5 @@
 /**
- * Landing Page View - Production Quality
+ * Landing Page View - Production Quality Polish
  * Displays asset type categories (mythologies, items, archetypes, places, magic, etc.)
  * in a polished, accessible grid layout with smooth animations.
  *
@@ -11,6 +11,10 @@
  * - SVG icons with emoji fallbacks for error handling
  * - WCAG 2.1 AA compliance
  * - Performance optimized (lazy loading, CSS containment)
+ * - Skeleton loading states with fade-in animations
+ * - Consistent card dimensions with min-height
+ * - Text truncation (1 line titles, 2 line descriptions)
+ * - Smooth hover effects with 0.2s transitions
  */
 
 class LandingPageView {
@@ -21,8 +25,8 @@ class LandingPageView {
     }
 
     /**
- * Define all asset type categories for the landing page
- * Now using SVG icons instead of emoji for better visual quality
+     * Define all asset type categories for the landing page
+     * Now using SVG icons instead of emoji for better visual quality
      */
     getAssetTypes() {
         return [
@@ -151,9 +155,20 @@ class LandingPageView {
             }
             console.log('[Landing Page] Container valid:', container.tagName, container.id);
 
-            // RENDER IMMEDIATELY - no skeleton delay (prevents race condition with lazy loader)
+            // STEP 1: Show skeleton loading state first for smooth UX
+            container.innerHTML = this.getSkeletonHTML();
+            container.classList.add('landing-loading');
+            console.log('[Landing Page] Skeleton loading state displayed');
+
+            // STEP 2: Brief delay to show skeleton (simulates async data fetch)
+            // This ensures users see the loading state for at least 100ms
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // STEP 3: Render final content with fade-in animation
             console.log('[Landing Page] Setting final HTML...');
             container.innerHTML = this.getLandingHTML();
+            container.classList.remove('landing-loading');
+            container.classList.add('landing-loaded');
 
             // CRITICAL: Remove ALL classes that could hide content
             // These classes from skeleton-screens.css and visual-polish.css set opacity: 0
@@ -252,70 +267,363 @@ class LandingPageView {
     }
 
     /**
+     * Get skeleton loading HTML for smooth UX
+     * Shows placeholder cards while content loads with staggered animations
+     */
+    getSkeletonHTML() {
+        // Generate 12 skeleton cards to match the 12 categories
+        const skeletonCards = Array(12).fill('').map((_, index) => `
+            <div class="landing-skeleton-card" style="--skeleton-index: ${index};">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-title"></div>
+                <div class="skeleton-description"></div>
+                <div class="skeleton-description skeleton-short"></div>
+            </div>
+        `).join('');
+
+        return `
+            <div class="landing-page-view landing-skeleton-container">
+                <!-- Skeleton Hero Section -->
+                <section class="landing-hero-section landing-skeleton-hero">
+                    <div class="skeleton-hero-glow" aria-hidden="true"></div>
+                    <div class="skeleton-hero-icon-wrapper">
+                        <div class="skeleton-hero-icon"></div>
+                        <div class="skeleton-hero-ring"></div>
+                    </div>
+                    <div class="skeleton-hero-title-small"></div>
+                    <div class="skeleton-hero-title"></div>
+                    <div class="skeleton-hero-subtitle"></div>
+                    <div class="skeleton-hero-description"></div>
+                    <div class="skeleton-hero-actions">
+                        <div class="skeleton-button skeleton-button-primary"></div>
+                        <div class="skeleton-button skeleton-button-secondary"></div>
+                    </div>
+                </section>
+
+                <!-- Skeleton Category Grid -->
+                <section class="landing-categories-section">
+                    <div class="skeleton-section-header"></div>
+                    <div class="skeleton-section-subtitle"></div>
+                    <div class="landing-category-grid">
+                        ${skeletonCards}
+                    </div>
+                </section>
+            </div>
+
+            <style>
+                /* ===== SKELETON LOADING STYLES - POLISHED ===== */
+
+                /* Skeleton shimmer animation - smoother wave effect */
+                @keyframes skeletonShimmer {
+                    0% {
+                        background-position: -200% 0;
+                    }
+                    100% {
+                        background-position: 200% 0;
+                    }
+                }
+
+                /* Skeleton pulse animation - gentler breathing effect */
+                @keyframes skeletonPulse {
+                    0%, 100% {
+                        opacity: 0.5;
+                    }
+                    50% {
+                        opacity: 0.8;
+                    }
+                }
+
+                /* Skeleton card entrance animation */
+                @keyframes skeletonCardEnter {
+                    from {
+                        opacity: 0;
+                        transform: translateY(12px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                /* Base skeleton element styles */
+                .landing-skeleton-container [class*="skeleton-"]:not(.landing-skeleton-card):not(.landing-skeleton-hero):not(.landing-skeleton-container) {
+                    background: linear-gradient(
+                        90deg,
+                        rgba(var(--color-primary-rgb, 139, 127, 255), 0.08) 0%,
+                        rgba(var(--color-primary-rgb, 139, 127, 255), 0.18) 40%,
+                        rgba(var(--color-primary-rgb, 139, 127, 255), 0.18) 60%,
+                        rgba(var(--color-primary-rgb, 139, 127, 255), 0.08) 100%
+                    );
+                    background-size: 200% 100%;
+                    animation: skeletonShimmer 2s ease-in-out infinite;
+                    border-radius: var(--radius-md, 8px);
+                }
+
+                /* Skeleton Hero - Enhanced */
+                .landing-skeleton-hero {
+                    position: relative;
+                    padding: 72px 40px 64px !important;
+                }
+
+                .skeleton-hero-glow {
+                    position: absolute;
+                    inset: 0;
+                    background: radial-gradient(
+                        circle at center,
+                        rgba(var(--color-primary-rgb, 139, 127, 255), 0.08) 0%,
+                        transparent 60%
+                    );
+                    animation: skeletonPulse 3s ease-in-out infinite;
+                }
+
+                .skeleton-hero-icon-wrapper {
+                    position: relative;
+                    width: 90px;
+                    height: 90px;
+                    margin: 0 auto 24px;
+                }
+
+                .skeleton-hero-icon {
+                    width: 70px;
+                    height: 70px;
+                    border-radius: 50%;
+                    margin: 10px auto;
+                }
+
+                .skeleton-hero-ring {
+                    position: absolute;
+                    inset: 0;
+                    border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+                    border-radius: 50%;
+                    animation: skeletonPulse 2s ease-in-out infinite;
+                }
+
+                .skeleton-hero-title-small {
+                    width: 120px;
+                    height: 18px;
+                    margin: 0 auto 8px;
+                    border-radius: 4px;
+                }
+
+                .skeleton-hero-title {
+                    width: 280px;
+                    max-width: 80%;
+                    height: 52px;
+                    margin: 0 auto 20px;
+                    border-radius: 8px;
+                }
+
+                .skeleton-hero-subtitle {
+                    width: 420px;
+                    max-width: 90%;
+                    height: 24px;
+                    margin: 0 auto 16px;
+                }
+
+                .skeleton-hero-description {
+                    width: 520px;
+                    max-width: 85%;
+                    height: 40px;
+                    margin: 0 auto 32px;
+                    border-radius: 8px;
+                }
+
+                .skeleton-hero-actions {
+                    display: flex;
+                    gap: 16px;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                }
+
+                .skeleton-button {
+                    height: 52px;
+                    border-radius: 14px;
+                }
+
+                .skeleton-button-primary {
+                    width: 200px;
+                }
+
+                .skeleton-button-secondary {
+                    width: 180px;
+                    opacity: 0.7;
+                }
+
+                /* Skeleton Section Header */
+                .skeleton-section-header {
+                    width: 220px;
+                    height: 32px;
+                    margin: 0 auto 16px;
+                }
+
+                .skeleton-section-subtitle {
+                    width: 320px;
+                    max-width: 85%;
+                    height: 18px;
+                    margin: 0 auto 32px;
+                }
+
+                /* Skeleton Cards - Staggered entrance */
+                .landing-skeleton-card {
+                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.5);
+                    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.25);
+                    border-radius: 14px;
+                    padding: 22px 20px;
+                    min-height: 175px;
+                    display: flex;
+                    flex-direction: column;
+                    opacity: 0;
+                    animation:
+                        skeletonCardEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+                        skeletonPulse 2.5s ease-in-out infinite 0.4s;
+                    animation-delay: calc(var(--skeleton-index, 0) * 0.05s);
+                }
+
+                .landing-skeleton-card .skeleton-icon {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 10px;
+                    margin-bottom: 14px;
+                }
+
+                .landing-skeleton-card .skeleton-title {
+                    width: 70%;
+                    height: 18px;
+                    margin-bottom: 10px;
+                    border-radius: 4px;
+                }
+
+                .landing-skeleton-card .skeleton-description {
+                    width: 100%;
+                    height: 12px;
+                    margin-bottom: 6px;
+                    border-radius: 3px;
+                }
+
+                .landing-skeleton-card .skeleton-description.skeleton-short {
+                    width: 65%;
+                }
+
+                /* Responsive skeleton adjustments */
+                @media (max-width: 767px) {
+                    .skeleton-hero-icon-wrapper {
+                        width: 70px;
+                        height: 70px;
+                    }
+
+                    .skeleton-hero-icon {
+                        width: 50px;
+                        height: 50px;
+                    }
+
+                    .skeleton-hero-title {
+                        height: 40px;
+                    }
+
+                    .skeleton-hero-actions {
+                        flex-direction: column;
+                        align-items: center;
+                    }
+
+                    .skeleton-button {
+                        width: 100%;
+                        max-width: 280px;
+                    }
+                }
+            </style>
+        `;
+    }
+
+    /**
      * Get landing page HTML
      */
     getLandingHTML() {
         return `
             <div class="landing-page-view">
                 <!-- Hero Section -->
-                <section class="landing-hero-section">
-                    <div class="hero-icon-display">👁️</div>
-                    <h1 class="landing-hero-title">Eyes of Azrael</h1>
-                    <p class="landing-hero-subtitle">
-                        Explore the myths, legends, and sacred traditions of humanity
-                    </p>
-                    <p class="landing-hero-description">
-                        Journey through 6000+ years of mythology, from ancient Sumer to modern traditions.
-                        Discover deities, heroes, creatures, sacred texts, and mystical practices from cultures across the globe.
-                    </p>
-                    <div class="landing-hero-actions">
-                        <a href="#/mythologies" class="landing-btn landing-btn-primary">
-                            🏛️ Explore Mythologies
-                        </a>
-                        <a href="#/search" class="landing-btn landing-btn-secondary">
-                            🔍 Browse All Content
-                        </a>
+                <section class="landing-hero-section" role="banner">
+                    <div class="hero-background-glow" aria-hidden="true"></div>
+                    <div class="hero-content-wrapper">
+                        <div class="hero-icon-display" aria-hidden="true">
+                            <span class="hero-eye-icon">&#128065;</span>
+                            <div class="hero-icon-ring"></div>
+                        </div>
+                        <h1 class="landing-hero-title">
+                            <span class="title-line title-line-1">Eyes of</span>
+                            <span class="title-line title-line-2">Azrael</span>
+                        </h1>
+                        <p class="landing-hero-subtitle">
+                            Explore the myths, legends, and sacred traditions of humanity
+                        </p>
+                        <p class="landing-hero-description">
+                            Journey through 6000+ years of mythology, from ancient Sumer to modern traditions.
+                            Discover deities, heroes, creatures, sacred texts, and mystical practices from cultures across the globe.
+                        </p>
+                        <div class="landing-hero-actions">
+                            <a href="#/mythologies" class="landing-btn landing-btn-primary">
+                                <span class="btn-icon">&#127963;</span>
+                                <span class="btn-text">Explore Mythologies</span>
+                            </a>
+                            <a href="#/search" class="landing-btn landing-btn-secondary">
+                                <span class="btn-icon">&#128269;</span>
+                                <span class="btn-text">Browse All Content</span>
+                            </a>
+                        </div>
                     </div>
                 </section>
 
                 <!-- Asset Type Grid -->
                 <section class="landing-categories-section">
                     <h2 class="landing-section-header">
-                        <span class="landing-section-icon">🗂️</span>
+                        <span class="landing-section-icon">&#128450;</span>
                         Explore by Category
                     </h2>
                     <p class="landing-section-subtitle">
                         Browse our comprehensive collection of mythological content
                     </p>
                     <div class="landing-category-grid">
-                        ${this.assetTypes.map(type => this.getAssetTypeCardHTML(type)).join('')}
+                        ${this.assetTypes.map((type, index) => this.getAssetTypeCardHTML(type, index)).join('')}
+                    </div>
+                </section>
+
+                <!-- Featured Entities Section - Dynamically loaded if data available -->
+                <section class="landing-featured-section" id="featured-entities-section" style="display: none;">
+                    <h2 class="landing-section-header">
+                        <span class="landing-section-icon">&#11088;</span>
+                        Featured Entities
+                    </h2>
+                    <p class="landing-section-subtitle">
+                        Popular mythological beings and artifacts
+                    </p>
+                    <div class="landing-featured-grid" id="featured-entities-grid">
+                        <!-- Featured entities will be dynamically loaded here -->
                     </div>
                 </section>
 
                 <!-- Features Section -->
                 <section class="landing-features-section">
                     <h2 class="landing-section-header">
-                        <span class="landing-section-icon">✨</span>
+                        <span class="landing-section-icon">&#10024;</span>
                         Database Features
                     </h2>
                     <div class="landing-features-grid">
-                        <div class="landing-feature-card">
-                            <div class="landing-feature-icon">📚</div>
+                        <div class="landing-feature-card" style="--feature-index: 0;">
+                            <div class="landing-feature-icon">&#128218;</div>
                             <h3>Comprehensive Database</h3>
                             <p>Thousands of entities across 22+ mythological traditions</p>
                         </div>
-                        <div class="landing-feature-card">
-                            <div class="landing-feature-icon">🔗</div>
+                        <div class="landing-feature-card" style="--feature-index: 1;">
+                            <div class="landing-feature-icon">&#128279;</div>
                             <h3>Cross-Cultural Links</h3>
                             <p>Discover connections between different traditions</p>
                         </div>
-                        <div class="landing-feature-card">
-                            <div class="landing-feature-icon">🔍</div>
+                        <div class="landing-feature-card" style="--feature-index: 2;">
+                            <div class="landing-feature-icon">&#128269;</div>
                             <h3>Advanced Search</h3>
                             <p>Find entities by name, type, mythology, or attributes</p>
                         </div>
-                        <div class="landing-feature-card">
-                            <div class="landing-feature-icon">⚖️</div>
+                        <div class="landing-feature-card" style="--feature-index: 3;">
+                            <div class="landing-feature-icon">&#9878;</div>
                             <h3>Compare Traditions</h3>
                             <p>Side-by-side comparison of entities and concepts</p>
                         </div>
@@ -324,7 +632,7 @@ class LandingPageView {
             </div>
 
             <style>
-                /* ===== LANDING PAGE STYLES - PRODUCTION QUALITY ===== */
+                /* ===== LANDING PAGE STYLES - PRODUCTION QUALITY POLISH ===== */
                 /*
                  * Design System:
                  * - Golden Ratio Typography: 1.618
@@ -333,7 +641,22 @@ class LandingPageView {
                  * - Enhanced Glass-morphism with multiple blur layers
                  * - WCAG 2.1 AA Compliant
                  * - Performance optimized with CSS containment
+                 * - Consistent card dimensions with min-height
+                 * - Text truncation for titles (1 line) and descriptions (2 lines)
+                 * - Smooth 0.2s hover transitions
                  */
+
+                /* === Fade-in Animation for Content Load === */
+                @keyframes landingFadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(8px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
 
                 /* === Root Container === */
                 /* FIXED: Removed opacity:0 animation that was causing content to stay hidden */
@@ -346,6 +669,18 @@ class LandingPageView {
                     opacity: 1 !important;
                     visibility: visible !important;
                     display: block !important;
+                    /* Fade-in animation when content loads */
+                    animation: landingFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                }
+
+                /* Loading state class for container */
+                .landing-loading .landing-page-view {
+                    animation: none;
+                }
+
+                /* Loaded state with fade-in */
+                .landing-loaded .landing-page-view {
+                    animation: landingFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
                 }
 
                 /* === Hero Section - Enhanced Glass-morphism === */
@@ -353,68 +688,116 @@ class LandingPageView {
                     /* Multi-layer glass effect */
                     background:
                         linear-gradient(135deg,
-                            rgba(var(--color-primary-rgb, 139, 127, 255), 0.15),
-                            rgba(var(--color-secondary-rgb, 251, 191, 36), 0.1)),
+                            rgba(var(--color-primary-rgb, 139, 127, 255), 0.12),
+                            rgba(var(--color-secondary-rgb, 251, 191, 36), 0.08)),
                         linear-gradient(180deg,
-                            rgba(255, 255, 255, 0.05),
+                            rgba(255, 255, 255, 0.06),
                             transparent);
 
-                    border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
-                    border-radius: 24px; /* 3x8px grid */
-                    padding: 64px 32px; /* 8x8px, 4x8px grid */
+                    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.25);
+                    border-radius: 28px; /* Slightly larger radius */
+                    padding: 72px 40px 64px; /* Extra top padding for visual balance */
                     text-align: center;
-                    margin-bottom: 64px; /* 8x8px grid */
+                    margin-bottom: 56px;
                     position: relative;
                     overflow: hidden;
                     contain: layout style paint;
 
                     /* Enhanced glass-morphism */
-                    backdrop-filter: blur(24px) saturate(180%);
-                    -webkit-backdrop-filter: blur(24px) saturate(180%);
+                    backdrop-filter: blur(20px) saturate(180%);
+                    -webkit-backdrop-filter: blur(20px) saturate(180%);
 
                     /* Layered shadows for depth */
                     box-shadow:
-                        0 8px 32px rgba(0, 0, 0, 0.3),
-                        0 1px 1px rgba(255, 255, 255, 0.1) inset,
-                        0 0 80px rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+                        0 12px 40px rgba(0, 0, 0, 0.35),
+                        0 1px 0 rgba(255, 255, 255, 0.08) inset,
+                        0 -1px 0 rgba(0, 0, 0, 0.2) inset,
+                        0 0 100px rgba(var(--color-primary-rgb, 139, 127, 255), 0.08);
 
                     /* Performance optimization */
                     will-change: transform;
                 }
 
-                /* Subtle gradient overlay for depth */
-                .landing-hero-section::before {
-                    content: '';
+                /* Animated background glow */
+                .hero-background-glow {
                     position: absolute;
-                    inset: 0;
-                    background: radial-gradient(
-                        circle at top center,
-                        rgba(var(--color-primary-rgb, 139, 127, 255), 0.1),
-                        transparent 70%
-                    );
+                    inset: -50%;
+                    background:
+                        radial-gradient(circle at 30% 20%, rgba(var(--color-primary-rgb, 139, 127, 255), 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(var(--color-secondary-rgb, 251, 191, 36), 0.1) 0%, transparent 50%);
+                    animation: heroGlowShift 20s ease-in-out infinite;
                     pointer-events: none;
                     z-index: 0;
                 }
 
-                .landing-hero-section > * {
+                @keyframes heroGlowShift {
+                    0%, 100% {
+                        transform: translate(0, 0) rotate(0deg);
+                        opacity: 0.8;
+                    }
+                    33% {
+                        transform: translate(5%, 3%) rotate(60deg);
+                        opacity: 1;
+                    }
+                    66% {
+                        transform: translate(-3%, -2%) rotate(120deg);
+                        opacity: 0.9;
+                    }
+                }
+
+                .hero-content-wrapper {
                     position: relative;
                     z-index: 1;
                 }
 
-                /* Hero Icon - Smooth Float Animation */
+                /* Hero Icon - Enhanced with Ring Animation */
                 .hero-icon-display {
-                    font-size: clamp(3.5rem, 7vw, 5rem); /* Golden ratio from base */
-                    margin-bottom: 16px; /* 2x8px grid */
-                    filter: drop-shadow(0 4px 12px rgba(var(--color-primary-rgb, 139, 127, 255), 0.6))
-                            drop-shadow(0 0 24px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3));
-                    animation: smoothFloat 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-                    will-change: transform;
-                    line-height: 1;
+                    position: relative;
+                    margin-bottom: 24px;
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    width: clamp(4rem, 8vw, 6rem);
-                    height: clamp(4rem, 8vw, 6rem);
+                    width: clamp(80px, 12vw, 100px);
+                    height: clamp(80px, 12vw, 100px);
+                }
+
+                .hero-eye-icon {
+                    font-size: clamp(3rem, 6vw, 4.5rem);
+                    line-height: 1;
+                    filter: drop-shadow(0 4px 16px rgba(var(--color-primary-rgb, 139, 127, 255), 0.5))
+                            drop-shadow(0 0 32px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3));
+                    animation: smoothFloat 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                    will-change: transform;
+                    position: relative;
+                    z-index: 2;
+                }
+
+                .hero-icon-ring {
+                    position: absolute;
+                    inset: -8px;
+                    border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+                    border-radius: 50%;
+                    animation: ringPulse 3s ease-in-out infinite;
+                }
+
+                .hero-icon-ring::before {
+                    content: '';
+                    position: absolute;
+                    inset: -12px;
+                    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+                    border-radius: 50%;
+                    animation: ringPulse 3s ease-in-out infinite 0.5s;
+                }
+
+                @keyframes ringPulse {
+                    0%, 100% {
+                        transform: scale(1);
+                        opacity: 0.5;
+                    }
+                    50% {
+                        transform: scale(1.1);
+                        opacity: 0.8;
+                    }
                 }
 
                 @keyframes smoothFloat {
@@ -422,21 +805,26 @@ class LandingPageView {
                         transform: translateY(0) scale(1);
                     }
                     50% {
-                        transform: translateY(-12px) scale(1.02);
+                        transform: translateY(-8px) scale(1.03);
                     }
                 }
 
-                /* Hero Title - Golden Ratio Typography */
+                /* Hero Title - Enhanced Typography with Split Lines */
                 .landing-hero-title {
                     font-family: var(--font-heading, Georgia, serif);
-                    /* Golden ratio: base 2rem × 1.618³ ≈ 3.5rem */
-                    font-size: clamp(2.618rem, 6vw, 4.236rem);
-                    font-weight: 700;
-                    margin-bottom: 16px; /* 2x8px grid */
-                    letter-spacing: -0.02em;
-                    line-height: 1.1;
+                    font-size: clamp(2.5rem, 5.5vw, 4rem);
+                    font-weight: 800;
+                    margin-bottom: 20px;
+                    letter-spacing: -0.03em;
+                    line-height: 1.05;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 0;
+                }
 
-                    /* Vibrant gradient text */
+                .title-line {
+                    display: block;
                     background: linear-gradient(
                         135deg,
                         var(--color-primary, #8b7fff) 0%,
@@ -447,12 +835,23 @@ class LandingPageView {
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                     background-clip: text;
-
-                    /* Enhanced glow effect */
-                    filter: drop-shadow(0 2px 8px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4))
-                            drop-shadow(0 0 24px rgba(var(--color-primary-rgb, 139, 127, 255), 0.2));
-
                     animation: gradientShift 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                }
+
+                .title-line-1 {
+                    font-size: 0.65em;
+                    font-weight: 600;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                    opacity: 0.9;
+                    margin-bottom: 4px;
+                }
+
+                .title-line-2 {
+                    font-size: 1em;
+                    font-weight: 800;
+                    letter-spacing: -0.02em;
+                    text-shadow: 0 0 40px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
                 }
 
                 @keyframes gradientShift {
@@ -462,7 +861,7 @@ class LandingPageView {
 
                 /* Hero Subtitle - Golden Ratio */
                 .landing-hero-subtitle {
-                    /* Golden ratio: base 1rem × 1.618 ≈ 1.618rem */
+                    /* Golden ratio: base 1rem x 1.618 = 1.618rem */
                     font-size: clamp(1.25rem, 3vw, 1.618rem);
                     color: var(--color-text-primary, #e5e7eb);
                     margin-bottom: 24px; /* 3x8px grid */
@@ -491,32 +890,45 @@ class LandingPageView {
                     margin-top: 32px; /* 4x8px grid */
                 }
 
-                /* Buttons - Smooth Micro-animations */
+                /* Button Icon */
+                .btn-icon {
+                    font-size: 1.15em;
+                    line-height: 1;
+                    flex-shrink: 0;
+                    transition: transform 0.2s ease;
+                }
+
+                .btn-text {
+                    font-weight: inherit;
+                }
+
+                /* Buttons - Smooth 0.2s Micro-animations */
                 .landing-btn {
                     font-family: var(--font-primary, sans-serif);
                     font-weight: 600;
-                    padding: 16px 32px; /* 2x8px, 4x8px grid */
-                    border-radius: 12px; /* 1.5x8px grid */
+                    padding: 14px 28px;
+                    border-radius: 14px;
                     border: none;
                     cursor: pointer;
-                    font-size: 1rem;
+                    font-size: 0.975rem;
                     text-decoration: none;
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    gap: 8px; /* 1x8px grid */
-                    min-height: 48px; /* WCAG 2.1 AA touch target */
-                    min-width: 48px;
+                    gap: 10px;
+                    min-height: 52px; /* WCAG 2.1 AA touch target */
+                    min-width: 52px;
                     position: relative;
                     overflow: hidden;
                     contain: layout style paint;
+                    letter-spacing: 0.01em;
 
-                    /* Smooth cubic-bezier transitions */
+                    /* POLISHED: 0.2s ease transitions for snappy hover */
                     transition:
-                        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                        background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                        color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                        background 0.2s ease,
+                        border-color 0.2s ease;
 
                     will-change: transform;
                 }
@@ -526,12 +938,12 @@ class LandingPageView {
                     content: '';
                     position: absolute;
                     inset: 0;
-                    background: rgba(255, 255, 255, 0.2);
-                    border-radius: 12px;
+                    background: rgba(255, 255, 255, 0.15);
+                    border-radius: inherit;
                     opacity: 0;
                     transform: scale(0);
-                    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-                                opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                                opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
                 }
 
                 .landing-btn:active::after {
@@ -545,48 +957,65 @@ class LandingPageView {
                     background: linear-gradient(
                         135deg,
                         var(--color-primary, #8b7fff) 0%,
+                        #a78bfa 50%,
                         var(--color-secondary, #fbbf24) 100%
                     );
+                    background-size: 200% 200%;
                     color: white;
                     font-weight: 600;
                     box-shadow:
-                        0 4px 16px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3),
-                        0 2px 8px rgba(0, 0, 0, 0.2);
+                        0 4px 20px rgba(var(--color-primary-rgb, 139, 127, 255), 0.35),
+                        0 2px 8px rgba(0, 0, 0, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
                 }
 
+                /* POLISHED: translateY(-3px) hover effect */
                 .landing-btn-primary:hover {
-                    transform: translateY(-3px) scale(1.02);
+                    transform: translateY(-3px);
+                    background-position: 100% 50%;
                     box-shadow:
                         0 8px 32px rgba(var(--color-primary-rgb, 139, 127, 255), 0.5),
-                        0 4px 16px rgba(0, 0, 0, 0.3),
-                        0 0 40px rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+                        0 4px 16px rgba(0, 0, 0, 0.25),
+                        0 0 48px rgba(var(--color-primary-rgb, 139, 127, 255), 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+                }
+
+                .landing-btn-primary:hover .btn-icon {
+                    transform: scale(1.1);
                 }
 
                 .landing-btn-primary:active {
-                    transform: translateY(-1px) scale(0.98);
+                    transform: translateY(-1px);
                 }
 
                 /* Secondary Button - Glass morphism */
                 .landing-btn-secondary {
-                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.08);
                     backdrop-filter: blur(12px);
                     -webkit-backdrop-filter: blur(12px);
-                    border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.5);
-                    color: var(--color-primary, #8b7fff);
+                    border: 1.5px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+                    color: var(--color-text-primary, #e5e7eb);
                     font-weight: 600;
                 }
 
+                /* POLISHED: translateY(-3px) hover effect */
                 .landing-btn-secondary:hover {
-                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
-                    border-color: var(--color-primary, #8b7fff);
-                    transform: translateY(-3px) scale(1.02);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+                    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.7);
+                    transform: translateY(-3px);
                     box-shadow:
-                        0 8px 32px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3),
-                        0 4px 16px rgba(0, 0, 0, 0.2);
+                        0 8px 28px rgba(var(--color-primary-rgb, 139, 127, 255), 0.25),
+                        0 4px 12px rgba(0, 0, 0, 0.15);
+                    color: var(--color-primary, #8b7fff);
+                }
+
+                .landing-btn-secondary:hover .btn-icon {
+                    transform: scale(1.1);
                 }
 
                 .landing-btn-secondary:active {
-                    transform: translateY(-1px) scale(0.98);
+                    transform: translateY(-1px);
                 }
 
                 /* === Categories Section === */
@@ -596,7 +1025,7 @@ class LandingPageView {
 
                 /* Section Header - Golden Ratio */
                 .landing-section-header {
-                    /* Golden ratio: base 1.25rem × 1.618 ≈ 2rem */
+                    /* Golden ratio: base 1.25rem x 1.618 = 2rem */
                     font-size: clamp(1.75rem, 4vw, 2.618rem);
                     text-align: center;
                     margin-bottom: 16px; /* 2x8px grid */
@@ -637,43 +1066,64 @@ class LandingPageView {
                     contain: layout style;
                 }
 
-                /* Category Cards - Compact Glass-morphism Panels */
+                /* Category Cards - POLISHED: Consistent dimensions, smooth hover */
                 .landing-category-card {
                     /* Multi-layer glass effect */
                     background:
-                        linear-gradient(135deg,
-                            rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.7),
-                            rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.5));
+                        linear-gradient(145deg,
+                            rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.75),
+                            rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.55));
 
-                    backdrop-filter: blur(16px) saturate(150%);
-                    -webkit-backdrop-filter: blur(16px) saturate(150%);
+                    backdrop-filter: blur(16px) saturate(160%);
+                    -webkit-backdrop-filter: blur(16px) saturate(160%);
 
-                    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.5);
-                    border-radius: 12px; /* Slightly smaller radius for compact look */
-                    padding: 20px; /* Reduced padding for compact cards */
+                    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.4);
+                    border-radius: 14px;
+                    padding: 22px 20px;
                     text-decoration: none;
                     color: inherit;
                     cursor: pointer;
                     position: relative;
                     overflow: hidden;
-                    min-height: 150px; /* Reduced from 200px for compact sizing */
+
+                    /* POLISHED: Consistent card dimensions - prevents layout shift */
+                    min-height: 175px;
+                    height: 100%;
+
                     display: flex;
                     flex-direction: column;
                     contain: layout style paint;
 
-                    /* Smooth cubic-bezier transitions */
+                    /* POLISHED: 0.2s cubic-bezier transitions for smooth hover */
                     transition:
-                        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                        border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                        background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                        box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                        border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                        background 0.25s ease,
+                        box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
                     /* Layered shadows */
                     box-shadow:
-                        0 4px 16px rgba(0, 0, 0, 0.15),
-                        0 1px 1px rgba(255, 255, 255, 0.05) inset;
+                        0 4px 16px rgba(0, 0, 0, 0.12),
+                        0 1px 0 rgba(255, 255, 255, 0.04) inset;
 
-                    will-change: transform;
+                    will-change: transform, box-shadow;
+
+                    /* Staggered fade-in animation with calc for delay */
+                    opacity: 0;
+                    animation: cardFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                    animation-delay: calc(var(--card-index, 0) * 0.06s);
+                }
+
+                /* Staggered card fade-in animation */
+                @keyframes cardFadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(16px) scale(0.98);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
                 }
 
                 /* Top accent bar - animated on hover */
@@ -683,11 +1133,11 @@ class LandingPageView {
                     top: 0;
                     left: 0;
                     right: 0;
-                    height: 4px;
-                    background: linear-gradient(90deg, var(--card-color), transparent);
+                    height: 3px;
+                    background: linear-gradient(90deg, var(--card-color), rgba(255, 255, 255, 0.2));
                     transform: scaleX(0);
                     transform-origin: left;
-                    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
                 }
 
                 /* Subtle glow overlay */
@@ -696,12 +1146,12 @@ class LandingPageView {
                     position: absolute;
                     inset: 0;
                     background: radial-gradient(
-                        circle at top left,
-                        rgba(255, 255, 255, 0.08),
-                        transparent 50%
+                        ellipse at top left,
+                        rgba(255, 255, 255, 0.06),
+                        transparent 60%
                     );
                     opacity: 0;
-                    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                    transition: opacity 0.25s ease;
                     pointer-events: none;
                 }
 
@@ -709,18 +1159,19 @@ class LandingPageView {
                     opacity: 1;
                 }
 
-                /* Enhanced hover state */
+                /* POLISHED: Enhanced hover state with subtle scale */
                 .landing-category-card:hover {
-                    transform: translateY(-10px) scale(1.01);
+                    transform: translateY(-6px) scale(1.01);
+                    border-color: rgba(var(--card-color-rgb, 139, 127, 255), 0.6);
                     border-color: var(--card-color);
                     background:
-                        linear-gradient(135deg,
-                            rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.85),
-                            rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.7));
+                        linear-gradient(145deg,
+                            rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.9),
+                            rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.75));
                     box-shadow:
-                        0 16px 48px rgba(0, 0, 0, 0.25),
-                        0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-                        0 0 40px -10px var(--card-color);
+                        0 16px 40px rgba(0, 0, 0, 0.2),
+                        0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+                        0 0 40px -12px var(--card-color);
                 }
 
                 .landing-category-card:hover::before {
@@ -728,7 +1179,8 @@ class LandingPageView {
                 }
 
                 .landing-category-card:active {
-                    transform: translateY(-6px) scale(0.99);
+                    transform: translateY(-3px) scale(1.005);
+                    transition-duration: 0.1s;
                 }
 
                 /* Ensure content is above pseudo-elements */
@@ -737,14 +1189,16 @@ class LandingPageView {
                     z-index: 1;
                 }
 
-                /* SVG Icon - Compact sizing for panel layout */
+                /* SVG Icon - POLISHED: Consistent 48px sizing */
                 .landing-category-icon {
-                    width: clamp(2rem, 3vw, 2.5rem); /* Smaller icon for compact cards */
-                    height: clamp(2rem, 3vw, 2.5rem);
+                    /* POLISHED: Fixed 48px size for consistency */
+                    width: 48px;
+                    height: 48px;
                     margin-bottom: 12px; /* Reduced margin */
                     display: block;
                     object-fit: contain;
                     opacity: 0.9;
+                    flex-shrink: 0;
 
                     /* SVG icons loaded via <img> cannot inherit CSS color.
                      * Use brightness(0) + invert(1) to make white, then sepia and hue-rotate
@@ -755,15 +1209,15 @@ class LandingPageView {
                         drop-shadow(0 0 12px var(--card-color));
 
                     transition:
-                        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                        opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                        filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        transform 0.2s ease,
+                        opacity 0.2s ease,
+                        filter 0.2s ease;
 
                     will-change: transform;
                 }
 
                 .landing-category-card:hover .landing-category-icon {
-                    transform: scale(1.15) rotateZ(5deg);
+                    transform: scale(1.1) rotateZ(3deg);
                     opacity: 1;
                     filter:
                         brightness(0) invert(1)
@@ -774,14 +1228,16 @@ class LandingPageView {
 
                 /* Inline SVG Icon - Direct SVG rendering with color inheritance */
                 .entity-icon-svg {
-                    width: clamp(2rem, 3vw, 2.5rem);
-                    height: clamp(2rem, 3vw, 2.5rem);
+                    /* POLISHED: Fixed 48px size for consistency */
+                    width: 48px;
+                    height: 48px;
                     margin-bottom: 12px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     opacity: 0.9;
                     color: var(--card-color, var(--color-primary, #8b7fff));
+                    flex-shrink: 0;
 
                     /* Inline SVGs inherit color, apply glow effects */
                     filter:
@@ -789,9 +1245,9 @@ class LandingPageView {
                         drop-shadow(0 0 12px var(--card-color));
 
                     transition:
-                        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                        opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                        filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        transform 0.2s ease,
+                        opacity 0.2s ease,
+                        filter 0.2s ease;
 
                     will-change: transform;
                 }
@@ -805,7 +1261,7 @@ class LandingPageView {
                 }
 
                 .landing-category-card:hover .entity-icon-svg {
-                    transform: scale(1.15) rotateZ(5deg);
+                    transform: scale(1.1) rotateZ(3deg);
                     opacity: 1;
                     filter:
                         drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))
@@ -813,40 +1269,42 @@ class LandingPageView {
                         brightness(1.2);
                 }
 
-                /* Emoji Fallback Icon - Shown when SVG fails to load */
+                /* Emoji Fallback Icon - POLISHED: Consistent 48px sizing */
                 .landing-category-icon-fallback {
-                    width: clamp(2rem, 3vw, 2.5rem);
-                    height: clamp(2rem, 3vw, 2.5rem);
+                    /* POLISHED: Fixed 48px size for consistency */
+                    width: 48px;
+                    height: 48px;
                     margin-bottom: 12px;
-                    font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+                    font-size: 2rem;
                     line-height: 1;
                     text-align: center;
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    flex-shrink: 0;
 
                     filter:
                         drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3))
                         drop-shadow(0 0 12px var(--card-color));
 
                     transition:
-                        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                        filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        transform 0.2s ease,
+                        filter 0.2s ease;
                 }
 
                 .landing-category-card:hover .landing-category-icon-fallback {
-                    transform: scale(1.15) rotateZ(5deg);
+                    transform: scale(1.1) rotateZ(3deg);
                     filter:
                         drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))
                         drop-shadow(0 0 24px var(--card-color))
                         brightness(1.1);
                 }
 
-                /* Category Name - Compact sizing */
+                /* Category Name - POLISHED: 1 line max with ellipsis */
                 .landing-category-name {
                     font-size: clamp(1rem, 2vw, 1.125rem); /* Compact for panel layout */
                     font-weight: 600;
-                    margin-bottom: 6px; /* Tighter spacing */
+                    margin-bottom: 8px;
                     color: var(--color-text-primary, #e5e7eb);
                     letter-spacing: -0.01em;
                     line-height: 1.25;
@@ -854,14 +1312,19 @@ class LandingPageView {
                         0 1px 4px rgba(0, 0, 0, 0.4),
                         0 0 8px rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
 
-                    transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    /* POLISHED: 1 line truncation with ellipsis */
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+
+                    transition: color 0.2s ease;
                 }
 
                 .landing-category-card:hover .landing-category-name {
                     color: var(--card-color, var(--color-text-primary));
                 }
 
-                /* Category Description - Compact */
+                /* Category Description - POLISHED: 2 line clamp */
                 .landing-category-description {
                     /* Smaller for compact cards, maintaining readability */
                     font-size: clamp(0.8125rem, 1.25vw, 0.9375rem); /* 13-15px range */
@@ -869,9 +1332,10 @@ class LandingPageView {
                     line-height: 1.5; /* Tighter line height */
                     flex-grow: 1;
                     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-                    /* Limit to 2-3 lines for compact appearance */
+
+                    /* POLISHED: 2-line clamp for consistent card heights */
                     display: -webkit-box;
-                    -webkit-line-clamp: 3;
+                    -webkit-line-clamp: 2;
                     -webkit-box-orient: vertical;
                     overflow: hidden;
                 }
@@ -890,7 +1354,7 @@ class LandingPageView {
                     contain: layout style;
                 }
 
-                /* Feature Cards - Subtle Glass */
+                /* Feature Cards - POLISHED: Consistent with category cards */
                 .landing-feature-card {
                     text-align: center;
                     padding: 32px; /* 4x8px grid */
@@ -901,17 +1365,22 @@ class LandingPageView {
                     border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.3);
                     contain: layout style paint;
 
+                    /* POLISHED: Consistent min-height */
+                    min-height: 200px;
+
+                    /* POLISHED: 0.2s transitions */
                     transition:
-                        background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                        border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        background 0.2s ease,
+                        border-color 0.2s ease,
+                        transform 0.2s ease,
+                        box-shadow 0.2s ease;
                 }
 
+                /* POLISHED: translateY(-4px) hover */
                 .landing-feature-card:hover {
                     background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.5);
                     border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.5);
-                    transform: translateY(-6px);
+                    transform: translateY(-4px);
                     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
                 }
 
@@ -941,186 +1410,310 @@ class LandingPageView {
                     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
                 }
 
+                /* === Featured Entities Section === */
+                .landing-featured-section {
+                    margin-bottom: 64px;
+                    opacity: 0;
+                    animation: sectionFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                    animation-delay: 0.3s;
+                }
+
+                @keyframes sectionFadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .landing-featured-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                    gap: 16px;
+                    margin-top: 24px;
+                }
+
+                .landing-featured-card {
+                    position: relative;
+                }
+
+                .landing-featured-mythology {
+                    display: inline-block;
+                    font-size: 0.75rem;
+                    font-weight: 500;
+                    color: var(--color-primary, #8b7fff);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+                    padding: 3px 8px;
+                    border-radius: 4px;
+                    margin-bottom: 6px;
+                    letter-spacing: 0.02em;
+                    text-transform: uppercase;
+                }
+
                 /* === Responsive Design - Production Quality === */
 
-                /* Extra Small Mobile (320px - 479px) */
+                /* Extra Small Mobile (320px - 479px) - 2 columns */
                 @media (max-width: 479px) {
                     .landing-page-view {
-                        padding: 0 12px 32px; /* Increased from 8px for better edge spacing */
+                        padding: 0 12px 32px;
                     }
 
                     .landing-hero-section {
-                        padding: 32px 16px; /* Reduced top padding for small screens */
-                        margin-bottom: 32px; /* 4x8px grid */
-                        border-radius: 16px; /* 2x8px grid */
+                        padding: 40px 16px 32px;
+                        margin-bottom: 32px;
+                        border-radius: 20px;
                     }
 
-                    .landing-category-grid,
+                    .hero-icon-display {
+                        width: 70px;
+                        height: 70px;
+                        margin-bottom: 16px;
+                    }
+
+                    .hero-eye-icon {
+                        font-size: 2.5rem;
+                    }
+
+                    .hero-icon-ring {
+                        inset: -6px;
+                    }
+
+                    .hero-icon-ring::before {
+                        inset: -10px;
+                    }
+
+                    .title-line-1 {
+                        font-size: 0.7em;
+                    }
+
+                    /* POLISHED: 2 columns on mobile */
+                    .landing-category-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 10px;
+                    }
+
                     .landing-features-grid {
                         grid-template-columns: 1fr;
-                        gap: 12px; /* Tighter gap on very small screens */
+                        gap: 12px;
                     }
 
                     .landing-category-card {
-                        padding: 20px; /* Slightly reduced padding */
-                        min-height: 160px; /* Reduced height for mobile */
+                        padding: 16px 14px;
+                        min-height: 145px;
                     }
 
                     .landing-feature-card {
                         padding: 20px;
+                        min-height: 160px;
                     }
 
-                    /* Ensure touch targets are WCAG 2.1 AA compliant (48px minimum) */
+                    /* POLISHED: Ensure touch targets are WCAG 2.1 AA compliant (44px minimum) */
                     .landing-category-card,
                     .landing-btn {
-                        min-height: 48px;
-                        /* Ensure adequate touch target with padding */
+                        min-height: 44px;
                         touch-action: manipulation;
                     }
 
                     .landing-hero-actions {
                         flex-direction: column;
                         align-items: stretch;
-                        gap: 12px; /* 1.5x8px grid */
+                        gap: 12px;
+                        margin-top: 24px;
                     }
 
                     .landing-btn {
                         width: 100%;
                         justify-content: center;
-                        padding: 14px 24px; /* Ensure comfortable tap target */
-                        font-size: 1rem; /* Maintain readability */
+                        padding: 14px 20px;
+                        font-size: 0.95rem;
                     }
 
-                    /* Ensure text remains readable on small screens */
                     .landing-hero-title {
-                        font-size: 1.75rem; /* Explicit small screen size */
+                        font-size: 2rem;
                     }
 
                     .landing-hero-subtitle {
-                        font-size: 1.125rem;
+                        font-size: 1rem;
+                        margin-bottom: 16px;
+                    }
+
+                    .landing-hero-description {
+                        font-size: 0.9rem;
+                        margin-bottom: 24px;
                     }
 
                     .landing-section-header {
-                        font-size: 1.5rem;
+                        font-size: 1.4rem;
                         gap: 8px;
                     }
 
+                    .landing-section-subtitle {
+                        font-size: 0.9rem;
+                    }
+
                     .landing-category-name {
-                        font-size: 1.125rem; /* Ensure readable on small screens */
+                        font-size: 0.95rem;
                     }
 
+                    .landing-category-description {
+                        font-size: 0.8rem;
+                        -webkit-line-clamp: 2;
+                    }
+
+                    /* POLISHED: Compact 40px icons on mobile */
                     .landing-category-icon,
+                    .entity-icon-svg,
                     .landing-category-icon-fallback {
-                        width: 2.5rem;
-                        height: 2.5rem;
-                        margin-bottom: 12px;
+                        width: 40px;
+                        height: 40px;
+                        margin-bottom: 10px;
                     }
 
                     .landing-category-icon-fallback {
-                        font-size: 2rem;
+                        font-size: 1.75rem;
+                    }
+
+                    .landing-featured-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 10px;
                     }
                 }
 
-                /* Mobile (480px - 767px) */
+                /* Mobile (480px - 767px) - 2 columns */
                 @media (min-width: 480px) and (max-width: 767px) {
                     .landing-page-view {
-                        padding: 0 16px 48px; /* 2x8px, 6x8px grid */
+                        padding: 0 16px 48px;
                     }
 
                     .landing-hero-section {
-                        padding: 48px 24px; /* 6x8px, 3x8px grid */
-                        margin-bottom: 48px; /* 6x8px grid */
+                        padding: 48px 24px;
+                        margin-bottom: 40px;
                     }
 
-                    /* Single column for category cards on mobile for readability */
+                    /* POLISHED: 2 columns for category cards on mobile */
                     .landing-category-grid {
-                        grid-template-columns: 1fr;
-                        gap: 16px; /* 2x8px grid */
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 14px;
                     }
 
                     .landing-category-card {
-                        min-height: 140px; /* Compact but still touchable */
-                        padding: 24px;
+                        min-height: 155px;
+                        padding: 18px 16px;
                     }
 
                     .landing-features-grid {
                         grid-template-columns: repeat(2, 1fr);
-                        gap: 16px; /* 2x8px grid */
+                        gap: 14px;
                     }
 
                     .landing-feature-card {
                         padding: 20px;
-                        min-height: 180px;
+                        min-height: 170px;
                     }
 
                     /* Ensure buttons are easily tappable */
                     .landing-btn {
-                        min-height: 48px;
-                        padding: 14px 28px;
+                        min-height: 50px;
+                        padding: 14px 26px;
                         touch-action: manipulation;
                     }
 
-                    /* Readable typography */
-                    .landing-category-description {
+                    .landing-category-name {
                         font-size: 1rem;
-                        line-height: 1.6;
+                    }
+
+                    .landing-category-description {
+                        font-size: 0.85rem;
+                        line-height: 1.5;
+                    }
+
+                    .landing-category-icon,
+                    .entity-icon-svg,
+                    .landing-category-icon-fallback {
+                        width: 44px;
+                        height: 44px;
+                    }
+
+                    .landing-featured-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 14px;
                     }
                 }
 
-                /* Tablet (768px - 899px) - 2 columns */
+                /* Tablet (768px - 899px) - 3 columns */
                 @media (min-width: 768px) and (max-width: 899px) {
+                    /* POLISHED: 3 columns on tablet */
                     .landing-category-grid {
-                        grid-template-columns: repeat(2, 1fr);
-                        gap: 20px; /* 2.5x8px grid */
+                        grid-template-columns: repeat(3, 1fr);
+                        gap: 16px;
                     }
 
                     .landing-category-card {
-                        min-height: 180px;
-                        padding: 28px;
+                        min-height: 170px;
+                        padding: 22px 18px;
                     }
 
                     .landing-features-grid {
                         grid-template-columns: repeat(2, 1fr);
-                        gap: 20px;
+                        gap: 18px;
                     }
 
                     /* Touch targets for tablet */
                     .landing-btn {
-                        min-height: 48px;
+                        min-height: 50px;
                         touch-action: manipulation;
+                    }
+
+                    .landing-featured-grid {
+                        grid-template-columns: repeat(3, 1fr);
+                        gap: 16px;
                     }
                 }
 
-                /* Large Tablet (900px - 1023px) - 3 columns for better space usage */
+                /* Large Tablet (900px - 1023px) - 3 columns */
                 @media (min-width: 900px) and (max-width: 1023px) {
                     .landing-category-grid {
                         grid-template-columns: repeat(3, 1fr);
-                        gap: 20px;
+                        gap: 18px;
                     }
 
                     .landing-category-card {
-                        min-height: 160px;
-                        padding: 24px;
+                        min-height: 175px;
+                        padding: 22px 20px;
                     }
 
                     .landing-features-grid {
-                        grid-template-columns: repeat(2, 1fr);
-                        gap: 20px;
+                        grid-template-columns: repeat(4, 1fr);
+                        gap: 18px;
+                    }
+
+                    .landing-featured-grid {
+                        grid-template-columns: repeat(3, 1fr);
+                        gap: 18px;
                     }
                 }
 
-                /* Desktop (1024px - 1439px) */
+                /* Desktop (1024px - 1439px) - 4 columns */
                 @media (min-width: 1024px) and (max-width: 1439px) {
                     .landing-category-grid {
-                        grid-template-columns: repeat(3, 1fr);
+                        grid-template-columns: repeat(4, 1fr);
+                        gap: 18px;
                     }
 
                     .landing-features-grid {
                         grid-template-columns: repeat(4, 1fr);
                     }
+
+                    .landing-featured-grid {
+                        grid-template-columns: repeat(4, 1fr);
+                        gap: 18px;
+                    }
                 }
 
-                /* Large Desktop (1440px - 1919px) */
+                /* Large Desktop (1440px - 1919px) - 4 columns */
                 @media (min-width: 1440px) and (max-width: 1919px) {
                     .landing-category-grid {
                         grid-template-columns: repeat(4, 1fr);
@@ -1141,17 +1734,17 @@ class LandingPageView {
 
                 /* === Accessibility - WCAG 2.1 AA Compliance === */
 
-                /* Touch-friendly adjustments for mobile devices */
+                /* POLISHED: Touch-friendly adjustments for mobile devices */
                 @media (hover: none) and (pointer: coarse) {
                     .landing-btn {
-                        min-height: 48px; /* WCAG 2.1 touch target minimum */
-                        min-width: 48px;
+                        min-height: 44px; /* WCAG 2.1 touch target minimum */
+                        min-width: 44px;
                         padding: 16px 32px; /* 2x8px, 4x8px grid */
                         touch-action: manipulation; /* Disable double-tap zoom for faster response */
                     }
 
                     .landing-category-card {
-                        min-height: 160px; /* Compact for mobile while maintaining touch area */
+                        min-height: 140px; /* Compact for mobile while maintaining touch area */
                         padding: 24px; /* 3x8px grid */
                         touch-action: manipulation;
                         /* Ensure entire card is clickable with adequate padding */
@@ -1166,19 +1759,20 @@ class LandingPageView {
 
                     /* Increase tap targets */
                     .landing-category-icon,
+                    .entity-icon-svg,
                     .landing-category-icon-fallback {
-                        width: 3rem;
-                        height: 3rem;
+                        width: 48px;
+                        height: 48px;
                     }
 
                     .landing-category-icon-fallback {
-                        font-size: 2.5rem;
+                        font-size: 2rem;
                     }
 
                     /* Ensure links have adequate touch targets */
                     .landing-hero-actions a {
-                        min-height: 48px;
-                        min-width: 48px;
+                        min-height: 44px;
+                        min-width: 44px;
                     }
 
                     /* Feature cards also need touch optimization */
@@ -1210,6 +1804,11 @@ class LandingPageView {
                         animation: none;
                     }
 
+                    .landing-category-card {
+                        animation: none;
+                        opacity: 1;
+                    }
+
                     .landing-category-card:hover,
                     .landing-feature-card:hover,
                     .landing-btn:hover,
@@ -1218,6 +1817,7 @@ class LandingPageView {
                     }
 
                     .landing-category-card:hover .landing-category-icon,
+                    .landing-category-card:hover .entity-icon-svg,
                     .landing-category-card:hover .landing-category-icon-fallback {
                         transform: none;
                     }
@@ -1302,28 +1902,28 @@ class LandingPageView {
      */
     getEmojiFallbacks() {
         return {
-            mythologies: '🌍',
-            deities: '👑',
-            heroes: '🦸',
-            creatures: '🐉',
-            items: '⚔️',
-            places: '🏛️',
-            archetypes: '🎭',
-            magic: '✨',
-            herbs: '🌿',
-            rituals: '🕯️',
-            texts: '📜',
-            symbols: '☯️'
+            mythologies: '&#127759;', // Globe
+            deities: '&#128081;',    // Crown
+            heroes: '&#129464;',     // Superhero
+            creatures: '&#128009;',  // Dragon
+            items: '&#9876;',        // Sword
+            places: '&#127963;',     // Temple
+            archetypes: '&#127917;', // Masks
+            magic: '&#10024;',       // Sparkles
+            herbs: '&#127807;',      // Herb
+            rituals: '&#128367;',    // Candle
+            texts: '&#128220;',      // Scroll
+            symbols: '&#9775;'       // Yin Yang
         };
     }
 
     /**
      * Truncate text to a maximum length with ellipsis
      * @param {string} text - The text to truncate
-     * @param {number} maxLength - Maximum character length (default 200)
+     * @param {number} maxLength - Maximum character length (default 100 for descriptions)
      * @returns {string} - Truncated text with ellipsis if needed
      */
-    truncateText(text, maxLength = 200) {
+    truncateText(text, maxLength = 100) {
         if (!text || text.length <= maxLength) {
             return text || '';
         }
@@ -1344,7 +1944,7 @@ class LandingPageView {
      * @returns {string} - HTML string for the icon
      */
     renderIconHTML(icon, fallbackId, cssClass = 'landing-category-icon') {
-        const emojiFallback = this.getEmojiFallbacks()[fallbackId] || '📄';
+        const emojiFallback = this.getEmojiFallbacks()[fallbackId] || '&#128196;';
 
         // Check if icon is inline SVG (starts with <svg)
         if (icon && typeof icon === 'string' && icon.trim().startsWith('<svg')) {
@@ -1378,16 +1978,19 @@ class LandingPageView {
     /**
      * Get asset type card HTML
      * Renders SVG icons with error handling and emoji fallbacks
+     * @param {object} type - Asset type configuration
+     * @param {number} index - Card index for staggered animation
      */
-    getAssetTypeCardHTML(type) {
-        const truncatedDescription = this.truncateText(type.description, 200);
+    getAssetTypeCardHTML(type, index = 0) {
+        const truncatedDescription = this.truncateText(type.description, 100);
 
         return `
             <a href="${type.route}"
                class="landing-category-card"
                data-type="${type.id}"
-               style="--card-color: ${type.color}"
-               aria-label="${type.name} - ${truncatedDescription}">
+               style="--card-color: ${type.color}; --card-index: ${index};"
+               aria-label="${type.name} - ${truncatedDescription}"
+               tabindex="0">
                 ${this.renderIconHTML(type.icon, type.id, 'landing-category-icon')}
                 <h3 class="landing-category-name">${type.name}</h3>
                 <p class="landing-category-description">${truncatedDescription}</p>
@@ -1406,7 +2009,96 @@ class LandingPageView {
                 console.log('[Landing Page] Navigating to:', type);
                 // SPA navigation will handle the route
             });
+
+            // Add keyboard support for Enter key
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    card.click();
+                }
+            });
         });
+
+        // Load featured entities if database is available
+        this.loadFeaturedEntities();
+    }
+
+    /**
+     * Load featured entities from the database and display them
+     */
+    async loadFeaturedEntities() {
+        const featuredSection = document.getElementById('featured-entities-section');
+        const featuredGrid = document.getElementById('featured-entities-grid');
+
+        if (!featuredSection || !featuredGrid || !this.db) {
+            console.log('[Landing Page] Featured entities section not available or no database');
+            return;
+        }
+
+        try {
+            // Attempt to load featured deities and creatures
+            const featuredEntities = [];
+
+            // Try to get some featured deities
+            const deitiesRef = this.db.collection('deities');
+            const deitiesSnapshot = await deitiesRef.limit(4).get();
+
+            deitiesSnapshot.forEach(doc => {
+                featuredEntities.push({
+                    id: doc.id,
+                    type: 'deities',
+                    ...doc.data()
+                });
+            });
+
+            // Try to get some featured creatures
+            const creaturesRef = this.db.collection('creatures');
+            const creaturesSnapshot = await creaturesRef.limit(4).get();
+
+            creaturesSnapshot.forEach(doc => {
+                featuredEntities.push({
+                    id: doc.id,
+                    type: 'creatures',
+                    ...doc.data()
+                });
+            });
+
+            if (featuredEntities.length > 0) {
+                // Render featured entities
+                featuredGrid.innerHTML = featuredEntities.map((entity, index) => this.getFeaturedEntityCardHTML(entity, index)).join('');
+                featuredSection.style.display = 'block';
+                console.log('[Landing Page] Loaded', featuredEntities.length, 'featured entities');
+            }
+        } catch (error) {
+            console.warn('[Landing Page] Could not load featured entities:', error.message);
+            // Hide section if loading fails
+            featuredSection.style.display = 'none';
+        }
+    }
+
+    /**
+     * Get HTML for a featured entity card
+     * @param {object} entity - Entity data
+     * @param {number} index - Card index for animation delay
+     */
+    getFeaturedEntityCardHTML(entity, index = 0) {
+        const name = entity.name || entity.title || entity.id || 'Unknown';
+        const description = this.truncateText(entity.description || entity.summary || '', 80);
+        const mythology = entity.mythology || entity.tradition || '';
+        const icon = entity.icon || this.getEmojiFallbacks()[entity.type] || '&#128196;';
+        const route = `#/${entity.type}/${entity.id}`;
+
+        return `
+            <a href="${route}"
+               class="landing-featured-card landing-category-card"
+               style="--card-color: var(--color-primary, #8b7fff); --card-index: ${index};"
+               aria-label="${name}${mythology ? ' - ' + mythology : ''}">
+                ${this.renderIconHTML(icon, entity.type, 'landing-category-icon')}
+                <h3 class="landing-category-name">${this.escapeHTML(name)}</h3>
+                ${mythology ? `<span class="landing-featured-mythology">${this.escapeHTML(mythology)}</span>` : ''}
+                ${description ? `<p class="landing-category-description">${this.escapeHTML(description)}</p>` : ''}
+            </a>
+        `;
     }
 }
 

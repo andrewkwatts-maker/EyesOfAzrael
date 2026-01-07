@@ -1,7 +1,34 @@
 /**
- * Edit Modal & Edit Icon Styles
- * Provides styling for entity edit modals and edit buttons
+ * Edit Modal & Edit Icon Styles - Polished Design
+ * Eyes of Azrael Project
+ *
+ * Features:
+ * - Smooth animations (backdrop fade 0.2s, content scale 0.2s)
+ * - Backdrop blur effect (4px)
+ * - Focus trap styling
+ * - Unsaved changes confirmation dialog
+ * - Loading overlay during save
+ * - Mobile full-screen support
+ * - Toast notifications
+ * - Accessibility support
  */
+
+/* === Base Variables === */
+:root {
+    --edit-modal-animation-duration: 0.2s;
+    --edit-modal-animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
+    --edit-modal-bounce-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --edit-modal-backdrop-color: rgba(0, 0, 0, 0.6);
+    --edit-modal-backdrop-blur: 4px;
+    --edit-modal-content-bg: var(--color-bg-card, rgba(26, 31, 58, 0.95));
+    --edit-modal-border-color: var(--color-border-primary, rgba(139, 127, 255, 0.3));
+    --edit-modal-primary: var(--color-primary, #8b7fff);
+    --edit-modal-primary-hover: #7966ff;
+    --edit-modal-danger: #ef4444;
+    --edit-modal-success: #10b981;
+    --edit-modal-text-primary: var(--color-text-primary, #f8f9fa);
+    --edit-modal-text-secondary: var(--color-text-secondary, #adb5bd);
+}
 
 /* ===================================
    Edit Icon Button
@@ -11,8 +38,8 @@
     position: absolute;
     top: 0.5rem;
     right: 0.5rem;
-    background: rgba(var(--color-bg-card-rgb), 0.95);
-    border: 1px solid var(--color-border-primary);
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 50%;
     width: 36px;
     height: 36px;
@@ -21,30 +48,42 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s var(--edit-modal-animation-easing);
     z-index: 10;
-    opacity: 0.7;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    color: var(--edit-modal-text-primary);
+}
+
+/* Show on parent hover */
+.entity-card:hover .edit-icon-btn,
+.glass-card:hover .edit-icon-btn,
+.deity-card:hover .edit-icon-btn,
+.creature-card:hover .edit-icon-btn,
+.cosmology-card:hover .edit-icon-btn,
+.edit-icon-btn.edit-icon--visible {
+    opacity: 0.8;
 }
 
 .edit-icon-btn:hover {
     opacity: 1;
-    background: var(--color-primary);
-    border-color: var(--color-primary);
+    background: var(--edit-modal-primary);
+    border-color: var(--edit-modal-primary);
     transform: scale(1.1) rotate(15deg);
-    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+    box-shadow: 0 4px 12px rgba(139, 127, 255, 0.4);
 }
 
 .edit-icon-btn:active {
     transform: scale(0.95) rotate(15deg);
 }
 
-.edit-icon-btn:focus {
-    outline: 2px solid var(--color-primary);
+.edit-icon-btn:focus-visible {
+    outline: 2px solid var(--edit-modal-primary);
     outline-offset: 2px;
+    opacity: 1;
 }
 
-/* Edit Icon in different positions */
+/* Edit Icon position variants */
 .edit-icon--top-left {
     top: 0.5rem;
     left: 0.5rem;
@@ -69,7 +108,7 @@
     top: auto;
 }
 
-/* Edit Icon sizes */
+/* Edit Icon size variants */
 .edit-icon--small {
     width: 28px;
     height: 28px;
@@ -88,11 +127,6 @@
     font-size: 1.3rem;
 }
 
-/* Edit Icon visible state */
-.edit-icon--visible {
-    opacity: 0.7;
-}
-
 /* Ensure parent cards have position relative */
 .entity-card,
 .glass-card,
@@ -106,56 +140,694 @@
    Modal Overlay
    =================================== */
 
-.modal-overlay {
+.edit-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: var(--edit-modal-backdrop-color);
+    backdrop-filter: blur(var(--edit-modal-backdrop-blur));
+    -webkit-backdrop-filter: blur(var(--edit-modal-backdrop-blur));
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10000;
     opacity: 0;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    visibility: hidden;
+    transition:
+        opacity var(--edit-modal-animation-duration) var(--edit-modal-animation-easing),
+        visibility var(--edit-modal-animation-duration) var(--edit-modal-animation-easing);
     padding: 1rem;
-    pointer-events: none;
 }
 
-.modal-overlay.show {
+.edit-modal-overlay.show {
     opacity: 1;
-    pointer-events: auto;
+    visibility: visible;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+    overflow: hidden;
 }
 
 /* ===================================
    Modal Content
    =================================== */
 
-.modal-content {
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border-primary);
+.edit-modal-content {
+    background: var(--edit-modal-content-bg);
+    border: 2px solid var(--edit-modal-border-color);
     border-radius: 16px;
     max-width: 600px;
-    width: 90%;
+    width: 100%;
     max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.95) translateY(-10px);
+    opacity: 0;
+    transition:
+        transform var(--edit-modal-animation-duration) var(--edit-modal-bounce-easing),
+        opacity var(--edit-modal-animation-duration) var(--edit-modal-animation-easing);
+    box-shadow:
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(139, 127, 255, 0.1);
+    outline: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.edit-modal-overlay.show .edit-modal-content {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.edit-modal-content:focus-visible {
+    outline: 2px solid var(--edit-modal-primary);
+    outline-offset: 2px;
+}
+
+.edit-modal-large {
+    max-width: 900px;
+}
+
+.edit-modal-small {
+    max-width: 400px;
+}
+
+/* ===================================
+   Modal Header
+   =================================== */
+
+.edit-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--edit-modal-border-color);
+    background: rgba(139, 127, 255, 0.03);
+    flex-shrink: 0;
+}
+
+.edit-modal-title-section {
+    flex: 1;
+    min-width: 0;
+    padding-right: 1rem;
+}
+
+.edit-modal-header h2 {
+    color: var(--edit-modal-primary);
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.edit-modal-subtitle {
+    font-size: 0.9rem;
+    color: var(--edit-modal-text-secondary);
+    margin-top: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.edit-modal-close {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--edit-modal-text-secondary);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    transition: all 0.2s var(--edit-modal-animation-easing);
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.edit-modal-close:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: var(--edit-modal-danger);
+    transform: rotate(90deg);
+}
+
+.edit-modal-close:focus-visible {
+    outline: 2px solid var(--edit-modal-primary);
+    outline-offset: 2px;
+}
+
+.edit-modal-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ===================================
+   Modal Body
+   =================================== */
+
+.edit-modal-body {
+    padding: 1.5rem;
     overflow-y: auto;
-    overflow-x: hidden;
-    transform: translateY(-30px) scale(0.95);
-    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    flex: 1;
+    min-height: 0;
+}
+
+/* Custom scrollbar for modal body */
+.edit-modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.edit-modal-body::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.edit-modal-body::-webkit-scrollbar-thumb {
+    background: rgba(139, 127, 255, 0.4);
+    border-radius: 3px;
+}
+
+.edit-modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--edit-modal-primary);
+}
+
+/* ===================================
+   Loading States
+   =================================== */
+
+.edit-modal-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+}
+
+.edit-modal-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.edit-modal-spinner {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.edit-modal-spinner .spinner-ring {
+    position: absolute;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    animation: edit-modal-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.edit-modal-spinner .spinner-ring:nth-child(1) {
+    width: 60px;
+    height: 60px;
+    border-top-color: var(--edit-modal-primary);
+}
+
+.edit-modal-spinner .spinner-ring:nth-child(2) {
+    width: 45px;
+    height: 45px;
+    top: 7.5px;
+    left: 7.5px;
+    border-top-color: #ff7eb6;
+    animation-delay: -0.4s;
+}
+
+.edit-modal-spinner .spinner-ring:nth-child(3) {
+    width: 30px;
+    height: 30px;
+    top: 15px;
+    left: 15px;
+    border-top-color: #51cf66;
+    animation-delay: -0.8s;
+}
+
+.edit-modal-loading-text {
+    color: var(--edit-modal-text-secondary);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+@keyframes edit-modal-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===================================
+   Save Overlay (Loading during save)
+   =================================== */
+
+.edit-modal-save-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(2px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.2s var(--edit-modal-animation-easing),
+        visibility 0.2s var(--edit-modal-animation-easing);
+}
+
+.edit-modal-save-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.edit-modal-save-overlay p {
+    color: var(--edit-modal-text-primary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.edit-modal-save-spinner {
+    position: relative;
+    width: 48px;
+    height: 48px;
+}
+
+.edit-modal-save-spinner .spinner-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 3px solid transparent;
+    border-top-color: var(--edit-modal-primary);
+    border-radius: 50%;
+    animation: edit-modal-spin 1s linear infinite;
+}
+
+/* ===================================
+   Error State
+   =================================== */
+
+.edit-modal-error {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.edit-modal-error-icon {
+    color: var(--edit-modal-danger);
+    margin-bottom: 1rem;
+}
+
+.edit-modal-error-icon svg {
+    filter: drop-shadow(0 4px 12px rgba(239, 68, 68, 0.3));
+}
+
+.edit-modal-error h3 {
+    color: var(--edit-modal-text-primary);
+    margin-bottom: 0.75rem;
+    font-size: 1.35rem;
+}
+
+.edit-modal-error-message {
+    color: var(--edit-modal-danger);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+/* ===================================
+   Buttons
+   =================================== */
+
+.edit-modal-btn {
+    padding: 0.75rem 1.25rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s var(--edit-modal-animation-easing);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: none;
+    outline: none;
+    font-family: inherit;
+}
+
+.edit-modal-btn-primary {
+    background: var(--edit-modal-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(139, 127, 255, 0.3);
+}
+
+.edit-modal-btn-primary:hover {
+    background: var(--edit-modal-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 127, 255, 0.4);
+}
+
+.edit-modal-btn-primary:focus-visible {
+    outline: 2px solid var(--edit-modal-primary);
+    outline-offset: 2px;
+}
+
+.edit-modal-btn-secondary {
+    background: rgba(139, 127, 255, 0.1);
+    color: var(--edit-modal-primary);
+    border: 1px solid var(--edit-modal-border-color);
+}
+
+.edit-modal-btn-secondary:hover {
+    background: rgba(139, 127, 255, 0.2);
+    border-color: var(--edit-modal-primary);
+}
+
+.edit-modal-btn-secondary:focus-visible {
+    outline: 2px solid var(--edit-modal-primary);
+    outline-offset: 2px;
+}
+
+.edit-modal-btn-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--edit-modal-danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.edit-modal-btn-danger:hover {
+    background: var(--edit-modal-danger);
+    color: white;
+    border-color: var(--edit-modal-danger);
+}
+
+.edit-modal-btn-danger:focus-visible {
+    outline: 2px solid var(--edit-modal-danger);
+    outline-offset: 2px;
+}
+
+/* ===================================
+   Unsaved Changes Confirmation Dialog
+   =================================== */
+
+.edit-modal-confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.2s var(--edit-modal-animation-easing),
+        visibility 0.2s var(--edit-modal-animation-easing);
+    padding: 1rem;
+}
+
+.edit-modal-confirm-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.edit-modal-confirm-dialog {
+    background: var(--edit-modal-content-bg);
+    border: 2px solid rgba(245, 158, 11, 0.3);
+    border-radius: 16px;
+    max-width: 400px;
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    transform: scale(0.95);
+    transition: transform 0.2s var(--edit-modal-bounce-easing);
+}
+
+.edit-modal-confirm-overlay.show .edit-modal-confirm-dialog {
+    transform: scale(1);
+}
+
+.edit-modal-confirm-icon {
+    color: #f59e0b;
+    margin-bottom: 1rem;
+}
+
+.edit-modal-confirm-icon svg {
+    filter: drop-shadow(0 4px 12px rgba(245, 158, 11, 0.3));
+}
+
+.edit-modal-confirm-dialog h3 {
+    color: var(--edit-modal-text-primary);
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.edit-modal-confirm-dialog p {
+    color: var(--edit-modal-text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.edit-modal-confirm-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+/* ===================================
+   Toast Notifications
+   =================================== */
+
+.edit-modal-toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    z-index: 99999;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transform: translateX(120%);
+    opacity: 0;
+    transition:
+        transform 0.3s var(--edit-modal-bounce-easing),
+        opacity 0.3s var(--edit-modal-animation-easing);
+}
+
+.edit-modal-toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.edit-modal-toast-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-modal-toast-message {
+    flex: 1;
+}
+
+.edit-modal-toast-success {
+    background: var(--edit-modal-success);
+    color: white;
+}
+
+.edit-modal-toast-error {
+    background: var(--edit-modal-danger);
+    color: white;
+}
+
+.edit-modal-toast-info {
+    background: #3b82f6;
+    color: white;
+}
+
+/* ===================================
+   Responsive Adjustments
+   =================================== */
+
+@media (max-width: 640px) {
+    .edit-modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .edit-modal-content {
+        max-width: 100%;
+        max-height: 95vh;
+        border-radius: 20px 20px 0 0;
+        border-bottom: none;
+        transform: translateY(100%);
+    }
+
+    .edit-modal-overlay.show .edit-modal-content {
+        transform: translateY(0);
+    }
+
+    .edit-modal-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .edit-modal-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .edit-modal-close {
+        width: 36px;
+        height: 36px;
+    }
+
+    .edit-modal-close svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .edit-modal-body {
+        padding: 1.25rem;
+    }
+
+    .edit-modal-toast {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        max-width: none;
+    }
+
+    .edit-modal-confirm-dialog {
+        padding: 1.5rem;
+    }
+
+    .edit-modal-confirm-actions {
+        flex-direction: column;
+    }
+
+    .edit-modal-confirm-actions .edit-modal-btn {
+        width: 100%;
+    }
+
+    .edit-icon-btn {
+        opacity: 0.8;
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 900px) {
+    .edit-modal-overlay {
+        padding: 1rem;
+    }
+
+    .edit-modal-content {
+        max-width: 90%;
+    }
+}
+
+/* ===================================
+   Accessibility
+   =================================== */
+
+.edit-modal-overlay:focus-visible {
     outline: none;
 }
 
-.modal-overlay.show .modal-content {
-    transform: translateY(0) scale(1);
+/* Focus visible styles are already defined on interactive elements */
+
+/* ===================================
+   Reduced Motion
+   =================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .edit-modal-overlay,
+    .edit-modal-content,
+    .edit-modal-close,
+    .edit-modal-btn,
+    .edit-icon-btn,
+    .edit-modal-toast,
+    .edit-modal-confirm-overlay,
+    .edit-modal-confirm-dialog,
+    .edit-modal-save-overlay {
+        transition: none;
+    }
+
+    .edit-modal-spinner .spinner-ring,
+    .edit-modal-save-spinner .spinner-ring {
+        animation: none;
+    }
+
+    .edit-modal-overlay.show .edit-modal-content {
+        transform: none;
+    }
+
+    .edit-modal-toast.show {
+        transform: none;
+    }
 }
 
-.modal-content:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
+/* ===================================
+   High Contrast Mode
+   =================================== */
+
+@media (prefers-contrast: high) {
+    .edit-modal-content {
+        border-width: 3px;
+        border-color: var(--edit-modal-primary);
+    }
+
+    .edit-modal-btn,
+    .edit-icon-btn {
+        border-width: 2px;
+    }
+
+    .edit-modal-confirm-dialog {
+        border-width: 3px;
+    }
+}
+
+/* ===================================
+   Legacy Compatibility Aliases
+   =================================== */
+
+/* These aliases maintain backward compatibility with existing code */
+.modal-overlay {
+    /* Inherits from edit-modal-overlay when both classes present */
+}
+
+.modal-content {
+    /* Inherits from edit-modal-content when both classes present */
+}
+
+.modal-header {
+    /* Inherits from edit-modal-header when both classes present */
+}
+
+.modal-body {
+    /* Inherits from edit-modal-body when both classes present */
+}
+
+.modal-close {
+    /* Inherits from edit-modal-close when both classes present */
 }
 
 .modal-large {
@@ -166,89 +838,47 @@
     max-width: 400px;
 }
 
-/* ===================================
-   Modal Header
-   =================================== */
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid var(--color-border-primary);
-    background: rgba(var(--color-bg-secondary), 0.5);
-    border-radius: 16px 16px 0 0;
+/* Toast legacy support */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    z-index: 99999;
+    max-width: 400px;
+    font-weight: 500;
+    animation: toast-slide-in 0.3s var(--edit-modal-bounce-easing);
 }
 
-.modal-header h2 {
-    color: var(--color-primary);
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin: 0;
+.toast-success {
+    background: var(--edit-modal-success);
+    color: white;
 }
 
-.modal-close {
-    font-size: 2rem;
-    background: none;
-    border: none;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    line-height: 1;
-    padding: 0;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    flex-shrink: 0;
+.toast-error {
+    background: var(--edit-modal-danger);
+    color: white;
 }
 
-.modal-close:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--color-primary);
-    transform: rotate(90deg) scale(1.1);
+.toast-info {
+    background: #3b82f6;
+    color: white;
 }
 
-.modal-close:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
+@keyframes toast-slide-in {
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
-/* ===================================
-   Modal Body
-   =================================== */
-
-.modal-body {
-    padding: 2rem;
-    overflow-y: auto;
-    max-height: calc(90vh - 100px);
-}
-
-/* Custom scrollbar for modal */
-.modal-body::-webkit-scrollbar {
-    width: 8px;
-}
-
-.modal-body::-webkit-scrollbar-track {
-    background: rgba(var(--color-bg-secondary), 0.5);
-    border-radius: 4px;
-}
-
-.modal-body::-webkit-scrollbar-thumb {
-    background: var(--color-border-primary);
-    border-radius: 4px;
-}
-
-.modal-body::-webkit-scrollbar-thumb:hover {
-    background: var(--color-primary);
-}
-
-/* ===================================
-   Loading State
-   =================================== */
-
+/* Loading spinner legacy support */
 .loading-spinner-container {
     display: flex;
     flex-direction: column;
@@ -259,7 +889,7 @@
 }
 
 .loading-spinner {
-    color: var(--color-text-secondary);
+    color: var(--edit-modal-text-secondary);
     font-size: 1rem;
 }
 
@@ -270,158 +900,23 @@
     height: 40px;
     margin: 0 auto 1rem;
     border: 3px solid transparent;
-    border-top-color: var(--color-primary);
+    border-top-color: var(--edit-modal-primary);
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: edit-modal-spin 1s linear infinite;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ===================================
-   Toast Notifications
-   =================================== */
-
-.toast {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    z-index: 99999;
-    max-width: 400px;
-    font-weight: 500;
-    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.toast-success {
-    background: #10b981;
-    color: white;
-}
-
-.toast-error {
-    background: #ef4444;
-    color: white;
-}
-
-.toast-info {
-    background: #3b82f6;
-    color: white;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(400px);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes slideOut {
-    from {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateX(400px);
-        opacity: 0;
-    }
-}
-
-/* ===================================
-   Error Container
-   =================================== */
-
+/* Error container legacy support */
 .error-container {
     text-align: center;
     padding: 3rem;
 }
 
 .error-container h3 {
-    color: var(--color-text-primary);
+    color: var(--edit-modal-text-primary);
     margin-bottom: 0.5rem;
 }
 
 .error-container p {
-    color: #ef4444;
+    color: var(--edit-modal-danger);
     margin: 1rem 0;
-}
-
-/* ===================================
-   Responsive Adjustments
-   =================================== */
-
-@media (max-width: 768px) {
-    .modal-overlay {
-        padding: 0.5rem;
-    }
-
-    .modal-content {
-        width: 95%;
-        max-height: 95vh;
-        border-radius: 12px;
-    }
-
-    .modal-header {
-        padding: 1rem 1.5rem;
-        border-radius: 12px 12px 0 0;
-    }
-
-    .modal-header h2 {
-        font-size: 1.25rem;
-    }
-
-    .modal-body {
-        padding: 1.5rem;
-        max-height: calc(95vh - 80px);
-    }
-
-    .modal-close {
-        width: 36px;
-        height: 36px;
-        font-size: 1.75rem;
-    }
-
-    .toast {
-        bottom: 1rem;
-        right: 1rem;
-        left: 1rem;
-        max-width: none;
-    }
-
-    .edit-icon-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 1rem;
-    }
-}
-
-/* ===================================
-   Accessibility
-   =================================== */
-
-.modal-overlay:focus-visible {
-    outline: none;
-}
-
-.edit-icon-btn:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .modal-overlay,
-    .modal-content,
-    .modal-header,
-    .modal-close,
-    .edit-icon-btn,
-    .toast {
-        transition: none;
-        animation: none;
-    }
 }

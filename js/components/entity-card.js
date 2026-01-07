@@ -1,7 +1,17 @@
 /**
- * Entity Card Component - Reusable display component for entities
+ * Entity Card Component - Polished Reusable Display Component
  * Supports mini, compact, and full display modes
  * Integrates with theme system and entity loader
+ *
+ * Features:
+ * - Image handling with 16:9 aspect ratio and fallbacks
+ * - CSS line-clamp text truncation (title: 2 lines, desc: 3 lines)
+ * - Hover states with subtle lift and image zoom
+ * - Full keyboard accessibility with focus states
+ * - Mythology and type badge pills
+ * - Quick action buttons (favorite, quick view)
+ *
+ * Updated: 2026-01-07
  */
 
 (function() {
@@ -19,6 +29,7 @@
             this.loader = options.loader || window.entityLoader;
             this.onLoad = options.onLoad || null;
             this.interactive = options.interactive !== false;
+            this.showQuickActions = options.showQuickActions !== false;
 
             // Track event listeners for cleanup
             this._eventListeners = [];
@@ -138,26 +149,81 @@
         }
 
         /**
-         * Render loading placeholder
+         * Render loading placeholder with skeleton animation
          */
         renderLoading() {
             if (!this.container) return;
 
             this.container.setAttribute('aria-busy', 'true');
             this.container.innerHTML = `
-                <div class="entity-card entity-card-compact entity-card-loading glass-card skeleton"
+                <article class="entity-card entity-card-compact entity-card--loading glass-card"
                      role="article"
                      aria-label="Loading entity...">
-                    <div class="entity-card-header">
-                        <div class="entity-icon-large card-icon skeleton-icon" aria-hidden="true"></div>
-                        <div class="entity-info">
-                            <div class="card-title skeleton-text"></div>
-                            <div class="card-meta skeleton-text skeleton-text-sm"></div>
+                    <!-- Image skeleton -->
+                    <div class="entity-card__image-wrapper">
+                        <div class="entity-card__image-skeleton skeleton-shimmer"></div>
+                    </div>
+
+                    <div class="entity-card__content">
+                        <!-- Icon and title skeleton -->
+                        <div class="entity-card__header">
+                            <div class="entity-card__icon skeleton-shimmer"></div>
+                            <div class="entity-card__title-skeleton skeleton-shimmer"></div>
+                        </div>
+
+                        <!-- Description skeleton -->
+                        <div class="entity-card__desc-skeleton skeleton-shimmer"></div>
+                        <div class="entity-card__desc-skeleton entity-card__desc-skeleton--short skeleton-shimmer"></div>
+
+                        <!-- Badge skeleton -->
+                        <div class="entity-card__badges">
+                            <span class="entity-card__badge-skeleton skeleton-shimmer"></span>
+                            <span class="entity-card__badge-skeleton skeleton-shimmer"></span>
                         </div>
                     </div>
-                    <p class="entity-short-desc card-description skeleton-text"></p>
-                    <div class="entity-card-footer grid-card-footer">
-                        <span class="skeleton-button"></span>
+                </article>
+            `;
+        }
+
+        /**
+         * Render card image with fallback
+         */
+        renderCardImage() {
+            const imageUrl = this.data.image || this.data.imageUrl || this.data.thumbnail;
+            const fallbackLetter = this.data.name ? this.data.name.charAt(0).toUpperCase() : '?';
+
+            if (imageUrl) {
+                const sanitizedUrl = this.sanitizeUrl(imageUrl);
+                if (sanitizedUrl) {
+                    return `
+                        <div class="entity-card__image-wrapper">
+                            <img
+                                src="${this.escapeAttr(sanitizedUrl)}"
+                                alt="${this.escapeAttr(this.data.name || 'Entity image')}"
+                                class="entity-card__image"
+                                loading="lazy"
+                                decoding="async"
+                                onerror="this.parentElement.innerHTML='<div class=\\'entity-card__image-fallback\\'><span>${this.escapeAttr(fallbackLetter)}</span></div>'"
+                            />
+                            <div class="entity-card__image-overlay"></div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Return placeholder/fallback image
+            return `
+                <div class="entity-card__image-wrapper">
+                    <div class="entity-card__image-fallback" data-mythology="${this.escapeAttr(this.data.primaryMythology || 'unknown')}">
+                        <span class="entity-card__image-fallback-letter">${this.escapeHtml(fallbackLetter)}</span>
+                        <svg class="entity-card__image-fallback-pattern" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <defs>
+                                <pattern id="sacred-pattern-${this.entityId}" patternUnits="userSpaceOnUse" width="20" height="20">
+                                    <circle cx="10" cy="10" r="1.5" fill="currentColor" opacity="0.1"/>
+                                </pattern>
+                            </defs>
+                            <rect width="100" height="100" fill="url(#sacred-pattern-${this.entityId})"/>
+                        </svg>
                     </div>
                 </div>
             `;
@@ -170,19 +236,19 @@
             const url = this.getEntityUrl();
 
             return `
-                <span class="entity-card entity-card-mini"
+                <span class="entity-card entity-card--mini"
                       data-entity-id="${this.escapeAttr(this.entityId)}"
                       data-entity-type="${this.escapeAttr(this.entityType)}">
-                    <a href="${url}" class="entity-mini-link" title="${this.escapeAttr(this.data.shortDescription || this.data.name)}">
-                        ${this.data.icon ? `<span class="entity-icon">${this.renderIconWithFallback(this.data.icon, this.data.name)}</span>` : ''}
-                        <span class="entity-name">${this.escapeHtml(this.data.name)}</span>
+                    <a href="${url}" class="entity-card__mini-link" title="${this.escapeAttr(this.data.shortDescription || this.data.name)}">
+                        ${this.data.icon ? `<span class="entity-card__mini-icon">${this.renderIconWithFallback(this.data.icon, this.data.name)}</span>` : ''}
+                        <span class="entity-card__mini-name">${this.escapeHtml(this.data.name)}</span>
                     </a>
                 </span>
             `;
         }
 
         /**
-         * Render compact mode (card)
+         * Render compact mode (card) - main card format
          */
         renderCompact() {
             const colors = this.data.colors || {};
@@ -195,7 +261,7 @@
             const sourceLabel = this.getSourceLabel();
 
             return `
-                <div class="entity-card entity-card-compact glass-card ${sourceClass}"
+                <article class="entity-card entity-card--compact glass-card ${sourceClass}"
                      data-entity-id="${this.escapeAttr(this.entityId)}"
                      data-entity-type="${this.escapeAttr(this.entityType)}"
                      data-mythology="${this.escapeAttr(mythologyLower)}"
@@ -204,35 +270,162 @@
                      role="article"
                      aria-label="${this.escapeAttr(this.data.name)} - ${sourceLabel}">
 
-                    <div class="entity-card-header">
-                        <div class="entity-icon-large card-icon" aria-hidden="true">${iconContent}</div>
-                        <div class="entity-info">
-                            <h2 class="card-title">
-                                <a href="${this.getEntityUrl()}">${this.escapeHtml(this.data.name)}</a>
+                    <!-- Card Image Section (16:9) -->
+                    ${this.renderCardImage()}
+
+                    <!-- Card Content -->
+                    <div class="entity-card__content">
+                        <!-- Header with Icon and Title -->
+                        <div class="entity-card__header">
+                            <div class="entity-card__icon" aria-hidden="true">${iconContent}</div>
+                            <h2 class="entity-card__title">
+                                <a href="${this.getEntityUrl()}" class="entity-card__title-link">
+                                    ${this.escapeHtml(this.data.name)}
+                                </a>
                             </h2>
-                            ${this.renderAuthorBadge()}
-                            <div class="card-meta" role="doc-subtitle">
-                                ${this.renderTypeBadge()}
-                                ${mythologies.length > 0 ? this.renderMythologyBadges(mythologies) : ''}
-                                ${this.renderPerspectivesIndicator()}
-                            </div>
                         </div>
+
+                        ${this.renderAuthorBadge()}
+
+                        <!-- Description (max 3 lines via CSS) -->
+                        ${this.data.shortDescription ? `
+                            <p class="entity-card__description">${this.escapeHtml(this.data.shortDescription)}</p>
+                        ` : ''}
+
+                        <!-- Metadata Pills -->
+                        <div class="entity-card__badges">
+                            ${this.renderMythologyPill(primaryMythology)}
+                            ${this.renderTypePill()}
+                        </div>
+
+                        ${this.renderWhisper(primaryMythology)}
+
+                        ${this.renderCompactMetadata()}
                     </div>
 
-                    ${this.data.shortDescription ? `
-                        <p class="entity-short-desc card-description">${this.escapeHtml(this.data.shortDescription)}</p>
-                    ` : ''}
+                    <!-- Quick Actions (show on hover) -->
+                    ${this.showQuickActions ? this.renderQuickActions(mythologyLower) : ''}
 
-                    ${this.renderWhisper(primaryMythology)}
-
-                    ${this.renderCompactMetadata()}
-
-                    <div class="entity-card-footer grid-card-footer">
-                        <a href="${this.getEntityUrl()}" class="btn-view-details" aria-label="View full details for ${this.escapeHtml(this.data.name)}">View Details</a>
-                        ${this.interactive ? `<button class="btn-secondary entity-expand" data-id="${this.escapeAttr(this.entityId)}" data-type="${this.escapeAttr(this.entityType)}" aria-label="Expand ${this.escapeHtml(this.data.name)}">Expand</button>` : ''}
-                        ${this.renderFavoriteButton(mythologyLower)}
+                    <!-- Card Footer -->
+                    <div class="entity-card__footer">
+                        <a href="${this.getEntityUrl()}" class="entity-card__btn entity-card__btn--primary" aria-label="View full details for ${this.escapeHtml(this.data.name)}">
+                            View Details
+                        </a>
+                        ${this.interactive ? `
+                            <button class="entity-card__btn entity-card__btn--secondary entity-expand"
+                                    data-id="${this.escapeAttr(this.entityId)}"
+                                    data-type="${this.escapeAttr(this.entityType)}"
+                                    aria-label="Expand ${this.escapeHtml(this.data.name)}">
+                                Expand
+                            </button>
+                        ` : ''}
                     </div>
+                </article>
+            `;
+        }
+
+        /**
+         * Render quick action buttons (favorite, quick view, compare)
+         */
+        renderQuickActions(mythologyLower) {
+            // Check if entity is already in comparison
+            const isInComparison = window.CompareView?.isInComparison?.(this.entityId, this.entityType + 's') || false;
+
+            return `
+                <div class="entity-card__quick-actions" aria-label="Quick actions">
+                    <!-- Compare Button -->
+                    <button class="entity-card__action-btn entity-card__action-btn--compare entity-compare ${isInComparison ? 'entity-card__action-btn--in-compare' : ''}"
+                            data-entity-id="${this.escapeAttr(this.entityId)}"
+                            data-entity-type="${this.escapeAttr(this.entityType)}"
+                            data-entity-name="${this.escapeAttr(this.data.name)}"
+                            data-entity-mythology="${this.escapeAttr(mythologyLower)}"
+                            data-entity-icon="${this.escapeAttr(this.data.icon || '')}"
+                            aria-label="${isInComparison ? 'Already in comparison' : `Add ${this.escapeHtml(this.data.name)} to comparison`}"
+                            title="${isInComparison ? 'In comparison' : 'Add to comparison'}"
+                            type="button"
+                            ${isInComparison ? 'disabled' : ''}>
+                        <svg class="entity-card__action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="9" rx="1"/>
+                            <rect x="14" y="3" width="7" height="9" rx="1"/>
+                            <path d="M10 7h4"/>
+                            <path d="M7 15v6M17 15v6"/>
+                        </svg>
+                    </button>
+
+                    <!-- Favorite Button -->
+                    <button class="entity-card__action-btn entity-card__action-btn--favorite entity-favorite"
+                            data-entity-id="${this.escapeAttr(this.entityId)}"
+                            data-entity-type="${this.escapeAttr(this.entityType)}"
+                            data-entity-name="${this.escapeAttr(this.data.name)}"
+                            data-entity-mythology="${this.escapeAttr(mythologyLower)}"
+                            data-entity-icon="${this.escapeAttr(this.data.icon || '')}"
+                            aria-label="Add ${this.escapeHtml(this.data.name)} to favorites"
+                            aria-pressed="false"
+                            title="Add to favorites"
+                            type="button">
+                        <svg class="entity-card__action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </button>
+
+                    <!-- Quick View Button -->
+                    <button class="entity-card__action-btn entity-card__action-btn--quickview entity-quickview"
+                            data-entity-id="${this.escapeAttr(this.entityId)}"
+                            data-entity-type="${this.escapeAttr(this.entityType)}"
+                            aria-label="Quick view ${this.escapeHtml(this.data.name)}"
+                            title="Quick view"
+                            type="button">
+                        <svg class="entity-card__action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
                 </div>
+            `;
+        }
+
+        /**
+         * Render mythology pill badge
+         */
+        renderMythologyPill(mythology) {
+            if (!mythology || mythology === 'unknown') return '';
+
+            return `
+                <span class="entity-card__pill entity-card__pill--mythology" data-mythology="${this.escapeAttr(mythology.toLowerCase())}">
+                    ${this.escapeHtml(this.capitalize(mythology))}
+                </span>
+            `;
+        }
+
+        /**
+         * Render entity type pill badge
+         */
+        renderTypePill() {
+            const typeIcons = {
+                deity: '<svg viewBox="0 0 16 16" class="pill-icon"><path fill="currentColor" d="M8 1l2 4 4.5.7-3.3 3.2.8 4.5L8 11.4l-4 2 .8-4.5L1.5 5.7 6 5z"/></svg>',
+                item: '<svg viewBox="0 0 16 16" class="pill-icon"><path fill="currentColor" d="M14.5 3L8 0 1.5 3v6L8 16l6.5-7V3z"/></svg>',
+                place: '<svg viewBox="0 0 16 16" class="pill-icon"><path fill="currentColor" d="M8 0C5.2 0 3 2.2 3 5c0 3.5 5 11 5 11s5-7.5 5-11c0-2.8-2.2-5-5-5zm0 7c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>',
+                creature: '<svg viewBox="0 0 16 16" class="pill-icon"><path fill="currentColor" d="M13 2c-1.7 0-3.4.7-4.6 1.9L7 5.3l-1.4-1.4C4.4 2.7 2.7 2 1 2v2c1.1 0 2.2.4 3 1.2L5.4 6.6 3 9H0v2h4l3-3 1.4 1.4c.8.8 1.9 1.2 3 1.2V8.4L13 10v4h2V2h-2z"/></svg>',
+                hero: '<svg viewBox="0 0 16 16" class="pill-icon"><path fill="currentColor" d="M8 0L6 6H0l5 4-2 6 5-4 5 4-2-6 5-4h-6z"/></svg>',
+                concept: '<svg viewBox="0 0 16 16" class="pill-icon"><circle fill="currentColor" cx="8" cy="8" r="7"/></svg>',
+                magic: '<svg viewBox="0 0 16 16" class="pill-icon"><path fill="currentColor" d="M8 0l1.5 5H15l-4.5 3.5L12 14l-4-3-4 3 1.5-5.5L1 5h5.5z"/></svg>',
+                archetype: '<svg viewBox="0 0 16 16" class="pill-icon"><path fill="currentColor" d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"/></svg>',
+                ritual: '<svg viewBox="0 0 16 16" class="pill-icon"><path fill="currentColor" d="M8 2c-.6 0-1 .4-1 1v5c0 .6.4 1 1 1s1-.4 1-1V3c0-.6-.4-1-1-1zM4 12h8v2H4z"/></svg>',
+                text: '<svg viewBox="0 0 16 16" class="pill-icon"><path fill="currentColor" d="M2 0v16h12V4l-4-4H2zm8 1.4L13.6 5H10V1.4zM3 15V1h6v5h4v9H3z"/></svg>',
+                herb: '<svg viewBox="0 0 16 16" class="pill-icon"><path fill="currentColor" d="M8 0c-2 4-6 6-6 10 0 3.3 2.7 6 6 6s6-2.7 6-6c0-4-4-6-6-10z"/></svg>',
+                symbol: '<svg viewBox="0 0 16 16" class="pill-icon"><path fill="currentColor" d="M8 0L0 8l8 8 8-8-8-8zm0 2.8L13.2 8 8 13.2 2.8 8 8 2.8z"/></svg>',
+                cosmology: '<svg viewBox="0 0 16 16" class="pill-icon"><circle fill="currentColor" cx="8" cy="8" r="6"/><ellipse fill="none" stroke="currentColor" cx="8" cy="8" rx="6" ry="2.5"/></svg>',
+                mythology: '<svg viewBox="0 0 16 16" class="pill-icon"><circle fill="currentColor" cx="8" cy="8" r="7"/></svg>'
+            };
+
+            const icon = typeIcons[this.entityType] || typeIcons.concept;
+            const label = this.capitalize(this.entityType);
+
+            return `
+                <span class="entity-card__pill entity-card__pill--type" data-type="${this.escapeAttr(this.entityType)}">
+                    ${icon}
+                    <span class="pill-text">${this.escapeHtml(label)}</span>
+                </span>
             `;
         }
 
@@ -242,8 +435,8 @@
         renderIconWithFallback(icon, name) {
             const fallbackLetter = name ? this.escapeHtml(name.charAt(0).toUpperCase()) : '';
             const fallbackHtml = fallbackLetter
-                ? `<span class="icon-fallback">${fallbackLetter}</span>`
-                : '<span class="icon-fallback" aria-hidden="true">&#10024;</span>';
+                ? `<span class="entity-card__icon-fallback">${fallbackLetter}</span>`
+                : '<span class="entity-card__icon-fallback" aria-hidden="true">&#10024;</span>';
 
             if (!icon) {
                 return fallbackHtml;
@@ -254,7 +447,7 @@
                 const iconTrimmed = icon.trim();
                 if (iconTrimmed.toLowerCase().startsWith('<svg')) {
                     // Render inline SVG directly (SVG is already safe markup)
-                    return `<span class="entity-icon-svg" aria-hidden="true">${icon}</span>`;
+                    return `<span class="entity-card__icon-svg" aria-hidden="true">${icon}</span>`;
                 }
             }
 
@@ -265,17 +458,17 @@
                 }
                 return `<img src="${this.escapeAttr(sanitizedUrl)}"
                              alt=""
-                             class="entity-icon-img"
+                             class="entity-card__icon-img"
                              loading="lazy"
                              decoding="async"
                              data-fallback-letter="${this.escapeAttr(fallbackLetter || '&#10024;')}"
-                             width="56"
-                             height="56"
+                             width="40"
+                             height="40"
                              data-fallback-html="${this.escapeAttr(fallbackHtml)}">`;
             }
 
             // Escape any text/emoji icon to prevent XSS
-            return `<span class="entity-icon-text" aria-hidden="true">${this.escapeHtml(icon)}</span>`;
+            return `<span class="entity-card__icon-text" aria-hidden="true">${this.escapeHtml(icon)}</span>`;
         }
 
         /**
@@ -321,25 +514,25 @@
             const secondary = colors.secondary || '#764ba2';
 
             return `
-                <div class="entity-card entity-card-full glass-card"
+                <article class="entity-card entity-card--full glass-card"
                      data-entity-id="${this.escapeAttr(this.entityId)}"
                      data-entity-type="${this.escapeAttr(this.entityType)}">
 
                     <!-- Hero Section -->
-                    <div class="entity-hero" style="background: linear-gradient(135deg, ${this.escapeAttr(primary)}, ${this.escapeAttr(secondary)});">
-                        ${this.data.icon ? `<div class="entity-icon-hero">${this.renderIconWithFallback(this.data.icon, this.data.name)}</div>` : ''}
-                        <h1 class="entity-title">${this.escapeHtml(this.data.name)}</h1>
+                    <div class="entity-card__hero" style="background: linear-gradient(135deg, ${this.escapeAttr(primary)}, ${this.escapeAttr(secondary)});">
+                        ${this.data.icon ? `<div class="entity-card__hero-icon">${this.renderIconWithFallback(this.data.icon, this.data.name)}</div>` : ''}
+                        <h1 class="entity-card__hero-title">${this.escapeHtml(this.data.name)}</h1>
                         ${this.data.linguistic?.originalName ? `
-                            <div class="entity-original-name">${this.escapeHtml(this.data.linguistic.originalName)}</div>
+                            <div class="entity-card__hero-original">${this.escapeHtml(this.data.linguistic.originalName)}</div>
                         ` : ''}
                         ${this.data.shortDescription ? `
-                            <p class="entity-subtitle">${this.escapeHtml(this.data.shortDescription)}</p>
+                            <p class="entity-card__hero-subtitle">${this.escapeHtml(this.data.shortDescription)}</p>
                         ` : ''}
                         ${this.renderMythologyBadges(this.data.mythologies || [])}
                     </div>
 
                     <!-- Main Content -->
-                    <div class="entity-content">
+                    <div class="entity-card__body">
                         ${this.renderFullDescription()}
                         ${this.renderLinguisticData()}
                         ${this.renderTypeSpecificContent()}
@@ -352,21 +545,21 @@
                     </div>
 
                     <!-- Footer Actions -->
-                    <div class="entity-card-footer">
-                        <a href="${this.getEntityUrl()}" class="btn-primary">Full Page</a>
-                        <button class="btn-secondary corpus-search" data-term="${this.escapeAttr(this.data.name)}">
+                    <div class="entity-card__footer entity-card__footer--full">
+                        <a href="${this.getEntityUrl()}" class="entity-card__btn entity-card__btn--primary">Full Page</a>
+                        <button class="entity-card__btn entity-card__btn--secondary corpus-search" data-term="${this.escapeAttr(this.data.name)}">
                             Search Texts
                         </button>
-                        <button class="btn-secondary share-entity" data-id="${this.escapeAttr(this.entityId)}">
+                        <button class="entity-card__btn entity-card__btn--secondary share-entity" data-id="${this.escapeAttr(this.entityId)}">
                             Share
                         </button>
                     </div>
-                </div>
+                </article>
             `;
         }
 
         /**
-         * Render type badge
+         * Render type badge (legacy support)
          */
         renderTypeBadge() {
             const typeIcons = {
@@ -408,9 +601,9 @@
                 if (!whisper) return '';
 
                 return `
-                    <div class="entity-whisper" aria-hidden="true">
-                        <span class="entity-whisper-text">${this.escapeHtml(whisper.text)}</span>
-                        <span class="entity-whisper-source">${this.escapeHtml(whisper.source)}</span>
+                    <div class="entity-card__whisper" aria-hidden="true">
+                        <span class="entity-card__whisper-text">${this.escapeHtml(whisper.text)}</span>
+                        <span class="entity-card__whisper-source">${this.escapeHtml(whisper.source)}</span>
                     </div>
                 `;
             } catch (error) {
@@ -426,7 +619,7 @@
             if (!mythologies || mythologies.length === 0) return '';
 
             return `
-                <div class="entity-mythology-badges">
+                <div class="entity-card__mythology-badges">
                     ${mythologies.map(myth => `
                         <span class="mythology-badge" data-mythology="${this.escapeAttr(myth)}">
                             ${this.escapeHtml(this.capitalize(myth))}
@@ -466,8 +659,8 @@
             if (metadata.length === 0) return '';
 
             return `
-                <div class="entity-metadata-compact">
-                    ${metadata.map(m => `<div class="metadata-item">${m}</div>`).join('')}
+                <div class="entity-card__metadata">
+                    ${metadata.map(m => `<div class="entity-card__metadata-item">${m}</div>`).join('')}
                 </div>
             `;
         }
@@ -480,10 +673,10 @@
             if (!desc) return '';
 
             return `
-                <div class="entity-section">
-                    <h2>Description</h2>
-                    <div class="entity-description">${this.renderMarkdown(desc)}</div>
-                </div>
+                <section class="entity-card__section">
+                    <h2 class="entity-card__section-title">Description</h2>
+                    <div class="entity-card__section-content">${this.renderMarkdown(desc)}</div>
+                </section>
             `;
         }
 
@@ -495,35 +688,35 @@
             if (!ling) return '';
 
             return `
-                <div class="entity-section linguistic-section">
-                    <h2>Linguistic Information</h2>
-                    <div class="property-grid">
+                <section class="entity-card__section entity-card__section--linguistic">
+                    <h2 class="entity-card__section-title">Linguistic Information</h2>
+                    <div class="entity-card__property-grid">
                         ${ling.originalName ? `
-                            <div class="property-card">
-                                <div class="property-label">Original Name</div>
-                                <div class="property-value">${this.escapeHtml(ling.originalName)}</div>
+                            <div class="entity-card__property">
+                                <div class="entity-card__property-label">Original Name</div>
+                                <div class="entity-card__property-value">${this.escapeHtml(ling.originalName)}</div>
                             </div>
                         ` : ''}
                         ${ling.transliteration ? `
-                            <div class="property-card">
-                                <div class="property-label">Transliteration</div>
-                                <div class="property-value">${this.escapeHtml(ling.transliteration)}</div>
+                            <div class="entity-card__property">
+                                <div class="entity-card__property-label">Transliteration</div>
+                                <div class="entity-card__property-value">${this.escapeHtml(ling.transliteration)}</div>
                             </div>
                         ` : ''}
                         ${ling.pronunciation ? `
-                            <div class="property-card">
-                                <div class="property-label">Pronunciation</div>
-                                <div class="property-value"><code>${this.escapeHtml(ling.pronunciation)}</code></div>
+                            <div class="entity-card__property">
+                                <div class="entity-card__property-label">Pronunciation</div>
+                                <div class="entity-card__property-value"><code>${this.escapeHtml(ling.pronunciation)}</code></div>
                             </div>
                         ` : ''}
                         ${ling.etymology?.meaning ? `
-                            <div class="property-card">
-                                <div class="property-label">Etymology</div>
-                                <div class="property-value">${this.escapeHtml(ling.etymology.meaning)}</div>
+                            <div class="entity-card__property">
+                                <div class="entity-card__property-label">Etymology</div>
+                                <div class="entity-card__property-value">${this.escapeHtml(ling.etymology.meaning)}</div>
                             </div>
                         ` : ''}
                     </div>
-                </div>
+                </section>
             `;
         }
 
@@ -554,27 +747,27 @@
             if (!this.data.properties && !this.data.uses) return '';
 
             return `
-                <div class="entity-section">
-                    <h2>Properties</h2>
+                <section class="entity-card__section">
+                    <h2 class="entity-card__section-title">Properties</h2>
                     ${this.data.properties ? `
-                        <div class="property-grid">
+                        <div class="entity-card__property-grid">
                             ${this.data.properties.map(prop => `
-                                <div class="property-card">
-                                    <div class="property-label">${this.escapeHtml(prop.name)}</div>
-                                    <div class="property-value">${this.escapeHtml(prop.value)}</div>
+                                <div class="entity-card__property">
+                                    <div class="entity-card__property-label">${this.escapeHtml(prop.name)}</div>
+                                    <div class="entity-card__property-value">${this.escapeHtml(prop.value)}</div>
                                 </div>
                             `).join('')}
                         </div>
                     ` : ''}
                     ${this.data.uses && this.data.uses.length > 0 ? `
-                        <div class="uses-section">
-                            <h3>Uses</h3>
-                            <div class="tag-list">
-                                ${this.data.uses.map(use => `<span class="tag">${this.escapeHtml(use)}</span>`).join('')}
+                        <div class="entity-card__tags-section">
+                            <h3 class="entity-card__tags-title">Uses</h3>
+                            <div class="entity-card__tags">
+                                ${this.data.uses.map(use => `<span class="entity-card__tag">${this.escapeHtml(use)}</span>`).join('')}
                             </div>
                         </div>
                     ` : ''}
-                </div>
+                </section>
             `;
         }
 
@@ -586,23 +779,23 @@
             if (!geo) return '';
 
             return `
-                <div class="entity-section">
-                    <h2>Location Details</h2>
-                    <div class="property-grid">
+                <section class="entity-card__section">
+                    <h2 class="entity-card__section-title">Location Details</h2>
+                    <div class="entity-card__property-grid">
                         ${geo.realm ? `
-                            <div class="property-card">
-                                <div class="property-label">Realm</div>
-                                <div class="property-value">${this.escapeHtml(geo.realm)}</div>
+                            <div class="entity-card__property">
+                                <div class="entity-card__property-label">Realm</div>
+                                <div class="entity-card__property-value">${this.escapeHtml(geo.realm)}</div>
                             </div>
                         ` : ''}
                         ${geo.region ? `
-                            <div class="property-card">
-                                <div class="property-label">Region</div>
-                                <div class="property-value">${this.escapeHtml(geo.region)}</div>
+                            <div class="entity-card__property">
+                                <div class="entity-card__property-label">Region</div>
+                                <div class="entity-card__property-value">${this.escapeHtml(geo.region)}</div>
                             </div>
                         ` : ''}
                     </div>
-                </div>
+                </section>
             `;
         }
 
@@ -611,52 +804,42 @@
          */
         renderDeityProperties() {
             return `
-                <div class="entity-section">
-                    <h2>Divine Attributes</h2>
+                <section class="entity-card__section">
+                    <h2 class="entity-card__section-title">Divine Attributes</h2>
                     ${this.data.domains ? `
-                        <div class="attribute-block">
-                            <h3>Domains</h3>
-                            <div class="tag-list">
-                                ${this.data.domains.map(d => `<span class="tag">${this.escapeHtml(d)}</span>`).join('')}
+                        <div class="entity-card__tags-section">
+                            <h3 class="entity-card__tags-title">Domains</h3>
+                            <div class="entity-card__tags">
+                                ${this.data.domains.map(d => `<span class="entity-card__tag">${this.escapeHtml(d)}</span>`).join('')}
                             </div>
                         </div>
                     ` : ''}
                     ${this.data.symbols ? `
-                        <div class="attribute-block">
-                            <h3>Symbols</h3>
-                            <div class="tag-list">
-                                ${this.data.symbols.map(s => `<span class="tag">${this.escapeHtml(s)}</span>`).join('')}
+                        <div class="entity-card__tags-section">
+                            <h3 class="entity-card__tags-title">Symbols</h3>
+                            <div class="entity-card__tags">
+                                ${this.data.symbols.map(s => `<span class="entity-card__tag">${this.escapeHtml(s)}</span>`).join('')}
                             </div>
                         </div>
                     ` : ''}
-                </div>
+                </section>
             `;
         }
 
         /**
          * Render concept properties
-         * TODO: Implement proper rendering for concept entities.
-         * Concepts may include properties such as:
-         * - philosophical principles/foundations
-         * - related traditions
-         * - symbolic meanings
-         * - abstract vs. concrete manifestations
-         * Currently returns empty string as concept entity data schema is not yet finalized.
          */
         renderConceptProperties() {
-            // Return empty until concept schema is finalized
-            // Check if we have any concept-specific data to render
             if (!this.data) return '';
 
             const props = [];
 
-            // Render any available concept-like properties
             if (this.data.principles && this.data.principles.length > 0) {
                 props.push(`
-                    <div class="attribute-block">
-                        <h3>Principles</h3>
-                        <div class="tag-list">
-                            ${this.data.principles.map(p => `<span class="tag">${this.escapeHtml(p)}</span>`).join('')}
+                    <div class="entity-card__tags-section">
+                        <h3 class="entity-card__tags-title">Principles</h3>
+                        <div class="entity-card__tags">
+                            ${this.data.principles.map(p => `<span class="entity-card__tag">${this.escapeHtml(p)}</span>`).join('')}
                         </div>
                     </div>
                 `);
@@ -664,10 +847,10 @@
 
             if (this.data.traditions && this.data.traditions.length > 0) {
                 props.push(`
-                    <div class="attribute-block">
-                        <h3>Traditions</h3>
-                        <div class="tag-list">
-                            ${this.data.traditions.map(t => `<span class="tag">${this.escapeHtml(t)}</span>`).join('')}
+                    <div class="entity-card__tags-section">
+                        <h3 class="entity-card__tags-title">Traditions</h3>
+                        <div class="entity-card__tags">
+                            ${this.data.traditions.map(t => `<span class="entity-card__tag">${this.escapeHtml(t)}</span>`).join('')}
                         </div>
                     </div>
                 `);
@@ -676,38 +859,27 @@
             if (props.length === 0) return '';
 
             return `
-                <div class="entity-section">
-                    <h2>Conceptual Attributes</h2>
+                <section class="entity-card__section">
+                    <h2 class="entity-card__section-title">Conceptual Attributes</h2>
                     ${props.join('')}
-                </div>
+                </section>
             `;
         }
 
         /**
          * Render magic properties
-         * TODO: Implement proper rendering for magic/spell entities.
-         * Magic entities may include properties such as:
-         * - spell components/ingredients
-         * - casting requirements
-         * - magical effects and duration
-         * - associated traditions/schools
-         * - power level/difficulty
-         * Currently returns empty string as magic entity data schema is not yet finalized.
          */
         renderMagicProperties() {
-            // Return empty until magic schema is finalized
-            // Check if we have any magic-specific data to render
             if (!this.data) return '';
 
             const props = [];
 
-            // Render any available magic-like properties
             if (this.data.components && this.data.components.length > 0) {
                 props.push(`
-                    <div class="attribute-block">
-                        <h3>Components</h3>
-                        <div class="tag-list">
-                            ${this.data.components.map(c => `<span class="tag">${this.escapeHtml(c)}</span>`).join('')}
+                    <div class="entity-card__tags-section">
+                        <h3 class="entity-card__tags-title">Components</h3>
+                        <div class="entity-card__tags">
+                            ${this.data.components.map(c => `<span class="entity-card__tag">${this.escapeHtml(c)}</span>`).join('')}
                         </div>
                     </div>
                 `);
@@ -715,10 +887,10 @@
 
             if (this.data.effects && this.data.effects.length > 0) {
                 props.push(`
-                    <div class="attribute-block">
-                        <h3>Effects</h3>
-                        <div class="tag-list">
-                            ${this.data.effects.map(e => `<span class="tag">${this.escapeHtml(e)}</span>`).join('')}
+                    <div class="entity-card__tags-section">
+                        <h3 class="entity-card__tags-title">Effects</h3>
+                        <div class="entity-card__tags">
+                            ${this.data.effects.map(e => `<span class="entity-card__tag">${this.escapeHtml(e)}</span>`).join('')}
                         </div>
                     </div>
                 `);
@@ -726,9 +898,9 @@
 
             if (this.data.school) {
                 props.push(`
-                    <div class="attribute-block">
-                        <h3>School/Tradition</h3>
-                        <p>${this.escapeHtml(this.data.school)}</p>
+                    <div class="entity-card__tags-section">
+                        <h3 class="entity-card__tags-title">School/Tradition</h3>
+                        <p class="entity-card__school">${this.escapeHtml(this.data.school)}</p>
                     </div>
                 `);
             }
@@ -736,10 +908,10 @@
             if (props.length === 0) return '';
 
             return `
-                <div class="entity-section">
-                    <h2>Magical Properties</h2>
+                <section class="entity-card__section">
+                    <h2 class="entity-card__section-title">Magical Properties</h2>
                     ${props.join('')}
-                </div>
+                </section>
             `;
         }
 
@@ -751,35 +923,35 @@
             if (!meta || Object.keys(meta).length === 0) return '';
 
             return `
-                <div class="entity-section metaphysical-section">
-                    <h2>Metaphysical Properties</h2>
-                    <div class="property-grid">
+                <section class="entity-card__section entity-card__section--metaphysical">
+                    <h2 class="entity-card__section-title">Metaphysical Properties</h2>
+                    <div class="entity-card__property-grid">
                         ${meta.primaryElement ? `
-                            <div class="property-card">
-                                <div class="property-label">Element</div>
-                                <div class="property-value">${this.escapeHtml(this.capitalize(meta.primaryElement))}</div>
+                            <div class="entity-card__property">
+                                <div class="entity-card__property-label">Element</div>
+                                <div class="entity-card__property-value">${this.escapeHtml(this.capitalize(meta.primaryElement))}</div>
                             </div>
                         ` : ''}
                         ${meta.planet ? `
-                            <div class="property-card">
-                                <div class="property-label">Planet</div>
-                                <div class="property-value">${this.escapeHtml(meta.planet)}</div>
+                            <div class="entity-card__property">
+                                <div class="entity-card__property-label">Planet</div>
+                                <div class="entity-card__property-value">${this.escapeHtml(meta.planet)}</div>
                             </div>
                         ` : ''}
                         ${meta.sefirot && meta.sefirot.length > 0 ? `
-                            <div class="property-card">
-                                <div class="property-label">Sefirot</div>
-                                <div class="property-value">${meta.sefirot.map(s => this.escapeHtml(this.capitalize(s))).join(', ')}</div>
+                            <div class="entity-card__property">
+                                <div class="entity-card__property-label">Sefirot</div>
+                                <div class="entity-card__property-value">${meta.sefirot.map(s => this.escapeHtml(this.capitalize(s))).join(', ')}</div>
                             </div>
                         ` : ''}
                         ${meta.chakras && meta.chakras.length > 0 ? `
-                            <div class="property-card">
-                                <div class="property-label">Chakras</div>
-                                <div class="property-value">${meta.chakras.map(c => this.escapeHtml(this.capitalize(c))).join(', ')}</div>
+                            <div class="entity-card__property">
+                                <div class="entity-card__property-label">Chakras</div>
+                                <div class="entity-card__property-value">${meta.chakras.map(c => this.escapeHtml(this.capitalize(c))).join(', ')}</div>
                             </div>
                         ` : ''}
                     </div>
-                </div>
+                </section>
             `;
         }
 
@@ -791,13 +963,13 @@
             if (!geo) return '';
 
             return `
-                <div class="entity-section geographical-section">
-                    <h2>Geography</h2>
+                <section class="entity-card__section entity-card__section--geographical">
+                    <h2 class="entity-card__section-title">Geography</h2>
                     ${geo.region ? `<p><strong>Region:</strong> ${this.escapeHtml(geo.region)}</p>` : ''}
                     ${geo.modernCountries && geo.modernCountries.length > 0 ? `
                         <p><strong>Modern Countries:</strong> ${geo.modernCountries.map(c => this.escapeHtml(c)).join(', ')}</p>
                     ` : ''}
-                </div>
+                </section>
             `;
         }
 
@@ -809,11 +981,11 @@
             if (!temp) return '';
 
             return `
-                <div class="entity-section temporal-section">
-                    <h2>Historical Context</h2>
+                <section class="entity-card__section entity-card__section--temporal">
+                    <h2 class="entity-card__section-title">Historical Context</h2>
                     ${temp.culturalPeriod ? `<p><strong>Period:</strong> ${this.escapeHtml(temp.culturalPeriod)}</p>` : ''}
                     ${temp.historicalDate?.display ? `<p><strong>Date:</strong> ${this.escapeHtml(temp.historicalDate.display)}</p>` : ''}
-                </div>
+                </section>
             `;
         }
 
@@ -828,20 +1000,20 @@
             if (!hasAny) return '';
 
             return `
-                <div class="entity-section related-entities-section">
-                    <h2>Related Entities</h2>
+                <section class="entity-card__section entity-card__section--related">
+                    <h2 class="entity-card__section-title">Related Entities</h2>
                     ${Object.entries(related).map(([type, entities]) => {
                         if (!entities || entities.length === 0) return '';
                         return `
-                            <div class="related-category">
-                                <h3>${this.capitalize(type)}</h3>
-                                <div class="entity-grid">
+                            <div class="entity-card__related-category">
+                                <h3 class="entity-card__related-title">${this.capitalize(type)}</h3>
+                                <div class="entity-card__related-grid">
                                     ${entities.map(e => this.renderMiniEntityCard(e)).join('')}
                                 </div>
                             </div>
                         `;
                     }).join('')}
-                </div>
+                </section>
             `;
         }
 
@@ -851,9 +1023,9 @@
         renderMiniEntityCard(entity) {
             const safeUrl = this.sanitizeUrl(entity.url) || '#';
             return `
-                <a href="${this.escapeAttr(safeUrl)}" class="entity-mini-card">
-                    ${entity.icon ? `<span class="entity-icon">${this.renderIconWithFallback(entity.icon, entity.name)}</span>` : ''}
-                    <span class="entity-name">${this.escapeHtml(entity.name)}</span>
+                <a href="${this.escapeAttr(safeUrl)}" class="entity-card__mini-entity">
+                    ${entity.icon ? `<span class="entity-card__mini-entity-icon">${this.renderIconWithFallback(entity.icon, entity.name)}</span>` : ''}
+                    <span class="entity-card__mini-entity-name">${this.escapeHtml(entity.name)}</span>
                 </a>
             `;
         }
@@ -866,21 +1038,21 @@
             if (!sources || sources.length === 0) return '';
 
             return `
-                <div class="entity-section sources-section">
-                    <h2>Ancient Sources</h2>
-                    <ul class="sources-list">
+                <section class="entity-card__section entity-card__section--sources">
+                    <h2 class="entity-card__section-title">Ancient Sources</h2>
+                    <ul class="entity-card__sources-list">
                         ${sources.map(source => {
                             const safeCorpusUrl = source.corpusUrl ? this.sanitizeUrl(source.corpusUrl) : null;
                             return `
-                            <li>
+                            <li class="entity-card__source">
                                 ${source.author ? `<strong>${this.escapeHtml(source.author)}</strong>, ` : ''}
                                 <em>${this.escapeHtml(source.text || source.title)}</em>
                                 ${source.passage ? `, ${this.escapeHtml(source.passage)}` : ''}
-                                ${safeCorpusUrl ? `<a href="${this.escapeAttr(safeCorpusUrl)}" class="corpus-link">&#128220; View</a>` : ''}
+                                ${safeCorpusUrl ? `<a href="${this.escapeAttr(safeCorpusUrl)}" class="entity-card__source-link">&#128220; View</a>` : ''}
                             </li>
                         `}).join('')}
                     </ul>
-                </div>
+                </section>
             `;
         }
 
@@ -892,25 +1064,25 @@
             if (!archetypes || archetypes.length === 0) return '';
 
             return `
-                <div class="entity-section archetypes-section">
-                    <h2>Archetypes</h2>
-                    <div class="archetype-grid">
+                <section class="entity-card__section entity-card__section--archetypes">
+                    <h2 class="entity-card__section-title">Archetypes</h2>
+                    <div class="entity-card__archetypes-grid">
                         ${archetypes.map(arch => `
-                            <div class="archetype-card">
-                                <h3>${this.escapeHtml(arch.name || arch.category)}</h3>
+                            <div class="entity-card__archetype">
+                                <h3 class="entity-card__archetype-name">${this.escapeHtml(arch.name || arch.category)}</h3>
                                 ${arch.score !== undefined ? `
-                                    <div class="archetype-score">
-                                        <div class="score-bar">
-                                            <div class="score-fill" style="width: ${arch.score}%"></div>
+                                    <div class="entity-card__archetype-score">
+                                        <div class="entity-card__score-bar">
+                                            <div class="entity-card__score-fill" style="width: ${arch.score}%"></div>
                                         </div>
-                                        <span class="score-value">${arch.score}%</span>
+                                        <span class="entity-card__score-value">${arch.score}%</span>
                                     </div>
                                 ` : ''}
-                                ${arch.context ? `<p>${this.escapeHtml(arch.context)}</p>` : ''}
+                                ${arch.context ? `<p class="entity-card__archetype-context">${this.escapeHtml(arch.context)}</p>` : ''}
                             </div>
                         `).join('')}
                     </div>
-                </div>
+                </section>
             `;
         }
 
@@ -928,11 +1100,18 @@
 
             if (this.container) {
                 this.container.innerHTML = `
-                    <div class="entity-card entity-card-error">
-                        <div class="error-icon">⚠️</div>
-                        <p>Failed to load entity: ${this.entityId}</p>
-                        <p class="error-detail">${this.escapeHtml(error.message)}</p>
-                    </div>
+                    <article class="entity-card entity-card--error" role="alert">
+                        <div class="entity-card__error-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                        </div>
+                        <p class="entity-card__error-title">Failed to load entity</p>
+                        <p class="entity-card__error-id">${this.escapeHtml(this.entityId)}</p>
+                        <p class="entity-card__error-detail">${this.escapeHtml(error.message)}</p>
+                    </article>
                 `;
             }
         }
@@ -953,6 +1132,64 @@
         }
 
         /**
+         * Get source class for user-generated content distinction
+         */
+        getSourceClass() {
+            if (this.data?.isUserGenerated) {
+                return 'entity-card--user-generated';
+            }
+            if (this.data?.isVerified) {
+                return 'entity-card--verified';
+            }
+            return 'entity-card--canonical';
+        }
+
+        /**
+         * Get source label for accessibility
+         */
+        getSourceLabel() {
+            if (this.data?.isUserGenerated) {
+                return 'User-generated content';
+            }
+            if (this.data?.isVerified) {
+                return 'Verified content';
+            }
+            return this.capitalize(this.entityType);
+        }
+
+        /**
+         * Render author badge if user-generated
+         */
+        renderAuthorBadge() {
+            if (!this.data?.author) return '';
+
+            return `
+                <div class="entity-card__author">
+                    <span class="entity-card__author-label">by</span>
+                    <span class="entity-card__author-name">${this.escapeHtml(this.data.author)}</span>
+                </div>
+            `;
+        }
+
+        /**
+         * Render perspectives indicator
+         */
+        renderPerspectivesIndicator() {
+            if (!this.data?.perspectiveCount || this.data.perspectiveCount <= 1) return '';
+
+            return `
+                <span class="entity-card__perspectives" title="${this.data.perspectiveCount} perspectives available">
+                    <svg viewBox="0 0 16 16" class="perspectives-icon">
+                        <circle cx="4" cy="8" r="2" fill="currentColor"/>
+                        <circle cx="8" cy="8" r="2" fill="currentColor"/>
+                        <circle cx="12" cy="8" r="2" fill="currentColor"/>
+                    </svg>
+                    ${this.data.perspectiveCount}
+                </span>
+            `;
+        }
+
+        /**
          * Add event listener with tracking for cleanup
          * @private
          */
@@ -968,25 +1205,36 @@
         attachEventListeners() {
             this._cleanupEventListeners();
 
-            const iconImages = this.container.querySelectorAll('.entity-icon-img');
+            // Image error handling and load animation
+            const iconImages = this.container.querySelectorAll('.entity-card__icon-img');
             iconImages.forEach(img => {
                 const errorHandler = () => {
                     const parent = img.parentElement;
                     if (parent) {
-                        const fallbackHtml = img.dataset.fallbackHtml || `<span class="icon-fallback" aria-hidden="true">&#10024;</span>`;
+                        const fallbackHtml = img.dataset.fallbackHtml || `<span class="entity-card__icon-fallback" aria-hidden="true">&#10024;</span>`;
                         const span = document.createElement('span');
-                        span.className = 'icon-fallback';
+                        span.className = 'entity-card__icon-fallback';
                         span.setAttribute('aria-hidden', 'true');
-                        span.innerHTML = fallbackHtml.replace(/^<span class="icon-fallback"[^>]*>|<\/span>$/g, '');
+                        span.innerHTML = fallbackHtml.replace(/^<span class="entity-card__icon-fallback"[^>]*>|<\/span>$/g, '');
                         parent.replaceChild(span, img);
                     }
                 };
                 const loadHandler = () => {
                     img.style.opacity = '1';
+                    img.classList.add('entity-card__icon-img--loaded');
                 };
                 img.style.opacity = '0.8';
                 img.style.transition = 'opacity 0.3s ease';
                 this._addTrackedListener(img, 'error', errorHandler);
+                this._addTrackedListener(img, 'load', loadHandler);
+            });
+
+            // Card image error handling
+            const cardImages = this.container.querySelectorAll('.entity-card__image');
+            cardImages.forEach(img => {
+                const loadHandler = () => {
+                    img.classList.add('entity-card__image--loaded');
+                };
                 this._addTrackedListener(img, 'load', loadHandler);
             });
 
@@ -1000,7 +1248,7 @@
                             return;
                         }
                         e.preventDefault();
-                        const detailsLink = card.querySelector('.btn-view-details');
+                        const detailsLink = card.querySelector('.entity-card__btn--primary');
                         if (detailsLink) {
                             detailsLink.click();
                         }
@@ -1044,10 +1292,9 @@
                 this._addTrackedListener(shareBtn, 'click', shareHandler);
             }
 
-            // Favorite button - only attach if FavoritesService might be available
+            // Favorite button
             const favoriteBtn = this.container.querySelector('.entity-favorite');
             if (favoriteBtn) {
-                // Check initial favorite state (gracefully handles missing service)
                 this.checkFavoriteState(favoriteBtn);
 
                 const favoriteHandler = async (e) => {
@@ -1057,6 +1304,78 @@
                 };
                 this._addTrackedListener(favoriteBtn, 'click', favoriteHandler);
             }
+
+            // Quick view button
+            const quickViewBtn = this.container.querySelector('.entity-quickview');
+            if (quickViewBtn) {
+                const quickViewHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.showQuickView();
+                };
+                this._addTrackedListener(quickViewBtn, 'click', quickViewHandler);
+            }
+
+            // Compare button
+            const compareBtn = this.container.querySelector('.entity-compare');
+            if (compareBtn) {
+                const compareHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.addToComparison(compareBtn);
+                };
+                this._addTrackedListener(compareBtn, 'click', compareHandler);
+            }
+        }
+
+        /**
+         * Add entity to comparison
+         */
+        addToComparison(button) {
+            if (!window.CompareView?.addToComparison) {
+                console.warn('[EntityCard] CompareView not available');
+                alert('Comparison feature not available');
+                return;
+            }
+
+            const entity = {
+                id: button.dataset.entityId,
+                name: button.dataset.entityName,
+                type: button.dataset.entityType,
+                mythology: button.dataset.entityMythology,
+                icon: button.dataset.entityIcon || this.data?.icon,
+                shortDescription: this.data?.shortDescription,
+                ...this.data
+            };
+
+            // Use plural collection name (deity -> deities)
+            const collection = button.dataset.entityType + 's';
+
+            const success = window.CompareView.addToComparison(entity, collection);
+
+            if (success) {
+                // Update button state
+                button.classList.add('entity-card__action-btn--in-compare');
+                button.disabled = true;
+                button.setAttribute('title', 'In comparison');
+                button.setAttribute('aria-label', 'Already in comparison');
+            }
+        }
+
+        /**
+         * Show quick view modal/panel
+         */
+        showQuickView() {
+            // Dispatch custom event for quick view
+            const event = new CustomEvent('entityQuickView', {
+                detail: {
+                    entityId: this.entityId,
+                    entityType: this.entityType,
+                    data: this.data
+                },
+                bubbles: true
+            });
+            this.container.dispatchEvent(event);
         }
 
         /**
@@ -1104,7 +1423,7 @@
                 const isFavorited = await window.EyesOfAzrael.favorites.isFavorited(entityId, entityType);
 
                 if (isFavorited) {
-                    button.classList.add('favorited');
+                    button.classList.add('entity-card__action-btn--favorited');
                     button.setAttribute('aria-label', `Remove ${button.dataset.entityName} from favorites`);
                     button.setAttribute('aria-pressed', 'true');
                 }
@@ -1124,7 +1443,7 @@
             }
 
             button.disabled = true;
-            button.classList.add('loading');
+            button.classList.add('entity-card__action-btn--loading');
 
             const entity = {
                 id: button.dataset.entityId,
@@ -1139,11 +1458,11 @@
 
                 if (result.success) {
                     if (result.isFavorited) {
-                        button.classList.add('favorited');
+                        button.classList.add('entity-card__action-btn--favorited');
                         button.setAttribute('aria-label', `Remove ${entity.name} from favorites`);
                         button.setAttribute('aria-pressed', 'true');
                     } else {
-                        button.classList.remove('favorited');
+                        button.classList.remove('entity-card__action-btn--favorited');
                         button.setAttribute('aria-label', `Add ${entity.name} to favorites`);
                         button.setAttribute('aria-pressed', 'false');
                     }
@@ -1152,7 +1471,7 @@
                 console.error('[EntityCard] Failed to toggle favorite:', error);
             } finally {
                 button.disabled = false;
-                button.classList.remove('loading');
+                button.classList.remove('entity-card__action-btn--loading');
             }
         }
 
@@ -1214,6 +1533,7 @@
         /**
          * Render favorite button - only if service is potentially available
          * Gracefully degrades if FavoritesService isn't loaded
+         * @deprecated Use renderQuickActions instead
          */
         renderFavoriteButton(mythologyLower) {
             return `
@@ -1226,7 +1546,7 @@
                         aria-label="Add ${this.escapeHtml(this.data.name)} to favorites"
                         title="Add to Personal Pantheon"
                         type="button">
-                    <span class="favorite-icon" aria-hidden="true">★</span>
+                    <span class="favorite-icon" aria-hidden="true">&#9733;</span>
                 </button>
             `;
         }
@@ -1271,7 +1591,8 @@
                 entityType: element.dataset.entityType,
                 displayMode: element.dataset.displayMode || 'compact',
                 container: element,
-                mythology: element.dataset.mythology || null
+                mythology: element.dataset.mythology || null,
+                showQuickActions: element.dataset.showQuickActions !== 'false'
             });
 
             card.render().catch(console.error);
