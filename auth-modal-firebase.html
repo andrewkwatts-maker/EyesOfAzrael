@@ -27,43 +27,95 @@
 -->
 
 <!-- Authentication Modal -->
-<div id="auth-modal" class="auth-modal">
+<div id="auth-modal" class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
     <div class="auth-modal-content">
-        <button class="auth-modal-close" onclick="window.firebaseAuth.hideAuthModal()">&times;</button>
+        <button class="auth-modal-close" onclick="window.firebaseAuth?.hideAuthModal()" aria-label="Close dialog">&times;</button>
 
-        <h2 id="auth-modal-title" class="auth-modal-title">Sign in to Eyes of Azrael</h2>
+        <div class="auth-modal-header">
+            <div class="auth-modal-logo" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="20" stroke="url(#authLogoGradient)" stroke-width="2.5"/>
+                    <circle cx="24" cy="24" r="8" fill="url(#authLogoGradient)"/>
+                    <defs>
+                        <linearGradient id="authLogoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#8b7fff"/>
+                            <stop offset="100%" stop-color="#ff7eb6"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <h2 id="auth-modal-title" class="auth-modal-title">Sign in to Eyes of Azrael</h2>
+            <p class="auth-modal-subtitle">Explore the depths of world mythology</p>
+        </div>
 
-        <div id="auth-message" class="auth-message"></div>
+        <div id="auth-message" class="auth-message" role="alert" aria-live="polite"></div>
 
         <!-- User Profile (shown when logged in) -->
         <div id="user-profile-display" data-auth-show="loggedIn" style="display: none;">
-            <div style="text-align: center; padding: 2rem;">
-                <img data-auth-avatar src="" alt="Profile"
-                     style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 1rem; border: 3px solid var(--mythos-primary, #9333ea);">
-                <h3 data-auth-username style="margin: 0 0 0.5rem 0; color: var(--color-text-primary, #fff);"></h3>
-                <p data-auth-email style="color: var(--color-text-secondary, #999); margin: 0 0 1.5rem 0;"></p>
-                <button class="auth-submit-btn" onclick="handleSignOut()"
-                        style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
-                    Sign Out
+            <div class="auth-profile-card">
+                <div class="auth-profile-avatar-wrapper">
+                    <img data-auth-avatar src="" alt="Profile picture" class="auth-profile-avatar">
+                    <span class="auth-profile-status" aria-label="Online"></span>
+                </div>
+                <h3 data-auth-username class="auth-profile-name"></h3>
+                <p data-auth-email class="auth-profile-email"></p>
+                <button class="auth-signout-btn" onclick="handleSignOut()">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3"/>
+                        <path d="M10 11l3-3-3-3"/>
+                        <path d="M13 8H6"/>
+                    </svg>
+                    <span>Sign Out</span>
                 </button>
             </div>
         </div>
 
         <!-- Google Sign-In Button (shown when logged out) -->
-        <div data-auth-show="loggedOut">
-            <div style="padding: 1.5rem 0;">
-                <div data-google-signin data-button-text="Sign in with Google" data-button-size="large"></div>
+        <div data-auth-show="loggedOut" class="auth-signin-section">
+            <div class="auth-google-btn-wrapper">
+                <div data-google-signin data-button-text="Continue with Google" data-button-size="large"></div>
             </div>
 
-            <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(147, 51, 234, 0.1); border-radius: 8px; border: 1px solid rgba(147, 51, 234, 0.3);">
-                <p style="margin: 0; color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; text-align: center;">
-                    <strong>Why sign in?</strong><br>
-                    Submit your own theories, vote on content, and join the discussion about mythology and ancient wisdom.
+            <div class="auth-divider">
+                <span>Secure sign-in with Google</span>
+            </div>
+
+            <div class="auth-benefits">
+                <h4 class="auth-benefits-title">Why create an account?</h4>
+                <ul class="auth-benefits-list">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M3 8l3 3 7-7"/>
+                        </svg>
+                        <span>Submit your own theories and analyses</span>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M3 8l3 3 7-7"/>
+                        </svg>
+                        <span>Vote on community content</span>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M3 8l3 3 7-7"/>
+                        </svg>
+                        <span>Save favorites and track progress</span>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M3 8l3 3 7-7"/>
+                        </svg>
+                        <span>Join discussions on mythology</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="auth-terms">
+                <p>
+                    By signing in, you agree to our
+                    <a href="/terms.html">Terms of Service</a> and
+                    <a href="/privacy.html">Privacy Policy</a>
                 </p>
-            </div>
-
-            <div style="margin-top: 1rem; text-align: center; color: rgba(255, 255, 255, 0.6); font-size: 0.85rem;">
-                By signing in, you agree to our terms of service and privacy policy.
             </div>
         </div>
     </div>
@@ -105,18 +157,268 @@
 </div>
 
 <style>
-/* Additional styles for Firebase auth modal */
+/* ===========================================
+   POLISHED AUTH MODAL STYLES
+   =========================================== */
+
+/* Modal Header */
+.auth-modal-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.auth-modal-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    animation: logoFloat 3s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.auth-modal-subtitle {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.95rem;
+    color: var(--color-text-secondary, #adb5bd);
+    font-style: italic;
+}
+
+/* Profile Card */
+.auth-profile-card {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(139, 127, 255, 0.05);
+    border-radius: 16px;
+    border: 1px solid rgba(139, 127, 255, 0.15);
+}
+
+.auth-profile-avatar-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.auth-profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--color-primary, #8b7fff);
+    object-fit: cover;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.auth-profile-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(139, 127, 255, 0.35);
+}
+
+.auth-profile-status {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    background: #22c55e;
+    border: 3px solid var(--color-surface, #1a1f3a);
+    border-radius: 50%;
+}
+
+.auth-profile-name {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #f8f9fa);
+}
+
+.auth-profile-email {
+    margin: 0 0 1.25rem 0;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary, #adb5bd);
+}
+
+.auth-signout-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 10px;
+    color: #f87171;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.auth-signout-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+    transform: translateY(-1px);
+}
+
+/* Sign In Section */
+.auth-signin-section {
+    padding-top: 0.5rem;
+}
+
+.auth-google-btn-wrapper {
+    padding: 1rem 0;
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(139, 127, 255, 0.3), transparent);
+}
+
+.auth-divider span {
+    font-size: 0.8rem;
+    color: var(--color-text-muted, #6c757d);
+    white-space: nowrap;
+}
+
+/* Benefits List */
+.auth-benefits {
+    padding: 1.25rem;
+    background: rgba(139, 127, 255, 0.05);
+    border: 1px solid rgba(139, 127, 255, 0.15);
+    border-radius: 12px;
+    margin-bottom: 1.25rem;
+}
+
+.auth-benefits-title {
+    margin: 0 0 1rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #f8f9fa);
+    text-align: center;
+}
+
+.auth-benefits-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.auth-benefits-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary, #adb5bd);
+    line-height: 1.4;
+}
+
+.auth-benefits-list li svg {
+    flex-shrink: 0;
+    color: var(--color-primary, #8b7fff);
+    margin-top: 2px;
+}
+
+/* Terms */
+.auth-terms {
+    text-align: center;
+}
+
+.auth-terms p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--color-text-muted, #6c757d);
+    line-height: 1.6;
+}
+
+.auth-terms a {
+    color: var(--color-primary, #8b7fff);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.auth-terms a:hover {
+    color: var(--color-secondary, #ff7eb6);
+    text-decoration: underline;
+}
+
+/* User Dropdown Header (legacy support) */
 .user-dropdown-header {
     display: flex;
     align-items: center;
     padding: 0.75rem;
-    background: rgba(147, 51, 234, 0.1);
+    background: rgba(139, 127, 255, 0.1);
     border-radius: 8px;
     margin-bottom: 0.5rem;
 }
 
 .google-signin-wrapper {
     margin: 1.5rem 0;
+}
+
+/* Enhanced Loading State */
+.auth-submit-btn.loading {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+}
+
+.auth-submit-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: authBtnSpinner 0.7s linear infinite;
+}
+
+@keyframes authBtnSpinner {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .auth-profile-card {
+        padding: 1.5rem 1rem;
+    }
+
+    .auth-benefits {
+        padding: 1rem;
+    }
+
+    .auth-benefits-list {
+        gap: 0.625rem;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .auth-modal-logo,
+    .auth-profile-avatar,
+    .auth-signout-btn,
+    .auth-submit-btn.loading::after {
+        animation: none;
+    }
 }
 </style>
 

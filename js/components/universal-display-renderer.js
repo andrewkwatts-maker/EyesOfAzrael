@@ -515,7 +515,7 @@ class UniversalDisplayRenderer {
         const entityType = this.escapeAttr(entity.entityType);
 
         return `
-            <div class="entity-card grid-card"
+            <div class="entity-card grid-card card-strict-height"
                  data-entity-id="${entityId}"
                  data-mythology="${mythology}"
                  data-entity-type="${entityType}"
@@ -533,7 +533,7 @@ class UniversalDisplayRenderer {
                     ${iconContent}
                 </div>
 
-                <h3 class="card-title">
+                <h3 class="card-title card-title-truncate" aria-label="${this.escapeAttr(display.title || entity.name)}">
                     <a href="#/mythology/${this.escapeAttr(entity.mythology)}/${entityType}/${entityId}"
                        class="entity-link">
                         ${this.escapeHtml(display.title || entity.name)}
@@ -545,7 +545,7 @@ class UniversalDisplayRenderer {
                     <span class="mythology-badge" data-mythology="${mythology}">${this.escapeHtml(this.formatLabel(entity.mythology))}</span>
                 </div>
 
-                ${display.subtitle ? `<p class="card-description">${this.escapeHtml(this.truncateText(display.subtitle, 120))}</p>` : ''}
+                ${display.subtitle ? `<p class="card-description card-desc-truncate" aria-label="${this.escapeAttr(display.subtitle)}">${this.escapeHtml(this.truncateText(display.subtitle, 120))}</p>` : ''}
 
                 ${display.stats ? this.renderStats(display.stats) : ''}
 
@@ -662,8 +662,8 @@ class UniversalDisplayRenderer {
                 <div class="list-item-main"${expandable ? ` data-expandable="true"` : ''}>
                     <span class="list-icon">${iconContent}</span>
                     <div class="list-content">
-                        <div class="list-primary">${this.escapeHtml(display.primary || entity.name)}</div>
-                        ${display.secondary ? `<div class="list-secondary">${this.escapeHtml(display.secondary)}</div>` : ''}
+                        <div class="list-primary list-item-title card-title-truncate">${this.escapeHtml(display.primary || entity.name)}</div>
+                        ${display.secondary ? `<div class="list-secondary list-item-description card-desc-truncate">${this.escapeHtml(display.secondary)}</div>` : ''}
                         ${display.meta ? `<div class="list-meta">${this.escapeHtml(display.meta)}</div>` : ''}
                     </div>
                     ${expandable ? '<span class="expand-indicator">&#9660;</span>' : ''}

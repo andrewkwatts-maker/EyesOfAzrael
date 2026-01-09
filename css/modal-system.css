@@ -1,0 +1,1132 @@
+/**
+ * Modal System - Unified Styles for All Modals and Overlays
+ * Eyes of Azrael Project
+ *
+ * Features:
+ * - Smooth open/close animations (0.3s fade + scale/slide)
+ * - Backdrop blur effect (8px blur + dark overlay)
+ * - Focus trap styling
+ * - Close on escape key support
+ * - Close on backdrop click support
+ * - Mobile responsive with bottom sheet behavior
+ * - High contrast and reduced motion support
+ * - Lightbox for images with zoom and keyboard navigation
+ */
+
+/* ============================================
+   CSS CUSTOM PROPERTIES (Modal Theme Variables)
+   ============================================ */
+
+:root {
+    /* Animation timing */
+    --modal-animation-duration: 0.3s;
+    --modal-animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
+    --modal-bounce-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --modal-spring-easing: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    /* Backdrop */
+    --modal-backdrop-color: rgba(0, 0, 0, 0.75);
+    --modal-backdrop-blur: 8px;
+
+    /* Content */
+    --modal-content-bg: rgba(26, 31, 58, 0.98);
+    --modal-content-bg-solid: rgb(26, 31, 58);
+    --modal-border-color: rgba(139, 127, 255, 0.3);
+    --modal-border-radius: 16px;
+    --modal-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 127, 255, 0.1);
+
+    /* Colors */
+    --modal-primary: var(--color-primary, #8b7fff);
+    --modal-primary-hover: #7966ff;
+    --modal-danger: #ef4444;
+    --modal-danger-hover: #dc2626;
+    --modal-success: #10b981;
+    --modal-warning: #f59e0b;
+    --modal-info: #3b82f6;
+
+    /* Text */
+    --modal-text-primary: var(--color-text-primary, #f8f9fa);
+    --modal-text-secondary: var(--color-text-secondary, #adb5bd);
+    --modal-text-muted: #888888;
+
+    /* Z-index layers */
+    --modal-z-base: 9000;
+    --modal-z-content: 9001;
+    --modal-z-confirm: 9100;
+    --modal-z-lightbox: 9500;
+    --modal-z-toast: 10000;
+}
+
+/* ============================================
+   BASE MODAL OVERLAY
+   ============================================ */
+
+.modal-backdrop,
+.modal-overlay,
+.eoa-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--modal-backdrop-color);
+    backdrop-filter: blur(var(--modal-backdrop-blur));
+    -webkit-backdrop-filter: blur(var(--modal-backdrop-blur));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--modal-z-base);
+    padding: 1.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity var(--modal-animation-duration) var(--modal-animation-easing),
+        visibility var(--modal-animation-duration) var(--modal-animation-easing);
+}
+
+.modal-backdrop.show,
+.modal-overlay.show,
+.eoa-modal-overlay.show,
+.modal-backdrop.active,
+.modal-overlay.active,
+.eoa-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open,
+body.has-modal {
+    overflow: hidden;
+    padding-right: var(--scrollbar-width, 0);
+}
+
+/* ============================================
+   MODAL CONTENT CONTAINER
+   ============================================ */
+
+.modal-content,
+.modal-dialog,
+.eoa-modal-content {
+    background: var(--modal-content-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 2px solid var(--modal-border-color);
+    border-radius: var(--modal-border-radius);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--modal-shadow);
+    position: relative;
+    transform: scale(0.95) translateY(-10px);
+    opacity: 0;
+    transition:
+        transform var(--modal-animation-duration) var(--modal-bounce-easing),
+        opacity var(--modal-animation-duration) var(--modal-animation-easing);
+    outline: none;
+    overflow: hidden;
+}
+
+.modal-backdrop.show .modal-content,
+.modal-overlay.show .modal-content,
+.modal-overlay.show .modal-dialog,
+.eoa-modal-overlay.show .eoa-modal-content {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* Modal sizes */
+.modal-content.modal-sm,
+.modal-dialog.modal-sm {
+    max-width: 400px;
+}
+
+.modal-content.modal-lg,
+.modal-dialog.modal-lg {
+    max-width: 800px;
+}
+
+.modal-content.modal-xl,
+.modal-dialog.modal-xl {
+    max-width: 1000px;
+}
+
+.modal-content.modal-fullscreen,
+.modal-dialog.modal-fullscreen {
+    max-width: none;
+    max-height: none;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    margin: 0;
+}
+
+/* Focus visible for modal content */
+.modal-content:focus-visible,
+.modal-dialog:focus-visible,
+.eoa-modal-content:focus-visible {
+    outline: 2px solid var(--modal-primary);
+    outline-offset: 2px;
+}
+
+/* ============================================
+   MODAL HEADER
+   ============================================ */
+
+.modal-header,
+.eoa-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--modal-border-color);
+    background: rgba(139, 127, 255, 0.03);
+    flex-shrink: 0;
+    gap: 1rem;
+}
+
+.modal-title,
+.eoa-modal-title {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--modal-primary);
+    line-height: 1.3;
+    flex: 1;
+    min-width: 0;
+}
+
+.modal-subtitle {
+    font-size: 0.9rem;
+    color: var(--modal-text-secondary);
+    margin-top: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ============================================
+   MODAL CLOSE BUTTON
+   ============================================ */
+
+.modal-close,
+.modal-close-btn,
+.eoa-modal-close {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--modal-text-secondary);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    transition: all 0.2s var(--modal-animation-easing);
+    flex-shrink: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.modal-close:hover,
+.modal-close-btn:hover,
+.eoa-modal-close:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: var(--modal-danger);
+    transform: rotate(90deg);
+}
+
+.modal-close:focus-visible,
+.modal-close-btn:focus-visible,
+.eoa-modal-close:focus-visible {
+    outline: 2px solid var(--modal-primary);
+    outline-offset: 2px;
+}
+
+.modal-close svg,
+.modal-close-btn svg,
+.eoa-modal-close svg {
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+
+/* ============================================
+   MODAL BODY
+   ============================================ */
+
+.modal-body,
+.eoa-modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Custom scrollbar for modal body */
+.modal-body::-webkit-scrollbar,
+.eoa-modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track,
+.eoa-modal-body::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb,
+.eoa-modal-body::-webkit-scrollbar-thumb {
+    background: rgba(139, 127, 255, 0.4);
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover,
+.eoa-modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--modal-primary);
+}
+
+/* ============================================
+   MODAL FOOTER
+   ============================================ */
+
+.modal-footer,
+.eoa-modal-footer {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--modal-border-color);
+    background: rgba(139, 127, 255, 0.03);
+    flex-shrink: 0;
+}
+
+.modal-footer-left {
+    justify-content: flex-start;
+}
+
+.modal-footer-center {
+    justify-content: center;
+}
+
+.modal-footer-space-between {
+    justify-content: space-between;
+}
+
+/* ============================================
+   MODAL BUTTONS
+   ============================================ */
+
+.modal-btn,
+.eoa-modal-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s var(--modal-animation-easing);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    min-height: 44px;
+}
+
+.modal-btn:disabled,
+.eoa-modal-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.modal-btn svg,
+.eoa-modal-btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* Primary button */
+.modal-btn-primary,
+.eoa-modal-btn-primary {
+    background: var(--modal-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(139, 127, 255, 0.3);
+}
+
+.modal-btn-primary:hover:not(:disabled),
+.eoa-modal-btn-primary:hover:not(:disabled) {
+    background: var(--modal-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 127, 255, 0.4);
+}
+
+.modal-btn-primary:focus-visible,
+.eoa-modal-btn-primary:focus-visible {
+    outline: 2px solid var(--modal-primary);
+    outline-offset: 2px;
+}
+
+/* Secondary button */
+.modal-btn-secondary,
+.eoa-modal-btn-secondary {
+    background: rgba(139, 127, 255, 0.1);
+    color: var(--modal-primary);
+    border: 1px solid var(--modal-border-color);
+}
+
+.modal-btn-secondary:hover:not(:disabled),
+.eoa-modal-btn-secondary:hover:not(:disabled) {
+    background: rgba(139, 127, 255, 0.2);
+    border-color: var(--modal-primary);
+}
+
+.modal-btn-secondary:focus-visible,
+.eoa-modal-btn-secondary:focus-visible {
+    outline: 2px solid var(--modal-primary);
+    outline-offset: 2px;
+}
+
+/* Danger button */
+.modal-btn-danger,
+.eoa-modal-btn-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--modal-danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.modal-btn-danger:hover:not(:disabled),
+.eoa-modal-btn-danger:hover:not(:disabled) {
+    background: var(--modal-danger);
+    color: white;
+    border-color: var(--modal-danger);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.modal-btn-danger:focus-visible,
+.eoa-modal-btn-danger:focus-visible {
+    outline: 2px solid var(--modal-danger);
+    outline-offset: 2px;
+}
+
+/* Success button */
+.modal-btn-success,
+.eoa-modal-btn-success {
+    background: var(--modal-success);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.modal-btn-success:hover:not(:disabled),
+.eoa-modal-btn-success:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* Ghost/Text button */
+.modal-btn-ghost,
+.eoa-modal-btn-ghost {
+    background: transparent;
+    color: var(--modal-text-secondary);
+    border: none;
+}
+
+.modal-btn-ghost:hover:not(:disabled),
+.eoa-modal-btn-ghost:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--modal-text-primary);
+}
+
+/* ============================================
+   CONFIRMATION DIALOG
+   ============================================ */
+
+.confirm-dialog-overlay,
+.modal-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--modal-z-confirm);
+    padding: 1rem;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.2s var(--modal-animation-easing),
+        visibility 0.2s var(--modal-animation-easing);
+}
+
+.confirm-dialog-overlay.show,
+.modal-confirm-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.confirm-dialog,
+.modal-confirm-dialog {
+    background: var(--modal-content-bg);
+    border: 2px solid var(--modal-border-color);
+    border-radius: var(--modal-border-radius);
+    max-width: 420px;
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--modal-shadow);
+    transform: scale(0.95);
+    transition: transform 0.2s var(--modal-bounce-easing);
+}
+
+.confirm-dialog-overlay.show .confirm-dialog,
+.modal-confirm-overlay.show .modal-confirm-dialog {
+    transform: scale(1);
+}
+
+/* Confirm dialog icon */
+.confirm-dialog-icon,
+.modal-confirm-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    animation: confirmIconPop 0.4s var(--modal-spring-easing);
+}
+
+@keyframes confirmIconPop {
+    0% {
+        transform: scale(0);
+    }
+    60% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.confirm-dialog-icon svg,
+.modal-confirm-icon svg {
+    width: 32px;
+    height: 32px;
+}
+
+/* Icon variants */
+.confirm-dialog-icon.warning,
+.modal-confirm-icon.warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--modal-warning);
+}
+
+.confirm-dialog-icon.danger,
+.modal-confirm-icon.danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--modal-danger);
+}
+
+.confirm-dialog-icon.info,
+.modal-confirm-icon.info {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--modal-info);
+}
+
+.confirm-dialog-icon.success,
+.modal-confirm-icon.success {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--modal-success);
+}
+
+/* Confirm dialog text */
+.confirm-dialog h3,
+.modal-confirm-dialog h3 {
+    color: var(--modal-text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+}
+
+.confirm-dialog p,
+.modal-confirm-dialog p {
+    color: var(--modal-text-secondary);
+    font-size: 0.95rem;
+    margin: 0 0 1.5rem;
+    line-height: 1.5;
+}
+
+/* Confirm dialog actions */
+.confirm-dialog-actions,
+.modal-confirm-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+@media (max-width: 480px) {
+    .confirm-dialog-actions,
+    .modal-confirm-actions {
+        flex-direction: column;
+    }
+
+    .confirm-dialog-actions .modal-btn,
+    .modal-confirm-actions .modal-btn,
+    .modal-confirm-actions .eoa-modal-btn {
+        width: 100%;
+    }
+}
+
+/* ============================================
+   IMAGE LIGHTBOX
+   ============================================ */
+
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: var(--modal-z-lightbox);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.3s var(--modal-animation-easing),
+        visibility 0.3s var(--modal-animation-easing);
+    cursor: zoom-out;
+}
+
+.lightbox-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Lightbox content container */
+.lightbox-container {
+    position: relative;
+    max-width: 95vw;
+    max-height: 95vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+}
+
+/* Lightbox image */
+.lightbox-image {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9);
+    opacity: 0;
+    transition:
+        transform 0.3s var(--modal-bounce-easing),
+        opacity 0.3s var(--modal-animation-easing);
+    cursor: zoom-in;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.lightbox-overlay.show .lightbox-image {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Zoomed state */
+.lightbox-image.zoomed {
+    cursor: grab;
+    transform: scale(2);
+    transition: transform 0.2s var(--modal-animation-easing);
+}
+
+.lightbox-image.zoomed.grabbing {
+    cursor: grabbing;
+}
+
+/* Lightbox controls */
+.lightbox-controls {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent);
+    z-index: 10;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.lightbox-overlay:not(:hover) .lightbox-controls {
+    opacity: 0;
+}
+
+.lightbox-overlay:focus-within .lightbox-controls {
+    opacity: 1;
+}
+
+/* Lightbox info (left side) */
+.lightbox-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.lightbox-title {
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.lightbox-counter {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.875rem;
+}
+
+/* Lightbox actions (right side) */
+.lightbox-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.lightbox-btn {
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+}
+
+.lightbox-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.lightbox-btn:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+.lightbox-btn svg {
+    width: 22px;
+    height: 22px;
+}
+
+.lightbox-close {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+.lightbox-close:hover {
+    background: rgba(239, 68, 68, 0.5);
+}
+
+/* Lightbox navigation arrows */
+.lightbox-nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 80px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+    z-index: 10;
+    opacity: 0;
+}
+
+.lightbox-overlay:hover .lightbox-nav,
+.lightbox-overlay:focus-within .lightbox-nav {
+    opacity: 1;
+}
+
+.lightbox-nav:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.lightbox-nav:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+.lightbox-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.lightbox-nav svg {
+    width: 28px;
+    height: 28px;
+}
+
+.lightbox-prev {
+    left: 0;
+    border-radius: 0 10px 10px 0;
+}
+
+.lightbox-next {
+    right: 0;
+    border-radius: 10px 0 0 10px;
+}
+
+/* Lightbox footer with thumbnails */
+.lightbox-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    z-index: 10;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.lightbox-overlay:not(:hover) .lightbox-footer {
+    opacity: 0;
+}
+
+.lightbox-thumbnails {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    scroll-behavior: smooth;
+}
+
+.lightbox-thumb {
+    width: 60px;
+    height: 60px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    opacity: 0.6;
+}
+
+.lightbox-thumb:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.lightbox-thumb.active {
+    border-color: var(--modal-primary);
+    opacity: 1;
+}
+
+.lightbox-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Lightbox loading state */
+.lightbox-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: lightboxSpin 0.8s linear infinite;
+}
+
+@keyframes lightboxSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================
+   MOBILE RESPONSIVE MODALS
+   ============================================ */
+
+@media (max-width: 640px) {
+    .modal-backdrop,
+    .modal-overlay,
+    .eoa-modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .modal-content,
+    .modal-dialog,
+    .eoa-modal-content {
+        max-width: 100%;
+        max-height: 95vh;
+        border-radius: 20px 20px 0 0;
+        border-bottom: none;
+        transform: translateY(100%);
+    }
+
+    .modal-backdrop.show .modal-content,
+    .modal-overlay.show .modal-content,
+    .modal-overlay.show .modal-dialog,
+    .eoa-modal-overlay.show .eoa-modal-content {
+        transform: translateY(0);
+    }
+
+    .modal-header,
+    .eoa-modal-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .modal-title,
+    .eoa-modal-title {
+        font-size: 1.2rem;
+    }
+
+    .modal-close,
+    .modal-close-btn,
+    .eoa-modal-close {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+    }
+
+    .modal-close svg,
+    .modal-close-btn svg,
+    .eoa-modal-close svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .modal-body,
+    .eoa-modal-body {
+        padding: 1.25rem;
+    }
+
+    .modal-footer,
+    .eoa-modal-footer {
+        flex-direction: column;
+        padding: 1rem 1.25rem;
+        gap: 0.5rem;
+    }
+
+    .modal-footer .modal-btn,
+    .eoa-modal-footer .eoa-modal-btn {
+        width: 100%;
+    }
+
+    /* Drag handle for mobile bottom sheet */
+    .modal-drag-handle {
+        display: flex;
+        justify-content: center;
+        padding: 0.75rem 0 0.25rem;
+        cursor: grab;
+        touch-action: none;
+    }
+
+    .modal-drag-handle span {
+        width: 40px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+    }
+
+    /* Lightbox mobile adjustments */
+    .lightbox-nav {
+        width: 44px;
+        height: 60px;
+    }
+
+    .lightbox-nav svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .lightbox-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .lightbox-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .lightbox-thumb {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .modal-backdrop,
+    .modal-overlay,
+    .eoa-modal-overlay,
+    .modal-content,
+    .modal-dialog,
+    .eoa-modal-content,
+    .modal-close,
+    .modal-close-btn,
+    .eoa-modal-close,
+    .modal-btn,
+    .eoa-modal-btn,
+    .confirm-dialog-overlay,
+    .modal-confirm-overlay,
+    .confirm-dialog,
+    .modal-confirm-dialog,
+    .lightbox-overlay,
+    .lightbox-image,
+    .lightbox-btn,
+    .lightbox-nav,
+    .lightbox-thumb {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .modal-backdrop.show .modal-content,
+    .modal-overlay.show .modal-content,
+    .modal-overlay.show .modal-dialog,
+    .eoa-modal-overlay.show .eoa-modal-content {
+        transform: none;
+    }
+
+    .lightbox-overlay.show .lightbox-image {
+        transform: none;
+    }
+}
+
+/* ============================================
+   HIGH CONTRAST MODE
+   ============================================ */
+
+@media (prefers-contrast: high) {
+    .modal-content,
+    .modal-dialog,
+    .eoa-modal-content,
+    .confirm-dialog,
+    .modal-confirm-dialog {
+        border-width: 3px;
+        border-color: var(--modal-primary);
+    }
+
+    .modal-btn,
+    .eoa-modal-btn {
+        border-width: 2px;
+    }
+
+    .lightbox-image {
+        border: 2px solid white;
+    }
+}
+
+/* ============================================
+   FOCUS TRAP INDICATOR (Development)
+   ============================================ */
+
+.modal-content[data-focus-trap="active"]::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border: 2px dashed var(--modal-primary);
+    border-radius: calc(var(--modal-border-radius) + 2px);
+    pointer-events: none;
+    opacity: 0;
+}
+
+/* ============================================
+   LOADING OVERLAY WITHIN MODALS
+   ============================================ */
+
+.modal-loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(2px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.2s var(--modal-animation-easing),
+        visibility 0.2s var(--modal-animation-easing);
+    border-radius: inherit;
+}
+
+.modal-loading-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(139, 127, 255, 0.3);
+    border-top-color: var(--modal-primary);
+    border-radius: 50%;
+    animation: modalSpin 0.8s linear infinite;
+}
+
+@keyframes modalSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.modal-loading-text {
+    color: var(--modal-text-primary);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .modal-backdrop,
+    .modal-overlay,
+    .eoa-modal-overlay,
+    .confirm-dialog-overlay,
+    .modal-confirm-overlay,
+    .lightbox-overlay {
+        display: none !important;
+    }
+}

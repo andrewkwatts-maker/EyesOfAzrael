@@ -1,0 +1,701 @@
+/**
+ * Card Truncation CSS
+ * Strict text truncation for grid/array/card displays
+ *
+ * RULES:
+ * - Grid, array, and card displays: text MUST be truncated
+ * - Large panel displays and full pages: show full content (no truncation)
+ *
+ * Features:
+ * - Title: max 2 lines with ellipsis (.card-title-truncate)
+ * - Description: max 3 lines with ellipsis (.card-desc-truncate)
+ * - Strict height constraints (.card-strict-height)
+ * - Responsive truncation for different screen sizes
+ * - Accessibility: Screen readers get full text via aria-label
+ *
+ * Updated: 2026-01-09
+ */
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES - Truncation Design Tokens
+   ============================================================================ */
+
+:root {
+    /* Line clamp values */
+    --card-title-max-lines: 2;
+    --card-desc-max-lines: 3;
+    --card-desc-compact-lines: 2;
+    --card-desc-mobile-lines: 2;
+
+    /* Card height constraints */
+    --card-strict-min-height: 280px;
+    --card-strict-max-height: 380px;
+    --card-strict-height-xs: 200px;
+    --card-strict-height-sm: 240px;
+    --card-strict-height-md: 320px;
+    --card-strict-height-lg: 400px;
+
+    /* Typography for truncation */
+    --card-title-font-size: 1.1rem;
+    --card-title-line-height: 1.35;
+    --card-desc-font-size: 0.875rem;
+    --card-desc-line-height: 1.55;
+}
+
+/* ============================================================================
+   TITLE TRUNCATION - Max 2 Lines
+   ============================================================================ */
+
+.card-title-truncate,
+.entity-grid .card-title,
+.entity-grid .entity-card__title,
+.entity-grid .grid-card-title,
+.universal-grid .card-title,
+.universal-grid .grid-card-title,
+.browse-category-grid .card-title,
+[data-display-mode="grid"] .card-title {
+    /* CSS line-clamp for exactly 2 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: var(--card-title-max-lines, 2);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    /* Consistent typography */
+    font-size: var(--card-title-font-size, 1.1rem);
+    line-height: var(--card-title-line-height, 1.35);
+
+    /* Height constraint based on line count */
+    max-height: calc(var(--card-title-max-lines, 2) * var(--card-title-font-size, 1.1rem) * var(--card-title-line-height, 1.35));
+
+    /* Prevent word breaks in middle of words */
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+
+    /* Text rendering */
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Title truncation specifically in card contexts */
+.entity-card .card-title,
+.entity-card .entity-card__title,
+.grid-card .grid-card-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 3em; /* ~2 lines */
+}
+
+/* ============================================================================
+   DESCRIPTION TRUNCATION - Max 3 Lines
+   ============================================================================ */
+
+.card-desc-truncate,
+.entity-grid .card-description,
+.entity-grid .entity-card__description,
+.entity-grid .grid-card-description,
+.entity-grid .entity-short-desc,
+.universal-grid .card-description,
+.universal-grid .grid-card-description,
+.browse-category-grid .card-description,
+[data-display-mode="grid"] .card-description {
+    /* CSS line-clamp for exactly 3 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: var(--card-desc-max-lines, 3);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    /* Consistent typography */
+    font-size: var(--card-desc-font-size, 0.875rem);
+    line-height: var(--card-desc-line-height, 1.55);
+
+    /* Height constraint based on line count */
+    max-height: calc(var(--card-desc-max-lines, 3) * var(--card-desc-font-size, 0.875rem) * var(--card-desc-line-height, 1.55));
+
+    /* Prevent word breaks in middle of words */
+    word-break: break-word;
+    overflow-wrap: break-word;
+
+    /* Secondary text color */
+    color: var(--color-text-secondary, #9ca3af);
+
+    /* Text rendering */
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Description truncation specifically in card contexts */
+.entity-card .card-description,
+.entity-card .entity-card__description,
+.entity-card .entity-short-desc,
+.grid-card .grid-card-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 4.65em; /* ~3 lines at 1.55 line-height */
+}
+
+/* ============================================================================
+   STRICT HEIGHT CONSTRAINTS FOR CARDS
+   ============================================================================ */
+
+.card-strict-height,
+.entity-grid > .entity-card,
+.entity-grid > .grid-card,
+.universal-grid > .entity-card,
+.universal-grid > .grid-card,
+.universal-grid > .universal-grid-card,
+[data-display-mode="grid"] > .entity-card {
+    /* Strict height bounds */
+    min-height: var(--card-strict-min-height, 280px);
+    max-height: var(--card-strict-max-height, 380px);
+
+    /* Ensure content doesn't overflow */
+    overflow: hidden;
+
+    /* Flex layout for proper content distribution */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Card content area - flex grow to fill available space */
+.card-strict-height .entity-card__content,
+.card-strict-height .grid-card-body,
+.entity-grid > .entity-card .entity-card__content,
+.entity-grid > .grid-card .grid-card-body,
+.universal-grid > .entity-card .entity-card__content,
+.universal-grid > .grid-card .grid-card-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Card footer - fixed at bottom */
+.card-strict-height .entity-card__footer,
+.card-strict-height .grid-card-footer,
+.entity-grid > .entity-card .entity-card__footer,
+.entity-grid > .grid-card .grid-card-footer,
+.universal-grid > .entity-card .entity-card__footer,
+.universal-grid > .grid-card .grid-card-footer {
+    margin-top: auto;
+    flex-shrink: 0;
+}
+
+/* ============================================================================
+   SIZE VARIANTS - Different Card Sizes
+   ============================================================================ */
+
+/* Extra Small Cards */
+.card-strict-height--xs,
+.entity-grid--ultra-compact > .entity-card,
+.entity-grid--ultra-compact > .grid-card,
+[data-density="ultra-compact"] > .entity-card {
+    min-height: var(--card-strict-height-xs, 200px);
+    max-height: 260px;
+    --card-desc-max-lines: 2;
+}
+
+/* Small/Compact Cards */
+.card-strict-height--sm,
+.entity-grid--compact > .entity-card,
+.entity-grid--compact > .grid-card,
+[data-density="compact"] > .entity-card {
+    min-height: var(--card-strict-height-sm, 240px);
+    max-height: 300px;
+    --card-desc-max-lines: 2;
+}
+
+/* Medium Cards (default) */
+.card-strict-height--md,
+.entity-grid--comfortable > .entity-card,
+.entity-grid--comfortable > .grid-card,
+[data-density="comfortable"] > .entity-card {
+    min-height: var(--card-strict-height-md, 320px);
+    max-height: 400px;
+    --card-desc-max-lines: 3;
+}
+
+/* Large/Detailed Cards */
+.card-strict-height--lg,
+.entity-grid--detailed > .entity-card,
+.entity-grid--detailed > .grid-card,
+[data-density="detailed"] > .entity-card {
+    min-height: var(--card-strict-height-lg, 400px);
+    max-height: 500px;
+    --card-desc-max-lines: 4;
+}
+
+/* ============================================================================
+   COMPACT TRUNCATION - 2 Lines for Description
+   ============================================================================ */
+
+.card-desc-truncate--compact,
+.entity-grid--compact .card-description,
+.entity-grid--compact .entity-card__description,
+.entity-grid--compact .grid-card-description,
+[data-density="compact"] .card-description,
+[data-density="ultra-compact"] .card-description {
+    -webkit-line-clamp: var(--card-desc-compact-lines, 2);
+    max-height: calc(var(--card-desc-compact-lines, 2) * var(--card-desc-font-size, 0.875rem) * var(--card-desc-line-height, 1.55));
+}
+
+/* ============================================================================
+   ARRAY/LIST DISPLAYS - Apply Same Truncation
+   ============================================================================ */
+
+/* List items in array/list views */
+.universal-list .list-item-title,
+.entity-list .list-item-title,
+[data-display-mode="list"] .list-item-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.universal-list .list-item-description,
+.entity-list .list-item-description,
+[data-display-mode="list"] .list-item-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ============================================================================
+   TABLE DISPLAYS - Truncation for Cell Content
+   ============================================================================ */
+
+.universal-table td,
+.entity-table td,
+[data-display-mode="table"] td {
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Name cells can wrap but limited */
+.universal-table .name-cell,
+.entity-table .name-cell {
+    max-width: 200px;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ============================================================================
+   INLINE DISPLAYS - Single Line Truncation
+   ============================================================================ */
+
+.entity-inline,
+.inline-entity-link,
+[data-display-mode="inline"] .entity-name {
+    display: inline-block;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* ============================================================================
+   FULL PANEL/PAGE DISPLAYS - NO TRUNCATION
+   Important: These overrides ensure full content is visible in detailed views
+   ============================================================================ */
+
+/* Panel display mode - show full content */
+.entity-panel .panel-title,
+.entity-panel .entity-card__hero-title,
+.entity-card--full .entity-card__hero-title,
+[data-display-mode="panel"] .panel-title,
+.universal-panel-card .panel-title {
+    /* Remove line clamp - show full title */
+    display: block;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+    overflow: visible;
+    text-overflow: unset;
+    max-height: none;
+}
+
+/* Panel description - show full content */
+.entity-panel .panel-description,
+.entity-panel .panel-content,
+.entity-panel .section-content,
+.entity-card--full .entity-card__section-content,
+.entity-card--full .entity-card__description,
+[data-display-mode="panel"] .panel-description,
+.universal-panel-card .panel-description,
+.universal-panel-card .panel-content {
+    /* Remove line clamp - show full description */
+    display: block;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+    overflow: visible;
+    text-overflow: unset;
+    max-height: none;
+}
+
+/* Full card variant - no truncation */
+.entity-card--full,
+.entity-card--full .entity-card__content,
+.entity-card--full .entity-card__body {
+    max-height: none;
+    overflow: visible;
+}
+
+/* Entity detail pages - full content */
+.entity-detail .entity-title,
+.entity-detail .entity-description,
+.entity-detail-page .entity-title,
+.entity-detail-page .entity-description,
+.entity-page .entity-title,
+.entity-page .entity-description {
+    display: block;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+    overflow: visible;
+    text-overflow: unset;
+    max-height: none;
+}
+
+/* Section content in detail views - full text */
+.entity-detail .section-content,
+.entity-detail-page .section-content,
+.panel-section .section-content,
+.text-section .section-content {
+    display: block;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+    overflow: visible;
+    max-height: none;
+}
+
+/* ============================================================================
+   TRUNCATABLE TEXT WITH SHOW MORE - For Panel Views
+   ============================================================================ */
+
+/* Text that can be expanded */
+.truncatable-text {
+    position: relative;
+}
+
+.truncatable-text .truncatable-content {
+    display: -webkit-box;
+    -webkit-line-clamp: var(--max-lines, 3);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.truncatable-text.truncate-expanded .truncatable-content {
+    display: block;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+    overflow: visible;
+}
+
+.truncatable-text .truncate-toggle {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    color: var(--color-primary, #8b7fff);
+    background: transparent;
+    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.truncatable-text .truncate-toggle:hover {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+    border-color: var(--color-primary, #8b7fff);
+}
+
+.truncatable-text .truncate-toggle .toggle-more {
+    display: inline;
+}
+
+.truncatable-text .truncate-toggle .toggle-less {
+    display: none;
+}
+
+.truncatable-text.truncate-expanded .truncate-toggle .toggle-more {
+    display: none;
+}
+
+.truncatable-text.truncate-expanded .truncate-toggle .toggle-less {
+    display: inline;
+}
+
+/* ============================================================================
+   PILLS/TAGS TRUNCATION - Limit Visible Pills
+   ============================================================================ */
+
+.pills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.pills-container .pills-visible {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.pills-container .pills-hidden {
+    display: none;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.pills-container.pills-expanded .pills-hidden {
+    display: flex;
+    margin-top: 0.375rem;
+}
+
+.pills-container .pill-more,
+.pills-container .pill-less {
+    cursor: pointer;
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+    color: var(--color-primary, #8b7fff);
+    border: 1px dashed rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+}
+
+.pills-container .pill-more:hover,
+.pills-container .pill-less:hover {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.25);
+}
+
+/* ============================================================================
+   METADATA TRUNCATION - Limit Long Values
+   ============================================================================ */
+
+.entity-card__metadata-item,
+.metadata-item,
+.field-value {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Allow wrapping in panel views */
+.entity-panel .metadata-item,
+.entity-panel .field-value,
+[data-display-mode="panel"] .metadata-item,
+[data-display-mode="panel"] .field-value {
+    max-width: none;
+    white-space: normal;
+    overflow: visible;
+}
+
+/* ============================================================================
+   RESPONSIVE TRUNCATION - Mobile Optimizations
+   ============================================================================ */
+
+/* Tablet - reduce to 2 lines for description */
+@media (max-width: 900px) {
+    .entity-grid .card-description,
+    .entity-grid .entity-card__description,
+    .universal-grid .grid-card-description {
+        -webkit-line-clamp: 2;
+        max-height: calc(2 * var(--card-desc-font-size, 0.875rem) * var(--card-desc-line-height, 1.55));
+    }
+
+    .card-strict-height,
+    .entity-grid > .entity-card,
+    .universal-grid > .entity-card {
+        min-height: 260px;
+        max-height: 340px;
+    }
+}
+
+/* Mobile Portrait - aggressive truncation */
+@media (max-width: 600px) {
+    :root {
+        --card-title-max-lines: 2;
+        --card-desc-max-lines: 2;
+        --card-strict-min-height: 220px;
+        --card-strict-max-height: 300px;
+    }
+
+    .entity-grid .card-title,
+    .entity-grid .entity-card__title,
+    .universal-grid .grid-card-title {
+        font-size: 0.95rem;
+        -webkit-line-clamp: 2;
+    }
+
+    .entity-grid .card-description,
+    .entity-grid .entity-card__description,
+    .universal-grid .grid-card-description {
+        font-size: 0.8rem;
+        -webkit-line-clamp: 2;
+        max-height: 2.8em;
+    }
+
+    .card-strict-height,
+    .entity-grid > .entity-card,
+    .universal-grid > .entity-card {
+        min-height: var(--card-strict-min-height);
+        max-height: var(--card-strict-max-height);
+    }
+}
+
+/* Small Mobile - minimal content */
+@media (max-width: 480px) {
+    .entity-grid .card-description,
+    .entity-grid .entity-card__description,
+    .universal-grid .grid-card-description {
+        -webkit-line-clamp: 2;
+        font-size: 0.75rem;
+    }
+
+    .entity-grid .card-title,
+    .entity-grid .entity-card__title,
+    .universal-grid .grid-card-title {
+        font-size: 0.875rem;
+    }
+
+    /* Hide metadata on very small screens */
+    .entity-grid .entity-card__metadata,
+    .entity-grid .grid-card-meta {
+        display: none;
+    }
+}
+
+/* ============================================================================
+   ACCESSIBILITY - Ensure Truncated Content is Still Accessible
+   ============================================================================ */
+
+/* Provide full text via aria-label on truncated elements */
+[aria-label].card-title-truncate,
+[aria-label].card-desc-truncate {
+    /* Screen readers will read aria-label instead of truncated visible text */
+}
+
+/* High contrast mode - clearer truncation indicator */
+@media (prefers-contrast: high) {
+    .card-title-truncate,
+    .card-desc-truncate {
+        /* Use stronger ellipsis visual */
+        text-decoration-style: dotted;
+    }
+
+    .truncatable-text .truncate-toggle {
+        border-width: 2px;
+        font-weight: 600;
+    }
+}
+
+/* Reduced motion - no transitions on truncation interactions */
+@media (prefers-reduced-motion: reduce) {
+    .truncatable-text .truncate-toggle,
+    .pills-container .pill-more,
+    .pills-container .pill-less {
+        transition: none;
+    }
+}
+
+/* ============================================================================
+   PRINT STYLES - Full Content for Print
+   ============================================================================ */
+
+@media print {
+    /* Remove all truncation for print */
+    .card-title-truncate,
+    .card-desc-truncate,
+    .entity-grid .card-title,
+    .entity-grid .card-description,
+    .entity-grid .entity-card__title,
+    .entity-grid .entity-card__description,
+    .universal-grid .grid-card-title,
+    .universal-grid .grid-card-description {
+        display: block;
+        -webkit-line-clamp: unset;
+        -webkit-box-orient: unset;
+        overflow: visible;
+        text-overflow: unset;
+        max-height: none;
+    }
+
+    /* Show all hidden pills */
+    .pills-container .pills-hidden {
+        display: flex !important;
+    }
+
+    .pills-container .pill-more,
+    .pills-container .pill-less {
+        display: none !important;
+    }
+
+    /* Remove height constraints */
+    .card-strict-height,
+    .entity-grid > .entity-card,
+    .universal-grid > .entity-card {
+        min-height: auto;
+        max-height: none;
+    }
+}
+
+/* ============================================================================
+   UTILITY CLASSES - For Manual Override
+   ============================================================================ */
+
+/* Force no truncation */
+.no-truncate {
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    -webkit-box-orient: unset !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    max-height: none !important;
+}
+
+/* Force 1-line truncation */
+.truncate-1-line {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Force 2-line truncation */
+.truncate-2-lines {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Force 3-line truncation */
+.truncate-3-lines {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Force single-line ellipsis (no wrap) */
+.truncate-ellipsis {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}

@@ -1195,3 +1195,584 @@ main,
         --link-hover: #0044aa;
     }
 }
+
+/* ============================================
+   ENHANCED FOCUS RING SYSTEM
+   ============================================ */
+
+/* Custom focus ring for cards with interactive content */
+.entity-card:focus-within,
+.category-card:focus-within,
+.landing-category-card:focus-within {
+    outline: 2px solid var(--color-primary, #9370DB);
+    outline-offset: 2px;
+}
+
+/* Focus indicator for custom radio/checkbox groups */
+[role="radiogroup"]:focus-within,
+[role="listbox"]:focus-within,
+[role="menu"]:focus-within {
+    outline: 2px solid var(--color-primary, #9370DB);
+    outline-offset: 4px;
+    border-radius: 8px;
+}
+
+/* ============================================
+   ACCESSIBLE LOADING STATES
+   ============================================ */
+
+/* Loading spinner with screen reader text */
+.loading-container,
+.spinner-container,
+[data-loading="true"] {
+    position: relative;
+}
+
+.loading-container::before,
+[data-loading="true"]::before {
+    content: 'Loading...';
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Progress indicator accessibility */
+[role="progressbar"] {
+    position: relative;
+}
+
+[role="progressbar"]:not([aria-valuenow]) {
+    /* Indeterminate progress */
+    animation: progressPulse 2s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* ============================================
+   ENHANCED ERROR STATE ACCESSIBILITY
+   ============================================ */
+
+/* Form field error states */
+.form-field.has-error input,
+.form-field.has-error select,
+.form-field.has-error textarea,
+input.error,
+select.error,
+textarea.error {
+    border-color: var(--color-error, #ff6b6b) !important;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+}
+
+/* Ensure error messages are properly announced */
+.form-error[role="alert"],
+.error-message[role="alert"] {
+    animation: errorShake 0.3s ease-in-out;
+}
+
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .form-error[role="alert"],
+    .error-message[role="alert"] {
+        animation: none;
+    }
+}
+
+/* ============================================
+   ACCESSIBLE TOGGLE SWITCHES
+   ============================================ */
+
+.toggle-switch,
+[role="switch"] {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    min-height: 44px;
+    padding: 0.5rem;
+}
+
+.toggle-switch input[type="checkbox"],
+[role="switch"] input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+[role="switch"][aria-checked="true"] .toggle-track,
+.toggle-switch input:checked + .toggle-track {
+    background: var(--color-primary, #9370DB);
+}
+
+[role="switch"]:focus-visible,
+.toggle-switch:focus-within {
+    outline: 3px solid var(--color-primary, #9370DB);
+    outline-offset: 3px;
+    border-radius: 20px;
+}
+
+/* ============================================
+   ACCESSIBLE ACCORDION PATTERNS
+   ============================================ */
+
+.accordion-header,
+[role="button"][aria-expanded] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    min-height: 44px;
+}
+
+.accordion-header:hover,
+[role="button"][aria-expanded]:hover {
+    background: rgba(var(--color-primary-rgb, 147, 112, 219), 0.05);
+}
+
+.accordion-header:focus-visible,
+[role="button"][aria-expanded]:focus-visible {
+    outline: 2px solid var(--color-primary, #9370DB);
+    outline-offset: -2px;
+}
+
+/* Accordion expand/collapse indicator */
+.accordion-header .expand-icon,
+[role="button"][aria-expanded] .expand-icon {
+    transition: transform 0.2s ease;
+}
+
+[aria-expanded="true"] .expand-icon {
+    transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .accordion-header .expand-icon,
+    [role="button"][aria-expanded] .expand-icon {
+        transition: none;
+    }
+}
+
+/* ============================================
+   ACCESSIBLE TABS PATTERN
+   ============================================ */
+
+[role="tablist"] {
+    display: flex;
+    gap: 0.25rem;
+    border-bottom: 2px solid rgba(var(--color-primary-rgb, 147, 112, 219), 0.2);
+    padding-bottom: 0;
+}
+
+[role="tab"] {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary, #adb5bd);
+    cursor: pointer;
+    font-weight: 500;
+    position: relative;
+    min-height: 44px;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+[role="tab"]:hover {
+    color: var(--color-text-primary, #f8f9fa);
+}
+
+[role="tab"][aria-selected="true"] {
+    color: var(--color-primary, #9370DB);
+    border-bottom-color: var(--color-primary, #9370DB);
+}
+
+[role="tab"]:focus-visible {
+    outline: 2px solid var(--color-primary, #9370DB);
+    outline-offset: -2px;
+    border-radius: 4px 4px 0 0;
+}
+
+[role="tabpanel"] {
+    padding: 1.5rem 0;
+}
+
+[role="tabpanel"][aria-hidden="true"],
+[role="tabpanel"]:not(.active) {
+    display: none;
+}
+
+[role="tabpanel"]:focus-visible {
+    outline: 2px solid var(--color-primary, #9370DB);
+    outline-offset: 4px;
+}
+
+/* ============================================
+   ACCESSIBLE DROPDOWN MENUS
+   ============================================ */
+
+[role="menu"] {
+    position: absolute;
+    background: var(--color-bg-card, #1a1f3a);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 12px;
+    padding: 0.5rem;
+    min-width: 200px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+[role="menu"][aria-hidden="true"] {
+    display: none;
+}
+
+[role="menuitem"],
+[role="menuitemradio"],
+[role="menuitemcheckbox"] {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: transparent;
+    color: var(--color-text-primary, #f8f9fa);
+    cursor: pointer;
+    text-align: left;
+    border-radius: 8px;
+    min-height: 44px;
+    transition: background 0.15s ease;
+}
+
+[role="menuitem"]:hover,
+[role="menuitemradio"]:hover,
+[role="menuitemcheckbox"]:hover {
+    background: rgba(var(--color-primary-rgb, 147, 112, 219), 0.1);
+}
+
+[role="menuitem"]:focus-visible,
+[role="menuitemradio"]:focus-visible,
+[role="menuitemcheckbox"]:focus-visible {
+    outline: none;
+    background: rgba(var(--color-primary-rgb, 147, 112, 219), 0.2);
+    box-shadow: inset 0 0 0 2px var(--color-primary, #9370DB);
+}
+
+[role="menuitemradio"][aria-checked="true"],
+[role="menuitemcheckbox"][aria-checked="true"] {
+    background: rgba(var(--color-primary-rgb, 147, 112, 219), 0.15);
+}
+
+/* Menu separator */
+[role="separator"] {
+    height: 1px;
+    background: var(--color-border-primary, #2a2f4a);
+    margin: 0.5rem 0;
+}
+
+/* ============================================
+   ACCESSIBLE COMBOBOX/AUTOCOMPLETE
+   ============================================ */
+
+[role="combobox"] {
+    position: relative;
+}
+
+[role="listbox"] {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-bg-card, #1a1f3a);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    border-radius: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+[role="listbox"][aria-hidden="true"] {
+    display: none;
+}
+
+[role="option"] {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+}
+
+[role="option"]:hover,
+[role="option"][aria-selected="true"] {
+    background: rgba(var(--color-primary-rgb, 147, 112, 219), 0.15);
+}
+
+[role="option"]:focus-visible,
+[role="option"].focused {
+    outline: none;
+    background: rgba(var(--color-primary-rgb, 147, 112, 219), 0.2);
+    box-shadow: inset 0 0 0 2px var(--color-primary, #9370DB);
+}
+
+/* ============================================
+   ACCESSIBLE NOTIFICATION/TOAST SYSTEM
+   ============================================ */
+
+.toast-notification,
+[role="alert"] {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    background: var(--color-bg-card, #1a1f3a);
+    border: 1px solid var(--color-border-primary, #2a2f4a);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    animation: toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast-notification,
+    [role="alert"] {
+        animation: none;
+    }
+}
+
+.toast-notification.success {
+    border-left: 4px solid var(--color-success, #51cf66);
+}
+
+.toast-notification.error {
+    border-left: 4px solid var(--color-error, #ff6b6b);
+}
+
+.toast-notification.warning {
+    border-left: 4px solid var(--color-warning, #ffd43b);
+}
+
+.toast-notification.info {
+    border-left: 4px solid var(--color-primary, #9370DB);
+}
+
+/* Toast close button */
+.toast-notification .toast-close {
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary, #adb5bd);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    min-width: 28px;
+    min-height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+}
+
+.toast-notification .toast-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-primary, #f8f9fa);
+}
+
+.toast-notification .toast-close:focus-visible {
+    outline: 2px solid var(--color-primary, #9370DB);
+    outline-offset: 2px;
+}
+
+/* ============================================
+   ACCESSIBLE CARD INTERACTIONS
+   ============================================ */
+
+/* Ensure cards are keyboard accessible */
+.entity-card,
+.category-card,
+.landing-category-card,
+.mythology-card {
+    cursor: pointer;
+}
+
+/* Cards should not have nested interactive elements - use overlay pattern */
+.entity-card a.card-link-overlay,
+.category-card a.card-link-overlay,
+.landing-category-card a.card-link-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+/* Secondary actions within cards need higher z-index */
+.entity-card .card-actions,
+.category-card .card-actions,
+.landing-category-card .card-actions {
+    position: relative;
+    z-index: 2;
+}
+
+/* ============================================
+   ACCESSIBLE IMAGE HANDLING
+   ============================================ */
+
+/* Decorative images */
+img[aria-hidden="true"],
+img.decorative,
+.decorative-image {
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Images with captions */
+figure {
+    margin: 1.5rem 0;
+}
+
+figure figcaption {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary, #adb5bd);
+    text-align: center;
+}
+
+/* ============================================
+   ACCESSIBLE TEXT SELECTION
+   ============================================ */
+
+::selection {
+    background: rgba(var(--color-primary-rgb, 147, 112, 219), 0.4);
+    color: var(--color-text-primary, #ffffff);
+}
+
+::-moz-selection {
+    background: rgba(var(--color-primary-rgb, 147, 112, 219), 0.4);
+    color: var(--color-text-primary, #ffffff);
+}
+
+/* ============================================
+   ACCESSIBLE SCROLLBARS
+   ============================================ */
+
+/* Custom scrollbar for better visibility */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary, #151a35);
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border-primary, #2a2f4a);
+    border-radius: 6px;
+    border: 3px solid var(--color-bg-secondary, #151a35);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary, #9370DB);
+}
+
+/* Ensure scrollbar is visible in high contrast mode */
+@media (prefers-contrast: high) {
+    ::-webkit-scrollbar-thumb {
+        background: var(--color-text-secondary, #adb5bd);
+    }
+}
+
+/* ============================================
+   SKIP LINK ENHANCEMENTS
+   ============================================ */
+
+/* Additional skip links for complex pages */
+.skip-links {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100001;
+}
+
+.skip-links a {
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-primary, #9370DB);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 0 0 8px 8px;
+    transition: top 0.2s ease;
+}
+
+.skip-links a:focus {
+    top: 0;
+    outline: none;
+}
+
+/* ============================================
+   LANDMARK REGION VISIBILITY FOR DEBUGGING
+   ============================================ */
+
+/* Debug mode - show landmark regions */
+body.show-landmarks [role="banner"],
+body.show-landmarks [role="navigation"],
+body.show-landmarks [role="main"],
+body.show-landmarks [role="contentinfo"],
+body.show-landmarks [role="complementary"],
+body.show-landmarks [role="search"] {
+    outline: 2px dashed rgba(var(--color-primary-rgb, 147, 112, 219), 0.5);
+    outline-offset: 4px;
+}
+
+body.show-landmarks [role="banner"]::before,
+body.show-landmarks [role="navigation"]::before,
+body.show-landmarks [role="main"]::before,
+body.show-landmarks [role="contentinfo"]::before,
+body.show-landmarks [role="complementary"]::before,
+body.show-landmarks [role="search"]::before {
+    content: attr(role);
+    position: absolute;
+    top: -1.5rem;
+    left: 0;
+    font-size: 0.75rem;
+    background: var(--color-primary, #9370DB);
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 4px;
+}

@@ -351,8 +351,95 @@ class GlobeTimeline {
     // Update stats
     document.getElementById('stat-visible').textContent = visibleEntities.length;
 
-    // Create influence arrows (TODO: implement when influence data is populated)
-    // this.createInfluenceArrows(visibleEntities, year);
+    // Create influence arrows between visible entities that have influence data
+    this.createInfluenceArrows(visibleEntities, year);
+  }
+
+  /**
+   * Create arrows showing influence relationships between visible entities
+   * @param {Array} visibleEntities - Entities currently visible on the globe
+   * @param {number} year - Current timeline year
+   */
+  createInfluenceArrows(visibleEntities, year) {
+    // Clear existing influence arrows
+    this.arrows.forEach(arrow => {
+      this.scene.remove(arrow);
+      if (arrow.geometry) arrow.geometry.dispose();
+      if (arrow.material) arrow.material.dispose();
+    });
+    this.arrows = [];
+
+    // Create a map of entity IDs to their positions for quick lookup
+    const entityPositions = new Map();
+    visibleEntities.forEach(entity => {
+      if (entity.geographical?.coordinates) {
+        const pos = this.latLonToVector3(
+          entity.geographical.coordinates.latitude,
+          entity.geographical.coordinates.longitude,
+          102
+        );
+        entityPositions.set(entity.id, { entity, position: pos });
+      }
+    });
+
+    // Iterate through visible entities and create arrows for their influences
+    visibleEntities.forEach(entity => {
+      if (!entity.influences) return;
+
+      // Handle entities that this entity influenced
+      if (entity.influences.influenced && Array.isArray(entity.influences.influenced)) {
+        entity.influences.influenced.forEach(influence => {
+          const targetId = influence.entityId || influence.id || influence;
+          const target = entityPositions.get(targetId);
+          const source = entityPositions.get(entity.id);
+
+          if (source && target) {
+            const arrow = this.createInfluenceArrow(
+              { coordinates: entity.geographical.coordinates },
+              { coordinates: target.entity.geographical.coordinates },
+              this.mythologyColors[entity.mythology] || 0xffaa00
+            );
+            if (arrow) {
+              arrow.userData = {
+                fromEntity: entity.id,
+                toEntity: targetId,
+                influenceType: influence.type || 'cultural',
+                description: influence.description || 'Influenced'
+              };
+              this.arrows.push(arrow);
+              this.scene.add(arrow);
+            }
+          }
+        });
+      }
+
+      // Handle entities that influenced this entity (reverse direction arrows)
+      if (entity.influences.influencedBy && Array.isArray(entity.influences.influencedBy)) {
+        entity.influences.influencedBy.forEach(influence => {
+          const sourceId = influence.entityId || influence.id || influence;
+          const source = entityPositions.get(sourceId);
+          const target = entityPositions.get(entity.id);
+
+          if (source && target) {
+            const arrow = this.createInfluenceArrow(
+              { coordinates: source.entity.geographical.coordinates },
+              { coordinates: entity.geographical.coordinates },
+              this.mythologyColors[source.entity.mythology] || 0xffaa00
+            );
+            if (arrow) {
+              arrow.userData = {
+                fromEntity: sourceId,
+                toEntity: entity.id,
+                influenceType: influence.type || 'cultural',
+                description: influence.description || 'Influenced by'
+              };
+              this.arrows.push(arrow);
+              this.scene.add(arrow);
+            }
+          }
+        });
+      }
+    });
   }
 
   animateMarkerIn(marker) {

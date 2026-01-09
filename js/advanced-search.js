@@ -870,6 +870,237 @@ class AdvancedSearchSystem {
         this.searchIndex.clear();
         await this.buildSearchIndex();
     }
+
+    // ==================== Filter Presets ====================
+
+    /**
+     * Save a filter preset
+     */
+    saveFilterPreset(name, filters) {
+        const presets = this.getFilterPresets();
+        const newPreset = {
+            id: `preset_${Date.now()}`,
+            name,
+            filters,
+            createdAt: Date.now(),
+            usageCount: 0
+        };
+
+        presets.push(newPreset);
+        localStorage.setItem('eoa_search_presets', JSON.stringify(presets));
+
+        return newPreset;
+    }
+
+    /**
+     * Get all saved filter presets
+     */
+    getFilterPresets() {
+        try {
+            const stored = localStorage.getItem('eoa_search_presets');
+            return stored ? JSON.parse(stored) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    /**
+     * Delete a filter preset
+     */
+    deleteFilterPreset(presetId) {
+        const presets = this.getFilterPresets().filter(p => p.id !== presetId);
+        localStorage.setItem('eoa_search_presets', JSON.stringify(presets));
+    }
+
+    /**
+     * Apply a filter preset
+     */
+    applyFilterPreset(presetId) {
+        const presets = this.getFilterPresets();
+        const preset = presets.find(p => p.id === presetId);
+
+        if (preset) {
+            // Increment usage count
+            preset.usageCount++;
+            localStorage.setItem('eoa_search_presets', JSON.stringify(presets));
+            return preset.filters;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get default filter presets (built-in)
+     */
+    getDefaultPresets() {
+        return [
+            {
+                id: 'default_gods',
+                name: 'Supreme Deities',
+                filters: {
+                    contentTypes: ['deities'],
+                    tags: ['supreme', 'creator', 'sky']
+                },
+                isDefault: true
+            },
+            {
+                id: 'default_creatures',
+                name: 'Mythical Beasts',
+                filters: {
+                    contentTypes: ['creatures'],
+                    tags: ['monster', 'beast', 'guardian']
+                },
+                isDefault: true
+            },
+            {
+                id: 'default_heroes',
+                name: 'Epic Heroes',
+                filters: {
+                    contentTypes: ['heroes'],
+                    tags: ['demigod', 'warrior', 'quest']
+                },
+                isDefault: true
+            },
+            {
+                id: 'default_underworld',
+                name: 'Underworld & Death',
+                filters: {
+                    domains: ['death', 'underworld', 'afterlife']
+                },
+                isDefault: true
+            },
+            {
+                id: 'default_magic',
+                name: 'Magic & Sorcery',
+                filters: {
+                    domains: ['magic', 'sorcery', 'wisdom']
+                },
+                isDefault: true
+            }
+        ];
+    }
+
+    /**
+     * Get combined presets (default + user saved)
+     */
+    getAllPresets() {
+        const defaults = this.getDefaultPresets();
+        const userPresets = this.getFilterPresets();
+        return [...defaults, ...userPresets];
+    }
+
+    // ==================== Search Statistics ====================
+
+    /**
+     * Get search statistics
+     */
+    getSearchStats() {
+        const totalSearches = this.searchAnalytics.queries.length;
+        const uniqueQueries = new Set(this.searchAnalytics.queries.map(q => q.query)).size;
+        const avgResultCount = totalSearches > 0
+            ? Math.round(this.searchAnalytics.queries.reduce((sum, q) => sum + q.resultCount, 0) / totalSearches)
+            : 0;
+        const noResultsRate = totalSearches > 0
+            ? Math.round((this.searchAnalytics.noResultsQueries.length / totalSearches) * 100)
+            : 0;
+
+        return {
+            totalSearches,
+            uniqueQueries,
+            avgResultCount,
+            noResultsRate,
+            totalIndexedContent: this.searchIndex.size,
+            cacheSize: this.searchCache.size
+        };
+    }
+
+    /**
+     * Get search performance metrics
+     */
+    getPerformanceMetrics() {
+        const recentQueries = this.searchAnalytics.queries.slice(-100);
+        if (recentQueries.length === 0) return null;
+
+        // Calculate average search time (would need to track this in queries)
+        return {
+            queriesInLastHour: recentQueries.filter(q => {
+                const hourAgo = Date.now() - 3600000;
+                return new Date(q.timestamp).getTime() > hourAgo;
+            }).length,
+            indexSize: this.searchIndex.size,
+            cacheHitRate: 'N/A' // Would need to track cache hits
+        };
+    }
+
+    // ==================== Export / Import ====================
+
+    /**
+     * Export search preferences and history
+     */
+    exportSearchData() {
+        return {
+            presets: this.getFilterPresets(),
+            history: this.searchHistory,
+            analytics: {
+                popularSearches: this.searchAnalytics.popularSearches,
+                popularEntities: this.searchAnalytics.popularEntities
+            },
+            exportedAt: new Date().toISOString()
+        };
+    }
+
+    /**
+     * Import search preferences and history
+     */
+    importSearchData(data) {
+        if (!data) return false;
+
+        try {
+            if (data.presets) {
+                localStorage.setItem('eoa_search_presets', JSON.stringify(data.presets));
+            }
+
+            if (data.history) {
+                this.searchHistory = data.history;
+                localStorage.setItem('searchHistory', JSON.stringify(data.history));
+            }
+
+            if (data.analytics) {
+                if (data.analytics.popularSearches) {
+                    this.searchAnalytics.popularSearches = {
+                        ...this.searchAnalytics.popularSearches,
+                        ...data.analytics.popularSearches
+                    };
+                }
+                this.saveAnalytics();
+            }
+
+            return true;
+        } catch (e) {
+            console.error('Failed to import search data:', e);
+            return false;
+        }
+    }
+
+    /**
+     * Clear all search data
+     */
+    clearAllSearchData() {
+        this.searchCache.clear();
+        this.searchHistory = [];
+        this.searchAnalytics = {
+            queries: [],
+            popularSearches: {},
+            noResultsQueries: [],
+            popularEntities: {}
+        };
+
+        localStorage.removeItem('searchAnalytics');
+        localStorage.removeItem('searchHistory');
+        localStorage.removeItem('eoa_search_presets');
+        localStorage.removeItem('eoa_recent_searches');
+        localStorage.removeItem('eoa_search_preferences');
+    }
 }
 
 // Create global instance

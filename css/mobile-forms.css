@@ -1,0 +1,773 @@
+/**
+ * Mobile Forms CSS
+ * Enhanced form experience for touch devices
+ *
+ * Features:
+ * - Full-width inputs on mobile
+ * - Large touch-friendly submit buttons (44px+ height)
+ * - Appropriate input types with correct keyboard hints
+ * - Focus states optimized for touch
+ * - Form validation feedback
+ * - Floating labels support
+ *
+ * Last updated: 2026-01-10
+ */
+
+/* ============================================
+   MOBILE FORM BASE STYLES
+   ============================================ */
+
+/* Mobile-first form container */
+.mobile-form,
+.form-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 1rem;
+}
+
+@media (min-width: 641px) {
+    .mobile-form,
+    .form-container {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 0;
+    }
+}
+
+/* Form group spacing */
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+/* Labels */
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--color-text-primary, #f8f9fa);
+}
+
+.form-label.required::after {
+    content: ' *';
+    color: #ff6b6b;
+}
+
+/* Help text */
+.form-help {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary, #adb5bd);
+}
+
+/* ============================================
+   INPUT FIELDS - MOBILE OPTIMIZED
+   ============================================ */
+
+/* Base input styles */
+.form-input,
+.form-textarea,
+.form-select,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+textarea,
+select {
+    display: block;
+    width: 100%;
+    min-height: 48px; /* 44px minimum touch target */
+    padding: 0.875rem 1rem;
+    font-size: 16px; /* Prevents iOS zoom */
+    font-family: inherit;
+    line-height: 1.5;
+    color: var(--color-text-primary, #f8f9fa);
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.6);
+    border-radius: 12px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Placeholder styles */
+.form-input::placeholder,
+.form-textarea::placeholder,
+input::placeholder,
+textarea::placeholder {
+    color: var(--color-text-secondary, #adb5bd);
+    opacity: 0.6;
+}
+
+/* Focus states */
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus,
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--color-primary, #8b7fff);
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+}
+
+/* Hover states (for devices with hover capability) */
+@media (hover: hover) {
+    .form-input:hover:not(:focus),
+    .form-textarea:hover:not(:focus),
+    .form-select:hover:not(:focus),
+    input:hover:not(:focus),
+    textarea:hover:not(:focus),
+    select:hover:not(:focus) {
+        border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+    }
+}
+
+/* Textarea specific */
+.form-textarea,
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Select specific */
+.form-select,
+select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23adb5bd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 16px;
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
+
+/* ============================================
+   FORM VALIDATION STATES
+   ============================================ */
+
+/* Valid state */
+.form-input.valid,
+.form-textarea.valid,
+.form-select.valid,
+input.valid,
+textarea.valid,
+select.valid,
+.form-group.valid .form-input,
+.form-group.valid .form-textarea,
+.form-group.valid .form-select {
+    border-color: #4ecdc4;
+}
+
+.form-group.valid .form-input:focus,
+.form-group.valid .form-textarea:focus,
+.form-group.valid .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.15);
+}
+
+/* Invalid/Error state */
+.form-input.invalid,
+.form-input.error,
+.form-textarea.invalid,
+.form-textarea.error,
+.form-select.invalid,
+.form-select.error,
+input.invalid,
+input.error,
+textarea.invalid,
+textarea.error,
+select.invalid,
+select.error,
+.form-group.invalid .form-input,
+.form-group.invalid .form-textarea,
+.form-group.invalid .form-select,
+.form-group.error .form-input,
+.form-group.error .form-textarea,
+.form-group.error .form-select {
+    border-color: #ff6b6b;
+}
+
+.form-group.invalid .form-input:focus,
+.form-group.invalid .form-textarea:focus,
+.form-group.invalid .form-select:focus,
+.form-group.error .form-input:focus,
+.form-group.error .form-textarea:focus,
+.form-group.error .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
+}
+
+/* Error message */
+.form-error,
+.error-message {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: #ff6b6b;
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Disabled state */
+.form-input:disabled,
+.form-textarea:disabled,
+.form-select:disabled,
+input:disabled,
+textarea:disabled,
+select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.3);
+}
+
+/* ============================================
+   SUBMIT BUTTONS - LARGE TOUCH TARGETS
+   ============================================ */
+
+.form-submit,
+.btn-submit,
+button[type="submit"],
+input[type="submit"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 52px; /* Large touch target */
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(
+        135deg,
+        var(--color-primary, #8b7fff),
+        var(--color-secondary, #ff7eb6)
+    );
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.form-submit:hover,
+.btn-submit:hover,
+button[type="submit"]:hover,
+input[type="submit"]:hover {
+    box-shadow: 0 4px 20px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+}
+
+.form-submit:active,
+.btn-submit:active,
+button[type="submit"]:active,
+input[type="submit"]:active {
+    transform: scale(0.98);
+}
+
+.form-submit:disabled,
+.btn-submit:disabled,
+button[type="submit"]:disabled,
+input[type="submit"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Loading state */
+.form-submit.loading,
+.btn-submit.loading {
+    pointer-events: none;
+    position: relative;
+    color: transparent;
+}
+
+.form-submit.loading::after,
+.btn-submit.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Secondary button */
+.btn-secondary,
+.form-cancel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 52px;
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-text-primary, #f8f9fa);
+    background: transparent;
+    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.8);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-secondary:hover,
+.form-cancel:hover {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+    border-color: var(--color-primary, #8b7fff);
+}
+
+/* Button group */
+.form-buttons,
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 2rem;
+}
+
+@media (min-width: 481px) {
+    .form-buttons.inline,
+    .button-group.inline {
+        flex-direction: row;
+    }
+
+    .form-buttons.inline > *,
+    .button-group.inline > * {
+        flex: 1;
+    }
+}
+
+/* ============================================
+   CHECKBOX & RADIO - TOUCH FRIENDLY
+   ============================================ */
+
+.form-checkbox,
+.form-radio {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    min-height: 44px;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.form-checkbox input[type="checkbox"],
+.form-radio input[type="radio"] {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--color-primary, #8b7fff);
+}
+
+.form-checkbox-label,
+.form-radio-label {
+    font-size: 0.9375rem;
+    color: var(--color-text-primary, #f8f9fa);
+    line-height: 1.5;
+}
+
+/* Custom checkbox/radio styling */
+.checkbox-custom,
+.radio-custom {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 44px;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.checkbox-custom input,
+.radio-custom input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.checkbox-custom .checkmark,
+.radio-custom .checkmark {
+    width: 24px;
+    height: 24px;
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
+    border: 2px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.8);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.radio-custom .checkmark {
+    border-radius: 50%;
+}
+
+.checkbox-custom input:checked + .checkmark,
+.radio-custom input:checked + .checkmark {
+    background: var(--color-primary, #8b7fff);
+    border-color: var(--color-primary, #8b7fff);
+}
+
+.checkbox-custom input:checked + .checkmark::after {
+    content: '';
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-bottom: 2px;
+}
+
+.radio-custom input:checked + .checkmark::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+}
+
+/* ============================================
+   FLOATING LABELS
+   ============================================ */
+
+.floating-label-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.floating-label-group .form-input,
+.floating-label-group input {
+    padding-top: 1.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.floating-label-group .form-label,
+.floating-label-group label {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: var(--color-text-secondary, #adb5bd);
+    pointer-events: none;
+    transition: all 0.2s ease;
+    background: transparent;
+    padding: 0 0.25rem;
+    margin: 0;
+}
+
+.floating-label-group .form-input:focus + .form-label,
+.floating-label-group .form-input:not(:placeholder-shown) + .form-label,
+.floating-label-group input:focus + label,
+.floating-label-group input:not(:placeholder-shown) + label {
+    top: 0.5rem;
+    transform: translateY(0);
+    font-size: 0.75rem;
+    color: var(--color-primary, #8b7fff);
+}
+
+/* ============================================
+   SEARCH INPUT SPECIFIC
+   ============================================ */
+
+.search-input-group {
+    position: relative;
+}
+
+.search-input-group .form-input,
+.search-input-group input[type="search"] {
+    padding-left: 3rem;
+    padding-right: 3rem;
+}
+
+.search-input-group .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-secondary, #adb5bd);
+    pointer-events: none;
+}
+
+.search-input-group .clear-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary, #adb5bd);
+    cursor: pointer;
+    border-radius: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.search-input-group .form-input:not(:placeholder-shown) + .search-icon + .clear-btn,
+.search-input-group input:not(:placeholder-shown) ~ .clear-btn {
+    opacity: 1;
+}
+
+/* ============================================
+   INPUT WITH ICON/PREFIX
+   ============================================ */
+
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon .input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-secondary, #adb5bd);
+    pointer-events: none;
+}
+
+.input-with-icon .form-input,
+.input-with-icon input {
+    padding-left: 3rem;
+}
+
+.input-with-prefix {
+    display: flex;
+    align-items: stretch;
+}
+
+.input-prefix {
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    background: rgba(var(--color-bg-secondary-rgb, 21, 26, 53), 0.8);
+    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.6);
+    border-right: none;
+    border-radius: 12px 0 0 12px;
+    color: var(--color-text-secondary, #adb5bd);
+    font-size: 0.9375rem;
+}
+
+.input-with-prefix .form-input,
+.input-with-prefix input {
+    border-radius: 0 12px 12px 0;
+}
+
+/* ============================================
+   MOBILE-SPECIFIC ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 640px) {
+    /* Ensure full width on mobile */
+    .form-group,
+    .form-input,
+    .form-textarea,
+    .form-select,
+    .form-submit,
+    .btn-submit,
+    .btn-secondary,
+    input,
+    textarea,
+    select,
+    button[type="submit"] {
+        width: 100%;
+    }
+
+    /* Larger touch targets */
+    .form-input,
+    .form-textarea,
+    .form-select,
+    input,
+    textarea,
+    select {
+        min-height: 52px;
+        padding: 1rem;
+    }
+
+    /* Larger buttons */
+    .form-submit,
+    .btn-submit,
+    button[type="submit"],
+    input[type="submit"] {
+        min-height: 56px;
+        font-size: 1.0625rem;
+    }
+
+    /* Extra spacing for forms */
+    .form-group {
+        margin-bottom: 1.75rem;
+    }
+
+    /* Stack buttons on very small screens */
+    .form-buttons,
+    .button-group {
+        flex-direction: column;
+    }
+
+    /* Ensure keyboard doesn't cover inputs */
+    .form-input:focus,
+    .form-textarea:focus,
+    input:focus,
+    textarea:focus {
+        scroll-margin-bottom: 120px;
+    }
+}
+
+/* ============================================
+   KEYBOARD TYPE HINTS
+   ============================================ */
+
+/* These classes help indicate appropriate keyboard types */
+.input-email {
+    /* inputmode="email" should be set in HTML */
+}
+
+.input-tel {
+    /* inputmode="tel" should be set in HTML */
+}
+
+.input-numeric {
+    /* inputmode="numeric" should be set in HTML */
+}
+
+.input-decimal {
+    /* inputmode="decimal" should be set in HTML */
+}
+
+.input-url {
+    /* inputmode="url" should be set in HTML */
+}
+
+.input-search {
+    /* type="search" should be set in HTML */
+}
+
+/* ============================================
+   DARK MODE / THEME ADJUSTMENTS
+   ============================================ */
+
+/* These styles work with the existing theme system */
+[data-theme="cosmic"] .form-input:focus,
+[data-theme="cosmic"] .form-textarea:focus,
+[data-theme="cosmic"] .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+[data-theme="sacred"] .form-input:focus,
+[data-theme="sacred"] .form-textarea:focus,
+[data-theme="sacred"] .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15);
+}
+
+[data-theme="golden"] .form-input:focus,
+[data-theme="golden"] .form-textarea:focus,
+[data-theme="golden"] .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+}
+
+[data-theme="ocean"] .form-input:focus,
+[data-theme="ocean"] .form-textarea:focus,
+[data-theme="ocean"] .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+}
+
+[data-theme="fire"] .form-input:focus,
+[data-theme="fire"] .form-textarea:focus,
+[data-theme="fire"] .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Focus visible for keyboard navigation */
+.form-input:focus-visible,
+.form-textarea:focus-visible,
+.form-select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--color-primary, #8b7fff);
+    outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .form-input,
+    .form-textarea,
+    .form-select,
+    input,
+    textarea,
+    select {
+        border-width: 2px;
+    }
+
+    .form-submit,
+    .btn-submit,
+    button[type="submit"] {
+        border: 2px solid white;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .form-input,
+    .form-textarea,
+    .form-select,
+    .form-submit,
+    .btn-submit,
+    input,
+    textarea,
+    select,
+    button,
+    .floating-label-group .form-label,
+    .floating-label-group label,
+    .form-error,
+    .error-message {
+        transition: none !important;
+        animation: none !important;
+    }
+}

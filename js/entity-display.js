@@ -848,11 +848,17 @@ class EntityDisplay {
 
     /**
      * Helper: Create entity link
+     * Formats entity ID as human-readable name (converts snake_case/kebab-case to Title Case)
      */
     static createEntityLink(id, type) {
         if (!id) return '';
-        // TODO: Fetch entity name from Firestore
-        return `<a href="/${type}s/${id}.html" class="entity-link" data-entity-id="${id}" data-entity-type="${type}">${id}</a>`;
+        // Format ID to display name: convert underscores/hyphens to spaces and capitalize each word
+        const displayName = id
+            .replace(/[-_]/g, ' ')
+            .split(' ')
+            .map(word => this.capitalize(word))
+            .join(' ');
+        return `<a href="/${type}s/${id}.html" class="entity-link" data-entity-id="${id}" data-entity-type="${type}">${displayName}</a>`;
     }
 
     /**

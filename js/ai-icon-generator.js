@@ -425,22 +425,372 @@ class AIIconGenerator {
     }
 
     /**
-     * Validate generated SVG
+     * Validate generated SVG with comprehensive checks
+     * @param {string} svgCode - SVG code to validate
+     * @returns {Object} Validation result with valid flag and errors array
      */
     validateSVG(svgCode) {
+        const errors = [];
+        const warnings = [];
+
+        // Basic checks
         if (!svgCode || typeof svgCode !== 'string') {
-            return { valid: false, errors: ['Invalid SVG code'] };
+            return { valid: false, errors: ['Invalid SVG code - must be a non-empty string'], warnings: [] };
         }
 
-        if (!svgCode.includes('<svg')) {
-            return { valid: false, errors: ['Not a valid SVG'] };
+        const trimmed = svgCode.trim();
+
+        // Check for SVG structure
+        if (!trimmed.includes('<svg')) {
+            errors.push('Missing <svg> element');
         }
 
-        if (!svgCode.includes('</svg>')) {
-            return { valid: false, errors: ['SVG not properly closed'] };
+        if (!trimmed.includes('</svg>')) {
+            errors.push('SVG not properly closed - missing </svg>');
         }
 
-        return { valid: true, errors: [] };
+        // Check for required attributes
+        if (!/<svg[^>]*viewBox=/i.test(trimmed)) {
+            warnings.push('Missing viewBox attribute - icon may not scale properly');
+        }
+
+        if (!/<svg[^>]*xmlns=/i.test(trimmed)) {
+            warnings.push('Missing xmlns attribute - may cause issues in some browsers');
+        }
+
+        // Check for potentially dangerous content (XSS prevention)
+        const dangerousPatterns = [
+            /<script/i,
+            /javascript:/i,
+            /on\w+\s*=/i,  // event handlers like onclick=
+            /<iframe/i,
+            /<object/i,
+            /<embed/i
+        ];
+
+        for (const pattern of dangerousPatterns) {
+            if (pattern.test(trimmed)) {
+                errors.push('SVG contains potentially dangerous content (scripts or event handlers)');
+                break;
+            }
+        }
+
+        // Check for valid path syntax
+        const pathElements = trimmed.match(/<path[^>]*d="([^"]*)"[^>]*>/gi) || [];
+        for (const pathEl of pathElements) {
+            const dAttr = pathEl.match(/d="([^"]*)"/);
+            if (dAttr && dAttr[1]) {
+                const pathData = dAttr[1];
+                // Very basic path validation - check for valid commands
+                const validCommands = /^[MmZzLlHhVvCcSsQqTtAa0-9\s,.-]+$/;
+                if (!validCommands.test(pathData)) {
+                    warnings.push('Path data may contain invalid characters');
+                }
+            }
+        }
+
+        // Check file size (warn if over 50KB)
+        if (trimmed.length > 50000) {
+            warnings.push('SVG is larger than 50KB - consider optimizing');
+        }
+
+        // Check for reasonable dimensions
+        const viewBoxMatch = trimmed.match(/viewBox=["']([^"']*)["']/);
+        if (viewBoxMatch) {
+            const parts = viewBoxMatch[1].split(/[\s,]+/);
+            if (parts.length === 4) {
+                const width = parseFloat(parts[2]);
+                const height = parseFloat(parts[3]);
+                if (width > 2000 || height > 2000) {
+                    warnings.push('ViewBox dimensions are very large - may affect performance');
+                }
+            }
+        }
+
+        return {
+            valid: errors.length === 0,
+            errors,
+            warnings,
+            sanitized: errors.length === 0 ? this.sanitizeSVG(trimmed) : null
+        };
+    }
+
+    /**
+     * Sanitize SVG by removing potentially dangerous elements
+     * @param {string} svgCode - SVG code to sanitize
+     * @returns {string} Sanitized SVG
+     */
+    sanitizeSVG(svgCode) {
+        let sanitized = svgCode;
+
+        // Remove script tags
+        sanitized = sanitized.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+
+        // Remove event handlers
+        sanitized = sanitized.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
+
+        // Remove javascript: URLs
+        sanitized = sanitized.replace(/javascript:[^"']*/gi, '');
+
+        // Remove external references that could be tracking pixels
+        sanitized = sanitized.replace(/xlink:href\s*=\s*["'](?!#)[^"']*["']/gi, '');
+
+        return sanitized;
+    }
+
+    /**
+     * Style presets for icon generation
+     */
+    static STYLE_PRESETS = {
+        symbolic: {
+            name: 'Symbolic',
+            description: 'Clean, iconic symbols with minimal detail',
+            strokeWidth: 2,
+            fillOpacity: 0.7,
+            strokeOpacity: 1,
+            useGradients: false,
+            cornerRadius: 15
+        },
+        detailed: {
+            name: 'Detailed',
+            description: 'Rich, intricate designs with layered elements',
+            strokeWidth: 1.5,
+            fillOpacity: 0.8,
+            strokeOpacity: 0.9,
+            useGradients: true,
+            cornerRadius: 12
+        },
+        minimalist: {
+            name: 'Minimalist',
+            description: 'Simple, modern aesthetic with clean lines',
+            strokeWidth: 2.5,
+            fillOpacity: 0.5,
+            strokeOpacity: 1,
+            useGradients: false,
+            cornerRadius: 20
+        },
+        geometric: {
+            name: 'Geometric',
+            description: 'Sacred geometry patterns with precise shapes',
+            strokeWidth: 1,
+            fillOpacity: 0.6,
+            strokeOpacity: 1,
+            useGradients: true,
+            cornerRadius: 0
+        },
+        vintage: {
+            name: 'Vintage',
+            description: 'Classic, aged appearance with muted tones',
+            strokeWidth: 1.5,
+            fillOpacity: 0.75,
+            strokeOpacity: 0.85,
+            useGradients: false,
+            cornerRadius: 10
+        },
+        neon: {
+            name: 'Neon',
+            description: 'Glowing, vibrant cyberpunk aesthetic',
+            strokeWidth: 2,
+            fillOpacity: 0.3,
+            strokeOpacity: 1,
+            useGradients: true,
+            cornerRadius: 15,
+            glowEffect: true
+        }
+    };
+
+    /**
+     * Theme color palettes
+     */
+    static THEME_PALETTES = {
+        night: {
+            name: 'Night',
+            background: 'rgba(10, 14, 39, 0.9)',
+            primary: '#8b7fff',
+            secondary: '#667eea',
+            accent: '#a78bfa'
+        },
+        cosmic: {
+            name: 'Cosmic',
+            background: 'rgba(15, 10, 30, 0.9)',
+            primary: '#ec4899',
+            secondary: '#8b5cf6',
+            accent: '#f472b6'
+        },
+        sacred: {
+            name: 'Sacred',
+            background: 'rgba(20, 15, 10, 0.9)',
+            primary: '#f59e0b',
+            secondary: '#d97706',
+            accent: '#fbbf24'
+        },
+        golden: {
+            name: 'Golden',
+            background: 'rgba(25, 20, 10, 0.9)',
+            primary: '#fbbf24',
+            secondary: '#f59e0b',
+            accent: '#fcd34d'
+        },
+        ocean: {
+            name: 'Ocean',
+            background: 'rgba(5, 15, 25, 0.9)',
+            primary: '#06b6d4',
+            secondary: '#0891b2',
+            accent: '#22d3ee'
+        },
+        fire: {
+            name: 'Fire',
+            background: 'rgba(20, 5, 5, 0.9)',
+            primary: '#ef4444',
+            secondary: '#dc2626',
+            accent: '#f97316'
+        },
+        nature: {
+            name: 'Nature',
+            background: 'rgba(10, 20, 10, 0.9)',
+            primary: '#22c55e',
+            secondary: '#16a34a',
+            accent: '#4ade80'
+        }
+    };
+
+    /**
+     * Generate icon with specific style preset
+     * @param {Object} entityData - Entity metadata
+     * @param {string} styleName - Style preset name
+     * @param {string} themeName - Theme palette name
+     * @returns {Object} Result with SVG and metadata
+     */
+    generateWithStyle(entityData, styleName = 'symbolic', themeName = 'night') {
+        const style = AIIconGenerator.STYLE_PRESETS[styleName] || AIIconGenerator.STYLE_PRESETS.symbolic;
+        const theme = AIIconGenerator.THEME_PALETTES[themeName] || AIIconGenerator.THEME_PALETTES.night;
+
+        try {
+            // Analyze entity to determine visual elements
+            const analysis = this.analyzeEntity(entityData);
+            const elements = this.selectVisualElements(analysis);
+
+            // Apply style and theme
+            const svg = this.composeSVGWithStyle(elements, entityData, style, theme);
+
+            return {
+                success: true,
+                svgCode: svg,
+                metadata: {
+                    entityName: entityData.name,
+                    entityType: entityData.type,
+                    mythology: entityData.mythology,
+                    style: styleName,
+                    theme: themeName,
+                    generatedAt: new Date().toISOString()
+                }
+            };
+        } catch (error) {
+            console.error('Icon generation error:', error);
+            return {
+                success: false,
+                error: error.message,
+                svgCode: this.generateFallbackIcon(entityData.name || 'Icon')
+            };
+        }
+    }
+
+    /**
+     * Compose SVG with style and theme applied
+     */
+    composeSVGWithStyle(elements, entityData, style, theme) {
+        const viewBox = '0 0 100 100';
+        const size = 64;
+        const timestamp = Date.now();
+        const title = entityData.name || 'Icon';
+
+        // Build gradient definitions if needed
+        let defs = '';
+        if (style.useGradients) {
+            defs = `
+        <linearGradient id="grad-primary-${timestamp}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:${theme.primary};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${theme.secondary};stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="grad-secondary-${timestamp}" x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:${theme.secondary};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${theme.accent};stop-opacity:1" />
+        </linearGradient>`;
+        }
+
+        // Add glow effect if neon style
+        if (style.glowEffect) {
+            defs += `
+        <filter id="glow-${timestamp}" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>`;
+        }
+
+        // Build paths based on elements and style
+        let paths = '';
+        const primaryColor = style.useGradients ? `url(#grad-primary-${timestamp})` : theme.primary;
+        const secondaryColor = style.useGradients ? `url(#grad-secondary-${timestamp})` : theme.secondary;
+        const glowFilter = style.glowEffect ? `filter="url(#glow-${timestamp})"` : '';
+
+        if (elements.length === 1) {
+            paths = `<path d="${elements[0].path}"
+                fill="${primaryColor}"
+                fill-opacity="${style.fillOpacity}"
+                stroke="${theme.accent}"
+                stroke-width="${style.strokeWidth}"
+                stroke-opacity="${style.strokeOpacity}"
+                ${glowFilter}/>`;
+        } else if (elements.length >= 2) {
+            paths = `
+            <path d="${elements[0].path}"
+                fill="${primaryColor}"
+                fill-opacity="${style.fillOpacity * 0.9}"
+                stroke="${theme.secondary}"
+                stroke-width="${style.strokeWidth * 0.75}"
+                ${glowFilter}/>
+            <path d="${elements[1].path}"
+                fill="${secondaryColor}"
+                fill-opacity="${style.fillOpacity * 0.6}"
+                stroke="${theme.primary}"
+                stroke-width="${style.strokeWidth * 0.5}"
+                ${glowFilter}/>`;
+        } else {
+            // Fallback circle
+            paths = `<circle cx="50" cy="50" r="30"
+                fill="${primaryColor}"
+                fill-opacity="${style.fillOpacity}"
+                stroke="${theme.accent}"
+                stroke-width="${style.strokeWidth}"
+                ${glowFilter}/>`;
+        }
+
+        return `<svg viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" aria-label="${title}">
+    <title>${title}</title>
+    <defs>${defs}
+    </defs>
+    <rect width="100" height="100" fill="${theme.background}" rx="${style.cornerRadius}"/>
+    ${paths}
+</svg>`;
+    }
+
+    /**
+     * Get all available style presets
+     * @returns {Object} Style presets object
+     */
+    static getStylePresets() {
+        return AIIconGenerator.STYLE_PRESETS;
+    }
+
+    /**
+     * Get all available theme palettes
+     * @returns {Object} Theme palettes object
+     */
+    static getThemePalettes() {
+        return AIIconGenerator.THEME_PALETTES;
     }
 
     /**

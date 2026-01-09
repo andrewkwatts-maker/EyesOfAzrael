@@ -766,8 +766,11 @@ class EnhancedEntityRenderer extends FirebaseEntityRenderer {
         relationshipCards.forEach(card => {
             card.addEventListener('click', () => {
                 const name = card.querySelector('.relationship-name').textContent;
-                console.log('Navigate to:', name);
-                // TODO: Implement navigation
+                // Convert name to URL-friendly ID (lowercase, spaces to hyphens)
+                const entityId = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                const mythology = this.mythology || entity.mythology || 'greek';
+                // Navigate to the entity detail page
+                window.location.href = `/mythos/${mythology}/deities/${entityId}.html`;
             });
         });
     }

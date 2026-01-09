@@ -46,14 +46,47 @@ class BreadcrumbNav {
         const breadcrumbs = this.generateBreadcrumbs(route);
         const html = this.renderBreadcrumbs(breadcrumbs);
 
+        // Apply transition for smooth update
+        this.container.style.opacity = '0';
+        this.container.style.transform = 'translateY(-4px)';
+
         this.container.innerHTML = html;
         this.attachEventListeners();
 
         // Show or hide container based on breadcrumbs
         if (breadcrumbs.length > 1) {
             this.container.classList.add('visible');
+
+            // Animate in after DOM update
+            requestAnimationFrame(() => {
+                this.container.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+                this.container.style.opacity = '1';
+                this.container.style.transform = 'translateY(0)';
+            });
+
+            // Announce breadcrumb update to screen readers
+            this._announceUpdate(breadcrumbs);
         } else {
             this.container.classList.remove('visible');
+            this.container.style.opacity = '1';
+            this.container.style.transform = 'translateY(0)';
+        }
+    }
+
+    /**
+     * Announce breadcrumb update to screen readers
+     * @param {Array} breadcrumbs - Array of breadcrumb objects
+     */
+    _announceUpdate(breadcrumbs) {
+        const currentPage = breadcrumbs[breadcrumbs.length - 1]?.label;
+        const announcer = document.getElementById('spa-route-announcer');
+
+        if (announcer && currentPage) {
+            // Delay announcement slightly to allow page content to render
+            setTimeout(() => {
+                const path = breadcrumbs.map(c => c.label).join(' > ');
+                announcer.textContent = `Navigation: ${path}`;
+            }, 100);
         }
     }
 

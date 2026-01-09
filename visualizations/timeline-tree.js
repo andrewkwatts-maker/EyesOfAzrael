@@ -177,7 +177,7 @@ class TimelineTree {
       });
     });
 
-    // Calculate connections based on influences (TODO: populate when influence data available)
+    // Calculate connections based on influences and temporal/cultural relationships
     this.calculateConnections();
 
     // Center view

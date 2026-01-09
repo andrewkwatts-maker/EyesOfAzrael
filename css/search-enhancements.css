@@ -1,0 +1,868 @@
+/**
+ * Search Enhancements CSS
+ * Eyes of Azrael
+ *
+ * Polished styles for:
+ * - Command palette (Ctrl+K)
+ * - Enhanced autocomplete dropdown
+ * - Recent searches
+ * - Loading states
+ * - Keyboard hints
+ *
+ * @version 2.0.0
+ */
+
+/* ============================================================================
+   CSS Custom Properties
+   ============================================================================ */
+
+:root {
+    /* Command palette tokens */
+    --cmd-bg: rgba(15, 15, 25, 0.98);
+    --cmd-backdrop: rgba(0, 0, 0, 0.75);
+    --cmd-border: rgba(147, 112, 219, 0.2);
+    --cmd-border-active: rgba(147, 112, 219, 0.5);
+    --cmd-text: #f8f9fa;
+    --cmd-text-secondary: #adb5bd;
+    --cmd-text-muted: #6c757d;
+    --cmd-item-hover: rgba(147, 112, 219, 0.15);
+    --cmd-item-active: rgba(147, 112, 219, 0.25);
+    --cmd-primary: #9370DB;
+    --cmd-primary-rgb: 147, 112, 219;
+    --cmd-secondary: #B094E6;
+    --cmd-radius: 16px;
+    --cmd-radius-sm: 8px;
+    --cmd-shadow: 0 25px 100px rgba(0, 0, 0, 0.5);
+    --cmd-transition: 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ============================================================================
+   Command Palette
+   ============================================================================ */
+
+.command-palette {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 15vh;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--cmd-transition), visibility var(--cmd-transition);
+}
+
+.command-palette.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Backdrop */
+.command-palette-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--cmd-backdrop);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Container */
+.command-palette-container {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    max-height: 70vh;
+    margin: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    background: var(--cmd-bg);
+    border: 1px solid var(--cmd-border);
+    border-radius: var(--cmd-radius);
+    box-shadow: var(--cmd-shadow);
+    overflow: hidden;
+    transform: translateY(-20px) scale(0.95);
+    transition: transform var(--cmd-transition);
+}
+
+.command-palette.open .command-palette-container {
+    transform: translateY(0) scale(1);
+}
+
+/* Header */
+.command-palette-header {
+    flex-shrink: 0;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--cmd-border);
+}
+
+.command-palette-search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px solid var(--cmd-border);
+    border-radius: var(--cmd-radius-sm);
+    transition: border-color var(--cmd-transition);
+}
+
+.command-palette-search-wrapper:focus-within {
+    border-color: var(--cmd-border-active);
+}
+
+.command-palette-icon {
+    flex-shrink: 0;
+    color: var(--cmd-text-secondary);
+}
+
+.command-palette-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1.1rem;
+    font-family: inherit;
+    color: var(--cmd-text);
+}
+
+.command-palette-input::placeholder {
+    color: var(--cmd-text-muted);
+}
+
+.command-palette-kbd {
+    flex-shrink: 0;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-family: inherit;
+    font-weight: 600;
+    color: var(--cmd-text-secondary);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* Body */
+.command-palette-body {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--cmd-primary) transparent;
+}
+
+.command-palette-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.command-palette-body::-webkit-scrollbar-thumb {
+    background: var(--cmd-primary);
+    border-radius: 3px;
+}
+
+.command-palette-content {
+    padding: 0.5rem;
+}
+
+/* Section */
+.command-section {
+    margin-bottom: 0.5rem;
+}
+
+.command-section:last-child {
+    margin-bottom: 0;
+}
+
+.command-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem 0.5rem;
+}
+
+.command-section-icon {
+    font-size: 1rem;
+}
+
+.command-section-title {
+    flex: 1;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--cmd-text-secondary);
+}
+
+.command-section-clear {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--cmd-text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.command-section-clear:hover {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.command-section-items {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Command Item */
+.command-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--cmd-radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.command-item:hover,
+.command-item.active {
+    background: var(--cmd-item-hover);
+}
+
+.command-item.active {
+    background: var(--cmd-item-active);
+}
+
+.command-item-primary {
+    background: rgba(var(--cmd-primary-rgb), 0.1);
+    border: 1px solid rgba(var(--cmd-primary-rgb), 0.2);
+}
+
+.command-item-primary:hover,
+.command-item-primary.active {
+    background: rgba(var(--cmd-primary-rgb), 0.2);
+    border-color: rgba(var(--cmd-primary-rgb), 0.4);
+}
+
+.command-item-icon {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    opacity: 0.8;
+}
+
+.command-item-text {
+    flex: 1;
+    font-size: 0.95rem;
+    color: var(--cmd-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.command-item-text mark {
+    background: rgba(255, 215, 0, 0.3);
+    color: inherit;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+.command-item-meta {
+    font-size: 0.8rem;
+    color: var(--cmd-text-muted);
+}
+
+.command-item kbd {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--cmd-text-secondary);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* Command Chips */
+.command-chips {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0 0.75rem;
+}
+
+.command-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--cmd-text);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.command-chip:hover {
+    background: var(--cmd-primary);
+    border-color: var(--cmd-primary);
+    color: white;
+}
+
+/* Loading State */
+.command-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem 1rem;
+    color: var(--cmd-text-secondary);
+}
+
+.command-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(var(--cmd-primary-rgb), 0.2);
+    border-top-color: var(--cmd-primary);
+    border-radius: 50%;
+    animation: cmd-spin 0.8s linear infinite;
+}
+
+@keyframes cmd-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Footer */
+.command-palette-footer {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--cmd-border);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.command-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--cmd-text-muted);
+}
+
+.command-hint kbd {
+    padding: 0.15rem 0.375rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--cmd-text-secondary);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+/* ============================================================================
+   Enhanced Search Dropdown
+   ============================================================================ */
+
+.search-dropdown-enhanced {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(15, 15, 25, 0.98);
+    border: 1px solid var(--cmd-border);
+    border-radius: var(--cmd-radius);
+    box-shadow: var(--cmd-shadow);
+    max-height: 400px;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all var(--cmd-transition);
+}
+
+.search-dropdown-enhanced.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-section {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--cmd-border);
+}
+
+.dropdown-section:last-child {
+    border-bottom: none;
+}
+
+.dropdown-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--cmd-text-secondary);
+}
+
+.dropdown-clear-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--cmd-text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dropdown-clear-btn:hover {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dropdown-item:hover,
+.dropdown-item.active {
+    background: var(--cmd-item-hover);
+}
+
+.dropdown-item-icon {
+    flex-shrink: 0;
+    font-size: 1rem;
+    opacity: 0.7;
+}
+
+.dropdown-item-text {
+    flex: 1;
+    font-size: 0.95rem;
+    color: var(--cmd-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdown-item-text mark {
+    background: rgba(255, 215, 0, 0.3);
+    color: inherit;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+.dropdown-item-count {
+    font-size: 0.8rem;
+    color: var(--cmd-text-muted);
+}
+
+/* Loading */
+.dropdown-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem;
+    color: var(--cmd-text-secondary);
+}
+
+.dropdown-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(var(--cmd-primary-rgb), 0.2);
+    border-top-color: var(--cmd-primary);
+    border-radius: 50%;
+    animation: cmd-spin 0.8s linear infinite;
+}
+
+/* No Results */
+.dropdown-no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    color: var(--cmd-text-secondary);
+}
+
+.dropdown-no-results-icon {
+    font-size: 2rem;
+    opacity: 0.5;
+}
+
+.dropdown-no-results-hint {
+    font-size: 0.8rem;
+    color: var(--cmd-text-muted);
+}
+
+/* ============================================================================
+   Keyboard Shortcut Hint
+   ============================================================================ */
+
+.search-kbd-hint {
+    position: absolute;
+    right: 100px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0.25rem 0.5rem;
+    background: rgba(var(--cmd-primary-rgb), 0.1);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    opacity: 0.8;
+}
+
+.search-kbd-hint:hover {
+    opacity: 1;
+    background: rgba(var(--cmd-primary-rgb), 0.2);
+}
+
+.search-kbd-hint kbd {
+    padding: 0.15rem 0.375rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--cmd-primary);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(var(--cmd-primary-rgb), 0.3);
+    border-radius: 4px;
+}
+
+/* Hide on mobile */
+@media (max-width: 768px) {
+    .search-kbd-hint {
+        display: none;
+    }
+}
+
+/* ============================================================================
+   Enhanced Loading States for Search Results
+   ============================================================================ */
+
+.search-loading-enhanced {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    padding: 3rem;
+    text-align: center;
+}
+
+.search-loading-animation {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 2rem;
+}
+
+.search-loading-ring {
+    position: absolute;
+    inset: 0;
+    border: 3px solid transparent;
+    border-top-color: var(--cmd-primary);
+    border-radius: 50%;
+    animation: search-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.search-loading-ring:nth-child(2) {
+    inset: 10px;
+    border-top-color: var(--cmd-secondary);
+    animation-delay: -0.4s;
+}
+
+.search-loading-ring:nth-child(3) {
+    inset: 20px;
+    border-top-color: #51cf66;
+    animation-delay: -0.8s;
+}
+
+@keyframes search-spin {
+    to { transform: rotate(360deg); }
+}
+
+.search-loading-text {
+    font-size: 1.1rem;
+    color: var(--cmd-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.search-loading-subtext {
+    font-size: 0.9rem;
+    color: var(--cmd-text-muted);
+}
+
+/* Shimmer effect for skeleton cards */
+.search-skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.search-skeleton-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.08),
+        transparent
+    );
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* ============================================================================
+   No Results State Enhancement
+   ============================================================================ */
+
+.no-results-enhanced {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(
+        135deg,
+        rgba(var(--cmd-primary-rgb), 0.05) 0%,
+        rgba(var(--cmd-primary-rgb), 0.02) 100%
+    );
+    border: 2px dashed rgba(var(--cmd-primary-rgb), 0.2);
+    border-radius: 20px;
+}
+
+.no-results-visual {
+    margin-bottom: 1.5rem;
+}
+
+.no-results-icon-animated {
+    font-size: 4rem;
+    opacity: 0.6;
+    animation: no-results-bounce 2s ease-in-out infinite;
+}
+
+@keyframes no-results-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.no-results-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--cmd-text);
+    margin: 0 0 0.5rem;
+}
+
+.no-results-query {
+    color: var(--cmd-primary);
+}
+
+.no-results-hint {
+    font-size: 1rem;
+    color: var(--cmd-text-secondary);
+    margin: 0 0 2rem;
+}
+
+.no-results-tips {
+    max-width: 400px;
+    margin: 0 auto 2rem;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    text-align: left;
+}
+
+.no-results-tips-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--cmd-text);
+    margin: 0 0 0.75rem;
+}
+
+.no-results-tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.no-results-tips-list li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--cmd-text-secondary);
+}
+
+.no-results-tips-list li::before {
+    content: '\2713';
+    position: absolute;
+    left: 0;
+    color: var(--cmd-primary);
+}
+
+.no-results-suggestions {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(var(--cmd-primary-rgb), 0.2);
+}
+
+.suggestions-title {
+    font-size: 0.9rem;
+    color: var(--cmd-text-secondary);
+    margin: 0 0 1rem;
+}
+
+.suggestion-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.suggestion-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--cmd-primary);
+    background: rgba(var(--cmd-primary-rgb), 0.1);
+    border: 1px solid rgba(var(--cmd-primary-rgb), 0.3);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.suggestion-btn:hover {
+    background: var(--cmd-primary);
+    border-color: var(--cmd-primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* ============================================================================
+   Light Mode Support
+   ============================================================================ */
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --cmd-bg: rgba(255, 255, 255, 0.98);
+        --cmd-backdrop: rgba(0, 0, 0, 0.5);
+        --cmd-border: rgba(147, 112, 219, 0.15);
+        --cmd-border-active: rgba(147, 112, 219, 0.4);
+        --cmd-text: #1a1a2e;
+        --cmd-text-secondary: #666;
+        --cmd-text-muted: #999;
+        --cmd-item-hover: rgba(147, 112, 219, 0.1);
+        --cmd-item-active: rgba(147, 112, 219, 0.15);
+    }
+
+    .command-palette-search-wrapper {
+        background: rgba(0, 0, 0, 0.02);
+    }
+
+    .command-palette-kbd,
+    .command-hint kbd,
+    .search-kbd-hint kbd {
+        background: rgba(0, 0, 0, 0.05);
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .command-chip {
+        background: rgba(0, 0, 0, 0.03);
+        border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .search-dropdown-enhanced {
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    }
+}
+
+/* ============================================================================
+   Responsive Adjustments
+   ============================================================================ */
+
+@media (max-width: 640px) {
+    .command-palette {
+        padding-top: 5vh;
+    }
+
+    .command-palette-container {
+        max-height: 80vh;
+        margin: 0 0.5rem;
+        border-radius: 12px;
+    }
+
+    .command-palette-input {
+        font-size: 1rem;
+    }
+
+    .command-palette-footer {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .command-item {
+        padding: 0.625rem 0.75rem;
+    }
+}
+
+/* ============================================================================
+   Reduced Motion
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .command-palette,
+    .command-palette-container,
+    .search-dropdown-enhanced,
+    .command-item,
+    .dropdown-item {
+        transition: none;
+    }
+
+    .command-spinner,
+    .dropdown-spinner,
+    .search-loading-ring,
+    .no-results-icon-animated {
+        animation: none;
+    }
+
+    .search-skeleton-shimmer::after {
+        animation: none;
+    }
+}
+
+/* ============================================================================
+   Print Styles
+   ============================================================================ */
+
+@media print {
+    .command-palette,
+    .search-kbd-hint,
+    .search-dropdown-enhanced {
+        display: none !important;
+    }
+}

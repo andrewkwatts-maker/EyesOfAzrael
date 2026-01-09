@@ -824,6 +824,9 @@ class EntityDetailViewer {
 
                         <!-- Quick Stats in Hero -->
                         ${this.renderQuickStats(entity, entityType)}
+
+                        <!-- Hero Action Buttons -->
+                        ${this.renderHeroActions(entity)}
                     </div>
                 </header>
 
@@ -954,6 +957,47 @@ class EntityDetailViewer {
     }
 
     /**
+     * Render hero action buttons
+     */
+    renderHeroActions(entity) {
+        const isFavorite = EntityDetailViewer.isBookmarked(entity.id);
+
+        return `
+            <div class="entity-hero-actions">
+                <button class="hero-action-btn hero-action-btn--favorite${isFavorite ? ' active' : ''}"
+                        data-action="bookmark"
+                        data-entity-id="${this.escapeAttr(entity.id)}"
+                        aria-label="${isFavorite ? 'Remove from favorites' : 'Add to favorites'}"
+                        aria-pressed="${isFavorite}">
+                    <span class="action-icon" aria-hidden="true">${isFavorite ? '&#9829;' : '&#9825;'}</span>
+                    <span class="action-text">${isFavorite ? 'Favorited' : 'Favorite'}</span>
+                </button>
+                <button class="hero-action-btn"
+                        data-action="share"
+                        data-entity-name="${this.escapeAttr(entity.name || entity.title)}"
+                        data-entity-id="${this.escapeAttr(entity.id)}"
+                        aria-label="Share this entity">
+                    <span class="action-icon" aria-hidden="true">&#128279;</span>
+                    <span class="action-text">Share</span>
+                </button>
+                <button class="hero-action-btn"
+                        data-action="add-note"
+                        data-entity-id="${this.escapeAttr(entity.id)}"
+                        aria-label="Add personal note">
+                    <span class="action-icon" aria-hidden="true">&#128221;</span>
+                    <span class="action-text">Add Note</span>
+                </button>
+                ${entity.editLink ? `
+                    <a href="${this.escapeAttr(entity.editLink)}" class="hero-action-btn hero-action-btn--primary" aria-label="Edit this entity">
+                        <span class="action-icon" aria-hidden="true">&#9998;</span>
+                        <span class="action-text">Edit</span>
+                    </a>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    /**
      * Render Overview tab panel
      */
     renderOverviewPanel(entity, entityType) {
@@ -1044,63 +1088,110 @@ class EntityDetailViewer {
                 </h2>
 
                 <!-- Community Sub-tabs -->
-                <div class="community-tabs">
-                    <button class="community-tab active" data-community-tab="notes">
-                        <span class="tab-icon">&#128221;</span>
+                <div class="community-tabs" role="tablist">
+                    <button class="community-tab active" data-community-tab="discussion" role="tab" aria-selected="true">
+                        <span class="tab-icon" aria-hidden="true">&#128172;</span>
+                        Discussion
+                    </button>
+                    <button class="community-tab" data-community-tab="notes" role="tab" aria-selected="false">
+                        <span class="tab-icon" aria-hidden="true">&#128221;</span>
                         Notes
                     </button>
-                    <button class="community-tab" data-community-tab="perspectives">
-                        <span class="tab-icon">&#128065;</span>
-                        User Perspectives
+                    <button class="community-tab" data-community-tab="perspectives" role="tab" aria-selected="false">
+                        <span class="tab-icon" aria-hidden="true">&#128065;</span>
+                        Perspectives
                     </button>
-                    <button class="community-tab" data-community-tab="connections">
-                        <span class="tab-icon">&#128279;</span>
-                        Relationships
+                    <button class="community-tab" data-community-tab="connections" role="tab" aria-selected="false">
+                        <span class="tab-icon" aria-hidden="true">&#128279;</span>
+                        Connections
                     </button>
                 </div>
 
                 <!-- Community Content Panels -->
                 <div class="community-panels">
-                    <!-- Notes Panel -->
-                    <div class="community-panel active" data-panel="notes">
-                        <div class="community-empty-state">
-                            <span class="empty-icon">&#128221;</span>
-                            <h3>No Notes Yet</h3>
-                            <p>Be the first to add notes about this entity.</p>
-                            <button class="btn-contribute" data-action="add-note" data-entity-id="${this.escapeAttr(entity.id)}">
-                                <span class="btn-icon">&#10133;</span>
-                                Add Note
-                            </button>
+                    <!-- Discussion Panel (Reddit-style threaded discussions) -->
+                    <div class="community-panel active" data-panel="discussion" role="tabpanel">
+                        <div class="asset-discussion-container"
+                             id="discussion-${this.escapeAttr(entity.id)}"
+                             data-asset-id="${this.escapeAttr(entity.id)}"
+                             data-asset-type="${this.escapeAttr(entity.entityType || 'entities')}"
+                             data-asset-name="${this.escapeAttr(entity.name || '')}"
+                             data-mythology="${this.escapeAttr(entity.mythology || '')}">
+                            <!-- AssetDiscussion component will be initialized here -->
+                            <div class="discussion-loading">
+                                <div class="loading-spinner"></div>
+                                <p class="loading-text">Loading discussions...</p>
+                            </div>
                         </div>
-                        <div class="community-notes-list" id="notes-list"></div>
+                    </div>
+
+                    <!-- Notes Panel -->
+                    <div class="community-panel" data-panel="notes" role="tabpanel">
+                        <div class="community-notes-list" id="notes-list">
+                            <div class="community-empty-state">
+                                <span class="empty-icon" aria-hidden="true">&#128221;</span>
+                                <h3>Share Your Research Notes</h3>
+                                <p>Add personal notes, observations, or research about ${this.escapeHtml(entity.name || 'this entity')}.</p>
+                                <button class="btn-contribute" data-action="add-note" data-entity-id="${this.escapeAttr(entity.id)}">
+                                    <span class="btn-icon" aria-hidden="true">&#10133;</span>
+                                    Add Note
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Add Note Form (hidden by default) -->
+                        <div class="add-contribution-form" id="add-note-form" style="display: none;">
+                            <h4>Add Your Note</h4>
+                            <textarea class="contribution-textarea" placeholder="Share your research notes, observations, or insights about ${this.escapeHtml(entity.name || 'this entity')}..." aria-label="Note content"></textarea>
+                            <div class="contribution-actions">
+                                <button class="btn-secondary" data-action="cancel-note">Cancel</button>
+                                <button class="btn-primary" data-action="submit-note" data-entity-id="${this.escapeAttr(entity.id)}">
+                                    <span class="btn-icon" aria-hidden="true">&#10003;</span>
+                                    Save Note
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Perspectives Panel -->
-                    <div class="community-panel" data-panel="perspectives">
-                        <div class="community-empty-state">
-                            <span class="empty-icon">&#128065;</span>
-                            <h3>No Perspectives Yet</h3>
-                            <p>Share your interpretation or analysis.</p>
-                            <button class="btn-contribute" data-action="add-perspective" data-entity-id="${this.escapeAttr(entity.id)}">
-                                <span class="btn-icon">&#10133;</span>
-                                Add Perspective
-                            </button>
+                    <div class="community-panel" data-panel="perspectives" role="tabpanel">
+                        <div class="community-perspectives-list" id="perspectives-list">
+                            <div class="community-empty-state">
+                                <span class="empty-icon" aria-hidden="true">&#128065;</span>
+                                <h3>Share Your Interpretation</h3>
+                                <p>What does ${this.escapeHtml(entity.name || 'this entity')} mean to you? Share your unique perspective.</p>
+                                <button class="btn-contribute" data-action="add-perspective" data-entity-id="${this.escapeAttr(entity.id)}">
+                                    <span class="btn-icon" aria-hidden="true">&#10133;</span>
+                                    Add Perspective
+                                </button>
+                            </div>
                         </div>
-                        <div class="community-perspectives-list" id="perspectives-list"></div>
+                        <!-- Add Perspective Form (hidden by default) -->
+                        <div class="add-contribution-form" id="add-perspective-form" style="display: none;">
+                            <h4>Share Your Perspective</h4>
+                            <textarea class="contribution-textarea" placeholder="Share your interpretation, analysis, or personal insights about ${this.escapeHtml(entity.name || 'this entity')}..." aria-label="Perspective content"></textarea>
+                            <div class="contribution-actions">
+                                <button class="btn-secondary" data-action="cancel-perspective">Cancel</button>
+                                <button class="btn-primary" data-action="submit-perspective" data-entity-id="${this.escapeAttr(entity.id)}">
+                                    <span class="btn-icon" aria-hidden="true">&#10003;</span>
+                                    Share Perspective
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Connections Panel -->
-                    <div class="community-panel" data-panel="connections">
-                        <div class="community-empty-state">
-                            <span class="empty-icon">&#128279;</span>
-                            <h3>No User Connections Yet</h3>
-                            <p>Suggest connections to other entities.</p>
-                            <button class="btn-contribute" data-action="add-connection" data-entity-id="${this.escapeAttr(entity.id)}">
-                                <span class="btn-icon">&#10133;</span>
-                                Add Connection
-                            </button>
+                    <div class="community-panel" data-panel="connections" role="tabpanel">
+                        <div class="community-connections-list" id="connections-list">
+                            <div class="community-empty-state">
+                                <span class="empty-icon" aria-hidden="true">&#128279;</span>
+                                <h3>Suggest Connections</h3>
+                                <p>Help map relationships between ${this.escapeHtml(entity.name || 'this entity')} and other mythological figures.</p>
+                                <button class="btn-contribute" data-action="add-connection" data-entity-id="${this.escapeAttr(entity.id)}">
+                                    <span class="btn-icon" aria-hidden="true">&#10133;</span>
+                                    Suggest Connection
+                                </button>
+                            </div>
                         </div>
-                        <div class="community-connections-list" id="connections-list"></div>
                     </div>
                 </div>
             </section>
@@ -1125,10 +1216,32 @@ class EntityDetailViewer {
         if (entity.linguistic) {
             sections.push({ id: 'linguistic-section', label: 'Linguistics', icon: '&#127759;' });
         }
+        if (entity.extendedContent?.length) {
+            sections.push({ id: 'extended-section', label: 'Deep Dive', icon: '&#128218;' });
+        }
+        if (entity.metaphysicalProperties) {
+            sections.push({ id: 'metaphysical-section', label: 'Metaphysics', icon: '&#10024;' });
+        }
 
         if (sections.length === 0) return '';
 
         return `
+            <nav class="entity-toc" aria-label="Table of contents">
+                <h3 class="toc-title">Contents</h3>
+                <ul class="toc-list">
+                    ${sections.map((section, index) => `
+                        <li class="toc-item${index === 0 ? ' active' : ''}" data-section="${section.id}">
+                            <a href="#${section.id}" class="toc-link" data-toc-link="${section.id}">
+                                <span class="nav-icon" aria-hidden="true">${section.icon}</span>
+                                ${section.label}
+                            </a>
+                        </li>
+                    `).join('')}
+                </ul>
+                <div class="toc-progress" aria-hidden="true">
+                    <div class="toc-progress-bar" style="width: 0%"></div>
+                </div>
+            </nav>
             <nav class="entity-quick-nav" aria-label="Section navigation">
                 <h3 class="quick-nav-title">Quick Navigation</h3>
                 <ul class="quick-nav-list">
@@ -1230,45 +1343,100 @@ class EntityDetailViewer {
     renderImageGallery(images) {
         if (!images || images.length === 0) return '';
 
+        const showThumbnails = images.length > 1 && images.length <= 8;
+        const showGrid = images.length > 8;
+
         return `
             <section class="entity-section entity-section-gallery" ${this.getAnimationStyle()}>
                 <h2 class="section-title">
                     <span class="section-icon" aria-hidden="true">&#127912;</span>
                     Gallery
+                    <span class="tab-badge">${images.length}</span>
                 </h2>
-                <div class="gallery-container">
-                    ${images.length > 1 ? `
+                <div class="gallery-container" data-gallery-id="${Date.now()}">
+                    ${showGrid ? `
+                        <!-- Grid View for many images -->
+                        <div class="gallery-grid">
+                            ${images.map((img, index) => `
+                                <div class="gallery-grid-item"
+                                     data-index="${index}"
+                                     data-src="${this.escapeAttr(img.url)}"
+                                     data-caption="${this.escapeAttr(img.caption || '')}"
+                                     role="button"
+                                     tabindex="0"
+                                     aria-label="View image ${index + 1}: ${this.escapeAttr(img.caption || 'Gallery image')}">
+                                    <img src="${this.escapeAttr(img.thumbnail || img.url)}"
+                                         alt="${this.escapeAttr(img.caption || 'Entity image')}"
+                                         loading="lazy" />
+                                    <span class="gallery-grid-zoom" aria-hidden="true">&#128269;</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : images.length > 1 ? `
+                        <!-- Carousel View -->
                         <div class="gallery-carousel">
+                            <span class="gallery-counter" aria-live="polite">1 / ${images.length}</span>
                             <button class="gallery-nav gallery-prev" aria-label="Previous image">&#8249;</button>
                             <div class="gallery-track">
                                 ${images.map((img, index) => `
-                                    <div class="gallery-slide ${index === 0 ? 'active' : ''}">
+                                    <div class="gallery-slide ${index === 0 ? 'active' : ''}" data-index="${index}">
                                         <img src="${this.escapeAttr(img.thumbnail || img.url)}"
                                              alt="${this.escapeAttr(img.caption || 'Entity image')}"
                                              class="gallery-image"
                                              data-src="${this.escapeAttr(img.url)}"
                                              data-caption="${this.escapeAttr(img.caption || '')}"
-                                             loading="lazy" />
+                                             loading="lazy"
+                                             role="button"
+                                             tabindex="0"
+                                             aria-label="Click to enlarge" />
                                     </div>
                                 `).join('')}
                             </div>
                             <button class="gallery-nav gallery-next" aria-label="Next image">&#8250;</button>
                         </div>
-                        <div class="gallery-indicators">
-                            ${images.map((_, index) => `
-                                <button class="gallery-indicator ${index === 0 ? 'active' : ''}"
-                                        data-index="${index}"
-                                        aria-label="Go to image ${index + 1}"></button>
-                            `).join('')}
-                        </div>
+                        ${showThumbnails ? `
+                            <div class="gallery-thumbnails" role="listbox" aria-label="Image thumbnails">
+                                ${images.map((img, index) => `
+                                    <button class="gallery-thumbnail ${index === 0 ? 'active' : ''}"
+                                            data-index="${index}"
+                                            role="option"
+                                            aria-selected="${index === 0}"
+                                            aria-label="View image ${index + 1}">
+                                        <img src="${this.escapeAttr(img.thumbnail || img.url)}"
+                                             alt=""
+                                             loading="lazy" />
+                                    </button>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div class="gallery-indicators" role="tablist">
+                                ${images.map((_, index) => `
+                                    <button class="gallery-indicator ${index === 0 ? 'active' : ''}"
+                                            data-index="${index}"
+                                            role="tab"
+                                            aria-selected="${index === 0}"
+                                            aria-label="Go to image ${index + 1}"></button>
+                                `).join('')}
+                            </div>
+                        `}
+                        ${images[0].caption ? `
+                            <p class="gallery-caption">${this.escapeHtml(images[0].caption)}</p>
+                        ` : ''}
                     ` : `
+                        <!-- Single Image View -->
                         <div class="gallery-single">
                             <img src="${this.escapeAttr(images[0].thumbnail || images[0].url)}"
                                  alt="${this.escapeAttr(images[0].caption || 'Entity image')}"
                                  class="gallery-image"
                                  data-src="${this.escapeAttr(images[0].url)}"
                                  data-caption="${this.escapeAttr(images[0].caption || '')}"
-                                 loading="lazy" />
+                                 loading="lazy"
+                                 role="button"
+                                 tabindex="0"
+                                 aria-label="Click to enlarge" />
+                            ${images[0].caption ? `
+                                <p class="gallery-caption">${this.escapeHtml(images[0].caption)}</p>
+                            ` : ''}
                         </div>
                     `}
                 </div>
@@ -2655,6 +2823,7 @@ class EntityDetailViewer {
         const container = document.querySelector('.entity-detail-viewer');
         if (!container) return;
 
+        // Main action button handler
         container.addEventListener('click', (e) => {
             const btn = e.target.closest('[data-action]');
             if (!btn) return;
@@ -2666,7 +2835,7 @@ class EntityDetailViewer {
                     EntityDetailViewer.shareEntity(btn.dataset.entityName, btn.dataset.entityId);
                     break;
                 case 'bookmark':
-                    EntityDetailViewer.bookmarkEntity(btn.dataset.entityId);
+                    this.handleBookmarkAction(btn);
                     break;
                 case 'scroll-to':
                     EntityDetailViewer.scrollToSection(btn.dataset.section);
@@ -2679,7 +2848,99 @@ class EntityDetailViewer {
             }
         });
 
+        // Tab navigation
+        this.initializeTabNavigation(container);
+
         // Community tab switching
+        this.initializeCommunityTabs(container);
+
+        // Gallery interactions
+        this.initializeGallery(container);
+
+        // Lightbox interactions
+        this.initializeLightbox(container);
+
+        // TOC scroll tracking
+        this.initializeTocTracking(container);
+
+        // Smooth scroll for anchor links
+        this.initializeSmoothScroll(container);
+
+        // Initialize discussion component if Discussion tab is initially active
+        const activeTab = container.querySelector('.community-tab.active');
+        if (activeTab && activeTab.dataset.communityTab === 'discussion') {
+            this.initializeDiscussion(container);
+        }
+    }
+
+    /**
+     * Handle bookmark action with visual feedback
+     */
+    handleBookmarkAction(btn) {
+        const entityId = btn.dataset.entityId;
+        EntityDetailViewer.bookmarkEntity(entityId);
+
+        // Update all bookmark buttons on the page
+        const isBookmarked = EntityDetailViewer.isBookmarked(entityId);
+        const bookmarkBtns = document.querySelectorAll(`[data-action="bookmark"][data-entity-id="${entityId}"]`);
+
+        bookmarkBtns.forEach(bookmarkBtn => {
+            bookmarkBtn.classList.toggle('bookmarked', isBookmarked);
+            bookmarkBtn.classList.toggle('active', isBookmarked);
+            const icon = bookmarkBtn.querySelector('.action-icon');
+            const text = bookmarkBtn.querySelector('.action-text');
+            if (icon) {
+                icon.innerHTML = isBookmarked ? '&#9829;' : '&#9825;';
+            }
+            if (text) {
+                text.textContent = isBookmarked ? 'Favorited' : 'Favorite';
+            }
+        });
+    }
+
+    /**
+     * Initialize main tab navigation
+     */
+    initializeTabNavigation(container) {
+        const tabBtns = container.querySelectorAll('.entity-tab-btn');
+        const tabPanels = container.querySelectorAll('.entity-tab-panel');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+
+                // Update tab buttons
+                tabBtns.forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
+
+                // Update tab panels with animation
+                tabPanels.forEach(panel => {
+                    if (panel.classList.contains('active')) {
+                        panel.classList.add('exiting');
+                        setTimeout(() => {
+                            panel.classList.remove('active', 'exiting');
+                        }, 200);
+                    }
+                });
+
+                setTimeout(() => {
+                    const activePanel = container.querySelector(`#panel-${tabId}`);
+                    if (activePanel) {
+                        activePanel.classList.add('active');
+                    }
+                }, 200);
+            });
+        });
+    }
+
+    /**
+     * Initialize community tabs
+     */
+    initializeCommunityTabs(container) {
         const communityTabs = container.querySelectorAll('.community-tab');
         const communityPanels = container.querySelectorAll('.community-panel');
 
@@ -2687,14 +2948,310 @@ class EntityDetailViewer {
             tab.addEventListener('click', () => {
                 const tabId = tab.dataset.communityTab;
 
-                communityTabs.forEach(t => t.classList.remove('active'));
+                communityTabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
                 communityPanels.forEach(p => p.classList.remove('active'));
 
                 tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+
                 const panel = container.querySelector(`[data-panel="${tabId}"]`);
                 if (panel) panel.classList.add('active');
+
+                // Initialize discussion component when Discussion tab is clicked
+                if (tabId === 'discussion') {
+                    this.initializeDiscussion(container);
+                }
             });
         });
+    }
+
+    /**
+     * Initialize gallery interactions
+     */
+    initializeGallery(container) {
+        const galleryContainer = container.querySelector('.gallery-container');
+        if (!galleryContainer) return;
+
+        // Carousel navigation
+        const prevBtn = galleryContainer.querySelector('.gallery-prev');
+        const nextBtn = galleryContainer.querySelector('.gallery-next');
+        const slides = galleryContainer.querySelectorAll('.gallery-slide');
+        const indicators = galleryContainer.querySelectorAll('.gallery-indicator');
+        const thumbnails = galleryContainer.querySelectorAll('.gallery-thumbnail');
+        const counter = galleryContainer.querySelector('.gallery-counter');
+        const caption = galleryContainer.querySelector('.gallery-caption');
+
+        let currentIndex = 0;
+
+        const updateGallery = (index) => {
+            currentIndex = index;
+
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+
+            indicators.forEach((indicator, i) => {
+                indicator.classList.toggle('active', i === index);
+                indicator.setAttribute('aria-selected', i === index);
+            });
+
+            thumbnails.forEach((thumb, i) => {
+                thumb.classList.toggle('active', i === index);
+                thumb.setAttribute('aria-selected', i === index);
+            });
+
+            if (counter) {
+                counter.textContent = `${index + 1} / ${slides.length}`;
+            }
+
+            if (caption && slides[index]) {
+                const img = slides[index].querySelector('img');
+                const captionText = img?.dataset.caption || '';
+                caption.textContent = captionText;
+                caption.style.display = captionText ? 'block' : 'none';
+            }
+        };
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                const newIndex = currentIndex > 0 ? currentIndex - 1 : slides.length - 1;
+                updateGallery(newIndex);
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                const newIndex = currentIndex < slides.length - 1 ? currentIndex + 1 : 0;
+                updateGallery(newIndex);
+            });
+        }
+
+        indicators.forEach((indicator, index) => {
+            indicator.addEventListener('click', () => updateGallery(index));
+        });
+
+        thumbnails.forEach((thumb, index) => {
+            thumb.addEventListener('click', () => updateGallery(index));
+        });
+
+        // Grid items click to open lightbox
+        const gridItems = galleryContainer.querySelectorAll('.gallery-grid-item');
+        gridItems.forEach(item => {
+            item.addEventListener('click', () => {
+                this.openLightbox(item.dataset.src, item.dataset.caption);
+            });
+
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.openLightbox(item.dataset.src, item.dataset.caption);
+                }
+            });
+        });
+
+        // Gallery images click to open lightbox
+        const galleryImages = galleryContainer.querySelectorAll('.gallery-image');
+        galleryImages.forEach(img => {
+            img.addEventListener('click', () => {
+                this.openLightbox(img.dataset.src || img.src, img.dataset.caption || img.alt);
+            });
+
+            img.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.openLightbox(img.dataset.src || img.src, img.dataset.caption || img.alt);
+                }
+            });
+        });
+    }
+
+    /**
+     * Initialize lightbox functionality
+     */
+    initializeLightbox(container) {
+        // Create lightbox element if it doesn't exist
+        if (!document.querySelector('.entity-lightbox')) {
+            const lightboxHTML = `
+                <div class="entity-lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+                    <div class="lightbox-overlay">
+                        <button class="lightbox-close" aria-label="Close lightbox">&times;</button>
+                        <div class="lightbox-content">
+                            <img src="" alt="" />
+                            <p class="lightbox-caption"></p>
+                        </div>
+                        <div class="lightbox-keyboard-hint">
+                            <kbd>Esc</kbd> to close
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', lightboxHTML);
+        }
+
+        const lightbox = document.querySelector('.entity-lightbox');
+        const closeBtn = lightbox.querySelector('.lightbox-close');
+        const overlay = lightbox.querySelector('.lightbox-overlay');
+
+        // Close button handler
+        closeBtn?.addEventListener('click', () => this.closeLightbox());
+
+        // Click outside to close
+        overlay?.addEventListener('click', (e) => {
+            if (e.target === overlay || e.target.classList.contains('lightbox-overlay')) {
+                this.closeLightbox();
+            }
+        });
+
+        // Escape key to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('open')) {
+                this.closeLightbox();
+            }
+        });
+    }
+
+    /**
+     * Open lightbox with image
+     */
+    openLightbox(src, caption = '') {
+        const lightbox = document.querySelector('.entity-lightbox');
+        if (!lightbox) return;
+
+        const img = lightbox.querySelector('.lightbox-content img');
+        const captionEl = lightbox.querySelector('.lightbox-caption');
+
+        if (img) img.src = src;
+        if (captionEl) {
+            captionEl.textContent = caption;
+            captionEl.style.display = caption ? 'block' : 'none';
+        }
+
+        lightbox.classList.add('open');
+        document.body.classList.add('lightbox-open');
+
+        // Focus trap
+        lightbox.querySelector('.lightbox-close')?.focus();
+    }
+
+    /**
+     * Close lightbox
+     */
+    closeLightbox() {
+        const lightbox = document.querySelector('.entity-lightbox');
+        if (!lightbox) return;
+
+        lightbox.classList.add('closing');
+        setTimeout(() => {
+            lightbox.classList.remove('open', 'closing');
+            document.body.classList.remove('lightbox-open');
+        }, 300);
+    }
+
+    /**
+     * Initialize TOC scroll tracking
+     */
+    initializeTocTracking(container) {
+        const tocItems = container.querySelectorAll('.toc-item');
+        const progressBar = container.querySelector('.toc-progress-bar');
+        const sections = container.querySelectorAll('.entity-section[id]');
+
+        if (tocItems.length === 0 || sections.length === 0) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const sectionId = entry.target.id;
+                    tocItems.forEach(item => {
+                        item.classList.toggle('active', item.dataset.section === sectionId);
+                    });
+                }
+            });
+        }, { rootMargin: '-100px 0px -80% 0px' });
+
+        sections.forEach(section => observer.observe(section));
+
+        // Update progress bar on scroll
+        if (progressBar) {
+            window.addEventListener('scroll', () => {
+                const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollProgress = (window.scrollY / scrollHeight) * 100;
+                progressBar.style.width = `${Math.min(100, scrollProgress)}%`;
+            });
+        }
+    }
+
+    /**
+     * Initialize smooth scroll for anchor links
+     */
+    initializeSmoothScroll(container) {
+        container.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', (e) => {
+                const targetId = anchor.getAttribute('href').slice(1);
+                const target = document.getElementById(targetId);
+
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+
+                    // Update URL without triggering navigation
+                    history.pushState(null, '', `#${targetId}`);
+                }
+            });
+        });
+    }
+
+    /**
+     * Initialize the AssetDiscussion component for Reddit-style discussions
+     */
+    initializeDiscussion(container) {
+        const discussionContainer = container.querySelector('.asset-discussion-container');
+        if (!discussionContainer) return;
+
+        // Check if already initialized
+        if (discussionContainer.dataset.initialized === 'true') return;
+
+        // Check if AssetDiscussion is available
+        if (!window.AssetDiscussion) {
+            console.warn('[EntityDetailViewer] AssetDiscussion component not loaded');
+            discussionContainer.innerHTML = `
+                <div class="discussion-load-error">
+                    <p>Discussion system is currently unavailable.</p>
+                </div>
+            `;
+            return;
+        }
+
+        try {
+            // Initialize the discussion component
+            const discussion = new window.AssetDiscussion(discussionContainer, {
+                assetId: discussionContainer.dataset.assetId,
+                assetType: discussionContainer.dataset.assetType,
+                assetName: discussionContainer.dataset.assetName,
+                mythology: discussionContainer.dataset.mythology,
+                enableRealTime: true,
+                enableCorpusCitations: true,
+                showSubmitForm: true
+            });
+
+            // Store reference for cleanup
+            discussionContainer._discussionComponent = discussion;
+            discussionContainer.dataset.initialized = 'true';
+
+            console.log('[EntityDetailViewer] Discussion initialized for:', discussionContainer.dataset.assetId);
+        } catch (error) {
+            console.error('[EntityDetailViewer] Failed to initialize discussion:', error);
+            discussionContainer.innerHTML = `
+                <div class="discussion-load-error">
+                    <p>Failed to load discussion. Please refresh the page.</p>
+                </div>
+            `;
+        }
     }
 
     /**
